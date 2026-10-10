@@ -8,20 +8,18 @@ description: 'Predefined constant for COGINIT instruction
 category: Execution Mode Directives
 value: '%0_0_0000'
 documentation_level: complete
-syntax: 'COGINIT #COGEXEC+id, #address'
+syntax: 'COGINIT #COGEXEC+id, ##address'
 usage: 'Used with COGINIT to load and start a specific cog
 
   Target cog loads code from hub RAM and begins execution at cog address $000
 
   '
 examples:
-- code: 'COGINIT #COGEXEC+1, #$100   '' Load and start Cog 1 from Hub RAM $100
-
-    '
+- code: |
+    COGINIT #COGEXEC+1, #$100    ' Load and start Cog 1 from Hub RAM $100
   description: Start specific cog with code load
-- code: 'COGINIT #COGEXEC+5, @code   '' Load and start Cog 5 from @code
-
-    '
+- code: |
+    COGINIT #COGEXEC+5, ##@code  ' Load and start Cog 5 from @code
   description: Start Cog 5 with code at label
 notes:
 - Loads cog RAM registers $000-$1F7 from hub RAM

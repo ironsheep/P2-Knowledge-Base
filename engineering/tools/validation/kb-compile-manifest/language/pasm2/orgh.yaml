@@ -11,7 +11,6 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: examples[2].code
-    fp: "5bb0a1f82da4636c"
+    fp: "6f23e8c90092e0c6"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-169"

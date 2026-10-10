@@ -324,9 +324,7 @@ debugging:
   sources:
     - "switch_away_warning: Silicon Doc, silicon-doc-text.txt:2726"
 
-# Only the wrong/correct pairs the sources state. Two entries carried by the pre-purge
-# form of this block -- a hardcoded-WAITX pattern and a use-CLKFREQ-before-init pattern --
-# are authored advice that no ingested source states, and are not restored.
+# Only the wrong/correct pairs the sources state.
 anti_patterns:
   conflicting_definitions:
     wrong: "_rcfast together with _clkfreq"

@@ -43,14 +43,16 @@ knowledge_progression:
         content: "architecture/smart_pins.yaml"
         when: "Need autonomous hardware (PWM, UART, ADC, counters, etc.)"
       - name: "CORDIC Operations"
+        content: "architecture/cordic.yaml"
         when: "Need math coprocessor (trig, logs, rotation)"
       - name: "Streamer"
+        content: "architecture/streamer/overview.yaml"
         when: "Need high-speed pin sequencing (video, audio)"
   
   note: "Basic I/O concepts are NOT optional - they're foundational for all pin operations"
 
 file_structure:
-  source: "Parallax Spin2 Documentation v55 -- Minimal PASM Program engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:188; DAT Cog-exec / Hub-exec directive tables :310-323; Clock Setup :1708-1726; ASMCLK, clock-setter prepending and _AUTOCLK :1734-1740. Register map from the P2 Datasheet 2022/11/01 pp.13-14 -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:553-586."
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, Minimal PASM Program; DAT; Clock Setup; Parallax Propeller 2 (P2X8C4M64P) Datasheet, Release November 1, 2022, register map, p.13-14"
 
   overview: |
     PASM2 code lives in a DAT block of a Spin2 source file; there is no separate
@@ -68,7 +70,7 @@ file_structure:
     why_waitx_not_waitms: "WAITMS and WAITUS are Spin2 METHODS, not PASM2 instructions. In a PASM-only program the delay is WAITX, whose operand is a clock count -- which is why the source's own example computes it from the compiler-defined constant clkfreq_."
 
   clock_setup:
-    source: "Parallax Spin2 Documentation v55, section 'Clock Setup' -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1708-1726 (the CON declaration table, its two footnotes, and the compiler-defined constants) and :1734-1740 (ASMCLK, the auto-prepended clock-setter, _AUTOCLK). Frequency limits from the P2 Datasheet 2022/11/01, AC Characteristics -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2196-2200 and footnote 2 at :2209. how_to_declare: spin2-v55-text.txt:1709-1710, :1725. extraction_note_2026_08_27: spin2-v55-text.txt:1713 and :1738; word/document.xml of engineering/ingestion/sources/spin2-v55/Parallax Spin2 Documentation v55.docx. asmclk: spin2-v55-text.txt:1734, :1738-1740. default: spin2-v55-text.txt:1718, :1719. errfreq_is_optional: spin2-v55-text.txt:1721. the_x_bit: spin2-v55-text.txt:1722. when_declared: spin2-v55-text.txt:1735. inhibiting_it: spin2-v55-text.txt:1736. manual_switch: spin2-v55-text.txt:1725. compiler_constants: spin2-v55-text.txt:1725-1726."
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup; Parallax Propeller 2 (P2X8C4M64P) Datasheet, Release November 1, 2022, AC Characteristics, p.48 (frequency limits)"
     default: "With no clock-setup symbol declared and not in DEBUG mode, the compiler selects internal RCFAST, which runs at 20 MHz+. No clock symbol is required: _clkfreq is OPTIONAL, and a PASM-only program that declares none compiles and runs at RCFAST. With no symbol but DEBUG mode active, the compiler instead selects XI/XO-crystal mode at 20 MHz to facilitate DEBUG."
     why_the_default_bites: "The default is silent. A PASM-only program whose WAITX operands were computed for 200 MHz, but which declares no clock symbol, runs at RCFAST (20 MHz+, datasheet typical 24 MHz) and every delay is wrong by an order of magnitude with no diagnostic. Either declare the mode you intend (below), or compute delays from the compiler constant clkfreq_, which always tracks the mode actually compiled."
     how_to_declare: "The clock is selected at COMPILE time by declaring CON symbols. The compiler recognises the following combinations and no others; the HUBSET %CC_SS column is the clock-mode value the compiler derives, which is what the compiler constant clkmode_ carries and what HUBSET is invoked with."
@@ -109,7 +111,6 @@ file_structure:
         effect: "Selects XI/XO-crystal mode and 20 MHz to facilitate DEBUG."
         hubset_cc_ss: "%10_10"
         source_reference: 1719
-    extraction_note_2026_08_27: "The %01_11 value for the XI-input-plus-PLL row is written '01_1 1' in our plain-text extraction of v55. That is an extraction artifact, not the source: in the DOCX the cell is one table cell split across two Word runs ('01_1' + '1'), and it is the only one of the nine %CC_SS cells that is split. Verified directly against word/document.xml of Parallax Spin2 Documentation v55.docx. The value carried here is %01_11."
     errfreq_is_optional: "_errfreq is optional wherever the table shows it; it defaults to 1_000_000. All three PLL forms above were confirmed to compile without it."
     the_x_bit: "In the %1x_ CC values, x is the crystal-loading bit: if _xtlfreq >= 16_000_000 then x=0, for 15 pF per XI/XO; otherwise x=1, for 30 pF per XI/XO."
     combinations_are_compiler_verified: "Every form above was assembled clean by pnut-ts (v1.55.3) inside a PASM-only file. That establishes LEGALITY only -- the effect and %CC_SS columns are v55's statements, not the compiler's."
@@ -158,7 +159,7 @@ file_structure:
       v55_statement: "ORGH -- set hub-exec mode, hub origin = $00400, origin limit = $100000 (both defaults)"
       variants:
         - "ORGH $1000 -- hub origin = $01000, origin limit = $100000 (default limit)"
-        - "ORGH $FC000,$FC800 -- hub origin = $FC000, origin limit = $FC800"
+        - "ORGH $FC000,$FC800 -- hub origin = $FC000, origin limit = $FC800 (a syntax illustration: it assembles in a Spin2+PASM program; in a PASM-only program ORGH fills the hub image with zeros up to the address)"
       no_symbol_before: "No symbol allowed before ORGH."
       origin_step: "$ is the current origin, which steps by 4 with each hub-exec instruction."
 
@@ -166,7 +167,6 @@ file_structure:
     fit: "FIT $020 -- test to make sure cog address has not exceeded $020. FIT $2000 -- test to make sure hub address has not exceeded $2000."
     matching_the_default: "ORG's default cog limit is $1F8, so FIT $1F8 is the check that matches an unqualified ORG."
     why_1F8: "Registers $1F8 through $1FF give mapped access to eight special-purpose functions (PTRA, PTRB, DIRA, DIRB, OUTA, OUTB, INA, INB) -- when specifying an address between $1F8 and $1FF, the PASM instruction accesses a special-purpose register, not just the underlying RAM. Registers $1F0 through $1F7 may either be used as general-purpose registers, or may be used as special-purpose registers (IJMP3/IRET3/IJMP2/IRET2/IJMP1/IRET1/PA/PB) if their associated functions are enabled -- so code that uses no interrupts and no PA/PB may run up to $1F8."
-    correction_2026_08_25: "The pre-purge form of this block stated 'FIT $1F0 (496 longs)'. v55 states the default cog limit as $1F8; $1F0..$1F7 are dual-use RAM, not reserved. Not restored."
     orgf: "ORGF $040 -- fill to cog address $040 with zeros (no symbol allowed before ORGF)."
     res: "x RES 1 -- reserve 1 register, advance cog address by 1, don't advance hub address."
 
@@ -180,7 +180,7 @@ instruction_format:
       
   operand_types:
     register:
-      description: "Cog register 0-511 or LUT register"
+      description: "Cog register $000-$1FF (LUT RAM is reached with RDLUT/WRLUT, not as an operand)"
       syntax: "regname"
       example: "MOV  x, y"
       
@@ -200,7 +200,7 @@ instruction_format:
     WC:
       description: "Write C flag with result"
       usage: "Affects carry flag based on operation"
-      example: "ADD  x, y  WC      ' Set C if overflow"
+      example: "ADD  x, y  WC      ' C = carry out of the 32-bit add"
       
     WZ:
       description: "Write Z flag with result"
@@ -210,7 +210,7 @@ instruction_format:
     WCZ:
       description: "Write both C and Z flags"
       usage: "Combined flag updates"
-      example: "SUB  x, y  WCZ     ' Set both flags"
+      example: "SUB  x, y  WCZ     ' C = borrow of (x - y), Z = result is zero"
 
 register_model:
   source: "P2 Documentation -- engineering/ingestion/sources/silicon-doc/silicon-doc-text.txt:139 (512 KB hub RAM), :153-154 and :472 (register and lookup RAM), :437-467 (register map); hub and LUT access from the P2 Instructions v35 Rev B/C spreadsheet -- engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv, order 151-154, 220-223"
@@ -376,6 +376,8 @@ addressing_modes:
     example: "ADD  total, amount"
     
   pointer_with_auto_increment:
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Random Access Interface"
+    step_size: "PTRx++ and PTRx-- add or subtract the access size: 1 for RDBYTE/WRBYTE, 2 for RDWORD/WRWORD, 4 for RDLONG/WRLONG. PTRx++[INDEX] and PTRx--[INDEX] step by INDEX times that size (INDEX 1..16)."
     PTRA_increment:
       syntax: "PTRA++"
       description: "Use PTRA, then increment"
@@ -429,6 +431,7 @@ common_patterns:
       DJNZ     count, #.copy
 
 inline_pasm2_in_spin2:
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, In-line PASM Code"
   basic_inline:
     description: "PASM2 code between ORG and END in Spin2 method"
     example: |
@@ -470,7 +473,7 @@ labels_and_symbols:
       JMP   #main_loop
 
   local_labels:
-    syntax: ".labelname or :labelname"
+    syntax: ".labelname"
     scope: "Local to preceding global label only"
     reusable: "Same name can exist under different global labels"
     example: |
@@ -485,10 +488,10 @@ labels_and_symbols:
       RET
 
   reference_operators:
-    "#label": "Immediate COG address (for jumps/calls)"
+    "#label": "Immediate branch target (for jumps/calls); relative by default, and #\\label forces absolute"
     "#.local": "Immediate reference to local label"
     "@label": "Hub address of label"
-    "$": "Current COG address"
+    "$": "Current origin: the cog register address in ORG code (steps by 1 per instruction), the hub address in ORGH code (steps by 4)"
 
   detailed_reference: "language/pasm2/concepts/labels.yaml"
 
@@ -551,7 +554,7 @@ string_handling:
 debugging_support:
   overview: "DEBUG statements output runtime data to terminal during development"
   basic_example: |
-    DEBUG("Counter: ", UDEC(count))
+    DEBUG("Counter: ", UDEC(count))   ' PASM DEBUG statement: count is a cog register; takes effect only when the program is compiled with DEBUG enabled
   see_also:
     pasm2_debug:
       key: p2kbPasm2Debug
@@ -575,7 +578,7 @@ flag_behavior:
   C_flag:
     name: "Carry flag"
     uses:
-      - "Arithmetic overflow/underflow"
+      - "Carry out of an add, borrow of a subtract or compare (unsigned)"
       - "Shift/rotate carry out"
       - "Conditional execution"
     
@@ -596,15 +599,15 @@ flag_behavior:
 timing_considerations:
   instruction_timing:
     most_instructions: "2 clock cycles (typical ALU ops, fixed)"
-    cog_branches: "4 clocks for JMP/CALL/RET; first instruction after branch takes 4+ clocks (Silicon Doc v35: pipeline flush)"
+    cog_branches: "4 clocks for a taken JMP/CALL/RET in cog or LUT execution; DJNZ and the TJ/IJ family take 2 when not taken, 4 when taken"
     hub_access_reads: "9-16 clocks (cog) / 9-26 clocks (hub-exec) for RDLONG/RDWORD/RDBYTE"
     hub_access_writes: "3-10 clocks (cog) / 3-20 clocks (hub-exec) for WRLONG/WRWORD/WRBYTE"
     hubexec_sequential: "2 clocks/instruction (same as cogexec via the (cogs+11)=19-stage prefetch FIFO)"
-    hubexec_branch: "Minimum 13 clocks (+1 if not long-aligned) per Silicon Doc v35 verbatim"
-    multiply: "MUL 2 clocks; QMUL via CORDIC: 55-clock latency, 8-clock issue interval"
+    hubexec_branch: "13...20 clocks for a taken JMP/CALL/RET (2, or 13...20, for DJNZ and the TJ/IJ family); +1 clock when the target is not long-aligned (P2 Documentation, Hub Execution)"
+    multiply: "MUL 2 clocks; QMUL via the CORDIC: 2...9 clocks to issue, the result about 55 clocks later (a 54-stage pipeline), read with GETQX/GETQY, which wait for it"
     
   clock_frequency:
-    source: "P2 Datasheet 2022/11/01, AC Characteristics (p.48) -- engineering/ingestion/sources/p2-datasheet/p2-datasheet-text.txt:2196-2200, footnote 2 at :2209. Compiler default from Parallax Spin2 Documentation v55 -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:1718. framing: E-007 in engineering/ingestion/SOURCE-ERRATA.md."
+    source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet, Release November 1, 2022, AC Characteristics, p.48; the compiler default is from Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup"
     framing: "These are the DATASHEET's absolute limits, not the Hardware Manual's recommended-use range. The two documents differ in framing, not in fact."
     compiler_default: "RCFAST -- selected whenever no clock-setup symbol is declared and DEBUG mode is off. It is NOT a crystal-plus-PLL default. Its frequency is the rcfast row below: 20 MHz min, 24 MHz typical, 30 MHz max. See file_structure.clock_setup above for how to declare something else."
     rcfast: "20 MHz min, 24 MHz typical, 30 MHz max (internal)."
@@ -612,8 +615,6 @@ timing_considerations:
     crystal_input: "1 MHz to 50 MHz between XI and XO."
     direct_drive_input: "DC to 200 MHz into XI."
     pll_system_clock: "3.33 MHz min, 180 MHz typical, 320 MHz max. Nominal PLL frequency (system clock speed) is 180 MHz at up to 105 degC."
-    correction_2026_08_27: "This block previously read default '20 MHz crystal with PLL', typical '200-300 MHz system clock', maximum '340+ MHz (silicon dependent)' -- all three uncited. The 'default' contradicted this same file's clock_setup block (the compiler default is RCFAST); '200-300 MHz typical' has no source we hold and the datasheet's typical is 180 MHz; '340+ MHz' appears in our holdings only as a TAQOZ overclocking anecdote (community material, an upstream lead, never a citable authority), against a datasheet maximum of 320 MHz. Replaced source-first, not restored."
-    
   precise_timing:
     WAITX: "Accurate delay in clock cycles"
     GETCT: "Read 32-bit system counter"
@@ -627,13 +628,13 @@ next_steps:
   essential_reading:
     - "language/pasm2/concepts/basic-io.yaml - REQUIRED before any I/O work"
     - "language/pasm2/concepts/labels.yaml - Label scoping rules and reference operators"
-    - "Full PASM2 instruction reference - for detailed documentation"
+    - "language/pasm2/groups/ - the categorised PASM2 instruction inventory, for detailed documentation"
 
   advanced_features:
-    - "Smart Pin modes - autonomous hardware operations"
-    - "CORDIC solver - math coprocessor functions"
-    - "Streamer - high-speed pin sequencing"
-    - "Multi-COG programming - parallel processing"
+    - "architecture/smart_pins.yaml - Smart Pin modes, autonomous hardware operations"
+    - "architecture/cordic.yaml - CORDIC solver, math coprocessor functions"
+    - "architecture/streamer/overview.yaml - Streamer, high-speed pin sequencing"
+    - "language/pasm2/concepts/multi_cog_synchronization.yaml - Multi-COG programming, parallel processing"
 
 related:
   - language/pasm2/special-registers.yaml

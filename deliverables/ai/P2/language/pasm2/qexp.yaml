@@ -9,7 +9,7 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: Convert 5:27-bit logarithm to 32-bit unsigned integer. Takes logarithm
+description: Compute 2 to the power of a 5:27-bit logarithm, as a 32-bit unsigned integer. Takes logarithm
   in 5:27 format (5-bit whole exponent, 27-bit fractional exponent) in D operand.
   Result retrieved via GETQX instruction 55 clocks later.
 flags_affected:
@@ -104,4 +104,4 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.411047'
 category: CORDIC Solver
-oneliner: Convert 5:27-bit logarithm to 32-bit unsigned integer
+oneliner: Compute 2 to the power of a 5:27-bit logarithm, as a 32-bit unsigned integer

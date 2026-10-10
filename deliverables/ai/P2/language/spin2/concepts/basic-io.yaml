@@ -219,12 +219,6 @@ internal_pull_resistors:
       pinlow(16)                   ' DIR = 1, OUT = 0 -- REQUIRED
       waitms(1)
       level := pinread(16)         ' reads 0 unless something stronger holds the line high
-  corrected_2026_08_25: |
-    The pre-purge form of this block showed PINSTART(16, P_HIGH_15K, 0, 0) followed by
-    PINFLOAT(16) as 'input with pull-up', and named the P_HIGH_*/P_LOW_* constants as
-    pull-up / pull-down modes. Both are wrong: PINFLOAT drops DIR, which deactivates
-    the drive, and the constants are drive-strength selectors, not bias resistors.
-    Returned in the hardware-verified form instead.
   use_cases:
     - "Button inputs without external resistors -- weak high drive, DIR high, button pulls to ground"
     - "Holding an unused or undriven line at a known level for a stated reason"

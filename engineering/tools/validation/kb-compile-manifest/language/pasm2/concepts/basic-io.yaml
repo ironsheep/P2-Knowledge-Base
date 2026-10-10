@@ -27,27 +27,24 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: multi_pin_operations.set_direction.example
-    fp: "a3c3545b5750b72c"
+    fp: "a6151b2a5f266802"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-184"
   - at: multi_pin_operations.set_output.example
-    fp: "12465c4ec3dd4a70"
+    fp: "72530993bdeb0d5d"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-184"
   - at: multi_pin_operations.drive_pins.example
-    fp: "d6f46c126c6c95d0"
+    fp: "d92ce5e42b8bbdec"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-184"
   - at: multi_pin_operations.register_masking.example
     fp: "154b88043ae2a528"
     compile: fragment
     wrap: pasm2-dat
     assumes: [mask]
   - at: pin_field_encoding.addpins_operator.example
-    fp: "6c357796570a73af"
+    fp: "6009dc6ea6ddcdbb"
     compile: not-code
     reason: "operand-notation gloss `#8 ADDPINS #7 = pins 8 through 15`: an operand expression followed by a prose result, not a statement (its `ADDPINS #7` spelling is the class registered for addressing_modes-style examples, see defects addpins-hash-count)"
   - at: pin_field_encoding.manual_encoding.example
@@ -99,26 +96,24 @@ blocks:
     fp: "d3851d3de793abff"
     compile: program
   - at: common_patterns.parallel_bus_write.code
-    fp: "52b3a07ef54c5c6d"
+    fp: "eb2a609e60790025"
     compile: fragment
     wrap: pasm2-dat
     assumes: [temp, data]
-    finding: "S-184"
   - at: common_patterns.parallel_bus_read.code
-    fp: "5b2237ed111b9852"
+    fp: "009e6364db0cf96d"
     compile: fragment
     wrap: pasm2-dat
     assumes: [data]
-    finding: "S-184"
   - at: multi_cog_pin_coordination.coordination_strategies.single_cog_ownership.implementation
     fp: "0c5be21237159bbb"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: multi_cog_pin_coordination.lock_coordination_example.code
-    fp: "7fcc663b6a5f8919"
+    fp: "43663727fdff2b9a"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [lock_id, try_again]
+    assumes: [lock_id]
   - at: pin_field_encoding.manual_encoding.formula
     fp: "2ab2dc6256b89b56"
     compile: not-code

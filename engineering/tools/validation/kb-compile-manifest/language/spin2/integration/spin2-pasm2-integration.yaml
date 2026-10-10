@@ -36,7 +36,7 @@ blocks:
     fp: "f8773c21e6215634"
     compile: program
   - at: spin2_pasm2_integration.integration_patterns[11].syntax_examples[0].spin2_code
-    fp: "455c4d568aaeef0c"
+    fp: "7d17b8daa6a8fa3c"
     compile: program
   - at: spin2_pasm2_integration.integration_patterns[12].syntax_examples[0].spin2_code
     fp: "dc203f880b720d56"

@@ -120,7 +120,6 @@ limitations:
     For a wait longer than the bound, loop on GETMS()/GETCT() against a deadline in
     slices of at most a second, rather than asking for the whole span at once.
   resolution: "1 µs -- the argument's unit"
-  correction_2026_08_25: "The pre-purge form of this block claimed a range of 1-4,294,967,295 microseconds. That is the 32-bit unsigned range of the argument, not the wait the chip performs; the source's bound is $8000_0000 CLOCKS. Not restored."
 
 clock_frequency_impact:
   source: "Parallax Spin2 Documentation v55, Timing Methods -- engineering/ingestion/sources/spin2-v55/spin2-v55-text.txt:550 (\"uses CLKFREQ\")"

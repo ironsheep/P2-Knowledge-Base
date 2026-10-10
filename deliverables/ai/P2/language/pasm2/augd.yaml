@@ -51,7 +51,7 @@ silicon_errata:
       delta instead of the block-size delta.
     example: |
       SETQ   #16-1         ' ready to load 16 longs
-      AUGD   start_reg     ' AUGD here cancels the block-size PTRx delta!
+      AUGD   #$123456      ' AUGD here cancels the block-size PTRx delta!
       RDLONG 0,ptra++      ' ptra incremented by 4 (1 long), not 16*4
     workaround: "Do not place AUGD (or ALTx/AUGS) between SETQ/SETQ2 and the RDLONG/WRLONG/WMLONG-PTRx instruction; keep SETQ adjacent to the block transfer."
     status: "Active in Rev C silicon (current production)."
@@ -72,7 +72,7 @@ oneliner: Augment next literal Dest to 32-bits
 related:
 - AUGS
 examples:
-- description: Using ## syntax (compiler auto-generates AUGD)
+- description: "Using ## syntax (compiler auto-generates AUGD)"
   code: |
     PUSHA       ##$ABCDEF                            '2+3..10 cycles (in Cog RAM)
     QMUL        ##8192, #4                           '2+2..9 cycles

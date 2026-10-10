@@ -5,7 +5,7 @@ frequency: high
 
 idioms:
   - name: rep_loop
-    pattern: "rep #{iterations}, #{instructions}"
+    pattern: "rep #{instructions}, #{iterations}"
     description: Hardware repeat loop
     usage_count: 109
     examples:
@@ -23,16 +23,6 @@ idioms:
       - "_ret_ djnz y, #blank"
       - "djnz a, #pinloop"
     context: Counted loops with automatic decrement
-
-  - name: loop_instruction
-    pattern: "loop"
-    description: Loop instruction marker
-    usage_count: 166
-    examples:
-      - "sample_cy loop"
-      - "Field loop"
-      - "main loop"
-    context: Loop end marker for REP instruction
 
   - name: jmp_loop
     pattern: "jmp #{label}"
@@ -62,7 +52,8 @@ idioms:
       Rule of thumb:
         - DJNZ: "while not zero" — loop body runs count times; UNSAFE for count=0
         - DJNF: "at least once, then while not underflowed" — loop body runs
-          max(1, count) times; SAFE for count=0
+          count + 1 times (count = 0 runs it once; start at count - 1 to run it count times);
+          SAFE for count=0
     source_example: "Parallax P2 flash_loader.spin2 line 152"
     related_instructions:
       - language/pasm2/djnf.yaml
@@ -81,23 +72,23 @@ idioms:
       - |
         ' Checksum loop — 2-instruction body, runs 'count' times:
         rep     #2, count
-        rdlong  x, ptr++
+        rdlong  x, ptra++
         add     sum, x
       - |
         ' Copy loop — also 2 instructions, runs 'count' times:
         rep     #2, count
-        rdlong  x, src++
-        wrlong  x, dst++
+        rdlong  x, ptra++
+        wrlong  x, ptrb++
     context: |
       The canonical "tight inner loop" pattern in PASM2. Zero per-
       iteration branch cost makes this the fastest option for short
       bodies (1-8 instructions). The body cannot contain certain
       instructions (branches, REP itself) — see REP instruction docs.
-    source_example: "Parallax P2 flash_loader.spin2 lines 58-59"
+    source_example: "Adapted from Parallax P2 flash_loader.spin2 lines 56-60, which reads through the FIFO (rdfast, then rep #2,s with rflong v / add)"
     related_instruction: language/pasm2/rep.yaml
 
 related:
-  - language/pasm2/rep.yaml        # LOOP end marker is documented within rep.yaml
+  - language/pasm2/rep.yaml
   - language/pasm2/djnz.yaml
   - language/pasm2/djnf.yaml
   - code-examples/flash-loader-case-study.yaml

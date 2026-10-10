@@ -28,26 +28,19 @@ blocks:
     wrap: pasm2-dat
     assumes: [helper]
   - at: reference_operators.operators.hub_address.example
-    fp: "8072b4084cf29082"
+    fp: "7b311c7cbf01bb35"
     compile: fragment
     wrap: pasm2-dat
     assumes: [ptr, hub_data]
   - at: reference_operators.operators.object_relative.example
-    fp: "17ac6e6ed6d1388b"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [method_table]
-    finding: "S-191"
-  - at: reference_operators.operators.current_cog_address.example
+    fp: "fe0d249241d19caa"
+    compile: not-code
+    reason: "two-part illustration (a DAT declaration and a Spin2 expression, joined by semicolons) shown as one line: neither a single compilable unit nor a PASM2 statement"
+  - at: reference_operators.operators.current_origin.example
     fp: "788a11b96656d210"
     compile: fragment
     wrap: pasm2-dat
     assumes: [lead:1]
-  - at: reference_operators.operators.current_hub_address.example
-    fp: "db0731b4b73d0281"
-    compile: fragment
-    wrap: pasm2-hub
-    finding: "S-192"
   - at: scope_boundaries.boundaries[0].example
     fp: "d247623960c6f00d"
     compile: fragment

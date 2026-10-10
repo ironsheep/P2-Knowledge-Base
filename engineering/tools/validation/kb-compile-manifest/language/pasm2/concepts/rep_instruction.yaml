@@ -31,7 +31,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [sum, count, value]
   - at: common_patterns.bit_reversal.code
-    fp: "8dd2f5782a43e6f8"
+    fp: "3a4f1dfa86294e99"
     compile: fragment
     wrap: pasm2-dat
     assumes: [input, output]
@@ -45,7 +45,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [pattern]
   - at: common_patterns.multiply_accumulate.code
-    fp: "9055c7c29d45963e"
+    fp: "e4cbb50baea83cc9"
     compile: fragment
     wrap: pasm2-dat
     assumes: [multiplicand, coefficient, accumulator]
@@ -65,7 +65,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [data, sda, scl, delay]
   - at: advanced_usage.conditional_rep.code
-    fp: "5a553028717b1046"
+    fp: "4178dfadc6fdf99b"
     compile: fragment
     wrap: pasm2-dat
     assumes: [count]

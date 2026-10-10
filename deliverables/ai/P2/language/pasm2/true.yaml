@@ -15,15 +15,13 @@ usage: 'Use in conditional logic and boolean operations
 
   '
 examples:
-- code: 'cmp     x, #0       wz      '' Compare x with 0
-
-    mov     result, TRUE        '' Default to TRUE
-
-    if_z mov  result, FALSE     '' Set to FALSE if x was 0
-
-    '
+- code: |
+    cmp     x, #0       wz          ' Compare x with 0
+    mov     result, ##TRUE          ' Default to TRUE
+    if_z    mov result, ##FALSE     ' Set to FALSE if x was 0
   description: Using TRUE in conditional logic
 notes:
+- 'FALSE fits a 9-bit immediate: mov flag, #0. TRUE (-1) does not: write ##TRUE (the compiler adds an AUGS) or neg flag, #1.'
 - All bits set (-1 in signed representation)
 - Standard boolean true value in PASM2
 - Compatible with bitwise operations

@@ -7,8 +7,7 @@ blocks:
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: examples[0].code
-    fp: "5123057b451c6d5d"
+    fp: "1d2e38e97b93dacd"
     compile: fragment
     wrap: pasm2-dat
     assumes: [x, result]
-    finding: "S-162"

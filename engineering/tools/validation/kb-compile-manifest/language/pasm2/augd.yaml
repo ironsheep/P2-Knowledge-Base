@@ -7,10 +7,9 @@ blocks:
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: silicon_errata.setq_ptrx_block_size_delta_cancelled.example
-    fp: "4ba7bcbce1296938"
+    fp: "0a3f8177d7d89d34"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-163"
   - at: examples[0].code
     fp: "030b0c4452df108e"
     compile: fragment

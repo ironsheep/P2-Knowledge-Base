@@ -12,17 +12,17 @@ syntax:
   basic_form:
     - instruction: "REP #block_size, #count"
     - parameters:
-      - block_size: Number of instructions to repeat (0-511 with #, 0-2^32-1 with ## or register)
-      - count: Number of iterations (0-511 with #, 0-2^32-1 with ## or register)
+      - block_size: 'Number of instructions to repeat (0-511: only D[8:0] is used, with # or from a register)'
+      - count: 'Number of iterations (0-511 with #, 0-2^32-1 with ## or a register; 0 repeats forever)'
     - example: "REP #4, #10  ' Repeat next 4 instructions 10 times"
 
   extended_form:
-    - instruction: "REP ##block_size, ##count"
+    - instruction: "REP #block_size, ##count"
     - parameters:
-      - block_size: Extended via AUGD prefix (0 to 2^32-1)
+      - block_size: Number of instructions to repeat (0-511; only D[8:0] is used)
       - count: Extended via AUGS prefix (0 to 2^32-1)
     - example: "REP @.end, ##1000  ' 1000 iterations using AUGS prefix"
-    - note: "Compiler automatically emits AUGD/AUGS prefixes for values > 511"
+    - note: "Compiler automatically emits an AUGS prefix for a count > 511"
 
   register_count:
     - instruction: "REP #block_size, register"
@@ -64,7 +64,7 @@ key_features:
 
   constraints:
     - Maximum 511 instructions per block (9-bit D field)
-    - Maximum 512 iterations (immediate), unlimited with register
+    - 'Maximum 511 iterations with a # immediate; up to 2^32-1 with ## or a register; a count of 0 repeats forever'
     - No branches within REP block (branches cancel REP)
     - No REP nesting allowed (single hardware counter)
     - Interrupts stalled during REP execution
@@ -91,7 +91,7 @@ operational_details:
 
 restrictions:
   cannot_contain:
-    - Branch instructions (JMP, CALL, RET)
+    - Branch instructions are allowed but any branch taken inside the block cancels the REP
     - Another REP instruction
     - Instructions that modify PC
     - AUGS/AUGD (would affect wrong instruction)
@@ -113,7 +113,7 @@ common_patterns:
 
   bit_reversal:
     code: |
-      REP #32, #32
+      REP #2, #32
         SHR input, #1 WC
         RCL output, #1
     description: Reverse 32 bits
@@ -132,7 +132,7 @@ common_patterns:
 
   multiply_accumulate:
     code: |
-      REP #2, #16
+      REP #3, #16
         RDLONG multiplicand, PTRA++
         MUL multiplicand, coefficient
         ADD accumulator, multiplicand
@@ -190,8 +190,13 @@ advanced_usage:
   conditional_rep:
     code: |
       CMP count, #0 WZ
-      IF_NZ REP #4, count
-        ' Loop body executes only if count > 0
+      IF_Z JMP #skip_loop           ' count = 0: REP with S = 0 would repeat forever
+      REP #4, count
+        NOP                         ' ... four body instructions ...
+        NOP
+        NOP
+        NOP
+      skip_loop
     description: Conditional loop execution
 
   early_exit:

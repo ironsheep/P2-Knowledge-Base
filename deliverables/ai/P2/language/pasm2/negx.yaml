@@ -15,18 +15,14 @@ usage: 'Use for range checking and underflow detection
 
   '
 examples:
-- code: 'cmps    value, NEGX     wc  '' Check if value is below min negative
-
-    if_c jmp    #underflow      '' Jump if underflow (carry set means less than)
-
-    '
-  description: Checking for negative underflow
-- code: 'mov     limit, NEGX         '' Set limit to maximum negative value
-
-    fges    value, limit        '' Clamp value to not go below NEGX
-
-    '
-  description: Using NEGX as lower limit
+- code: |
+    cmps    value, ##NEGX   wz      ' is value the most negative number?
+    if_z    jmp     #at_minimum     ' NEG and ABS of NEGX give NEGX again (two's complement)
+  description: Detecting the one value that cannot be negated
+- code: |
+    mov     highest, ##NEGX         ' start a running maximum at the most negative value
+    fges    highest, sample         ' highest = the larger of highest and sample (signed)
+  description: Using NEGX as the starting value of a running signed maximum
 notes:
 - -2^31 in decimal notation
 - Bit 31 set, bits 30-0 clear

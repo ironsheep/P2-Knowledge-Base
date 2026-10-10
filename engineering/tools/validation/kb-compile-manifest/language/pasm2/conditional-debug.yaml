@@ -14,21 +14,19 @@ blocks:
     fp: "4b3ed0db6df064c2"
     compile: program
   - at: examples[1].code
-    fp: "64186dc24cea2190"
+    fp: "0a17034cf0a50cb4"
     compile: program
   - at: examples[2].code
-    fp: "bcfc6dadc26cd3e8"
+    fp: "223c553a586894f4"
     compile: program
   - at: examples[3].code
-    fp: "4130d9156d4b1999"
+    fp: "248ebc3a9c5a8f75"
     compile: fragment
     wrap: spin2-top
-    finding: "S-166"
   - at: examples[4].code
-    fp: "d82bb2c3ae9fa0fb"
+    fp: "601bf9381e1dfb3b"
     compile: fragment
     wrap: spin2-top
-    finding: "S-167"
   - at: generated_code
     fp: "cf22da77911b7e35"
     compile: not-code

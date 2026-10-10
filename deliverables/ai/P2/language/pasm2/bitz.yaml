@@ -9,7 +9,7 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: BITZ alters the Dest bit(s) designated by Src to equal the state of the Z flag. Dest bit(s) described by Src are set to Z; the rest are left as-is. If WCZ is specified, the Z flag is updated to the original state of the target bit.
+description: BITZ alters the Dest bit(s) designated by Src to equal the state of the Z flag. Dest bit(s) described by Src are set to Z; the rest are left as-is. Src[4:0] is the bit number (0-31) and Src[9:5] is how many further contiguous bits are affected, so a non-zero Src[9:5] changes a span of bits rather than one; a SETQ immediately before the instruction overrides Src[9:5] (a SETQ of zero forces a single bit). If WCZ is specified, the Z flag is updated to the original state of the target bit.
 flags_affected:
   C: Set to original D[S[4:0]] (original state of target bit)
   Z: Set to original D[S[4:0]] (original state of target bit)

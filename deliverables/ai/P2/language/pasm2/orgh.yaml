@@ -19,14 +19,14 @@ examples:
 
     '
   description: Default hub origin
-- code: 'ORGH $FC000,$FC800  '' hub origin = $FC000, origin limit = $FC800
-
-    '
+- code: |
+    ORGH $400,$800  ' hub origin = $400, origin limit = $800
   description: Set hub origin with an explicit limit
 notes:
 - ORGH sets hub RAM addresses (hub-exec mode)
 - 'Bare ORGH default address is context-dependent (per Spin2 v55 spec): in Spin2+PASM programs it is $400 (hub-exec code uses relative addressing and is relocated at runtime); in PASM-only programs it is the current hub address (origin always matches the hub address, and ORGH fills hub memory with zeros up to the given address)'
 - 'Optional second parameter sets the origin limit (default $100000); PNut enforces the ceiling -- ORGH address,limit beyond it emits "Hub address exceeds $100000 ceiling (m361)", and a bare ORGH address beyond it emits "Hub address exceeds limit (m372)" -- compiler-verified'
+- 'ORGH $FC000,$FC800 (the Spin2 v55 syntax illustration) assembles in a Spin2+PASM program, where the origin need not be the code''s real location; in a PASM-only program ORGH fills the hub image with zeros up to the address, so an address in the debug mirror ($FC000..$FFFFF, beyond the 512 KB of hub RAM) fails with "Program requirement exceeds 512KB hub RAM" -- compiler-verified'
 - Use for hub-exec code and hub data
 related:
 - ORG

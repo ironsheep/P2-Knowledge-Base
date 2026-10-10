@@ -357,11 +357,11 @@ spin2_pasm2_integration:
               REP @endFast, ##1000  ' repeat the instructions up to endFast, 1000 times
                 MOV outa, ina
             endFast
-              JMP @slowCode         ' Jump to hub
+              JMP #\@slowCode       ' Jump to the hub copy of the code
 
             slowCode     ' Runs from hub
-              CALL @complexMath     ' Hub subroutine
-              JMP @fastCode         ' Back to cog
+              CALL #\@complexMath   ' Hub subroutine
+              JMP #\@fastCode       ' Back to the hub copy of fastCode
 
             complexMath
               RET

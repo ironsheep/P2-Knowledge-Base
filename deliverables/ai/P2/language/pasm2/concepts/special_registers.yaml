@@ -18,11 +18,11 @@ registers:
     
   stack_pointers:
     - name: PTRA/PTRB
-    - description: Hardware stack pointers with auto-increment/decrement
-    - access: Direct use in many instructions, explicit via GETPTR/SETPTR
+    - description: Hub pointer registers with auto-increment/decrement
+    - access: "Direct as registers ($1F8/$1F9: MOV x, PTRA / MOV PTRA, ##addr) and as pointer expressions (PTRA++, PTRA[index])"
     - range: 20-bit hub addresses
     - features:
-      - Auto-increment/decrement modes (++, --, ++)
+      - Auto-increment/decrement modes (++, --)
       - Indexed addressing [PTRx + offset]
       - Stack operations (PUSHA/PUSHB, POPA/POPB)
     
@@ -40,7 +40,7 @@ registers:
 
   q_register:
     - name: Q
-    - description: Quotient/auxiliary register (32-bit)
+    - description: "Q register (32-bit): block-transfer count for SETQ/SETQ2, and the 32-bit extension/aux value for CORDIC commands"
     - access: Via GETQX/GETQY after CORDIC, SETQ/SETQ2 for block ops
     - uses:
       - CORDIC result retrieval
@@ -49,9 +49,9 @@ registers:
     
   random_generator:
     - name: RANDOM
-    - description: Hardware random number generator
+    - description: Pseudo-random number generator
     - access: Via GETRND instruction
-    - features: True random based on thermal noise
+    - features: xoroshiro128** PRNG, seeded at boot, iterating every clock (not a true-random source)
 
   ct_registers:
     - name: CT (Current Time)
@@ -70,30 +70,31 @@ access_patterns:
   explicit_access:
     - method: Dedicated instructions
     - examples:
-      - GETCT r0       ' Read system counter
-      - GETRND r0      ' Get random number
-      - GETQX  r0      ' Get CORDIC X result
-      - GETPTR r0      ' Read PTRA/PTRB value
-      
+      - "GETCT r0       ' Read system counter"
+      - "GETRND r0      ' Get a pseudo-random number"
+      - "GETQX  r0      ' Get CORDIC X result"
+      - "GETPTR r0      ' Read the current FIFO hub pointer"
+      - "MOV r0, PTRA   ' Read PTRA"
+
   implicit_access:
     - method: Automatic hardware use
     - examples:
       - PC increments after each instruction
       - PTRA/PTRB auto-modify in indexed operations
       - Flags update when WC/WZ specified
-      - Q receives quotient from DIV operations
+      - "SETQ sets Q for the next block transfer or CORDIC command; CORDIC results come from GETQX/GETQY (QDIV: quotient in X, remainder in Y)"
 
   block_operations:
     - method: SETQ/SETQ2 + instruction
     - examples:
-      - SETQ #15       ' Setup for 16 long transfer
-      - RDLONG 0, PTRA ' Read 16 longs from hub
+      - "SETQ #15       ' Setup for 16 long transfer"
+      - "RDLONG 0, PTRA ' Read 16 longs from hub"
 
 critical_behaviors:
   - PC wraps at 20-bit boundary (hub memory limit)
   - PTRA/PTRB modifications affect subsequent indexed operations
   - Event state persists until explicitly cleared
-  - CORDIC results must be read before next CORDIC operation
+  - CORDIC commands can be overlapped; results come back in submission order (read each with GETQX/GETQY)
   - Random generator continuously generates new values
   - CT register is global (same for all cogs reading simultaneously)
 

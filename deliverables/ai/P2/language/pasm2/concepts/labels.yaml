@@ -8,7 +8,7 @@ category: pasm2_syntax
 importance: fundamental
 
 metadata:
-  query_tags: ["label", "local_label", "global_label", "scope", "symbol", ".label", ":label", "@label"]
+  query_tags: ["label", "local_label", "global_label", "scope", "symbol", ".label", "@label"]
   complexity: beginner
   use_cases: ["code_organization", "subroutine_structure", "loop_targets", "branch_destinations"]
   common_questions:
@@ -49,9 +49,8 @@ label_types:
                       ret
 
   local_labels:
-    syntax: ".labelname or :labelname"
-    definition: "Identifier prefixed with dot (.) or colon (:)"
-    note: "Both prefix characters are functionally equivalent"
+    syntax: ".labelname"
+    definition: "Identifier prefixed with a dot (.)"
     characteristics:
       - "Visible only within scope of preceding global label"
       - "Scope ends when next global label is defined"
@@ -87,7 +86,7 @@ reference_operators:
   operators:
     immediate_cog:
       syntax: "#label"
-      meaning: "Immediate value (COG address)"
+      meaning: "Immediate branch target: relative by default when the label is in the same domain (cog or hub) as the code"
       context: "PASM instructions - jumps, calls, branches"
       example: "JMP #main_loop"
 
@@ -99,7 +98,7 @@ reference_operators:
 
     absolute_cog:
       syntax: "#\\label"
-      meaning: "Absolute COG-relative address (forces 9-bit)"
+      meaning: "Absolute address: the backslash forces the 20-bit absolute form instead of the default relative one"
       context: "When absolute address required"
       example: "CALL #\\helper"
 
@@ -107,25 +106,19 @@ reference_operators:
       syntax: "@label"
       meaning: "Hub address of label"
       context: "Spin2 or PASM - getting hub memory address"
-      example: "MOV ptr, @hub_data"
+      example: "MOV ptr, ##@hub_data"
 
     object_relative:
       syntax: "@@label"
-      meaning: "Object-relative address"
-      context: "Spin2 or PASM - object method tables"
-      example: "LONG @@method_table"
+      meaning: "Absolute hub address from an object-relative offset stored in DAT (a Spin2 operator: hub address of this object + offset)"
+      context: "Spin2 methods only - not accepted as a DAT data expression"
+      example: "DAT: ptrs LONG @start, @fin  (stores object-relative offsets);  Spin2: addr := @@ptrs[i]"
 
-    current_cog_address:
+    current_origin:
       syntax: "$"
-      meaning: "Current COG address"
-      context: "PASM in ORG mode - relative references"
+      meaning: "Current origin: the cog register address in ORG (cog-exec) code, stepping by 1 per instruction; the hub address in ORGH (hub-exec) code, stepping by 4"
+      context: "PASM instructions and data expressions"
       example: "JMP #$-1           ' Jump back one instruction"
-
-    current_hub_address:
-      syntax: "$$"
-      meaning: "Current Hub address"
-      context: "PASM in ORGH mode"
-      example: "LONG $$ + 4        ' Address of next long"
 
 scope_boundaries:
   description: "Events that create new local label scopes"
@@ -169,10 +162,6 @@ best_practices:
   naming:
     global: "Use descriptive names for routine entry points: send_packet, init_uart, calc_crc"
     local: "Use short names for flow control: .loop, .done, .retry, .skip, .exit"
-
-  convention:
-    preferred: "Dot notation (.label) over colon notation (:label)"
-    reason: "More widely used in modern P2 code"
 
   organization:
     - "Keep local labels near their references"

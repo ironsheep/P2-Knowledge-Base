@@ -1,5 +1,5 @@
 instruction: CALLD
-syntax: CALLD PA|PB|PTRA|PTRB, #{\}Addr | CALLD Dest, {#}Src {WC|WZ|WCZ}
+syntax: 'CALLD PA|PB|PTRA|PTRB, #{\}Addr | CALLD Dest, {#}Src {WC|WZ|WCZ}'
 brief_description: Call with destination register
 category: Branch
 description: >-
@@ -46,19 +46,19 @@ parameters:
   addressing.
 - Dest is a register to write the current C and Z flags and the address of the
   next instruction into.
-- Src is a register, 9-bit literal, or 32-bit augmented literal that contains
+- "Src is a register, 9-bit literal, or 32-bit augmented literal that contains
   the relative or absolute address to set PC to and optional new C and Z
-  states. Use # for relative addressing; omit # for absolute addressing.
+  states. Use # for relative addressing; omit # for absolute addressing."
 - WC, WZ, or WCZ are optional effects to update the flags from Src's upper bit
   states.
 flags_affected:
   C: Updated from S[31] if WC/WCZ specified (after recording original)
   Z: Updated from S[30] if WZ/WCZ specified (after recording original)
 syntax_variants:
-- CALLD PA, #Addr
-- CALLD PB, #Addr
-- CALLD PTRA, #Addr
-- CALLD PTRB, #Addr
+- 'CALLD PA, #Addr'
+- 'CALLD PB, #Addr'
+- 'CALLD PTRA, #Addr'
+- 'CALLD PTRB, #Addr'
 - CALLD Dest, {#}Src {WC|WZ|WCZ}
 timing:
   cycles: 4

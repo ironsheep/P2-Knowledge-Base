@@ -28,7 +28,7 @@ idioms:
         ...
         ' checksum loop uses zeroa as accumulator:
         rep    #2, count
-        rdlong x, ptr++
+        rdlong x, ptra++
         add    zeroa, x        ' zeroa accumulates checksum
         ...
         ' validation passes; zeroa is now overwritten with its real meaning:
@@ -43,7 +43,7 @@ idioms:
       - "Order of operations is load-bearing — a maintainer changing the code must understand the scratch-vs-real boundary"
       - "Best used in self-contained tight code (cog images, ISR-like sequences) where the full lifetime is visible at once"
       - "AVOID in large or evolving code where reasoning about the scratch boundary becomes brittle"
-    source: "Parallax P2 flash_loader.spin2 lines 60, 78, 84, 286-291"
+    source: "Parallax P2 flash_loader.spin2 lines 60, 78, 84, 286-291; the checksum loop shown is adapted from lines 56-60, which read through the FIFO (rdfast, then rep #2,s with rflong v)"
 
   - name: aliased_register_through_org
     pattern: |

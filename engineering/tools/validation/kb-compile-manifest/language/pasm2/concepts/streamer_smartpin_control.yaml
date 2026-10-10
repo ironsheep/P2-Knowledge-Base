@@ -23,11 +23,10 @@ blocks:
     wrap: pasm2-dat
     assumes: [drive_pins, drive_u_, pin_pwm_u_l, adc_pins]
   - at: smart_pin_system.status_operations.RDPIN.example
-    fp: "a9255c0964bedadf"
+    fp: "7afb1d62838b8624"
     compile: fragment
     wrap: pasm2-dat
     assumes: [data, process_received_byte, rx_pin=con]
-    finding: "S-195"
   - at: smart_pin_system.status_operations.TESTP.hall_sensor_example
     fp: "4682773dd0a1619e"
     compile: fragment
@@ -79,9 +78,9 @@ blocks:
     wrap: pasm2-dat
     assumes: [pwmn, pin_pwm_u_l, pwmt, pin_pwm_u_h, fram, drive_pins, drive_u_, dead_gap_]
   - at: coordination.bit_edge_lockstep.rule
-    fp: "40e6859c1b9799e2"
+    fp: "44827ef0b8aec11f"
     compile: not-code
-    reason: "prose rule with pseudo-formulas (`bits_per_streamer_clk = 2^32 / SETXFRQ_value`, `->` arrows) and a worked list; English text with arithmetic notation, neither Spin2 nor PASM2 source"
+    reason: "prose rule with pseudo-formulas (`sysclks_per_streamer_bit = $8000_0000 / SETXFRQ_value`,`->` arrows) and a worked list; English text with arithmetic notation, neither Spin2 nor PASM2 source"
   - at: coordination.bit_edge_lockstep.worked_examples
     fp: "65ba083c94ecf991"
     compile: fragment

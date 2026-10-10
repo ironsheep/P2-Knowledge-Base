@@ -17,7 +17,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [lock_num, timeout]
   - at: examples[3].code
-    fp: "a594ff9a973372b2"
+    fp: "101aff8ff3a7ab5d"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [LOCK_A=con, LOCK_B=con, LOCK_C=con]
+    assumes: [LOCK_A=con, LOCK_B=con, LOCK_C=con, result]

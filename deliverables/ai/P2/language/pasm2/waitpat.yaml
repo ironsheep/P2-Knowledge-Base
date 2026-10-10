@@ -8,7 +8,7 @@ encoding:
   z: timeout
   clocks: '2+'
 timing:
-  cycles: 2
+  cycles: 2+
   type: variable
 description: >-
   WAITPAT waits for a pin-pattern-detected event to occur (unless the event flag is

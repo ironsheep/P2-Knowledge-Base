@@ -137,11 +137,6 @@ special_prefixes_pasm2:
     syntax: ".label"
     meaning: "Local label (scoped to current block)"
     note: "Documentation indicates local label syntax exists"
-    
-  colon_prefix:
-    syntax: ":label"
-    meaning: "Local label (alternate syntax)"
-    note: "Documentation indicates local label syntax exists"
 
 length_considerations:
   practical_limit: "Keep identifiers under 20-25 chars for readability"

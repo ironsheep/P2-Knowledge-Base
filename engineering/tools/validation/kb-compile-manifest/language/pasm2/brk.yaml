@@ -13,7 +13,6 @@ blocks:
     wrap: pasm2-dat
     assumes: [debug_val, result]
   - at: examples[2].code
-    fp: "65e824b17c7854c9"
+    fp: "b41bbd13fb7484ef"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-164"

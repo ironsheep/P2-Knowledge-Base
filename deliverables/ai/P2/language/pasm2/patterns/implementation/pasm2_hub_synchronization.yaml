@@ -6,17 +6,13 @@ when_use:
 implementation: |
   ' Hub synchronization pattern
   hub_write
-          wrlong  value, hub_ptr          ' Write to hub
+          wrlong  value, hub_ptr          ' Write to hub (waits for this cog's hub slot by itself)
           add     hub_ptr, #4             ' Advance pointer
-          
+
   hub_read
-          rdlong  value, hub_ptr  wc      ' Read from hub, set C if non-zero
-    if_c  jmp     #process_data           ' Process if data present
-          
-  ' Wait for hub slot
-  wait_hub
-          waitx   ##20-2                  ' Wait for hub window
-          
+          rdlong  value, hub_ptr  wz      ' Read from hub, Z = 1 if the long is zero
+    if_nz jmp     #process_data           ' Process if data present
+
   value   long    0
   hub_ptr long    $4000                   ' Hub address
 resources:

@@ -17,31 +17,31 @@ parameters:
   range: 0-$3FF (COG/LUT registers; COG mode only -- not valid in ORGH/hub mode)
   description: Target COG or LUT address to advance to, filling intervening space with zeros (subject to the active FIT limit)
 examples:
-- code: 'DAT
-    ORG  0
+- code: |
+    DAT
+            ORG  0
     entry   jmp  #main
-            '' ... some code ...
+            ' ... some code ...
 
-    ORGF $100            '' Fill with zeros up to address $100
-    table   long 1,2,3   '' Table starts exactly at $100
-    '
+            ORGF $100            ' Fill with zeros up to address $100
+    table   long 1,2,3           ' Table starts exactly at $100
   description: Fill gap to place data at exact address
-- code: 'DAT
-    ORG  0
+- code: |
+    DAT
+            ORG  0
             nop
             nop
-    ORGF $10             '' Advance to $10, filling $02-$0F with zeros
+            ORGF $10             ' Advance to $10, filling $02-$0F with zeros
     handler jmp  #process
-    '
   description: Create padded interrupt vector table
-- code: 'DAT
-    '' Create fixed-size code block
-    ORG  0
+- code: |
+    DAT
+            ' Create fixed-size code block
+            ORG  0
     block_start
-            '' ... code ...
-    ORGF block_start + 64   '' Ensure block is exactly 64 longs
+            ' ... code ...
+            ORGF block_start + 64   ' Ensure block is exactly 64 longs
     block_end
-    '
   description: Pad code block to fixed size
 notes:
 - ORGF fills the gap with zero bytes/longs

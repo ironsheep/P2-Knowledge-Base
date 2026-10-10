@@ -1,5 +1,5 @@
 instruction: CALLA
-syntax: CALLA #{\}Addr | CALLA Dest {WC|WZ|WCZ}
+syntax: 'CALLA #{\}Addr | CALLA Dest {WC|WZ|WCZ}'
 brief_description: Call subroutine via PTRA
 encoding:
 - bits: EEEE 1101011 CZ0 DDDDDDDDD 000101110

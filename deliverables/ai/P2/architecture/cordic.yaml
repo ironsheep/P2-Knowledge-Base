@@ -25,7 +25,7 @@ critical_usage_pattern:
   fill_phase: "Submit ~6-7 ops before expecting results (derived: 54/8 = 6.75; the first result returns ~55 clocks after issue)"
   steady_state: "Each 8-clock slot: retrieve one result + submit one op"
   drain_phase: "Retrieve remaining results (may stall)"
-  warning: "GETQX/GETQY stalls COG if result not ready - use POLLQMT to check"
+  warning: "GETQX/GETQY stalls COG if result not ready - there is no non-blocking result-ready test (POLLQMT is not one); schedule the read at least 55 clocks after the command"
 
   keep_hub_access_out_of_both_loops:
     rule: |
@@ -127,8 +127,9 @@ result_retrieval:
     
   pollqmt:
     instruction: "POLLQMT"
-    operation: "Check if CORDIC pipeline empty"
-    flags: "C=1 if empty, C=0 if operations pending"
+    operation: "Read and clear the CORDIC-read-but-empty event flag (event 15)"
+    flags: "C/Z = 1 if a GETQX/GETQY has executed since the flag was last cleared with no CORDIC result available or in progress"
+    note: "Not a result-ready poll: the flag says nothing about a result still being computed. GETQX/GETQY simply wait for it."
     non_blocking: true
 
 pipeline_behavior:

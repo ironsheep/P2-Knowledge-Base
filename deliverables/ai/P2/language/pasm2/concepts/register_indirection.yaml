@@ -12,7 +12,7 @@ altx_instructions:
   ALTS:
     function: "Substitute S field of next instruction"
     syntax: "ALTS index_reg, #base"
-    operation: "Next_S = base + index_reg[8:0]"
+    operation: "Next_S = base + index_reg[8:0]; then index_reg += sign-extended S[17:9]"
     range: "9-bit result (0-511)"
     examples:
       - |
@@ -27,7 +27,7 @@ altx_instructions:
   ALTD:
     function: "Substitute D field of next instruction"
     syntax: "ALTD index_reg, #base"
-    operation: "Next_D = base + index_reg[8:0]"
+    operation: "Next_D = base + index_reg[8:0]; then index_reg += sign-extended S[17:9]"
     range: "9-bit result (0-511)"
     examples:
       - |
@@ -42,12 +42,12 @@ altx_instructions:
   ALTR:
     function: "Substitute result destination"
     syntax: "ALTR index_reg, #base"
-    operation: "Result_D = base + index_reg[8:0]"   # (S + D) & $1FF, like ALTS/ALTD
+    operation: "Result_D = (index_reg + base) & $1FF, like ALTS/ALTD; the base is the S operand; then index_reg += sign-extended S[17:9]"
     range: "9-bit result (0-511)"
     examples:
       - |
         MOV offset, #3
-        ALTR offset, #0
+        ALTR offset, #base_reg
         ADD base_reg, value     ' Result goes to base_reg+3
     use_cases:
       - Indexed result storage
@@ -61,7 +61,7 @@ altx_instructions:
     behavior: "Next instruction slot executes exec_reg contents"
     examples:
       - |
-        MOV exec_reg, ##(ADD | (dst<<9) | src)
+        MOV exec_reg, ##$F100_0000 | (dst<<9) | src   ' an ADD dst, src instruction word
         ALTI exec_reg
         NOP                     ' This becomes ADD dst, src
     use_cases:
@@ -70,15 +70,16 @@ altx_instructions:
       - Interpreters
 
   ALTB:
-    function: "Modify bit field of next instruction"
+    function: "Substitute the D (register) field of the next BITxxx/TESTB instruction"
     syntax: "ALTB bit_reg, #base"
-    operation: "Next instruction's bit field = base + bit_reg[4:0]"
-    range: "5-bit result (0-31)"
+    operation: "Next instruction's D = (bit_reg[13:5] + base) & $1FF; its S operand supplies the bit number, so name the same register there (bit_reg[4:0])"
+    range: "14-bit bit index: register offset in [13:5], bit number in [4:0]"
+    note: "BITxxx also reads S[9:5] as a span of extra bits, so a bit number held in a register can be misread; a SETQ with value 0 right before the ALTB + BITxxx pair forces the single-bit form"
     examples:
       - |
         MOV bit_num, #7
-        ALTB bit_num, #0
-        BITH flags, #0-0        ' Actually sets bit 7
+        ALTB bit_num, #flags
+        BITH 0-0, bit_num       ' Actually sets bit 7 of flags
     use_cases:
       - Dynamic bit manipulation
       - Bit array operations
@@ -86,31 +87,32 @@ altx_instructions:
 
 advanced_features:
   increment_modes:
-    description: "ALTx can auto-increment/decrement index"
+    description: "ALTx adds the sign-extended S[17:9] to D after the substitution (index update)"
     options:
-      - "No modification (default)"
-      - "Post-increment index"
-      - "Post-decrement index"
+      - "S[17:9] = 0: D unchanged (a plain 9-bit #S)"
+      - "S[17:9] = 1: D incremented by 1"
+      - "S[17:9] = -1: D decremented by 1"
     syntax_variants:
-      - "ALTS index"          # No modification
-      - "ALTS index++"        # Post-increment
-      - "ALTS index--"        # Post-decrement
+      - "ALTS index, #base                (no update)"
+      - "ALTS index, ##$200 + base        (post-increment)"
+      - "ALTS index, ##$3FE00 + base      (post-decrement)"
     examples:
       - |
         MOV index, #0
-        REP #4, #10
-          ALTS index++          ' Index increments after use
+        REP #3, #10
+          ALTS index, ##$200 + table   ' Index increments after use
           MOV sum, 0-0
           ADD total, sum
 
   combined_operations:
-    description: "Multiple ALTx can be combined"
+    description: "ALTx alters only the instruction that follows it; to substitute both S and D of one instruction use ALTI"
     examples:
       - |
-        ' Copy with computed source and destination
-        ALTS src_index
-        ALTD dst_index
-        MOV 0-0, 0-0           ' Copies from computed to computed
+        ' Copy with computed source and destination: ptrs[8:0] = source register, ptrs[17:9] = destination register
+        MOV  ptrs, ##(dst_reg<<9) | src_reg
+        REP  #2, count
+        ALTI ptrs, #%111_111      ' next D = ptrs[17:9], next S = ptrs[8:0]; both then step up by 1
+        MOV  0-0, 0-0
 
   conditional_execution:
     description: "ALTx instructions can be conditional"
@@ -125,7 +127,7 @@ operational_details:
     - ALTx takes 2 cycles
     - Modified instruction executes normally
     - No pipeline stall
-    - Back-to-back ALTx possible
+    - ALTx alters only the next instruction, even when that instruction is itself an ALTx
 
   scope:
     - Affects ONLY the next instruction
@@ -146,34 +148,21 @@ common_patterns:
       MOV result, 0-0
     description: "Index into lookup table"
 
-  computed_jump:
-    code: |
-      ALTS state, #jump_table
-      JMP #0-0
-    description: "State machine dispatch"
-
   array_copy:
     code: |
-      REP #2, count
-        ALTS src_ptr++
-        ALTD dst_ptr++
-        MOV 0-0, 0-0
+      REP #4, count
+      ALTS src_ptr, ##$200      ' next S = src_ptr, then src_ptr += 1
+      MOV  tmp, 0-0             ' tmp = cog[src_ptr]
+      ALTD dst_ptr, ##$200      ' next D = dst_ptr, then dst_ptr += 1
+      MOV  0-0, tmp             ' cog[dst_ptr] = tmp
     description: "Memory-to-memory copy"
-
-  switch_case:
-    code: |
-      CMP value, #MAX_CASE WC
-      IF_C ALTS value, #case_table
-      IF_C JMP #0-0
-      JMP #default_case
-    description: "Efficient switch statement"
 
   bit_scan:
     code: |
       MOV bit_pos, #0
       .loop
-        ALTB bit_pos
-        TESTB flags, #0-0 WC
+        ALTB bit_pos, #flags
+        TESTB 0-0, bit_pos WC    ' C = bit bit_pos of flags
         IF_C JMP #found
         ADD bit_pos, #1
         CMP bit_pos, #32 WZ
@@ -185,7 +174,6 @@ limitations:
   - Limited to 9-bit address range (0-511)
   - Cannot chain (each affects only next instruction)
   - No effect on AUGS/AUGD augmentation
-  - Cannot modify ALTx instructions themselves
 
 best_practices:
   - Use for table-driven code

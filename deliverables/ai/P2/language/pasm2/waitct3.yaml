@@ -36,7 +36,7 @@ flags_affected:
 syntax_variants:
 - WAITCT3 {WC|WZ|WCZ}
 timing:
-  cycles: 2
+  cycles: 2+
   type: variable
   notes: 2+ cycles depending on wait time
 encoding:

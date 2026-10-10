@@ -3,136 +3,114 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: addressing_modes.relative_immediate.examples[0]
-    fp: "2f853d6139309fb0"
+    fp: "95adfec3b008a751"
     compile: fragment
     wrap: pasm2-dat
     assumes: [forward_label]
-    finding: "S-183"
   - at: addressing_modes.relative_immediate.examples[1]
-    fp: "86c4446cd3075629"
+    fp: "ea41d29a5de95bc1"
     compile: fragment
     wrap: pasm2-dat
     assumes: [subroutine]
-    finding: "S-183"
   - at: addressing_modes.relative_immediate.examples[2]
-    fp: "be67f4b4027f07f3"
+    fp: "9e252798cf603d7e"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-183+S-008"
+    assumes: [skip_it]
   - at: addressing_modes.absolute_immediate.examples[0]
-    fp: "2f853d6139309fb0"
+    fp: "d9a7b4f33f3ae3e6"
     compile: fragment
     wrap: pasm2-dat
     assumes: [hub_routine]
-    finding: "S-183"
   - at: addressing_modes.absolute_immediate.examples[1]
-    fp: "86c4446cd3075629"
+    fp: "e7c45412411ff50e"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-183"
   - at: addressing_modes.absolute_immediate.examples[2]
-    fp: "2f853d6139309fb0"
+    fp: "dc029cea9b30e813"
     compile: fragment
     wrap: pasm2-dat
     assumes: [cog_routine]
-    finding: "S-183"
   - at: addressing_modes.register_indirect.examples[0]
-    fp: "e95375223bfa168d"
+    fp: "640d41dbae91b603"
     compile: fragment
     wrap: pasm2-dat
     assumes: [vector]
   - at: addressing_modes.register_indirect.examples[1]
-    fp: "3e34d0718782e58a"
+    fp: "6693b2cd17c44957"
     compile: fragment
     wrap: pasm2-dat
     assumes: [routine_ptr]
   - at: addressing_modes.register_indirect.examples[2]
-    fp: "e961e779171076be"
+    fp: "107aecdf140f8897"
     compile: fragment
     wrap: pasm2-dat
   - at: "branch_types[\"CALLA/CALLB\"].examples[0]"
-    fp: "a29f70cb468ffdd3"
+    fp: "9c5ef5203913cda5"
     compile: fragment
     wrap: pasm2-dat
     assumes: [function]
-    finding: "S-183"
   - at: "branch_types[\"CALLA/CALLB\"].examples[1]"
-    fp: "277834cb9192da1e"
+    fp: "7aeaf2aa4751ab3f"
     compile: fragment
     wrap: pasm2-dat
     assumes: [function]
-    finding: "S-183"
   - at: "branch_types[\"CALLA/CALLB\"].examples[2]"
-    fp: "65c8a14eca47bbda"
+    fp: "8906de645742d201"
     compile: fragment
     wrap: pasm2-dat
   - at: "branch_types[\"CALLA/CALLB\"].examples[3]"
-    fp: "c268aba3be656063"
+    fp: "a6ba517aa4c63db5"
     compile: fragment
     wrap: pasm2-dat
   - at: branch_types.CALLD.examples[0]
-    fp: "f5aed594ac069821"
+    fp: "e6170f5f945a5bc0"
     compile: fragment
     wrap: pasm2-dat
     assumes: [link_reg, function]
-    finding: "S-183"
   - at: branch_types.CALLD.examples[1]
-    fp: "b1d4ee3921cfdf10"
+    fp: "a9f31732d378a5ea"
     compile: fragment
     wrap: pasm2-dat
     assumes: [link_reg]
   - at: branch_types.EXECF.example
-    fp: "ecb9216050e26309"
+    fp: "75803e1bc5674f32"
     compile: fragment
     wrap: pasm2-dat
   - at: special_addressing.hub_execution.examples[0]
-    fp: "2f853d6139309fb0"
+    fp: "1834882e1c7d0836"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-183"
   - at: special_addressing.hub_execution.examples[1]
-    fp: "86c4446cd3075629"
+    fp: "d3170fb1ebc49ac5"
     compile: fragment
     wrap: pasm2-dat
     assumes: [hub_function]
-    finding: "S-183"
   - at: special_addressing.hub_execution.examples[2]
-    fp: "e961e779171076be"
+    fp: "26cc0c31f0d74eca"
     compile: fragment
     wrap: pasm2-dat
-  - at: special_addressing.long_branches.examples[0]
-    fp: "a34ef2961cd67879"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [high_bits, far_label]
-    finding: "S-188"
   - at: special_addressing.interrupt_vectors.setup
     fp: "cd954c42963b31fc"
     compile: fragment
     wrap: pasm2-dat
     assumes: [interrupt_handler=con, event=con]
-  - at: common_patterns.table_dispatch.code
-    fp: "7119f540e628cb4b"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [index, MAX_INDEX=con, default, case_0, case_1, case_2]
   - at: common_patterns.loop_control.code
     fp: "a117d597c39fbd94"
     compile: fragment
     wrap: pasm2-dat
     assumes: [counter]
   - at: common_patterns.subroutine_call.code
-    fp: "8673e9afd4cba30d"
+    fp: "e430eaeaee3fc35e"
     compile: fragment
     wrap: pasm2-dat
   - at: common_patterns.tail_call.code
-    fp: "6c063965099af5ee"
+    fp: "53283adf155a6b9a"
     compile: fragment
     wrap: pasm2-dat
     assumes: [other_function]
-    finding: "S-188"
   - at: common_patterns.conditional_call.code
-    fp: "70d96d804bbdb6e0"
+    fp: "cb587eeb076b8fb2"
     compile: fragment
     wrap: pasm2-dat
     assumes: [value, threshold, handle_low, handle_high]

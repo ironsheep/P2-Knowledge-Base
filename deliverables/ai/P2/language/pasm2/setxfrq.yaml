@@ -36,7 +36,7 @@ examples:
       ' Calculate: 25_175_000 * $8000_0000 / 250_000_000 = $0CE3_BCD3, remainder
       '   The division does not come out even, so increment: $0CE3_BCD4
       setxfrq ##$0CE3_BCD4      ' ~25.175 MHz pixel rate
-    notes: Use ## for 32-bit immediate values
+    notes: 'Use ## for 32-bit immediate values'
   - context: Audio sample rate 48 kHz
     code: |
       ' Calculate: 48_000 * $8000_0000 / 250_000_000 = $0006_4A9C, remainder

@@ -9,14 +9,14 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: Convert 32-bit unsigned integer to 5:27-bit logarithm format. Takes unsigned
+description: Compute the base-2 logarithm of a 32-bit unsigned integer, as a 5:27-bit fixed-point value. Takes unsigned
   integer in D operand and produces logarithm with 5-bit whole exponent and 27-bit
   fractional exponent. Result retrieved via GETQX instruction 55 clocks later.
 flags_affected:
   C: No effect
   Z: No effect
-long_description: 'The QLOG instruction performs integer to logarithm conversion using
-  the P2''s 54-stage pipelined CORDIC solver. It converts a 32-bit unsigned integer
+long_description: 'The QLOG instruction performs integer to base-2 logarithm conversion
+  using the P2''s 54-stage pipelined CORDIC solver. It converts a 32-bit unsigned integer
   into a 5:27-bit logarithm format, where the result contains a 5-bit whole exponent
   in bits [31:27] and a 27-bit fractional exponent in bits [26:0].
 
@@ -36,41 +36,27 @@ long_description: 'The QLOG instruction performs integer to logarithm conversion
 
   '
 examples:
-- code: ''' Calculate logarithm of 1000
-
-    QLOG    #1000          '' Begin log conversion
-
-    '' Wait 55 clocks...
-
-    GETQX   log_result     '' Get 5:27 logarithm
-
-    '
+- code: |
+    ' Calculate logarithm of 1000
+    QLOG    ##1000         ' Begin log conversion
+    ' Wait 55 clocks...
+    GETQX   log_result     ' Get 5:27 logarithm
   description: Basic logarithm calculation
-- code: ''' Calculate logarithm of variable
-
+- code: |
+    ' Calculate logarithm of variable
     QLOG    input_value
-
-    '' ... other work for 55 clocks ...
-
+    ' ... other work for 55 clocks ...
     GETQX   logarithm
-
-    '
   description: Variable logarithm conversion
-- code: ''' Extract exponent and mantissa parts
-
+- code: |
+    ' Extract exponent and mantissa parts
     QLOG    number
-
-    '' ... wait 55 clocks ...
-
+    ' ... wait 55 clocks ...
     GETQX   log_result
-
-    SHR     log_result, #27 WZ  '' Extract 5-bit exponent
-
+    MOV     mantissa, log_result
+    AND     mantissa, ##$07FFFFFF  ' Extract 27-bit mantissa (fractional exponent)
+    SHR     log_result, #27 WZ     ' Extract 5-bit exponent
     MOV     exponent, log_result
-
-    AND     mantissa, ##$07FFFFFF  '' Extract 27-bit mantissa
-
-    '
   description: Extracting logarithm components
 related_instructions:
 - GETQX
@@ -96,4 +82,4 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.192894'
 category: CORDIC Solver
-oneliner: Convert 32-bit unsigned integer to 5:27-bit logarithm format
+oneliner: Compute the base-2 logarithm of a 32-bit unsigned integer, as a 5:27-bit fixed-point value

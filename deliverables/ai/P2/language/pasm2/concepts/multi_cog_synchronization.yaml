@@ -79,8 +79,11 @@ hardware_primitives:
     atomic_ops: "Single hub operations are atomic"
     coordination_pattern: |
       ' Mailbox pattern
-      mailbox_base    = $7F000
-      
+      CON
+        mailbox_base    = $7F000
+
+      DAT
+              org 0
       ' COG A writes request
       wrlong  request, ##mailbox_base
       wrlong  #1, ##mailbox_base+4     ' Flag
@@ -97,8 +100,11 @@ resource_protection_patterns:
     description: "Basic mutual exclusion"
     code: |
       ' Define lock number
-      SPI_LOCK = 5
-      
+      CON
+        SPI_LOCK = 5
+
+      DAT
+              org 0
       spi_transaction
               locktry #SPI_LOCK       wc
       if_nc   jmp     #spi_transaction     ' Spin wait
@@ -166,17 +172,20 @@ producer_consumer_patterns:
     description: "Lock-free ring buffer"
     code: |
       ' Hub memory layout
-      ring_base       = $70000
-      ring_size       = 1024        ' Longs
-      ring_mask       = ring_size-1
-      head_ptr        = ring_base + (ring_size*4)
-      tail_ptr        = head_ptr + 4
-      
+      CON
+        ring_base       = $70000
+        ring_size       = 1024        ' Longs
+        ring_mask       = ring_size-1
+        head_ptr        = ring_base + (ring_size*4)
+        tail_ptr        = head_ptr + 4
+
+      DAT
+              org 0
       ' Producer (any COG)
       produce_data
               rdlong  head, ##head_ptr
               mov     next_head, head
-              incmod  next_head, ring_mask
+              incmod  next_head, ##ring_mask
               
               ' Check if full
               rdlong  tail, ##tail_ptr
@@ -206,7 +215,7 @@ producer_consumer_patterns:
               rdlong  data, addr
               
               ' Update tail
-              incmod  tail, ring_mask
+              incmod  tail, ##ring_mask
               wrlong  tail, ##tail_ptr
               ret
     
@@ -214,9 +223,12 @@ producer_consumer_patterns:
     description: "Multi-COG mailbox communication"
     code: |
       ' Each COG has mailbox
-      mailbox_size    = 16         ' Bytes per mailbox
-      mailbox_base    = $7F000
-      
+      CON
+        mailbox_size    = 16         ' Bytes per mailbox
+        mailbox_base    = $7F000
+
+      DAT
+              org 0
       ' Send message to COG
       send_to_cog
               ' PA = target COG, PB = message
@@ -286,9 +298,11 @@ parallel_processing_patterns:
               mov     cog_num, #1     ' Start with COG 1
               
       .loop   ' Assign work to each COG
-              shl     work_index, #16
-              or      work_index, cog_num
-              coginit cog_num, #worker_code, work_index
+              mov     param, work_index       ' Scratch copy of the work index
+              shl     param, #16              ' Work index in the upper half
+              or      param, cog_num          ' Cog number in the lower half
+              setq    param                   ' PTRA of the new cog
+              coginit cog_num, ##@worker_code ' Two operands: cog selector, hub start address
               add     cog_num, #1
               add     work_index, #WORK_CHUNK
               cmp     cog_num, #8     wz
@@ -301,36 +315,38 @@ parallel_processing_patterns:
               ' Check completion status...
     
   barrier_synchronization:
-    description: "All COGs wait at barrier"
+    description: "All COGs wait at a one-shot barrier (the arrival counter is guarded by a lock: P2 has no atomic add on hub RAM)"
     code: |
-      ' Shared barrier counter
-      barrier_count   = $7FFF0
-      barrier_target  = 8
-      
+      ' Shared barrier counter, guarded by a lock
+      CON
+        barrier_count   = $7FFF0
+        barrier_target  = 8
+        barrier_lock    = 3
+
+      DAT
+              org 0
       barrier_wait
-              ' Increment counter atomically
-              loc     ptra, #\barrier_count
-      .inc    rdlong  old, ptra
-              add     old, #1
-              wrlong  new, ptra
-              rdlong  check, ptra
-              cmp     check, old      wz
-      if_nz   jmp     #.inc           ' Retry if changed
-              
+      .lock   locktry #barrier_lock   wc
+      if_nc   jmp     #.lock                  ' Wait for the lock
+              rdlong  count, ##barrier_count
+              add     count, #1
+              wrlong  count, ##barrier_count  ' Count this cog's arrival
+              lockrel #barrier_lock
+
               ' Check if all arrived
-              cmp     new, #barrier_target wz
+              cmp     count, #barrier_target wz
       if_z    jmp     #.release
-              
+
               ' Wait for release
-      .wait   rdlong  count, ptra
+      .wait   rdlong  count, ##barrier_count
               cmp     count, #0       wz
       if_nz   jmp     #.wait
               ret
-              
+
       .release
               ' Last COG releases all
-              wrlong  #0, ptra        ' Reset counter
-              cogatn  #$FF            ' Signal all COGs
+              wrlong  #0, ##barrier_count     ' Reset counter
+              cogatn  #$FF                    ' Signal all COGs
               ret
 
 synchronization_hazards:

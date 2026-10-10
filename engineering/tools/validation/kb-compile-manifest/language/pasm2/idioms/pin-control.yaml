@@ -32,11 +32,10 @@ blocks:
     wrap: pasm2-dat
     assumes: [parallel_data=con]
   - at: idioms[2].examples[0]
-    fp: "f5e6cedc91c04d9f"
+    fp: "de4497b76f3fdb80"
     compile: fragment
     wrap: pasm2-dat
     assumes: [addr_bus=con]
-    finding: "S-167"
   - at: idioms[2].examples[1]
     fp: "b2025d84ed87d784"
     compile: fragment

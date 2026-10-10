@@ -30,7 +30,7 @@ flags_affected:
 syntax_variants:
 - WAITXFI {WC|WZ|WCZ}
 timing:
-  cycles: 2
+  cycles: 2+
   type: variable
 encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
 - bits: EEEE 1101011 CZ0 000011011 000100100

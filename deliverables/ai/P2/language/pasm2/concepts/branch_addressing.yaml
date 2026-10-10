@@ -10,26 +10,26 @@ overview: |
 
 addressing_modes:
   relative_immediate:
-    syntax: "#@label"
-    encoding: "20-bit signed offset from PC"
-    range: "±1MB from current instruction"
+    syntax: "#label"
+    encoding: "20-bit immediate address with R = 1: PC += A, a signed 20-bit byte offset (a jump to itself assembles with A = $FFFFC, which is -4)"
+    range: "±512 KB: a 20-bit signed byte offset"
     instructions: ["JMP", "CALL", "CALLA", "CALLB", "CALLD"]
     examples:
-      - JMP #@forward_label    # Jump to label (relative)
-      - CALL #@subroutine      # Call with relative address
-      - IF_Z JMP #@skip        # Conditional relative jump
-    notes: "Assembler converts label to PC-relative offset"
+      - "JMP #forward_label    ' Jump to label (relative)"
+      - "CALL #subroutine      ' Call with relative address"
+      - "IF_Z JMP #skip_it     ' Conditional relative jump"
+    notes: "Relative is the default when cog code references cog labels or hub code references hub labels; the assembler converts the label to a PC-relative offset"
 
   absolute_immediate:
-    syntax: "#\\label or #label"
-    encoding: "20-bit absolute address"
+    syntax: "#\\label"
+    encoding: "20-bit absolute address (R = 0)"
     range: "$00000-$FFFFF (entire hub space)"
     instructions: ["JMP", "CALL", "CALLA", "CALLB", "CALLD"]
     examples:
-      - JMP #\\hub_routine      # Jump to absolute hub address
-      - CALL #\\$10000          # Call absolute address
-      - JMP #cog_routine       # Jump within cog (absolute)
-    notes: "\\ forces absolute, # alone is context-dependent"
+      - "JMP #\\hub_routine      ' Jump to absolute hub address"
+      - "CALL #\\$10000          ' Call absolute address"
+      - "JMP #cog_routine       ' Jump within cog (relative)"
+    notes: "\\ forces absolute addressing. Crossing between cog and hub is always absolute and is forced by the assembler, so # alone is enough there; @label is the hub address of a label defined under ORG"
 
   register_indirect:
     syntax: "register"
@@ -37,47 +37,47 @@ addressing_modes:
     range: "Full 20-bit addressing"
     instructions: ["JMP", "CALL", "CALLA", "CALLB", "CALLD", "RET"]
     examples:
-      - JMP vector             # Jump to address in vector
-      - CALL routine_ptr       # Call through pointer
-      - RET                    # Return using stack
+      - "JMP vector             ' Jump to address in vector"
+      - "CALL routine_ptr       ' Call through pointer"
+      - "RET                    ' Return using stack"
     notes: "Enables computed jumps and returns"
 
 branch_types:
   JMP:
     description: "Unconditional jump"
     variants:
-      - "JMP #@label"          # Relative jump
-      - "JMP #\\label"          # Absolute jump
-      - "JMP register"         # Indirect jump
-      - "JMP #register"        # Jump to cog address
-    pipeline: "2-cycle latency for all jumps"
-    
+      - "JMP #label            ' Relative jump"
+      - "JMP #\\label           ' Absolute jump"
+      - "JMP register          ' Indirect jump"
+      - "JMP #register         ' Jump to cog address"
+    timing: "JMP/CALL/RET taken: 4 clocks in cog or LUT execution, 13...20 in hub execution; DJNZ/TJZ-family branches: 2 clocks not taken, 4 taken in cog execution (2, or 13...20, in hub execution)"
+
   CALL:
     description: "Call with return address on stack"
     variants:
-      - "CALL #@label"         # Relative call
-      - "CALL #\\label"         # Absolute call  
-      - "CALL register"        # Indirect call
-    stack: "Pushes 20-bit return address to internal stack"
-    depth: "8-level hardware stack"
+      - "CALL #label           ' Relative call"
+      - "CALL #\\label          ' Absolute call"
+      - "CALL register         ' Indirect call"
+    stack: "Pushes {C, Z, 10'b0, PC[19:0]} (a 32-bit entry) onto the hardware stack"
+    depth: "8-level hardware stack; a 9th push discards the oldest entry"
 
   CALLA/CALLB:
-    description: "Call with return in PTRA/PTRB"
-    operation: "PTRx = PC + 4, then jump"
+    description: "Call with the return address pushed onto a hub stack addressed by PTRA/PTRB"
+    operation: "Write {C, Z, 10'b0, PC[19:0]} to the hub long at PTRA++ (CALLB: PTRB++), then jump"
     examples:
-      - CALLA #@function       # Return address in PTRA
-      - CALLB #@function       # Return address in PTRB
-      - RETA                   # Return using PTRA
-      - RETB                   # Return using PTRB
-    use_case: "Leaf functions, no stack needed"
+      - "CALLA #function       ' Push {C, Z, PC} to hub at PTRA++, then jump"
+      - "CALLB #function       ' Push {C, Z, PC} to hub at PTRB++, then jump"
+      - "RETA                   ' Return: pop the long at --PTRA"
+      - "RETB                   ' Return: pop the long at --PTRB"
+    use_case: "Calls nested deeper than the 8-level hardware stack; the stack lives in hub RAM (set PTRA/PTRB first)"
 
   CALLD:
     description: "Call with return in register"
-    syntax: "CALLD return_reg, #@label"
-    operation: "return_reg = PC + 4, then jump"
+    syntax: "CALLD return_reg, #label"
+    operation: "return_reg = {C, Z, 10'b0, address of the next instruction}, then jump"
     examples:
-      - CALLD link_reg, #@function
-      - JMP link_reg           # Return via jump
+      - "CALLD link_reg, #function"
+      - "JMP link_reg           ' Return via jump"
     use_case: "Custom calling conventions"
 
   EXECF:
@@ -85,7 +85,7 @@ branch_types:
     syntax: "EXECF skip_pattern"
     operation: "Load skip pattern, execute, then branch"
     example: |
-      EXECF ##%1010_1010_1010_1010__000000_000_111111
+      EXECF ##%1010_1010_1010_1010_000000__00_0011_1111
       ' Skip pattern in bits 31:10, branch address in 9:0
     use_case: "Conditional execution with branch"
 
@@ -93,21 +93,13 @@ special_addressing:
   hub_execution:
     description: "Branches between cog and hub memory"
     rules:
-      - "JMP to $000-$1FF stays in cog"
-      - "JMP to $200+ enters hub execution"
-      - "Return address indicates execution mode"
+      - "JMP to $000-$3FF stays in cog or LUT execution"
+      - "JMP to $400 and above enters hub execution (the PC rolling from $3FF to $400 does not)"
+      - "Crossing between cog and hub is always absolute; the assembler forces it"
     examples:
-      - JMP #\\$400            # Enter hub execution
-      - CALL #@hub_function   # Call hub from cog
-      - RET                   # Return preserves mode
-
-  long_branches:
-    description: "Branches beyond ±1MB"
-    technique: "Use AUGS for extended range"
-    examples:
-      - |
-        AUGS #high_bits
-        JMP #@far_label       # Combined for 32-bit range
+      - "JMP #\\$400            ' Enter hub execution"
+      - "CALL #hub_function    ' Call hub from cog"
+      - "RET                   ' Return restores the saved PC"
 
   interrupt_vectors:
     description: "Hardware interrupt branch addresses"
@@ -118,34 +110,19 @@ special_addressing:
 
 branch_optimization:
   pipeline_effects:
-    - Branch taken: 2-cycle penalty
-    - Branch not taken: No penalty
-    - Indirect branch: Same 2-cycle penalty
-    - RET instruction: 2-cycle penalty
+    - "Branch taken (JMP, CALL, RET, ...): 4 clocks in cog or LUT execution, 13...20 clocks in hub execution"
+    - "DJNZ/TJZ-family branches: 2 clocks when not taken"
+    - "Indirect branch (JMP register): same 4 / 13...20 clocks"
+    - "CALLA/CALLB: 5...12 clocks (cog execution); RETA/RETB: 11...18"
 
   alignment:
-    - Cog branches: 4-byte aligned
-    - Hub branches: Can be unaligned
-    - Performance: Aligned branches preferred
+    - "Hub execution: branching to a hub address that is not long-aligned takes one additional clock"
+    - "Performance: align hot hub-execution branch targets to a long"
 
   prediction:
-    - No branch prediction hardware
-    - All branches have fixed latency
-    - Consider branch-free alternatives
+    - "Consider branch-free alternatives (conditional execution, SKIP/SKIPF) for short sequences"
 
 common_patterns:
-  table_dispatch:
-    code: |
-      CMP index, #MAX_INDEX WC
-      IF_NC JMP #default
-      ALTS index, #jump_table
-      JMP #0-0
-      jump_table
-        JMP #case_0
-        JMP #case_1
-        JMP #case_2
-    description: "Computed jump table"
-
   loop_control:
     code: |
       .loop
@@ -156,7 +133,7 @@ common_patterns:
 
   subroutine_call:
     code: |
-      CALL #@subroutine
+      CALL #subroutine
       ' Continue after return
       subroutine
         ' Function body
@@ -166,20 +143,20 @@ common_patterns:
   tail_call:
     code: |
       ' Instead of CALL + RET
-      JMP #@other_function    # Tail call optimization
+      JMP #other_function    ' Tail call optimization
     description: "Optimize tail recursion"
 
   conditional_call:
     code: |
       CMP value, threshold WC
-      IF_C CALL #@handle_low
-      IF_NC CALL #@handle_high
+      IF_C CALL #handle_low
+      IF_NC CALL #handle_high
     description: "Conditional subroutine calls"
 
 debugging_considerations:
   return_stack:
     - 8-level hardware stack
-    - No overflow detection
+    - No overflow detection - a 9th push silently discards the oldest entry, so the outermost return is lost
     - Corruption hard to debug
     - Consider stack depth carefully
 
@@ -195,7 +172,7 @@ debugging_considerations:
 
 best_practices:
   - Use relative branches for position-independent code
-  - Prefer CALLA/CALLB for leaf functions
+  - Use CALLA/CALLB when call depth exceeds the 8-level hardware stack (CALL itself costs 4 clocks, CALLA 5...12)
   - Validate indirect branch targets
   - Consider REP for small loops
   - Use SKIPF for conditional sequences

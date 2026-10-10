@@ -15,17 +15,14 @@ usage: 'Use in conditional logic and boolean operations
 
   '
 examples:
-- code: 'mov     flag, FALSE     '' Initialize flag to FALSE
-
-    '' ... some operations ...
-
-    cmp     x, y        wz  '' Compare x and y
-
-    if_e mov  flag, TRUE    '' Set flag to TRUE if equal
-
-    '
+- code: |
+    mov     flag, ##FALSE           ' Initialize flag to FALSE
+    ' ... some operations ...
+    cmp     x, y        wz          ' Compare x and y
+    if_e    mov flag, ##TRUE        ' Set flag to TRUE if equal
   description: Using FALSE for initialization
 notes:
+- 'FALSE fits a 9-bit immediate: mov flag, #0. TRUE (-1) does not: write ##TRUE (the compiler adds an AUGS) or neg flag, #1.'
 - All bits cleared (0 value)
 - Standard boolean false value in PASM2
 - Used for clearing flags and initialization

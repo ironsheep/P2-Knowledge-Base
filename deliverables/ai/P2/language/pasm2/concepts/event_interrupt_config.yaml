@@ -76,16 +76,16 @@ interrupt_system:
 
   return_instructions:
     RETI0_3:
-      syntax: "RETI0/1/2/3 {WC/WZ/WCZ}"
-      operation: "Return from interrupt, restore C/Z if specified"
-      behavior: "Pop address from internal stack, restore flags"
-      example: "RETI1 WCZ  ' Return and restore both flags"
-      
+      syntax: "RETI0/1/2/3"
+      operation: "Return from an interrupt service routine; the interrupted address, C and Z are restored"
+      behavior: "RETIx is the alias CALLD INB,IRETx WCZ (RETI0: CALLD INB,INB WCZ): it jumps to the address saved in IRETx, restores C and Z from it, and clears the cog's interrupt-busy flag so another interrupt of that level can occur. It takes no WC/WZ/WCZ of its own"
+      example: "RETI1  ' Return from the INT1 service routine"
+
     RESI0_3:
       syntax: "RESI0/1/2/3"
-      operation: "Resume from interrupt (continue interrupted code)"
-      behavior: "Like RETI but continues interrupted instruction"
-      use: "For interrupts that don't fully handle event"
+      operation: "Return from the interrupt, but resume this ISR at its next instruction when the next interrupt occurs"
+      behavior: "RESIx is the alias CALLD IJMPx,IRETx WCZ: it returns to the interrupted code and writes the ISR's next address into IJMPx, so the next interrupt continues after the RESI instead of at the start of the ISR (RETIx leaves IJMPx unchanged)"
+      use: "Co-routine style interrupt service routines that keep their place between interrupts"
 
 event_sources:
   selectable_events:
@@ -202,7 +202,7 @@ interrupt_context:
         PUSHA work_reg
         ' ISR body
         POPA work_reg
-        RETI1 WCZ        ' Restore flags
+        RETI1            ' Restore flags and return (RETIx restores C and Z itself)
 
 common_patterns:
   timer_interrupt:
@@ -237,7 +237,7 @@ common_patterns:
     code: |
       ' Setup attention interrupt
       MOV IJMP3, ##atn_handler
-      SETINT3 #12      ' ATN event
+      SETINT3 #14      ' ATN event
       
       atn_handler
         ' Check which cog sent ATN

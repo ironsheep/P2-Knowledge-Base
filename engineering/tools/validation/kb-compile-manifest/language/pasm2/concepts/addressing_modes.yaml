@@ -93,23 +93,20 @@ blocks:
     wrap: pasm2-dat
     assumes: [r0, buffer]
   - at: modes.bit_addressing.examples[0]
-    fp: "33a97e1a7b75b6e0"
+    fp: "8babbb214fe13764"
     compile: fragment
     wrap: pasm2-dat
     assumes: [flags]
-    finding: "S-183"
   - at: modes.bit_addressing.examples[1]
-    fp: "4525333785d24264"
+    fp: "50dc2865bbc365d2"
     compile: fragment
     wrap: pasm2-dat
     assumes: [flags, READY_BIT=con]
-    finding: "S-183"
   - at: modes.bit_addressing.examples[2]
-    fp: "5412a0336bed6b0b"
+    fp: "f12c7e1e69a8f33c"
     compile: fragment
     wrap: pasm2-dat
     assumes: [flags]
-    finding: "S-183"
   - at: special_cases.altx_modified.examples[0]
     fp: "407434258c10d8a0"
     compile: fragment
@@ -121,25 +118,23 @@ blocks:
     wrap: pasm2-dat
     assumes: [index]
   - at: special_cases.altx_modified.examples[2]
-    fp: "3d5a853926d6ee81"
+    fp: "65a7606c42f01619"
     compile: fragment
     wrap: pasm2-dat
     assumes: [index]
   - at: special_cases.setq_block.examples[0]
-    fp: "4c61a10e4e0730d6"
+    fp: "803a3f7663ae0c62"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-183"
   - at: special_cases.setq_block.examples[1]
     fp: "0becbe1492904b47"
     compile: fragment
     wrap: pasm2-dat
     assumes: [base, hub_ptr]
   - at: special_cases.rep_block.examples[0]
-    fp: "8d65b9eee5e4cf25"
+    fp: "5ae8fdac85c1cc5c"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-183"
   - at: special_cases.rep_block.examples[1]
     fp: "a6b66fd4774bd9f7"
     compile: fragment

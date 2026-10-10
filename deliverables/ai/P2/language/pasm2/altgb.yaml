@@ -57,7 +57,7 @@ examples:
 - name: String Processing with Auto-Increment
   description: Process string bytes with automatic pointer advance
   code: "' Process null-terminated string\nprocess_string\n        mov     ptr, string_addr\
-    \         ' String start address\n.loop   altgb   ptr, ##$100              ' Auto-increment\
+    \         ' String start address\n.loop   altgb   ptr, ##$200              ' Auto-increment\
     \ by 1\n        getbyte char, 0-0, #0            ' Get next character\n      \
     \  tjz     char, #.done             ' Check for null terminator\n        \n  \
     \      ' Process character\n        call    #process_char\n        jmp     #.loop\n\

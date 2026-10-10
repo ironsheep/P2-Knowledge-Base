@@ -8,7 +8,7 @@ encoding:
   z: timeout
   clocks: '2+'
 timing:
-  cycles: 2
+  cycles: 2+
   type: variable
 description: >-
   WAITXMT waits for a streamer-empty event to occur (unless the event flag is already

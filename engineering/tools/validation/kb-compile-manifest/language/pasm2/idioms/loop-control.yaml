@@ -30,50 +30,36 @@ blocks:
     wrap: pasm2-dat
     assumes: [a, pinloop]
   - at: idioms[2].examples[0]
-    fp: "3c6b7e3b77c9adf4"
-    compile: not-code
-    reason: "corpus token pair (a label name followed by the word `loop`: `sample_cy loop`, `Field loop`, `main loop`) listed as example forms of a \"loop\" marker; not a statement (PASM2 has no LOOP instruction)"
-  - at: idioms[2].examples[1]
-    fp: "038a06119821a8af"
-    compile: not-code
-    reason: "corpus token pair (a label name followed by the word `loop`: `sample_cy loop`, `Field loop`, `main loop`) listed as example forms of a \"loop\" marker; not a statement (PASM2 has no LOOP instruction)"
-  - at: idioms[2].examples[2]
-    fp: "2edf6d302e659b11"
-    compile: not-code
-    reason: "corpus token pair (a label name followed by the word `loop`: `sample_cy loop`, `Field loop`, `main loop`) listed as example forms of a \"loop\" marker; not a statement (PASM2 has no LOOP instruction)"
-  - at: idioms[3].examples[0]
     fp: "7500e5aa63060635"
     compile: fragment
     wrap: pasm2-dat
     assumes: [main_loop]
-  - at: idioms[3].examples[1]
+  - at: idioms[2].examples[1]
     fp: "5d4a645886e3c0c9"
     compile: fragment
     wrap: pasm2-dat
     assumes: [start]
-  - at: idioms[4].examples[0]
+  - at: idioms[3].examples[0]
     fp: "96ae168b6a6754e4"
     compile: fragment
     wrap: pasm2-dat
     assumes: [t, label:.move]
-  - at: idioms[4].examples[1]
+  - at: idioms[3].examples[1]
     fp: "f58f48f7748dbf99"
     compile: fragment
     wrap: pasm2-dat
     assumes: [count, process_loop]
-  - at: idioms[5].pattern
+  - at: idioms[4].pattern
     fp: "e8a53d7e51faba10"
     compile: not-code
     reason: "`pattern:` TEMPLATE with `{placeholder}` fields (e.g. `{interface_base}`, `{count - 1}`); the braces are fill-in marks, not source; the page's concrete forms are its `examples:` entries"
-  - at: idioms[5].examples[0]
-    fp: "2402bfd61fb51131"
+  - at: idioms[4].examples[0]
+    fp: "001d0f8004587c21"
     compile: fragment
     wrap: pasm2-dat
     assumes: [count, x, sum]
-    finding: "S-197"
-  - at: idioms[5].examples[1]
-    fp: "96825906d6f003d0"
+  - at: idioms[4].examples[1]
+    fp: "b56a50bfeb9700b0"
     compile: fragment
     wrap: pasm2-dat
     assumes: [count, x]
-    finding: "S-197"

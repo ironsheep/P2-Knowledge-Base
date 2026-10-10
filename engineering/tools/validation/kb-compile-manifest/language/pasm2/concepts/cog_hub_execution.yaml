@@ -23,7 +23,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [a, b, c, d, e]
   - at: performance_comparison.timing_critical.hubexec
-    fp: "e7a2e9d7483d26dd"
+    fp: "e3114cc4eeb40ab6"
     compile: fragment
     wrap: pasm2-dat
     assumes: [count, a, b, c, d, e]
@@ -38,17 +38,15 @@ blocks:
     wrap: pasm2-dat
     assumes: [value, ptr]
   - at: code_organization.hybrid_approach.example
-    fp: "a5ffc62823acfd49"
+    fp: "05455ba73b9da99a"
     compile: fragment
     wrap: spin2-top
     assumes: [load_critical_code, data, sum, peak, valley]
-    finding: "S-167+S-189"
   - at: loading_strategies.initial_load.code
-    fp: "bd3d2a518f360dbd"
+    fp: "9608e92d7a67515d"
     compile: fragment
     wrap: pasm2-dat
     assumes: [cog_code, parameters]
-    finding: "S-190"
   - at: loading_strategies.dynamic_load.code
     fp: "b13c13494b8fb7b1"
     compile: fragment

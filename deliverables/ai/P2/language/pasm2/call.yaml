@@ -1,5 +1,5 @@
 instruction: CALL
-syntax: CALL #{\}Addr | CALL Dest {WC|WZ|WCZ}
+syntax: 'CALL #{\}Addr | CALL Dest {WC|WZ|WCZ}'
 brief_description: Call subroutine
 category: Branch
 description: >-
@@ -47,8 +47,8 @@ flags_affected:
   C: Updated from D[31] if WC/WCZ specified (after recording original)
   Z: Updated from D[30] if WZ/WCZ specified (after recording original)
 syntax_variants:
-- CALL #Addr
-- CALL #\Addr
+- 'CALL #Addr'
+- 'CALL #\Addr'
 - CALL Dest {WC|WZ|WCZ}
 timing:
   cycles: 4

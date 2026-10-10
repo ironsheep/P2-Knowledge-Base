@@ -113,7 +113,6 @@ limitations:
     For a wait longer than the bound, loop on GETMS()/GETCT() against a deadline in
     slices of at most a second, rather than asking for the whole span at once.
   resolution: "1 ms -- the argument's unit"
-  correction_2026_08_25: "The pre-purge form of this block claimed a maximum delay of ~4,294 seconds (71 minutes). That is 2^32 milliseconds; the source states the bound in CLOCKS ($8000_0000), which is three orders of magnitude smaller at any realistic clock frequency. Not restored."
 
 anti_patterns:
   - anti_pattern: "periodic_drift"

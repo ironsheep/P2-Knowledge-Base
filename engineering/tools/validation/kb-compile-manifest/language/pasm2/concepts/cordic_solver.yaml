@@ -12,11 +12,11 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [a0, b0, a1, b1, a2, b2, result_lo, result_hi, a_next, b_next, count]
-  - at: usage_patterns.non_blocking_check.code
-    fp: "5a29e230a3fe627c"
+  - at: usage_patterns.no_result_ready_poll.code
+    fp: "5f42fe741a35fa85"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [result]
+    assumes: [a, b, result_lo, result_hi]
   - at: interrupt_protection.basic_protection.code
     fp: "2674ecb4ed1ae61c"
     compile: fragment

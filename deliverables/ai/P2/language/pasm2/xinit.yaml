@@ -47,29 +47,24 @@ examples:
 
     '' Where:
 
-    '' bmode = $4081_0008 + spi_di<<17  '' 1-pin output, bytes-msb-first, 1 byte from
-    S
+    '' bmode = $4081_0008 + spi_di<<17  '' 1-pin output, bytes-msb-first, 1 byte from S
 
     '
   source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:166-168"
 - context: High-Speed Data Reception
-  code: ''' Receive data from SPI flash to hub
+  code: |
+    ' Receive data from SPI flash to hub
+    shl     x, #5                    ' number of bits to receive (x = number of longs)
+    setword wmode, x, #0             ' insert the count into the streamer command
+    shl     x, #1                    ' two spi_ck transitions per bit
+    wypin   x, #spi_ck               ' Start spi_ck transitions
+    waitx   #3                       ' Align spi_ck with spi_do sampling
+    xinit   wmode, #0                ' Start inputting spi_do bits to hub
+    waitxfi                          ' Wait for streamer to finish
 
-    wypin   x, #spi_ck       '' Start spi_ck transitions
-
-    waitx   #3               '' Align spi_ck with spi_do sampling
-
-    xinit   wmode, #0        '' Start inputting spi_do bits to hub
-
-    waitxfi                  '' Wait for streamer to finish
-
-
-    '' Where:
-
-    '' wmode = $C081_0000 + spi_do<<17  '' 1-pin input, bytes-msb-first, to hub
-
-    '
-  source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:258-261"
+    ' Where:
+    ' wmode = $C081_0000 + spi_do<<17  ' 1-pin input, bytes-msb-first, to hub; D[15:0] (the bit count) is set by the SETWORD above
+  source: "flash_loader.spin2 -- engineering/ingestion/sources/flash-loader/flash_loader.spin2:254-261"
 patterns:
 - name: Streamer-SmartPin Synchronization
   description: 'Combines streamer for data transfer with smart pin for clock generation,

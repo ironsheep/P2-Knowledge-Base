@@ -96,10 +96,12 @@ flags:
 
 stack:
   hardware_stack:
-    depth: "8 levels"
-    width: "22 bits (20-bit address + C + Z)"
-    push_instructions: ["CALL", "CALLA", "CALLB", "CALLPA", "CALLPB", "CALLD"]
-    pop_instructions: ["RET", "RETA", "RETB"]
+    depth: "8 levels; a 9th push discards the oldest entry"
+    width: "32 bits per entry (CALL pushes {C, Z, 10'b0, PC[19:0]}; PUSH pushes a full 32-bit value)"
+    push_instructions: ["CALL", "CALLPA", "CALLPB", "PUSH"]
+    pop_instructions: ["RET", "POP"]
+    not_on_this_stack: "CALLA/CALLB/RETA/RETB use a hub stack at PTRA/PTRB; CALLD writes its return into a register"
+    source: "EF-094; Parallax Propeller 2 (P2X8C4M64P) Datasheet, Release November 1, 2022, Branch Instructions, p.40"
   software_stack:
     ptra_stack: "PUSHA/POPA use PTRA as stack pointer"
     ptrb_stack: "PUSHB/POPB use PTRB as stack pointer"
@@ -228,9 +230,9 @@ cog_communication:
     attention: "COGATN signaling"
 
 performance:
-  mips: "80 MIPS at 160MHz (2 clocks/instruction)"
+  mips: "One instruction per 2 clocks, so CLKFREQ / 2 instructions per second per cog"
   deterministic: "Timing predictable for real-time"
-  parallel: "8 COGs = 640 MIPS total"
+  parallel: "8 COGs run in parallel, each at that rate"
   
   instruction_timing:
     alu_ops: "2 clocks (typical math/logic; Silicon Doc verbatim)"

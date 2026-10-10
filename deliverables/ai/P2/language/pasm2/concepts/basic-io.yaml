@@ -121,23 +121,23 @@ multi_pin_operations:
     
   set_direction:
     instruction: "DIRH/DIRL"
-    syntax: "DIRH #base_pin ADDPINS #count"
+    syntax: "DIRH #base_pin ADDPINS count"
     example: |
-      DIRH #8 ADDPINS #7  ' Pins 8-15 as outputs
-      DIRL #0 ADDPINS #3  ' Pins 0-3 as inputs
-      
+      DIRH #8 ADDPINS 7  ' Pins 8-15 as outputs
+      DIRL #0 ADDPINS 3  ' Pins 0-3 as inputs
+
   set_output:
     instruction: "OUTH/OUTL"
-    syntax: "OUTH #base_pin ADDPINS #count"
+    syntax: "OUTH #base_pin ADDPINS count"
     example: |
-      OUTH #8 ADDPINS #7  ' Pins 8-15 output high
-      OUTL #0 ADDPINS #3  ' Pins 0-3 output low
-      
+      OUTH #8 ADDPINS 7  ' Pins 8-15 output high
+      OUTL #0 ADDPINS 3  ' Pins 0-3 output low
+
   drive_pins:
     instruction: "DRVH/DRVL"
-    syntax: "DRVH #base_pin ADDPINS #count"
+    syntax: "DRVH #base_pin ADDPINS count"
     effect: "Sets DIR=1 and OUT simultaneously for pin range"
-    example: "DRVH #16 ADDPINS #7  ' Pins 16-23 drive high"
+    example: "DRVH #16 ADDPINS 7  ' Pins 16-23 drive high"
     
   register_masking:
     description: "Use bit masks for non-contiguous pins"
@@ -154,7 +154,7 @@ pin_field_encoding:
 
   addpins_operator:
     syntax: "base_pin ADDPINS count"
-    example: "#8 ADDPINS #7 = pins 8 through 15"
+    example: "#8 ADDPINS 7 = pins 8 through 15"
     encoding: "Bits [10:6]=count, bits [5:0]=base_pin"
 
   manual_encoding:
@@ -166,8 +166,8 @@ pin_field_encoding:
     critical_rule: "Pin fields wrap WITHIN 32-pin blocks only"
     p0_p31_block: "Pins 0-31 wrap within themselves"
     p32_p63_block: "Pins 32-63 wrap within themselves"
-    example_no_wrap: "#8 ADDPINS #7 = pins 8-15 (no wrapping)"
-    example_with_wrap: "#28 ADDPINS #7 = pins 28-31, 0-3 (wraps at 31)"
+    example_no_wrap: "#8 ADDPINS 7 = pins 8-15 (no wrapping)"
+    example_with_wrap: "#28 ADDPINS 7 = pins 28-31, 0-3 (wraps at 31)"
     cross_block: "Cannot span from P31 to P32 - separate operations required"
 
 direction_output_instructions:
@@ -276,11 +276,6 @@ internal_pull_resistors:
       WRPIN   ##P_LOW_15K, #16     ' low side drives through 15 kOhm
       DRVL    #16                  ' DIR = 1, OUT = 0 -- REQUIRED
       TESTP   #16 WC               ' C = 0 unless something stronger holds the line high
-  corrected_2026_08_25: |
-    The pre-purge form of this block showed 'DIRL #16  -- Use as input with pull-up'
-    and named the P_HIGH_*/P_LOW_* constants as pull-up / pull-down modes. Both are
-    wrong: DIR = 0 deactivates the drive, and the constants are drive-strength
-    selectors, not bias resistors. Returned in the hardware-verified form instead.
   use_cases:
     - "Button inputs without external resistors -- weak high drive, DIR high, button pulls to ground"
     - "Holding an unused or undriven line at a known level for a stated reason"
@@ -354,7 +349,7 @@ common_patterns:
   parallel_bus_write:
     code: |
       ' Write byte to 8-bit bus (pins 16-23)
-      DIRH  #16 ADDPINS #7      ' All outputs
+      DIRH  #16 ADDPINS 7       ' All outputs
       MOV   temp, data
       AND   temp, ##$FF         ' Mask to 8 bits
       SHL   temp, #16           ' Position for pins 16-23
@@ -364,7 +359,7 @@ common_patterns:
   parallel_bus_read:
     code: |
       ' Read byte from 8-bit bus (pins 16-23)
-      DIRL  #16 ADDPINS #7      ' All inputs
+      DIRL  #16 ADDPINS 7       ' All inputs
       MOV   data, INA           ' Read all pins
       SHR   data, #16           ' Position to bits 0-7
       AND   data, ##$FF         ' Mask to byte
@@ -401,12 +396,12 @@ multi_cog_pin_coordination:
   lock_coordination_example:
     code: |
       ' COG 0 and COG 1 share pin 16
-      LOCKTRY lock_id WC        ' Try to acquire lock
-      IF_C  JMP #try_again      ' C=1 means locked by other COG
-      DRVH  #16                 ' We have lock, drive pin
-      ' ... do work ...
-      DIRL  #16                 ' Release pin (tri-state)
-      LOCKREL lock_id           ' Release lock
+      .try    LOCKTRY lock_id WC        ' Try to acquire lock
+      IF_NC   JMP     #.try             ' C=0: another cog holds the lock - try again
+              DRVH    #16               ' We have the lock, drive pin
+              ' ... do work ...
+              DIRL    #16               ' Release pin (tri-state)
+              LOCKREL lock_id           ' Release lock
 
 related_concepts:
   - "Smart pin autonomous modes (PWM, UART, etc.)"

@@ -12,7 +12,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [r0]
   - at: access_patterns.explicit_access[1].examples[1]
-    fp: "2f02ad7dd54ff637"
+    fp: "f6d2b02faf1af2ea"
     compile: fragment
     wrap: pasm2-dat
     assumes: [r0]
@@ -22,7 +22,12 @@ blocks:
     wrap: pasm2-dat
     assumes: [r0]
   - at: access_patterns.explicit_access[1].examples[3]
-    fp: "1508cce73a137e06"
+    fp: "ebec92c4565ecf21"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [r0]
+  - at: access_patterns.explicit_access[1].examples[4]
+    fp: "d454a0162a2393a1"
     compile: fragment
     wrap: pasm2-dat
     assumes: [r0]
@@ -39,14 +44,13 @@ blocks:
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: access_patterns.implicit_access[1].examples[3]
-    fp: "928304cd5a327575"
+    fp: "02a6ddbcd065c5ba"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: access_patterns.block_operations[1].examples[0]
-    fp: "4c61a10e4e0730d6"
+    fp: "a8e8e5b54db0d532"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-183"
   - at: access_patterns.block_operations[1].examples[1]
     fp: "7077b4de43186fea"
     compile: fragment

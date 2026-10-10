@@ -12,8 +12,8 @@ timing:
 description: Execute next D[8:0] instructions S times. If S = 0, repeat instructions
   infinitely. If D[8:0] = 0, nothing repeats.
 constraints:
-  - Instruction count is D[8:0] only (maximum 511 instructions, whether D is #immediate or a register); it does not extend beyond 9 bits
-  - Maximum 511 iterations with #immediate; use ## or register for S up to 2^32-1
+  - "Instruction count is D[8:0] only (maximum 511 instructions, whether D is #immediate or a register); it does not extend beyond 9 bits"
+  - "Maximum 511 iterations with #immediate; use ## or register for S up to 2^32-1"
   - REP cannot be nested (single hardware counter)
   - Interrupts stalled during execution
   - Cannot use WC, WZ, or WCZ effects

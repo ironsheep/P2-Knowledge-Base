@@ -11,4 +11,3 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [handler=con]
-    finding: "S-137"

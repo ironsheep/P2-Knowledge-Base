@@ -26,6 +26,5 @@ blocks:
     fp: "8e115212bd6fce58"
     compile: program
   - at: pasm2_complete
-    fp: "a5c600ed28968902"
+    fp: "359719482d6d70ed"
     compile: program
-    finding: "S-167"

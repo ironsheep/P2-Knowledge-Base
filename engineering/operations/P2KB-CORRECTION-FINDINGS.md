@@ -317,6 +317,22 @@ most-copied beginner page in the set. **Fix:** `SOURCE-REPAIR-ORDER.md` — remo
 each block from the spreadsheet / P2 Documentation / v55, compile every example, report
 grounded · gaps · removals.
 
+> **Applied 2026-10-10 («#418»); the entry stays PENDING-VALIDATION until a release serves it.**
+> The remaining guide blocks, against the spreadsheet / P2 Documentation / v55: `operand_types`
+> "or LUT register" (LUT is reached with RDLUT/WRLUT, not as an operand); the `WC`/`WCZ` examples read C
+> as carry and borrow; `pointer_with_auto_increment` gained the step size (1/2/4, `INDEX` 1..16) and a
+> canonical citation; `inline_pasm2_in_spin2` gained a canonical citation; `reference_operators`
+> (`#label` relative by default, `$` = the current origin, stepping 1 in ORG and 4 in ORGH); the C-flag
+> use ("overflow" → carry/borrow); `timing_considerations` (taken branch 4 / 13...20 clocks, +1 when
+> a hub target is not long-aligned — which IS stated, P2 Documentation Hub Execution; QMUL 2...9 to
+> issue, ~55 to result); `next_steps` and `immediate_next_steps` now name real files; the dated
+> `extraction_note`/`correction_*` notes are gone (also from `basic-io`, `waitms`, `waitus`,
+> `clock_system`, `spin2-getting-started`); the three clock-block citations are canonical. **Finding
+> carried:** `:labelname` as a local-label form is accepted by pnut-ts (`:loop` assembles) but no
+> Parallax document states it — the guide and `concepts/labels.yaml` now say `.labelname` and
+> flag the colon form as compiler-accepted only; `language/fundamentals/pasm-labels.yaml` and
+> `identifier-rules.yaml` still list it as documented.
+
 ### F-550 — `serial_loader.yaml` `protocol_commands` gives the FPGA build's `Prop_Chk` answer and an invented `Prop_Clk` syntax — `CONFIRMED`
 Found 2026-10-07 fixing F-421 in the same file. Against the P2 Hardware Manual (`p2-hardware-manual-text.txt:1629-1725`)
 and the Silicon Doc (`silicon-doc-text.txt:4860-4868`):
@@ -3430,6 +3446,21 @@ drift.
   > punch list (items 6, 7), each to be checked against PNut first. Still outside the net by design:
   > single-line strings (S-256 asks whether tutorial one-liners should come in) and text YAML has
   > already cut (S-183/S-200: 47 served strings truncated at ` #`; needs its own gate).
+
+  > **Drained for `language/pasm2` 2026-10-10 («#418»).** Every pasm2 finding in the manifest is
+  > gone (86 entries in 29 files → 0 `finding:` under `kb-compile-manifest/language/pasm2`; the
+  > 18 `S-137` quick_example entries were already compiling). The ` #` plain-scalar gate
+  > (`audit-yaml-plain-scalar-comment.py`) reads 47 flagged in 15 files → 0; the D3 bare-constant
+  > sites (`false`/`true`/`negx`/`posx`/`multi_cog_synchronization`) → 0. Stack: EF-094 — a 9th
+  > push discards the oldest entry and entries are 32 bits (the "22 bits" claim is gone from
+  > `stack_operations.yaml` and `architecture/cog.yaml`, whose push/pop lists also named CALLA/CALLB/
+  > CALLD/RETA/RETB, which use no hardware stack); EF-101 — a zero XORO32 state is absorbing.
+  > Wider findings fixed in the same pass: the ALTS+`JMP #0-0` computed-jump idiom (the immediate
+  > branch assembles as a relative offset, so the substituted S field gives a wrong target) is now a
+  > table of `JMP #case` entries entered with `JMP reg`; `architecture/cordic.yaml` `pollqmt` was
+  > "check if CORDIC pipeline empty" (the QMT flag is set by a GETQX/GETQY with nothing queued);
+  > the WAIT-family `timing.cycles: 2` is now `2+` as each page's encoding says (15 pages); the
+  > Spin2 `spin2-pasm2-integration` `JMP @slowCode` register-indirect form is `JMP #\@slowCode`.
 
   *Filed 2026-08-21;
   Stephen's call, and he asked for it in these words: "we must, for all code in YAML files, compile

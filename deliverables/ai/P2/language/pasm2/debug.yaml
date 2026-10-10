@@ -1,7 +1,7 @@
 instruction: DEBUG
-syntax: DEBUG
+syntax: DEBUG | DEBUG(...)
 compiler_syntax: DEBUG
-encoding: TBD
+encoding: "BRK #code (language/pasm2/brk.yaml): EEEE 1101011 00L DDDDDDDDD 000110110; code 0 for a plain DEBUG, 1..255 for DEBUG(...)"
 compiler_encoding:
   bits: 32
   opcode: 54
@@ -9,15 +9,19 @@ compiler_encoding:
   operandFormat: 37
   rawValue: 75830
 timing:
-  cycles: TBD
-  type: TBD
-description: Debug instruction. Provides debugging functionality during program execution.
+  cycles: 2
+  type: fixed
+description: |
+  DEBUG is a compiler directive that places one BRK instruction at that point when the program is compiled with DEBUG enabled; without DEBUG enabled it generates no code.
+  A plain DEBUG becomes BRK #0 and launches (or updates) the PASM debugger; DEBUG(...) with output commands becomes BRK #1..255, the code indexing that statement's record in the DEBUG database. If the cog's debug interrupt is disabled the BRK does nothing and takes two clocks. A condition prefix (IF_xx DEBUG(...), v50+) is implemented by an opposite-condition SKIP #1 placed before the BRK.
 compiler_category: Miscellaneous
 examples:
-- code: 'DEBUG
-
-    '
+- code: |
+    DEBUG                   ' plain DEBUG: BRK #0, opens or updates the PASM debugger
   description: Basic debug operation
+- code: |
+    DEBUG("x = ", sdec(x))
+  description: DEBUG with output commands
 operand_details:
   none: No operands required
 compiler_operand_format:
@@ -27,8 +31,8 @@ compiler_operand_format:
   valueType: 37
 compiler_effects: []
 documentation_source: PNUT_TS_compiler_analysis
-documentation_level: minimal
+documentation_level: comprehensive
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
 last_updated: '2025-09-19T16:04:17.215079'
 category: Debug Directives
-oneliner: Debug instruction
+oneliner: Place a BRK that triggers a DEBUG statement (when DEBUG is enabled)

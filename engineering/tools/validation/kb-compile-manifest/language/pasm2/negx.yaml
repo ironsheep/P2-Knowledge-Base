@@ -7,14 +7,12 @@ blocks:
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: examples[0].code
-    fp: "273ef4ad3fd62516"
+    fp: "7e845ccebbdff30c"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [value, underflow]
-    finding: "S-162"
+    assumes: [value, label:at_minimum]
   - at: examples[1].code
-    fp: "603540c7d884238a"
+    fp: "c0233bd0ec980f76"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [limit, value]
-    finding: "S-162"
+    assumes: [highest, sample]

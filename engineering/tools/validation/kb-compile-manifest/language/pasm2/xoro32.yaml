@@ -2,32 +2,23 @@
 # ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
-  - at: algorithm.operation
-    fp: "a083ad79f48f89ad"
-    compile: not-code
-    reason: "pseudo-code notation of the XORO32 algorithm steps (`D ^= D >> 2` ...) with a parenthetical remark; neither Spin2 nor PASM2 source"
-  - at: critical_warning.description
-    fp: "ba82c74d3e2810e6"
-    compile: not-code
-    reason: "YAML description prose (English sentences), not code"
   - at: critical_warning.solution
-    fp: "c85757377e315935"
+    fp: "58b03c83ea789614"
     compile: fragment
     wrap: pasm2-dat
     assumes: [seed]
   - at: examples[0].code
-    fp: "8e45f74277895fb1"
+    fp: "32d2c9ca6cea7837"
     compile: fragment
     wrap: pasm2-dat
     assumes: [seed, rnd_init, result]
   - at: examples[1].code
-    fp: "260f06e3d9e39261"
+    fp: "29e3496c537bfea9"
     compile: fragment
     wrap: pasm2-dat
     assumes: [seed, temp]
-    finding: "S-170"
   - at: examples[2].code
-    fp: "f58d5303953058b1"
+    fp: "4a219c9a5bceef56"
     compile: fragment
     wrap: pasm2-dat
     assumes: [seed]

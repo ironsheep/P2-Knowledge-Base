@@ -61,7 +61,7 @@ input_selectors:
     x111: "relative -1 pin's read state"
 critical_requirement:
   reset_before_configure: true
-  description: A smart pin should be configured by WRPIN while DIR is low; WRPIN #0 on a running pin resets it with no DIR cycle
+  description: 'A smart pin should be configured by WRPIN while DIR is low; WRPIN #0 on a running pin resets it with no DIR cycle'
   sequence:
   - 'DIRL pin       '' Reset smart pin (DIR=0) before configuring'
   - WRPIN mode, pin ' Configure smart pin mode

@@ -1,5 +1,5 @@
 instruction: CALLB
-syntax: CALLB #{\}Addr | CALLB Dest {WC|WZ|WCZ}
+syntax: 'CALLB #{\}Addr | CALLB Dest {WC|WZ|WCZ}'
 brief_description: Call subroutine via PTRB
 category: Branch
 description: Write current C and Z flags and address of the next instruction into

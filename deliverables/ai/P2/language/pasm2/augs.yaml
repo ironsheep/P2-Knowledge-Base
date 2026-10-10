@@ -1,5 +1,5 @@
 instruction: AUGS
-syntax: AUGS #Src
+syntax: 'AUGS #Src'
 brief_description: Augment source
 category: Miscellaneous
 description: >-
@@ -92,7 +92,7 @@ oneliner: Augment next literal Src to 32-bits
 related:
 - AUGD
 examples:
-- description: Using ## syntax (compiler inserts AUGS automatically)
+- description: "Using ## syntax (compiler inserts AUGS automatically)"
   code: |
     AND      address, ##$FFFFF           '2+2 cycles
     DJNZ     idx, ##far_away             '2+(2 or 4) cycles (in Cog RAM)

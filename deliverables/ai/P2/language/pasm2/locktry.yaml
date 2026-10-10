@@ -52,14 +52,27 @@ examples:
     \     djnz    timeout, #.loop\n        ' Timeout - handle error\n"
   source: synchronization_pattern
 - name: Multi-Resource Manager
-  description: Manage multiple locks for complex operations
-  code: "' Acquire multiple locks in order (prevent deadlock)\nacquire_multi\n   \
-    \     locktry #LOCK_A            wc\nif_nc   jmp     #.fail\n        locktry #LOCK_B\
-    \            wc\nif_nc   jmp     #.release_a\n        locktry #LOCK_C        \
-    \    wc\nif_nc   jmp     #.release_b\n        \n        ' Got all locks - proceed\n\
-    \        setd    .result, #1          ' Success\n        ret\n        \n.release_b\n\
-    \        lockrel #LOCK_B\n.release_a  \n        lockrel #LOCK_A\n.fail   setd\
-    \    .result, #0          ' Failed\n.result ret\n"
+  description: Manage multiple locks for complex operations; the outcome is returned in a register
+  code: |
+    ' Acquire multiple locks in order (prevent deadlock); result = 1 on success, 0 on failure
+    acquire_multi
+            locktry #LOCK_A            wc
+    if_nc   jmp     #.fail
+            locktry #LOCK_B            wc
+    if_nc   jmp     #.release_a
+            locktry #LOCK_C            wc
+    if_nc   jmp     #.release_b
+
+            ' Got all locks - proceed
+            mov     result, #1           ' Success
+            ret
+
+    .release_b
+            lockrel #LOCK_B
+    .release_a
+            lockrel #LOCK_A
+    .fail   mov     result, #0           ' Failed
+            ret
   source: complex_synchronization
 related_instructions:
 - LOCKREL: Release lock

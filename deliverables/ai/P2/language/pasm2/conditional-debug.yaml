@@ -55,7 +55,7 @@ examples:
       ' Zero flag conditional DEBUG
       DAT             org
       
-      check_zero      test    value, #$FF     wz      ' Set Z if value is zero
+      check_zero      cmp     value, #0       wz      ' Set Z if value is zero
               if_z    DEBUG("Value is zero")
               if_nz   DEBUG("Value is non-zero: ", uhex(value))
                       ret
@@ -67,16 +67,15 @@ examples:
       ' Combined flag conditions
       DAT             org
       
-      analyze         cmp     a, b            wcz     ' Set both C and Z
-              if_c_and_z    DEBUG("a == b AND overflow")
+      analyze         cmp     a, b            wcz     ' C = (a < b), Z = (a == b)
               if_c_and_nz   DEBUG("a < b")
               if_nc_and_z   DEBUG("a == b")
               if_nc_and_nz  DEBUG("a > b")
                       ret
-      
+
       a               long    0
       b               long    0
-    description: "Combined C and Z flag conditions"
+    description: "Combined C and Z flag conditions (after CMP, C and Z are never both set)"
     
   - code: |
       ' Loop iteration debugging
@@ -86,9 +85,10 @@ examples:
       .loop           ' Do work here
                       nop
                       
-                      djnz    count, #.loop   wz      ' Z set when done
-              if_z    DEBUG("Loop complete")
+                      sub     count, #1       wz      ' Z set when done
               if_nz   DEBUG("Iteration: ", udec(count))
+              if_nz   jmp     #.loop
+              if_z    DEBUG("Loop complete")
                       ret
       
       count           long    0
@@ -99,7 +99,7 @@ examples:
       DAT             org
       
       process         rdlong  result, ptra            ' Read result
-                      test    result, #$8000_0000 wz  ' Check error bit
+                      test    result, ##$8000_0000 wz ' Check error bit
               if_nz   DEBUG("ERROR: result = ", uhex(result))
                       cmp     result, #0      wz
               if_z    DEBUG("Warning: zero result")

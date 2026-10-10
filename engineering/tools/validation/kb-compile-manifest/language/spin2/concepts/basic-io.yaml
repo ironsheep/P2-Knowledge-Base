@@ -122,10 +122,6 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [value, ADC_PIN=con]
-  - at: internal_pull_resistors.corrected_2026_08_25
-    fp: "9f7811aa53c3cd6c"
-    compile: not-code
-    reason: "YAML description prose (English sentences), not code"
   - at: smart_pin_to_basic_io_transition.safe_reconfiguration.using_pinclear
     fp: "cbfcfc30f7a05506"
     compile: fragment

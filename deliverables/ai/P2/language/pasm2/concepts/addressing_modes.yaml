@@ -13,8 +13,8 @@ modes:
     syntax: "#value"
     encoding: S field contains literal value
     range:
-      - 9-bit: #0 to #511 (literal fits the instruction's 9-bit S or D field)
-      - 32-bit: ##$0 to ##$FFFFFFFF (full 32-bit literal via an augment prefix)
+      - 9-bit: "#0 to #511 (literal fits the instruction's 9-bit S or D field)"
+      - 32-bit: '##$0 to ##$FFFFFFFF (full 32-bit literal via an augment prefix)'
     examples:
       - "MOV r0, #42           ' 9-bit immediate"
       - "MOV r0, ##1000        ' 32-bit Src immediate (AUGS prefix added)"
@@ -45,8 +45,8 @@ modes:
     base: PTRA or PTRB
     index_range: -32 to +31 (6-bit signed)
     examples:
-      - RDLONG r0, PTRA[4]    ' Read from hub[PTRA + 16] (index scaled by 4)
-      - WRWORD r0, PTRB[-2]   ' Write to hub[PTRB - 4] (index scaled by 2)
+      - "RDLONG r0, PTRA[4]    ' Read from hub[PTRA + 16] (index scaled by 4)"
+      - "WRWORD r0, PTRB[-2]   ' Write to hub[PTRB - 4] (index scaled by 2)"
     scaling:
       - RDBYTE/WRBYTE: index × 1
       - RDWORD/WRWORD: index × 2
@@ -58,9 +58,9 @@ modes:
     encoding: Special PTR encoding bits
     behavior: Use current value, then increment
     examples:
-      - RDLONG r0, PTRA++     ' Read from hub[PTRA], then PTRA += 4
-      - WRWORD r0, PTRB++     ' Write to hub[PTRB], then PTRB += 2
-      - PUSHB value           ' Implicit PTRB++ operation (WRLONG value,PTRB++)
+      - "RDLONG r0, PTRA++     ' Read from hub[PTRA], then PTRA += 4"
+      - "WRWORD r0, PTRB++     ' Write to hub[PTRB], then PTRB += 2"
+      - "PUSHB value           ' Implicit PTRB++ operation (WRLONG value,PTRB++)"
     increment_amount: Based on operation size (1/2/4 bytes)
 
   auto_decrement:
@@ -68,8 +68,8 @@ modes:
     encoding: Special PTR encoding bits
     behavior: Decrement first, then use new value
     examples:
-      - RDLONG r0, --PTRA     ' PTRA -= 4, then read from hub[PTRA]
-      - POPB value            ' Implicit --PTRB operation (RDLONG value,--PTRB)
+      - "RDLONG r0, --PTRA     ' PTRA -= 4, then read from hub[PTRA]"
+      - "POPB value            ' Implicit --PTRB operation (RDLONG value,--PTRB)"
     decrement_amount: Based on operation size (1/2/4 bytes)
 
   post_modify:
@@ -78,14 +78,14 @@ modes:
     behavior: Use current value, then add scaled index
     index_range: "1 to 16 (magnitude; ++ forms add INDEX*SCALE, -- forms subtract INDEX*SCALE)"
     examples:
-      - RDLONG r0, PTRA++[8]  ' Read from hub[PTRA], then PTRA += 32
-      - WRLONG r0, PTRB--[1]  ' Write to hub[PTRB], then PTRB -= 4
+      - "RDLONG r0, PTRA++[8]  ' Read from hub[PTRA], then PTRA += 32"
+      - "WRLONG r0, PTRB--[1]  ' Write to hub[PTRB], then PTRB -= 4"
     notes: Index is scaled by operation size
 
   absolute:
     syntax: "##hub_address"
     encoding: 20-bit immediate for hub operations
-    range: ##$00000 to ##$FFFFF
+    range: '##$00000 to ##$FFFFF'
     examples:
       - "RDLONG r0, ##$10000   ' Read from hub[$10000]"
       - "WRLONG r0, ##buffer   ' Write to hub[buffer]"
@@ -96,45 +96,44 @@ modes:
     encoding: Bit number in immediate field
     range: Bit 0-31
     examples:
-      - BITH flags, #7        ' Set bit 7 of flags
-      - BITL flags, #READY_BIT' Clear READY_BIT
-      - TESTB flags, #4 WC    ' Test bit 4, update C
+      - "BITH flags, #7        ' Set bit 7 of flags"
+      - "BITL flags, #READY_BIT ' Clear READY_BIT"
+      - "TESTB flags, #4 WC    ' Test bit 4, update C"
     notes: Bit operations only
 
 special_cases:
   altx_modified:
     description: ALTX instructions modify subsequent instruction's addressing
     examples:
-      - ALTS index            ' Next S field = cog[index]
-      - ALTD index            ' Next D field = cog[index]
-      - ALTR index            ' Next result = cog[D + index]
+      - "ALTS index            ' Next S field = cog[index]"
+      - "ALTD index            ' Next D field = cog[index]"
+      - "ALTR index            ' Next result register = cog[index]"
     notes: Enables computed addressing
 
   setq_block:
     description: SETQ/SETQ2 modify next hub operation for block transfer
     examples:
-      - SETQ #15              ' Next RDLONG reads 16 longs
-      - RDLONG base, hub_ptr  ' Block read 16 longs
+      - "SETQ #15              ' Next RDLONG reads 16 longs"
+      - "RDLONG base, hub_ptr  ' Block read 16 longs"
     notes: Count is SETQ value + 1
 
   rep_block:
     description: REP creates zero-overhead loops
     examples:
-      - REP #4, #10           ' Repeat next 4 instructions 10 times
-      - REP @end_label, count ' Repeat until end_label, count times
+      - "REP #4, #10           ' Repeat next 4 instructions 10 times"
+      - "REP @end_label, count ' Repeat until end_label, count times"
     notes: Not addressing per se, but affects instruction flow
 
 encoding_selection:
   automatic:
     - Assembler chooses optimal encoding
-    - ## forces augmented encoding
-    - # forces immediate encoding
+    - '## forces augmented encoding'
+    - '# forces immediate encoding'
     - No prefix forces register encoding
 
   size_based:
-    - Values 0-511: Direct immediate
-    - Values 512-$FFFFF: AUGS augmented
-    - Values $100000+: AUGD augmented
+    - 'Values 0-511: Direct immediate (#)'
+    - 'Values 512 and up: augmented immediate (##) - AUGS for a Src literal, AUGD for a Dest literal'
 
 best_practices:
   - Use immediate for constants known at compile time

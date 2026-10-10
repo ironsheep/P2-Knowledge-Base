@@ -14,19 +14,20 @@ metadata:
     - "How do I make instructions conditional?"
     - "What are all the IF_ conditions?"
     - "How do C and Z flags work?"
-    - "Can any instruction be conditional?"
+    - "Can any instruction be conditional? Yes, every instruction except NOP"
     - "Does _RET_ work on a CALL?"
     - "Why did my _RET_ CALL not return?"
 
 fundamental_concept: |
-  EVERY PASM2 instruction can optionally:
+  Every PASM2 instruction except NOP can optionally:
   1. Be executed conditionally based on C and Z flags (IF_xxx prefix)
-  2. Conditionally update C and Z flags (WC, WZ, WCZ suffixes)
+  2. Conditionally update C and Z flags (WC, WZ, WCZ suffixes), on the instructions that list a flag effect (DJNZ, RETI and NOP take none)
   These are independent features - you can use either, both, or neither.
-  
-  This universal conditionality eliminates branch penalties and enables
+
+  This near-universal conditionality eliminates branch penalties and enables
   extremely efficient, deterministic code. Unlike traditional processors
-  that require branches, P2 can conditionally execute ANY instruction in-place.
+  that require branches, P2 can conditionally execute almost any instruction in-place
+  (NOP, the all-zero word, cannot carry a condition or _RET_).
 
 flag_system:
   c_flag:
@@ -143,8 +144,8 @@ condition_codes:
     condition: "C=0 OR Z=1"
     c_required: "0 OR"
     z_required: "1 OR"
-    use: "Unsigned below/equal, signed less/equal"
-    
+    use: "C clear or Z set (after a comparison the same as above-or-equal, IF_AE: Z = 1 implies C = 0)"
+
   - value: "%1100"
     primary: "IF_C"
     aliases: ["IF_B", "IF_LT", "IF_1X"]
@@ -198,7 +199,7 @@ syntax_rules:
 
 usage_patterns:
   any_instruction_conditional:
-    description: "ANY instruction can be conditional"
+    description: "Any instruction except NOP can be conditional"
     code: |
       ' Arithmetic
       IF_Z    ADD  x, #1
@@ -215,12 +216,9 @@ usage_patterns:
       ' Jumps
       IF_C    JMP  #error_handler
       IF_Z    CALL #process_zero
-      
-      ' Even NOP!
-      IF_C    NOP
-  
+
   branchless_min_max:
-    description: "Find minimum without branches"
+    description: "Find the unsigned minimum without branches"
     code: |
       CMP     a, b WC           ' Compare a to b
       IF_C    MOV min_val, a    ' If a < b, min = a
@@ -229,8 +227,8 @@ usage_patterns:
   conditional_accumulation:
     description: "Conditionally add to sum"
     code: |
-      TEST    value, #$80 WZ    ' Test sign bit
-      IF_Z    ADD sum, value    ' Add if positive
+      TEST    value, ##$8000_0000 WZ    ' Z = 1 when bit 31 (the sign bit) is clear
+      IF_Z    ADD sum, value            ' Add if non-negative
   
   multi_way_decision:
     description: "Multiple conditions without branches"
@@ -306,14 +304,14 @@ special_patterns:
     description: "Replace test-and-branch with conditional execution"
     traditional: |
       ' Traditional approach (2 instructions + pipeline flush)
-      TEST    flags, #READY_BIT WZ
-      IF_Z    JMP #wait_loop
+      TESTB   flags, #READY_BIT WC    ' READY_BIT is a bit number
+      IF_NC   JMP #wait_loop
       ' continue...
-    
+
     efficient: |
       ' P2 approach (inline conditional)
-      TEST    flags, #READY_BIT WZ
-      IF_Z    JMP #$-1        ' Loop on this instruction
+      TESTB   flags, #READY_BIT WC    ' READY_BIT is a bit number
+      IF_NC   JMP #$-1        ' Loop back to the TESTB above
       ' continue when ready
 
 performance_benefits:
@@ -321,7 +319,7 @@ performance_benefits:
   constant_timing: "Same execution time regardless of condition"
   code_density: "Fewer instructions than branch-based code"
   predictability: "Deterministic timing for real-time code"
-  universal: "Works on ALL instructions, not just a subset"
+  universal: "Works on all instructions except NOP, not just a subset"
 
 common_mistakes:
   - mistake: "Using _RET_ on a CALL to 'call and return in one instruction'"
@@ -367,14 +365,14 @@ common_mistakes:
 why_this_matters:
   p2_philosophy: |
     Universal conditional execution is fundamental to P2's architecture.
-    EVERY instruction can be conditional and can conditionally set flags.
+    EVERY instruction except NOP can be conditional and can conditionally set flags (where it lists a flag effect).
     This enables writing highly efficient, deterministic code without
     branch prediction penalties. This is especially important for
     real-time systems and signal processing.
   
   vs_traditional: |
     Traditional: Limited conditional instructions, most require branches
-    P2: ANY instruction conditional, no pipeline penalties
+    P2: any instruction except NOP conditional, no pipeline penalties
     
     Traditional: CMP + Branch (2+ instructions, pipeline penalty)
     P2: CMP + Conditional execution (2 instructions, no penalty)

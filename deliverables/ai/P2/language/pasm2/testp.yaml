@@ -27,7 +27,7 @@ timing:
   pin_sampling_latency: |
     TESTP reads pin state from 2 system-clock cycles BEFORE the instruction starts.
     This is "fresher" data than reading INx registers (which are 3 clocks old).
-description: 'Test pin state with optional XOR operation. Z = C/Z XOR IN[D[5:0]].
+description: 'Test the state of pin D[5:0] and write it to C or Z (WC/WZ), or combine it with the existing C or Z flag by AND, OR or XOR (ANDC/ANDZ, ORC/ORZ, XORC/XORZ).
 
 
   Common uses:
@@ -56,35 +56,25 @@ examples:
     \        and     hall_, #%111_111                ' (old << 3 | new) [_x_:ooo:nnn]\n"
   source: "isp_bldc_motor.spin2 -- engineering/ingestion/external-inputs/source-code/external-projects/P2-BLDC-Motor-Control/src/isp_bldc_motor.spin2:2041-2047"
 - name: Edge Detection
-  description: Detect rising edge on input pin
-  code: ''' Detect rising edge (0->1 transition)
-
-    testp   input_pin           wc   '' Get current state
-
-    if_nc_and_z  jmp #edge_detected  '' Was 0, now 1
-
-    muxz    flag_reg, #1             '' Store current state
-
-
+  description: Detect a rising edge (0 -> 1 transition) on an input pin
+  code: |
+    ' last_state bit 0 holds the pin state from the previous pass
+            testp   input_pin       wc      ' C = current pin state
+            testbn  last_state, #0  andc    ' C = high now AND low before = rising edge
+            testp   input_pin       wz      ' Z = current pin state
+            muxz    last_state, #1          ' remember it for the next pass (MUXZ leaves C alone)
+    if_c    jmp     #edge_detected
+    ' no edge: continue here
     edge_detected
-
-    '' Handle rising edge event
-
-    '
+    ' Handle rising edge event
 - name: Conditional Pin Test
-  description: Test pin based on condition flag
-  code: ''' Test pin with XOR based on previous condition
-
-    testb   status, #FLAG_BIT   wc   '' Get condition flag
-
-    testp   sensor_pin          wz   '' Test pin, XOR with C
-
-
-    '' Z now indicates: pin state XOR condition
-
-    '' Useful for conditional inversion
-
-    '
+  description: Combine a pin state with a condition flag
+  code: |
+    ' Test pin with XOR based on previous condition
+    testb   status, #FLAG_BIT   wz   ' Z = condition flag
+    testp   sensor_pin          xorz ' Z = condition flag XOR pin state
+    ' Z now indicates: pin state XOR condition
+    ' Useful for conditional inversion
   source: debugger_pattern
 - name: Multi-Pin State Check
   description: Check multiple pin states efficiently
@@ -101,7 +91,7 @@ related_instructions:
 - FLTH: Float pin high
 notes:
 - TESTP reads actual pin state, not output register
-- XOR with C flag useful for conditional inversion
+- XORC/XORZ combine the pin with the existing flag (C or Z, matching the suffix)
 - Efficient for building multi-bit values from pins
 - Critical for real-time sensor reading like Hall sensors
 compiler_operand_format:
@@ -115,4 +105,4 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.623961'
 category: Pin
-oneliner: Test pin state with optional XOR operation
+oneliner: Test pin state into C or Z, optionally ANDed, ORed or XORed with the existing flag

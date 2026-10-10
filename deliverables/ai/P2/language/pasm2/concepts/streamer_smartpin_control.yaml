@@ -125,7 +125,7 @@ smart_pin_system:
       flags: "WC sets C if new data available"
       example: |
         RDPIN data, #rx_pin WC
-        IF_C process_received_byte
+        IF_C CALL #process_received_byte
     
     RQPIN:
       syntax: "RQPIN result, #pin {WC}"
@@ -343,10 +343,10 @@ coordination:
       When pairing a P_TRANSITION smart pin (clock) with a streamer
       (data) for SPI-style synchronous I/O, the bit rate and edge rate
       must satisfy:
-        bits_per_streamer_clk = 2^32 / SETXFRQ_value
-        sysclks_per_SCK_edge  = WXPIN_value
+        sysclks_per_streamer_bit = $8000_0000 / SETXFRQ_value
+        sysclks_per_SCK_edge     = WXPIN_value
       For lockstep at sysclk/2 SPI:
-        SETXFRQ = $4000_0000 (= sysclk/2 bit rate)
+        SETXFRQ = $4000_0000 (= 1 bit per 2 sysclks)
         WXPIN   = 1          (= 1 sysclk between SCK edges)
         → 1 streamer bit = 2 sysclks = 1 full SCK cycle (2 edges). Lockstep.
       Halving the SCK rate (WXPIN = 2) MUST be matched by halving the

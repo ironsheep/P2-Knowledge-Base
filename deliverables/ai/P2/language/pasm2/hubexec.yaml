@@ -8,20 +8,18 @@ description: 'Predefined constant for COGINIT instruction
 category: Execution Mode Constants
 value: '%10_0000'
 documentation_level: complete
-syntax: 'COGINIT #HUBEXEC+id, #address'
+syntax: 'COGINIT #HUBEXEC+id, ##address'
 usage: 'Used with COGINIT to start a cog executing from hub RAM
 
   Target cog executes instructions directly from hub RAM (no cog RAM load)
 
   '
 examples:
-- code: 'COGINIT #HUBEXEC+1, #$400   '' Start Cog 1 executing from Hub RAM $400
-
-    '
+- code: |
+    COGINIT #HUBEXEC+1, ##$400   ' Start Cog 1 executing from Hub RAM $400
   description: Start specific cog with hub execution
-- code: 'COGINIT #HUBEXEC+5, @code   '' Start Cog 5 executing from @code in hub
-
-    '
+- code: |
+    COGINIT #HUBEXEC+5, ##@code  ' Start Cog 5 executing from @code in hub
   description: Start Cog 5 with hub execution at label
 notes:
 - Executes instructions directly from hub RAM (no cog RAM load)
@@ -44,4 +42,4 @@ related:
 - language/pasm2/concepts/cog_hub_execution.yaml
 - language/pasm2/concepts/execution_modes.yaml
 - architecture/fifo.yaml
-oneliner: Set hub execution mode for subsequent code
+oneliner: Predefined constant for COGINIT instruction

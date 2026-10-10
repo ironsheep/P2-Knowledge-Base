@@ -3,17 +3,15 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "091a2ba47785fa88"
+    fp: "25313a3b9dadcd43"
     compile: fragment
     wrap: spin2-top
     assumes: [main]
-    finding: "S-168"
   - at: examples[1].code
-    fp: "02e6ab17a69cff94"
+    fp: "744122c883845d7e"
     compile: fragment
     wrap: spin2-top
     assumes: [process]
-    finding: "S-168"
   - at: examples[2].code
-    fp: "c538311851777766"
+    fp: "a068ef494b856830"
     compile: program

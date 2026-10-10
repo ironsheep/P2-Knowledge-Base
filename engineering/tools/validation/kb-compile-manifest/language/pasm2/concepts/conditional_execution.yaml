@@ -33,18 +33,17 @@ blocks:
     wrap: pasm2-dat
     assumes: [x, y]
   - at: usage_patterns.any_instruction_conditional.code
-    fp: "708bc8bbe084079b"
+    fp: "79749e075a67b83a"
     compile: fragment
     wrap: pasm2-dat
     assumes: [x, y, mask, pattern, flags, value, ptr, address, error_handler, process_zero]
-    finding: "S-186"
   - at: usage_patterns.branchless_min_max.code
     fp: "c37953dd6242515d"
     compile: fragment
     wrap: pasm2-dat
     assumes: [a, b, min_val]
   - at: usage_patterns.conditional_accumulation.code
-    fp: "51da54fda85e1151"
+    fp: "4fba675331bf5609"
     compile: fragment
     wrap: pasm2-dat
     assumes: [value, sum]
@@ -77,12 +76,12 @@ blocks:
     wrap: pasm2-dat
     assumes: [x, y]
   - at: special_patterns.test_and_branch_alternative.traditional
-    fp: "7190ca28d3f595b2"
+    fp: "c2d6f0d04583f798"
     compile: fragment
     wrap: pasm2-dat
     assumes: [flags, READY_BIT=con, wait_loop]
   - at: special_patterns.test_and_branch_alternative.efficient
-    fp: "00099a859beb66f1"
+    fp: "297304404a5fc637"
     compile: fragment
     wrap: pasm2-dat
     assumes: [flags, READY_BIT=con]

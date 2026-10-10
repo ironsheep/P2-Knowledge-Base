@@ -3,53 +3,48 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "46e32c72b5ec57a0"
+    fp: "cbe7f7a9ead51587"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-165"
   - at: examples[1].code
-    fp: "2dd471bf1407d767"
+    fp: "03ab569e362033af"
     compile: fragment
     wrap: pasm2-dat
   - at: examples[2].code
-    fp: "7423f5675d632f82"
+    fp: "f90ac21e4bbc3956"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-165"
   - at: examples[3].code
-    fp: "0a97c511dd183688"
+    fp: "851e579421164acb"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [ptra_val]
   - at: examples[4].code
-    fp: "60baf771e0124b43"
+    fp: "7e4afe8166375851"
     compile: fragment
     wrap: pasm2-dat
     assumes: [addr, ptra_val]
-    finding: "S-165"
   - at: examples[5].code
-    fp: "8f860ae4b86d5ec9"
+    fp: "b14ecfc2ae6edb83"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [addr]
+    assumes: [addr, ptra_val]
   - at: examples[6].code
-    fp: "18ec6ee918c17192"
+    fp: "ccff34ccd7f44022"
     compile: fragment
     wrap: pasm2-dat
     assumes: [addr]
-    finding: "S-165"
   - at: examples[7].code
-    fp: "ab1aafe172a27a1e"
+    fp: "2a8944de28d2e0f7"
     compile: fragment
     wrap: pasm2-dat
     assumes: [addr]
   - at: examples[8].code
-    fp: "63f1222fd20a6900"
+    fp: "a4a635c67448f439"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [id, addr, myID]
+    assumes: [id, addr]
   - at: examples[9].code
-    fp: "a89c238abc68ba6d"
+    fp: "a1135e73571d64a1"
     compile: fragment
     wrap: pasm2-dat
     assumes: [myID]

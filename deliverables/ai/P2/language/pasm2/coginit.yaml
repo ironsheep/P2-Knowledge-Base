@@ -47,27 +47,26 @@ related:
 - architecture/boot-rom/spi-flash-boot.yaml
 - code-examples/flash-loader-case-study.yaml
 examples:
-- code: 'COGINIT #1,#$100                                  ''load and start Cog 1
-    from Hub RAM $100
-
-    --or--'
-- code: 'COGINIT #COGEXEC+1,#$100'
-- code: 'COGINIT #%1_0_0101, PTRA                          ''skip load and start Cog
-    5 at PTRA
-
-    --or--'
-- code: "COGINIT #HUBEXEC+5, PTRA\n  SETQ       ptra_val                         \
-    \      'ptra_val will go into target cog's PTRA register"
-- code: "COGINIT #%0_1_0000, addr                          'load and start a free\
-    \ cog at addr\n--or--\n  SETQ    ptra_val"
-- code: 'COGINIT #COGEXEC_NEW, addr'
-- code: 'COGINIT #%1_1_0001, addr                          ''skip load, start a free
-    pair of cogs at addr (for LUT RAM sharing)
-
-    --or--'
-- code: 'COGINIT #HUBEXEC_NEW_PAIR, addr'
-- code: "COGINIT id, addr               WC                       '(id=HUBEXEC_NEW)\
-    \ skip load, start a free cog at addr\n                                      \
-    \                    'C=0 and id=cog if okay\n  COGID         myID           \
-    \                           'reload and restart me at Hub RAM PTRB"
-- code: COGINIT myID, PTRB
+- code: |
+    COGINIT #1,#$100                 'load and start Cog 1 from Hub RAM $100
+- code: |
+    COGINIT #COGEXEC+1,#$100         'same, with the named constant
+- code: |
+    COGINIT #%1_0_0101, PTRA         'skip load and start Cog 5 at PTRA
+- code: |
+    COGINIT #HUBEXEC+5, PTRA         'same, with the named constant
+- code: |
+    SETQ    ptra_val                 'ptra_val will go into the target cog's PTRA register
+    COGINIT #%0_1_0000, addr         'load and start a free cog at addr
+- code: |
+    SETQ    ptra_val
+    COGINIT #COGEXEC_NEW, addr       'same, with the named constant
+- code: |
+    COGINIT #%1_1_0001, addr         'skip load, start a free pair of cogs at addr (for LUT RAM sharing)
+- code: |
+    COGINIT #HUBEXEC_NEW_PAIR, addr  'same, with the named constant
+- code: |
+    COGINIT id, addr  WC             '(id=HUBEXEC_NEW) skip load, start a free cog at addr; C=0 and id=cog if okay
+- code: |
+    COGID   myID                     'reload and restart me at Hub RAM PTRB
+    COGINIT myID, PTRB

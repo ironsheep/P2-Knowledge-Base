@@ -3,11 +3,10 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: idioms[0].examples[0]
-    fp: "72476fc829a1dfc7"
+    fp: "1fc4001df380ad40"
     compile: fragment
     wrap: pasm2-dat
     assumes: [count, x, computed_value]
-    finding: "S-197"
   - at: idioms[1].pattern
     fp: "968cd8fff57fec6e"
     compile: fragment

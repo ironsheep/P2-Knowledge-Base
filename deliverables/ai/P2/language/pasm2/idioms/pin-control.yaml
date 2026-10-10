@@ -54,7 +54,7 @@ idioms:
       Eliminates the per-pin loop or sequential drives that would otherwise
       create inter-pin skew.
     examples:
-      - "drvl #addr_bus addpins 15    ' drive 16-pin address bus all low"
+      - "drvl ##addr_bus addpins 15   ' drive 16-pin address bus all low"
       - "outh #ctrl_bus addpins 3     ' set 4 control pins high simultaneously"
     context: |
       Especially valuable when the receiving device samples the bus on

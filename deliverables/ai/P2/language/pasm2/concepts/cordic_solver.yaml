@@ -102,11 +102,14 @@ usage_patterns:
         GETQY result_hi
       .drain
 
-  non_blocking_check:
-    description: Check if results are available without blocking
+  no_result_ready_poll:
+    description: There is no non-blocking "result ready" test for the CORDIC
     code: |
-      POLLQMT             WC    ' C=1 if pipeline empty
-      IF_NC GETQX result        ' Retrieve only if available
+      QMUL    a, b
+      ' ... 55 or more clocks of other work ...
+      GETQX   result_lo       ' waits for the result if it is not ready yet
+      GETQY   result_hi
+    note: "POLLQMT is not a result-ready poll: its flag is set only when a GETQX/GETQY executed with nothing queued or in progress, which is a programming error (event 15). To avoid a stall, schedule the read at least 55 clocks after the command."
 
 interrupt_protection:
   applicability: |

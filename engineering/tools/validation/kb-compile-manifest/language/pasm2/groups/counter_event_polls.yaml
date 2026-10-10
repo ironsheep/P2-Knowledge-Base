@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "79ffd69d86dc88a7"
+    fp: "64f0433d9f0985ac"
     compile: fragment
     wrap: pasm2-dat
     assumes: [timeout_handler, target]

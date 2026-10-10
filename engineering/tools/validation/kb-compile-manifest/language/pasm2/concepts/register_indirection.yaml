@@ -13,32 +13,30 @@ blocks:
     wrap: pasm2-dat
     assumes: [index, array_start, value]
   - at: altx_instructions.ALTR.examples[0]
-    fp: "c3c0e07070c194df"
+    fp: "3d9d2f430b8ea53a"
     compile: fragment
     wrap: pasm2-dat
     assumes: [offset, base_reg, value]
   - at: altx_instructions.ALTI.examples[0]
-    fp: "8fde98295bd37fc1"
+    fp: "419088193786976d"
     compile: fragment
     wrap: pasm2-dat
     assumes: [exec_reg, dst=con, src=con]
-    finding: "S-193"
   - at: altx_instructions.ALTB.examples[0]
-    fp: "889f727671b23db5"
+    fp: "e697f67375517b7e"
     compile: fragment
     wrap: pasm2-dat
     assumes: [bit_num, flags]
   - at: advanced_features.increment_modes.examples[0]
-    fp: "022cc84a73a4bf06"
+    fp: "92ee73b62f0ab654"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [index, sum, total]
-    finding: "S-194"
+    assumes: [index, sum, total, table]
   - at: advanced_features.combined_operations.examples[0]
-    fp: "59dc072d22d3fac1"
+    fp: "32983ae1d6738f6b"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [src_index, dst_index]
+    assumes: [ptrs, dst_reg=con, src_reg=con, count]
   - at: advanced_features.conditional_execution.examples[0]
     fp: "5446a2eda3a84f50"
     compile: fragment
@@ -49,24 +47,13 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [index, lookup_table, result]
-  - at: common_patterns.computed_jump.code
-    fp: "ea9daad4908bc72d"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [state, jump_table]
   - at: common_patterns.array_copy.code
-    fp: "a0fe95a5b20b4fbd"
+    fp: "949add0769683c7e"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [count, src_ptr, dst_ptr]
-    finding: "S-194"
-  - at: common_patterns.switch_case.code
-    fp: "8827c003b88b60a6"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [value, MAX_CASE=con, case_table, default_case]
+    assumes: [count, src_ptr, dst_ptr, tmp]
   - at: common_patterns.bit_scan.code
-    fp: "b6a43d65fbd5994a"
+    fp: "a7b469f24a3d7817"
     compile: fragment
     wrap: pasm2-dat
     assumes: [bit_pos, flags, found]

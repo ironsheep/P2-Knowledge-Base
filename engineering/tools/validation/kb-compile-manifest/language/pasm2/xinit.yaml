@@ -13,7 +13,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [bmode, spi_ck=con]
   - at: examples[2].code
-    fp: "80b8859511d6a70f"
+    fp: "bf45bbad02efd3db"
     compile: fragment
     wrap: pasm2-dat
     assumes: [x, spi_ck=con, wmode]

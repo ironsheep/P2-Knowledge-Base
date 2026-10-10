@@ -13,7 +13,7 @@ flags_affected:
 syntax_variants:
 - WAITSE4 {WC|WZ|WCZ}
 timing:
-  cycles: 2
+  cycles: 2+
   type: variable
 encoding:
 - bits: EEEE 1101011 CZ0 000010111 000100100

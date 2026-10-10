@@ -11,16 +11,14 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: interrupt_system.return_instructions.RETI0_3.example
-    fp: "66575ab83523effd"
+    fp: "39b8691b4a83c28b"
     compile: fragment
     wrap: pasm2-dat
-    finding: "S-187"
   - at: interrupt_context.context_preservation.code
-    fp: "d92eeabe82e53e9d"
+    fp: "73031600a7d5917a"
     compile: fragment
     wrap: pasm2-dat
     assumes: [work_reg]
-    finding: "S-187"
   - at: common_patterns.timer_interrupt.code
     fp: "2b8d7a7218622b17"
     compile: fragment
@@ -32,7 +30,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [pin]
   - at: common_patterns.attention_handler.code
-    fp: "b7e5f922d7875c73"
+    fp: "e7b735ee87994351"
     compile: fragment
     wrap: pasm2-dat
   - at: common_patterns.critical_section.code

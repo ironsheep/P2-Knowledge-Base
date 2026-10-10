@@ -47,7 +47,7 @@ examples:
 related_instructions:
   - XCONT: Buffer command continuing phase (seamless chaining)
   - XINIT: Start streamer immediately (no buffering)
-  - XSTOP: Stop streamer immediately (alias for XINIT #0,#0)
+  - XSTOP: 'Stop streamer immediately (alias for XINIT #0,#0)'
 sources:
   - "related_instructions (XSTOP alias for XINIT #0,#0): Silicon Doc, silicon-doc-text.txt:1405"
 notes:

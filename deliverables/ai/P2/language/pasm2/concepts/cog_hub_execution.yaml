@@ -207,18 +207,20 @@ performance_comparison:
       ' Total: 800 clocks for 100 iterations (REP has zero loop overhead)
     
     hubexec: |
-      ' REP not available; use DJNZ
+      ' REP also works in hubexec, but its hidden jump back to the top of the block pays
+      ' the same branch-refill cost per iteration as a taken DJNZ, so the loop is shown with DJNZ
       MOV   count, #100
       .loop
       ADD   a, b              ' 2 clocks (sequential, FIFO streaming)
       SUB   a, b              ' 2 clocks
       XOR   c, d              ' 2 clocks
       ROL   e, #1             ' 2 clocks
-      DJNZ  count, #.loop     ' 13-14 clocks taken (FIFO refill, +1 if misaligned)
-      ' Per iteration: 8 (body) + ~13 (DJNZ taken) = ~21 clocks
-      ' Total: ~2100 clocks for 100 iterations
+      DJNZ  count, #.loop     ' taken: at least 13 clocks (FIFO refill; 13...20 in the instruction table)
+      ' Per iteration: 8 (body) + at least 13 (DJNZ taken) = at least 21 clocks
+      ' Total: at least ~2100 clocks for 100 iterations
       ' Cost difference vs cogexec (~13x in this loop) comes ENTIRELY from
-      ' the DJNZ branch refill + lack of REP — NOT from per-instruction throughput.
+      ' the branch refill (DJNZ here; REP's hidden jump costs the same) - NOT from
+      ' per-instruction throughput.
       ' The four ALU ops in the body run at the SAME 2 clocks each.
   
   memory_intensive:
@@ -260,18 +262,19 @@ code_organization:
       ' COG-based critical routine
               ORG   0
       critical_loop
-              REP   #4, #1000
+              REP   #4, ##1000
               RDLONG data, ptra++
               ADD    sum, data
-              MAX    peak, data
-              MIN    valley, data
+              FGE    peak, data          ' peak = the larger of peak and data (unsigned)
+              FLE    valley, data        ' valley = the smaller of valley and data (unsigned)
               RET
 
 loading_strategies:
   initial_load:
     description: "Load COG code at startup"
     code: |
-      COGINIT #16, #@cog_code, #@parameters
+      SETQ    ##@parameters            ' PTRA of the new cog
+      COGINIT #16, ##@cog_code         ' #16 = %0_1_0000: load and start a free cog; S goes to its PTRB
   
   dynamic_load:
     description: "Load different COG code as needed"

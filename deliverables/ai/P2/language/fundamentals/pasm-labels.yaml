@@ -25,17 +25,9 @@ label_types:
         .next
         .done
       description: "Local labels using dot prefix"
-    
-    colon_prefix:
-      syntax: ":label_name"
-      example: |
-        :retry
-        :skip
-        :exit
-      description: "Local labels using colon prefix"
-    
+
     rules:
-      - "Prefix with either '.' (dot) or ':' (colon)"
+      - "Prefix with '.' (dot)"
       - "Scope limited to current routine/context"
       - "Can be reused in different routines"
       - "Useful for common label names like 'loop' or 'done'"
@@ -49,16 +41,17 @@ usage_examples:
           mov     x, #0
       .loop               ' Local label with dot prefix
           add     x, #1
-          cmp     x, #10
-          jnz     .loop   ' Jump to local .loop
+          cmp     x, #10 wz
+          if_nz   jmp #.loop   ' Jump to local .loop
           ret
-      
+
       ' Another global routine
       validate_input
-          test    value, #$FF
-      :retry              ' Local label with colon prefix
+          test    value, #$FF wz
+          if_z    ret
+      .retry              ' Another local label, reused under a different global label
           rdlong  temp, ptr
-          tjz     temp, :retry  ' Jump to local :retry
+          tjz     temp, #.retry  ' Jump to local .retry
           ret
 
 best_practices:

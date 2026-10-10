@@ -3,18 +3,17 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "5727ed19e8fa3f13"
+    fp: "25a57a26ec7b60c8"
     compile: fragment
     wrap: pasm2-dat
     assumes: [log_result]
-    finding: "S-167"
   - at: examples[1].code
     fp: "3d9fbbbc0e2ac7b9"
     compile: fragment
     wrap: pasm2-dat
     assumes: [input_value, logarithm]
   - at: examples[2].code
-    fp: "df59ed1268accf1d"
+    fp: "b46b4dff17ee2dd9"
     compile: fragment
     wrap: pasm2-dat
     assumes: [number, log_result, exponent, mantissa]

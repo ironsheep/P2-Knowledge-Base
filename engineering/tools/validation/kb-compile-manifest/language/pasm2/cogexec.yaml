@@ -7,11 +7,11 @@ blocks:
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: examples[0].code
-    fp: "7aed5b3dfe68d541"
+    fp: "0308c0e738a4e350"
     compile: fragment
     wrap: pasm2-dat
   - at: examples[1].code
-    fp: "21ee1447f3a253b5"
+    fp: "5e021793b7a50986"
     compile: fragment
     wrap: pasm2-dat
     assumes: [code]

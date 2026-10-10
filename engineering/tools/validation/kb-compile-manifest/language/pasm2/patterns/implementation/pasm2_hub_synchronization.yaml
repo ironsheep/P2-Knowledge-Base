@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: implementation
-    fp: "3efd291725306c78"
+    fp: "f702fd51c4d2e954"
     compile: fragment
     wrap: pasm2-dat
     assumes: [process_data]

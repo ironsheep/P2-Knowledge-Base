@@ -49,7 +49,7 @@ blocks:
     compile: not-code
     reason: "YAML `usage:` text, an English description of what the C / Z flag effect does; prose, not code"
   - at: instruction_format.instruction_effects.WC.example
-    fp: "f80a32d3a119943e"
+    fp: "0b35ead296fb4d73"
     compile: fragment
     wrap: pasm2-dat
     assumes: [x, y]
@@ -67,7 +67,7 @@ blocks:
     compile: not-code
     reason: "YAML `usage:` text, an English description of what the C / Z flag effect does; prose, not code"
   - at: instruction_format.instruction_effects.WCZ.example
-    fp: "a199bc079905a095"
+    fp: "6b9e3cef4e150813"
     compile: fragment
     wrap: pasm2-dat
     assumes: [x, y]

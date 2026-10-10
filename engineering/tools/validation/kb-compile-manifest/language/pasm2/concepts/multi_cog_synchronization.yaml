@@ -12,17 +12,15 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: hardware_primitives.shared_memory.coordination_pattern
-    fp: "47413ddcdd194448"
+    fp: "7bb755c059c1f64c"
     compile: fragment
     wrap: pasm2-dat
     assumes: [request, flag]
-    finding: "S-164"
   - at: resource_protection_patterns.simple_mutex.code
-    fp: "bc4e096d3a3c691b"
+    fp: "cdda2fe1b9f7c32b"
     compile: fragment
     wrap: pasm2-dat
     assumes: [spi_select, spi_transfer, spi_deselect]
-    finding: "S-164"
   - at: resource_protection_patterns.timeout_mutex.code
     fp: "32a82cbba7c6052a"
     compile: fragment
@@ -39,34 +37,30 @@ blocks:
     wrap: pasm2-dat
     assumes: [lock_num, flags, HAVE_LOCK=con, complex_work]
   - at: producer_consumer_patterns.ring_buffer.code
-    fp: "bd98ea6993137b00"
+    fp: "b80af09bc8e5ccbf"
     compile: fragment
     wrap: pasm2-dat
     assumes: [head, next_head, tail, data, addr]
-    finding: "S-164+S-162"
   - at: producer_consumer_patterns.mailbox_system.code
-    fp: "bde9faaf9eda778d"
+    fp: "c2ced7e5e443b2f3"
     compile: fragment
     wrap: pasm2-dat
     assumes: [mask, target_cog, flag, message, handle_message]
-    finding: "S-164"
   - at: smart_pin_repository.pattern
     fp: "dd312f29a121332b"
     compile: fragment
     wrap: pasm2-dat
     assumes: [REPO_PIN=con, data_value]
   - at: parallel_processing_patterns.work_distribution.code
-    fp: "c649440084045ece"
+    fp: "5a7b83f8d920f105"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [work_index, cog_num, worker_code, WORK_CHUNK=con, mask]
-    finding: "S-190"
+    assumes: [work_index, cog_num, param, worker_code, WORK_CHUNK=con, mask]
   - at: parallel_processing_patterns.barrier_synchronization.code
-    fp: "167fdb2c14d82a31"
+    fp: "1d9b3c8234b6468e"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [old, new, check, count]
-    finding: "S-164"
+    assumes: [count]
   - at: synchronization_hazards.deadlock.example
     fp: "ed452f8b8c013c2f"
     compile: fragment

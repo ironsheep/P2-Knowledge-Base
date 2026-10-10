@@ -15,18 +15,14 @@ usage: 'Use for range checking and overflow detection
 
   '
 examples:
-- code: 'cmp     value, POSX     wc  '' Check if value exceeds max positive
-
-    if_nc jmp   #overflow       '' Jump if overflow (carry not set means greater/equal)
-
-    '
-  description: Checking for positive overflow
-- code: 'mov     limit, POSX         '' Set limit to maximum positive value
-
-    fles    value, limit        '' Clamp value to not exceed POSX
-
-    '
-  description: Using POSX as upper limit
+- code: |
+    cmp     value, ##POSX   wcz     ' unsigned compare against POSX
+    if_a    jmp     #overflow       ' value > POSX: bit 31 is set (negative as a signed long)
+  description: Detecting a value above POSX (unsigned compare)
+- code: |
+    mov     lowest, ##POSX          ' start a running minimum at the largest signed value
+    fles    lowest, sample          ' lowest = the smaller of lowest and sample (signed)
+  description: Using POSX as the starting value of a running signed minimum
 notes:
 - 2^31 - 1 in decimal notation
 - Bit 31 clear, bits 30-0 set
