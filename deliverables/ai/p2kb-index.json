@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.6.0",
-    "generated": "2026-10-10T06:52:18.046103",
+    "generated": "2026-10-10T07:31:14.725259",
     "total_entries": 1136,
     "total_categories": 59,
     "total_aliases": 3492,
@@ -679,6 +679,7 @@
     ],
     "hardware_eval_addon_boards": [
       "p2kbHwAddonAvBreakoutAddonAvBreakout",
+      "p2kbHwAddonClickAdapterAddonClickAdapter",
       "p2kbHwAddonControlBoardAddonControlBoard",
       "p2kbHwAddonDigitalVideoOutAddonDigitalVideoOut",
       "p2kbHwAddonGoertzelTouchAddonGoertzelTouch",
@@ -704,7 +705,8 @@
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix",
       "p2kbHwP1RomFontCharacterSetP1RomFontCharacterSet",
       "p2kbHwP2HardwareFeatureComparisonP2HardwareFeatureComparison",
-      "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
+      "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide",
+      "p2kbHwP2PackageMechanicalP2PackageMechanical"
     ]
   },
   "aliases": {
@@ -11447,8 +11449,8 @@
     },
     "p2kbAppNoteP2an006SizingCogTaskStacks": {
       "path": "deliverables/ai/P2/application-notes/p2an006-sizing-cog-task-stacks.yaml",
-      "mtime": 1791615115,
-      "sha256": "a3940d3f2f47f70d7ce421227503826f55248e7a99e7550eec345c24cd3b2d8b"
+      "mtime": 1791617449,
+      "sha256": "5b7417a3d88fb2bf07f3807ea700adf84177a00bb4a428481a65a2fcdf274741"
     },
     "p2kbAppNoteP2an007DataStructuresNewFacilities": {
       "path": "deliverables/ai/P2/application-notes/p2an007-data-structures-new-facilities.yaml",
@@ -15732,8 +15734,8 @@
     },
     "p2kbSpin2Cogspin": {
       "path": "deliverables/ai/P2/language/spin2/methods/cogspin.yaml",
-      "mtime": 1791615115,
-      "sha256": "57358a658dc8406746f0a26b0aad587e642da252ff6c1e9050353da714be99a8"
+      "mtime": 1791617449,
+      "sha256": "2e903e7d01826c5256bce10a74994d4c0743b7c41c64fdba3ae62436ec221df7"
     },
     "p2kbSpin2Cogstop": {
       "path": "deliverables/ai/P2/language/spin2/methods/cogstop.yaml",
@@ -16092,8 +16094,8 @@
     },
     "p2kbSpin2Taskspin": {
       "path": "deliverables/ai/P2/language/spin2/methods/taskspin.yaml",
-      "mtime": 1791615115,
-      "sha256": "244c6e64e7936a2f8049f0136d314a1e1a32ccd5ac26ed1e9656a924e53469dc"
+      "mtime": 1791617449,
+      "sha256": "2a1a1cb956c709b9ed21dcdcaa9868b73003b67fc5c3fcafe253d764bb528c04"
     },
     "p2kbSpin2Taskstop": {
       "path": "deliverables/ai/P2/language/spin2/methods/taskstop.yaml",
