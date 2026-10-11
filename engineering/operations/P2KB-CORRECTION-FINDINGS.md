@@ -422,6 +422,17 @@ list, so the drift cannot recur.
 > stays red until `verify-ps1-filter.ps1` is re-run and `PS1-VERIFIED.md` updated. *Fetch Script Parity*
 > reads the published index rule and turns green when the index is regenerated after the commit.
 
+## Impact survey — v1.24.1 (`release-yamls` §8, run 2026-10-11)
+
+v1.24.1 changed one fact: `field` cannot name a method local (FIELD.yaml, CP-010). Every other hunk
+moves provenance into stripped fields, removes pointers to material the KB does not have, or relocates
+the OBEX upload date — no served fact changes. No live manual declares a local named `field` (grep of
+every `opus-master/` for a PUB/PRI local list containing it: none). The Getting Started guide names
+`jm_fullduplexserial` (OBEX 2842) in three `OBJ` shape examples (getting-started-body.md:342, 470, 746)
+that illustrate block structure; none is in its compiled examples library, and the guide makes no claim
+about the object, so the KB's removal of the compile verdict leaves it unaffected. **No document is
+flagged.** Published state verified live on p2kb-mcp 1.5.0 (F-572 probes).
+
 ## Impact survey — v1.23.2 (`release-yamls` §8, run 2026-10-04)
 
 v1.23.2 changed two facts, both decided on the bench (EF-090, EF-091). Sync serial TX primes its first
