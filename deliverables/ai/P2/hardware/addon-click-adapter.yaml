@@ -105,7 +105,7 @@ orientation:
   source: "P2 mikroBUS Adapter Part Number 64008, Revision A, schematic (note printed on the sheet)"
   note: >-
     "If this adapter is plugged into the P2-EVAL top edge, then P2 MISO/MOSI are
-    aligned with the mikroBUS MISO/MOSI" -- verbatim from the schematic sheet.
+    aligned with the mikroBUS MISO/MOSI" -- the note printed on the schematic sheet.
 
 uart_direction_caveat:
   source: "Absence established by reading the P2 mikroBUS Adapter Part Number 64008, Revision A, schematic, which names the UART nets but does not say whose transmit they are"

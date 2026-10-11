@@ -129,18 +129,18 @@ enable_control:
     value_1: "Pin output enabled"
     symbol_0: X_PINS_OFF
     symbol_1: X_PINS_ON
-    what_it_enables: "the streamer's contribution to the pin's OUT side. Verbatim:
-      the streamer's pin data is OR'd \"with {OUTB, OUTA} to produce the final 64 pin
+    what_it_enables: "the streamer's contribution to the pin's OUT side. The
+      streamer's pin data is OR'd \"with {OUTB, OUTA} to produce the final 64 pin
       output states on each clock for the cog. For these modes, %e in D[23] must be
       '1' to enable pin output.\""
     dir_is_still_required: "%e enables the streamer's OUT contribution; it does NOT
       enable the pin's output driver. DIR still gates that, so a streamer pin drives
-      nothing until DIR is raised. Measured: one streamer
-      command twice, differing only in DIR -- 4 of 8 with DIR low, 8 of 8 with DIRH,
-      against an 8-of-8 plain-drive control. The DIR-high leg started from OUT = 0, so passing proves
-      the streamer overrode OUT rather than the OUT bit doing the work."
+      nothing until DIR is raised. With DIR high and OUT = 0, the streamer's pin
+      data alone drives the pin."
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, for the
-      OR rule and the %e requirement; EF-062 for the DIR result."
+      OR rule and the %e requirement; EF-062 for the DIR result (one streamer
+      command run twice, differing only in DIR: 4 of 8 pins with DIR low, 8 of 8 with
+      DIRH, against an 8-of-8 plain-drive control; the DIR-high leg started from OUT = 0)."
 
   input_modes:
     bit_name: "%w"
@@ -153,22 +153,22 @@ enable_control:
     # {INB, INA}, which is the fact that decides whether a capture reads traffic or
     # a smart pin's handshake.
     what_is_read: "{INB, INA} -- the cog's IN registers, not the pins' raw pads.
-      Verbatim: \"Initially, and on each subsequent NCO rollover, 1/2/4/8/16/32 pins
+      \"Initially, and on each subsequent NCO rollover, 1/2/4/8/16/32 pins
       are read from {INB, INA} and X3, X2, X1, and X0 are updated using the read data.\""
     widths: "1, 2, 4, 8, 16 or 32 pins, set by the mode -- see
       architecture/streamer/modes-reference.yaml, the %1100..%1111 capture block."
-    what_is_written: "Verbatim: \"If the %w bit in D[23] is high, WFBYTE/WFWORD/WFLONG
+    what_is_written: "\"If the %w bit in D[23] is high, WFBYTE/WFWORD/WFLONG
       operations will be done automatically to record the pin data.\" Which of the
       three is used is fixed by the mode; the mode symbol names it (…_WFBYTE,
       …_WFWORD, …_WFLONG)."
-    accrual_rule: "Verbatim: \"In the case of 1/2/4-pin modes, a WFBYTE will be done
+    accrual_rule: "\"In the case of 1/2/4-pin modes, a WFBYTE will be done
       each time 8 bits of pin data accrue.\" So a 1-pin mode writes one byte per 8
       NCO rollovers, a 2-pin mode per 4, a 4-pin mode per 2 -- samples pack into the
       byte, they are not one byte each."
     bit_order_within_the_byte: "bottom-first by default; the %a bit in D[16] reorders
       to top-first. See alt_bit_order below."
     prerequisite: "A WRFAST must have been executed beforehand, from cog RAM.
-      Verbatim: \"For WRFAST modes, it is necessary to do a WRFAST sometime beforehand,
+      \"For WRFAST modes, it is necessary to do a WRFAST sometime beforehand,
       to ensure that the hub RAM FIFO is ready to receive data.\" WRFAST's D operand is
       the block count (0 = no wrapping) and its S operand is the hub start address."
     what_this_does_NOT_capture: "the logic level of any pin that is running a smart-pin

@@ -112,7 +112,7 @@ performance_comparison:
     
     For deterministic per-instruction timing, see the underlying PASM ops:
     - Integer add/sub/mul/and/or/xor/shift: 2 clocks each (per ADD/SUB/MUL/etc. YAMLs)
-    - QMUL via CORDIC: 55-clock latency, 8-clock issue interval (per language/pasm2/qmul.yaml + Silicon Doc v35)
+    - QMUL via CORDIC: 55-clock latency, 8-clock issue interval (per language/pasm2/qmul.yaml)
     - Hardware divide via CORDIC (QDIV): 55-clock latency (per language/pasm2/qdiv.yaml)
     - Hardware square root via CORDIC (QSQRT): 55-clock latency (per language/pasm2/qsqrt.yaml)
 
@@ -205,6 +205,9 @@ anti_patterns:
       else
         use_result(result)
     reason: "Invalid operations produce NaN"
+
+sources:
+  - "performance_comparison (QMUL via CORDIC: 55-clock latency, 8-clock issue interval): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES, CORDIC Solver; SUMMARY (cogs can start CORDIC operations every 1/2/4/8/16 (#cogs) clocks and get results 55 clocks later)"
 
 related:
   - language/spin2/methods/float.yaml

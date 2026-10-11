@@ -120,7 +120,10 @@ notes:
   - "Compiler calculates optimal PLL settings automatically"
   - "Use CLKSET for safe clock transitions (handles PLL lock timing)"
   - "Raw HUBSET to change mode requires proper sequencing"
-  - "PLL must lock before switching to PLL source (~10 ms). Silicon Doc (Parallax Propeller 2 Documentation) v35 -- \"XI input must be enabled by %CC. Allow 10ms for crystal+PLL to stabilize before switching over to PLL clock source.\""
+
+pll_lock:
+  rule: "PLL must lock before switching to PLL source (~10 ms). The XI input must be enabled by %CC; allow 10 ms for the crystal and PLL to stabilize before switching over to the PLL clock source."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, Configuring the Clock Generator (the PLL Setting table, %E row)"
 
 sources:
   - "notes (PLL lock, 10 ms crystal+PLL stabilization): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, Configuring the Clock Generator (the PLL Setting table, %E row)"

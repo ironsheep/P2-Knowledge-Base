@@ -36,8 +36,8 @@ execution_model:
   # CRITICAL: this is cog-exec, NOT hub-exec.
   summary: |
     Inline PASM2 in a Spin2 method (ORG...END inside PUB/PRI) is loaded into
-    cog RAM at runtime by the Spin2 interpreter. Per Spin2 Language Documentation
-    v55 (IN-LINE PASM CODE) verbatim, the interpreter performs TWO separate copies before jumping:
+    cog RAM at runtime by the Spin2 interpreter. The interpreter performs TWO
+    separate copies before jumping:
     
     1. "Copy the method's first 16 long variables, including any parameters,
        return values, and local variables, from hub RAM to cog registers
@@ -48,7 +48,8 @@ execution_model:
     
     The block then runs as cog-exec at the deterministic per-instruction
     PASM timings.
-  
+  source: "summary (the two copies, quoted): Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE"
+
   it_does_NOT_run_in_hubexec: true
   
   variable_limit:
@@ -101,7 +102,8 @@ syntax_forms:
       hub_code
         NOP              ' PASM2 code for hub execution
     description: "PASM2 code in DAT that runs as hub-exec (separate from inline PASM)"
-    execution: "Executes directly from hub memory through the (cogs+11)=19-stage prefetch FIFO. Sequential code: 2 clocks/instruction (same as cog-exec). Branches: minimum 13 clocks (+1 if not long-aligned) per Silicon Doc HUB EXECUTION. FIFO/streamer instructions (RDFAST/WRFAST/FBLOCK/RFx/WFx/XINIT/XZERO/XCONT) are FORBIDDEN in this mode. NOT the same as inline PASM in a method."
+    execution: "Executes directly from hub memory through the (cogs+11)=19-stage prefetch FIFO. Sequential code: 2 clocks/instruction (same as cog-exec). Branches: minimum 13 clocks (+1 if not long-aligned). FIFO/streamer instructions (RDFAST/WRFAST/FBLOCK/RFx/WFx/XINIT/XZERO/XCONT) are FORBIDDEN in this mode. NOT the same as inline PASM in a method."
+    source: "execution: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION (minimum 13 clocks to branch to a hub address, one more if not long-aligned; the instructions that cannot be used during hub execution); the (cogs+11)-stage FIFO: the same document, the hub FIFO interface description"
 
   - form: "mixed_method"
     syntax: |
@@ -175,7 +177,7 @@ register_access:
                        Source: Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE.
   
   local_label_rule:
-    requirement: "Inline PASM labels are local to the ORG..END block; a plain label (lp), a '.'-prefixed (.lp) or a ':'-prefixed (:lp) label all work"
+    requirement: "Inline PASM labels are local to the ORG..END block; a plain label (lp) or a '.'-prefixed local label (.lp) works"
     reason: "Inline PASM symbols are not accessible outside the in-line PASM code"
     reference: "language/pasm2/concepts/labels.yaml"
 
@@ -323,7 +325,7 @@ debugging_considerations:
     solution: "Let the appended RET do the work, or return early with _RET_ / RET; never fall out of the block"
 
 hardware_stack_budget:
-  source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE and CALLING PASM FROM SPIN2, both verbatim: 'Use up to 5 levels of the hardware stack for nested CALLs, including CALLs to hub RAM.'"
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE and CALLING PASM FROM SPIN2, both state: 'Use up to 5 levels of the hardware stack for nested CALLs, including CALLs to hub RAM.'"
   levels_available: 5
   of_total: 8
   applies_to: "both the ORG/END inline form and the CALL() surface -- v55 states it in both places"

@@ -60,7 +60,7 @@ file_structure:
     with ORG (cog-exec) or ORGH (hub-exec) and which has no PUB method.
 
   minimal_program:
-    description: "The Parallax minimal PASM-only program, verbatim from Spin2 v55 -- reproduced here in its own line layout."
+    description: "The Parallax minimal PASM-only program from the Parallax Spin2 v55 documentation, reproduced here in its own line layout."
     source: "Parallax Propeller 2 Spin2 Language Documentation v55, Spin2 Program Structure (Minimal PASM Program)"
     example: |
       DAT             ORG                      'start PASM at hub $00000 for cog $000

@@ -87,7 +87,7 @@ electrical_characteristics: >-
   NOT DOCUMENTED. The receiver front-end thresholds for the
   J / K / SE0 / SE1 line-state detectors are not in the P2 datasheet -- the datasheet
   names USB only twice, as a capability, and contains no line-state or SE0 material --
-  nor in the Silicon Doc. Do not point a reader at the datasheet for them.
+  nor in the Propeller 2 Documentation v35. Do not point a reader at the datasheet for them.
   The programming interface (baud, host/device, FS/LS, line-state sends, 16-bit status
   word) IS complete above; it is only the analog thresholds that are undocumented.
   Closing this needs Chip Gracey or a bench measurement, not further reading.
@@ -185,4 +185,3 @@ notes:
   - "Supports USB 1.1 Full Speed and Low Speed"
   - "Requires careful timing and USB protocol knowledge"
   - "Consult USB specification and Parallax USB examples for complete implementation"
-  - "Limited documentation available - refer to Parallax forums and examples"

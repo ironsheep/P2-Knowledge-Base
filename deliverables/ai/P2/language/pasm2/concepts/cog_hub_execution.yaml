@@ -6,6 +6,7 @@ concept: "COG vs HUB Execution"
 category: "pasm2_core"
 importance: "fundamental"
 documentation_level: comprehensive
+source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION (13-clock minimum branch with +1 when not long-aligned, forbidden-instruction list); THE COG -to- HUB RAM INTERFACE (FIFO of (cogs+11) stages); INSTRUCTION REPEATING (REP hidden jump in hub memory)"
 
 metadata:
   query_tags: ["cogexec", "hubexec", "execution", "performance", "memory", "overlay"]
@@ -28,14 +29,13 @@ fundamental_concept: |
        because the FIFO prefetches and streams instructions through the
        19-stage ((cogs+11)) instruction prefetch buffer
      - Branches: minimum 13 clocks (+1 if not long-aligned)
-     - REP works in hubexec (Silicon Doc v35 verbatim: "REP works in hub
-       memory, as well, but executes a hidden jump to get back to the top
-       of the repeated instructions"). The hidden jump on each iteration
+     - REP works in hubexec, but executes a hidden jump to get back to the
+       top of the repeated instructions. The hidden jump on each iteration
        pays the 13+ clock hub-branch cost, so REP loops in hubexec are
        slower than in cogexec but still functional.
-     - All ALTx instructions (ALTI/ALTS/ALTD/ALTR/ALTB/ALTSN/ALTSB/ALTSW/
-       ALTGN/ALTGB/ALTGW) are not excluded from hubexec (none are in the
-       Silicon Doc HUB EXECUTION forbidden list).
+     - All ALTx instructions (ALTI/ALTS/ALTD/ALTR/ALTB/ALTSN/ALTSB/ALTSW/ALTGN/ALTGB/ALTGW)
+       are not excluded from hubexec (none are in the forbidden list for
+       hub execution).
      - FIFO/streamer instructions ARE forbidden in hubexec
        (see `hubexec_forbidden_instructions:` below)
   
@@ -81,7 +81,7 @@ hub_execution:
   timing_factors:
     instruction_fetch: "Per-cog 19-stage ((cogs+11)) prefetch FIFO streams instructions at 2 clocks each — no per-instruction hub window penalty when streaming"
     data_access: "RD/WR instructions follow normal hub-access timing (9-24 clocks typical, egg-beater dependent)"
-    branches: "Force FIFO refill from new hub address — minimum 13 clocks (Silicon Doc); +1 clock if target is not long-aligned"
+    branches: "Force FIFO refill from new hub address — minimum 13 clocks; +1 clock if target is not long-aligned"
   
   advantages:
     - "Access to full 512KB+ hub address space"
@@ -94,12 +94,12 @@ hub_execution:
   limitations:
     - "Branch timing non-deterministic (minimum 13 clocks for FIFO refill)"
     - "Branches cost much more than in COGEXEC (13+ vs 4 clocks)"
-    - "REP works but pays the hub-branch cost on each iteration's hidden jump back to the top of the block (Silicon Doc verbatim) — slower than cogexec REP, not forbidden"
+    - "REP works but pays the hub-branch cost on each iteration's hidden jump back to the top of the block — slower than cogexec REP, not forbidden"
     - "FIFO/streamer instructions FORBIDDEN — see hubexec_forbidden_instructions"
     - "Sequential code is full speed — branch-heavy code is where the cost shows up"
 
 hubexec_forbidden_instructions:
-  # Silicon Doc verbatim: "While in hub execution mode, the FIFO cannot be used for anything else.
+  # "While in hub execution mode, the FIFO cannot be used for anything else.
   # So, during hub execution these instructions cannot be used:"
   rationale: "In hubexec the FIFO is dedicated to instruction prefetch. These instructions repurpose or consume the FIFO and so are not allowed."
   cannot_be_used:
@@ -118,7 +118,7 @@ hubexec_forbidden_instructions:
     - "XZERO"
     - "XCONT (when streamer mode engages the FIFO)"
   also_works_in_hubexec_but_with_caveat:
-    REP: "Works in hubexec per Silicon Doc v35 verbatim: 'REP works in hub memory, as well, but executes a hidden jump to get back to the top of the repeated instructions.' Each iteration's hidden jump pays the 13+-clock hub-branch cost, so REP loops are slower in hubexec than in cogexec."
+    REP: "Works in hubexec, but executes a hidden jump to get back to the top of the repeated instructions. Each iteration's hidden jump pays the 13+-clock hub-branch cost, so REP loops are slower in hubexec than in cogexec."
     ALTx_family: "None of the ALTx instructions (ALTI/ALTS/ALTD/ALTR/ALTB/ALTSN/ALTSB/ALTSW/ALTGN/ALTGB/ALTGW) is in the HUB EXECUTION list of instructions that cannot be used in hub execution, so they are not excluded from hubexec."
   source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION"
 
@@ -163,7 +163,7 @@ execution_control:
 
 instruction_availability:
   cogexec_only:
-    - "All FIFO/streamer ops (RDFAST/WRFAST/FBLOCK/RFx/WFx/XINIT/XZERO/XCONT) — Silicon Doc HUB EXECUTION forbidden list"
+    - "All FIFO/streamer ops (RDFAST/WRFAST/FBLOCK/RFx/WFx/XINIT/XZERO/XCONT) — in the hub-execution forbidden list"
     - "Some self-modifying code patterns (e.g., patching the just-prefetched-into-FIFO instructions has no effect, since the FIFO already holds them)"
   works_in_both_modes_with_caveats:
     - "REP — works in hubexec but each iteration's hidden jump back to top costs 13+ clocks (hub-branch FIFO refill)"
@@ -173,7 +173,7 @@ instruction_availability:
     - "None — hubexec is a strict subset (with the forbidden list above)"
   
   performance_differences:
-    # All numbers cross-checked against per-instruction YAMLs and Silicon Doc HUB EXECUTION section.
+    # All numbers cross-checked against per-instruction YAMLs and the v35 HUB EXECUTION section.
     - "Sequential ALU ops (ADD, SUB, AND, MOV, etc.): 2 clocks in BOTH modes — no penalty in hubexec"
     - "JMP: 4 clocks (cog) vs minimum 13 clocks (hub, +1 if target not long-aligned)"
     - "CALL: 4 clocks (cog) vs minimum 13 clocks (hub, +1 if target not long-aligned)"
@@ -307,12 +307,12 @@ fifo_behavior:
 #   and the per-instruction pages in language/pasm2/.
   summary: |
     Hubexec instruction timing is governed by the per-cog instruction-prefetch
-    FIFO. Per Silicon Doc verbatim, 'The FIFO contains (cogs+11) stages' —
+    FIFO. The FIFO contains (cogs+11) stages —
     19 stages on a P2 with 8 cogs. While streaming, sequential instructions
     execute at 2 clocks each, IDENTICAL to cogexec. A branch forces FIFO refill
-    from a new hub address, which Silicon Doc states 'takes a minimum of 13
+    from a new hub address, which takes a minimum of 13
     clock cycles. If the instruction being branched to is not long-aligned,
-    one additional clock cycle is required.' FIFO/streamer instructions are
+    one additional clock cycle is required. FIFO/streamer instructions are
     not usable in hubexec at all.
   
   fifo_depth:
@@ -420,7 +420,7 @@ common_mistakes:
       ORG
       REP #4, #100    ' Zero-overhead REP loop (cogexec) -- use cogexec
                       ' for tight inner loops that need free looping
-    explanation: "REP works in hubexec (Silicon Doc v35: 'REP works in hub memory, as well, but executes a hidden jump to get back to the top of the repeated instructions'). It is not forbidden -- but the hidden jump costs 13+ clocks per iteration, so move tight loops to cogexec when you need REP's zero loop overhead."
+    explanation: "REP works in hubexec, but executes a hidden jump to get back to the top of the repeated instructions. It is not forbidden -- but the hidden jump costs 13+ clocks per iteration, so move tight loops to cogexec when you need REP's zero loop overhead."
   
   - mistake: "Not loading COG code before jumping"
     wrong: |
@@ -439,7 +439,7 @@ common_mistakes:
   
   - mistake: "Calling RDFAST/WRFAST/RFBYTE/etc. from hubexec code"
     wrong: "Assuming FIFO/streamer instructions just run slowly in hubexec"
-    right: "They are FORBIDDEN in hubexec (Silicon Doc HUB EXECUTION section). Either move the code that uses them to cogexec, or stage the work via a separate cog"
+    right: "They are FORBIDDEN in hubexec. Either move the code that uses them to cogexec, or stage the work via a separate cog"
   
   - mistake: "Overlay overwrites active code"
     wrong: |
@@ -489,7 +489,7 @@ related:
   - language/spin2/constructs/inline_pasm.yaml
 
 references:
-  - propeller_2_documentation_v35: "HUB EXECUTION section. Verbatim: 'Branching to a hub address takes a minimum of 13 clock cycles. If the instruction being branched to is not long-aligned, one additional clock cycle is required.' Verbatim FIFO depth: 'The FIFO contains (cogs+11) stages.' Verbatim forbidden list: 'While in hub execution mode, the FIFO cannot be used for anything else. So, during hub execution these instructions cannot be used: RDFAST / WRFAST / FBLOCK / RFBYTE / RFWORD / RFLONG / RFVAR / RFVARS / WFBYTE / WFWORD / WFLONG / XINIT / XZERO / XCONT - when the streamer mode engages the FIFO.'"
+  - propeller_2_documentation_v35: "HUB EXECUTION section. Branching to a hub address takes a minimum of 13 clock cycles. If the instruction being branched to is not long-aligned, one additional clock cycle is required. FIFO depth (THE COG -to- HUB RAM INTERFACE section): (cogs+11) stages. REP hidden jump (INSTRUCTION REPEATING section): REP works in hub memory, but executes a hidden jump to get back to the top of the repeated instructions. Forbidden list (HUB EXECUTION section): while in hub execution mode, the FIFO cannot be used for anything else, so during hub execution these instructions cannot be used: RDFAST / WRFAST / FBLOCK / RFBYTE / RFWORD / RFLONG / RFVAR / RFVARS / WFBYTE / WFWORD / WFLONG / XINIT / XZERO / XCONT - when the streamer mode engages the FIFO."
   - sequential_hubexec_clocks: "Sequential hubexec instructions stream through the FIFO at 2 clocks each (same as cogexec): the Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.148-159, gives one Clocks value for Cog & LUT and Hub execution on each sequential instruction, and Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION, describes the FIFO spooling up the stream."
   - per_instruction_yamls: "language/pasm2/jmp.yaml: clocks 4 (cog), range 4 / 13...20. language/pasm2/call.yaml: cycles 4, notes '4 cycles for Cog/LUT, 13-20 cycles for Hub execution'. language/pasm2/ret.yaml: range 4 / 13...20. language/pasm2/djnz.yaml: clocks '2 or 4', range 13...20. language/pasm2/add.yaml: cycles 2 fixed. language/pasm2/mov.yaml: cycles 2."
   - "Parallax Spin2/PASM Debugger v51, Breakpoint Handler Overlay (SETQ + RDLONG loads the overlay code into cog registers)"

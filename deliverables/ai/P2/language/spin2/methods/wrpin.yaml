@@ -5,6 +5,12 @@
 method: "WRPIN"
 category: "smart_pin_operations"
 type: "method"
+aliases:
+  - "WRPIN erratum E6"
+  - "erratum E6"
+  - "P2 erratum E6"
+  - "E6 erratum"
+  - "DAC smart pin OUT does not start the ADC"
 description: |
   Write the mode configuration register of one or more smart pins.
   Sets up the smart pin operating mode, input sources, and output options.
@@ -46,7 +52,7 @@ tt_field:
     language/spin2/symbols/spin2-builtin-symbols-complete.yaml. Defined once, in those
     two places, and pointed at from here."
   context_dependent: |
-    %TT DOES NOT HAVE ONE MEANING. The Silicon Doc specifies four meaning-sets, selected by
+    %TT DOES NOT HAVE ONE MEANING. There are four meaning-sets, selected by
     whether the smart pin is on (%SSSSS) and whether DAC_MODE (M[12:10] = %101) is active.
     The per-constant effects at the pointer above are the SMART-PIN-ON, non-DAC_MODE meanings only.
     The four contexts:
@@ -155,7 +161,16 @@ warnings:
   - "Mode bits must be valid for hardware"
   - "Incorrect mode can damage external circuits"
 
+silicon_errata:
+  dac_smart_pin_mode_out_needs_tt_bit_0:
+    erratum: "E6"
+    condition: "A pin in a DAC smart-pin mode (%SSSSS = %00001 to %00011) configured with TT = %00, whose ADC the program switches on with OUT."
+    effect: "Raising OUT does not start the ADC; the pin reads exactly as with OUT low."
+    workaround: "Set TT bit 0 in the WRPIN word ($40, P_TT_01). The DAC then drives the pin while the ADC runs."
+    source: "EF-071; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS, %TT table (the published rule the bench contradicts)"
+
 related:
+  - architecture/silicon_errata.yaml
   - architecture/smart_pins.yaml
   - architecture/pin-drive-configuration.yaml
   - language/spin2/symbols/spin2-builtin-symbols-complete.yaml

@@ -4,7 +4,7 @@
 #     (boot ROM size/content consolidated from the Hardware Manual)
 #   - Parallax Propeller 2 ROM Booter v33_01j (assembly listing of the Prop2 silicon ROM)
 #   - Parallax P2 Datasheet (cross-reference)
-#   - P2 Silicon Doc v35 (cross-reference)
+#   - Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), OVERVIEW (cross-reference)
 
 component: boot_rom_contents
 category: boot_rom
@@ -24,7 +24,7 @@ authoritative_content_list:
   statement: "ROM | 16 KB (Bootloader, P2 Monitor debug interface, and TAQOZ (Forth) command interface)"
   names: 3
   source: "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, OVERVIEW (Specifications table, ROM row), p.9; what_other_sources_say: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES (16KB boot ROM), p.2, and Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (hub features: 16KB boot ROM)"
-  what_other_sources_say: "The P2 Datasheet and the Silicon Doc state only '16KB boot ROM' and inventory nothing. No ingested source inventories the ROM more finely than the line above."
+  what_other_sources_say: "The P2 Datasheet and the Propeller 2 Documentation v35 state only '16KB boot ROM' and inventory nothing."
 
 # ROM residents (per Hardware Manual + ROM booter narrative)
 residents:

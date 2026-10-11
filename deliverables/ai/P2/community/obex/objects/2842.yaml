@@ -10,6 +10,7 @@ object_metadata:
     - 'jm_fullduplexserial.spin2 declares a local variable named field in the format() method. FIELD is now a reserved Spin2 word, so the object as published does not compile with the current compiler until that local is renamed.'
     p2_chip_versions:
     - all
+    source: 'known_issues: CP-010'
     tested_platforms: []
   functionality:
     category: communication

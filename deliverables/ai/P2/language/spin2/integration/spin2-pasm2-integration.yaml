@@ -468,5 +468,6 @@ integration_rules:
     
   performance_considerations:
     cog_execution: "2 clocks per typical ALU instruction; 4 clocks per branch (per per-instruction YAMLs)"
-    hub_execution: "Sequential code: 2 clocks/instruction (same as cogexec via the (cogs+11)=19-stage prefetch FIFO). Branches: minimum 13 clocks (+1 if not long-aligned, Silicon Doc v35 verbatim)."
+    hub_execution: "Sequential code: 2 clocks/instruction (same as cogexec via the (cogs+11)=19-stage prefetch FIFO). Branches: minimum 13 clocks (+1 if not long-aligned)."
     variable_access: "$1E0-$1EF fastest, hub variables slower"
+    source: "hub_execution: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION (branch to a hub address: minimum 13 clocks, one more if not long-aligned); the (cogs+11)-stage FIFO: the same document, the hub FIFO interface description (three ways the FIFO can be used: hub execution, streamer, software)"

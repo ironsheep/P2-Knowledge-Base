@@ -270,10 +270,10 @@ priority_and_nesting:
 
   dispatch:
     mechanism: |
-      Silicon Doc v35 verbatim: "Interrupt branches are realized, internally,
-      by inserting a 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline
-      while holding the program counter at its current value, so that the
-      interrupt later returns to the address saved in IRETx."
+      Interrupt branches are realized, internally, by inserting a
+      'CALLD IRETx,IJMPx WCZ' into the instruction pipeline while holding the
+      program counter at its current value, so that the interrupt later
+      returns to the address saved in IRETx.
     entry_overhead_cogexec: "4 clocks (per language/pasm2/calld.yaml encoding)"
     entry_overhead_hubexec: "13-20 clocks (FIFO refill on the branch)"
     exit_overhead: "Same as entry (RETIx/RESIx are CALLD instructions)"

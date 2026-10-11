@@ -115,7 +115,7 @@ common_patterns:
 
 performance_notes:
   - CORDIC methods are significantly faster than equivalent software math
-  - 'Result available 55 clocks after the CORDIC instruction issues (Silicon Doc v35 verbatim: "Fifty-five clocks later, results will be available"). The 54-clock pipeline depth is a separate fact that allows multiple operations to be overlapped (issue every 8 clocks per cog with 8 cogs).'
+  - 'Result available 55 clocks after the CORDIC instruction issues (a result is available via GETQX / GETQY fifty-five clocks later). The 54-clock pipeline depth is a separate fact that allows multiple operations to be overlapped (issue every 8 clocks per cog with 8 cogs).'
   - Multiple CORDIC calls in sequence are handled efficiently by the interpreter
   - No need to add delays or manage timing - interpreter handles everything
 
@@ -134,6 +134,9 @@ comparison_with_pasm2:
   recommendation: |
     Use Spin2 methods for most applications. Switch to inline PASM2 only when
     processing large datasets where pipeline optimization provides significant benefit.
+
+sources:
+  - "performance_notes (result available 55 clocks after the CORDIC instruction issues): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES, CORDIC Solver"
 
 related:
   - language/spin2/methods/qsin.yaml

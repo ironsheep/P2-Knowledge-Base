@@ -20,8 +20,8 @@ comparison_categories:
   - "power_requirements"
   - "form_factors"
   - "expansion_options"
-  - "educational_value"
-  - "cost_tier"
+
+pricing: "For current pricing, see the Parallax store (parallax.com)."
 
 edge_modules:
   source: >-
@@ -39,9 +39,7 @@ edge_modules:
     smart_pins: 64
     form_factor: "Edge connector module, double-sided 80-way 0.05 in (1.27 mm) edge slot"
     carrier_compatibility: ["standard_breakout", "mini_breakout", "breadboard_carrier"]
-    cost_tier: "budget"
     primary_applications: ["general_purpose", "education", "prototyping"]
-    educational_rating: "excellent"
 
   p2_ec_32mb:
     part_number: "P2-EC32MB"
@@ -56,13 +54,7 @@ edge_modules:
     psram_pins: "P40-P57 are dedicated to the on-module RAM and do not reach the edge connector"
     form_factor: "Edge connector module, double-sided 80-way 0.05 in (1.27 mm) edge slot"
     carrier_compatibility: ["standard_breakout", "mini_breakout", "breadboard_carrier"]
-    cost_tier: "premium"
     primary_applications: ["advanced_projects", "large_programs", "data_logging"]
-    educational_rating: "good"
-  corrections_applied_2026_08_25: >-
-    Both modules shipped dimensions "27x40mm" (the guides say 37 x 51.7 mm) and
-    io_pins_total 64 for the P2-EC32MB (only 46 reach the edge connector).
-    Corrected from the guides above.
 
 development_boards:
   source: >-
@@ -87,9 +79,7 @@ development_boards:
     addon_headers: "eight I/O Pin Breakout Edge Headers, each taking a 2x6 pass-through accessory board; together they cover all 64 I/O pins in 8 groups of 8"
     form_factor: "Full development board"
     expansion_options: ["addon_boards", "edge_headers", "aux_power_pads"]
-    cost_tier: "mid_range"
     primary_applications: ["full_development", "education", "prototyping", "characterization"]
-    educational_rating: "excellent"
 
   standard_breakout:
     part_number: "64029"
@@ -106,9 +96,7 @@ development_boards:
     mounting_holes: "four 3.2 mm diameter plated holes connected to GND"
     form_factor: "Edge module carrier / breakout board"
     expansion_options: ["accessory_headers", "wire_connections"]
-    cost_tier: "budget"
     primary_applications: ["custom_circuits", "embedded_systems", "production"]
-    educational_rating: "good"
 
   mini_breakout:
     part_number: "64019"
@@ -125,9 +113,7 @@ development_boards:
     prototyping: "two 0.1 in pitch 4x5 matrix prototyping sections, either side of the edge connector"
     form_factor: "Compact edge module carrier"
     expansion_options: ["accessory_headers", "jumper_wires"]
-    cost_tier: "budget"
     primary_applications: ["space_constrained", "embedded", "production"]
-    educational_rating: "fair"
 
   breadboard_carrier:
     part_number: "64020"
@@ -145,17 +131,7 @@ development_boards:
     servo_ports: "eight 5V servo/sensor ports with series resistors for compatibility with the 3.3 V P2 I/Os"
     form_factor: "Breadboard carrier"
     expansion_options: ["breadboard", "accessory_headers", "servo_ports", "jumper_wires"]
-    cost_tier: "budget"
     primary_applications: ["education", "rapid_prototyping", "learning"]
-    educational_rating: "excellent"
-  corrections_applied_2026_08_25: >-
-    Removed and corrected against the sources above: the eval board's fabricated
-    "USB-C programming", "Two 2x6 headers", "127x89mm", "16MB (with P2-EC)" and
-    part number "64000-ES"; and the three carriers' fabricated part
-    numbers P2-EVAL-STD-BREAKOUT / P2-EVAL-MINI-BREAKOUT /
-    P2-EVAL-BREADBOARD-CARRIER, their wrong dimensions, the mini breakout's
-    "3.3V input only" and "All 64 pins on edge castellations", and the
-    "crystal_frequency: 20MHz" attributed to carriers that carry no crystal.
 
 addon_boards:
   source: >-
@@ -307,7 +283,7 @@ feature_matrix:
       
   authored_here_note: >-
     educational_progression and application_domains below are guidance authored
-    in this knowledge base, not statements from any ingested document.
+    in this knowledge base, not statements from any Parallax document.
 
   educational_progression:
     beginner_path: ["breadboard_carrier", "control_board", "mini_prototyping"]
@@ -325,21 +301,18 @@ feature_matrix:
 selection_criteria:
   source: >-
     The part numbers are from P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, cover, p.1.
-    The recommendations, cost tiers and rationales are authored in this knowledge
-    base and have NO upstream source: treat them as guidance, not as documented fact.
+    The recommendations and rationales are authored in this knowledge base and
+    have no upstream source.
   by_experience_level:
     beginner:
       recommended: ["P2 Eval Board + Control Board"]
       rationale: "Complete development environment with simple I/O"
-      cost: "Mid-range investment"
     intermediate:
       recommended: ["Standard Breakout + selected add-ons"]
       rationale: "More flexibility, custom circuit integration"
-      cost: "Budget-conscious with expansion options"
     advanced:
       recommended: ["Mini Breakout or custom carrier"]
       rationale: "Maximum flexibility, production-ready form factors"
-      cost: "Minimal base cost, custom expansion"
       
   by_application_type:
     learning_embedded_systems:
@@ -358,10 +331,10 @@ selection_criteria:
       hardware: "P2 Eval Board"
       addons: ["64006B (USB Host)", "64006F (USB Device)"]
       advantages: "Complete USB ecosystem testing"
-    cost_sensitive_projects:
+    standard_breakout_projects:
       hardware: "P2 Edge Standard Breakout"
       edge_module: "P2-EC standard"
-      advantages: "Minimum cost for full P2 capability"
+      advantages: "All 64 pins at accessory headers; the P2-EC module carries the full P2 feature set"
 
 compatibility_matrix:
   edge_module_carriers:
@@ -404,23 +377,19 @@ compatibility_matrix:
     education_starter:
       main: "P2 Eval Board"
       addons: ["64006A Control", "64006E Prototyping"]
-      cost_tier: "mid_range"
     multimedia_developer:
       main: "P2 Eval Board"
       addons: ["64006H A/V Breakout", "64006C LED Matrix"]
-      cost_tier: "premium"
     embedded_prototype:
       main: "P2 Edge Standard Breakout"
       module: "P2-EC standard"
-      cost_tier: "budget"
     production_ready:
       main: "P2 Edge Mini Breakout"
       module: "P2-EC (size dependent)"
-      cost_tier: "minimal"
 
 summary_recommendations:
   first_time_users: "P2 Eval Board with Control Board add-on - provides complete development environment with simple I/O for learning"
-  budget_conscious: "P2 Edge Standard Breakout with P2-EC - minimal cost for full P2 capability"
+  general_breakout: "P2 Edge Standard Breakout with P2-EC - all 64 pins at accessory headers with the full P2 feature set"
   space_critical: "P2 Edge Mini Breakout with P2-EC - smallest footprint while maintaining full functionality"
   multimedia_focus: "P2 Eval Board with A/V Breakout - comprehensive audio/video development platform"
   production_transition: "Start with Eval Board for development, transition to appropriate breakout for production"

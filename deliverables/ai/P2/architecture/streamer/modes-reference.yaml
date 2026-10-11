@@ -21,7 +21,7 @@ encoding:
   config_field: "D[19:16]"
 
   # How to read the d_19_16 column. Every symbol below is one BIT of D[19:16],
-  # written MSB-first, exactly as the Silicon Doc prints it.
+  # written MSB-first, exactly as the Propeller 2 Documentation v35 prints it.
   field_notation:
     "0 / 1": "a FIXED bit. The mode template sets it; you do not."
     "p": >-
@@ -31,8 +31,7 @@ encoding:
       unaligned base pin silently selects a DIFFERENT MODE rather than a different
       pin: the stray low bits have nowhere to go and carry up into D[22:20].
     "a": >-
-      the ALTERNATE-BIT-ORDER flag, D[16] (Silicon Doc
-      "Some of
+      the ALTERNATE-BIT-ORDER flag, D[16] ("Some of
       these modes have the %a bit in D[16] to reorder the data sequence within the
       individual bytes to top-first when %a = 1"). It is NOT a pin
       bit. Writing a 4th p where an `a` belongs is a specific error.
@@ -56,6 +55,7 @@ encoding:
     The defect is invisible in testing -- the capture "works", the buffer fills, and
     the data is simply the wrong shape.
   source: >-
+    Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (the %a bit in D[16]).
     EF-065 and EF-059, both real P2, 2026-08-20 and 2026-08-14.
     field_notation: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB RAM, FAST SEQUENTIAL FIFO INTERFACE (immediate, RDFAST, WRFAST).
     The "a" bit: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER.

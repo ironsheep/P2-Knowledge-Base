@@ -1,7 +1,7 @@
 # P2 Architecture Mental Model - Agent Orientation Guide
 # Purpose: Concise, definitive architectural overview for AI agents generating P2 code
 # Priority: PRE-READ - Fetch this BEFORE writing any P2 code
-# Source: Silicon Doc v35, P2 Datasheet, verified YAML knowledge base
+# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01
 
 concept: p2_architecture_mental_model
 title: "P2 Architecture Mental Model for Code-Generating Agents"

@@ -53,6 +53,7 @@ related:
 - ALTD
 - ALTS
 - ALTR
+- architecture/silicon_errata.yaml
 examples:
 - code: "ALTI         ptrs,#%111_111                          'set next D and S fields,\
     \ increment ptrs[17:9] and ptrs[8:0]\n     ADD          0,0                  \

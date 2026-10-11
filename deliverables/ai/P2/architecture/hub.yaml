@@ -1,5 +1,5 @@
 # Hub - Central Shared Memory and Resources
-# Source: Silicon Doc v35, P2 Datasheet
+# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01
 
 component: HUB
 category: shared_memory
@@ -61,11 +61,11 @@ egg_beater_architecture:
     access_order: "COG 0→1→2→3→4→5→6→7→0..."
     
   slicing:
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), THE COG -to- HUB RAM INTERFACE"
     concept: |
       Hub RAM is divided into 8 slices for parallel access (one 32-bit-wide RAM per cog).
       A slice holds LONGS, not bytes: "Each RAM slice holds every single/2nd/4th/8th/16th
-      (depending on number of cogs) set of 4 bytes in the composite hub RAM" (Silicon Doc,
-      THE COG -to- HUB RAM INTERFACE). On the 8-cog P2X8C4M64P, slice = (address >> 2) & 7,
+      (depending on number of cogs) set of 4 bytes in the composite hub RAM". On the 8-cog P2X8C4M64P, slice = (address >> 2) & 7,
       i.e. hub address bits [4:2]; the four bytes of one long share one slice.
       All 8 slices can be accessed simultaneously by different COGs.
 

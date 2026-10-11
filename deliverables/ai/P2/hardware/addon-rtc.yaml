@@ -98,8 +98,7 @@ pin_mode_tip:
     1.5 kOhm, 15 kOhm, 150 kOhm, 1 mA, 100 uA, 10 uA and float. Use the nearest
     rung the bus timing tolerates (P_HIGH_1K5 or P_HIGH_15K), again with DIR HIGH,
     or an external pull-up. GAP: the #64013 guide does not say whether the RTC
-    board carries its own SDA/SCL pull-ups, and no ingested source states it - the
-    board schematic would settle it.
+    board carries its own SDA/SCL pull-ups - the board schematic would settle it.
 
 board_interface:
   source: "P2 RTC Add-on (#64013) v1.0 11/29/2022, Features, p.1; Key Specifications (Supply voltage +3.3 VDC; Control interface I2C bus (100, 400, 1000 kHz)), p.2"
@@ -108,8 +107,7 @@ board_interface:
   signal_levels: "3.3 V"
   board_unknown: >-
     UNKNOWN today: whether the #64013 board carries its own SDA/SCL pull-ups, and
-    which I2C speed a given P2 program should pick. The board guide states neither
-    and no other ingested document does.
+    which I2C speed a given P2 program should pick. The board guide states neither.
 
 # === RTC CHIP FACTS (the PCF8523 itself - not the board) ===
 # Facts about the chip only, each from the chip maker's own datasheet.

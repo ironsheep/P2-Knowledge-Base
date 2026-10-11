@@ -1,5 +1,5 @@
 # COG - Symmetric 32-bit Processor Core
-# Source: Silicon Doc v35, P2 Datasheet
+# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01
 
 component: COG
 category: processor
@@ -12,10 +12,11 @@ architecture:
   address_width: 20
   pipeline_stages: 5
   pipeline_type: "In-order scalar"
-  execution_time: "2 clocks for typical ALU ops when pipeline full (Silicon Doc v35: '2-clock execution for all math and logic instructions')"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COGS"
+  execution_time: "2 clocks for typical ALU ops when pipeline full ('2-clock execution for all math and logic instructions')"
   branch_instruction_time: "4 clocks (per JMP/CALL/RET per-instruction YAMLs)"
-  post_branch_first_instruction: "At least 4 clocks (Silicon Doc v35 verbatim: 'Branch instructions cause the pipeline to be flushed, so the first instruction following the branch will take at least four clock cycles'). This is a separate fact from the branch instruction time."
-  conditionally_canceled_instruction: "Still 2 clocks (Silicon Doc v35: 'Any instruction that is conditionally canceled will still move through the pipeline without stalling or executing, but taking two clock cycles')"
+  post_branch_first_instruction: "At least 4 clocks ('Branch instructions cause the pipeline to be flushed, so the first instruction following the branch will take at least four clock cycles'). This is a separate fact from the branch instruction time."
+  conditionally_canceled_instruction: "Still 2 clocks ('Any instruction that is conditionally canceled will still move through the pipeline without stalling or executing, but taking two clock cycles')"
 
 memory:
   cog_ram:
@@ -125,8 +126,9 @@ execution_modes:
     instruction_fetch: "32-bit from hub via the (cogs+11)=19-stage prefetch FIFO"
     pc_increment: 4
     timing_sequential: "2 clocks per instruction (FIFO streaming — same as cogexec)"
-    timing_branch: "Minimum 13 clocks (+1 if not long-aligned) per Silicon Doc v35 verbatim"
-    fifo_depth: "(cogs+11) = 19 stages on 8-cog P2 (Silicon Doc verbatim)"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION (pc_range, timing_sequential, timing_branch); THE COG -to- HUB RAM INTERFACE (fifo_depth, 'The FIFO contains (cogs+11) stages')"
+    timing_branch: "Minimum 13 clocks (+1 if not long-aligned)"
+    fifo_depth: "(cogs+11) = 19 stages on 8-cog P2"
 
 interrupts:
   levels:
@@ -139,8 +141,9 @@ interrupts:
     events: "Any of 16 hardware events"
     software: "TRGINTx instructions"
     
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INTERRUPTS"
   dispatch_mechanism: |
-    Silicon Doc v35 verbatim: "Interrupt branches are realized, internally,
+    Interrupt dispatch mechanism: "Interrupt branches are realized, internally,
     by inserting a 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline
     while holding the program counter at its current value, so that the
     interrupt later returns to the address saved in IRETx."
@@ -159,7 +162,7 @@ interrupts:
     hubexec_minimum: "~26 clocks (13 entry + 13 exit), excluding the ISR body"
   
   deferral_conditions:
-    description: "Silicon Doc v35 verbatim list — the interrupt branch is held off while any of these are in progress"
+    description: "The interrupt branch is held off while any of these are in progress"
     conditions:
       - "ALTxx / CRCNIB / SCA / SCAS / GETCT+WC / GETXACC / SETQ / SETQ2 / XORO32 / XBYTE must not be executing"
       - "AUGS must not be executing or waiting for an S/# instruction"
@@ -235,14 +238,15 @@ performance:
   parallel: "8 COGs run in parallel, each at that rate"
   
   instruction_timing:
-    alu_ops: "2 clocks (typical math/logic; Silicon Doc verbatim)"
-    cog_branches: "4 clocks for the branch instruction (JMP/CALL/RET per-instruction YAMLs); first instruction after the branch takes 4+ clocks (Silicon Doc verbatim pipeline flush)"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COGS, HUB EXECUTION, and CORDIC Solver"
+    alu_ops: "2 clocks (typical math/logic)"
+    cog_branches: "4 clocks for the branch instruction (JMP/CALL/RET per-instruction YAMLs); first instruction after the branch takes 4+ clocks (pipeline flush)"
     hub_reads: "9-16 clocks (cog) / 9-26 clocks (hub-exec) for RDLONG/RDWORD/RDBYTE — hub-window dependent"
     hub_writes: "3-10 clocks (cog) / 3-20 clocks (hub-exec) for WRLONG/WRWORD/WRBYTE — hub-window dependent"
     hubexec_sequential: "2 clocks per instruction (FIFO streaming — same as cogexec)"
-    hubexec_branch: "Minimum 13 clocks (+1 if not long-aligned) per Silicon Doc verbatim"
-    cordic_result_latency: "55 clocks (Silicon Doc verbatim); 8-clock issue interval per cog"
-    cordic_getqx_getqy_when_empty: "2 clocks (Silicon Doc verbatim)"
+    hubexec_branch: "Minimum 13 clocks (+1 if not long-aligned)"
+    cordic_result_latency: "55 clocks; 8-clock issue interval per cog"
+    cordic_getqx_getqy_when_empty: "2 clocks"
 
 programming_model:
   registers_as_memory: "All 496 registers are general purpose"

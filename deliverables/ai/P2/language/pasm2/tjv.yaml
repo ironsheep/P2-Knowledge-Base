@@ -31,7 +31,7 @@ timing:
   cycles: "2 not-taken / 4 taken (cog); 2 not-taken / 13-20 taken (hub-exec)"
   type: variable
   source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TJV (clocks), p.138"
-  notes: "Branch when V flag set; hub-exec branch refill is minimum 13 clocks per Silicon Doc"
+  notes: "Branch when V flag set; hub-exec branch refill is minimum 13 clocks"
 encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
 - bits: EEEE 1011110 00I DDDDDDDDD SSSSSSSSS
   write: PC   1
@@ -40,7 +40,7 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   clocks: 2 or 4 / 2 or 13–20
 encoding_notes:
 - PC is written only when Dest has overﬂowed.
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TJV, p.138"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TJV, p.138; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION (13-clock minimum hub-exec branch)"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_dsj

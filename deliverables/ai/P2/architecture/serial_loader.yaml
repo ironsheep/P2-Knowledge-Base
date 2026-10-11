@@ -1,5 +1,5 @@
 # Serial Loader - Auto-baud ASCII Boot Protocol
-# Source: Silicon Doc v35, P2 Datasheet
+# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01
 
 component: Serial_Loader
 category: boot_system

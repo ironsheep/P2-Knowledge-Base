@@ -33,8 +33,7 @@ summary: |
   supply reference, and the pin) through the same path and takes a ratio; supply and
   temperature drift divide out, making the result absolute rather than relative. A
   techniques-catalog: one shared base build plus recipes that trade resolution, channel
-  count, and sample rate. The technique is Chip Gracey's, from his 2023-2024 Parallax Forums
-  discussion "Improved ADC Pin Techniques".
+  count, and sample rate.
 audience: [human, agent]
 
 # ---- CONSUMPTION TIER: the composition recipe (LINKS to existing KB primitives) ----

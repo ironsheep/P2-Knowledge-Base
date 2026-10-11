@@ -25,7 +25,7 @@ key_facts_summary:
     V50+ adds an ORGH...END inline option where code stays in hub RAM and
     runs as hub-exec (no cog-RAM copy of code); the 16-long variable buffer
     at $1E0..$1EF behaves identically. See language/spin2/assembly-directives/orgh.yaml.
-  variable_limit: "16 long variables (params + result + locals only); copied to cog $1E0..$1EF. Per Spin2 Language Documentation v55 (IN-LINE PASM CODE) verbatim."
+  variable_limit: "16 long variables (params + result + locals only); copied to cog $1E0..$1EF."
   code_size: "For ORG..END: inline code area is $000..$11F (288 longs) when no multitasking is in use, plus LUT $000..$00F. For ORGH..END (V50+): up to $FFFF longs in hub RAM. Code is buffered separately from the 16-long variable area in either case."
   multitasking_caveat: |
     $100..$11F is the multitasking taskptr table, building DOWNWARD from $11F.
@@ -33,7 +33,7 @@ key_facts_summary:
     $100..$11F free for user code. This range overlaps the ORG..END inline
     code area, so multitasking and large inline-PASM blocks compete for the
     same space. Source: Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: task pointers build downward in the last 32 free cog registers, from $11F..$100).
-  label_rule: "Inline PASM labels are local to the ORG..END block; a plain label (lp), a '.'-prefixed (.lp) or a ':'-prefixed (:lp) label all work"
+  label_rule: "Inline PASM labels are local to the ORG..END block; a plain label (lp) or a '.'-prefixed local label (.lp) works"
 
 canonical_source: language/spin2/constructs/inline_pasm.yaml
 

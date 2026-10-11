@@ -8,9 +8,6 @@ description: >-
 
   MUXQ must be preceded by SETQ to function properly since the Q value's high
   bits identify the bits to target in Src and Dest.
-
-  Critical for parallel bit operations, especially RGB LED driving where
-  multiple data lines need simultaneous updates.
 result: >-
   Bits from Src corresponding to high bits in Q are copied to the same bit
   positions in Dest; other Dest bits are unchanged.
@@ -69,7 +66,7 @@ examples:
             setq    mask             ' Load mask
             muxq    dest, source     ' dest = (dest & !mask) | (source & mask)
 
-    ' This is atomic and faster than:
+    ' The same result as:
     ' andn dest, mask
     ' and  temp, source, mask
     ' or   dest, temp
@@ -90,5 +87,3 @@ related:
 - MUXNZ
 notes:
 - Q register must be set before MUXQ
-- Atomic operation for parallel bit updates
-- More efficient than AND/OR sequences

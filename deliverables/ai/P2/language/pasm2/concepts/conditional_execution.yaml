@@ -1,5 +1,5 @@
 # PASM2 Conditional Execution System
-# Source: Silicon Doc v35, Spin2 v51 Manual
+# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon); Parallax Propeller 2 Spin2 Language Documentation v51
 # Critical for: Efficient branchless code and conditional operations
 
 concept: "Conditional Execution"

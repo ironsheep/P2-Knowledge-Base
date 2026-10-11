@@ -1,0 +1,8 @@
+{Spin2_v45}
+' CP-011 control: the same program under {Spin2_v45} -- expected to compile.
+
+VAR long a[4], b[4], r
+
+PUB go()
+  BYTESWAP(@a, @b, 4)
+  r := LONGCOMP(@a, @b, 2)

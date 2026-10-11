@@ -1,0 +1,5 @@
+' CP-010 control: the same local list with `field` renamed `fld` -- expected to compile.
+
+PUB format(p_str, p_args) | idx, c, asc, fld, digits
+
+  idx := p_str + p_args

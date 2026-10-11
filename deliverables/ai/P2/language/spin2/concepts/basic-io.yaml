@@ -174,9 +174,9 @@ internal_pull_resistors:
     Yes -- the P2 can hold a line weakly high or weakly low, and the constants that
     do it are P_HIGH_15K and P_LOW_15K (the whole ladder is below). In your circuit
     this behaves as a pull-up or pull-down behaves: it holds the net, and a stronger
-    external driver overpowers it. The Silicon Doc uses that same vocabulary for
-    these same ladder rungs -- USB mode is described as "two 15k pull-downs for
-    'host' or a 1.5k pull-up and a float for 'device'".
+    external driver overpowers it. The same vocabulary is used for these same
+    ladder rungs -- USB mode is described as "two 15k pull-downs for 'host' or a
+    1.5k pull-up and a float for 'device'".
 
     ONE THING DIFFERS FROM THE PULL-UP YOU ARE USED TO, and it is the thing that
     breaks code: see the_dir_rule below. The pull is a property of DRIVING, so the

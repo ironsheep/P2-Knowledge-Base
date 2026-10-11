@@ -29,9 +29,9 @@ precedence:
   level: 8
   associates: "left"
   same_level: "+, -, +., -."
-  note: "The v55 operator table has no POW row. This level was established by compiling mixed expressions with pnut-ts: POW groups with + - +. -. (2.0 POW 3.0 +. 1.0 is 9.0 and 1.0 +. 3.0 POW 2.0 is 16.0, both left to right), *. binds tighter (2.0 *. 3.0 POW 2.0 is about 36.0), and 2.0 POW 3.0 POW 2.0 is 64.0, so it associates left."
+  note: "POW groups with + - +. -. (2.0 POW 3.0 +. 1.0 is 9.0 and 1.0 +. 3.0 POW 2.0 is 16.0, both left to right), *. binds tighter (2.0 *. 3.0 POW 2.0 is about 36.0), and 2.0 POW 3.0 POW 2.0 is 64.0, so it associates left."
 
-source: "Parallax Propeller 2 Spin2 Language Documentation v55, New Keywords Introduced by New Versions; CP-006 (precedence)"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, New Keywords Introduced by New Versions; precedence level: CP-006 (the v55 operator table has no POW row; the level is established by compiling mixed expressions); 3.0 POW 4.0 = 81.0: Parallax Propeller 2 Spin2 Language Documentation v55, Floating-point operators (fpx POW fpy returns fpx to the power of fpy)"
 aliases:
   - "POW"
   - "power"
@@ -81,7 +81,7 @@ notes:
   - "Computed as EXP2(exponent * LOG2(base)) internally"
   - "Left-associative: a POW b POW c = (a POW b) POW c"
   - "Same precedence as + and - operators (priority 8)"
-  - "v55 gives 3.0 POW 4.0 = 81.0"
+  - "3.0 POW 4.0 = 81.0"
 
 related:
   - language/spin2/methods/log2.yaml

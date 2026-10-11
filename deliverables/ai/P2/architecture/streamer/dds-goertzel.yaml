@@ -38,11 +38,11 @@ adc_input_pins:
     The ADC pins feeding Goertzel are RAW delta-sigma bit streams: configure them for ADC
     mode (a P_ADC_* constant) with smart-pin mode field %00000, and DO NOT set DIR.
     A smart pin left enabled on these pins produces no Goertzel accumulation.
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel (verbatim: pins 'should be configured for ADC mode, so that their IN signals are raw delta-sigma bit streams, with no smart pin mode selected'); source_tension: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER (introduction); bitstream_summation: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel (states: pins 'should be configured for ADC mode, so that their IN signals are raw delta-sigma bit streams, with no smart pin mode selected'); source_tension: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER (introduction); bitstream_summation: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel"
   source_tension: |
-    The Silicon Doc's STREAMER intro says Goertzel works "from smart
+    The STREAMER introduction says Goertzel works "from smart
     pins configured as ADC's". That wording is loose and MISLEADS: the DDS/Goertzel section
-    above is the specific, authoritative statement, and the Silicon Doc's own worked example
+    above is the specific, authoritative statement, and the worked example
     follows it — `wrpin adcmode,#adcpin` with mode field %00000 and no DIR on the ADC pin
     (only the DAC pin gets `dirh`). Configure raw.
 
@@ -62,7 +62,7 @@ adc_input_pins:
       bits -- "%001_ATTTTTTTT", "%010_AATTTTTTT" and so on. The %A bits BOUND the
       read to a sub-region of the LUT, so more than one waveform can be resident at
       once; the %T bits are ADDED to the topmost NCO bits, which shifts or modulates
-      the phase of playback. Silicon Doc, verbatim:
+      the phase of playback:
       "On each clock, the lookup RAM is read at the 9-bit location bound by the %A
       bits, with the lower bits being the sum of the %T bits and the topmost NCO
       bits. This allows you to set bounded areas within the LUT and to shift or
@@ -77,7 +77,7 @@ adc_input_pins:
       modulate the phase of playback'). field_8_0: Parallax Propeller 2 Documentation v35
       (Rev B/C silicon), STREAMER, DDS/Goertzel."
   bitstream_summation: "IN '0' counts as -1, '1' as +1. For two or four summed channels the sum is always even and is shifted right one bit."
-  gain_choice: "Gain is a property of the COUPLING, not of this mode. A high-gain constant such as P_ADC_100X saturates on a directly-coupled (wired) signal and reads a constant; the shipped Silicon Doc demo can use high gain because it couples capacitively through a touch pad."
+  gain_choice: "Gain is a property of the COUPLING, not of this mode. A high-gain constant such as P_ADC_100X saturates on a directly-coupled (wired) signal and reads a constant; the documentation's demo can use high gain because it couples capacitively through a touch pad."
 
 # Operation (every clock cycle)
 operation:
@@ -121,7 +121,7 @@ lut_setup:
   lut_window:
     description: >-
       S[11:9] selects the loop size; the remaining S[8:0] bits split into %A region
-      bounds and %T phase offset. Silicon Doc.
+      bounds and %T phase offset.
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel (lut_window description)"
     settings:
       - {s_11_0: "%000_TTTTTTTTT", loop_size: 512, nco_bits: "30..22", lut_range: "%000000000..%111111111"}
@@ -175,7 +175,7 @@ reading_results:
        running total and clears nothing; a new streamer command does not reset it.
     4. Each Goertzel burst's last term is added on the first clock of the NEXT
        Goertzel burst, so a reading after a burst of N clocks holds N-1 terms.
-    (The Silicon Doc describes capture-and-clear into holding registers on every
+    (The documentation describes capture-and-clear into holding registers on every
     GETXACC; Rev C silicon clears only during a Goertzel burst -- P2 errata E4 and
     E5, in language/pasm2/getxacc.yaml silicon_errata.)
 
@@ -186,7 +186,7 @@ reading_results:
     Read idle before the burst and after it and subtract; deliver the held last
     term first with a zero-term burst (the helper routine in
     language/pasm2/getxacc.yaml, SINC1). Inside a running Goertzel burst a read does clear, so the XCONT-loop
-    form in the Silicon Doc demo reads once per command and subtracts a baseline
+    form in the documentation's demo reads once per command and subtracts a baseline
     established on the first pass.
   source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel (documented behaviour); Rev C behaviour: EF-069 (item 3), EF-070 (item 4), EF-076 (the helper routine)"
 

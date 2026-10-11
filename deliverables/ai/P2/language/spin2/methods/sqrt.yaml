@@ -10,11 +10,12 @@ parameters:
     description: "Unsigned integer value (0 to 2³²-1)"
 returns:
   type: "long"
-  description: "Integer square root"
+  description: "Integer square root (0 to 65535)"
 examples:
   - code: |
       x := SQRT(100)     ' Result: 10
       y := SQRT(65536)   ' Result: 256
+      z := SQRT(2)       ' Result: 1 (truncated)
     description: "Basic square root operations"
   - code: |
       ' Distance calculation (Pythagorean)
@@ -27,6 +28,7 @@ examples:
 notes:
   - "Returns the truncated (floor) integer root, never rounded to nearest: SQRT(8) = 2, SQRT(99) = 9"
   - "Input treated as unsigned 32-bit"
+  - "Maximum result is 65535 (sqrt of $FFFF_FFFF)"
   - "No floating-point variant; use FSQRT() for floats"
   - "Priority 2 operator (unary)"
 related:

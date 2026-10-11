@@ -143,11 +143,12 @@ configuration_constants:
   adc_input_modes:
     # GIO / VIO / FLOAT are NOT input ranges - they select an INTERNAL reference as the
     # ADC's input. Only the 1x..100x entries are pin-input gain ranges.
-    # Silicon Doc - "Delta-sigma ADC with 5 ranges, 2 sources,
-    # and VIO/GIO calibration." Mode-name glosses: Spin2 v55.
+    # Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES -
+    # "Delta-sigma ADC with 5 ranges, 2 sources, and VIO/GIO calibration."
+    # Mode-name glosses: Spin2 v55.
     - "P_ADC_GIO - GIO calibration reference to the ADC (a calibration SOURCE, not an input range)"
     - "P_ADC_VIO - VIO calibration reference to the ADC (a calibration SOURCE, not an input range)"
-    - "P_ADC_FLOAT - ADC input floated (Rev C silicon); used to determine the ADC's floating bias point, not an input range (Silicon Doc)"
+    - "P_ADC_FLOAT - ADC input floated (Rev C silicon); used to determine the ADC's floating bias point, not an input range"
     - "P_ADC_1X - 1x gain"
     - "P_ADC_3X - 3.16x gain (sqrt-10-spaced ladder)"
     - "P_ADC_10X - 10x gain"
@@ -163,6 +164,7 @@ configuration_constants:
 
   sources:
     - "adc_input_modes (5 ranges, 2 sources, VIO/GIO calibration): Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (smart I/O pin functions)"
+    - "adc_input_modes (P_ADC_FLOAT floats the ADC input on Rev C; useful for determining the floating bias point): Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Design Status (2020_02_24)"
     - "adc_input_modes (mode-name glosses): Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Smart Pin Configuration"
     - "P_ADC_FLOAT: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Design Status (2020_02_24)"
 

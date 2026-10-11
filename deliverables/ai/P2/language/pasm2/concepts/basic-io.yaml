@@ -230,14 +230,14 @@ pin_span_setq_override:
     no_setq: "Use instruction's embedded ADDPINS or constant field normally"
 
 internal_pull_resistors:
-  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Mode Legend, p.24; FEATURES, p.2. THAT IS THE AUTHORITY HERE -- documentary, not empirical. EF-063 and EF-064 (real P2, 2026-08-20) corroborate that the mechanism behaves as described -- a 15 kOhm drive with DIR high holds a net, and anything stronger overpowers it -- but they establish it INCIDENTALLY, as the rig apparatus certifying other measurements: EF-063 is a streamer-fed DAC %TT finding and EF-064 a streamer pin-placement finding. Neither is a pull-up/drive-strength finding, and the ledger contains none. Silicon Doc USB mode quote ('two 15k pull-downs' ...): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES. Datasheet Pin Mode Legend DIR quote: the same datasheet, Pin Mode Legend, p.24."
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Mode Legend, p.24; FEATURES, p.2. THAT IS THE AUTHORITY HERE -- documentary, not empirical. EF-063 and EF-064 (real P2, 2026-08-20) corroborate that the mechanism behaves as described -- a 15 kOhm drive with DIR high holds a net, and anything stronger overpowers it -- but they establish it INCIDENTALLY, as the rig apparatus certifying other measurements: EF-063 is a streamer-fed DAC %TT finding and EF-064 a streamer pin-placement finding. Neither is a pull-up/drive-strength finding, and the ledger contains none. USB mode quote ('two 15k pull-downs' ...): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES. Datasheet Pin Mode Legend DIR quote: the same datasheet, Pin Mode Legend, p.24."
   yes_you_can_pull_a_line_high_or_low: |
     Yes -- the P2 can hold a line weakly high or weakly low, and the constants that
     do it are P_HIGH_15K and P_LOW_15K (the whole ladder is below). In your circuit
     this behaves as a pull-up or pull-down behaves: it holds the net, and a stronger
-    external driver overpowers it. The Silicon Doc uses that same vocabulary for
-    these same ladder rungs -- USB mode is described as "two 15k pull-downs for
-    'host' or a 1.5k pull-up and a float for 'device'".
+    external driver overpowers it. The same vocabulary describes these same
+    ladder rungs in USB mode: "two 15k pull-downs for 'host' or a 1.5k pull-up
+    and a float for 'device'".
 
     ONE THING DIFFERS FROM THE PULL-UP YOU ARE USED TO, and it is the thing that
     breaks code: see the_dir_rule below. The pull is a property of DRIVING, so the
@@ -292,7 +292,8 @@ smart_pin_to_basic_io_transition:
       DRVH  #16           ' Now use as normal I/O
       
   safe_reconfiguration:
-    rule: "Configure a smart pin while its DIR bit is low, holding it in reset (silicon doc); WRPIN #0 is the exception"
+    rule: "Configure a smart pin while its DIR bit is low, holding it in reset; WRPIN #0 is the exception"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS ('A smart pin should be configured while its DIR bit is low, holding it in reset')"
     sequence: |
       DIRL  pin           ' 1. DIR=0 (hold in reset)
       WRPIN mode, pin     ' 2. Configure mode

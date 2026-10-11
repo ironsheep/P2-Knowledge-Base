@@ -12,7 +12,7 @@ description: |
   2. HUBEXEC INSTRUCTION-PREFETCH ROLE: when the cog is in hub-execute mode,
      the FIFO is dedicated to prefetching instructions from hub RAM, allowing
      sequential hubexec code to stream at 2 clocks/instruction (matching cogexec).
-     In this role the Silicon Doc states the FIFO contains '(cogs+11) stages' —
+     In this role the FIFO contains '(cogs+11) stages' —
      19 stages on a P2 with 8 cogs.
   
   These two roles are mutually exclusive: while a cog is in hub-execute mode,
@@ -29,12 +29,12 @@ description: |
   - 19-stage ((cogs+11)) prefetch buffer
   - Refills continuously while fewer than (cogs+7) = 15 stages are filled
   - Sustains 2 clocks/instruction throughput on sequential code
-  - Branch refill costs minimum 13 clocks (Silicon Doc verbatim, +1 if target not long-aligned)
+  - Branch refill costs minimum 13 clocks (+1 if target not long-aligned)
 
 architecture:
   per_cog: true
   block_size: 64  # bytes — streamer/software-transfer block granularity
-  hubexec_prefetch_depth_stages: 19  # (cogs+11) per Silicon Doc v35
+  hubexec_prefetch_depth_stages: 19  # (cogs+11)
   hubexec_refill_threshold_stages: 15  # (cogs+7); FIFO loads while fewer than this filled
   modes:
     - read: "RDFAST initiates reading from Hub to COG (streamer/software role; cogexec only)"
@@ -239,7 +239,6 @@ limitations:
   - "Minimum transfer granularity is 64-byte blocks (streamer/software role)"
   - "Hub-execute mode dedicates the FIFO to instruction prefetch"
   - "In hubexec, these FIFO/streamer instructions are FORBIDDEN: RDFAST, WRFAST, FBLOCK, RFBYTE, RFWORD, RFLONG, RFVAR, RFVARS, WFBYTE, WFWORD, WFLONG, XINIT, XZERO, XCONT (when streamer engages FIFO)"
-  - "Source: Silicon Doc v35 HUB EXECUTION section verbatim"
 
 related:
   - streamer: "Streamer also uses hub data transfers"
@@ -259,5 +258,5 @@ hubexec_fifo_facts:
   - "Branching to a hub address takes a minimum of 13 clock cycles. If the instruction being branched to is not long-aligned, one additional clock cycle is required."
   - "While in hub execution mode, the FIFO cannot be used for anything else."
 sources:
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB EXECUTION: the hub-execution FIFO facts in hubexec_fifo_facts, verbatim"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB EXECUTION (branch minimum, FIFO unavailable for other use) and THE COG -to- HUB RAM INTERFACE ((cogs+11) stages, load threshold): the hub-execution FIFO facts in hubexec_fifo_facts"
   - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.148-159: one Clocks value for Cog & LUT and Hub execution on each sequential instruction (the 2 clocks/instruction hubexec figure)"

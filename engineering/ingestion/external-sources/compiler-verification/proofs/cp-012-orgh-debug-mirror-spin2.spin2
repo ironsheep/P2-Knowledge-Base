@@ -1,0 +1,5 @@
+PUB go()
+
+DAT
+        ORGH    $FC000, $FC800
+lbl     NOP

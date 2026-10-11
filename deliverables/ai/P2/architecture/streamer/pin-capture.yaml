@@ -76,14 +76,14 @@ why_direct_capture_fails:
   headline: "On a pin running a smart-pin mode, IN is the smart pin's handshake, not
     the pin's logic level -- and the streamer's capture path reads IN."
   the_two_facts_that_collide:
-    what_the_streamer_reads: "Verbatim: \"Initially, and on each subsequent NCO
+    what_the_streamer_reads: "\"Initially, and on each subsequent NCO
       rollover, 1/2/4/8/16/32 pins are read from {INB, INA}...\" -- so the capture
       samples the cog's IN registers, not the pads."
-    what_in_carries_on_a_smart_pin: "Verbatim: \"When a mode-related event occurs in a
+    what_in_carries_on_a_smart_pin: "\"When a mode-related event occurs in a
       smart pin, it raises its IN signal to alert the cog(s) that new data is ready,
       new data can be loaded, or some process has finished.\" It is lowered by a WRPIN,
       WXPIN, WYPIN, RDPIN or AKPIN on that pin -- not by anything the wire does."
-    what_in_carries_otherwise: "Verbatim: \"The resultant 'A' will drive the IN signal
+    what_in_carries_otherwise: "\"The resultant 'A' will drive the IN signal
       in non-smart-pin modes.\" Only with %SSSSS = %00000 does IN follow the pin's
       level, and then it follows the level chosen by %AAAA and shaped by %FFF."
   what_you_would_actually_capture: "one bit per bus pin that sits low while a transfer
@@ -95,7 +95,7 @@ why_direct_capture_fails:
     not been told this rule will attribute to a clocking or alignment mistake and
     chase for a long time."
   rule_home: "architecture/smart_pins.yaml in_signal_semantics -- the rule, both
-    halves, with the verbatim source lines."
+    halves, with the quoted lines."
 
 neighbour_capture_composition:
   why_this_is_the_mechanism_and_not_a_workaround: "The %AAAA input selector exists to
@@ -164,7 +164,7 @@ parallax_worked_example:
     -- a smart pin transmitting async serial, captured by the streamer through a
     non-smart neighbour, displayed in a DEBUG LOGIC window. It is the closest thing to
     a canonical form for this composition."
-  verbatim: "\"The LOGIC display can be used to display data that was captured at high
+  parallax_text: "\"The LOGIC display can be used to display data that was captured at high
     speed. In the example below, the P2 is generating 8-N-1 serial at 333 Mbaud using a
     smart pin. This bit stream can be captured by the streamer. On every clock, the
     streamer will record the smart pin's IN signal and its output state, as read from

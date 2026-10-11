@@ -17,7 +17,7 @@ description: |
   Timer (CT), ATN, pattern match, streamer, and CORDIC events cannot be configured
   with SETSE - they have dedicated WAIT/POLL instructions.
 d_encoding:
-  title: "D[8:0] Configuration Values (Silicon Doc v35)"
+  title: "D[8:0] Configuration Values"
   lut_events:
     - encoding: "%000_00_00AA"
       description: "This cog reads LUT address %1111111AA"

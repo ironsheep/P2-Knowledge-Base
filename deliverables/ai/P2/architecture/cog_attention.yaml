@@ -307,7 +307,7 @@ performance_characteristics:
   response_latency:
     polling: "Varies with polling frequency"
     waiting: "2+ clocks (2 minimum, plus the wait for the event)"
-    interrupt: "Silicon Doc v35 does not publish a specific clock-count latency for ATN-triggered interrupt entry. Mechanism is documented (CALLD insertion into pipeline) but timing is not."
+    interrupt: "The Parallax Propeller 2 Documentation v35 does not publish a specific clock-count latency for ATN-triggered interrupt entry. Mechanism is documented (CALLD insertion into pipeline) but timing is not."
   
   bandwidth_impact: "Zero hub bandwidth consumed"
   

@@ -37,6 +37,18 @@ pin_group:
   base_pin_note: >-
     Wireless P2 PROGRAMMING requires the P56-P63 header marked with the "RES"
     logo (base_pin 56); serial-over-Wi-Fi works on any accessory header.
+  wireless_programming_placement:
+    source: "Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, 11a. I/O Pin Breakout Edge Headers (without 5V output), pp.9-10 (the P56-P63 header has the RES pin; ideal for a WiFi module); USB RES / Boot Mode Selection switch bank (USB RES off for a WiFi module on the P62/P63 edge header), p.11; I/O Pin Assignments (P62/P63 PC-USB serial link), p.15; this board's pin map: signal_map offsets +6 and +7"
+    text: >-
+      base_pin 56 is the documented placement for wireless programming: the Eval
+      Board guide calls the P56-P63 header (the one with the active-low RES pin tied
+      to the P2 RESn circuit) ideal for a WiFi module. The pins this board shares
+      there with the Eval Board's own circuits are P62/P63, which are this board's
+      DI/DO serial offsets +6/+7 and are also the PC-USB serial link, and the
+      header's RES pin. Every pin P56-P63 also drives a buffered on-board LED, and
+      P57 can be routed to the LDO enable (a user option, not connected by default);
+      the rest of the P56-P63 sharing is in p56_p63_caution. When programming wirelessly the Eval guide recommends
+      switching the USB RES feature off at the Mode Selection Switch Bank.
 
 # "WiFi module pin" = the #32420 module signal each accessory pin routes to.
 signal_map:

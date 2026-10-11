@@ -72,6 +72,7 @@ state_versus_allocation:
     field still reads the stopped cog after its lock has gone free.
 
 pattern_prerequisite:
+  source: "lock_15: Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG ('LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts to time-share the DEBUG serial TX and RX pins, as well as some RAM'; the DLY command releases LOCK[15] so other cogs may capture LOCK[15] and output their own DEBUG messages)"
   summary: >-
     Every pattern below assumes an ALLOCATED lock, and the number must come from LOCKNEW.
     LOCKTRY on an unallocated lock never succeeds - "not allocated" is one of the
@@ -343,6 +344,7 @@ debugging_tips:
   
   - tip: "lock_usage_map"
     description: "Document lock assignments in a central location"
+    source: "lock 15 comment: Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG ('LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts to time-share the DEBUG serial TX and RX pins, as well as some RAM'; the DLY command releases LOCK[15] so other cogs may capture LOCK[15] and output their own DEBUG messages)"
     example: |
       ' Lock assignments for this project (the numbers are whatever LOCKNEW returned):
       ' mailbox_lock - protects the hub mailbox
@@ -365,5 +367,6 @@ related_topics:
 sources:
     - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOCKS (Allocating Locks and Using Locks)"
     - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language (instruction encodings: LOCKNEW/LOCKRET/LOCKTRY/LOCKREL)"
+    - "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG ('LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts'; the DLY command releases LOCK[15])"
     - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Locks, pp.19-20"
     - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (lock rows), p.41"

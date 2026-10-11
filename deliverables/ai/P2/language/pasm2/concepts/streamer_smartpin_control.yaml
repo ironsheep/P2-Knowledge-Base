@@ -212,8 +212,8 @@ smart_pin_modes:
       description: "PWM for motor control (one output pin per Smart Pin)"
       complementary_note: >-
         A complementary half-bridge pair (high + low side) is NOT one Smart Pin:
-        the P2 has no single-pin dead-band mode (none of the smart modes listed in the
-        Silicon Doc SMART PIN MODES is a dead-band mode).
+        the P2 has no single-pin dead-band mode (none of the smart pin modes is
+        a dead-band mode).
         Use TWO Smart Pins -- one per side, low side inverted (P_INVERT_OUTPUT),
         enabled together -- and insert dead-time in software. Full pattern in
         architecture/smart_pin_patterns.yaml (motor_pwm_with_deadtime).
@@ -224,7 +224,7 @@ smart_pin_modes:
         if_nc   wypin   drive_u_, pin_pwm_u_l
         sub     drive_u_, dead_gap_             ' high side turns on later
         if_nc   wypin   drive_u_, pin_pwm_u_h
-      source: "OBEX 2874 (ISP BLDC Motor Control), isp_bldc_motor.spin2 (example code, not a Parallax document)"
+      source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (the list of smart pin modes); OBEX 2874 (ISP BLDC Motor Control), isp_bldc_motor.spin2 (example code, not a Parallax document)"
       
     nco_frequency:
       mode: "P_NCO_FREQ"

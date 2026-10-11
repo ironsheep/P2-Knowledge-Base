@@ -101,6 +101,8 @@ examples:
     rdlong  head_idx, head_ptr
 
     '
+related:
+- architecture/silicon_errata.yaml
 related_instructions:
 - ALTD: Modify destination field
 - ALTB: Modify bit field

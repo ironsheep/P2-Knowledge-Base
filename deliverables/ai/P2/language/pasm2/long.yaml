@@ -26,3 +26,4 @@ related:
 - WORD
 - ALIGNL
 oneliner: Declare long data in memory
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (data is packed in memory in the order declared; ALIGNL long-aligns to hub memory by emitting 1 to 3 zero bytes, if necessary)"

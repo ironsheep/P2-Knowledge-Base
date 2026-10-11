@@ -635,3 +635,130 @@ compiling program; the record decides only the between-terms placement.
 line is not run; the multi-line double-brace form is run only in the KB example, not here. One
 compiler version.
 *→ EF:* none — legality stays CP.
+
+## Symbols (continued)
+
+### CP-010 · A method local named `field` is rejected (`Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, "^", ALIGNW, or ALIGNL (m241)`); the same local list with `field` renamed compiles — so OBEX 2842's `jm_fullduplexserial.spin2`, whose `format()` declares that local, does not compile — `LEGALITY`
+*KB:* `community/obex/objects/2842.yaml`
+*Class:* legality. `FIELD` is a Spin2 language word, and the name is not free for a local. The failing
+run stops with exit status 1 at the method line; the control compiles.
+*Source:* `proofs/cp-010-local-named-field.spin2` (the local list of `jm_fullduplexserial.spin2`
+`format()`, line 403 of the object as published in OBEX 2842: `pub format(p_str, p_args) | idx, c,
+asc, field, digits`), `proofs/cp-010-local-named-fld.spin2` (the same with `fld`). The whole
+object was also compiled from the copy held in the ingestion tree and fails with the same message
+at its line 403.
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026.
+
+*Command (local named `field`):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-010-local-named-field.spin2`
+*Output (2026-10-11; exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-010-local-named-field.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-010-local-named-field.spin2:4:error:Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, "^", ALIGNW, or ALIGNL (m241)
+```
+*Command (control, `fld`):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-010-local-named-fld.spin2`
+*Output (2026-10-11; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-010-local-named-fld.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-010-local-named-fld.bin (6296 bytes)
+pnut-ts: Done
+```
+**Grounds:** the Parallax *Spin2 Language Documentation* v55 defines `FIELD` as a language
+construct, `FIELD[fieldpointer]` (FIELD POINTERS, `spin2-v55-text.txt:871-876`); it does not say
+whether the word may also be a local name. The record decides only that it may not.
+*Limits:* one local position; VAR and CON names called `field` are not run here. One compiler
+version.
+*→ EF:* none — legality stays CP.
+
+## Version gating
+
+### CP-011 · BYTESWAP and LONGCOMP do not compile under `{Spin2_v44}` (`{Spin2_v44} is no longer supported due to changes in data structures beginning in v45]`); the same program compiles under `{Spin2_v45}` — the earliest gate that enables the COMP/SWAP methods is v45, not the v44 the v55 symbol table names — `LEGALITY`
+*KB:* `language/spin2/methods/byteswap.yaml`, `language/spin2/methods/wordswap.yaml`,
+`language/spin2/methods/longswap.yaml`, `language/spin2/methods/bytecomp.yaml`,
+`language/spin2/methods/wordcomp.yaml`, `language/spin2/methods/longcomp.yaml`
+*Class:* legality. The `{Spin2_v44}` run stops with exit status 1; the message refuses the gate
+itself, not the methods, so no program can select v44. The `{Spin2_v45}` control compiles.
+*Source:* `proofs/cp-011-comp-swap-gate-v44.spin2`, `proofs/cp-011-comp-swap-gate-v45.spin2`
+(identical programs, `BYTESWAP(@a, @b, 4)` and `r := LONGCOMP(@a, @b, 2)`, differing only in the
+gate line).
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026.
+
+*Command (`{Spin2_v44}`):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-011-comp-swap-gate-v44.spin2`
+*Output (2026-10-11; exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-011-comp-swap-gate-v44.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-011-comp-swap-gate-v44.spin2:4:error:{Spin2_v44} is no longer supported due to changes in data structures beginning in v45]
+```
+*Command (`{Spin2_v45}`):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-011-comp-swap-gate-v45.spin2`
+*Output (2026-10-11; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-011-comp-swap-gate-v45.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-011-comp-swap-gate-v45.bin (6308 bytes)
+pnut-ts: Done
+```
+The error is reported at line 4 (the VAR line), the first line after the gate that the compiler parses.
+**Grounds:** the Parallax *Spin2 Language Documentation* v55, symbol table by version, row v44:
+"BYTESWAP WORDSWAP LONGSWAP BYTECOMP WORDCOMP LONGCOMP … Minimum to Enable {Spin2_v44}"
+(`spin2-v55-text.txt:146`). The document names a gate the compiler no longer accepts.
+*Limits:* BYTESWAP and LONGCOMP are run; the other four methods of the row share it and are not run
+one by one. One compiler version.
+*→ EF:* none — legality stays CP.
+
+## Assembly directives
+
+### CP-012 · ORGH limits: a limit beyond $100000 is rejected (`Hub address exceeds $100000 ceiling (m361)`); a bare ORGH address beyond the default limit is rejected at the next instruction (`Hub address exceeds limit (m372)`); `ORGH $FC000,$FC800` compiles in a Spin2+PASM program and fails in a PASM-only program (`Program requirement exceeds 512KB hub RAM by …`) — `LEGALITY`
+*KB:* `language/pasm2/orgh.yaml`
+*Class:* legality. The three failing runs stop with exit status 1; the Spin2+PASM control compiles.
+*Source:* `proofs/cp-012-orgh-limit-beyond-ceiling.spin2` (`ORGH $400, $100004` in a Spin2 program),
+`proofs/cp-012-orgh-address-beyond-limit.spin2` (`ORGH $100004`), `proofs/cp-012-orgh-debug-mirror-pasm-only.spin2`
+(a PASM-only program: `ORG`, `JMP #$`, then `ORGH $FC000, $FC800`), `proofs/cp-012-orgh-debug-mirror-spin2.spin2`
+(the same ORGH in a Spin2 program).
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026.
+
+*Command (limit beyond the ceiling):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-012-orgh-limit-beyond-ceiling.spin2`
+*Output (2026-10-11; exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-012-orgh-limit-beyond-ceiling.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-012-orgh-limit-beyond-ceiling.spin2:4:error:Hub address exceeds $100000 ceiling (m361)
+```
+*Command (bare address beyond the limit):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-012-orgh-address-beyond-limit.spin2`
+*Output (2026-10-11; exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-012-orgh-address-beyond-limit.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-012-orgh-address-beyond-limit.spin2:5:error:Hub address exceeds limit (m372)
+```
+*Command (debug mirror, PASM-only):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-012-orgh-debug-mirror-pasm-only.spin2`
+*Output (2026-10-11; exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-012-orgh-debug-mirror-pasm-only.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-012-orgh-debug-mirror-pasm-only.spin2:6:error:Program requirement exceeds 512KB hub RAM by 507908 bytes
+```
+*Command (debug mirror, Spin2+PASM):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-012-orgh-debug-mirror-spin2.spin2`
+*Output (2026-10-11; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-012-orgh-debug-mirror-spin2.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-012-orgh-debug-mirror-spin2.bin (6296 bytes)
+pnut-ts: Done
+```
+**Grounds:** the Parallax *Spin2 Language Documentation* v55, DAT Blocks, Hub-exec, gives the $100000
+default limit and `ORGH $FC000,$FC800` as a syntax illustration, and says ORGH in a PASM-only program
+fills hub memory with zeros up to the address (`spin2-v55-text.txt:322-327`). It names no error
+messages; the record supplies them.
+*Limits:* one address of each kind; the debug-mirror case is run at its first address only. One
+compiler version.
+*→ EF:* none — legality stays CP.

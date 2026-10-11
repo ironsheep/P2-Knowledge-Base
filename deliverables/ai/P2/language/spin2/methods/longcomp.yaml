@@ -44,6 +44,8 @@ notes:
   - "Returns FALSE (0) if any long differs"
   - "Count of 0 returns 0 (FALSE), not TRUE"
   - "Each long is 32 bits (4 bytes)"
+sources:
+  - "requires_version: CP-011 ({Spin2_v44} is refused by the compiler; {Spin2_v45} is the earliest gate that enables the method)"
 timing:
   execution_model: |
     Spin2 methods execute via the bytecode interpreter. Clock count: not documented.

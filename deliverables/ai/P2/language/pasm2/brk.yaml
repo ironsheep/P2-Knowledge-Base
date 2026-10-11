@@ -13,7 +13,7 @@ description: 'BRK triggers a breakpoint in the current cog and either defines a 
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BRK, p.55"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BRK, p.55; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT (BRK)"
 documentation_level: comprehensive
 examples:
 - name: Conditional Breakpoint
@@ -40,7 +40,7 @@ examples:
             brk     #DEBUG_WARNING           ' Warning-level break
 
     ' Debugger filters based on level
-condition_behavior: "Regardless of its execution condition, BRK triggers the debug interrupt (if enabled); the condition only gates the writing of the 8-bit code (Silicon Doc, BRK in the debugging section). So 'if_c brk #code' with C = 0 still enters the debug ISR, and GETBRK there shows the code of the last BRK whose condition was true, not this one. To make a break conditional: an opposite-condition SKIP #1 before it, or a JMP around an unconditional BRK -- both cancel the break and the code. pnut-ts compiles a conditional DEBUG() to the SKIP form, but leaves a hand-written conditional BRK as written, without a warning. Documented behaviour, not a silicon erratum."
+condition_behavior: "Regardless of its execution condition, BRK triggers the debug interrupt (if enabled); the condition only gates the writing of the 8-bit code. So 'if_c brk #code' with C = 0 still enters the debug ISR, and GETBRK there shows the code of the last BRK whose condition was true, not this one. To make a break conditional: an opposite-condition SKIP #1 before it, or a JMP around an unconditional BRK -- both cancel the break and the code. pnut-ts compiles a conditional DEBUG() to the SKIP form, but leaves a hand-written conditional BRK as written, without a warning. Documented behaviour, not a silicon erratum."
 related_instructions:
 - GETBRK: Get breakpoint status/code
 - COGBRK: Trigger breakpoint in another COG

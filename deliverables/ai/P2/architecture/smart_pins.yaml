@@ -250,14 +250,14 @@ in_signal_semantics:
   when_smart_pin_mode_is_ON:
     condition: "%SSSSS > %00000 -- the pin is running one of the smart-pin modes"
     what_in_carries: "a HANDSHAKE, not the pin's logic level"
-    raised_by: "the smart pin itself. Verbatim: \"When a mode-related event occurs in
+    raised_by: "the smart pin itself. \"When a mode-related event occurs in
       a smart pin, it raises its IN signal to alert the cog(s) that new data is ready,
       new data can be loaded, or some process has finished.\""
-    lowered_by: "WRPIN, WXPIN, WYPIN, RDPIN or AKPIN on that pin. Verbatim: \"A cog
+    lowered_by: "WRPIN, WXPIN, WYPIN, RDPIN or AKPIN on that pin. \"A cog
       acknowledges a smart pin whenever it does a WRPIN, WXPIN, WYPIN, RDPIN or AKPIN
       on it. This causes the smart pin to lower its IN signal so that it can be raised
       again on the next event.\""
-    rqpin_does_not_lower_it: "RQPIN is the deliberate exception. Verbatim: \"Note that
+    rqpin_does_not_lower_it: "RQPIN is the deliberate exception. \"Note that
       since the RQPIN instruction (read quiet) does not do an acknowledge, it can be
       used by any number of cogs, concurrently, to read a pin without bus conflict.\""
     drop_latency: "\"After WRPIN/WXPIN/WYPIN/RDPIN/AKPIN, it will take two clocks for
@@ -267,7 +267,7 @@ in_signal_semantics:
   when_smart_pin_mode_is_OFF:
     condition: "%SSSSS = %00000 -- smart pin mode off"
     what_in_carries: "the pin's logic level, after the %AAAA input selector and the
-      %FFF input logic/filtering have been applied. Verbatim: \"The resultant 'A' will
+      %FFF input logic/filtering have been applied. \"The resultant 'A' will
       drive the IN signal in non-smart-pin modes.\""
     which_pin_that_level_came_from: "NOT necessarily this pin. %AAAA can route 'A'
       from a neighbour at +-1, +-2 or +-3, or from this pin's own OUT bit. The

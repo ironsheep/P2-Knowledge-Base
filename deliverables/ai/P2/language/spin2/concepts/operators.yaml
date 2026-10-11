@@ -381,12 +381,9 @@ changed_from_p1:
   description: |
     Spin (P1) operators whose token is gone or means something else in Spin2. A P1 habit
     that fails to compile costs a minute; one that still compiles gives a wrong value
-    with no error. Each row was compiled on pnut-ts 1.55.8 (2026-10-07); where a P1 form
-    compiles, its Spin2 meaning was proven by a byte-identical binary. The P1 side is the
-    Spin operator table of the Propeller Manual v1.2 (Table 2-9). ENCOD spelling checked by
-    compile: ENCOD 0 = 0, (x <> 0) ? ENCOD x + 1 : 0 gives 0 / 8 / 32 / 21 for P1's four
-    examples.
-  source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+    with no error. ENCOD 0 = 0, and (x <> 0) ? ENCOD x + 1 : 0 gives 0 / 8 / 32 / 21 for
+    P1's four >| examples.
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators. The P1 side of each row is the Spin operator table of the Parallax Propeller Manual v1.2, Table 2-9. Every row was compiled; where a P1 form compiles, its Spin2 meaning was established by a byte-identical binary, and the ENCOD spelling was checked by compile."
   compiles_with_a_different_meaning:
     - p1: "a ~> 2 -- shift arithmetic right"
       spin2_reads_it_as: "(a~) > 2 -- a comparison that also CLEARS a (post-clear ~)"

@@ -1,5 +1,5 @@
 # CORDIC Solver - 54-Stage Pipelined Math Engine
-# Source: Silicon Doc v35, P2 Datasheet, Chip Gracey clarification
+# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), CORDIC Solver; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01
 
 component: CORDIC
 category: math_engine
@@ -13,10 +13,11 @@ architecture:
   pipeline_stages: 54
   pipeline_type: "Fully pipelined"
   access_model: "Hub rotation (like hub RAM)"
-  cog_access_interval: "Every 8 clocks per COG (P2X8C4M64P with 8 cogs; Silicon Doc verbatim: 'every 1/2/4/8/16 (#cogs) clocks')"
-  ops_in_flight_per_cog: "up to ~6-7 (54-stage pipeline / 8-clock hub slot = 54/8; the Silicon Doc says 'several', stating no hard count). MEASURED SUPPORT: a register-only fill and drain stayed correct through a fill depth of 7 on real P2 silicon, so deep pipelining is real and is not limited to a shallow result buffer."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), CORDIC Solver and OVERLAPPING CORDIC COMMANDS; the fill depth of 7 on real P2 silicon: EF-053"
+  cog_access_interval: "Every 8 clocks per COG (P2X8C4M64P with 8 cogs; 'every 1/2/4/8/16 (#cogs) clocks')"
+  ops_in_flight_per_cog: "up to ~6-7 (54-stage pipeline / 8-clock hub slot = 54/8; the documentation says 'several', stating no hard count). A register-only fill and drain stays correct through a fill depth of 7, so deep pipelining is real and is not limited to a shallow result buffer."
   system_throughput: "1 operation per clock (all COGs combined)"
-  result_latency: "55 clocks (Silicon Doc v35 verbatim: 'Fifty-five clocks later, results will be available via the GETQX and GETQY instructions')"
+  result_latency: "55 clocks ('Fifty-five clocks later, results will be available via the GETQX and GETQY instructions')"
   pipeline_depth: "54 clocks (separate from result latency; this is the depth that enables overlapping ops)"
   shared_resource: true
   arbitration: "Round-robin via hub rotation"
@@ -36,20 +37,17 @@ critical_usage_pattern:
       The failure is SILENT. A pipelined sequence with hub I/O inside a loop returns
       wrong numbers, not missing ones — the code looks correct and the results look
       plausible. There is no flag, no stall, and no error to notice.
-    measured: |
-      Real P2 silicon, four arms differing only in where hub access sat, swept over
-      fill depths 1-7 against single-operation ground truth:
+    observed_failures: |
+      Compared against single-operation results at fill depths 1-7:
         - RDLONG inside the fill loop   -> first wrong result at fill depth 2
         - WRLONG inside the drain loop  -> first wrong result at fill depth 3
-        - register-only fill AND drain, hub I/O batched outside -> clean through 7
-      Seven consistent runs, with a control (queue one, retrieve immediately) that
-      stalled 58 clocks — the documented GETQX maximum — proving the rig could see
-      the failure before any arm was trusted.
+        - register-only fill AND drain, hub I/O batched outside -> correct through 7
     scope: |
-      This states the TESTED SHAPE, not a law. The measurement shows WHERE results are
-      lost, not why; not every hub operation or cadence was tested. Do not generalize
-      it to "any hub access anywhere" and do not prescribe a clock-level discipline.
-    source: "EF-053"
+      This is the shape that fails, not a general law. It shows WHERE results are
+      lost, not why; it covers RDLONG in the fill loop and WRLONG in the drain loop,
+      not every hub operation or cadence. Do not generalize it to "any hub access
+      anywhere" and do not prescribe a clock-level discipline.
+    source: "EF-053 (real P2 silicon, four arms differing only in where hub access sat, swept over fill depths 1-7 against single-operation ground truth; seven consistent runs, with a control -- queue one, retrieve immediately -- that stalled 58 clocks, the documented GETQX maximum)"
 
 operations:
   multiply:
@@ -113,17 +111,18 @@ operations:
     result: "2^D in X"
 
 result_retrieval:
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), CORDIC Solver and OVERLAPPING CORDIC COMMANDS"
   getqx:
     instruction: "GETQX"
     operation: "Retrieve X result from CORDIC"
     behavior: "Stalls if result not ready"
-    timing: "2 clocks if no CORDIC operation is in progress (Silicon Doc v35: 'GETQX/GETQY will only take two clock and the QMT (CORDIC empty) event flag will be set'). Otherwise waits for the next available result — worst case approaching the 55-clock CORDIC result latency from when the operation was issued."
+    timing: "2 clocks if no CORDIC operation is in progress ('GETQX/GETQY will only take two clock and the QMT (CORDIC empty) event flag will be set'). Otherwise waits for the next available result — worst case approaching the 55-clock CORDIC result latency from when the operation was issued."
     
   getqy:
     instruction: "GETQY"
     operation: "Retrieve Y result from CORDIC"
     behavior: "Stalls if result not ready"
-    timing: "2 clocks if no CORDIC operation is in progress (per Silicon Doc v35). Otherwise waits for the next available result — worst case approaching the 55-clock CORDIC result latency from when the operation was issued."
+    timing: "2 clocks if no CORDIC operation is in progress. Otherwise waits for the next available result — worst case approaching the 55-clock CORDIC result latency from when the operation was issued."
     
   pollqmt:
     instruction: "POLLQMT"
@@ -179,10 +178,10 @@ programming_patterns:
 
 accuracy:
   source: >-
-    Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (hub features: CORDIC solver summary), which states the solver and each operation's result format verbatim.
+    Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (hub features: CORDIC solver summary), which states the solver and each operation's result format.
     Per-operation detail lives in the instruction entries below; this block states only the result formats and does not restate them.
     The truncated (floor) square root: EF-104.
-  solver: "32-bit, pipelined, with scale-factor correction (Silicon Doc verbatim)"
+  solver: "32-bit, pipelined, with scale-factor correction"
   multiply: "Exact -- 32 x 32 unsigned, 64-bit result (see language/pasm2/qmul.yaml)"
   divide: "Exact -- 64 / 32 unsigned, 32-bit quotient and 32-bit remainder (see language/pasm2/qdiv.yaml)"
   square_root: "64-bit -> 32-bit square root, truncated (floor) (see language/pasm2/qsqrt.yaml)"

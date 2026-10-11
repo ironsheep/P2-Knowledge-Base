@@ -1,5 +1,5 @@
 # XBYTE - Hardware Bytecode Execution Engine
-# Source: Silicon Doc v35, P2 Datasheet
+# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BYTECODE EXECUTION (XBYTE); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01
 
 component: XBYTE_Engine
 category: bytecode_engine
@@ -69,7 +69,7 @@ starting_xbyte:
     stack_note: |
       Use 'PUSH #$1FF' to place it. A CALL will NOT do -- a CALL pushes its own
       return address, not $1FF, so the _RET_ would simply return and XBYTE would
-      never engage. Silicon Doc: "Starting XBYTE and establishing its operating
+      never engage. "Starting XBYTE and establishing its operating
       mode is done all at once by a '_RET_ SETQ {#}D' instruction, with the top
       of the hardware stack holding $1FF."
 
@@ -120,7 +120,8 @@ configuration_patterns:
 
   index_form_bit:
     name: "Mode-operand bit 1 -- index-form selector"
-    status: "DEFINED. Documentary (full Silicon Doc v35 mode table)."
+    status: "DEFINED. Documentary (the full XBYTE mode table)."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BYTECODE EXECUTION (XBYTE)"
     detail: |
       Bit 1 selects WHICH HALF of the bytecode indexes the dispatch table:
         bit 1 = 0  -> index from the bytecode's LOW  bits (the 'primary' form)
@@ -148,7 +149,7 @@ configuration_patterns:
   compressed_16_bytecodes:
     pattern: "%ABBBB00xF"
     lut_base: "%A00000000"
-    threshold: "%BBBB must be > 0 (Silicon Doc). %BBBB = %0001 gives the 16/240 split below."
+    threshold: "%BBBB must be > 0. %BBBB = %0001 gives the 16/240 split below."
     operation: |
       If bytecode[7:4] < %BBBB: Use full bytecode as index
       If bytecode[7:4] >= %BBBB: Use compressed index
@@ -199,7 +200,7 @@ flag_control:
 
 lut_table_format:
   entry_format: |
-    Each LUT entry contains (per EXECF encoding, Silicon Doc):
+    Each LUT entry contains (per EXECF encoding):
     [9:0]  = Base routine address (10-bit COG/LUT address to jump to)
     [31:10] = SKIPF pattern (22 bits)
     
@@ -275,9 +276,9 @@ performance:
   overhead_per_bytecode: "6 clocks"
   throughput: "At 160MHz: 26.7M bytecodes/second (overhead only)"
   comparison:
-    software_dispatch: "9 clocks overhead per bytecode (Silicon Doc v35 verbatim: 'takes only 2+3+4, or 9, clocks to get the next bytecode, look it up, then execute that bytecode's routine')"
-    xbyte_dispatch: "6 clocks overhead per bytecode (Silicon Doc v35 verbatim: '6-clock custom-bytecode executor'; 'total overhead of only 6 clocks, excluding the bytecode routine')"
-    minimum_xbyte_loop: "8 clocks (Silicon Doc verbatim: 'The bytecode routine could be as short as a single 2-clock instruction with a _RET_ prefix, making the total XBYTE loop take only 8 clocks')"
+    software_dispatch: "9 clocks overhead per bytecode ('takes only 2+3+4, or 9, clocks to get the next bytecode, look it up, then execute that bytecode's routine')"
+    xbyte_dispatch: "6 clocks overhead per bytecode ('6-clock custom-bytecode executor'; 'total overhead of only 6 clocks, excluding the bytecode routine')"
+    minimum_xbyte_loop: "8 clocks ('The bytecode routine could be as short as a single 2-clock instruction with a _RET_ prefix, making the total XBYTE loop take only 8 clocks')"
     improvement: "3-7x faster dispatch"
 
 applications:

@@ -17,7 +17,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [z]
   - at: reading_results.reading_protocol
-    fp: "fa91ef92f94d0827"
+    fp: "89c32e8da80d3592"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: reading_results.example

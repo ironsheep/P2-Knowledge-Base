@@ -10,7 +10,7 @@ timing:
   cycles: 2
   type: fixed
 description: Read the streamer's Goertzel accumulators -- the cosine (X) accumulation into D,
-  the sine (Y) accumulation into the next instruction's S value. The Silicon Doc says GETXACC
+  the sine (Y) accumulation into the next instruction's S value. As documented, GETXACC
   captures both into holding registers and clears them, and that repeat reads return the
   same values until a new streamer command executes. ON REV C SILICON THE CLEAR ACTS ONLY
   WHILE A DDS/GOERTZEL COMMAND IS RUNNING; with the streamer idle (or in another mode)
@@ -25,14 +25,14 @@ silicon_errata:
   clear_only_during_goertzel_burst:
     erratum: "E4"
     effect: "With the streamer idle, or running any non-Goertzel mode, GETXACC returns the live accumulator and clears nothing: repeated reads -- including right after XINIT of a non-Goertzel command -- return the same value, and the accumulators keep growing from one burst to the next. During a Goertzel burst the clear does act, and partitions the burst exactly (a read inside it plus the next read = one unread burst)."
-    source: "Hardware-verified on Rev C (EF-069): 50 of 50 idle/non-Goertzel reads equal the prior value; 8 of 8 mid-burst partitions exact. Contradicts the Silicon Doc's capture-and-clear statement."
+    source: "Hardware-verified on Rev C (EF-069): 50 of 50 idle/non-Goertzel reads equal the prior value; 8 of 8 mid-burst partitions exact. Contradicts the capture-and-clear statement in Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER."
   last_term_lands_in_next_burst:
     erratum: "E5"
     effect: "A reading after a Goertzel burst of N clocks holds N-1 terms; the last term waits in an internal register no instruction reads and is added on the first active clock of the NEXT Goertzel burst. Waiting does not deliver it. A short zero-term burst (same mode, input enables S[15:12] clear) after the burst delivers it: the reading then holds all N terms and nothing spills into the next burst."
-    evidence: "Hardware-verified on Rev C: 16 of 16 sequences, N = 64 and 65, both signs. (SINC2's iteration-count corruption is a separate, documented behaviour -- see goertzel_usage.sinc2_constraint.)"
-    source: "Hardware-verified on Rev C silicon: EF-070 (the one-clock lag and the zero-term-burst delivery); helper routine below: EF-076"
-  workaround: "Helper routine (SINC1), for E4 and E5 together: take each burst's sums as the difference of two idle reads, and deliver the held term before each: (1) a zero-term burst -- XINIT with the caller's D at count 4 and the caller's S with S[15:12] = 0 (every summed input off) -- then WAITXFI; (2) GETXACC idle = baseline; (3) the caller's burst, WAITXFI; (4) another zero-term burst, WAITXFI; (5) GETXACC idle; (6) subtract. Returned exactly N terms in 60 of 60 calls, N = 1..1001, back to back. Proven for SINC1 only; for SINC2 see goertzel_usage.sinc2_constraint."
-documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (the documented capture/clear/repeat-read statement); silicon behaviour: hardware-verified EF-069, EF-070, EF-076"
+    note: "SINC2's iteration-count corruption is a separate, documented behaviour -- see goertzel_usage.sinc2_constraint."
+    source: "Hardware-verified on Rev C silicon: EF-070 (the one-clock lag and the zero-term-burst delivery; 16 of 16 sequences, N = 64 and 65, both signs); helper routine below: EF-076 (returned exactly N terms in 60 of 60 calls, N = 1..1001, back to back; SINC1 only)"
+  workaround: "Helper routine (SINC1), for E4 and E5 together: take each burst's sums as the difference of two idle reads, and deliver the held term before each: (1) a zero-term burst -- XINIT with the caller's D at count 4 and the caller's S with S[15:12] = 0 (every summed input off) -- then WAITXFI; (2) GETXACC idle = baseline; (3) the caller's burst, WAITXFI; (4) another zero-term burst, WAITXFI; (5) GETXACC idle; (6) subtract. The result is exactly N terms. The helper is for SINC1; for SINC2 see goertzel_usage.sinc2_constraint."
+documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (the documented capture/clear/repeat-read statement; the Goertzel worked demo with its 'get prior Goertzel acc's' comment; NOTE ABOUT GOERTZEL SINC2 MODE, 2024.12.16); silicon behaviour: hardware-verified EF-069, EF-070, EF-076"
 documentation_level: enhanced
 compiler_operand_format:
   name: operand_d
@@ -81,7 +81,7 @@ goertzel_usage:
   target_frequency: "Set via SETXFRQ to match tone being detected"
   sample_count: "Run for power-of-2 samples (64, 128, 256 typical)"
   output: "X,Y are complex Goertzel output (real/imaginary)"
-  sinc2_constraint: "SINC2 (double integration) needs a CONSTANT iteration count per Goertzel cycle. A non-power-of-two SETXFRQ D makes the cycle span a varying number of clocks, and 'being off by a single clock cycle will corrupt the current and next samples' (Silicon Doc, NOTE ABOUT GOERTZEL SINC2 MODE, 2024.12.16). Mechanism, measured value for value: SINC2's first stage is a running integral GETXACC does not clear, so a window one clock longer or shorter than its neighbours moves one first-stage value between two adjacent samples, then self-corrects; one clock of read jitter corrupts most samples. Workarounds, both proven: a clock that makes the iteration count a power of two (the Silicon Doc's example runs 256 MHz, not 250, for a 1 MHz target), or start each measurement with XZERO instead of XCONT (clean at 10.24 us, 100 us and 25 ms windows). SINC1 is off by at most one term. Documented behaviour, not a silicon erratum. Measured: a corrupted pair occurs at every change of window length and never otherwise; XZERO held one window length and clean samples at 10.24 us, 100 us and 25 ms windows."
+  sinc2_constraint: "SINC2 (double integration) needs a CONSTANT iteration count per Goertzel cycle. A non-power-of-two SETXFRQ D makes the cycle span a varying number of clocks, and 'being off by a single clock cycle will corrupt the current and next samples'. Mechanism: SINC2's first stage is a running integral GETXACC does not clear, so a window one clock longer or shorter than its neighbours moves one first-stage value between two adjacent samples, then self-corrects; one clock of read jitter corrupts most samples. Workarounds: a clock that makes the iteration count a power of two (the documented example runs 256 MHz, not 250, for a 1 MHz target), or start each measurement with XZERO instead of XCONT (clean at 10.24 us, 100 us and 25 ms windows). SINC1 is off by at most one term. Documented behaviour, not a silicon erratum. A corrupted pair occurs at every change of window length and never otherwise."
 related_instructions:
   - QVECTOR: Compute magnitude/phase from X,Y pair
   - GETQX: Get magnitude result after QVECTOR
@@ -96,7 +96,7 @@ reading_protocol: |
   Read idle before the burst and after it and subtract; deliver each burst's held last
   term first with a zero-term burst (silicon_errata.workaround). Inside a running
   Goertzel burst a read does clear, so the XCONT-loop form reads once per command and
-  subtracts a baseline established on the first pass. The Silicon Doc's worked demo
+  subtracts a baseline established on the first pass. The documented worked demo
   comments its read "get prior Goertzel acc's".
 
 notes:

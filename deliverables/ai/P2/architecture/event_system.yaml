@@ -53,7 +53,7 @@ architecture:
   event_routing:
     - destination: "interrupts"
       description: "Events can trigger INT1/2/3"
-      dispatch_mechanism: "Hardware inserts 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline (Silicon Doc v35 verbatim)"
+      dispatch_mechanism: "Hardware inserts 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline"
       entry_overhead_cogexec: "4 clocks (per language/pasm2/calld.yaml encoding)"
       entry_overhead_hubexec: "13-20 clocks (FIFO refill on the branch)"
       deferral_conditions: "See architecture/interrupts.yaml deferral_conditions; the branch is held off during ALTxx/SETQ/REP/STALLI/WAITx etc."
@@ -99,7 +99,7 @@ instructions:
       SE1 := D[8:0] event configuration (9 bits)
       SETSE can ONLY configure pin, LUT, or lock events (NOT timer/ATN/pattern events)
     d_encoding_table: |
-      D[8:0] encoding (from Silicon Doc v35):
+      D[8:0] encoding:
       %000_00_00AA = this cog reads LUT address %1111111AA
       %000_00_01AA = this cog writes LUT address %1111111AA
       %000_00_10AA = odd/even companion cog reads LUT address %1111111AA
@@ -450,13 +450,13 @@ performance_characteristics:
   event_detection: |
     Event flags are set by hardware at the moment the event condition is
     evaluated; the flag is then visible to POLLxxx/WAITxxx/JATN/etc. on
-    subsequent instructions. Silicon Doc does not publish a specific
-    detection-to-flag clock count.
+    subsequent instructions. The Parallax Propeller 2 Documentation v35 does not
+    publish a specific detection-to-flag clock count.
   
   response_latency:
     polling: "POLLxxx: 2 clocks (per per-instruction YAMLs)"
     waiting: "WAITxxx releases on the same clock the event flag becomes set"
-    interrupt: "4 clocks cog / 13-20 clocks hub for the dispatched CALLD (per language/pasm2/calld.yaml; Silicon Doc v35 dispatch mechanism)"
+    interrupt: "4 clocks cog / 13-20 clocks hub for the dispatched CALLD (per language/pasm2/calld.yaml)"
   
   simultaneous_events: "All 4 SE events tracked independently"
   

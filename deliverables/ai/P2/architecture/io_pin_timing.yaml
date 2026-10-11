@@ -28,7 +28,7 @@ description: |
       1 mA / 100 µA / 10 µA / float". The eight
       rungs, their %HHH/%LLL encodings and their P_* constant names are defined once, in
       architecture/pin-drive-configuration.yaml.
-    - Slew rate. No Parallax document (the Silicon Doc, Spin2, the smart-pins
+    - Slew rate. No Parallax document (the Propeller 2 Documentation v35, Spin2, the smart-pins
       documentation, the P2 Datasheet, the P2 Hardware Manual) describes a slew-rate
       setting.
     - Propagation, rise and fall figures per drive setting. No Parallax source states them.
@@ -119,7 +119,7 @@ absolute_maximum_ratings:
   description: |
     Stress ratings from the P2 datasheet. Stresses beyond these can cause permanent
     damage; they are absolute stress limits, NOT operating conditions.
-  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Absolute Maximum Electrical Ratings (table and footnote 1), p.47. Every figure below matches that table verbatim. The table states four further limits this file does not carry (total power dissipation 2.5 W, max current out of GND 4 A, max current into VDD pins and into Vxxyy pins 120 mA per pin) -- they are package/supply limits rather than I/O pin limits, which is this file's subject."
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Absolute Maximum Electrical Ratings (table and footnote 1), p.47. Every figure below matches that table. The table states four further limits this file does not carry (total power dissipation 2.5 W, max current out of GND 4 A, max current into VDD pins and into Vxxyy pins 120 mA per pin) -- they are package/supply limits rather than I/O pin limits, which is this file's subject."
   voltage_on_VDD_vs_GND: "-0.3 V to +2.2 V"
   voltage_on_VIO_Vxxyy_vs_GND: "-0.3 V to +4.0 V"
   voltage_on_any_IO_pin_vs_GND: "-0.3 V to (Vxxyy + 0.3 V) -- about 3.6 V at the nominal 3.3 V I/O supply"
@@ -225,7 +225,7 @@ input_voltage_and_protection:
     internal protection (clamp) diode to the I/O supply rail (Vxxyy / VIO, nominally 3.3 V);
     the "+0.3 V" in the pin absolute-max is that diode's forward drop.
   io_supply: "Vxxyy (VIO) = 3.3 V nominal (3.15-3.45 V); pins operate 0-3.3 V"
-  datasheet_note_verbatim: "I/O pin voltages in respect to GND may be exceeded if the internal protection diode forward bias current is not exceeded."
+  datasheet_note: "I/O pin voltages in respect to GND may be exceeded if the internal protection diode forward bias current is not exceeded."
   reading_a_5V_signal:
     direct_connection: "Not safe. 5 V exceeds the ~3.6 V pin absolute-max and forward-biases the upper protection diode."
     with_series_resistor: |
@@ -238,7 +238,7 @@ input_voltage_and_protection:
       (e.g. >= 1 kohm) for margin so diode current stays well within the +/-10 mA limit.
     caveat: "A series resistor protects the pin electrically; it does not make the pin truly '5 V tolerant.' For sustained 5 V interfacing prefer a proper level shifter or resistor divider."
   latchup_context:
-    note: "The Silicon Doc reports VIO-triggered latch-up onset as early as ~4.3 V on VIO -- reinforcing that this is a 3.3 V part; do not over-drive the rails. Read it in context: the figure comes from ON Semi failure analysis of a specific wafer lot, quoted in the document's revision history, not from a characterised electrical limit table."
+    note: "VIO-triggered latch-up onset was reported as early as ~4.3 V on VIO -- this is a 3.3 V part; do not over-drive the rails. The figure comes from ON Semi failure analysis of a specific wafer lot, not from a characterised electrical limit table."
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Design Status (2019_09_13) -- \"it was determined by ON Semi that latch-up was occurring as early as 4.3V on VIO\""
 
 timing_measurement_techniques:

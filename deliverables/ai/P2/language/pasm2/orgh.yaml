@@ -25,11 +25,12 @@ examples:
 notes:
 - ORGH sets hub RAM addresses (hub-exec mode)
 - 'Bare ORGH default address is context-dependent (per Spin2 v55 spec): in Spin2+PASM programs it is $400 (hub-exec code uses relative addressing and is relocated at runtime); in PASM-only programs it is the current hub address (origin always matches the hub address, and ORGH fills hub memory with zeros up to the given address)'
-- 'Optional second parameter sets the origin limit (default $100000); PNut enforces the ceiling -- ORGH address,limit beyond it emits "Hub address exceeds $100000 ceiling (m361)", and a bare ORGH address beyond it emits "Hub address exceeds limit (m372)" -- compiler-verified'
-- 'ORGH $FC000,$FC800 (the Spin2 v55 syntax illustration) assembles in a Spin2+PASM program, where the origin need not be the code''s real location; in a PASM-only program ORGH fills the hub image with zeros up to the address, so an address in the debug mirror ($FC000..$FFFFF, beyond the 512 KB of hub RAM) fails with "Program requirement exceeds 512KB hub RAM" -- compiler-verified'
+- 'Optional second parameter sets the origin limit (default $100000); PNut enforces the ceiling -- ORGH address,limit beyond it emits "Hub address exceeds $100000 ceiling (m361)", and a bare ORGH address beyond it emits "Hub address exceeds limit (m372)"'
+- 'ORGH $FC000,$FC800 (the Spin2 v55 syntax illustration) assembles in a Spin2+PASM program, where the origin need not be the code''s real location; in a PASM-only program ORGH fills the hub image with zeros up to the address, so an address in the debug mirror ($FC000..$FFFFF, beyond the 512 KB of hub RAM) fails with "Program requirement exceeds 512KB hub RAM"'
 - Use for hub-exec code and hub data
 related:
 - ORG
 - ORGF
 - HUBEXEC
 oneliner: Set the assembly origin to a hub RAM address
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks, Hub-exec (default origin $400 and $100000 default limit; Spin2+PASM versus PASM-only ORGH behaviour; ORGH $FC000,$FC800 syntax illustration); the m361 and m372 limit errors and the PASM-only debug-mirror failure: CP-012"

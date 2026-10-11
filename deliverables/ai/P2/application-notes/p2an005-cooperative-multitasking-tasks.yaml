@@ -126,7 +126,8 @@ hardware_status: |
 
 sources:
   - "Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: cooperative multitasking) and New Keywords Introduced by New Versions (the authoritative TASK keyword list; TASKWAIT is absent)"
-  - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (the TASK method family TASKSPIN, TASKNEXT, TASKHALT, TASKCONT, TASKCHK, TASKID, TASKSTOP), Built-In Symbol for TASKSPIN() Usage (NEWTASK/THISTASK), and the TASKHLT register (reversed halt bits @ $1CC)"
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (the TASK method family TASKSPIN, TASKNEXT, TASKHALT, TASKCONT, TASKCHK, TASKID, TASKSTOP), Built-In Symbol for TASKSPIN() Usage (NEWTASK/THISTASK), and the TASKHLT register (halt bits for all tasks, in reverse order)"
+  - "Parallax Spin2 Interpreter v55 (2026.05.07), Multitasking (taskhlt 'task halt bits': one register, 12 registers below the pasm-use registers at $1D8, i.e. $1CC)"
 
 tool_ground_truth:
   - "pnut-ts — every recipe compiled with -d; TASKWAIT(cond) probed and rejected ('Expected an instruction or variable'), confirming it is not a Spin2 keyword"

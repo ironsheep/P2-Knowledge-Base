@@ -4,8 +4,6 @@ category: hardware_interface
 description: Standard patterns for integrating Click modules with P2 using offset-based pin mapping
 documentation_source: "P2 mikroBUS Adapter Part Number 64008, Revision A, schematic"
 documentation_level: comprehensive
-created: 2025-09-09
-updated: 2026-08-26
 p2kb_key: "p2kbArchClickModuleIntegration"
 aliases:
   - "Click module"
@@ -76,7 +74,8 @@ p2_adapter_mapping:
       PIN_NOT_USED = -1
   source: >-
     P2 mikroBUS Adapter Part Number 64008, Revision A, schematic (Parallax Inc., 2020-08-10), the consolidated offset map.
-    All twelve offsets confirmed against the sheet. Constant NAMES and the idiom are from the P2-Click-eInk driver.
+    All twelve offsets confirmed against the sheet; the orientation statement is the sheet's own note on
+    adapter orientation. Constant NAMES and the idiom are from the P2-Click-eInk driver.
   header_span: >-
     The adapter occupies TWO adjacent 2x6 accessory headers -- 16 consecutive P2
     I/O -- and uses 12 of them. Offsets +12..+15 are no-connects at the socket
@@ -85,9 +84,8 @@ p2_adapter_mapping:
     header B while every other signal sits in header A. Where a host maps each
     accessory header to its own pin-power group, the Click socket straddles two.
   orientation: >-
-    Schematic note, verbatim: "If this adapter is plugged into the P2-EVAL top
-    edge, then P2 MISO/MOSI are aligned with the mikroBUS MISO/MOSI".
-
+    If this adapter is plugged into the P2-EVAL top edge, then P2 MISO/MOSI are
+    aligned with the mikroBUS MISO/MOSI.
 implementation_patterns:
   base_pin_configuration:
     description: "Enum-based base pin selection for P2 Eval adapter slots"

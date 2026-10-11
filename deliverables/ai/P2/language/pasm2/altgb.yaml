@@ -74,6 +74,8 @@ related_instructions:
 - ALTGN: Alter subsequent GETNIB/ROLNIB
 - ALTGW: Alter subsequent GETWORD/ROLWORD
 - ALTI: General instruction alteration
+related:
+- architecture/silicon_errata.yaml
 notes:
 - ALTGB must immediately precede GETBYTE/ROLBYTE
 - Auto-increment feature useful for sequential access

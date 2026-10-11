@@ -1,7 +1,7 @@
 # Boot ROM Documentation Index
 # Download-on-demand manifest for P2 Boot ROM subsystem
 # Use this file to identify which file contains the information you need
-# Sources: Hardware Manual (BOOT-PROCESS-COMPLETE), Silicon Doc v35, P2 Datasheet,
+# Sources: Hardware Manual (BOOT-PROCESS-COMPLETE), Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), P2 Datasheet,
 #          Parallax Propeller 2 ROM Booter v33_01j (the silicon ROM listing),
 #          Parallax SPI Flash Programmer and Boot Loader v51 (the flash loader listing),
 #          P2 Edge Standard Module (Edge DIP-switch mapping),

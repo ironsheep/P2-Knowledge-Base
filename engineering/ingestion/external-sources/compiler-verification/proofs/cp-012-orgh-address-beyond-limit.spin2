@@ -1,0 +1,5 @@
+PUB go()
+
+DAT
+        ORGH    $100004
+lbl     NOP

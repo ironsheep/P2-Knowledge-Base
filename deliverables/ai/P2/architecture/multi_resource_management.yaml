@@ -3,7 +3,6 @@ title: Single COG Managing Multiple Resources
 category: architectural_pattern
 description: Design pattern for a single COG efficiently managing multiple instances of the same resource type
 documentation_level: comprehensive
-created: 2025-09-09
 
 overview: |
   A powerful P2 architectural pattern where a single COG manages multiple instances of
@@ -194,4 +193,3 @@ related_concepts:
 references:
   - P2-OctoSerial: 8-port UART implementation
   - Production code patterns from Iron Sheep Productions
-  - P2 forum discussions on multi-resource management

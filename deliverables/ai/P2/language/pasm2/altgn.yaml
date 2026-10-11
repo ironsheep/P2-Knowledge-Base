@@ -49,3 +49,5 @@ usage_notes: 'The instruction following ALTGN is shielded from interrupt
   next instruction'
 manual_extraction_date: '2025-01-19'
 oneliner: Alter subsequent GETNIB / ROLNIB instruction
+related:
+- architecture/silicon_errata.yaml

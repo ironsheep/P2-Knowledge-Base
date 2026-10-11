@@ -1,0 +1,8 @@
+{Spin2_v44}
+' CP-011: BYTESWAP and LONGCOMP under the {Spin2_v44} gate the v55 symbol table names for them.
+
+VAR long a[4], b[4], r
+
+PUB go()
+  BYTESWAP(@a, @b, 4)
+  r := LONGCOMP(@a, @b, 2)

@@ -148,8 +148,7 @@ gotchas:
 
 hardware_status: |
   Every embedded block and every examples-library program compiles clean under pnut-ts -d (_clkfreq = 200_000_000). Beyond legality, every CROSS-COG claim in this note is CONFIRMED ON REAL P2
-  SILICON with two cogs actually contending (2026-07-13; rigs +
-  golden analysis under external-sources/hardware-verification/campaigns/2026-07-cross-cog-data-structures/).
+  SILICON with two cogs actually contending.
   Each discipline was measured against a deliberately-broken control, and the control was REQUIRED to
   fail before the result was accepted (a rig reporting zero in both arms is INCONCLUSIVE, never a pass).
   Measured: R2 publish-index-last 0 torn / index-first 200_000 of 200_000 torn. R5 staged
@@ -164,6 +163,7 @@ hardware_status: |
 
 sources:
   - "Parallax Propeller 2 Spin2 Language Documentation v55, DATA STRUCTURES (the STRUCT facility: declaration, typed members, arrays, nesting, SIZEOF, pointers, v49 cross-object export/import, the >15-long struct-pointer bracket rule) and Built-In Methods (the hardware lock methods LOCKNEW/LOCKTRY/LOCKREL/LOCKRET)"
+  - "hardware_status (cross-cog measurements on real P2 silicon): EF-036 (publish-index-last ring), EF-037 (one-store packed-record publish), EF-038 (seq/ack handshake), EF-039 (lock-serialized enqueue), EF-040 (STRUCT layout OFFSETOF/SIZEOF)"
 
 tool_ground_truth:
   - "pnut-ts — every recipe compiled with -d; confirmed the STRUCT + real-P2-lock idioms are legal and that P1 lockset/lockclr are not P2 methods"

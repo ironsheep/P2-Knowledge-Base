@@ -17,6 +17,7 @@ flags_affected:
   C: No effect
   Z: No effect
 documentation_level: comprehensive
+documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST SEQUENTIAL FIFO INTERFACE (waiting and no-wait RDFAST forms); hardware-verified on Rev C silicon: the 10-17 clock waiting form and the 8-15 clock no-wait first-read window (EF-073); the 16-clock spacing and the read and write widths covered (EF-074, EF-077, EF-084, EF-086, EF-087, EF-088; spacing tested with WAITX and NOPs only)"
 examples:
 - name: Fast Checksum Calculation
   description: Verify application checksum by summing FIFO-read longs
@@ -49,8 +50,8 @@ related_instructions:
 - WRFAST: Begin fast hub write via FIFO
 - FBLOCK: Set the next start address and 64-byte block count, taken when the current blocks are fully read (2 clocks, never waits)
 notes:
-- "D[31]=0 (waiting form): waits for any previous WRFAST to finish, then until the FIFO has begun receiving hub data, so the next instruction can read it (P2 Silicon Doc, FAST SEQUENTIAL FIFO INTERFACE); measured 10-17 clocks."
-- "D[31]=1 (no-wait form): takes 2 clocks; the Silicon Doc requires 'a sufficient number of clocks' before reading FIFO data. Measured: the first correct RFxxxx read comes 8-15 clocks after the RDFAST starts, by hub alignment; an earlier read returns $0000_0000 with no error. Allow at least 15 clocks (e.g. WAITX #11 directly after it)."
+- "D[31]=0 (waiting form): waits for any previous WRFAST to finish, then until the FIFO has begun receiving hub data, so the next instruction can read it; it takes 10-17 clocks."
+- "D[31]=1 (no-wait form): takes 2 clocks; the documentation requires 'a sufficient number of clocks' before reading FIFO data. The first correct RFxxxx read comes 8-15 clocks after the RDFAST starts, by hub alignment; an earlier read returns $0000_0000 with no error. Allow at least 15 clocks (e.g. WAITX #11 directly after it)."
 - "After a no-wait RDFAST, start no hub instruction (RDxxxx, WRxxxx, SETQ block, another RDFAST) for 16 clocks -- see silicon_errata.no_wait_rdfast_releases_next_hub_op. A no-wait WRFAST has no such effect."
 - Block size is in 64-byte units; 0 means maximum (16384 blocks = 262,144 longs)
 - FIFO automatically wraps at block boundary
@@ -61,10 +62,10 @@ silicon_errata:
     erratum: "E7"
     condition: "A hub instruction started fewer than 16 clocks after the start of a no-wait RDFAST (D[31]=1), while it still waits for its hub slot. Cog execution (hub execution cannot use RDFAST)."
     effect: "It can complete before its own hub access (43 of 64 hub alignments at the next instruction; none from 16 clocks): RDBYTE/RDWORD/RDLONG return the PREVIOUS hub read's data (byte/word at their own offset) with that value's C/Z, and PTRA++ still steps; WRBYTE/WRWORD/WRLONG is lost if a hub read follows at once; a SETQ block RDLONG writes one wrong long, leaves the rest unwritten and can overwrite cog registers outside its destination, or the cog does not finish; a blocking RDFAST issued 8-15 clocks after it takes 2 clocks without waiting and the next RFLONG returns $0000_0000. Nothing flags any of these."
-    workaround: "Rule at each use: use the waiting form (D[31]=0), or start the next hub instruction at least 16 clocks after the no-wait RDFAST starts -- e.g. WAITX #12 directly after it (2 + 14 = 16 clocks), or 7 two-clock non-hub instructions (a SETQ counts as one). The waiting form and the 16-clock spacing are proven on silicon for every read and write width, SETQ block reads and a following RDFAST (spacing tested with WAITX and NOPs only)."
+    workaround: "Rule at each use: use the waiting form (D[31]=0), or start the next hub instruction at least 16 clocks after the no-wait RDFAST starts -- e.g. WAITX #12 directly after it (2 + 14 = 16 clocks), or 7 two-clock non-hub instructions (a SETQ counts as one). The waiting form and the 16-clock spacing hold for every read and write width, SETQ block reads and a following RDFAST."
     not_affected: "A no-wait WRFAST releases nothing. A blocking first RDFAST removes the RDFAST-after-RDFAST case."
     untested: "RETA and other hub-stack instructions, WMLONG, SETQ2 block reads, SETQ block writes, an interrupt inside the window, the streamer."
-    source: "Hardware-verified on Rev C silicon, 200 MHz: EF-074, EF-077, EF-084, EF-086, EF-087, EF-088. Not listed in the Silicon Doc's KNOWN BUGS."
+    source: "Hardware-verified on Rev C silicon, 200 MHz: EF-074, EF-077, EF-084, EF-086, EF-087, EF-088. Not listed in Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS."
 
 streamer_pairing:
   rule: |

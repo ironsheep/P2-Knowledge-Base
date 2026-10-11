@@ -1,0 +1,6 @@
+' CP-010: a method local named `field` (FIELD is a Spin2 keyword) -- expected to be rejected.
+' The same local list as OBEX 2842 jm_fullduplexserial.spin2 format(), line 403.
+
+PUB format(p_str, p_args) | idx, c, asc, field, digits
+
+  idx := p_str + p_args

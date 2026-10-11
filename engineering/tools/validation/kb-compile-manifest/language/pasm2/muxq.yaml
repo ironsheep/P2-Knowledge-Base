@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: description
-    fp: "73e1ab4f7a5211da"
+    fp: "55ef9b245084257a"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: examples[0].code
@@ -17,7 +17,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [update_mask, status, new_bits, config]
   - at: examples[2].code
-    fp: "752e9abdcb8124a9"
+    fp: "1125490a122bc0f0"
     compile: fragment
     wrap: pasm2-dat
     assumes: [mask, dest, source]

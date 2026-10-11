@@ -7,7 +7,7 @@ blocks:
     compile: not-code
     reason: "instruction-syntax notation: `SETQ {#}D` / `SETQ2 {#}D` where `{#}` marks an optional immediate; PNut reads `{...}` as a brace comment, so the lines compile vacuously as `SETQ D`; the facts (SETQ = persistent XBYTE mode, SETQ2 = next bytecode only) match silicon-doc-text.txt:965-969"
   - at: starting_xbyte.configuration.stack_note
-    fp: "ae7c47ae2b6eec9b"
+    fp: "79962ccfbcdd7e5b"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: configuration_patterns.compressed_16_bytecodes.operation

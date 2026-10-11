@@ -408,8 +408,9 @@ best_practices:
     rationale: "Hub access is slower and blocks other COGs"
 
 performance_characteristics:
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INTERRUPTS"
   dispatch_mechanism: |
-    Silicon Doc v35 verbatim: "Interrupt branches are realized, internally,
+    Interrupt dispatch mechanism: "Interrupt branches are realized, internally,
     by inserting a 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline
     while holding the program counter at its current value, so that the
     interrupt later returns to the address saved in IRETx."
@@ -429,7 +430,7 @@ performance_characteristics:
     hubexec: "~26 clocks (13 entry + 13 exit), excluding the ISR body"
   
   deferral_conditions:
-    description: "Silicon Doc v35 verbatim — the interrupt branch is held off while any of these are in progress"
+    description: "The interrupt branch is held off while any of these are in progress"
     list:
       - "ALTxx / CRCNIB / SCA / SCAS / GETCT+WC / GETXACC / SETQ / SETQ2 / XORO32 / XBYTE"
       - "AUGS or AUGD pending"
@@ -437,7 +438,7 @@ performance_characteristics:
       - "STALLI..ALLOWI window"
       - "WAITx stall"
   
-  context_switch_overhead: "0 clocks for register state — IJMPx/IRETx are dedicated registers; the dispatched CALLD captures C/Z and PC into IRETx automatically (Silicon Doc v35)"
+  context_switch_overhead: "0 clocks for register state — IJMPx/IRETx are dedicated registers; the dispatched CALLD captures C/Z and PC into IRETx automatically"
   
   interrupt_rate:
     note: |

@@ -169,7 +169,7 @@ execf_branching:
       EXECF ##(%1010 << 10) | next_section
 
 benefits:
-  - "One static instruction sequence serves many variants: the silicon doc's 9-instruction 'addr' sequence realizes 36 address calculations, one pattern each"
+  - "One static instruction sequence serves many variants: a 9-instruction 'addr' sequence realizes 36 address calculations, one pattern each"
   - "SKIPF/EXECF in cog/LUT step over skipped instructions with no clock penalty, except the two cancel cases"
 # Sources: benefits: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION SKIPPING ('addr' sequence; cancel cases)
 

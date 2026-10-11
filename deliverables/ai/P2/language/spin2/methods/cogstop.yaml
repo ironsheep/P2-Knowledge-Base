@@ -66,7 +66,7 @@ effects:
     - "Cog becomes available for COGINIT (it returns to the pool of free cogs)"
 
   pin_state_after_stop:
-    - "What a stopped cog leaves on the pins and in smart pin modes it configured is not established by an ingested source; do not rely on it"
+    - "What a stopped cog leaves on the pins and in smart pin modes it configured is not stated in the Parallax Propeller 2 Documentation v35 or the Spin2 Language Documentation v55; do not rely on it"
 
   resources:
     - "A lock the cog HELD goes free. Ownership stops holding the moment the cog becomes inactive - for any cause, not only COGSTOP - so nothing has to release it"

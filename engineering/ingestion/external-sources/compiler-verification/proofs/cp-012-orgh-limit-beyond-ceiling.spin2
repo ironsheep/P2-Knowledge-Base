@@ -1,0 +1,5 @@
+PUB go()
+
+DAT
+        ORGH    $400, $100004
+lbl     NOP
