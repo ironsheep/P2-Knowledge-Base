@@ -42,7 +42,6 @@ object_metadata:
   metadata:
     created_date: '2022-01-04'     # the OBEX upload date, served (not bookkeeping)
   version_tracking:
-    obex_version: ''
     has_github_repo: false
 ```
 

@@ -277,7 +277,7 @@ class ComprehensiveP2Discovery:
                 'functionality': {
                     'category': self._categorize_object(object_data),
                     'subcategory': '',
-                    'description_short': object_data.get('description', '')[:100],
+                    'description_short': '',  # authored one-liner (F-573), never a cut of the description
                     'description_full': object_data.get('description', ''),
                     'tags': self._generate_tags(object_data),
                     'hardware_support': [],

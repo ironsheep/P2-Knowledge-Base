@@ -68,5 +68,4 @@ object_metadata:
   metadata:
     created_date: '2021-02-09'
   version_tracking:
-    obex_version: ''
     has_github_repo: false

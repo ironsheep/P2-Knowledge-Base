@@ -66,7 +66,19 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen; + F-571, F-572, F-573, found 2026-10-11 by «#398» and the MCP agent's 1.5.1 review)
 
-### F-573 — OBEX `description_short` is our 100-character cut of the catalog text, and `version_tracking.obex_version` duplicates `technical_details.version` — `CONFIRMED` (found 2026-10-11 by the p2kb-mcp agent reviewing the 1.5.1 request; the form of the short description is Stephen's call)
+### F-573 — OBEX `description_short` is our 100-character cut of the catalog text, and `version_tracking.obex_version` duplicates `technical_details.version` — `PARTIAL` (found 2026-10-11 by the p2kb-mcp agent reviewing the 1.5.1 request; being fixed now, ships as KB v1.24.2)
+**Decided 2026-10-11 (Stephen):** each object gets a useful single-line description authored from its
+catalog text — restating only the title and catalog description, no added facts, no verdict — kept
+in `description_short` (the field the server shows; no MCP change), reviewed through a master index
+(`engineering/obex-integration/OBEX-ONE-LINER-MASTER-INDEX.md`) and audited line by line against the
+catalog text. Written once and edited in place; a new object's line is authored when it is added, and
+a release gate fails an object whose line is missing or cut. **Applied so far:** the scrapers no
+longer cut — `obex_discovery.py` (3 sites), `obex_discovery_fixed.py`, `comprehensive_p2_discovery.py`
+write `''`, `author_extraction.py` no longer overwrites it. `version_tracking.obex_version` removed
+from all 130 objects and from `scrape-obex-repos.py` (proved against HEAD: each value equal to
+`technical_details.version`, parsed data otherwise unchanged).
+(`obex_discovery.py` does not parse — truncated at line 128 since its first commit, 185ff1c58; its
+successor is `obex_discovery_fixed.py`. Known open item, not changed by this fix.)
 - **Cut-off descriptions.** The OBEX scrapers (`obex_discovery.py:374/909/1474`,
   `obex_discovery_fixed.py:264`, `author_extraction.py:238`) set `functionality.description_short` to
   `description[:100]`: 50 of 130 objects end mid-word (e.g. 4257 "…smart pins, meanin"), and 2842's

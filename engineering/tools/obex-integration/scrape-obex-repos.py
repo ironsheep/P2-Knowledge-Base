@@ -118,7 +118,6 @@ def update_yaml_file(yaml_path, scraped_data):
             data['object_metadata']['version_tracking'] = {}
         
         data['object_metadata']['version_tracking'].update({
-            'obex_version': scraped_data['version'],
             'has_github_repo': bool(scraped_data['github_repo'])
         })
         # the upload date is a fact about the object, served to agents: it lives at

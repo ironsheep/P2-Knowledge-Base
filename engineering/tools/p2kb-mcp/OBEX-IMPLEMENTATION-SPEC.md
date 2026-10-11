@@ -58,7 +58,6 @@ object_metadata:
     created_date: "2020-05-09"         # OBEX upload date; absent when OBEX shows none
 
   version_tracking:
-    obex_version: ""                   # OBEX-published version, if any
     has_github_repo: false
 
   scrape_tracking:                     # scraper bookkeeping; removed by the delivery filter

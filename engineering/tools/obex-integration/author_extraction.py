@@ -235,7 +235,8 @@ class OBEXAuthorExtractor:
             extracted_desc = extracted_info.get('description_full', '')
             if len(extracted_desc) > len(current_desc):
                 obj['functionality']['description_full'] = extracted_desc
-                obj['functionality']['description_short'] = extracted_desc[:100]
+                # description_short is an authored one-liner (F-573): a changed description is
+                # re-read by a person, never re-cut here
                 print(f"    ✅ Updated description")
             
             # Add extracted tags
