@@ -72,9 +72,9 @@ python3 engineering/tools/update-p2-reference-complete.py
 ```
 This rebuilds `deliverables/ai-reference/p2-reference.json` from all YAML sources.
 
-### Step 6: Compress and Commit Outputs
+### Step 6: Commit Outputs
+The index generator writes `p2kb-index.json.gz` itself, from the same bytes as the JSON.
 ```bash
-gzip -kf deliverables/ai/p2kb-index.json
 git add deliverables/ai/p2kb-index.json deliverables/ai/p2kb-index.json.gz
 git add deliverables/ai-reference/p2-reference.json
 git commit -m "Regenerate index and JSON reference after YAML changes"
@@ -95,7 +95,6 @@ python3 engineering/tools/validate-crossref-keys.py
 git add deliverables/ai/P2/ && git commit -m "YAML changes"
 python3 engineering/tools/generate-p2kb-index.py
 python3 engineering/tools/update-p2-reference-complete.py
-gzip -kf deliverables/ai/p2kb-index.json
 git add deliverables/ai/p2kb-index.json* deliverables/ai-reference/p2-reference.json
 git commit -m "Update index and JSON reference"
 ```

@@ -20,9 +20,9 @@ powershell -ExecutionPolicy Bypass -File .\verify-ps1-filter.ps1
 ## Latest run
 
 ```
-date: 2026-10-07 (Stephen, Windows PowerShell under his Windows emulator; folder copy)
+date: 2026-10-11 (Stephen, Windows PowerShell under his Windows emulator; folder copy)
 engine: 3.5
-fetch-kb-file.ps1: 45fec50ddfc45fbdf730d1c587efffb6112ee47085f0adc973542238a564c945
+fetch-kb-file.ps1: 12ff79da70780dd6438a6cf541cbf9751676de84fc1c87a71c8a22db98abf1e9
 refresh-kb.ps1: 7ba88c3aeafdcdead5fb53920d335966becb170d32b1a792acf2ace09b90a0f9
 result: PASS
 ```

@@ -24,6 +24,7 @@ Example keys:
 Git mtime is used for version tracking - no manual version numbers needed.
 """
 
+import gzip
 import hashlib
 import json
 import re
@@ -721,12 +722,16 @@ def main():
     # Output path
     output_path = base_path / "deliverables" / "ai" / "p2kb-index.json"
 
-    # Write the index
-    with open(output_path, 'w') as f:
-        json.dump(index, f, indent=2)
+    # Write the index, and its .gz from the same bytes: a separate hand-run gzip
+    # step was skipped often enough that the committed .gz went stale twice.
+    raw = json.dumps(index, indent=2).encode('utf-8')
+    output_path.write_bytes(raw)
+    gz_path = output_path.with_name(output_path.name + ".gz")
+    gz_path.write_bytes(gzip.compress(raw, mtime=0))
 
     print(f"\n✅ Index generated successfully!")
     print(f"   Output: {output_path}")
+    print(f"   Gzip:   {gz_path}")
     print(f"   Total entries: {index['system']['total_entries']}")
     print(f"   Total categories: {index['system']['total_categories']}")
     print(f"   Total aliases: {index['system']['total_aliases']}")
