@@ -153,10 +153,6 @@ optimal_configurations:
 documentation:
   primary: "P2 Edge Breakout Board (#64029) v1.0 03/01/2023, p.1"
 
-references:
-  - "Edge module documentation"
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon)"
-  - "Pin mapping references"
 
 related:
   - "hardware/edge-standard-module.yaml"

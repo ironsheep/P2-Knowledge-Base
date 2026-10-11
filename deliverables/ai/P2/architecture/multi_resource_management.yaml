@@ -189,7 +189,3 @@ related_concepts:
   - smart_pin_arrays: Hardware acceleration for I/O
   - hub_cog_communication: Efficient data transfer
   - round_robin_scheduling: Fair resource allocation
-
-references:
-  - P2-OctoSerial: 8-port UART implementation
-  - Production code patterns from Iron Sheep Productions

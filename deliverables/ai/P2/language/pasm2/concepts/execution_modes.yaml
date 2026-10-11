@@ -223,7 +223,3 @@ debugging:
     - "Hub timing varies with access patterns"
     - "Use CT registers for measurements"
 
-references:
-  - silicon_doc: Instruction Modes section
-  - architecture_guide: Memory organization
-  - optimization_guide: Execution mode selection

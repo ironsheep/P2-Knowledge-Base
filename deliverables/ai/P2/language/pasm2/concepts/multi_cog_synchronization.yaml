@@ -401,8 +401,6 @@ best_practices:
     - "Batch operations under single lock"
     - "Consider COG affinity for data"
 
-references:
-  - silicon_doc: Lock and COGATN instructions
+sources:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LOCKS and COG ATTENTION"
   - "Parallax Spin2/PASM Debugger v51, debug entry and debug_exit (LOCKTRY #15 / LOCKREL #15 give one cog at a time ownership of the save buffer and tx/rx pins)"
-  - isp_bldc_motor.spin2: Multi-COG coordination
-  - parallel_algorithms: Work distribution patterns

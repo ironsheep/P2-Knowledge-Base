@@ -315,7 +315,5 @@ limitations:
   - "SETQ blocks are atomic"
   - "Debug ISR size limited by COG RAM"
 
-references:
-  - silicon_doc: Events and Interrupts section
-  - instruction_set: Event/Interrupt instructions
-  - application_notes: Interrupt handling patterns
+sources:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS and INTERRUPTS"

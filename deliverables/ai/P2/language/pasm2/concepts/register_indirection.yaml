@@ -193,7 +193,5 @@ debugging:
     - Use fixed values during development
     - Log computed addresses for verification
 
-references:
-  - silicon_doc: Register Indirection section
-  - instruction_set: ALTx instruction encodings
-  - optimization_guide: Table-driven techniques
+sources:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), REGISTER INDIRECTION"

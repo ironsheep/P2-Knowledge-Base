@@ -178,10 +178,8 @@ best_practices:
   - Use SKIPF for conditional sequences
   - Align hot branch targets
 
-references:
-  - silicon_doc: Branch Addressing section
-  - instruction_set: Branch instruction encodings
-  - optimization_guide: Control flow optimization
+sources:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BRANCH ADDRESSING"
 
 related:
   - language/pasm2/concepts/labels.yaml

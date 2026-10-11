@@ -488,8 +488,7 @@ related:
   - architecture/fifo.yaml
   - language/spin2/constructs/inline_pasm.yaml
 
-references:
+sources:
   - propeller_2_documentation_v35: "HUB EXECUTION section. Branching to a hub address takes a minimum of 13 clock cycles. If the instruction being branched to is not long-aligned, one additional clock cycle is required. FIFO depth (THE COG -to- HUB RAM INTERFACE section): (cogs+11) stages. REP hidden jump (INSTRUCTION REPEATING section): REP works in hub memory, but executes a hidden jump to get back to the top of the repeated instructions. Forbidden list (HUB EXECUTION section): while in hub execution mode, the FIFO cannot be used for anything else, so during hub execution these instructions cannot be used: RDFAST / WRFAST / FBLOCK / RFBYTE / RFWORD / RFLONG / RFVAR / RFVARS / WFBYTE / WFWORD / WFLONG / XINIT / XZERO / XCONT - when the streamer mode engages the FIFO."
   - sequential_hubexec_clocks: "Sequential hubexec instructions stream through the FIFO at 2 clocks each (same as cogexec): the Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.148-159, gives one Clocks value for Cog & LUT and Hub execution on each sequential instruction, and Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION, describes the FIFO spooling up the stream."
-  - per_instruction_yamls: "language/pasm2/jmp.yaml: clocks 4 (cog), range 4 / 13...20. language/pasm2/call.yaml: cycles 4, notes '4 cycles for Cog/LUT, 13-20 cycles for Hub execution'. language/pasm2/ret.yaml: range 4 / 13...20. language/pasm2/djnz.yaml: clocks '2 or 4', range 13...20. language/pasm2/add.yaml: cycles 2 fixed. language/pasm2/mov.yaml: cycles 2."
   - "Parallax Spin2/PASM Debugger v51, Breakpoint Handler Overlay (SETQ + RDLONG loads the overlay code into cog registers)"

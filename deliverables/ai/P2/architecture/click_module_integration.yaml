@@ -245,10 +245,3 @@ related_concepts:
 
 see_also:
   - hardware/addon-click-adapter.yaml
-
-references:
-  - "64008 Rev A schematic (Parallax, 2020-08-10, CC BY-SA 4.0) - PRIMARY for the P2-side pin offsets"
-  - "MikroElektronika mikroBUS standard - authority for Click-side pin meanings; NOT held in this repo"
-  - "P2 to mikroBUS Click Adapter product page (Parallax) - board narrative and host compatibility"
-  - "P2-Click-eInk implementation - origin of the constant names and Spin2 idiom"
-  - "Iron Sheep Productions Click drivers"

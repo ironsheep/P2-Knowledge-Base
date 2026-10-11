@@ -224,11 +224,6 @@ educational_value:
 documentation:
   primary: "P2 Edge Module Breadboard (#64020) v1.2 01/07/2021, p.1"
 
-references:
-  - "Edge module documentation"
-  - "Servo control programming guides"
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon)"
-  - "Educational lab manuals"
 
 related:
   - "hardware/edge-standard-module.yaml"

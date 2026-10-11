@@ -236,10 +236,8 @@ comparison:
     - REP: Compact code, fixed overhead
     - Unrolled: Larger code, fully flexible
 
-references:
-  - silicon_doc: REP instruction details
-  - optimization_guide: Loop optimization techniques
-  - timing_doc: Cycle-accurate execution
+sources:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION REPEATING"
 
 related:
   - language/pasm2/concepts/labels.yaml

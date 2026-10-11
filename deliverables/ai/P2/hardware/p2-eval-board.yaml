@@ -233,10 +233,6 @@ target_audience:
 documentation:
   primary: "Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, p.1"
 
-references:
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon)"
-  - "Add-on board documentation (#64006)"
-  - "PASM2/Spin2 language references"
     
 availability:
   vendor: "Parallax Inc."

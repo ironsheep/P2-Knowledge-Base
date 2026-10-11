@@ -186,10 +186,6 @@ physical_advantages:
 documentation:
   primary: "P2 Edge Mini Breakout Board (#64019) v1.1 11/30/2020, p.1"
 
-references:
-  - "32MB Edge module documentation (optimal pairing)"
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon)"
-  - "Pin mapping and limitations guide"
 
 related:
   - "hardware/edge-32mb-module.yaml"

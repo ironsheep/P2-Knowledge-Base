@@ -423,7 +423,7 @@ best_practices:
   - "Test timing with oscilloscope"
   - "Use LUT for lookup tables"
 
-references:
+sources:
   - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER"
   - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES"
   - "Parallax SPI Flash Programmer and Boot Loader v51, Programmer and Loader (SPI coordination)"

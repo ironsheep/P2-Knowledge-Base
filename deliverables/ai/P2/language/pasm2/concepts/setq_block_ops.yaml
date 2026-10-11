@@ -303,12 +303,9 @@ best_practices:
   - "Use LUT for frequently accessed tables"
   - "Preserve debug state with SETQ blocks"
 
-references:
-  - silicon_doc: SETQ/SETQ2 block operations
-  - instruction_set: SETQ/SETQ2 encoding
+sources:
   - "Parallax SPI Flash Programmer and Boot Loader v51, Loader (SETQ moves code from cog to hub) and Move application down to $00000+ (SETQ2 block copy)"
   - "Parallax Spin2/PASM Debugger v51, debug entry and debug_exit (SETQ saves and restores registers $010..$1F7 to the save buffer)"
-  - optimization_guide: Fast memory transfers
 
 related:
   - language/pasm2/setq.yaml

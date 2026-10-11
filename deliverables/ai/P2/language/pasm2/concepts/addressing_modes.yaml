@@ -142,7 +142,3 @@ best_practices:
   - Use ALTX for computed jumps and table access
   - Prefer auto-increment for array processing
 
-references:
-  - silicon_doc: Addressing Modes section
-  - instruction_set: Encoding formats
-  - assembler_manual: Operand syntax

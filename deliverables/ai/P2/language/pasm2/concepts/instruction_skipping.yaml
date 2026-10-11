@@ -187,8 +187,3 @@ debugging:
   sources:
     - "GETBRK D WZ pattern: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT, GETBRK D WZ"
     - "GETBRK D WC fields: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT, GETBRK D WC"
-
-references:
-  - silicon_doc: Instruction Skipping section
-  - silicon_doc: Special SKIPF Branching Rules
-  - optimization_guide: Branch-free programming

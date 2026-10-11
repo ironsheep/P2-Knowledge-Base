@@ -281,7 +281,3 @@ best_practices:
   - "Use hardware stacks when possible"
   - "Implement overflow checking for critical systems"
 
-references:
-  - silicon_doc: Stack operations section
-  - instruction_set: PUSH/POP variants
-  - architecture_guide: Memory pointers

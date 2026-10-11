@@ -112,8 +112,10 @@ common_errors:
   skipf_in_hub_exec:
     - "SKIPF in hub exec reverts to SKIP behavior (cancels instead of stepping over)"
 
-references:
-  - silicon_doc: INSTRUCTION SKIPPING and Special SKIPF Branching Rules sections
-  - silicon_doc: GETBRK
+related:
   - language/pasm2/skipf.yaml
   - language/pasm2/execf.yaml
+
+sources:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION SKIPPING"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT (GETBRK D WC, GETBRK D WZ)"

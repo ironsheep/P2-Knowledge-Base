@@ -111,7 +111,5 @@ common_patterns:
     - pattern: "GETCT target / ADDCT1 target, ##delay / WAITCT1"
     - description: Precise timing using CT register
 
-references:
-  - silicon_doc: Special Registers section
-  - instruction_set: GET/SET instruction group
-  - timing_doc: CT and timing registers
+sources:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SPECIAL-PURPOSE REGISTERS"
