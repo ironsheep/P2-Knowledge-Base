@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-573`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-574`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -64,7 +64,22 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen; + F-571, F-572, found 2026-10-11 by «#398»)
+## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen; + F-571, F-572, F-573, found 2026-10-11 by «#398» and the MCP agent's 1.5.1 review)
+
+### F-573 — OBEX `description_short` is our 100-character cut of the catalog text, and `version_tracking.obex_version` duplicates `technical_details.version` — `CONFIRMED` (found 2026-10-11 by the p2kb-mcp agent reviewing the 1.5.1 request; the form of the short description is Stephen's call)
+- **Cut-off descriptions.** The OBEX scrapers (`obex_discovery.py:374/909/1474`,
+  `obex_discovery_fixed.py:264`, `author_extraction.py:238`) set `functionality.description_short` to
+  `description[:100]`: 50 of 130 objects end mid-word (e.g. 4257 "…smart pins, meanin"), and 2842's
+  reads "andthe" where `description_full` has "and the". `p2kb_obex_get`, `p2kb_obex_find` and the
+  suggestions list all show this field as `description`, so agents see our truncation as the
+  catalog's text. By the doctrine (*an OBEX entry carries what the catalog says*), the served short
+  form must be the catalog's own words, not a mid-word cut.
+- **Duplicate version.** `version_tracking.obex_version` and `technical_details.version` are written by
+  `scrape-obex-repos.py` from the same scrape; equal in all 130 objects (20 carry a value); nothing
+  reads `obex_version`. Two copies of one fact is the rename-drift F-571 just paid for. Fix: remove
+  `obex_version` from the objects and the scraper; the server reads `technical_details.version`
+  (`MCP-OBEX-SUMMARY-CHANGE-REQUEST.md` §7).
+No server change for either. Ships in the next KB release.
 
 ### F-571 — `p2kb_obex_get` shows a zero quality score and an empty created date for every OBEX object — `PARTIAL` (found 2026-10-11 by the close-out release MCP test, step 5, «#398»; the date moved KB-side 2026-10-11 for v1.24.1; the server half is requested for p2kb-mcp 1.5.1)
 **Applied 2026-10-11 (Stephen: "yes a now"):** the upload date moved from

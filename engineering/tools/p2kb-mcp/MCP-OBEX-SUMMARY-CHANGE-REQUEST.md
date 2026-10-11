@@ -128,3 +128,20 @@ any time after; it does not depend on any other KB change.
 | O6 | `p2kb_obex_find term:serial limit:2` | as on 1.5.0: `{count: 2, objects: [{author, category, description, match_type, object_id, title}, …], term: "serial", type: "objects"}` — 2837 (ESP32) then 2842 (Full Duplex Serial) |
 
 F-571 closes in the register on O1-O6, with the server version.
+
+## 7. Your review (2026-10-11) — our answers
+
+1. **Breaking change — agreed.** `metadata.quality` goes and the other `metadata` keys appear only
+   with a value; mark it breaking in the 1.5.1 changelog entry despite the patch number.
+2. **Two version fields — `technical_details.version` is authoritative.** `version_tracking.obex_version`
+   is a second copy the scraper writes from the same scrape; it equals `technical_details.version` in
+   all 130 objects today (20 carry a value), and nothing reads it. The KB removes it in its next
+   release so there is one field, not two. Read `technical_details.version` only, as §3.2 says.
+3. **The shared spec — updated.** `engineering/tools/p2kb-mcp/P2KB-MCP-SPECIFICATION.md`'s
+   `p2kb_obex_get` row now states the 1.5.0 shape and the 1.5.1 contract (breaking, field sources,
+   `full_metadata`). Re-import it byte-identical from the KB's `main`; `DOCs/API.md` and
+   `docs-src/data/tools.yml` are yours as you said.
+4. **2842's cut-off `description_short` ("andthe") — the KB's to fix, no server change.** Our scraper
+   builds `description_short` as the first 100 characters of the description, cutting mid-word (50 of
+   130 objects), and 2842's also lost a space. The KB corrects the field in its next release; keep
+   reading `functionality.description_short` for `description` exactly as today.
