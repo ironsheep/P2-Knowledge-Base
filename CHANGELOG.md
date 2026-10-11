@@ -20,6 +20,66 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.24.0] - 2026-10-11
+
+**All seven silicon errata have a home page, every code example compiles, and the index names the provenance fields consumers drop.**
+
+### Added
+
+- **Silicon errata hub**: one page lists errata E1-E7, each with what it affects, its effect, and the rule code follows; findable as "E3" or "errata"
+- **Erratum labels on affected pages**: SETQ, AUGS/AUGD, RDLONG/WRLONG/WMLONG, RDFAST, GETCT, GETXACC, GETMS, GETSEC and WRPIN name their erratum and link to the hub
+- **Delivery filter**: the index carries a `delivery_filter` rule naming the provenance and bookkeeping fields consumers drop, so pages arrive as content only; index format 3.6.0
+- **Six Spin2 operator pages**: `&`, `|`, `^`, `!`, the CON equate `=`, and post-assign `\` each give priority, forms and the blocks they work in
+- **P1 to Spin2 operator differences**: compile-checked rows show P1 tokens that fail (`||`, `^^`, `>|`) or compile with a new meaning (`~>`, `<-`)
+- **Floating-point operators**: float comparisons (`<.`, `<=.`, `==.`), CON-block float behavior, FLOAT/ROUND/TRUNC, and NaN comparison rules are on the operators pages
+- **USB smart pin (`%11011`)**: a live WRPIN switches a running pair between drive and sniffer; a live WXPIN sets the baud for the next packet
+- **Boot ROM TAQOZ**: the page lists the 432-word ROM dictionary, console control keys, hub memory layout, and BACKUP/RESTORE
+- **Top-level Spin2 stack**: COGSPIN documents how the compiler places the first cog's stack, that it grows upward, and its 6-long frame header
+- **AK5704 and PCF8523 chip facts**: HD Audio lists the codec's I2C addresses ($10/$11 by CAD pin) and SDTO2E; the RTC lists address $68 and its 20 registers
+- **HUB75 adapter wiring**: two 74HCT244 buffers, 70 MHz ceiling, spare through-holes J4-J6, 5 V taken from the lower header, base pins 0, 16, 32 or 48
+- **Eval Board P56-P63 warning**: the 15 add-on pages and the HUB75 adapter warn that a board on base pin 56, or a 16-pin board on 48, shares the boot flash, microSD, USB serial and LED pins
+- **P2 Eval Board Rev C**: the page lists Rev C's changes from Rev B; the WX Adapter gives the P56-P63 placement for wireless programming
+- **Package board-design guidance**: bypass capacitors, 1.8 V VDD, 3.3 V Vxxyy, TEST to GND, and a RESN pull-up (typically 10 K)
+- **Quick Bytes links**: every Quick Bytes entry points to its article on obex.parallax.com, with download details refreshed
+
+### Changed
+
+- **Entries cite their authority**: a Parallax document by title, edition, section and page; a source listing at its edition; an OBEX object; or a silicon or compiler test
+- **Code examples compile**: every code block compiles in the context it declares
+- **Entries state facts**: verification notes, extraction metadata and unsourced guidance are not part of what you receive
+- **Hardware comparison page**: keeps dimensions and flash/PSRAM sizes from Parallax's guides; pricing points to the Parallax store
+- **Version gates**: BYTECOMP/WORDCOMP/LONGCOMP and BYTESWAP/WORDSWAP/LONGSWAP require `{Spin2_v45}`
+- **Block compare and swap**: COMP methods return -1 on a match and 0 for a Count of 0; SWAP methods take `(AddrA, AddrB, Count)`
+- **`:=:` swaps structures**: both operands are variables of one STRUCT type (v45); swap plain variables with `a, b := b, a`
+- **SQRT and QSQRT truncate**: results are floor roots (SQRT 8 = 2, SQRT 99 = 9); round yourself for nearest
+- **XORO32 and `??` zero state**: a zero state stays zero, so seed with a non-zero value
+- **`<=>` is signed**: Spin2 has no unsigned three-way compare
+- **Operator precedence**: seventeen levels; `!!`/NOT is its own level, so `NOT a == b` means `NOT (a == b)`
+- **FIELD is reserved**: OBEX 2842's `jm_fullduplexserial.spin2` notes it needs its local named `field` renamed to compile
+- **Inline PASM**: labels are local to the ORG..END block (plain or `.`-prefixed); the first 16 method longs are addressed by name, separate from PR0..PR7
+- **ORGH, ORGF and WORD**: ORGH limits and the PASM-only debug-mirror failure are stated; ORGF fills with zeros to a cog address; WORD data needs ALIGNW
+- **Branch addressing**: relative `#label` spans +/-512 KB; JMP/CALL/RET cost 4 clocks in cog, 13-20 in hub; a 9th hardware-stack push discards the oldest
+- **Cog and hub jump boundary**: a jump to $000-$3FF stays in cog or LUT execution; $400 and above enters hub execution
+- **ALTx and bit instructions**: ALTB/ALTR take their base as the S operand, ALTI steps S and D together, and BITx reads a span from Src[9:5]
+- **RETIx and RESIx**: RETIx takes no WC/WZ/WCZ; RESIx returns and records its next address in IJMPx
+- **Cog attention**: the attention event is 14 (`SETINT3 #14`), and a cog's COGATN on its own bit raises its own flag
+- **Shared pins**: every cog's DIR and OUT bits are OR'd at each pin
+- **Smart pin timing**: NCO duty and SMPS X[15:0] is the base period in clocks; SINC2 is accurate from the third sample, SINC3 from the fifth
+- **PINSTART examples**: ADC with a 1,024-clock SINC2 period, triangle PWM, quadrature using `P_PLUS1_B`, and smart-pin SPI on the boot-flash pins
+- **WRPIN pin ranges**: ranges are written Top..Bottom (`15..8` is pins 8 through 15)
+- **COGSPIN stack sizing**: no Parallax document states a size; size the buffer by the high-water mark of the launched method, as P2AN006 measures
+- **REGEXEC and GETCRC**: REGEXEC loads a chunk with a two-word header and passes data through PR0..PR7; GETCRC starts from all ones across the polynomial's width
+- **Clock setup**: the 160 MHz (20 MHz x 8) and 250 MHz (/2 x 25) HUBSET examples both select VCO / 1 with %PPPP = 15
+- **JonnyMac source conventions**: the page records item by item what OBEX 2842 and OBEX 2824 show
+- **PNut-TS tool page**: options and defaults are read from `pnut-ts --help` and `pnut-term-ts --help`
+
+### Removed
+
+- **`+<=>` operator page**: Spin2 has no such operator
+- **ALTS + `JMP #0-0` examples**: the computed-jump and switch-case idioms are dropped from the branch-addressing and register-indirection pages
+
+---
+
 ## [1.23.3] - 2026-10-04
 
 **The P2 Edge modules' boot-pin note arrives whole.**

@@ -10,7 +10,7 @@
 > resumes your thread, and routes you into the right head. This README is what you
 > read to see the *whole board* and decide where to push next.
 >
-> _Last refreshed: 2026-10-03_
+> _Last refreshed: 2026-10-11_
 
 ## The heads — status & next action
 
@@ -19,8 +19,8 @@ Glance only — one line per head; each head's own dashboard (Dashboard column) 
 | Head | Dashboard | Status at a glance | Next actionable |
 |------|-----------|--------------------|-----------------|
 | **Ingestion** | [`ingestion/README.md`](ingestion/README.md) | **36 logical sources** (🏆 26) · gap ledger 6 OPEN + 4 PARTIAL · expert queue 6 open | **next target is open** — the prior entry (Smart Pins cert audit) closed 2026-08-26 |
-| **YAML (P2KB)** | [dashboard](operations/YAML-HEAD-DASHBOARD.md) · [register](operations/P2KB-CORRECTION-FINDINGS.md) | **v1.23.3** 2026-10-04 — Edge boot-pin note delivered whole; MCP filter handoff written (F-439); v1.23.2 benched sync TX and `##` skip cost | MCP roll per the handoff; F-545 (provenance under unlisted keys); F-542/F-543 KB fixes; «#378» manual updates ride each manual's release |
-| **Manual** | [`document-production/README.md`](document-production/README.md) · [roster](document-production/PUBLICATION-ROSTER.md) | **18 published** · 9 manuals · 7 app-notes · 1 guide · 1 tool-guide — latest **Assembly v3.1.11**, **deSilva v3.0.9**, **I/O & Smart Pins v1.0.11** and **XBYTE Guide v1.1.1** (2026-10-05) | «#378» manual updates all released (10-05); P2 Errata awaits Chip's design reasons («#373») and Parallax review |
+| **YAML (P2KB)** | [dashboard](operations/YAML-HEAD-DASHBOARD.md) · [register](operations/P2KB-CORRECTION-FINDINGS.md) | **v1.24.0** 2026-10-11 — close-out release: change set audited line by line, served text carries facts only, three compile proofs | release test plan steps 3-5 (old MCP, new MCP, probes; F-439); F-569 provenance keys |
+| **Manual** | [`document-production/README.md`](document-production/README.md) · [roster](document-production/PUBLICATION-ROSTER.md) | **18 published** · 9 manuals · 7 app-notes · 1 guide · 1 tool-guide — latest **Assembly v3.1.11**, **deSilva v3.0.9**, **I/O & Smart Pins v1.0.11** and **XBYTE Guide v1.1.1** (2026-10-05) | «#378» manual updates all released (10-05); P2 Errata's design-reason paragraphs parked on its punch list until the amended P2 Documentation publishes; Parallax review |
 | **OBEX** | [`obex-integration/README.md`](obex-integration/README.md) | ✅ **v2.2** (2026-06-29) · **130 P2 objects** · shipped in KB v1.13.3 · MCP-served | Delta re-scan vs the **2026-06-29** baseline |
 | **Operations** | [`operations/README.md`](operations/README.md) | Cross-cutting process · owns register + lessons-learned | (infrastructure — supports the content heads) |
 | **Quick Bytes** | [`quickbytes-integration/README.md`](quickbytes-integration/README.md) | 🔴 NOT processed · ~15% discovered | Parked — not moving soon (tracked so it isn't lost) |
