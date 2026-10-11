@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-571`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-572`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -62,9 +62,11 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen)
+## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen; + F-571, found 2026-10-11 by «#398»)
 
-### F-570 — the seven P2 errata E1-E7 could not all be found: no page listed them, and E1, E2 and E6 were reachable by no name — `PENDING-VALIDATION` (applied 2026-10-10, «#422»; closes when the next KB release serves it)
+### F-570 — the seven P2 errata E1-E7 could not all be found: no page listed them, and E1, E2 and E6 were reachable by no name — `RESOLVED` (reported 2026-10-10 by Stephen, applied 2026-10-10, «#422»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get "errata"` and `p2kb_get "erratum E6"` → `p2kbArchSiliconErrata` (`resolved_from` the alias), which serves all seven entries E1-E7 (title, affects, effect, rule, `related:`) and the aliases `errata`, `erratum`, `P2 errata`, `E1-E7`, `erratum E1`..`E7`, bare `E1`..`E7`; E6 reads "In a DAC Smart-Pin Mode, OUT Needs TT Bit 0 to Run the ADC". `p2kb_get "erratum E3"` returns only the hub, but `p2kb_find term:"erratum E3"` → `p2kbArchSiliconErrata`, `p2kbPasm2Getct`, `p2kbSpin2Getms`, `p2kbSpin2Getsec`, and the published `deliverables/ai/p2kb-index.json` carries `erratum E3` (and `ERRATUM E3`) → those same four keys (E1 → hub + `p2kbPasm2SetqBlockOps`, E7 → hub + `p2kbPasm2Rdfast`). The KB is right: the index holds both targets and the server's single-key `p2kb_get` picks the first (the hub); that is server behaviour, not a KB defect, and it is not counted against this entry.
 Reported by Stephen 2026-10-10: an agent looking up all the errata could not find all of them. Measured on
 the committed index (HEAD `ce07fd8f`): `errata`, `erratum`, `P2 errata` and every `erratum EN` resolved to
 nothing; only `GETCT erratum E3`, `RDFAST erratum E7` and `Goertzel errata E4 E5` existed as aliases. **The
@@ -90,6 +92,28 @@ ids, history prose — all clean. **Not done (left out, ungrounded):** the E1 ca
 transfer inserts an AUGS needs a compile-proof record. Pages that mention an erratum without its number
 (`rdlong`, `wrlong`, `wmlong`, `rdbyte`, `rdword`, `wrbyte`, `wrword`, `setq`, Spin2 `getct`/`getms`/`getsec`,
 the DAC smart-pin pages, `wrpin`) point to the home pages, which carry it.
+
+### F-571 — `p2kb_obex_get` shows OBEX fields the KB no longer has, and does not show the one that matters — `CONFIRMED` (found 2026-10-11 by the close-out release MCP test, step 5, «#398»; the fix is in the MCP server, not this repo)
+Probed on p2kb-mcp **1.5.0** against KB v1.24.0, after `p2kb_refresh include_obex` (0 stale entries).
+`p2kb_obex_get 2842` returns a curated summary whose `metadata` block reads object-YAML paths this KB no
+longer has:
+- `metadata.quality: 0` — the KB removed quality scores; the object has no quality field at all, and a
+  zero reads as a rating of the object.
+- `metadata.created_date: ""` — `object_metadata.metadata` was renamed `scrape_tracking` (filtered at
+  delivery; F-545), so the server finds nothing. The object's real publish date is
+  `version_tracking.obex_upload_date` (`'2022-01-04'` for 2842).
+- `compatibility.known_issues` is not in the summary at all. For 2842 that is the CP-010 note that the
+  object as published does not compile with the current compiler (`field` is now reserved).
+
+**The KB side is correct.** `p2kb_get p2kbCommunity2842` serves the filtered object body: no
+`scrape_tracking`, no `compatibility.source`, and `known_issues` present. Only the curated
+`p2kb_obex_*` view is wrong; v1.4.0 showed the same mapping (step 3 of the test record,
+`correction-sweeps/2026-10-11-close-out-release-mcp-test.md`, git-ignored).
+**Owed, in the MCP server:** drop `quality`; take the date from `version_tracking.obex_upload_date` (or
+omit it when empty, never `""`); surface `compatibility.known_issues` when non-empty. Then add the
+curated OBEX field map to `engineering/tools/p2kb-mcp/P2KB-MCP-SPECIFICATION.md` (its `p2kb_obex_get`
+row names no fields, which is why the rename broke nothing visible here). Re-probe 2842 on the release
+that carries it.
 
 ### F-569 — the new provenance-key gate's census: three provenance keys still reach agents, and the OBEX tooling it touched has two defects — `NEEDS-VERIFICATION` (found 2026-10-10, «#422»)
 Found building F-545's gate (`audit-yaml-provenance-key-names.py`, kind `open`). Each is understood but
@@ -142,7 +166,9 @@ needs a call or a record that is not in hand:
   served. And `original_archiver_name` (now filtered) carried one credit that is nowhere else on its
   page: OBEX 2816, "based on BR's original in the Propeller 1 Object repo".
 
-### F-568 — `addon-hd-audio.yaml` and `addon-rtc.yaml` cited the chip datasheets only in prose, leaned on un-ingested drivers and a schematic, and stated two AK5704 facts wrongly — `PENDING-VALIDATION` (applied 2026-10-10, «#422»; closes when the next KB release serves it)
+### F-568 — `addon-hd-audio.yaml` and `addon-rtc.yaml` cited the chip datasheets only in prose, leaned on un-ingested drivers and a schematic, and stated two AK5704 facts wrongly — `RESOLVED` (found 2026-10-10, applied 2026-10-10, «#422»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbHwAddonHdAudioAddonHdAudio` serves `adc_codec_chip` with the slave address "%001000C ... $10 with CAD low, $11 with CAD high" and "CAD low: write = $20, read = $21. CAD high: write = $22, read = $23", `sdto2_default` "Chip pin 6 is TDMIN (an INPUT) by default ... SDTO2E resets to 0", and `unknown_on_this_board` ("which level the #64014 ADC board ties the codec's CAD pin to ... The board guide states neither"); no `AK5704_DEVICE_ID`, no `source_trace`, no driver or schematic resource entry. `p2kb_get p2kbHwAddonRtcAddonRtc` serves `rtc_chip` ($68, $D0/$D1, reset $58, 00h-13h map) and `board_unknown` (pull-ups unknown), with the datasheet named by title and revision under `resources`; the "3.3K pull-up" appears only as a quote of the board guide's Code Tip inside `scl_pull_up_caveat`. The still-open CAD strap level stays marked unknown in both the served text and `KNOWLEDGE-GAPS.md` G-014.
 
 > **DECIDED by Stephen 2026-10-10 ("yes A"):** a chip maker's datasheet is citable for its own chip's
 > facts only (admission route 3, `AUTHORITATIVE-SOURCES.md`; doctrine *Provenance is for us*).
@@ -283,7 +309,9 @@ jumper-free read-back):** start a cog that drives P0 high, sets a smart-pin mode
 enables it, COGSTOP it from another cog, read P0's DIR/OUT/IN and P1's mode behaviour from the
 surviving cog. **Fix when answered:** state the measured result on `cogstop.yaml`, cite the EF.
 
-### F-563 — `smart-pin-11011-usb-host-device.yaml` gives the USB receiver status bits [6] and [3..0] from the superseded PDF-era capture — `PENDING-VALIDATION` (applied 2026-10-10, «#419»; closes when the next KB release serves it)
+### F-563 — `smart-pin-11011-usb-host-device.yaml` gives the USB receiver status bits [6] and [3..0] from the superseded PDF-era capture — `RESOLVED` (found 2026-10-09, applied 2026-10-10, «#419»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbArchSmartPin11011UsbHostDevice` serves `registers.z_register.bits` as "[6] error — ... EOP SE0 > 2 bit periods or SE1", "[3] steady state — cleared on DP/DM state change, set on 7 bit periods of no change", "[2] SE0 in — high when DP/DM state is SE0", "[1] K in", "[0] J in"; the PDF-era "SE1 in" / "EOP SE0 > 3" / "set on 7+ bits of J" wording is absent (also `git grep` at `v1.24.0` over `deliverables/ai/P2`: no hit).
 Found 2026-10-09 by the VO-J-035 rework writer («#409»). `architecture/smart-pins/smart-pin-11011-usb-host-device.yaml:61-67`
 ships `[6] … EOP SE0 > 3 bits, or SE1`, `[3] SE1 in (illegal) — cleared on !SE1, set on 1+ bits of SE1`,
 `[2] SE0 in (RESET) — … set on 1+ bits of SE0`, `[1] K in (RESUME) — … set on 7+ bits of K`,
@@ -340,7 +368,9 @@ state the order as the general one and drop the unsourced consequence, or source
 > changing the companion alone would put them in disagreement. It changes in the app-note release
 > together with the prose.
 
-### F-560 — 78 `source:` fields in 58 files name a label, not a document — `PENDING-VALIDATION` (applied 2026-10-10, «#422»; closes when the next KB release serves it)
+### F-560 — 78 `source:` fields in 58 files name a label, not a document — `RESOLVED` (found 2026-10-07, applied 2026-10-10, «#422»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** Provenance-only fix, so validated by absence live and presence in git. `p2kb_get p2kbCommunitySimpleAnalogInput` (a Quick Byte) serves no `source:` line (its citation is its `url:`); `p2kb_get p2kbSpin2Pinstart`, `p2kbPasm2Muxq` and `p2kbSpin2Cogspin` serve no `hub_driver` / `P2-FLASH-FS` / category-label attribution. `git grep -E "^\s+source: *['\"]?[A-Za-z0-9_-]+['\"]?\s*$"` at `v1.24.0` over `deliverables/ai/P2` returns eight lines, all EF-/CP- ids (`EF-098`..`EF-101`, `EF-057`, `EF-062`, `EF-099`, `CP-007`); `muxq.yaml:51` / `testp.yaml:57` carry "(example code, not a Parallax document)" in `source:`.
 Found 2026-10-07 by the F-553 class sweep: `grep -rn -E "^\s+source: *['\"]?[A-Za-z0-9_-]+['\"]?\s*$" deliverables/ai/P2/`
 returns 78 lines in 58 files whose `source:` is a bare label: `parallax-quick-bytes` ×42 (a corpus
 not yet ingested — `quickbytes-integration` is NOT processed), `P2-OctoSerial` ×10, `P2-Click-eInk`
@@ -378,7 +408,9 @@ driver contradicted its attributions; the HUB75 examples were invented code unde
 > (`grep -rn -E "^\s+source: *['\"]?[A-Za-z0-9_-]+['\"]?\s*$" deliverables/ai/P2/` returns only
 > EF-/CP- ids, 2026-10-10).
 
-### F-559 — the DEBUG guide states tool limits as facts (15,872 bytes); it should teach the techniques instead — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
+### F-559 — the DEBUG guide states tool limits as facts (15,872 bytes); it should teach the techniques instead — `RESOLVED` (found 2026-10-07, applied 2026-10-07; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbSpin2DbgDebugStrategyGuide` (also reached by the alias `debug data too long`) serves `the_compilers_limits` with no byte or record figure: "Those figures belong to the compiler and can change from one release to the next, so this guide states none of them ... read them from your compiler, never from a document", the `-d -l` listing method, the `m150`/`m151`/`m153` messages, and the techniques (DAT + `zstr_()`, value-only forms, merging statements, `DEBUG_MASK`, `debug(IF(...))` already in the corrected `debug(IF(errorCount > 0), ...)` form). No `15,872`, `16,384` or `255 records` figure appears.
 > **Applied 2026-10-07.** `debug-strategy-guide.yaml` rewritten to the ruling: no compiler or
 > debugger figure stated as fact (title, aliases, `hard_limits` → `the_compilers_limits`, decision
 > guide and setups keyed to the listing, not counts); the debugger layout reduced to what is
@@ -414,7 +446,9 @@ remedies" vs the DAT+`zstr_` fix that cuts both; `:128`/`:415-419` "don't rely o
 `$2A00` = 10,752). **Decision owed:** whether the KB states the layout limit (and VO-J-027 is
 reinstated as a bench confirmation), given the 2026-10-07 strike ruling.
 
-### F-558 — F-387's P1→Spin2 table: `||` in the wrong tier, `>|`→`ENCOD` off by one, two rows lose P1 behaviour — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
+### F-558 — F-387's P1→Spin2 table: `||` in the wrong tier, `>|`→`ENCOD` off by one, two rows lose P1 behaviour — `RESOLVED` (found 2026-10-07, applied 2026-10-07; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbSpin2Operators`, `changed_from_p1.fails_to_compile` serves `||a -- unary absolute value` → "ABS a; || is now binary logical OR"; `>| x` → "(x <> 0) ? ENCOD x + 1 : 0 -- ENCOD returns the bit number itself, one less than P1's >|"; `?x / x?` → "a reversible LFSR ... P1's reverse form x? has no Spin2 equivalent"; `~x / ~~x` → "x SIGNX= 7 / x SIGNX= 15 (x SIGNX 7 alone does not write x)"; and `compiles_with_a_different_meaning` carries the `<=`/`>=` assignment-form row.
 > **Applied 2026-10-07.** `operators.yaml`: `||a` moved to `fails_to_compile` (m172); `>|` →
 > `(x <> 0) ? ENCOD x + 1 : 0`, compile-checked against all four P1 examples (0/8/32/21);
 > `?x/x?` states the reversible LFSR and that `x?` has no equivalent; `~x/~~x` → `SIGNX=` (writes
@@ -436,7 +470,9 @@ operators (`:4950`, `:5463`) — the Spin2 equivalent writes back (`SIGNX=`, v55
 and cites `:471` (ADDPINS) instead of `:472`; `generate-p2kb-index.py:113-117,128` comments and
 `validation/baselines/yaml-source-lock.json:861` still name `+<=>` / `op_addlteqgt.yaml`.
 
-### F-557 — `pasm2-getting-started.yaml` (F-542): four facts incomplete against a primary source; 36 "(order N)" row locators ship — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
+### F-557 — `pasm2-getting-started.yaml` (F-542): four facts incomplete against a primary source; 36 "(order N)" row locators ship — `RESOLVED` (found 2026-10-07, applied 2026-10-07; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbGuidePasm2GettingStarted` serves GETCT "Cogs 0-3 and 4-7 each keep their own upper long, which advances only while a cog of that group is running when the lower long wraps"; ORGH "In a Spin2+PASM program, bare ORGH sets hub origin $00400 ... In a PASM-only program, bare ORGH sets hub-exec mode at the current hub address"; "## instead of # makes the assembler insert an AUGS or AUGD"; RDLONG/WRLONG "+1 if the long crosses a hub long boundary; figures for an 8-cog P2". No "(order N)" token appears anywhere in the served guide (`git grep "(order [0-9]+)"` at `v1.24.0` over `deliverables/ai/P2`: no hit).
 > **Applied 2026-10-07.** GETCT gains the group-copy caveat (EF-068, EF-079 in `source:`); ORGH
 > states the Spin2+PASM and PASM-only behaviours (v55 :326-327, compile-checked); `##` → AUGS or
 > AUGD (Silicon Doc :5571-5572, listing-checked); hub timing gains "+1 if crossing a hub long;
@@ -454,7 +490,9 @@ spreadsheet row numbers sit in shipped descriptions — an internal locator the 
 payload scan does not pattern-match (a gate gap). Also: `critical_gotchas` changed from a list to
 `{source, items}`, so readers now get `{items: [...]}` unlike the sibling Spin2 guide.
 
-### F-556 — "2x 74HCT244" ships with no primary source (HUB75 adapter) — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
+### F-556 — "2x 74HCT244" ships with no primary source (HUB75 adapter) — `RESOLVED` (found 2026-10-07, applied 2026-10-07; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11 — closed by supersession, not by the removal described below.** The 2026-10-07 removal of the part number was overtaken by F-567 (2026-10-10), which ingested the HUB75E Adapter schematic H/W Rev 1.4 as a primary source; `v1.24.0:deliverables/ai/P2/hardware/hub75_adapter.yaml` now states "two 74HCT244 octal buffers at 5 V ... output enables tied low" with `source:` naming the schematic ("U1/U2 74HCT244 buffers on +5VA between the P2 headers J1/J2 and the HUB75 connector J7"), so the defect (a part number with no primary source) no longer exists. Live: `p2kb_get p2kbHwHub75AdapterHub75Adapter` serves `level_shifting: "two 74HCT244 octal buffers at 5 V, 3.3 V in to 5 V out ... output enables tied low"` and an `authorship` line saying every fact comes from the designer's schematic or dated statement; `resources.obex` is "ISP Hub75 Matrix Driver" with no `driver_file` key (none in `v1.24.0` either). Note for a later pass: `hardware/hardware-compatibility-matrix.yaml` (`addon_board_host_compatibility`, the 64032 `note`) repeats "the adapter's 74HCT244 level shifters" inside a block whose `source:` cites only the #64006-series guide; the hub75 page it points to carries the schematic citation.
 > **Applied 2026-10-07.** Part number removed from `hub75_adapter.yaml` (×2) and
 > `hardware-compatibility-matrix.yaml`; "level shifter ICs" kept (`official-specs.md:22`). The
 > non-existent `driver_file: isp_hub75_matrix.spin2` removed. Independent check: CORRECT. The
@@ -466,7 +504,9 @@ and `hardware/hardware-compatibility-matrix.yaml`. The schematic PDF is not inge
 `hub75_adapter.yaml:159` names `driver_file: isp_hub75_matrix.spin2`, which is in neither OBEX
 2850 nor the project copy.
 
-### F-555 — `boot-rom-contents.yaml` calls `ROM_Booter.lst` "an FPGA build of the same source"; it is an earlier revision — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
+### F-555 — `boot-rom-contents.yaml` calls `ROM_Booter.lst` "an FPGA build of the same source"; it is an earlier revision — `RESOLVED` (found 2026-10-07, applied 2026-10-07; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbArchBootRomContents` serves no mention of `ROM_Booter.lst` or "of the same source"; its citations (stripped at delivery, present in `git show v1.24.0:deliverables/ai/P2/architecture/boot-rom/boot-rom-contents.yaml`) name only "Parallax Propeller 2 ROM Booter v33_01j (assembly listing of the Prop2 silicon ROM)". `git grep "ROM_Booter\.lst|of the same source"` at `v1.24.0` over `deliverables/ai/P2` finds no ROM_Booter.lst reference anywhere (the only "same source" hit is unrelated pnut-ts text in `object-image-dedup.yaml`). The 2026-10-07 label ("earlier revision v141, an FPGA build") is therefore not in the tag either: the FPGA listing is no longer cited in any served file, so the wrong claim cannot be read.
 > **Applied 2026-10-07.** Label now: the silicon build is revision v33_01j (2019); `ROM_Booter.lst`
 > is an earlier revision, v141 (2018), built for the Prop123-A9 / BeMicro-A9 FPGA boards — cited in
 > `source:` (both listings' history lines, `ROM_Booter.lst:118`, Silicon Doc `:2876`,
@@ -479,7 +519,9 @@ BeMicro-A9`, FPGA boards per `silicon-doc-text.txt:2876`, `:2950-2951` — so "F
 "of the same source" is wrong. The F-421 register text ("neither is a newer revision") is wrong
 the same way. The re-citation to the silicon listing itself is right.
 
-### F-554 — F-386 left the false "WYPIN after enable is safe for all modes" rule in three files; one wrong locator — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
+### F-554 — F-386 left the false "WYPIN after enable is safe for all modes" rule in three files; one wrong locator — `RESOLVED` (found 2026-10-07, applied 2026-10-07; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbArchSmartPins` serves the corrected `correct_sequence.note` ("Write Y with WYPIN AFTER raising DIR for the trigger modes ... and asynchronous serial transmit (%11110) ... EXCEPTION -- synchronous serial transmit (%11100) in continuous mode needs its FIRST word written with WYPIN DURING reset"); `p2kb_get p2kbPasm2Wrpin` serves the matching `critical_requirement.note` ("Required for the trigger modes %00100/%00101 and asynchronous serial transmit %11110 ... Exception: ... %11100") with no "safe for all other modes"; `p2kb_get p2kbArchSmartPin01110CountAEdgesOptionalBDec` serves "That is the general order" and "the order is not critical" for this mode, no "every mode" / "safe either way"; its PASM example uses `dirh` then `wypin`. `git grep` at `v1.24.0` for "universal ... order" / "safe for all" / "EVERY mode" finds only unrelated streamer/XINIT/p2an001 text. The `:3852` locator no longer exists (the `smart_pins.yaml:105` source cites the SMART PINS section by title).
 > **Applied 2026-10-07.** The rule corrected in `smart_pins.yaml` (procedure + note: documented
 > reason for pulse/transition, measured effect for async TX, %11100 exception), `wrpin.yaml`
 > (note; ids moved to `source:`), `smart-pin-01110` (no "every mode", no "safe either way"); locator
@@ -498,7 +540,9 @@ interpretation, not a documented or measured fact (Silicon Doc `:4714` says outp
 Ledger: EF-019's heading still reads CONFIRMED for prime-after-enable on %11100 with no pointer to
 EF-090. Register/VO-J-028 say "ten mode pages" for a list of nine.
 
-### F-553 — `pinstart.yaml` `production_patterns` keeps the invented labels F-543/F-549 removed from the examples — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
+### F-553 — `pinstart.yaml` `production_patterns` keeps the invented labels F-543/F-549 removed from the examples — `RESOLVED` (found 2026-10-07, applied 2026-10-07; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbSpin2Pinstart` serves no `production_patterns` key and no `hub75_panel` / `flash_filesystem` pattern; `p2kb_get p2kbSpin2Cogspin` serves its `production_patterns` with only `indexed_stack_allocation` (no flash-FS stress example, no `multi_cog_with_locks`) and `synchronization.file_system_access` reading "The P2 FLASH Filesystem driver supports multi-cog access without consuming a cog"; `p2kb_get p2kbPasm2Muxq` serves the "Parallax HUB75 driver" example as the 2-line `SETQ maskRgb12` / `MUXQ OUTA, reg_value` extract and no invented "Essential for HUB75" claim.
 > **Applied 2026-10-07, widened by the class sweep.** `pinstart.yaml` `production_patterns`
 > removed. Same labels elsewhere: `cogspin.yaml` — the flash-FS stress example and
 > `multi_cog_with_locks` removed, and the claims that callers must lock the flash filesystem
@@ -516,7 +560,9 @@ applied-note says it was widened to every example in the file; this block was mi
 **Fix:** per `SOURCE-REPAIR-ORDER.md` — remove both patterns (they cite nothing real); re-add
 only what a primary source states. Sacred Rule #7: the block holds no `related:` paths.
 
-### F-552 — F-387's P1→Spin2 operator tables ship line citations in content; the release gate fails — `PENDING-VALIDATION` (applied 2026-10-07; closes when the next KB release serves it)
+### F-552 — F-387's P1→Spin2 operator tables ship line citations in content; the release gate fails — `RESOLVED` (found 2026-10-07, applied 2026-10-07; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbSpin2Operators`, `changed_from_p1` rows read e.g. "a ~> 2 -- shift arithmetic right" / "a SAR 2" with no `(P1 :NNNN)` / `(:NNN)` / `v55 :NNN` cite in any `p1:`, `spin2_spelling:` or `spin2_reads_it_as:` value; `p2kb_get p2kbSpin2OpPrecedence` level 11 carries no `spin2-v55-text.txt:472-488` cite.
 > **Applied 2026-10-07.** `concepts/operators.yaml` `changed_from_p1`: all 32 row cites
 > (`(P1 :NNNN)`, `(:NNN)`, `v55 :419`) moved into the block's existing `source:` as a
 > row→line map (P1 Manual v1.2 layout-text 4943-4973, 5681-5683; v55 text 409-491); every
@@ -536,7 +582,9 @@ next KB release. **Fix:** move each cite to the entry's `sources:` (where the cl
 reads it), keep the stated fact; re-run `validate-dod-release.py`. Not touched by the filter sprint —
 its certification bundle is frozen at HEAD and this stays a register item (Stephen, 2026-10-07).
 
-### F-551 — `guides/pasm2-getting-started.yaml` is uncited outside the blocks F-542 re-derived — `PENDING-VALIDATION` (applied 2026-10-10, «#418»; closes when the next KB release serves it)
+### F-551 — `guides/pasm2-getting-started.yaml` is uncited outside the blocks F-542 re-derived — `RESOLVED` (found 2026-10-07, applied 2026-10-10, «#418»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbGuidePasm2GettingStarted` serves `operand_types.register` "Cog register $000-$1FF (LUT RAM is reached with RDLUT/WRLUT, not as an operand)", the `WC`/`WCZ` examples as "carry out of the 32-bit add" / "borrow of (x - y)", `pointer_with_auto_increment.step_size` ("1 for RDBYTE/WRBYTE, 2 for RDWORD/WRWORD, 4 for RDLONG/WRLONG ... INDEX 1..16"), `reference_operators` (`#label` relative by default, `$` steps by 1 in ORG and 4 in ORGH), `timing_considerations` (4 clocks taken cog branch, 13...20 hub-exec, "+1 clock when the target is not long-aligned", QMUL "2...9 clocks to issue, the result about 55 clocks later"), `next_steps` naming real files, and `local_labels.syntax: ".labelname"` with no `:labelname` form. No `extraction_note` / `correction_2026*` key anywhere in the tag (`git grep` at `v1.24.0`: no hit). The citations that make the blocks "cited" are provenance and are stripped at delivery; the guide's `source:` blocks are present in `git show v1.24.0:deliverables/ai/P2/guides/pasm2-getting-started.yaml`.
 Found 2026-10-07 scoping F-542. Of 729 lines only `file_structure` and `timing_considerations`
 carried a source; F-542 re-derived `register_model`, `core_instructions`, `assembler_directives`
 and `critical_gotchas`. Still uncited: `instruction_format`, `addressing_modes`, `common_patterns`,
@@ -563,7 +611,9 @@ grounded · gaps · removals.
 > flag the colon form as compiler-accepted only; `language/fundamentals/pasm-labels.yaml` and
 > `identifier-rules.yaml` do not list it (0 hits for `:labelname` / `:label` in both, 2026-10-10).
 
-### F-550 — `serial_loader.yaml` `protocol_commands` gives the FPGA build's `Prop_Chk` answer and an invented `Prop_Clk` syntax — `PENDING-VALIDATION` (applied 2026-10-10, «#419»; closes when the next KB release serves it)
+### F-550 — `serial_loader.yaml` `protocol_commands` gives the FPGA build's `Prop_Chk` answer and an invented `Prop_Clk` syntax — `RESOLVED` (found 2026-10-07, applied 2026-10-10, «#419»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbArchSerialLoader` serves `prop_chk.syntax` "Prop_Chk <INAmask> <INAdata> <INBmask> <INBdata>" with response "Prop_Ver ... The Rev B/C silicon responds with "G" (A-F were FPGA builds)"; `prop_clk.syntax` with the five fields ending `<HUBSETclocksetting>` and example `> Prop_Clk 0 0 0 0 19D28F8`; `prop_txt.syntax` with the four-field prefix and "2.25x denser than hex"; `response_codes` ('.' / '!'; "'?' and '~' are the sender's data terminators, and '> ' is the sender's auto-baud sequence"); `validation_format` ("Checksum complement = $706F7250 ... minus the sum of all longs"; "long-aligned"); `multi_chip_support.ina_limit` "INA[1:0] (P0 and P1) cannot be matched". No `Prop_Ver Au`, no `Prop_Clk 2 8 1` / `2 16 1`, no `performance` / `disable_option` block (`git grep` at `v1.24.0`: no `Prop_Ver Au` hit).
 Found 2026-10-07 fixing F-421 in the same file. Against the P2 Hardware Manual (`p2-hardware-manual-text.txt:1629-1725`)
 and the Silicon Doc (`silicon-doc-text.txt:4860-4868`):
 - `prop_chk.response` "'Prop_Ver Au' (version A silicon)". Both documents: the Rev B/C silicon
@@ -602,7 +652,9 @@ re-derive from HW Manual :1580-1725 (+ Silicon Doc :4860 ff.), every field quote
 > manual; the unsourced `disable_option`, `performance` and `recovery` lines removed. Class sweep
 > (`Prop_Ver`, `Prop_Clk [0-9]`, `prop_chk`): this file only.
 
-### F-549 — `pinstart.yaml`'s HUB75 and sensor-array examples carry invented `source:` labels, and the HUB75 one contradicts the board's pinout — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
+### F-549 — `pinstart.yaml`'s HUB75 and sensor-array examples carry invented `source:` labels, and the HUB75 one contradicts the board's pinout — `RESOLVED` (found 2026-10-07, applied 2026-10-07, «#387»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbSpin2Pinstart` serves five examples and none is the HUB75 or the sensor-array one: ADC `PINSTART(16, P_ADC | P_ADC_1X, %00_1010, 0)` ("X = 0 would select a 1-clock period, which the P2 Documentation marks impractical"), PWM triangle `1000 << 16 | 1` with Y 500, async TX, quadrature on ONE pin `P_QUADRATURE | P_PLUS1_B` ("Starting both pins with ADDPINS does not pair them"), and the P58-P61 smart-pin SPI example; no `hub75_driver` / `sensor_array` label anywhere in the tag.
 > **Applied 2026-10-07, and widened to every example in the file.** The two named examples were
 > **removed** (uncited; HUB75 contradicts the adapter pinout; the sensor one reconfigures its ADC
 > pins as outputs under a "same mode" comment). The other four were uncited too, so each was
@@ -625,7 +677,9 @@ pins. The sensor example configures eight pins as ADCs, then reconfigures the sa
 from an ingested driver, compiled, with a real `source:`. Per F-548, the HUB75 one should point to
 the driver rather than restate its setup.
 
-### F-548 — `hardware/` entries restate their drivers (API, timing, cog use, chipset tables), which every driver release can falsify — `PENDING-VALIDATION` (class sweep applied 2026-10-10, «#420»; closes when the next KB release serves it)
+### F-548 — `hardware/` entries restate their drivers (API, timing, cog use, chipset tables), which every driver release can falsify — `RESOLVED` (found 2026-10-07, class sweep applied 2026-10-10, «#420»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbHwEdge32mbModuleEdge32mbModule` serves `protocol_constraints.psram` as the chip's own limits only (`chip_max_clock_mhz: 133`, `chip_alternate_clock_mhz: 84`, `max_cs_low_us: 8`, "as stated by the MegaYume PSRAM driver (OBEX 4162)"), `resources.obex.note` "The driver's API, settings and error codes are documented by the OBEX object itself", and no `code_patterns` block; `p2kb_get p2kbHwAddonLedMatrixAddonLedMatrix` serves `at_50hz_pixel_us: 357` (derived) with no `refresh_recommended_hz`, `cog_required`, `jm_p2-es_matrix` block or `power_sharing`; `p2kb_get p2kbHwEdgeStandardModuleEdgeStandardModule` serves flash as "SPI" / "24-bit (16MB)" with no 133 MHz line.
 Found 2026-10-07 re-scoping F-354. Stephen's ruling: a hardware entry carries the board — pinout, pin
 budget, voltages, level shifting, the board's published ceiling — and names its driver; the driver's
 API, configuration, timing and resource use are the driver's (`.claude/doctrine-overlay.md`, *A
@@ -659,7 +713,9 @@ board facts are told apart from driver facts.
 > and the 16 MB capacity). Siblings read and left: `addon-rtc`,
 > `addon-microsd`, `addon-hd-audio`, `addon-wx-*`, `addon-av-breakout` (their lists track their guides).
 
-### F-547 — six comparison-operator entries describe themselves only as "Signed/unsigned compare", and one documents an operator that does not exist (`+<=>`) — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
+### F-547 — six comparison-operator entries describe themselves only as "Signed/unsigned compare", and one documents an operator that does not exist (`+<=>`) — `RESOLVED` (found 2026-10-05, applied 2026-10-07, cascade 2026-10-10 «#416»/«#421»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbSpin2OpOpAddlt` → "UNSIGNED less than. Returns -1 (true) or 0 (false)", priority 11; `p2kbSpin2OpOpLteqgt` → "SIGNED three-way comparison. Returns -1 ... 0 ... 1. There is no unsigned form: `+<=>` is not a Spin2 operator"; `p2kb_find term:"addlteqgt"` → 0 keys (`op_addlteqgt.yaml` is gone from the index); `p2kbSpin2OpOpEqeqeq` is an `operator_redirect` ("`===` is not a Spin2 operator ... Equality is `==`") and `op_notandand`, `op_ltshr`, `op_colon`, `op_question` are `operator_redirect` stubs in the tag; `p2kbSpin2OpPrecedence` level 11 lists the 17 operators including the six float compares and `<=>`, level 12 is `!!`/`NOT`, level 17 carries `=` and the missing compound forms; `p2kbSpin2OpOpPOW` is level 8 left-associative and states the compile-probe results (`2.0 POW 3.0 +. 1.0` is 9.0 ...).
 
 > **DECIDED by Stephen 2026-10-08 about this entry's ingestion-tree edit: REVERT it, and AUDIT
 > the operator ingestion.** This entry's commit (`53855f4f`) also edited
@@ -732,7 +788,9 @@ constant, unary operator, or (", while `a = 3 <=> 5` compiles). Its only origin 
 v55; delete `op_addlteqgt.yaml` (no fabricated names in the KB — redirect any `related:` that points to it
 to `op_lteqgt.yaml`, Sacred Rule #7); mark the derived v51 table's `+<=>` row as not a real operator.
 
-### F-546 — `instruction_skipping.yaml`'s absolute-CALL rule cites only the Silicon Doc; EF-092 proves it on silicon — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
+### F-546 — `instruction_skipping.yaml`'s absolute-CALL rule cites only the Silicon Doc; EF-092 proves it on silicon — `RESOLVED` (found 2026-10-04, applied 2026-10-07, «#387»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** Citation-only fix, so validated by absence live and presence in git. `p2kb_get p2kbPasm2InstructionSkipping` serves the rule unchanged ("If the instruction after a CALL/CALLPA/CALLPB might be skipped, its immediate branch address must be absolute (CALL #\\address ...)") and no `sources:` text; `git show v1.24.0:deliverables/ai/P2/language/pasm2/concepts/instruction_skipping.yaml:121` cites "... INSTRUCTION SKIPPING; bench-verified under XBYTE (a relative call # before a skipped instruction corrupted the VM, the absolute call #\\ ran it right), EF-092".
 > **Applied 2026-10-07.** `skip_behavior.special_cases.sources` (now `:121`) cites EF-092 beside
 > `silicon-doc-text.txt:889`; no content change. Proven: `:889` states the rule; EF-092
 > (`P2-EMPIRICAL-FINDINGS.md:1652`, Rev C, two identical runs) — relative `call #` 4 of 5 wrong,
@@ -774,7 +832,9 @@ audit, see their notes).
 
 F-526 (sync TX primes in reset, EF-090) and F-540 (`##` takes a skip-pattern bit, EF-091) are DONE and archived — `correction-sweeps/2026-10-04-P2KB-CORRECTION-FINDINGS-archive.md`.
 
-### F-542 — `guides/pasm2-getting-started.yaml` teaches a wrong register map and P1 instructions — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
+### F-542 — `guides/pasm2-getting-started.yaml` teaches a wrong register map and P1 instructions — `RESOLVED` (found 2026-10-04, applied 2026-10-07, «#387»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbGuidePasm2GettingStarted` serves `register_model.special_registers` PA `$1F6` ... PTRA `$1F8`, PTRB `$1F9`, DIRA `$1FA`, DIRB `$1FB`, OUTA `$1FC`, OUTB `$1FD`, INA `$1FE`, INB `$1FF` with PA/PB as "CALLD-imm return, CALLPA parameter, or LOC address"; `SETS`/`SETD` in place of `MOVS`/`MOVD`; CALL "pushing {C, Z, 10'b0, PC[19:0]} onto the hardware stack -- not into PA" and RET "popping the stack"; `TJZ`/`TJNZ` "D is not changed" with `DJNZ` decrementing; `FIT $1F8`; CMP "C = borrow of (D - S)"; MUL "16 x 16 multiply"; WAITX "waits 1002 clocks" for `##1000`.
 > **Applied 2026-10-07 per `SOURCE-REPAIR-ORDER.md`** — the four named blocks were uncited, so they
 > were removed and re-derived source-first, not patched. Sources: the Parallax *P2 Instructions v35
 > Rev B/C* spreadsheet (`sources/p2-instructions-csv/…Sheet1.csv`, each entry citing its `order`
@@ -809,7 +869,9 @@ Seen 2026-10-04 reading the served entry while verifying v1.23.1. Against the Si
 **Fix:** re-derive those blocks from the per-instruction YAMLs and the Silicon Doc register table. A
 beginner guide is the most-copied page in the set.
 
-### F-544 — the delivery filter deleted a line of the Edge modules' boot-pin note: a wrapped prose line began `sources:` — `PENDING-VALIDATION` (served in v1.23.3, verified 2026-10-04 via p2kb_get; closes when the MCP filter roll's acceptance probe shows the line intact)
+### F-544 — the delivery filter deleted a line of the Edge modules' boot-pin note: a wrapped prose line began `sources:` — `RESOLVED` (found 2026-10-04, served in v1.23.3, verified 2026-10-04 via p2kb_get; MCP filter acceptance probe validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** This is the MCP filter roll's acceptance probe. With p2kb-mcp 1.5.0 applying the index `delivery_filter`, `p2kb_get p2kbHwEdgeStandardModuleEdgeStandardModule` and `p2kb_get p2kbHwEdge32mbModuleEdge32mbModule` both serve `pin_mapping.boot_pin_direction_note` whole: "P60 and P61 SWAP roles between the two boot sources: flash SPI CLK on P60 and flash SPI CS on P61, but microSD CS on P60 and microSD CLK on P61". `p2kb_get p2kbArchIoPinTiming` serves a `description` that ends at "...SYSTEM CHARACTERISTICS, pp.47-48." with no provenance line swallowed into or deleted from it (its `source:` is a top-level key, stripped).
 Found 2026-10-04 writing the MCP filter handoff, by comparing the shipped filter's output with a
 structural strip of the same nine keys across all 1,131 files (8 differed). In
 `hardware/edge-32mb-module.yaml` and `hardware/edge-standard-module.yaml`, the folded
@@ -911,7 +973,9 @@ list, so the drift cannot recur.
 > stays red until `verify-ps1-filter.ps1` is re-run and `PS1-VERIFIED.md` updated. *Fetch Script Parity*
 > reads the published index rule and turns green when the index is regenerated after the commit.
 
-### F-543 — `spin2/methods/pinstart.yaml` flash-FS example puts a clock-pin selector in X for sync TX/RX — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
+### F-543 — `spin2/methods/pinstart.yaml` flash-FS example puts a clock-pin selector in X for sync TX/RX — `RESOLVED` (found 2026-10-04, applied 2026-10-07, «#387»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbSpin2Pinstart` serves the smart-pin SPI example on the real flash pins: `PINSTART(SF_SDO, P_OE | P_SYNC_TX | P_PLUS1_B, %1_00111, 0)` (SF_SDO 59, B input = SCK at pin+1), `PINSTART(SF_SDI, P_SYNC_RX | P_PLUS2_B, %0_00111, 0)` (SF_SDI 58, SCK at pin+2), `PINSTART(SF_SCK, P_OE | P_PULSE, x, 0)` with `x.word[0]` = ticks per period and `x.word[1]` = ticks low, and the description "the data pins clock from SCK through the mode word's B-input selector (a relative pin offset), not through X; X carries only the sync-serial mode bit and the word size minus 1". The `SPI_CLK<<24` form and the flash-FS attribution are gone (`git grep` at `v1.24.0`: no hit).
 > **Applied 2026-10-07 — and the defect was wider than filed.** The example's `source: P2-FLASH-FS`
 > was false: the real driver (OBEX 4261, `flash_fs.spin2:44-50`) puts the flash on **P58–P61** —
 > the example's 56/57 are the Eval/Edge **LEDs** — and never calls `PINSTART` or uses sync serial
@@ -990,7 +1054,9 @@ F-506…F-524 are DONE and archived (`correction-sweeps/2026-10-03-…` and the 
 
 F-523 (repo locators in shipped text) is DONE and archived — `correction-sweeps/2026-10-04-P2KB-CORRECTION-FINDINGS-archive.md`.
 
-### F-525 — `flash-loader-case-study.yaml` tells the reader to read a narrative the KB does not ship — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
+### F-525 — `flash-loader-case-study.yaml` tells the reader to read a narrative the KB does not ship — `RESOLVED` (found 2026-10-03, applied 2026-10-07, «#387»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbExampleFlashLoaderCaseStudy` serves `how_to_use_this_entry` as three lines — "Skim techniques_demonstrated for orientation", "Follow canonical links for depth on each technique", "Read the flash loader listing itself (Parallax SPI Flash Programmer and Boot Loader) for the full code" — with no `Flash-Loader-Theory-of-Operations.md` pointer (`git grep Theory-of-Operations` at `v1.24.0` over `deliverables/ai/P2`: no hit).
 > **Decided and applied 2026-10-07: drop the instruction.** `Flash-Loader-Theory-of-Operations.md`
 > is our own derived analysis of Chip Gracey's source — the ingestion dashboard classes it
 > "derived analysis docs … not raw extraction" (`engineering/ingestion/README.md:136`); its own
@@ -1099,7 +1165,9 @@ removed fabricated electricals, and 27 of its 48 hunks were delete-then-repopula
 inside the same file); it took four real facts with it. All four were confirmed verbatim in sources
 already held, so restoring them was transcription, not research.
 
-### F-454 — `edge-standard-module.yaml` lost its revision history, leaving a VIN maximum that destroys Rev A/B boards — `PENDING-VALIDATION` (fix applied 2026-09-22; the gate this entry named built 2026-10-09, «#410», and driven to 0 on 2026-10-10, «#420»; closes when the next KB release serves the scope decisions)
+### F-454 — `edge-standard-module.yaml` lost its revision history, leaving a VIN maximum that destroys Rev A/B boards — `RESOLVED` (found 2026-09-22, fix applied 2026-09-22; the gate this entry named built 2026-10-09, «#410», and driven to 0 on 2026-10-10, «#420»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbHwEdgeStandardModuleEdgeStandardModule` serves `power.input_voltage` "5-16 VDC on Rev C and later ... On Rev A and Rev B the VIN maximum is 5.5 VDC", `ratings.vin` "Maximum 16 V on Rev C and later; maximum 5.5 V on Rev A and Rev B. Applying 16 V to a Rev A or Rev B module exceeds its absolute maximum by roughly three times", and the `board_revisions` block (rev_b `vin_maximum: "5.5 V"`, rev_c "VIN voltage maximum increased from 5.5 V to 16 V", rev_d). The scope decisions for the other files are served too: `p2kb_get p2kbHwEdge32mbModuleEdge32mbModule` serves `board_revisions.rev_b` / `earlier_hardware` ("the Rev B VIN figures are not asserted for it") and "(Rev B)" on `vin` and `input_voltage`.
 
 > **SEVERITY: BREAKS USERS (hardware damage).** The purge deleted the board's revision history. What
 > remained read `input_voltage: "5-16 VDC"` and `ratings.vin: "5 V recommended, 16 V maximum"` with
@@ -1132,7 +1200,16 @@ already held, so restoring them was transcription, not research.
 
 ## The provenance strip reaches two of its three consumers — F-439
 
-### F-439 — the MCP serves provenance the fetch scripts no longer send — `CONFIRMED — found 2026-09-19 at the v1.19.0 publish verification; the fix is in the MCP server, not this repo`
+### F-439 — the MCP serves provenance the fetch scripts no longer send — `RESOLVED` (found 2026-09-19 at the v1.19.0 publish verification; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** p2kb-mcp 1.5.0 applies the index's `delivery_filter`: `p2kb_version` reports
+`filter_rule_source: index`, `filter_rule_id` `7dc618e4…` (the agreed rule). Live probes: PINSTART serves
+no `sources:` and keeps the %11100 sentence; Instruction Skipping has no column-0 comment and keeps the
+AUGS rule; the motor driver has no `source:` and no `engineering/ingestion` path; `REG_ARRAY: {source:
+"cog registers", …}` survives (a content key inside a flow map is untouched); the Edge module keeps
+"boot sources: flash SPI CLK on P60"; OBEX object 2842 served by `p2kb_get` has no `scrape_tracking` and
+no `compatibility.source`. Record: `correction-sweeps/2026-10-11-close-out-release-mcp-test.md` step 5.
+The curated `p2kb_obex_get` view has a separate field-mapping defect, F-571.
 
 v1.19.0 stripped provenance at delivery: `source`, `sources`, `source_reference`, `verified_against`
 and provenance comments, joining the five metadata fields already filtered. Both fetch scripts were
@@ -1172,7 +1249,9 @@ upstream request is a **lead, never an authority** (D3), so each claim below was
 sources this project holds before anything was applied. The two requests came out differently, and
 the difference is the point: one was confirmed by our own sources and applied; one was held.
 
-### F-436 — the `map_caveat` retraction is confirmed on the released compiler; applied — `PENDING-VALIDATION` (the last residue applied 2026-10-07, «#387»; closes when the next KB release serves it)
+### F-436 — the `map_caveat` retraction is confirmed on the released compiler; applied — `RESOLVED` (found 2026-09-17, applied 2026-09-19, last residue applied 2026-10-07, «#387»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbSpin2ObjectImageDedup` serves `map_caveat` ("The .map format changed at pnut-ts 1.55.8: there is no `Objects:` line ... Its labels are reliable ...") and, for the two lines that still carried byte pairs, relations only: `the_other_silent_trap` "Result: 3 images with none shared, against 2 images with the driver's shared when both declarations carry the override -- and more Code/DAT bytes", `completeness_rule` "Forwarding one of two gives 4 images, two of them the driver's. Adding the missing forwarding constant: 3 images, one driver image shared -- and fewer Code/DAT bytes." The old pairs ("348 vs 216", "372 ... 240") are absent.
 > **Applied 2026-10-07.** The two byte pairs (`singleton_rule` "Objects 3 vs 2, 348 vs 216", and
 > `completeness_rule` "Objects 4, 372 … Objects 3, 240") were still in the file. Re-measured on
 > pnut-ts 1.55.8 with fresh fixtures, reading the `.map` SUMMARY: the mirror trap (one declaration
@@ -1240,7 +1319,9 @@ two silent traps and `cascade_through_tiers` were not touched; this release chan
 
 ## The two ROM listings are different BUILD TARGETS, and F-123's grounding plan names the FPGA one (2026-09-10, ROM-asset mining) — F-421
 
-### F-421 — `ROM_Booter.lst` is an FPGA build; only `rom_booter_v33_01j.lst` is the Prop2 silicon ROM — `PENDING-VALIDATION` (the KB half applied 2026-10-07, «#387»; closes when the next KB release serves it)
+### F-421 — `ROM_Booter.lst` is an FPGA build; only `rom_booter_v33_01j.lst` is the Prop2 silicon ROM — `RESOLVED` (found 2026-09-10, the KB half applied 2026-10-07, «#387»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** The citations are provenance, so validated by absence live and presence in git. `p2kb_get p2kbArchSerialLoader` and `p2kb_get p2kbArchBootRomContents` serve no listing name and no FPGA-build clock constants; `git grep "ROM_Booter\.lst"` at `v1.24.0` over `deliverables/ai/P2` returns nothing, while `serial_loader.yaml:14,194`, `boot-pattern-selection.yaml:67-70` and `boot-rom-contents.yaml` cite "Parallax Propeller 2 ROM Booter v33_01j" (the silicon listing) by section (CON block `rc_max`, `timeout_per`, Command - clock setup, Serial done).
 > **Correction 2026-10-07 (F-555):** "neither is a newer revision" is wrong — `ROM_Booter.lst` is
 > an **earlier revision** (history ends v141, 2018-05-27, `:84-85`; the silicon listing adds the
 > 2019 v33_01a..j revisions, `rom_booter_v33_01j.lst:87-93`). It IS an FPGA build, but the proof
@@ -1364,7 +1445,9 @@ the word. Anyone scoping F-356 off its original wording will do the wrong repair
 
 ## The hardware selection guide ships 2025 US retail prices as data, in a set with no mechanism to age them (2026-08-30, release fix pass step 1) — F-398
 
-### F-398 — ~15 USD price sites across `p2-hardware-selection-guide.yaml`; needs a policy call, not a citation — `PENDING-VALIDATION` (applied 2026-10-10, «#420»; closes when the next KB release serves it)
+### F-398 — ~15 USD price sites across `p2-hardware-selection-guide.yaml`; needs a policy call, not a citation — `RESOLVED` (found 2026-08-30, decided 2026-10-08 and applied 2026-10-10, «#420»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide` serves `pricing: "For current pricing, see the Parallax store (parallax.com)."` and no dollar figure, `cost_estimate`, `total_investment`, `additional_cost` or `total_cost` key; the relative tiering stays (`ultra_budget_entry`, `value_balanced`, `capability_maximized`, "Lower cost, all pins accessible").
 
 > **DECIDED by Stephen 2026-10-08 (option a) and APPLIED 2026-10-10 («#420»).** Every dollar figure
 > (22 sites) is deleted from `hardware/p2-hardware-selection-guide.yaml`; the relative tiering (cheapest
@@ -1404,7 +1487,9 @@ on ordering, not amounts.
 
 ## The whole top-level cog stack is missing from the KB — no entry says cog 0 has one, where it starts, which way it grows, or that nothing checks it (2026-08-30, debug/stack research) — F-392
 
-### F-392 — the KB documents `cogspin`/`TASKSPIN` stacks and is silent on the stack every Spin2 program already has; the sizing numbers it does ship are unsourced and are cited back as authority — `PENDING-VALIDATION` (applied 2026-10-10, «#423»; closes when the next KB release serves it)
+### F-392 — the KB documents `cogspin`/`TASKSPIN` stacks and is silent on the stack every Spin2 program already has; the sizing numbers it does ship are unsourced and are cited back as authority — `RESOLVED` (found 2026-08-30, applied in stages, 2026-10-09 «#414» and 2026-10-10 «#423»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbSpin2Cogspin` serves `stack_requirements` as "No Parallax document states a stack size for COGSPIN. Size the buffer by measuring the high-water mark" with `p1_symbols_do_not_apply` ("P1's _STACK and _FREE declarations do not exist in Spin2 and have no effect if written"), `StackAddress` as "Size it for the method's worst case" (no "Minimum 32 longs"), the new `top_level_stack` block (`placement` after VAR space, `first_frame` 6-long header, `growth` "grows upward ... a return pops 7 longs", `size_and_limit` "Not documented ... no overflow check is documented") and `stack_observability` (any cog can read a COGSPIN/TASKSPIN buffer; PTRA is private; COGBRK from a debug ISR). `git grep -i -E "minimum (of )?[0-9]+ longs"` at `v1.24.0` over `deliverables/ai/P2`: no hit.
 
 > **The dangerous half is fixed.** `language/spin2/methods/cogspin.yaml`'s `stack_requirements`
 > shipped `minimum: "32 longs"` and `typical: "64-128 longs"` with no source, and
@@ -1520,7 +1605,9 @@ cog. The page must not imply that cog 0 is a place to evacuate.
 
 ## DEBUG's cost to the running application is nowhere in the KB: 16KB of hub gone, the protection LOCKED until reset, `LOCK[15]` taken, two pins consumed (2026-08-30, debug/stack research) — F-393
 
-### F-393 — the KB documents DEBUG's syntax and display commands and not one of the resources DEBUG takes away from the application — `PENDING-VALIDATION` (the last residue applied 2026-10-07, «#387»; closes when the next KB release serves it)
+### F-393 — the KB documents DEBUG's syntax and display commands and not one of the resources DEBUG takes away from the application — `RESOLVED` (found 2026-08-30, the last residue applied 2026-10-07, «#387»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbSpin2DbgDebugStrategyGuide` serves `what_a_debug_build_takes_from_your_program` with `hub_memory` ("top 16 KB, $7C000..$7FFFF, remapped to $FC000..$FFFFF and write-protected ... writes are SILENTLY DROPPED"), `protected_region_use` (DEBUG data, debugger, and "$FFC00..$FFFFF, one 128-byte block per cog (cog 7 at $FFC00 through cog 0 at $FFF80)"), `a_lock` ("LOCK[15] is held"), `pins_62_63`, `hubset_enables_locked`, `clock_source` ("at least 10 MHz") and `interrupt_retrigger_can_stop_for_good` ("the interrupt cycling stops permanently, not just late ... CT-based interrupts are not prone to it"). `p2kb_get p2kbSpin2Locknew` serves the cross-link in `related:` (`language/spin2/debug-commands/debug-strategy-guide.yaml`, with the comment "A DEBUG build takes one of the sixteen locks before your program runs"). The entry's "not done, low value, expiry: the next DEBUG touch" item (the `$FEA00` / `$FF1A0` debugger-internal layout in `debug_interrupt.yaml` / `hub.yaml`) is still not in those two files (`git grep` at `v1.24.0`); the served guide deliberately states only the silicon-fixed per-cog blocks at `$FFC00..$FFFFF` and says "how the debugger arranges the rest is its own and can change with the tool". Closed on that reading; if the layout is wanted after all, it is a new item, not an unserved part of this one.
 > **Applied 2026-10-07.** `debug-strategy-guide.yaml` `what_a_debug_build_takes_from_your_program`
 > gained `protected_region_layout` beside `hub_memory`: `$FC000` DEBUG data, `$FEA00` the debugged
 > cog's `$010..$1F7` buffer, `$FF1A0` debugger + overlays + data to `$FFC00`, then the per-cog
@@ -1598,7 +1685,9 @@ gets cost and limits on one page.
 
 ## The DEBUG budget: we ship all three limits and none of what they cost (2026-08-30, P2KB-GAPS-RUNNING-LOG GAP-4) — F-383
 
-### F-383 — `p2kbSpin2DbgDebugStrategyGuide` lists three peer numbers, and the one that mutes a board is not marked — `PENDING-VALIDATION` (applied 2026-10-07, «#387»; closes when the next KB release serves it)
+### F-383 — `p2kbSpin2DbgDebugStrategyGuide` lists three peer numbers, and the one that mutes a board is not marked — `RESOLVED` (found 2026-08-30, applied 2026-10-07, «#387»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbSpin2DbgDebugStrategyGuide` serves the guide in its final F-559 shape, which supersedes the numeric `hard_limits` wording this entry first applied: no peer numbers at all; `the_compilers_limits.how_it_fails` ("the build fails at compile time with 'DEBUG data is too long' ... m153 / m150 / m151"), the `-d -l` listing method (`DEBUG records:` / `DEBUG data:`), `which_you_reach_first` (shape of the output decides, "Watch both lines of the listing"), `reducing_bytes_and_records` with `reduces_debug_bytes` in the mechanism table, `debug_mask.per_object` (a parent can set a child's `DEBUG_MASK` at instantiation), and `binary_size_is_not_the_measure`. The refuted "fails silently / mutes the board" claim is not carried.
 > **Applied 2026-10-07 — by measurement on pnut-ts 1.55.8, and two of this entry's claims did not
 > survive it.** Instrument: `pnut-ts -d -l` — the listing states both budgets directly (`DEBUG
 > records: N of 255`, `DEBUG data: N of 15872 bytes`). Fixtures (scratch, regenerable):
@@ -1749,7 +1838,9 @@ the global-`-D` caveat. (7) Make the page reachable — see **F-389**.
 
 ## An improvement to the general smart-pin page made a contradiction with the mode page SHARPER (2026-08-30, P2KB-GAPS-RUNNING-LOG AMBIGUOUS-5) — F-386
 
-### F-386 — `p2kbArchSmartPins` now warns by name against the call `p2kbArchSmartPin01110CountAEdgesOptionalBDec` demonstrates twice — `PENDING-VALIDATION` (class sweep run 2026-10-07, «#387»; the nine mode pages settled by EF-097 on 2026-10-10, «#419»; closes when the next KB release serves it)
+### F-386 — `p2kbArchSmartPins` now warns by name against the call `p2kbArchSmartPin01110CountAEdgesOptionalBDec` demonstrates twice — `RESOLVED` (found 2026-08-30, class sweep run 2026-10-07, «#387»; the nine mode pages settled by EF-097 on 2026-10-10, «#419»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbArchSmartPins` serves `correct_sequence.note` with the nine order-safe modes named ("the counter and timing modes %01110, %01111, %10010-%10111 and the external-clock ADC mode %11001: a Y written while DIR is low is in force after DIRH"), the `%11100` exception, and "PINSTART()/pinstart() writes Y before raising DIR, so it is NOT safe for the trigger modes or asynchronous serial transmit"; `p2kb_get p2kbArchSmartPin01110CountAEdgesOptionalBDec` serves the PASM example `dirh #counter_pin` then `wypin #0, #counter_pin  ' Count A only - Y AFTER DIRH` and `configuration_order.about_pinstart` ("%01110 is a counting mode, not a trigger mode ... pinstart() is safe here") — no longer a page that contradicts the general one.
 > **Sweep run 2026-10-07 over all 33 files in `architecture/smart-pins/`.** Two shapes searched:
 > `pinstart` with a non-zero Y in a mode that loses it, and `wypin` before `dirh`.
 > **Trigger and async-TX pages are clean** — the only `pinstart` calls in those modes
@@ -1815,7 +1906,9 @@ this one differs and that it is safe. Then sweep every other mode page for the s
 
 ## `||` means logical OR in P2 and absolute value in P1, and the page that flags exactly this hazard twice does not flag it (2026-08-30, P2KB-GAPS-RUNNING-LOG AMBIGUOUS-6) — F-387
 
-### F-387 — `language/spin2/concepts/operators.yaml` annotates `~` and `~~` as P1 differences and leaves `||` unmarked — `PENDING-VALIDATION` (the class sweep applied 2026-10-07, «#387»; closes when the next KB release serves it)
+### F-387 — `language/spin2/concepts/operators.yaml` annotates `~` and `~~` as P1 differences and leaves `||` unmarked — `RESOLVED` (found 2026-08-30, `||` note applied 2026-09-22, the class sweep applied 2026-10-07, «#387»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** `p2kb_get p2kbSpin2Operators` serves the `["||", "OR"]` note "P2 Spin2 semantics; not P1 absolute value. In P1 '||' was the Absolute Value operator. For absolute value on P2 use ABS." and the new `changed_from_p1` block in two tiers: `compiles_with_a_different_meaning` (`a ~> 2` read as `(a~) > 2` that CLEARS a; `a <- 2` read as `a < -2`; `<=`/`>=` as the P1 assignment forms) and `fails_to_compile` (`||a`, `?x / x?`, `^^x`, `~x / ~~x`, `**`, `|< x`, `>| x`, `->`, `>< n`, `=<`/`=>`), each with its Spin2 spelling.
 > **Class sweep applied 2026-10-07.** Every row of P1 Manual Table 2-9 (`p1-…-layout-text.txt:4934-4975`)
 > was compared with the v55 operator table (`spin2-v55-text.txt:409-491`) and each P1 form compiled on
 > pnut-ts 1.55.8. New top-level `changed_from_p1` in `operators.yaml`, two tiers:
@@ -1868,7 +1961,9 @@ unlikely to be the only two, and this should be a class sweep, not a single edit
 
 ## The index returns partial results by construction: 27 of 60 debug files reachable, and nine DEBUG-window pages carry no searchable trace of the word (2026-08-30, measured; corroborates P2KB-GAPS-RUNNING-LOG FINDABLE-1/2/3) — F-389
 
-### F-389 — key generation abbreviates and drops path components, so whole subtrees vanish from the term that names them — `PENDING-VALIDATION` (gate built 2026-10-09, «#410»; partial-reach directories dispositioned 2026-10-10, «#420»; closes when the next KB release serves the aliases)
+### F-389 — key generation abbreviates and drops path components, so whole subtrees vanish from the term that names them — `RESOLVED` (found 2026-08-30, gate built 2026-10-09, «#410»; partial-reach directories dispositioned 2026-10-10, «#420»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** The aliases added for the four partial-reach directories resolve live: `p2kb_find "debug command"` → `p2kbSpin2DbgCZ`, `p2kbSpin2DbgDly`, `p2kbSpin2DbgPcKey`, `p2kbSpin2DbgPcMouse`; `p2kb_find "boot ROM TAQOZ"` → `p2kbArchTaqozForth` and `p2kb_get "boot ROM monitor"` → `p2kbArchP2Monitor` (`resolved_from` the alias); `p2kb_find "system registers"` → `p2kbArchCompleteSystemRegistersIndex`, `p2kbArchPtraRegister`; `p2kb_find "Spin2 conventions JonnyMac"` → `p2kbSpin2JohnnyMacDocumentationStyle` and `"Spin2 formatting conventions"` → `p2kbSpin2Spin2FormattingStandards`. The symptom/compiler-string route the entry asked for also resolves: `p2kb_get "debug data too long"` → `p2kbSpin2DbgDebugStrategyGuide`. The four baselined wide directories (`operators`, `registers`, `patterns/implementation`, `preprocessor`) remain the arbiter's judgement, as the entry states.
 
 > **Component-survival check built and driven to 0.**
 > `engineering/tools/validation/audit-index-findability.py` (in the DoD as *Index Findability by
@@ -1987,7 +2082,9 @@ programme, not an edit; it should be scoped from the hole list rather than start
 
 ## Citing ONE block in a wholly-uncited file turns its other blocks Tier-1 RED — 32 uncited quantity blocks across 24 files are structurally invisible to the blocking gate (2026-08-29, «#334», proved by accident) — F-381
 
-### F-381 — the Tier-2 advisory class is not "reviewed and accepted", it is "no control available" — `PENDING-VALIDATION` (Tier 2 blocking and at 0 since 2026-10-10, «#422»; closes when the next KB release serves the sourced files)
+### F-381 — the Tier-2 advisory class is not "reviewed and accepted", it is "no control available" — `RESOLVED` (found 2026-08-29, Tier 2 blocking and at 0 since 2026-10-10, «#422»; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.0, «#398»)
+
+**Validated 2026-10-11.** A gate finding, so the served evidence is sampled, not the 32-block census (re-measuring that needs `audit-yaml-claim-sourcing.py`, not run here). In the tag: `git show v1.24.0:engineering/tools/validation/audit-yaml-claim-sourcing.py` has `TIER2_BLOCKING = True` (`:871`). The sourced files are in the tag and served: `git diff v1.23.3 v1.24.0` shows `language/pasm2/hubset.yaml` and `asmclk.yaml` re-cited to canonical titles with edition and page, `architecture/decomposition/rate-adaptation.yaml` and three more decomposition pages losing unsourced Hz figures ("servos want a smooth stream at their frame rate"), and `hardware/hardware-compatibility-matrix.yaml` carrying a `source:` per block (read in the tag); live, `p2kb_get p2kbPasm2Hubset` serves the same content with no `source:` text, and `p2kb_get p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide` serves no dollar figures.
 
 > **APPLIED 2026-10-10 («#412», «#422»).** `audit-yaml-claim-sourcing.py` now blocks on wholly-uncited
 > files (`TIER2_BLOCKING` switched on, commit 89eb8c02) and accepts only a canonical Parallax title with
