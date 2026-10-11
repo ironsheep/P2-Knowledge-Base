@@ -20,6 +20,18 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.24.1] - 2026-10-11
+
+**Entries read as plain facts, and OBEX objects carry their catalog listing with the upload date.**
+
+### Changed
+
+- **Entries read as plain facts**: descriptions, notes and comments state the fact; citations, page numbers and document editions stay in the source fields consumers drop
+- **OBEX upload dates**: each object gives the date it was published to OBEX as `metadata.created_date`, which `p2kb_obex_get` reports
+- **OBEX objects mirror the catalog**: each object carries its OBEX listing as published
+- **FIELD is reserved**: the FIELD page states that `field` cannot name a method local; use another name such as `fld`
+- **Cog and hub execution**: links to the RET, DJNZ, ADD and MOV pages for their cog and hub clock counts
+
 ## [1.24.0] - 2026-10-11
 
 **All seven silicon errata have a home page, every code example compiles, and the index names the provenance fields consumers drop.**
