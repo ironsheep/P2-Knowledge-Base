@@ -99,8 +99,10 @@ notes:
   - "Y[0]=0: Simple high-time accumulator"
   - "Y[0]=1: Differential time accumulator"
   - "Perfect for precise pulse width measurement"
-  - "32-bit counter allows ~21 seconds at 200MHz before overflow (2^32 clocks / 200_000_000 = 21.5 s; the count is a 32-bit value: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Smart Pins, %01111)"
+  - "32-bit counter allows ~21 seconds at 200MHz before overflow (2^32 clocks / 200_000_000 = 21.5 s; the count is a 32-bit value)"
   - "The Y written before DIRH (as in the PASM2 example) is in force after DIRH: this mode is order-safe, so Y may be written before or after DIRH"
+# Source (32-bit count note): Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Smart Pins, %01111
 
 sources:
+  - "notes (32-bit count): Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Smart Pins, %01111"
   - "EF-097 (Y-before-DIRH order-safety bench-measured on one board, one Y value for this mode)"

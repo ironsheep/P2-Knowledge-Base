@@ -89,7 +89,7 @@ pin_mode_tip:
     The #64013 Code Tip says "set the P2 Smartpin (or equivalent) input mode to
     150 k-ohm pull-up". That cannot work on a P2 and must not be copied. (1) The
     P2 has NO pull-up resistors - P_HIGH_150K selects a 150 kOhm DRIVE STRENGTH
-    ("Drive high 150k-ohm" in the Spin2 v55 symbol table). (2) Input mode is DIR
+    ("Drive high 150k-ohm" in the Spin2 symbol table). (2) Input mode is DIR
     LOW, and every drive selection is inactive while the pin is an input; the pin
     simply floats.
   scl_pull_up_caveat: >-

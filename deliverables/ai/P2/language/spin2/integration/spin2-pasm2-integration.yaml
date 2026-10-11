@@ -336,7 +336,7 @@ spin2_pasm2_integration:
               JMP #loop
             ptr_cmd long 0
             temp long 0
-          explanation: "Hub RAM variables accessible to all cogs. COGINIT's third argument is delivered directly into the new cog's PTRA register (Spin2 v55 COGINIT(CogNum,PASMaddr,PTRAvalue)) -- there is no 'par' register on P2 (that is a P1-only concept), so PTRA is used as-is rather than copied from anything."
+          explanation: "Hub RAM variables accessible to all cogs. COGINIT's third argument is delivered directly into the new cog's PTRA register (Spin2 COGINIT(CogNum,PASMaddr,PTRAvalue)) -- there is no 'par' register on P2 (that is a P1-only concept), so PTRA is used as-is rather than copied from anything."
       use_cases:
         - "Inter-cog communication"
         - "Shared data processing"

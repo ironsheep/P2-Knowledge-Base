@@ -41,11 +41,9 @@ pin_access:
   breadboard_ties: "Direct connections to breadboard"
   
 connectivity:
+  source: "P2 Edge Module Breadboard (#64020) v1.2 01/07/2021, Key Specifications, p.2: \"Programming: Serial up to 2 MBaud; requires Parallax Prop-Plug programming adapter\", and 3. Prop Plug Programming Header, p.3"
   programming:
     # This board has NO on-board USB-to-serial converter.
-    # P2 Edge Module Breadboard (#64020) v1.2 01/07/2021, Key Specifications, p.2:
-    # "Programming: Serial up to 2 MBaud; requires Parallax Prop-Plug programming
-    # adapter", and 3. Prop Plug Programming Header, p.3.
     - type: "Prop Plug (#32201)"
       connector: "dedicated 4-way header, pins marked up-triangle / down-triangle / RES / VSS"
       note: "the only wired programming path; serial up to 2 MBaud"

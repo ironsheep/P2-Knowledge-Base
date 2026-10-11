@@ -7,7 +7,7 @@ description: |
   the PASM2 instruction AND, which ANDs two registers bit by bit.
 priority: 13
 term_form: "x AND y"
-assign_form: "var &&= y (the symbol spelling; the v55 operator table lists no word-spelled assignment form)"
+assign_form: "var &&= y (the symbol spelling; the Spin2 operator table lists no word-spelled assignment form)"
 block_usage: "Term in all blocks; assignment form in PUB/PRI only"
 examples:
   - "IF ready AND enabled\n  start()"

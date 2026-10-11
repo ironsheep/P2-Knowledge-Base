@@ -450,8 +450,7 @@ performance_characteristics:
   event_detection: |
     Event flags are set by hardware at the moment the event condition is
     evaluated; the flag is then visible to POLLxxx/WAITxxx/JATN/etc. on
-    subsequent instructions. The Parallax Propeller 2 Documentation v35 does not
-    publish a specific detection-to-flag clock count.
+    subsequent instructions. Detection-to-flag clock count: not documented.
   
   response_latency:
     polling: "POLLxxx: 2 clocks (per per-instruction YAMLs)"

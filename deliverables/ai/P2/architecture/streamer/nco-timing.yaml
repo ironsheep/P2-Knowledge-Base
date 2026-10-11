@@ -39,7 +39,7 @@ frequency_calculation:
     general rule, not a list of special cases. 1/3, 1/5 and 1/10 are only the
     familiar examples; 25.175 MHz at any of the three system clocks below needs the
     same increment. An exact division (1/2, 1/4, 1/8, 1/16) takes no increment.
-    Source: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER (one sentence) — "For fractions with remainders, the computed D/# value should be incremented, in order to produce proper initial rollover behavior."
+    Parallax states it in one sentence: "For fractions with remainders, the computed D/# value should be incremented, in order to produce proper initial rollover behavior."
 
   example: |
     ' 25 MHz pixel rate at 250 MHz clock:

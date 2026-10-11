@@ -1,9 +1,9 @@
 # Code Example: SPI Flash Programmer and Boot Loader — Annotated Reference
 
 example_id: "flash-loader-case-study"
-title: "SPI Flash Programmer and Boot Loader v51 — Annotated Reference Case Study"
+title: "SPI Flash Programmer and Boot Loader — Annotated Reference Case Study"
 description: |
-  Reference entry pointing at the Parallax SPI Flash Programmer and Boot Loader v51 — the compiler-embedded
+  Reference entry pointing at the Parallax SPI Flash Programmer and Boot Loader — the compiler-embedded
   boot loader that ships compiled into every
   PNut/PNut-TS binary built for SPI flash boot. This is NOT a tutorial;
   it catalogs the techniques the loader exercises with one-line summaries

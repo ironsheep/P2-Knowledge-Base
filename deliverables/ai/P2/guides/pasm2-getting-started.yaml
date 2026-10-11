@@ -60,7 +60,7 @@ file_structure:
     with ORG (cog-exec) or ORGH (hub-exec) and which has no PUB method.
 
   minimal_program:
-    description: "The Parallax minimal PASM-only program from the Parallax Spin2 v55 documentation, reproduced here in its own line layout."
+    description: "The Parallax minimal PASM-only program from the Parallax Spin2 documentation, reproduced here in its own line layout."
     source: "Parallax Propeller 2 Spin2 Language Documentation v55, Spin2 Program Structure (Minimal PASM Program)"
     example: |
       DAT             ORG                      'start PASM at hub $00000 for cog $000
@@ -104,11 +104,11 @@ file_structure:
         hubset_cc_ss: "%10_10"
     errfreq_is_optional: "_errfreq is optional wherever the table shows it; it defaults to 1_000_000. All three PLL forms above compile without it."
     the_x_bit: "In the %1x_ CC values, x is the crystal-loading bit: if _xtlfreq >= 16_000_000 then x=0, for 15 pF per XI/XO; otherwise x=1, for 30 pF per XI/XO."
-    combinations_are_compiler_verified: "Every form above was assembled clean by pnut-ts inside a PASM-only file. That establishes LEGALITY only -- the effect and %CC_SS columns are v55's statements, not the compiler's."
+    combinations_are_compiler_verified: "Every form above was assembled clean by pnut-ts inside a PASM-only file. That establishes LEGALITY only -- the effect and %CC_SS columns are the Spin2 documentation's statements, not the compiler's."
     when_declared: "PASM-only programs which use any non-RCFAST clock mode get a 16-long clock-setter program automatically prepended, which sets the clock mode, moves your PASM program down by 16 longs, then executes it by doing a COGINIT #0,#0, to effect a normal start. This is why ASMCLK is not needed at the start of a PASM-only program."
     inhibiting_it: "Declare _AUTOCLK = 0 to stop the clock-setter program from being prepended; your code then begins executing with the default RCFAST mode. If you then want another clock mode you must configure the clock yourself, perhaps using ASMCLK."
     asmclk: "ASMCLK is a PASM-only pseudo-instruction that sets the clock mode named by the clock-setup symbols. It has no operands but may take a conditional prefix, and assembles to one or six PASM instructions depending on the mode: HUBSET #0 for _rcfast, HUBSET #1 for _rcslow, and the six-long crystal/PLL start sequence shown under manual_switch_example for every external-clock form. With _AUTOCLK = 0 and an external-clock declaration, adding ASMCLK grows a pnut-ts build by exactly 6 longs; with _rcfast it grows it by 1."
-    manual_switch: "Without the prepended clock-setter (or with _AUTOCLK = 0), a pure PASM program moves off its initial RCFAST setting to the compiled crystal/PLL setting with the sequence v55 gives for clkmode_."
+    manual_switch: "Without the prepended clock-setter (or with _AUTOCLK = 0), a pure PASM program moves off its initial RCFAST setting to the compiled crystal/PLL setting with the sequence the Spin2 documentation gives for clkmode_."
     manual_switch_example: |
       HUBSET  ##clkmode_ & !%11   'start crystal/PLL, stay in RCFAST mode
       WAITX   ##20_000_000/100    'allow 10ms for the external clock to stabilise
@@ -651,7 +651,4 @@ see_also:
   - language/pasm2/idioms/
   - language/pasm2/patterns/
   - language/pasm2/concepts/
-  # The manifests/ scheme (DOD v3.0 key-based access, e271cab0) was retired by 03189a7d;
-  # no manifest file has existed since. The categorised instruction inventory it indexed
-  # is the groups/ tree.
   - language/pasm2/groups/

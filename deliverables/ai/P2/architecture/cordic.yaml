@@ -252,10 +252,9 @@ related:
   - language/pasm2/qexp.yaml
   - language/pasm2/qrotate.yaml
   - language/pasm2/qvector.yaml
-  # "Pipeline optimization techniques" was the fourth bare-prose see_also entry.
-  # Redirected, not dropped (Sacred Rule #7): the concept is documented in
-  # cordic_solver.yaml ("processing large datasets where pipeline optimization
-  # provides significant benefit") and worked as a runnable fill/steady/drain
-  # recipe in the P2AN002 companion.
+  # Pipeline optimization techniques: documented in cordic_solver.yaml
+  # ("processing large datasets where pipeline optimization provides significant
+  # benefit") and worked as a runnable fill/steady/drain recipe in the P2AN002
+  # companion.
   - language/spin2/concepts/cordic_solver.yaml
   - p2kbAppNoteP2an002CordicForRealWork

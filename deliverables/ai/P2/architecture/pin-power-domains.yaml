@@ -19,13 +19,10 @@ description: |
   SILICON layer (true on every board): "the Propeller 2 Smart I/O pins are grouped
   such that each 4 I/O's have a dedicated voltage supply connection" — VIO_0_3 /
   GIO_0_3 through VIO_60_63 / GIO_60_63, sixteen groups across the 64 pins.
-  Source: P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4;
-  and Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES summary, p.3, "Smart I/O pins: 3.3 VDC, powered in groups of 4 via VIO pins."
 
   BOARD layer (P2 Edge modules): "the voltage supply connections have been brought
   out in groups of 8 I/O pins each. Each group has a dedicated LDO regulator with
   the VIO output labeled Vxx at the edge connector."
-  Source: P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4.
 
   The distinction decides which pins may be grouped for an absolute (ratiometric)
   ADC measurement: the ADC references its own SILICON group, so a shared-node
@@ -35,7 +32,10 @@ description: |
   this particular module."
 
 sources:
-  - "description, silicon layer: P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4"
+  - "description, silicon layer: P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES summary, p.3, \"Smart I/O pins: 3.3 VDC, powered in groups of 4 via VIO pins.\""
+  - "silicon grouping: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), PIN DESCRIPTIONS — the TQFP-100 package pinout figure. Sixteen VIO package pins labelled VIO_0_3 through VIO_60_63, and sixteen internal GIO_0_3 through GIO_60_63 blocks."
+  - "silicon_power_grouping.pin_table_symbols, adc_reference: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), PIN DESCRIPTIONS — pin table: VIO_{x}_{y} / GIO_{x}_{y} = power / ground for smart pins {x} through {y} (per-group supply pairs; a pin's ADC references its own group's rails for calibration)."
+  - "board_power_grouping: P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4, and Edge Connector Pin Assignments, p.10: 8 independent 3.3 V LDO regulators, V00 through V56, one per 8-pin header group at 300 mA — the BOARD grouping."
   - "description, board layer: P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4"
   - "description, distributed power scheme quotation: P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4"
 
@@ -86,12 +86,6 @@ board_power_grouping:
   per_pin_current: "Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator supplies 300 mA total, shared by this I/O pin group and edge connector pin Vxx."
   silicon_absolute_maximum: "Max. allowable current per I/O pin ±30 mA; max DC current into an input pin with internal protection diode forward biased ±10 mA"
   budget_rule: "Eight pins at the 30 mA per-pin figure is 240 mA, inside the 300 mA the group's LDO supplies — but the edge-connector Vxx pin draws from the same 300 mA, so an add-on board powered from Vxx spends the same budget the eight pins do."
-
-evidence:
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), PIN DESCRIPTIONS — the TQFP-100 package pinout figure. Sixteen VIO package pins labelled VIO_0_3 through VIO_60_63, and sixteen internal GIO_0_3 through GIO_60_63 blocks."
-  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES summary, p.3: 'Smart I/O pins: 3.3 VDC, powered in groups of 4 via VIO pins.'"
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), PIN DESCRIPTIONS — pin table: VIO_{x}_{y} / GIO_{x}_{y} = power / ground for smart pins {x} through {y} (per-group supply pairs; a pin's ADC references its own group's rails for calibration)."
-  - "P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4, and Edge Connector Pin Assignments, p.10: 8 independent 3.3 V LDO regulators, V00 through V56, one per 8-pin header group at 300 mA — the BOARD grouping."
 
 related:
   - architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml

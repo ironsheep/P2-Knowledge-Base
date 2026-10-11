@@ -147,10 +147,8 @@ enable_control:
     value_1: "WRFAST enabled"
     symbol_0: X_WRITE_OFF
     symbol_1: X_WRITE_ON
-    # WHAT IS CAPTURED, AND FROM WHERE. Naming the bit and stopping left a reader
-    # unable to tell what lands in hub RAM -- and unable to see that the source is
-    # {INB, INA}, which is the fact that decides whether a capture reads traffic or
-    # a smart pin's handshake.
+    # WHAT IS CAPTURED, AND FROM WHERE. The source is {INB, INA}, which decides
+    # whether a capture reads traffic or a smart pin's handshake.
     what_is_read: "{INB, INA} -- the cog's IN registers, not the pins' raw pads.
       \"Initially, and on each subsequent NCO rollover, 1/2/4/8/16/32 pins
       are read from {INB, INA} and X3, X2, X1, and X0 are updated using the read data.\""

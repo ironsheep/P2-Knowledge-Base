@@ -1,6 +1,7 @@
 directive: ORGH
 type: assembly_directive
 category: Assembly Directives
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE (inline_assembly.features: the internal Spin2 procedure copies the method's first 16 long variables to cog registers $1E0..$1EF and restores them afterwards)"
 
 description: |
   Sets the origin address for hub RAM assembly code. In DAT blocks, ORGH positions 
@@ -22,7 +23,7 @@ parameters:
     type: "integer"
     description: "Hub address for code/data placement (DAT block usage)"
     optional: true
-    default: "Context-dependent (Spin2 v55): $400 in Spin2+PASM programs; current hub address in PASM-only programs"
+    default: "Context-dependent: $400 in Spin2+PASM programs; current hub address in PASM-only programs"
   - name: "limit"
     type: "integer"
     description: "Optional origin limit; PNut enforces a $100000 ceiling"
@@ -100,7 +101,7 @@ inline_assembly:
     - "Code executes in hub RAM (hub-execute mode)"
     - "Maximum size: $FFFF longs including auto-added RET"
     - "RET instruction automatically added at end"
-    - "First 16 long variables (params + result + locals) buffered at cog $1E0..$1EF on entry and restored to hub on exit, identical to ORG..END inline behavior. Source: Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE (the internal Spin2 procedure copies the method's first 16 long variables to cog registers $1E0..$1EF and restores them afterwards)."
+    - "First 16 long variables (params + result + locals) buffered at cog $1E0..$1EF on entry and restored to hub on exit, identical to ORG..END inline behavior. The internal Spin2 procedure copies the method's first 16 long variables to cog registers $1E0..$1EF and restores them afterwards."
     - "Access to method parameters and local variables"
   comparison:
     - feature: "Execution location"
@@ -126,7 +127,7 @@ restrictions:
 
 notes:
   - "In DAT blocks, ORGH sets hub origin for subsequent code/data"
-  - "Bare ORGH default address is context-dependent (Spin2 v55): $400 in Spin2+PASM programs (hub-exec code relocated at runtime, uses relative addressing); the current hub address in PASM-only programs (origin matches hub address; ORGH fills hub memory with zeros up to the given address)"
+  - "Bare ORGH default address is context-dependent: $400 in Spin2+PASM programs (hub-exec code relocated at runtime, uses relative addressing); the current hub address in PASM-only programs (origin matches hub address; ORGH fills hub memory with zeros up to the given address)"
   - "Optional second parameter sets the origin limit (default $100000); ORGH address,limit beyond the ceiling emits 'Hub address exceeds $100000 ceiling (m361)' -- compiler-verified"
   - "V50+: ORGH enables inline hub-execute assembly in Spin2 methods"
   - "Hub-execute code runs in place, no cog RAM copy required"

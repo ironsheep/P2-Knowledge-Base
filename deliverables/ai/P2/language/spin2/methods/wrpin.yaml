@@ -107,10 +107,8 @@ examples:
     description: "Disable smart pin mode"
 
 common_smart_modes:
-  # Removed 2026-08-25. This block defined thirteen P_* constants a second time, in
-  # wording that had drifted from the source. Every smart-pin mode
-  # constant is now defined exactly once, with the Spin2 v55 wording, its 32-bit value
-  # and its bit pattern.
+  # Every smart-pin mode constant is defined exactly once, in the file named below,
+  # with its 32-bit value and its bit pattern.
   reference: "language/spin2/symbols/spin2-builtin-symbols-complete.yaml -- all 32
     %SSSSS mode constants (subcategory operating_modes), each with its value, bit
     pattern and the source's own wording"

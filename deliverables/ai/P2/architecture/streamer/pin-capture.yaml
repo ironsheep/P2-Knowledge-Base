@@ -160,7 +160,7 @@ neighbour_capture_composition:
     verification_status.filter_delay for the delay values)."
 
 parallax_worked_example:
-  what_it_is: "Parallax's own Spin2 v55 documentation builds exactly this composition
+  what_it_is: "Parallax's own Spin2 documentation builds exactly this composition
     -- a smart pin transmitting async serial, captured by the streamer through a
     non-smart neighbour, displayed in a DEBUG LOGIC window. It is the closest thing to
     a canonical form for this composition."

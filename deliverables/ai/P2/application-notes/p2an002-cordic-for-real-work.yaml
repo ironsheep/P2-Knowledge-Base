@@ -92,8 +92,6 @@ key_parameters:
     - "QVECTOR (X,Y) -> (length, angle) (signed)"
     - "QLOG integer -> 5.27 fixed-point log2"
     - "QEXP 5.27 fixed-point -> integer"
-  # 2026-09-10: the "~28 bits" figure is stated by no Parallax source and is
-  # not asserted. See architecture/cordic.yaml accuracy.trigonometric.
   precision: "integer ops (mul/div/sqrt) exact -- the square root is the exact truncated (floor) root, not rounded to nearest; trig (rotate/vector/log/exp) iterative -- low bits approximate, no sourced bit count"
 
 prerequisites:
@@ -102,7 +100,7 @@ prerequisites:
   - "P2 32-bit signed integer / fixed-point model (no floating-point hardware)"
 
 gotchas:
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (hub features, CORDIC solver) and CORDIC Solver ('a 54-stage pipelined CORDIC solver'; the 55-clock result latency), EVENTS and INTERRUPTS (event 15 = GETQX/GETQY executed without any CORDIC results available), and OVERLAPPING CORDIC COMMANDS (the pipelining/interrupt warning); hardware-verified pipeline behaviour EF-053; hub-access-in-CORDIC-loops rule run on real P2 at 200 MHz, seven consistent runs (RDLONG in fill fails at FILL=2, WRLONG in drain at FILL=3, register-only clean through FILL=7)"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (hub features, CORDIC solver) and CORDIC Solver ('a 54-stage pipelined CORDIC solver'; the 55-clock result latency), EVENTS (event 15 = GETQX/GETQY executed without any CORDIC results available), and OVERLAPPING CORDIC COMMANDS (the pipelining/interrupt warning); hardware-verified pipeline behaviour EF-053; hub-access-in-CORDIC-loops rule run on real P2 at 200 MHz, seven consistent runs (RDLONG in fill fails at FILL=2, WRLONG in drain at FILL=3, register-only clean through FILL=7)"
   items:
     - flag: pitfall
       text: "QMUL/QDIV/QFRAC/QSQRT are UNSIGNED -- a negative operand becomes a huge positive one. For signed data take magnitude and sign separately. QVECTOR/QROTATE ARE signed, being built for coordinates."

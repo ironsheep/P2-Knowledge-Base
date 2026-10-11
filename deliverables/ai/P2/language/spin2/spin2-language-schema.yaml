@@ -67,7 +67,7 @@ spin2_language_schema:
           type: "array"
           items:
             enum: ["all_blocks", "pub_pri_only", "con_only"]
-          description: "Where the operator is valid, as the v55 operator table states it: all blocks, PUB/PRI only, or CON only"
+          description: "Where the operator is valid, as the Spin2 operator table states it: all blocks, PUB/PRI only, or CON only"
           required: true
           
         description:

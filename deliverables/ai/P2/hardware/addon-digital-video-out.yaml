@@ -19,7 +19,7 @@ description: >-
   driven by the P2 streamer. Unused connector signals (CEC, RSVD, SCL, SDA, 5V,
   HPD) sit on an unpopulated 0.1 inch pad row; an adjacent ACC 5V pad lets the
   5V line be bridged when a monitor needs 5V.
-  (P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Digital Video Out Add-on Board (#64006D), p.5)
+# Source: P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Digital Video Out Add-on Board (#64006D), p.5
 
 # --- Eval-header board model (uniform across all #64006 / eval-header occupants) ---
 eval_header_occupant: true

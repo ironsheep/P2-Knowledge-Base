@@ -1,11 +1,12 @@
 method: MULDIV64
 type: method
 description: |
-  Multiply then divide with a 64-bit intermediate product. Parallax Spin2
-  Documentation v55: "Divide the 64-bit product of 'mult1' and 'mult2' by
+  Multiply then divide with a 64-bit intermediate product. Parallax states:
+  "Divide the 64-bit product of 'mult1' and 'mult2' by
   'divisor', return quotient (unsigned operation)." All operands and the quotient
   are UNSIGNED 32-bit values -- an operand with bit 31 set is a large positive
   number, not a negative one; handle signs yourself for signed math.
+source: "Parallax Spin2 Documentation v55, MULDIV64 (description quotation; notes: unsigned operation)"
 category: Math/CORDIC Operations
 syntax: "result := MULDIV64(Multiplier, Multiplicand, Divisor)"
 parameters:
@@ -41,7 +42,7 @@ examples:
 notes:
   - "Prevents overflow in intermediate calculation"
   - "Uses 64-bit intermediate result"
-  - "Unsigned operation: all parameters and the result are 32-bit unsigned (Parallax Spin2 Documentation v55, MULDIV64)"
+  - "Unsigned operation: all parameters and the result are 32-bit unsigned"
   - "Useful for scaling and ratio calculations"
   - "More precise than (a*b)/c for large values"
   - "Divisor 0 does not trap: MULDIV64(a, b, 0) returns NOT (the upper 32 bits of a*b), every time -- so $FFFF_FFFF whenever a*b < 2^32 (e.g. MULDIV64(1000, 1000, 0)); MULDIV64($FFFF_FFFF, $FFFF_FFFF, 0) = 1. Guard the divisor if a zero is possible. The interpreter runs QMUL then QDIV."

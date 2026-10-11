@@ -14,13 +14,13 @@ syntax: "PC_KEY(pointer_to_long)"
 
 description: |
   PC_KEY reads the host PC's keyboard into the P2 from within a graphical DEBUG()
-  display. Spin2 v55 states it as: "FOR USE IN GRAPHICAL DEBUG() DISPLAYS - Must be
+  display. Parallax states it as: "FOR USE IN GRAPHICAL DEBUG() DISPLAYS - Must be
   the last command in a DEBUG() statement. Returns any new host-PC keypress that
   occurred within the last 100ms into a long inside the chip. The DEBUG() Display
   must have focus for keypresses to be noticed."
   The 100 ms latch is what sets the poll rate: a loop that polls more slowly than
   that will miss keypresses, and one that polls faster simply reads 0 between them.
-  (Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG, Miscellaneous commands, PC_KEY)
+# Source: Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG, Miscellaneous commands, PC_KEY
 
 usage_rules:
   source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (Miscellaneous commands: the PC_KEY entry); Graphical DEBUG Displays (backtick-escape mechanism)"

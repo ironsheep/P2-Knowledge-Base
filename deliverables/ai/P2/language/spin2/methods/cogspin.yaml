@@ -102,7 +102,7 @@ top_level_stack:
     for the return address (a return pops 7 longs), then the called method's parameters,
     results and local longs, which the call clears to zero.
   size_and_limit: >-
-    Not documented. Neither the Spin2 v55 documentation nor the v55 interpreter listing
+    Not documented. Neither the Spin2 documentation nor the Spin2 interpreter listing
     states a size for the top-level stack or an upper bound for it, and the interpreter
     listing contains no comparison of the stack pointer against a limit, so no overflow
     check is documented. How far the stack can grow before it reaches other hub data is

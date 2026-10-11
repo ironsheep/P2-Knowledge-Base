@@ -16,7 +16,7 @@ last_updated: "2026-08-25"
 # Findability. A coder asking for a pull-up is asking a REAL question with a real
 # answer -- P_HIGH_15K with DIR=1, OUT=1 is a 15 kOhm resistive path to VIO, which
 # is a pull-up in every sense that matters to their circuit. They must land here,
-# whatever separator or casing they type. The Propeller 2 Documentation v35 uses the same vocabulary
+# whatever separator or casing they type. The Propeller 2 Documentation uses the same vocabulary
 # for the same rungs (USB mode: "two 15k pull-downs for
 # 'host' or a 1.5k pull-up and a float for 'device'"), so this is the authority's
 # word too, not a concession to loose speech.
@@ -68,7 +68,7 @@ description: |
   digital drive down to float. The two sides are chosen independently: a pin can drive
   hard one way and weakly the other.
 
-  A drive selection is only ever a property of DRIVING. Per the datasheet legend, DIR
+  A drive selection is only ever a property of DRIVING. DIR
   is the direction bit -- input (float) or output (drive) -- so a pin configured with a
   weak drive and then left with DIR low is simply a high-impedance input, and the
   selection does nothing.
@@ -103,7 +103,7 @@ sub_fields:
       100000_OHHHLLL .. 100111_OHHHLLL   ADC input
       10100_DDDDDDDD .. 10111_DDDDDDDD   DAC output
       1100_CDDDDDDDD .. 1111_CDDDDDDDD   level comparison
-    The Spin2 v55 symbol table states the same letters as masks over the whole D
+    The Spin2 symbol table states the same letters as masks over the whole D
     operand, which is where each position below comes from.
   source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Modes ((M) Pin Mode
     table and the Pin Mode Legend), p.24; identical rows in the Propeller 2 P2X8C4M64P
@@ -125,7 +125,7 @@ sub_fields:
       "1": "Clocked"
     footnotes: "Live is used for feedback operations and provides a continuous
       (non-clocked) signal; Clocked updates on clock edge only"
-    also_named: "the Spin2 v55 table calls this same bit the Sync mode bit, selected by
+    also_named: "the Spin2 symbol table calls this same bit the Sync mode bit, selected by
       the two constants in the Sync Mode group"
     applies_to: "the logic / Schmitt / comparator and level-comparison families"
 
@@ -162,7 +162,7 @@ sub_fields:
 
   comparison_level:
     bits: "M[7:0]"
-    legend: "LLLLLLLL in the Spin2 v55 mask, DDDDDDDD in the datasheet pattern"
+    legend: "LLLLLLLL in the Spin2 mask, DDDDDDDD in the datasheet pattern"
     meaning: "8-bit Level, in the level-comparison family"
 
 drive_ladder:
@@ -218,7 +218,7 @@ idioms:
     a line held high or low weakly gets it by driving weakly in that direction, and the
     drive is live only while DIR is high.
 
-    The Spin2 v55 symbol table defines each constant individually and composes
+    The Spin2 symbol table defines each constant individually and composes
     them into no idiom at all; the two compositions below are the idioms for weak
     high and weak low.
   source: "Both compositions below were run on real P2 silicon (hardware-verified form, not a documentary idiom). Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Modes (Pin Mode Legend),
@@ -273,7 +273,7 @@ idioms:
   open_question_drive_strength:
     status: "open -- documentary only"
     note: "The fact this file rests on -- P_HIGH_*/P_LOW_* select DRIVE STRENGTH and the P2 has no
-      bias resistors -- is stated by the Datasheet Pin Mode Legend and the Spin2 v55 wording. The
+      bias resistors -- is stated by the Datasheet Pin Mode Legend and the Spin2 symbol table wording. The
       current a hard-driven opposing pin sinks from a pin set P_HIGH_15K with DIR high (15 kOhm
       source versus an internal resistor to VIO) is not documented."
     source: "Never the subject of a dedicated hardware verification; corroborated only incidentally by rigs built for other purposes (EF-063, EF-064). A direct bench run on real P2 silicon would settle it: jumper-only, no external instrument beyond a second pin; drive a pin P_HIGH_15K with DIR high, measure the current a hard-driven opposing pin sinks, and confirm it matches a 15 kOhm source rather than an internal resistor to VIO."

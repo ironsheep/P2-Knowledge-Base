@@ -6,7 +6,7 @@ description: |
   Both keys (p2kbSpin2InlinePasm and p2kbSpin2InlinePasm2) are kept indexed
   for back-compat with existing references; this stub eliminates content
   drift between the two locations.
-documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE"
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE; Document Status (v47: task pointers build downward in the last 32 free cog registers, from $11F..$100) (key_facts_summary.multitasking_caveat)"
 documentation_level: stub
 created: 2025-09-09
 updated: 2026-04-29
@@ -32,7 +32,7 @@ key_facts_summary:
     Programs using fewer than 32 software tasks leave the LOWER portion of
     $100..$11F free for user code. This range overlaps the ORG..END inline
     code area, so multitasking and large inline-PASM blocks compete for the
-    same space. Source: Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: task pointers build downward in the last 32 free cog registers, from $11F..$100).
+    same space.
   label_rule: "Inline PASM labels are local to the ORG..END block; a plain label (lp) or a '.'-prefixed local label (.lp) works"
 
 canonical_source: language/spin2/constructs/inline_pasm.yaml

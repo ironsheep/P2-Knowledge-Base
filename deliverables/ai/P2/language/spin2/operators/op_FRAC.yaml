@@ -1,8 +1,7 @@
 operator: "FRAC"
 type: operator
 description: |
-  Unsigned fraction: x FRAC y = (x << 32) / y (Parallax Spin2 Documentation v55,
-  operator table; assignment form var FRAC= y). The result is a 32-bit fraction of
+  Unsigned fraction: x FRAC y = (x << 32) / y. The result is a 32-bit fraction of
   2^32, so it fits only while x < y: 1 FRAC 3 = $5555_5555, 2 FRAC 7 = $4924_9249.
   The interpreter runs it as the CORDIC QFRAC.
 category: Math

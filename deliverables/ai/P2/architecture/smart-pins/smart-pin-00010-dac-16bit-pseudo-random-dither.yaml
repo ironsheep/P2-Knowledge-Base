@@ -4,6 +4,7 @@
 mode: "%00010"
 name: "DAC 16-bit with Pseudo-Random Dither"
 category: "dac"
+source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %00010 and DAC_MODE = DAC 16-bit with pseudo-random dither"
 
 # Constants
 constants:
@@ -26,7 +27,7 @@ operation: |
 accuracy_caveat: |
   The "16-bit" output is a NOMINAL, time-averaged figure: the smart pin dithers
   the underlying 8-bit DAC between adjacent levels to achieve 16-bit DAC output
-  averaged over time (Parallax Propeller 2 Documentation v35, SMART PIN MODES).
+  averaged over time.
 
 # Parameters
 x_register:

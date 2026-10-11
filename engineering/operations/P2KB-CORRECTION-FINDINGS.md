@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-572`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-573`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -63,7 +63,28 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen; + F-571, found 2026-10-11 by «#398»)
+## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen; + F-571, F-572, found 2026-10-11 by «#398»)
+
+### F-572 — provenance and change history reach agents through indented comments and served prose, where no gate looks — `PENDING-VALIDATION` (found 2026-10-11 probing v1.24.0, «#398»; applied 2026-10-11; closes when v1.24.1 serves it)
+The delivery filter strips the provenance keys and **column-0** comments; an indented comment is served
+as part of the body, and so is every value outside the stripped keys. The probes of v1.24.0 on p2kb-mcp
+1.5.0 found both carrying provenance: the hardware selection guide served an indented `# Source: P2 Eval
+Add-on Boards (#64006 Series) … p.9`; `addon-led-matrix.yaml` and `io_pin_timing.yaml` ended their
+`description:` with a document citation and pages; indented comments elsewhere served change history
+("Removed 2026-08-25 …", "read 1224 until 2026-08-26", "cross-checked against …", commit hashes,
+"Sacred Rule #7"). **Why it passed:** the *Internal IDs* and *Change-History Prose* release checks read
+parsed values only — a comment is invisible to them — and none of them looks for a document title with
+an edition or a page locator in a served value.
+**Applied 2026-10-11:** the class across the tree — ≈19 served comments in 14 files and ≈60 served values
+in ≈50 files: real citations moved to the nearest stripped `source:`/`sources:`/`documentation_source:`
+field or a column-0 `# Source:` comment, change history deleted, no fact changed (audited by a fresh
+agent; record `correction-sweeps/2026-10-11-v1.24.1-change-set-audit.md`). Twin found on the way:
+`multi_resource_management.yaml` had lost its only source (the OBEX 4257 octo-serial pointer removed as
+a phantom in `d965a065`); restored as `OBEX 4257 (ISP high-speed 8-port serial subsystem)`.
+**Gates:** `validate_served_comments` (served comments, via `yaml.scan` tokens so `#` inside a literal
+is value text) and a served-value citation check in `validate-dod-release.py`, each with a negative
+control. Closes on the live probe of v1.24.1: the selection guide's audio/video block and the LED
+matrix description serve no citation.
 
 ### F-571 — `p2kb_obex_get` shows OBEX fields the KB no longer has, and does not show the one that matters — `CONFIRMED` (found 2026-10-11 by the close-out release MCP test, step 5, «#398»; the fix is in the MCP server, not this repo)
 Probed on p2kb-mcp **1.5.0** against KB v1.24.0, after `p2kb_refresh include_obex` (0 stale entries).

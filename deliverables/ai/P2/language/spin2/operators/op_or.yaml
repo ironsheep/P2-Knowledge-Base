@@ -7,7 +7,7 @@ description: |
   instruction OR, which ORs two registers bit by bit.
 priority: 15
 term_form: "x OR y"
-assign_form: "var ||= y (the symbol spelling; the v55 operator table lists no word-spelled assignment form)"
+assign_form: "var ||= y (the symbol spelling; the Spin2 operator table lists no word-spelled assignment form)"
 block_usage: "Term in all blocks; assignment form in PUB/PRI only"
 examples:
   - "IF error OR timeout\n  ABORT"

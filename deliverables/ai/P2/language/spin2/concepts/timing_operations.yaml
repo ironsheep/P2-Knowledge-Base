@@ -13,7 +13,6 @@ description: |
   1 / CLKFREQ -- not a figure any source states. The frequencies used are the P2
   Datasheet's rated clock sources. Spin2 also provides time-unit
   functions for delays and measurements.
-  (Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48)
 
   Timing Categories:
   - Counter access: GETCT (raw counter), POLLCT/WAITCT (events)
@@ -21,6 +20,7 @@ description: |
   - Time measurement: GETMS, GETSEC (elapsed since boot)
 
   The counter rolls over approximately every 21.5 seconds at 200 MHz.
+# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48
 
 sources:
   - "description (GETCT WC returns the upper 32; quoted 'System counter extended to 64 bits. GETCT WC retrieves upper 32-bits.'): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status"

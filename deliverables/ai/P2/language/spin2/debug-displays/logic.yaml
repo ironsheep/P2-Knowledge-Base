@@ -33,7 +33,7 @@ where_the_data_comes_from:
   this_file_is_the_display_side: "LOGIC draws packed sample longs that something else
     already put in hub RAM. It does not sample pins and it has no acquisition
     settings; SAMPLES/SPACING/TRIGGER all act on data you feed it."
-  parallax_worked_example: "The Spin2 v55 LOGIC section builds both halves together --
+  parallax_worked_example: "The Spin2 documentation's LOGIC section builds both halves together --
     a smart pin transmitting async serial, the streamer capturing it through an
     adjacent non-smart pin, and this display unpacking the result with LONGS_2BIT."
   source: "parallax_worked_example: Parallax Propeller 2 Spin2 Language Documentation v55, LOGIC Display (the 333 Mbaud capture example)"

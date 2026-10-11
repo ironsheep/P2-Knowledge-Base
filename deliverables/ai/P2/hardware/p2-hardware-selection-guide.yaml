@@ -72,13 +72,13 @@ application_specific_guides:
     primary_hardware: "P2 Eval Board"
     required_addons: ["64006H - A/V Breakout Board"]
     optional_addons: ["64006D - Digital Video Out", "64006C - LED Matrix"]
+    source: "P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval A/V Breakout Add-on Board (#64006H), p.9"
     capabilities:
       # The #64006H guide lists sockets and signal formats, not a resolution
       # ceiling.
       # Resolution is a function of
       # the streamer/NCO timing you drive, not of the breakout board -- see
       # architecture/streamer/nco-timing.yaml.
-      # Source: P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval A/V Breakout Add-on Board (#64006H), p.9
       - "VGA output on a 15-pin VGA socket"
       - "Component video to RCA 4-band (composite sync, RGBS), digital component video on RCA, and composite video on RCA"
       - "Stereo audio with multiple output formats"

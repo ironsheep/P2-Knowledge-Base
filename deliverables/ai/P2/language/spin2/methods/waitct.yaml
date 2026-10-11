@@ -50,7 +50,7 @@ notes:
   - "Resolution is 1 system clock cycle"
 counter_wrap:
   statement: "GETCT and WAITCT use the 32-bit system counter, which wraps every 2^32 clocks: about 53.7 s at 80 MHz"
-  derived_from: "Parallax Propeller 2 Spin2 Language Documentation v55, Timing Methods (GETCT returns the 32-bit system counter); 2^32 / 80_000_000 = 53.687 s"
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, Timing Methods (GETCT returns the 32-bit system counter); 2^32 / 80_000_000 = 53.687 s"
 timing:
   description: "Waits until the counter has passed Tick, not until an exact match"
   cycles: "Variable based on target tick"

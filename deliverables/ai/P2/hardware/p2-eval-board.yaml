@@ -48,8 +48,8 @@ specifications:
     silicon_revision: "Rev C silicon, approved for production (engineering sample, not a production chip)"
     resources: "8 cogs, 512 KB shared hub RAM, 64 smart pins"
     part_number_note: >-
-      The source is inconsistent: p.2 key spec and the p.4 diagram callout read
-      P2X8C4M64PES; the p.4 section heading, the p.3 bullet and the p.17 board
+      The source is inconsistent: the key specification and the diagram callout read
+      P2X8C4M64PES; the section heading, a feature bullet and the board
       silkscreen read P2X8C4M64P.
   clock:
     crystal: "20 MHz SMT crystal; on-chip oscillator internal 9 pF load capacitance; XO = physical pin 50, XI = physical pin 51"
@@ -62,8 +62,8 @@ specifications:
     hub_ram: "512 KB (in the P2 itself)"
   smart_io_pins: >-
     64 accessible, grouped in 8 sets of 8 via the edge headers. The source states
-    the free count two different ways and does not reconcile them: p.2 says
-    "58 fully free" (twice), p.15 says "P0-P55 are fully free" with P56-P63 routed
+    the free count two different ways and does not reconcile them: the key
+    specifications say "58 fully free" (twice), the I/O pin assignments say "P0-P55 are fully free" with P56-P63 routed
     to peripheral circuits, and feature 12 adds "P56 and P57 are free by default".
   io_logic_voltage: "3.3 V"
   core_voltage: "1.8 V"
@@ -76,7 +76,7 @@ specifications:
     vdd_supply: "switching buck regulator, 1.8 V up to 2 A, 1 MHz nominal switching frequency; absolute maximum voltage set or connected to P2 VDD is 2.2 V"
     vio_supplies: "LDO 3.3 V up to 300 mA per 8 I/O pins"
     brownout: "RESn is permanently connected to the 1.8 V regulator Power-Good signal, holding the P2 in reset if the regulator voltage drops below ~1.5 V"
-    io_drive: "3.3 V logic level, source or sink 30 mA per I/O pin (per the p.15 I/O Pin Assignments table)"
+    io_drive: "3.3 V logic level, source or sink 30 mA per I/O pin (per the I/O Pin Assignments table)"
   programming:
     interface: "built-in FTDI-to-USB, serial over micro-USB, with a TX/RX activity indicator LED"
     speed: "user selectable up to 3 Mbps"

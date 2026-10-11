@@ -19,9 +19,8 @@ description: >-
   of P2 pins: to light one LED, drive one pin HIGH and one LOW per the lookup
   table, set both to INPUT to turn it off. Only one LED is lit at a time;
   multiplexing faster than ~50 Hz removes visible flicker. Each lit LED draws
-  ~4 mA, so instantaneous current stays ~4 mA (vs ~224 mA if all 56 were on)
-  — per the guide.
-  P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval LED Matrix Add-on Board (#64006C), pp.4-5.
+  ~4 mA, so instantaneous current stays ~4 mA (vs ~224 mA if all 56 were on).
+# Source: P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval LED Matrix Add-on Board (#64006C), pp.4-5
 
 # --- Eval-header board model (uniform across all #64006 / eval-header occupants) ---
 eval_header_occupant: true

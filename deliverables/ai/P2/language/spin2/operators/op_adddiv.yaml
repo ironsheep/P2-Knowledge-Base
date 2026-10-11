@@ -1,8 +1,7 @@
 operator: "+/"
 type: operator
 description: |
-  Unsigned divide, return quotient: x +/ y (Parallax Spin2 Documentation v55, operator
-  table; assignment form var +/= y). Both operands are treated as unsigned 32-bit
+  Unsigned divide, return quotient: x +/ y. Both operands are treated as unsigned 32-bit
   values.
 category: Divide
 priority: 7

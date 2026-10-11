@@ -1,6 +1,7 @@
 method: TASKSPIN
 type: method
 category: Task Operations
+source: "taskptr_table_location: Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: task pointers build downward in the last 32 free cog registers, from $11F..$100); IN-LINE PASM CODE (free cog registers $000..$11F)"
 
 requires_version: "Spin2_v47"
 version_directive: "{Spin2_v47}"
@@ -22,11 +23,11 @@ parameters:
     type: "address"
     description: "Address of stack space for the task"
 returns:
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: TASKSPIN)"
   type: "integer (as expression) / void (as statement)"
   description: |
     As a statement, TASKSPIN returns nothing. Used as an expression term, it
     returns the assigned task number (0-31), or -1 if no task slot was free.
-    Source: Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: TASKSPIN).
 examples:
   - code: |
       {Spin2_v47}                              ' REQUIRED directive
@@ -73,7 +74,6 @@ taskptr_table_location: |
   LOWER portion of $100..$11F free for user code as well. This range
   overlaps the ORG..END inline-PASM code area ($000..$11F), so multitasking
   and large inline-PASM blocks compete for the same space.
-  Source: Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: task pointers build downward in the last 32 free cog registers, from $11F..$100); IN-LINE PASM CODE (free cog registers $000..$11F).
 timing:
   execution_model: |
     Spin2 methods execute via the bytecode interpreter. Clock count: not documented.

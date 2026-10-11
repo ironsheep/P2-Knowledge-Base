@@ -20,7 +20,7 @@ parameters:
     range: "1-15"
     optional: true
     introduced_in: "v52"        # edition of introduction, NOT an enforced compiler gate
-    enforced_version_gate: none  # verified: NEXT level compiles at {Spin2_v41}/no-directive (pnut-ts probe)
+    enforced_version_gate: none  # NEXT level compiles at {Spin2_v41}/no-directive
     description: "Which OUTER loop to continue, counting outward (1 = 1st-outer loop, 2 = 2nd-outer, ...). Bare NEXT continues the current loop."
 
 examples:

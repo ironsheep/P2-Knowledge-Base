@@ -888,6 +888,344 @@ def validate_history_prose(verbose: bool = False) -> ValidationResult:
     return result
 
 
+# Served comments (#398, 2026-10-11). The delivery filter removes only COLUMN-0 `#`
+# lines; an INDENTED comment (and a trailing `key: v  # note`) is delivered to the
+# consumer exactly like a value. validate_history_prose and
+# validate_register_ids_in_values parse the YAML, and parsing discards comments, so
+# neither can see one; validate_internal_ids reads payload lines and so sees ids and
+# repo paths in comments, but not a document title with a page, a dated edit note or
+# "cross-checked against". This check reads the comments themselves.
+#
+# WHICH `#` IS A COMMENT. Found with PyYAML's scanner (yaml.scan), not by looking for
+# `#`: a `#` line inside a `|`/`>` block scalar, or inside a multi-line quoted/plain
+# scalar, is VALUE text (PASM2/Spin2 code, `#IFDEF`, ...) and is delivered as a value.
+# A comment is what follows the last token on its line, or a whole line that no
+# scalar covers. Chosen over ruamel (not a dependency of this runner) and over a
+# hand-written line tokenizer (which would be a second model of YAML).
+SERVED_COMMENT_PATTERNS = [
+    ("internal-id", INTERNAL_ID_PATTERN),
+    ("repo-locator", REPO_LOCATOR_PATTERN),
+    ("page-cite", re.compile(r"\bpp?\.\s?\d")),
+    ("edition-date", re.compile(r"\bv\d+(?:\.\d+)?\s+\d{1,4}/\d{1,2}/\d{2,4}\b")),
+    ("doc-title-edition", re.compile(
+        r"\b(?:Datasheet|Documentation|Manual|Guide|Spin2|PASM2)\s+v\d+", re.I)),
+    ("source-label", re.compile(r"(?:^|\s)(?:Sources?|Cited from)\s*:\s*\S")),
+    ("iso-date", re.compile(r"\b20\d\d-\d\d-\d\d\b")),
+    ("cross-checked", re.compile(
+        r"\b(?:cross-?checked|verified|reconciled|corrected) (?:against|with)\b", re.I)),
+    ("commit-hash", re.compile(r"\b(?=[0-9a-f]*\d)(?=[0-9a-f]*[a-f])[0-9a-f]{8}\b")),
+    ("process-rule", re.compile(r"\bSacred Rule\b")),
+    ("edit-note", re.compile(r"^\s*(?:Removed|Redirected|Retired)\b")),
+] + [("history:" + name, rx) for name, rx in HISTORY_PROSE_PATTERNS]
+
+
+def served_comments(text):
+    """[(first line no., joined text)] for every block of consecutive real YAML
+    comments in `text` (a delivery-filtered payload)."""
+    lines = text.split('\n')
+    inside, last_end = set(), {}
+    for tok in yaml.scan(text, Loader=yaml.SafeLoader):
+        s, e = tok.start_mark, tok.end_mark
+        if isinstance(tok, yaml.ScalarToken) and e.line > s.line:
+            inside.update(range(s.line + 1, e.line))        # value text, not comments
+        last_end[e.line] = max(last_end.get(e.line, 0), e.column)
+    found = []
+    for i, line in enumerate(lines):
+        if i in inside:
+            continue
+        tail = line[last_end[i]:] if i in last_end else line
+        body = tail.lstrip()
+        if body.startswith('#'):
+            found.append((i + 1, body[1:].strip()))
+    blocks = []
+    for n, body in found:
+        if blocks and blocks[-1][0] + blocks[-1][2] == n:
+            blocks[-1][1] += ' ' + body
+            blocks[-1][2] += 1
+        else:
+            blocks.append([n, body, 1])
+    return [(n, body) for n, body, _ in blocks]
+
+
+def served_comment_hits(text):
+    """[(line, pattern name, matched text)] for citation / provenance in served comments."""
+    return [(n, name, m.group(0)) for n, body in served_comments(text)
+            for name, rx in SERVED_COMMENT_PATTERNS for m in [rx.search(body)] if m]
+
+
+_CITE = "Source: P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, p.9"
+SERVED_COMMENT_CONTROL = [
+    # (YAML text, must_fire)
+    (f"a:\n  b: 1\n  # {_CITE}\n", True),                           # the 2026-10-11 hardware hit
+    ("a:\n  b: 1   # Removed 2026-08-25 from this block\n", True),   # trailing, dated edit note
+    ("a:\n  # 2026-09-10: the figure is not asserted.\n  b: 1\n", True),
+    ("a:\n  # All numbers cross-checked against the v35 documentation.\n  b: 1\n", True),
+    ("a:\n  # was retired by 03189a7d; nothing since\n  b: 1\n", True),
+    ("a:\n  # per engineering/ingestion/x.md\n  b: 1\n", True),
+    ("a:\n  # Level numbers follow the Spin2 v55 Term Priority column.\n  b: 1\n", True),
+    # The same text as VALUE text (code in a literal, a quoted string) -- MUST NOT fire.
+    (f"a:\n  code: |\n    # {_CITE}\n    mov x, y\n  b: 1\n", False),
+    (f"a:\n  code: >\n    # {_CITE}\n  b: 1\n", False),
+    (f"a: \"one\n   # {_CITE}\"\n", False),
+    (f"a: 'x # {_CITE}'\nb: c#p.9\n", False),
+    # Ordinary structure labels -- MUST NOT fire.
+    ("a:\n  # register-array forms (cog registers)\n  b: 1\n  c: 2   # unit: clocks\n", False),
+]
+
+
+def served_comment_negative_control():
+    """Return the control cases that misbehave (empty list == control passes)."""
+    return [(text, want) for text, want in SERVED_COMMENT_CONTROL
+            if bool(served_comment_hits(text)) != want]
+
+
+def validate_served_comments(verbose: bool = False) -> ValidationResult:
+    """No citation or change history in a comment the consumer receives (#398, 2026-10-11).
+
+    Reads the shipped payload, finds its real comments (see SERVED_COMMENT_PATTERNS for
+    how), and tests them for ids, repo paths, document titles with edition or page,
+    dated edit notes, change history and "cross-checked against". Provenance belongs in
+    a stripped field (source:/sources:). The negative control runs first."""
+    result = ValidationResult("Served Comments in Shipped Content")
+    bad_control = served_comment_negative_control()
+    if bad_control:
+        result.fail(f"negative control FAILED on {len(bad_control)} case(s) -- do not trust this run")
+        for text, want in bad_control:
+            result.info(f"  must_fire={want}: {text!r}")
+        return result
+    result.ok(f"Negative control: {sum(w for _, w in SERVED_COMMENT_CONTROL)} served-comment citations fire, "
+              f"{sum(not w for _, w in SERVED_COMMENT_CONTROL)} code-literal / quoted / structure-label cases do not")
+
+    live, shipped = _shipped_payload()
+    hits = []
+    for _, path in live:
+        try:
+            found = served_comment_hits(shipped[str(path)])
+        except yaml.YAMLError:
+            continue                    # a payload that does not parse is Metadata Filter's finding
+        hits.extend(f"{path} (payload line {n}): {name}: {text!r}" for n, name, text in found)
+
+    result.info(f"Files checked (shipped payload): {len(live)}")
+    if hits:
+        result.fail(f"{len(hits)} citation / change-history hit(s) in served comments -- delete the "
+                    f"comment or move a real citation into source:/sources:")
+        for h in hits:
+            result.info(f"  {h}")
+    else:
+        result.ok("No citation, id, date or change history in any comment that reaches a consumer")
+    return result
+
+
+# Served value citations (#398, 2026-10-11). The delivery filter strips the provenance
+# KEYS (source:/sources:/...), but a string VALUE it does not strip is delivered as a
+# statement of fact. A value that says where it came from ("... Datasheet 2022/11/01,
+# pp.47-48.", "per the guide") is provenance in the wrong place: the fact is the
+# sentence, the citation belongs in source:/sources:. validate_served_comments reads
+# comments; no other check reads a citation in a VALUE.
+#
+# The document-title table is NOT copied: CANONICAL_TITLES in
+# validation/audit-yaml-claim-sourcing.py is imported (the file name has hyphens, so by
+# path with importlib; its main is guarded by __name__, importing runs no audit).
+def _canonical_title_forms():
+    import importlib.util
+    path = Path("engineering/tools/validation/audit-yaml-claim-sourcing.py")
+    spec = importlib.util.spec_from_file_location("audit_yaml_claim_sourcing", path)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = mod            # dataclass-safe; harmless otherwise
+    spec.loader.exec_module(mod)
+    forms = sorted({mod._norm(t) for row in mod.CANONICAL_TITLES for t in row[1]},
+                   key=len, reverse=True)
+    return forms, mod.EDITION_RE
+
+
+_TITLE_FORMS = None
+
+
+def _title_citation(value):
+    """The matched text when `value` names a canonical Parallax document title with an
+    edition or date following it (within 40 characters), else None."""
+    global _TITLE_FORMS
+    if _TITLE_FORMS is None:
+        _TITLE_FORMS = _canonical_title_forms()
+    forms, edition_re = _TITLE_FORMS
+    norm = re.sub(r"\s+", " ", value.replace("\u2013", "-").replace("\u2014", "-").lower())
+    for f in forms:
+        i = norm.find(f)
+        while i >= 0:
+            m = edition_re.search(norm[i + len(f): i + len(f) + 40])
+            if m:
+                return norm[i: i + len(f) + m.end()]
+            i = norm.find(f, i + 1)
+    return None
+
+
+VALUE_CITATION_PATTERNS = [
+    ("page-locator", re.compile(r"(?<![\w.])pp?\.\s?\d")),
+    ("per-the-document", re.compile(
+        r"\bper the (?:guide|datasheet|manual|documentation|silicon doc\w*|spec(?:ification)?|"
+        r"hardware manual|product guide)\b", re.I)),
+    ("according-to-document", re.compile(
+        r"\baccording to the\b[^.;\n]{0,60}?\b(?:Guide|Manual|Documentation|Datasheet)\b", re.I)),
+    # An EDITION stamp attached to a document word. `Spin2 v47` alone is a language
+    # version (a fact) and is not matched here; only `Documentation v35`, `Datasheet 2022/11/01`.
+    ("document-edition-stamp", re.compile(
+        r"\b(?:Documentation|Datasheet|Manual|Guide)\s+(?:v\s?\d+\b|\d{4}[-/]\d{2}[-/]\d{2}\b)"
+        r"|\bSpin2\s+(?:Language\s+)?Documentation\s+v\s?\d+\b")),
+    # An EDITION stamp on a DOCUMENT noun or possessive ("the Spin2 v55 symbol table",
+    # "v55's own Feeding table", "per the v55 table heading", "the full v35 mode table",
+    # "Reference v51"). The KB is always "latest": the document's name carries no edition.
+    # Language VERSION-GATING reads differently and does not match: "introduced in the v52
+    # edition", "(v48+)", "{Spin2_v47}", "gated behind Spin2 v47", "under v45", and a tool
+    # version where a bug was seen ("did not open under PNut v55").
+    ("document-edition-noun", re.compile(
+        r"\bv\d{2}'s\b"
+        r"|\bv\d{2}\s+(?:(?:operator|symbol|mode|instruction|feeding)\s+)?"
+        r"(?:tables?|documentation|docs?|wording|sections?|spec|syntax|headings?|statements?|canonical)\b"
+        r"|\bSpin2\s+v\d{2}\s+(?:documentation|symbol table|operator table|wording|section|LOGIC|syntax)\b"
+        r"|\b(?:Documentation|Reference)\s+v\d{2}\b", re.I)),
+]
+
+# Key paths whose values are reader resource pointers -- a reader is TOLD to go to the
+# document there; that is the content, not provenance. Matched as a path PREFIX segment
+# sequence (list indices are ignored), never by value text.
+VALUE_CITATION_ALLOWED_PATHS = [
+    # documentation.*  -- the document map a reader is directed to
+    ("documentation",),
+    # resources.* (and its nested `references`) -- further-reading pointers
+    ("resources",),
+    # further_reading.*
+    ("further_reading",),
+]
+# `source_metadata` is allowed at ANY depth: it is the entry's declared source description
+# (a field about where an example came from, not a claim). The code-example schema
+# (deliverables/ai/P2/code-examples/code-example-schema.yaml) nests it under its schema
+# root and documents the field with format examples that look like citations -- they ARE
+# the format being specified, so it is allowed by this key, not by file or value.
+VALUE_CITATION_ALLOWED_ANYWHERE = {"source_metadata"}
+
+
+# Leaf keys whose value is a code listing (`code: |` blocks), where `p.3`-shaped text is
+# source code and not a page locator.
+VALUE_CITATION_CODE_LEAVES = {"code", "code_example", "usage_example", "snippet", "sample_output"}
+
+
+def _path_segments(key_path):
+    return [s for s in re.split(r"\.|\[\d+\]", key_path) if s]
+
+
+def value_citation_allowed(key_path):
+    segs = _path_segments(key_path)
+    return (any(tuple(segs[:len(p)]) == p for p in VALUE_CITATION_ALLOWED_PATHS)
+            or bool(VALUE_CITATION_ALLOWED_ANYWHERE.intersection(segs)))
+
+
+def served_value_citation_hits(doc, allow_all=False):
+    """[(key path, pattern name, matched text)] for citation prose in string values of a
+    parsed, filtered YAML document."""
+    out = []
+    for key, value in _walk_string_values(doc):
+        if allow_all or value_citation_allowed(key):
+            continue
+        if _path_segments(key)[-1] in VALUE_CITATION_CODE_LEAVES:
+            continue                                    # a code listing, not prose
+        code = _CODE_LITERAL_RE.sub(" ", value)         # `p.3` in a code literal is code
+        for name, rx in VALUE_CITATION_PATTERNS:
+            m = rx.search(code)
+            if m:
+                out.append((key, name, m.group(0)))
+        t = _title_citation(code)
+        if t:
+            out.append((key, "title-with-edition", t))
+    return out
+
+
+# Backtick spans and fenced blocks are code literals, not prose.
+_CODE_LITERAL_RE = re.compile(r"```.*?```|`[^`\n]*`", re.S)
+
+_SVC_DOC = "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, pp.47-48."
+VALUE_CITATION_CONTROL = [
+    # (YAML text, must_fire)
+    (f"a:\n  description: The drive-mode list is from {_SVC_DOC}\n", True),
+    ("a:\n  note: Level numbers are listed per the guide.\n", True),
+    ("a:\n  note: Per the datasheet, the pin sinks 8 mA.\n", True),
+    ("a:\n  note: According to the Hardware Manual the rail is 3.3 V.\n", True),
+    ("a:\n  note: Behaviour as in Parallax Propeller 2 Documentation v35.\n", True),
+    ("a:\n  note: P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval LED Matrix "
+     "Add-on Board (#64006C), pp.4-5.\n", True),
+    ("a:\n  list:\n    - see pp.4-5 for the table\n", True),
+    # An edition stamp on a document noun / possessive -- MUST fire.
+    ("a:\n  note: The Spin2 v55 symbol table states the letters.\n", True),
+    ("a:\n  note: v55's own Feeding table advertises it.\n", True),
+    ("a:\n  note: Scope is PASM per the v55 table heading.\n", True),
+    ("a:\n  note: Visible down the full v35 mode table.\n", True),
+    # Language version-gating and tool-version facts -- MUST NOT fire.
+    ("a:\n  note: Introduced in the v52 edition.\n", False),
+    ("a:\n  note: Available on this form (v48+).\n", False),
+    ("a:\n  note: This form is gated behind Spin2 v47.\n", False),
+    ("a:\n  note: A SCOPE named Trace did not open under PNut v55.\n", False),
+    # Reader-resource pointers and language facts -- MUST NOT fire.
+    (f"documentation:\n  primary: {_SVC_DOC}\n", False),
+    (f"resources:\n  references:\n    - {_SVC_DOC}\n", False),
+    (f"further_reading:\n  - {_SVC_DOC}\n", False),
+    (f"schema:\n  source_metadata:\n    source_document:\n      examples: [\"{_SVC_DOC}\"]\n", False),
+    ("a:\n  note: Added in Spin2 v47.\n", False),
+    ("a:\n  syntax: '{Spin2_v47} STRING(\"x\")'\n", False),
+    ("a:\n  code: |\n    mov p.3, #1\n", False),
+    ("a:\n  code: Write it as `OUTA.p.3` or `pins.p.3`.\n", False),
+    ("a:\n  note: Rev B silicon v35 differs here.\n", False),
+    ("a:\n  note: Set the loop count (e.g. up to 255) in a register.\n", False),
+]
+
+
+def served_value_citation_negative_control():
+    """Return the control cases that misbehave (empty list == control passes)."""
+    bad = []
+    for text, want in VALUE_CITATION_CONTROL:
+        if bool(served_value_citation_hits(yaml.safe_load(text))) != want:
+            bad.append((text, want))
+    return bad
+
+
+def validate_served_value_citations(verbose: bool = False) -> ValidationResult:
+    """No document citation inside a served string value (#398, 2026-10-11).
+
+    Reads the shipped payload, parses it and tests every string VALUE (outside the
+    reader-resource key paths in VALUE_CITATION_ALLOWED_PATHS) for a page locator, a
+    Parallax document title with an edition or date, "per the guide" / "according to the
+    ... Manual", and an edition stamp attached to a document word. The fact is the
+    sentence; the citation belongs in source:/sources:. The negative control runs first."""
+    result = ValidationResult("Served Value Citations in Shipped Content")
+    bad_control = served_value_citation_negative_control()
+    if bad_control:
+        result.fail(f"negative control FAILED on {len(bad_control)} case(s) -- do not trust this run")
+        for text, want in bad_control:
+            result.info(f"  must_fire={want}: {text!r}")
+        return result
+    result.ok(f"Negative control: {sum(w for _, w in VALUE_CITATION_CONTROL)} cited values fire, "
+              f"{sum(not w for _, w in VALUE_CITATION_CONTROL)} resource-pointer / language-fact / "
+              f"code-literal cases do not")
+
+    live, shipped = _shipped_payload()
+    hits = []
+    for _, path in live:
+        try:
+            doc = yaml.safe_load(shipped[str(path)])
+        except yaml.YAMLError:
+            continue                    # a payload that does not parse is Metadata Filter's finding
+        hits.extend(f"{path} [{key}] {name}: {text!r}"
+                    for key, name, text in served_value_citation_hits(doc))
+
+    result.info(f"Files checked (shipped payload): {len(live)}")
+    if hits:
+        result.fail(f"{len(hits)} document citation(s) in served values -- state the fact; "
+                    f"move the citation into source:/sources:")
+        for h in hits:
+            result.info(f"  {h}")
+    else:
+        result.ok("No document citation reaches a consumer inside a value")
+    return result
+
+
 LEDGERS = [
     Path("engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md"),
     Path("engineering/ingestion/external-sources/hardware-verification/EXTERNAL-HARDWARE-FINDINGS.md"),
@@ -1546,6 +1884,8 @@ def run_all_validations(verbose: bool = False, incremental: bool = False) -> boo
         validate_internal_ids,
         validate_register_ids_in_values,
         validate_history_prose,
+        validate_served_comments,
+        validate_served_value_citations,
         validate_ledger_kb_home,
         validate_cross_references,
         validate_constant_fidelity,

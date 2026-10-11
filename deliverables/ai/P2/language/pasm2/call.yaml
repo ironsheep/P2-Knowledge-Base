@@ -67,7 +67,7 @@ encoding:
   z: D[30]
   clocks: '4 / 13-20'
   notes: Syntax 2 - address from register
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALL, p.56"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALL, p.56; ret_prefix_caveat: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Conditions ( IF_x ), p.68, and P2 Instructions v35 - Rev B/C Silicon, row 410"
 documentation_level: comprehensive
 compiler_syntax: 'CALL #S | D'
 compiler_category: Control Flow
@@ -93,7 +93,6 @@ ret_prefix_caveat: >-
   whatever the assembler placed next. It assembles clean; there is no error and no
   flag. To call a helper and then return, write 'CALL #target' followed by 'RET'.
   Full rule: language/pasm2/concepts/conditional_execution.yaml (ret_prefix_rule).
-  Sources: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Conditions ( IF_x ), p.68; P2 Instructions v35 - Rev B/C Silicon, row 410
 oneliner: Call a subroutine; store return context on the stack
 related:
 - RET

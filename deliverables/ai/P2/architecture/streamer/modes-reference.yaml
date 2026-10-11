@@ -21,7 +21,7 @@ encoding:
   config_field: "D[19:16]"
 
   # How to read the d_19_16 column. Every symbol below is one BIT of D[19:16],
-  # written MSB-first, exactly as the Propeller 2 Documentation v35 prints it.
+  # written MSB-first.
   field_notation:
     "0 / 1": "a FIXED bit. The mode template sets it; you do not."
     "p": >-

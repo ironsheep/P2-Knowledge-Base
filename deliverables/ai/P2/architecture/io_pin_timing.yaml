@@ -28,15 +28,11 @@ description: |
       1 mA / 100 µA / 10 µA / float". The eight
       rungs, their %HHH/%LLL encodings and their P_* constant names are defined once, in
       architecture/pin-drive-configuration.yaml.
-    - Slew rate. No Parallax document (the Propeller 2 Documentation v35, Spin2, the smart-pins
+    - Slew rate. No Parallax document (the Propeller 2 Documentation, Spin2, the smart-pins
       documentation, the P2 Datasheet, the P2 Hardware Manual) describes a slew-rate
       setting.
     - Propagation, rise and fall figures per drive setting. No Parallax source states them.
-
-  The drive-mode list is from Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01,
-  FEATURES (Smart I/O pins), p.2; the ratings and characteristics are from Parallax
-  Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, SYSTEM CHARACTERISTICS, pp.47-48.
-source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES (drive modes), p.2, and SYSTEM CHARACTERISTICS (Absolute Maximum Electrical Ratings), p.47"
+source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES (Smart I/O pins; drive modes), p.2, and SYSTEM CHARACTERISTICS (Absolute Maximum Electrical Ratings, DC Characteristics), pp.47-48"
 
 instruction_to_pin_timing:
   description: |

@@ -33,8 +33,7 @@ d_operand_format:
   fields:
     # One home per fact. All six fields, with their bit ranges and purposes, live in
     # architecture/smart_pins.yaml; the 13-bit %M..M field's internals live in
-    # architecture/pin-drive-configuration.yaml. Restating them here is what let three
-    # of the six drift wrong.
+    # architecture/pin-drive-configuration.yaml.
     reference: "architecture/smart_pins.yaml (configuration_format.fields) -- all six
       fields, with bit ranges and purposes."
     sources:

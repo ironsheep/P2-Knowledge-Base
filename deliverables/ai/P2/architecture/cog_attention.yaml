@@ -60,7 +60,7 @@ architecture:
     
     - method: "interrupt"
       description: "Trigger interrupt on ATN"
-      latency: "Parallax Propeller 2 Documentation v35, INTERRUPTS describes the dispatch mechanism (interrupt branches realized by inserting a 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline) but gives no clock-count latency. Clock-count latency: not documented."
+      latency: "The dispatch mechanism is documented (interrupt branches realized by inserting a 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline) but no clock-count latency is given. Clock-count latency: not documented."
 
 instructions:
   - instruction: "COGATN"
@@ -307,7 +307,7 @@ performance_characteristics:
   response_latency:
     polling: "Varies with polling frequency"
     waiting: "2+ clocks (2 minimum, plus the wait for the event)"
-    interrupt: "The Parallax Propeller 2 Documentation v35 does not publish a specific clock-count latency for ATN-triggered interrupt entry. Mechanism is documented (CALLD insertion into pipeline) but timing is not."
+    interrupt: "Clock-count latency for ATN-triggered interrupt entry: not documented. The mechanism is documented (CALLD insertion into the pipeline); the timing is not."
   
   bandwidth_impact: "Zero hub bandwidth consumed"
   

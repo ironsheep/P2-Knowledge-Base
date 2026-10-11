@@ -173,7 +173,6 @@ instruction_availability:
     - "None — hubexec is a strict subset (with the forbidden list above)"
   
   performance_differences:
-    # All numbers cross-checked against per-instruction YAMLs and the v35 HUB EXECUTION section.
     - "Sequential ALU ops (ADD, SUB, AND, MOV, etc.): 2 clocks in BOTH modes — no penalty in hubexec"
     - "JMP: 4 clocks (cog) vs minimum 13 clocks (hub, +1 if target not long-aligned)"
     - "CALL: 4 clocks (cog) vs minimum 13 clocks (hub, +1 if target not long-aligned)"
@@ -477,6 +476,10 @@ why_this_matters:
 related:
   - language/pasm2/jmp.yaml
   - language/pasm2/call.yaml
+  - language/pasm2/ret.yaml
+  - language/pasm2/djnz.yaml
+  - language/pasm2/add.yaml
+  - language/pasm2/mov.yaml
   - language/pasm2/coginit.yaml
   - language/pasm2/rdfast.yaml
   - language/pasm2/wrfast.yaml

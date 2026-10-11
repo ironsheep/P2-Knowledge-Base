@@ -143,9 +143,6 @@ configuration_constants:
   adc_input_modes:
     # GIO / VIO / FLOAT are NOT input ranges - they select an INTERNAL reference as the
     # ADC's input. Only the 1x..100x entries are pin-input gain ranges.
-    # Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES -
-    # "Delta-sigma ADC with 5 ranges, 2 sources, and VIO/GIO calibration."
-    # Mode-name glosses: Spin2 v55.
     - "P_ADC_GIO - GIO calibration reference to the ADC (a calibration SOURCE, not an input range)"
     - "P_ADC_VIO - VIO calibration reference to the ADC (a calibration SOURCE, not an input range)"
     - "P_ADC_FLOAT - ADC input floated (Rev C silicon); used to determine the ADC's floating bias point, not an input range"

@@ -14,7 +14,7 @@ description: >-
   wait 2+(D AND RND) clock cycles, where RND is a random value, producing a
   randomized delay; the flag(s) the effect names are cleared to 0 after
   completion (WC: C, WZ: Z, WCZ: both -- a flag column applies only when its
-  effect is given, Parallax PASM2 Manual p.30). The 2-cycle
+  effect is given). The 2-cycle
   overhead is inherent to the instruction. Stalls the cog pipeline during the wait;
   no instructions execute and no interrupts are processed until the wait completes.
   Critical for bit-banging protocols, PWM generation, and timing-sensitive operations
@@ -22,7 +22,7 @@ description: >-
 flags_affected:
   C: Set to 0 only when WC or WCZ is specified
   Z: Set to 0 only when WZ or WCZ is specified
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release (2022/11/01), Propeller 2 Assembly Language (PASM2) in Brief, p.159; P2 Instructions v35 - Rev B/C Silicon, Sheet1"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release (2022/11/01), Propeller 2 Assembly Language (PASM2) in Brief, p.159; Parallax PASM2 Manual p.30 (description: flag column applies only when its effect is given); P2 Instructions v35 - Rev B/C Silicon, Sheet1"
 documentation_level: comprehensive
 examples:
 - name: Inline PASM2 Timing

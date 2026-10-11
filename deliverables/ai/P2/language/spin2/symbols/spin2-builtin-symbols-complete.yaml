@@ -132,13 +132,10 @@ spin2_builtin_symbols:
   source: "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Smart Pin Configuration"
   # Count of the records actually present in this file's `symbols:` list below,
   # derived by walking that list -- not the size of the upstream symbol universe.
-  # This field read 1224 until 2026-08-26; 1224 is the sum of
-  # the top-level `category_summary.*.total_symbols` (the source document's own
-  # tally of every symbol it names). The `clock` category alone accounts for 1044
-  # of that, of which 1024 are the XMUL1..XMUL1024 PLL multipliers; ZERO XMUL records
-  # are carried here (the last one was removed 2026-09-14 -- XMUL/XDIV/XSEL appear
-  # nowhere in Spin2 v55), so the old tally contradicted the records sitting directly
-  # underneath it.
+  # The sum of the top-level `category_summary.*.total_symbols` (the source
+  # document's own tally of every symbol it names) is larger; the `clock` category
+  # alone accounts for 1044 of it, of which 1024 are XMUL1..XMUL1024 PLL multipliers.
+  # No XMUL record is carried here (XMUL/XDIV/XSEL appear nowhere in Spin2).
   total_symbols: 136
   # 6 categories are described in `category_summary`; 5 of them have records here
   # (`math` is described but has no symbol records yet).
@@ -1710,7 +1707,7 @@ spin2_builtin_symbols:
       subcategory: "event_sources"
       value: "$0000_0000"
       description: "Interrupt-occurred event or interrupts off"
-      language_scope: "PASM (per the v55 table heading)"
+      language_scope: "PASM (per the Spin2 documentation's table heading)"
       related_symbols: ["INT_OFF"]
 
     - symbol_id: "int_off"
@@ -1719,7 +1716,7 @@ spin2_builtin_symbols:
       subcategory: "event_sources"
       value: "$0000_0000"
       description: "Interrupt-occurred event or interrupts off"
-      language_scope: "PASM (per the v55 table heading)"
+      language_scope: "PASM (per the Spin2 documentation's table heading)"
       related_symbols: ["EVENT_INT"]
 
     - symbol_id: "event_ct1"
@@ -1728,7 +1725,7 @@ spin2_builtin_symbols:
       subcategory: "event_sources"
       value: "$0000_0001"
       description: "CT-passed-CT1 event"
-      language_scope: "PASM (per the v55 table heading)"
+      language_scope: "PASM (per the Spin2 documentation's table heading)"
       related_symbols: ["EVENT_CT2", "EVENT_CT3"]
 
     - symbol_id: "event_ct2"
@@ -1737,7 +1734,7 @@ spin2_builtin_symbols:
       subcategory: "event_sources"
       value: "$0000_0002"
       description: "CT-passed-CT2 event"
-      language_scope: "PASM (per the v55 table heading)"
+      language_scope: "PASM (per the Spin2 documentation's table heading)"
       related_symbols: ["EVENT_CT1", "EVENT_CT3"]
 
     - symbol_id: "event_ct3"
@@ -1746,7 +1743,7 @@ spin2_builtin_symbols:
       subcategory: "event_sources"
       value: "$0000_0003"
       description: "CT-passed-CT3 event"
-      language_scope: "PASM (per the v55 table heading)"
+      language_scope: "PASM (per the Spin2 documentation's table heading)"
       related_symbols: ["EVENT_CT1", "EVENT_CT2"]
 
     - symbol_id: "event_se1"
@@ -1755,7 +1752,7 @@ spin2_builtin_symbols:
       subcategory: "event_sources"
       value: "$0000_0004"
       description: "Selectable event 1"
-      language_scope: "PASM (per the v55 table heading)"
+      language_scope: "PASM (per the Spin2 documentation's table heading)"
       related_symbols: ["EVENT_SE2", "EVENT_SE3", "EVENT_SE4"]
 
     - symbol_id: "event_se2"
@@ -1764,7 +1761,7 @@ spin2_builtin_symbols:
       subcategory: "event_sources"
       value: "$0000_0005"
       description: "Selectable event 2"
-      language_scope: "PASM (per the v55 table heading)"
+      language_scope: "PASM (per the Spin2 documentation's table heading)"
       related_symbols: ["EVENT_SE1", "EVENT_SE3", "EVENT_SE4"]
 
     - symbol_id: "event_se3"
@@ -1773,7 +1770,7 @@ spin2_builtin_symbols:
       subcategory: "event_sources"
       value: "$0000_0006"
       description: "Selectable event 3"
-      language_scope: "PASM (per the v55 table heading)"
+      language_scope: "PASM (per the Spin2 documentation's table heading)"
       related_symbols: ["EVENT_SE1", "EVENT_SE2", "EVENT_SE4"]
 
     - symbol_id: "event_se4"
@@ -1782,7 +1779,7 @@ spin2_builtin_symbols:
       subcategory: "event_sources"
       value: "$0000_0007"
       description: "Selectable event 4"
-      language_scope: "PASM (per the v55 table heading)"
+      language_scope: "PASM (per the Spin2 documentation's table heading)"
       related_symbols: ["EVENT_SE1", "EVENT_SE2", "EVENT_SE3"]
 
     - symbol_id: "event_pat"
@@ -1791,7 +1788,7 @@ spin2_builtin_symbols:
       subcategory: "event_sources"
       value: "$0000_0008"
       description: "INA/INB pattern match/mismatch event"
-      language_scope: "PASM (per the v55 table heading)"
+      language_scope: "PASM (per the Spin2 documentation's table heading)"
 
     - symbol_id: "event_fbw"
       symbol_name: "EVENT_FBW"
@@ -1799,7 +1796,7 @@ spin2_builtin_symbols:
       subcategory: "event_sources"
       value: "$0000_0009"
       description: "Hub FIFO block-wrap event"
-      language_scope: "PASM (per the v55 table heading)"
+      language_scope: "PASM (per the Spin2 documentation's table heading)"
 
     - symbol_id: "event_xmt"
       symbol_name: "EVENT_XMT"
@@ -1807,7 +1804,7 @@ spin2_builtin_symbols:
       subcategory: "event_sources"
       value: "$0000_000A"
       description: "Streamer command-empty event"
-      language_scope: "PASM (per the v55 table heading)"
+      language_scope: "PASM (per the Spin2 documentation's table heading)"
       related_symbols: ["EVENT_XFI", "EVENT_XRO", "EVENT_XRL"]
 
     - symbol_id: "event_xfi"
@@ -1816,7 +1813,7 @@ spin2_builtin_symbols:
       subcategory: "event_sources"
       value: "$0000_000B"
       description: "Streamer command-finished event"
-      language_scope: "PASM (per the v55 table heading)"
+      language_scope: "PASM (per the Spin2 documentation's table heading)"
       related_symbols: ["EVENT_XMT", "EVENT_XRO", "EVENT_XRL"]
 
     - symbol_id: "event_xro"
@@ -1825,7 +1822,7 @@ spin2_builtin_symbols:
       subcategory: "event_sources"
       value: "$0000_000C"
       description: "Streamer NCO-rollover event"
-      language_scope: "PASM (per the v55 table heading)"
+      language_scope: "PASM (per the Spin2 documentation's table heading)"
       related_symbols: ["EVENT_XMT", "EVENT_XFI", "EVENT_XRL"]
 
     - symbol_id: "event_xrl"
@@ -1834,7 +1831,7 @@ spin2_builtin_symbols:
       subcategory: "event_sources"
       value: "$0000_000D"
       description: "Streamer-read-last-LUT-location event"
-      language_scope: "PASM (per the v55 table heading)"
+      language_scope: "PASM (per the Spin2 documentation's table heading)"
       related_symbols: ["EVENT_XMT", "EVENT_XFI", "EVENT_XRO"]
 
     - symbol_id: "event_atn"
@@ -1843,7 +1840,7 @@ spin2_builtin_symbols:
       subcategory: "event_sources"
       value: "$0000_000E"
       description: "Attention-requested event"
-      language_scope: "PASM (per the v55 table heading)"
+      language_scope: "PASM (per the Spin2 documentation's table heading)"
 
     - symbol_id: "event_qmt"
       symbol_name: "EVENT_QMT"
@@ -1851,7 +1848,7 @@ spin2_builtin_symbols:
       subcategory: "event_sources"
       value: "$0000_000F"
       description: "GETQX/GETQY-on-empty event"
-      language_scope: "PASM (per the v55 table heading)"
+      language_scope: "PASM (per the Spin2 documentation's table heading)"
 
     # COG and Task Control Symbols
     - symbol_id: "cogexec"

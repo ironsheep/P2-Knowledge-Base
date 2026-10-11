@@ -111,7 +111,7 @@ gotchas:
   - flag: tip
     text: "Self-halt and self-stop are clean idioms: TASKHALT(THISTASK) pauses the caller and yields in one step; TASKSTOP(THISTASK) (or returning from the task's top method) frees the slot."
   - flag: hardware
-    text: "The taskptr table occupies cog registers $100..$11F (filling downward), overlapping the inline-PASM ORG..END area — heavy multitasking and heavy inline PASM in the same cog compete for those registers. Ordinary Spin2 tasks never hit this. (Parallax Propeller 2 Spin2 Language Documentation v55, Document Status, v47, and IN-LINE PASM CODE.)"
+    text: "The taskptr table occupies cog registers $100..$11F (filling downward), overlapping the inline-PASM ORG..END area — heavy multitasking and heavy inline PASM in the same cog compete for those registers. Ordinary Spin2 tasks never hit this."
   - flag: verify
     text: "R1: two LEDs blink at independent rates (interleaving proof); only one blinking means a task never yields. R2: the heartbeat line advances between crunch-pass lines (responsiveness). R3: the producer flips TASKCHK state 1<->2 as the ring fills/drains. R4: census shows running=workers+1 (the supervisor counts itself), then worker-census=0 after shutdown."
 
@@ -124,6 +124,7 @@ hardware_status: |
 
 sources:
   - "Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: cooperative multitasking) and New Keywords Introduced by New Versions (the authoritative TASK keyword list; TASKWAIT is absent)"
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: task pointers build downward in the last 32 free cog registers) and IN-LINE PASM CODE (the taskptr table / inline-PASM register overlap gotcha)"
   - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (the TASK method family TASKSPIN, TASKNEXT, TASKHALT, TASKCONT, TASKCHK, TASKID, TASKSTOP), Built-In Symbol for TASKSPIN() Usage (NEWTASK/THISTASK), and the TASKHLT register (halt bits for all tasks, in reverse order)"
   - "Parallax Spin2 Interpreter v55 (2026.05.07), Multitasking (taskhlt 'task halt bits': one register, 12 registers below the pasm-use registers at $1D8, i.e. $1CC)"
 

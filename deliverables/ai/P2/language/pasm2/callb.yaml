@@ -18,7 +18,7 @@ flags_affected:
 timing:
   cycles: '5-12 (cog/LUT) / 14-32 (hub-exec)'
   type: variable
-  notes: "5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec (P2 Instructions CSV v35 -- 14...32 *). +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
+  notes: "5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec. +1 clock if the long crosses a hub long boundary."
 encoding:
 - bits: EEEE 1101011 CZ0 DDDDDDDDD 000101111
   write: —
@@ -32,7 +32,7 @@ encoding:
   clocks: '5...12 * (cog/LUT) / 14...32 * (hub-exec)'
 encoding_notes:
 - Stores return context at PTRB address then increments PTRB by 4
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLA / CALLB, p.57"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLA / CALLB, p.57, and its instruction table footnote '+1 if crosses hub long'; P2 Instructions CSV v35, CALLB hub-exec clocks '14...32 *'"
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_call

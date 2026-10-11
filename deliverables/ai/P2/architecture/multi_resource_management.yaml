@@ -3,6 +3,7 @@ title: Single COG Managing Multiple Resources
 category: architectural_pattern
 description: Design pattern for a single COG efficiently managing multiple instances of the same resource type
 documentation_level: comprehensive
+source: "OBEX 4257 (ISP high-speed 8-port serial subsystem): one cog services 1 to 8 Tx/Rx pin pairs"
 
 overview: |
   A powerful P2 architectural pattern where a single COG manages multiple instances of

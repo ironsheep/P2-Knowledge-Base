@@ -402,5 +402,6 @@ best_practices:
     - "Consider COG affinity for data"
 
 sources:
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LOCKS and COG ATTENTION"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LOCKS"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG ATTENTION"
   - "Parallax Spin2/PASM Debugger v51, debug entry and debug_exit (LOCKTRY #15 / LOCKREL #15 give one cog at a time ownership of the save buffer and tx/rx pins)"

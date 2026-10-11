@@ -4,7 +4,7 @@ description: "Spin2 operator evaluation order (1=highest priority)"
 category: "Language Rules"
 
 precedence_table:
-  # Level numbers follow the Spin2 v55 "Term Priority" column (1 = highest).
+  # Level numbers follow the language's "Term Priority" column (1 = highest).
   # Seventeen levels: 1-16 are term priorities, 17 is the assignment priority.
   - level: 1
     operators: ["++", "--", "??", "\\", "~", "~~", "@", "@@", "^@", "#"]
@@ -30,11 +30,11 @@ precedence_table:
   - level: 7
     operators: ["*", "*.", "/", "/.", "+/", "//", "+//", "SCA", "SCAS", "FRAC"]
     type: "Multiply/Divide/Scale"
-    note: "Signed/float/unsigned multiply, divide, remainder, scale — one priority in v55"
+    note: "Signed/float/unsigned multiply, divide, remainder, scale — one priority"
   - level: 8
     operators: ["+", "+.", "-", "-."]
     type: "Add/Subtract"
-    note: "Integer and floating-point add/subtract — one priority in v55"
+    note: "Integer and floating-point add/subtract — one priority"
   - level: 9
     operators: ["#>", "<#"]
     type: "Limit"
@@ -46,7 +46,7 @@ precedence_table:
   - level: 11
     operators: ["<", "+<", "<.", "<=", "+<=", "<=.", "==", "==.", "<>", "<>.", ">=", "+>=", ">=.", ">", "+>", ">.", "<=>"]
     type: "Compare/Equality"
-    note: "Signed, unsigned (+) and floating-point (.) comparison, (in)equality and the signed three-way <=> — all one priority in v55"
+    note: "Signed, unsigned (+) and floating-point (.) comparison, (in)equality and the signed three-way <=> — all one priority"
     source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
   - level: 12
     operators: ["!!", "NOT"]
@@ -68,7 +68,7 @@ precedence_table:
   - level: 17
     operators: [":=", "=", "+=", "-=", "*=", "/=", "//=", "+/=", "+//=", "#>=", "<#=", "&=", "|=", "^=", ">>=", "<<=", "SAR=", "ROR=", "ROL=", "REV=", "ZEROX=", "SIGNX=", "SCA=", "SCAS=", "FRAC=", "ADDBITS=", "ADDPINS=", "&&=", "^^=", "||="]
     type: "Assignment"
-    note: "Lowest priority. := and the compound forms are PUB/PRI only; = is the CON equate. The compiler also accepts AND=, OR= and XOR=, which are not in the v55 operator table"
+    note: "Lowest priority. := and the compound forms are PUB/PRI only; = is the CON equate. The compiler also accepts AND=, OR= and XOR=, which are not in the Spin2 operator table"
 
 examples:
   - code: "x := a + b * c"
@@ -82,8 +82,8 @@ examples:
     reason: "Unary (2), Logical AND (13), Logical OR (15)"
 
 notes:
-  - "Lower numbers = higher priority (execute first); numbering follows Spin2 v55"
-  - "v55 groups *, / at one priority (7); +, - at one (8); all comparisons/equality at one (11)"
+  - "Lower numbers = higher priority (execute first); numbering follows the Spin2 operator table"
+  - "Spin2 groups *, / at one priority (7); +, - at one (8); all comparisons/equality at one (11)"
   - "Level 12 is the unary !! / NOT; the binary logical operators start at level 13"
   - "Assignment operators have lowest priority"
   - "Assignment is PUB/PRI only (the CON equate = is CON only); the ternary is a term in all blocks"

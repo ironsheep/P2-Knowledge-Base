@@ -13,7 +13,7 @@ description: 'BRK triggers a breakpoint in the current cog and either defines a 
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BRK, p.55; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT (BRK)"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BRK, p.55; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT (BRK); Parallax Spin2 Documentation v55 (the BRK #0 / BRK #1..255 DEBUG() mapping)"
 documentation_level: comprehensive
 examples:
 - name: Conditional Breakpoint
@@ -49,7 +49,7 @@ notes:
 - Requires debug interrupts enabled to function
 - Breakpoint code passed to debug ISR
 - "A condition on BRK does not make the break conditional -- see condition_behavior"
-- "Under the Spin2 debugger, BRK #0 is what a plain DEBUG compiles to: it launches the debugger or forces an update of one already open; DEBUG() commands compile to BRK #1..255, each code indexing its record in the DEBUG() database (Parallax Spin2 Documentation v55)"
+- "Under the Spin2 debugger, BRK #0 is what a plain DEBUG compiles to: it launches the debugger or forces an update of one already open; DEBUG() commands compile to BRK #1..255, each code indexing its record in the DEBUG() database"
 - Essential for interactive debugging
 compiler_operand_format:
   name: operand_l

@@ -75,6 +75,7 @@ addon_board_host_compatibility:
     P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, cover (the eight #64006 part numbers), and the one-header-per-board rule, p.1.
     P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Serial Host Add-on Board (#64006B) (the Serial Host 5 V requirement and its shunt jumper: "on a P2-ES Eval Board Rev B, the shunt jumper must connect that board's ACC HDR and 5V pins"), p.3.
     Each board added in the 2026-06 wave is described in its own per-board entry, which carries its own citation.
+    #64032 HUB75 Adapter (the 74HCT244 level shifters): HUB75E Adapter for P2 Eval, H/W Rev 1.4, 2020-11-25, schematic (Iron Sheep Productions, LLC): U1/U2 74HCT244 buffers on +5VA between the P2 headers J1/J2 and the HUB75 connector J7.
 
   eval_board_compatibility:
     host: "P2 Eval Board (64000)"

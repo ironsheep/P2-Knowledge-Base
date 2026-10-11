@@ -51,11 +51,11 @@ form_factors:
     which is why both form factors appear in the module guide.
 
 core:
+  source: "ESP8266 Wi-Fi Module (#32420) v1.0 05/12/2016, Configuration Pages (firmware), p.6"
   chip: "ESP8266-WROOM-02 (32-bit MCU + Wi-Fi, embedded TCP/IP, 16 Mbit SPI flash)"
   firmware: >-
     The module's configuration home page shows the firmware as "Remora" v1.0
-    (2016-11-02 18:04:30) with the credit "LINK by Thorsten von Eicken"
-    (ESP8266 Wi-Fi Module (#32420) v1.0 05/12/2016, Configuration Pages, p.6).
+    (2016-11-02 18:04:30) with the credit "LINK by Thorsten von Eicken".
     OTA-upgradeable via the module's web UI.
   certifications: "FCC, CE, KCC, TELEC, LCIE, IC"
 

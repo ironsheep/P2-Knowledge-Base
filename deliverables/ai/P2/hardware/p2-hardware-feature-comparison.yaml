@@ -278,7 +278,7 @@ feature_matrix:
       edge_module_direct: "5-16 VDC at the module's own VIN pads (P2-EC and P2-EC32MB)"
     supply_current:
       eval_board: "PC-USB input limited to 500 mA; AUX-USB input limited to 2000 mA"
-      edge_carriers: "recommended minimum 100 mA; maximum according to the customer application (the #64020 guide adds 'typical 1000 mA')"
+      edge_carriers: "recommended minimum 100 mA; maximum according to the customer application; typical 1000 mA on the #64020"
       vio_budget: "3.3 V up to 300 mA per 8 I/O pins, on every board"
 
 compatibility_matrix:

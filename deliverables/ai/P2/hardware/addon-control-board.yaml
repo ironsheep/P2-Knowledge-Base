@@ -18,7 +18,7 @@ description: >-
   active-high blue LED has a 470 ohm series resistor and sits next to a button;
   each active-high tactile push switch has a 470 ohm series resistor so the I/O
   pin reads high while the button is pressed.
-  P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Control Add-on Board (#64006A), p.2.
+# Source: P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Control Add-on Board (#64006A), p.2
 
 # --- Eval-header board model (uniform across all #64006 / eval-header occupants) ---
 eval_header_occupant: true
@@ -97,7 +97,7 @@ specifications:
 
 protocol_constraints:
   pwm:
-    notes: "Use PWM for LED brightness (Product Guide, P2 Eval Control Add-on Board (#64006A), p.2)."
+    notes: "Use PWM for LED brightness."
 
 code_patterns:
   spin2:

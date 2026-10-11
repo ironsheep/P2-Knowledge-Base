@@ -316,4 +316,5 @@ limitations:
   - "Debug ISR size limited by COG RAM"
 
 sources:
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS and INTERRUPTS"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INTERRUPTS"

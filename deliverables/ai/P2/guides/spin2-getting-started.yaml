@@ -541,8 +541,6 @@ next_steps:
     - "Inline PASM2 - performance optimization"
 
 see_also:
-  # The manifests/ scheme (DOD v3.0 key-based access, e271cab0) was retired by 03189a7d;
-  # no manifest file has existed since. The language inventory it indexed is this map.
   - language/spin2/spin2-language-complete-map.yaml
   - language/spin2/operators/
   - language/spin2/keywords/

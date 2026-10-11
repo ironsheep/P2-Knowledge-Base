@@ -6,11 +6,11 @@ method: "GETCT"
 category: "timing"
 type: "method"
 description: |
-  Get the 32-bit system counter. Parallax Spin2 Documentation v55 states it as
+  Get the 32-bit system counter. Parallax states it as
   "GETCT() : Count -- Get 32-bit system counter."
   The counter itself is wider than the value this method returns. The P2 Datasheet
   lists "64-bit free-running counter which increments every clock, cleared on
-  reset", and Propeller 2 Documentation v35 records the change as "System counter
+  reset", and the silicon documentation records the change as "System counter
   extended to 64 bits. GETCT WC retrieves upper 32-bits." The Datasheet's GETCT
   row states "Get CT[31:0] or CT[63:32] if WC into D. GETCT WC + GETCT gets full
   CT. CT=0 on reset, CT++ on every clock."

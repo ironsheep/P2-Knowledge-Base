@@ -84,7 +84,7 @@ electrical_characteristics: >-
   NOT DOCUMENTED. The receiver front-end thresholds for the
   J / K / SE0 / SE1 line-state detectors are not in the P2 datasheet -- the datasheet
   names USB only twice, as a capability, and contains no line-state or SE0 material --
-  nor in the Propeller 2 Documentation v35. Do not point a reader at the datasheet for them.
+  nor in the Propeller 2 Documentation. Do not point a reader at the datasheet for them.
   The programming interface (baud, host/device, FS/LS, line-state sends, 16-bit status
   word) IS complete above; it is only the analog thresholds that are undocumented.
   The thresholds are unknown.

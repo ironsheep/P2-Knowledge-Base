@@ -318,6 +318,9 @@ engineering/planning/yaml-audit-report.yaml
 # parent DIRECTORY is excluded, so the rule matches the contents instead.
 /engineering/operations/correction-sweeps/*
 !/engineering/operations/correction-sweeps/*-archive.md
+# release-yamls §1.5: the change-set audit record ships in the release's content commit.
+# Until 2026-10-11 the rule above ignored it, so v1.24.0's record never reached git.
+!/engineering/operations/correction-sweeps/*-change-set-audit.md
 /engineering/document-production/manuals/p2-debug-window-manual/figure-generators/screenshots-OLD-PNut-windows
 /engineering/document-production/manuals/p2-debug-window-manual/figure-generators/screenshots-OLD
 /engineering/document-production/manuals/p2-debug-window-manual/REF/robot-dog

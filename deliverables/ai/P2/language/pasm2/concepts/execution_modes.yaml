@@ -115,7 +115,6 @@ mode_transitions:
       CALL #$300        ' Call LUT routine
 
 performance_comparison:
-  # All numbers cross-checked against the v35 documentation and per-instruction YAMLs.
   instruction_timing:
     register_exec: "2 clocks per typical ALU instruction (deterministic)"
     lookup_exec: "2 clocks per typical ALU instruction (deterministic)"

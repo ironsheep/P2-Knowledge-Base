@@ -126,7 +126,8 @@ syntax_forms:
         END
     description: "V50+ inline PASM2 that runs as hub-exec directly from hub RAM (NOT loaded into cog RAM)"
     introduced: "Spin2 v50"
-    execution: "Per Spin2 Language Documentation v55 (IN-LINE PASM CODE): ORGH..END inline does NOT load code into cog RAM; PASM runs in hub-exec mode directly from hub. The first 16 long variables (params + result + locals) are still copied into cog $1E0..$1EF at entry and restored at exit, as in the documented procedure for ORG..END inline. Sequential PASM: 2 clocks/instruction (FIFO streaming, same as cogexec). Branches: minimum 13 clocks (FIFO refill, +1 if not long-aligned). Maximum block size: $FFFF longs including the appended RET (the documentation's own ORGH example is at the $FFFF-long limit)."
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE (execution: ORGH..END inline; the documented procedure for ORG..END inline; the ORGH example at the $FFFF-long limit)"
+    execution: "ORGH..END inline does NOT load code into cog RAM; PASM runs in hub-exec mode directly from hub. The first 16 long variables (params + result + locals) are still copied into cog $1E0..$1EF at entry and restored at exit, as in the documented procedure for ORG..END inline. Sequential PASM: 2 clocks/instruction (FIFO streaming, same as cogexec). Branches: minimum 13 clocks (FIFO refill, +1 if not long-aligned). Maximum block size: $FFFF longs including the appended RET (the documentation's own ORGH example is at the $FFFF-long limit)."
     contrast_with_org_inline: |
       ORG..END  : code copied into cog RAM at $000..; runs as cog-exec; size limited by cog code area ($000..$11F minus multitasking taskptr table)
       ORGH..END : code stays in hub RAM; runs as hub-exec; up to $FFFF longs; sequential 2 clocks/instruction but branches 13+ clocks
@@ -160,6 +161,7 @@ why_inline_pasm_matters:
     - Special registers
 
 register_access:
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE (method_interface)"
   method_interface: |
     Method parameters, results and locals map to PASM2 registers BY NAME:
     - The method's first 16 long variables (parameters, then results, then locals,
@@ -174,8 +176,7 @@ register_access:
                        when no multitasking is in use. For ORGH..END inline (V50+), code stays
                        in hub RAM and runs as hub-exec; the 16-long variable buffer at $1E0..$1EF
                        behaves identically.
-                       Source: Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE.
-  
+
   local_label_rule:
     requirement: "Inline PASM labels are local to the ORG..END block; a plain label (lp) or a '.'-prefixed local label (.lp) works"
     reason: "Inline PASM symbols are not accessible outside the in-line PASM code"
@@ -328,14 +329,14 @@ hardware_stack_budget:
   source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE and CALLING PASM FROM SPIN2, both state: 'Use up to 5 levels of the hardware stack for nested CALLs, including CALLs to hub RAM.'"
   levels_available: 5
   of_total: 8
-  applies_to: "both the ORG/END inline form and the CALL() surface -- v55 states it in both places"
+  applies_to: "both the ORG/END inline form and the CALL() surface -- the Spin2 documentation states it in both places"
   why_not_eight: >-
     The cog's hardware stack has 8 levels; the Spin2 interpreter holds the remainder for
     its own return path while your inline code runs. The documentation states the budget
     you may use, not the hardware depth.
   not_documented: >-
-    The C and Z flag state ON ENTRY to an inline block. v55's inline-PASM section
-    says nothing about it, so do not assume C or Z are cleared, set, or
+    The C and Z flag state ON ENTRY to an inline block. The Spin2 documentation's
+    inline-PASM section says nothing about it, so do not assume C or Z are cleared, set, or
     carried in from the calling Spin2 code. Read the flags only after an instruction of
     yours has written them.
 

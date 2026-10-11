@@ -283,10 +283,10 @@ in_signal_semantics:
     observe the wire, sample a pin whose %SSSSS is %00000 and whose %AAAA routes
     'A' from the pin you want to watch. That composition is written up in
     architecture/streamer/pin-capture.yaml.
-  consequence_source: "The streamer half is stated by Parallax in the Spin2 v55 LOGIC
-    display section: \"On every clock, the streamer will record the smart pin's IN
+  consequence_source: "The streamer half is stated by Parallax for the LOGIC debug
+    display: \"On every clock, the streamer will record the smart pin's IN
     signal and its output state, as read from an adjacent pin\". The pin-capture
-    read source is Propeller 2 Documentation v35, Pins => DACs/WRFAST."
+    read source is the streamer's Pins => DACs/WRFAST path."
 
   related:
     - architecture/streamer/pin-capture.yaml

@@ -3,7 +3,7 @@ part_number: "64010"
 series: "P2 Accessory Add-on Boards"
 manufacturer: "Parallax Inc."
 status: "active_production"
-board_revision: "Rev B (Guide v2.0)"
+board_revision: "Rev B"
 board_revisions:
   source: "Universal Motor Driver P2 Add-on Board (#64010) v2.0 5/5/2022, Revision History, p.12"
   rev_b:
@@ -155,7 +155,7 @@ specifications:
   mounting_holes: "two grounded plated holes, 3.2 mm (0.125 inch) diameter; 3 mm standoffs of 8 mm or 9 mm length are suggested for support"
   operating_temperature: "-40 to +85 C (-40 to +185 F)"
   pcb_dimensions: "2.75 x 2.75 in (70 x 70 mm)"
-  revision_note: "Guide v2.0 / Rev B changed the PCB from 80x64 mm to 70x70 mm, upgraded the MOSFET drivers, and added the current-sense amplifier to the low-side shunt."
+  revision_note: "Rev B changed the PCB from 80x64 mm to 70x70 mm, upgraded the MOSFET drivers, and added the current-sense amplifier to the low-side shunt."
 
 use_cases:
   primary:

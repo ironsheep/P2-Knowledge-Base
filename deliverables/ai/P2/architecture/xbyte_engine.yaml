@@ -127,7 +127,7 @@ configuration_patterns:
         bit 1 = 0  -> index from the bytecode's LOW  bits (the 'primary' form)
         bit 1 = 1  -> index from the bytecode's HIGH bits (the 'alternate' form),
                       leaving the low bits free as an operand in PA.
-      Visible straight down the full v35 mode table: e.g. 128-entry %AAxx0010F
+      Visible straight down the full mode table: e.g. 128-entry %AAxx0010F
       (I = b[6:0]) vs %AAxx0011F (I = b[7:1]) differ only in bit 1. Each of the
       128/64/32/16 sizes has this primary/alternate pair (see alt_pattern below).
     exception_256: |

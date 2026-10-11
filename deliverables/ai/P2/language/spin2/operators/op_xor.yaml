@@ -7,7 +7,7 @@ description: |
   and it is not the PASM2 instruction XOR, which XORs two registers bit by bit.
 priority: 14
 term_form: "x XOR y"
-assign_form: "var ^^= y (the symbol spelling; the v55 operator table lists no word-spelled assignment form)"
+assign_form: "var ^^= y (the symbol spelling; the Spin2 operator table lists no word-spelled assignment form)"
 block_usage: "Term in all blocks; assignment form in PUB/PRI only"
 examples:
   - "IF state1 XOR state2\n  toggle()"

@@ -1,8 +1,7 @@
 operator: "/"
 type: operator
 description: |
-  Signed divide, return quotient: x / y (Parallax Spin2 Documentation v55, operator
-  table; assignment form var /= y). The interpreter divides the magnitudes with the
+  Signed divide, return quotient: x / y. The interpreter divides the magnitudes with the
   CORDIC (QDIV) and negates the quotient when the operand signs differ, so it rounds
   toward zero: -1000 / 3 = -333, 1000 / -3 = -333, -1000 / -3 = 333.
 category: Divide

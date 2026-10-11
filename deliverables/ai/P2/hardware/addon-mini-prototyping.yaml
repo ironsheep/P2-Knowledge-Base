@@ -16,10 +16,10 @@ aliases:
 description: >-
   An 8x12 grid of plated thru-holes for custom prototyping. The 8 header I/O
   pins (offsets 0-7) plus 5V, VIO, and GND are brought to the grid.
-  (P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Mini Prototyping Add-on Board (#64006E), p.6)
   There is no fixed signal assignment
   - the eight I/O pins are raw, uncommitted prototyping I/O whose function is
   determined entirely by the user's wiring.
+# Source: P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Mini Prototyping Add-on Board (#64006E), p.6
 
 # --- Eval-header board model (uniform across all #64006 / eval-header occupants) ---
 eval_header_occupant: true
