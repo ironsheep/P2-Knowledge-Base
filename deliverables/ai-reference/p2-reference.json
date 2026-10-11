@@ -1,7 +1,7 @@
 {
   "meta": {
     "release_date": "2026-10-11",
-    "last_updated": "2026-10-11T19:32:27.413004",
+    "last_updated": "2026-10-11T21:53:35.083378",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-10-11T19:32:27.413004",
+    "extraction_date": "2026-10-11T21:53:35.083378",
     "categories": {
       "Math and Logic": {
         "count": 109,
@@ -12124,7 +12124,7 @@
                 "clocks": "2 + D"
               }
             ],
-            "description": "Wait 2+D clock cycles if no WC/WZ/WCZ is specified. If WC/WZ/WCZ is specified, wait 2+(D AND RND) clock cycles, where RND is a random value, producing a randomized delay; the flag(s) the effect names are cleared to 0 after completion (WC: C, WZ: Z, WCZ: both -- a flag column applies only when its effect is given, Parallax PASM2 Manual p.30). The 2-cycle overhead is inherent to the instruction. Stalls the cog pipeline during the wait; no instructions execute and no interrupts are processed until the wait completes. Critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.",
+            "description": "Wait 2+D clock cycles if no WC/WZ/WCZ is specified. If WC/WZ/WCZ is specified, wait 2+(D AND RND) clock cycles, where RND is a random value, producing a randomized delay; the flag(s) the effect names are cleared to 0 after completion (WC: C, WZ: Z, WCZ: both -- a flag column applies only when its effect is given). The 2-cycle overhead is inherent to the instruction. Stalls the cog pipeline during the wait; no instructions execute and no interrupts are processed until the wait completes. Critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.",
             "result": "",
             "timing": {
               "cycles": "2 + D",
@@ -12151,7 +12151,7 @@
                 "valueType": 26
               }
             },
-            "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release (2022/11/01), Propeller 2 Assembly Language (PASM2) in Brief, p.159; P2 Instructions v35 - Rev B/C Silicon, Sheet1",
+            "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release (2022/11/01), Propeller 2 Assembly Language (PASM2) in Brief, p.159; Parallax PASM2 Manual p.30 (description: flag column applies only when its effect is given); P2 Instructions v35 - Rev B/C Silicon, Sheet1",
             "documentation_level": "comprehensive"
           },
           "AUGD": {
@@ -12817,7 +12817,7 @@
                 "valueType": 26
               }
             },
-            "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BRK, p.55; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT (BRK)",
+            "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BRK, p.55; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT (BRK); Parallax Spin2 Documentation v55 (the BRK #0 / BRK #1..255 DEBUG() mapping)",
             "documentation_level": "comprehensive"
           },
           "ALLOWI": {
@@ -13640,7 +13640,7 @@
             "timing": {
               "cycles": "5-12 (cog/LUT) / 14-32 (hub-exec)",
               "type": "variable",
-              "notes": "5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec (P2 Instructions CSV v35 -- 14...32 *). +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
+              "notes": "5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec. +1 clock if the long crosses a hub long boundary."
             },
             "flags_affected": {
               "C": "Set to D[31] if WC/WCZ specified",
@@ -13671,7 +13671,7 @@
                 "valueType": 19
               }
             },
-            "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLA / CALLB, p.57",
+            "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLA / CALLB, p.57, and its instruction table footnote '+1 if crosses hub long'; P2 Instructions CSV v35, CALLB hub-exec clocks '14...32 *'",
             "documentation_level": "comprehensive"
           },
           "DJNF": {
@@ -13837,7 +13837,7 @@
                 "valueType": 19
               }
             },
-            "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALL, p.56",
+            "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALL, p.56; ret_prefix_caveat: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Conditions ( IF_x ), p.68, and P2 Instructions v35 - Rev B/C Silicon, row 410",
             "documentation_level": "comprehensive"
           },
           "RETI3": {
@@ -14612,7 +14612,7 @@
                 "valueType": 33
               }
             },
-            "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153",
+            "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153; ret_prefix_form: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Conditions ( IF_x ), p.68, and P2 Instructions v35 - Rev B/C Silicon, row 410",
             "documentation_level": "enhanced"
           },
           "CALLA": {
@@ -14641,7 +14641,7 @@
             "timing": {
               "cycles": "5-12 (cog/LUT) / 14-32 (hub-exec)",
               "type": "variable",
-              "notes": "5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec (P2 Instructions CSV v35 -- 14...32 *). +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
+              "notes": "5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec. +1 clock if the long crosses a hub long boundary."
             },
             "flags_affected": {
               "C": "Set to D[31] if WC/WCZ specified",
@@ -14672,7 +14672,7 @@
                 "valueType": 19
               }
             },
-            "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLA / CALLB, p.57",
+            "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLA / CALLB, p.57, and its instruction table footnote '+1 if crosses hub long'; P2 Instructions CSV v35, CALLA hub-exec clocks '14...32 *'",
             "documentation_level": "comprehensive"
           },
           "CALLPA": {
@@ -18487,7 +18487,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-10-11T19:32:27.413004",
+    "extraction_date": "2026-10-11T21:53:35.083378",
     "categories": {
       "keywords": {
         "count": 37,
@@ -19795,7 +19795,7 @@
           "FRAC": {
             "operator": "FRAC",
             "type": "operator",
-            "description": "Unsigned fraction: x FRAC y = (x << 32) / y (Parallax Spin2 Documentation v55,\noperator table; assignment form var FRAC= y). The result is a 32-bit fraction of\n2^32, so it fits only while x < y: 1 FRAC 3 = $5555_5555, 2 FRAC 7 = $4924_9249.\nThe interpreter runs it as the CORDIC QFRAC.\n",
+            "description": "Unsigned fraction: x FRAC y = (x << 32) / y. The result is a 32-bit fraction of\n2^32, so it fits only while x < y: 1 FRAC 3 = $5555_5555, 2 FRAC 7 = $4924_9249.\nThe interpreter runs it as the CORDIC QFRAC.\n",
             "category": "Math",
             "priority": 7,
             "term_form": "x FRAC y",
@@ -20373,7 +20373,7 @@
             "description": "Logical XOR, the word spelling of `^^`: x XOR y is -1 when exactly one of x <> 0 and\ny <> 0 holds, otherwise 0 (it returns 0 or -1). It is not the bitwise XOR (use `^`),\nand it is not the PASM2 instruction XOR, which XORs two registers bit by bit.\n",
             "priority": 14,
             "term_form": "x XOR y",
-            "assign_form": "var ^^= y (the symbol spelling; the v55 operator table lists no word-spelled assignment form)",
+            "assign_form": "var ^^= y (the symbol spelling; the Spin2 operator table lists no word-spelled assignment form)",
             "block_usage": "Term in all blocks; assignment form in PUB/PRI only",
             "examples": [
               "IF state1 XOR state2\n  toggle()"
@@ -20818,7 +20818,7 @@
             "description": "Logical AND, the word spelling of `&&`: x AND y is -1 when x <> 0 and y <> 0,\notherwise 0 (it returns 0 or -1). It is not the bitwise AND (use `&`), and it is not\nthe PASM2 instruction AND, which ANDs two registers bit by bit.\n",
             "priority": 13,
             "term_form": "x AND y",
-            "assign_form": "var &&= y (the symbol spelling; the v55 operator table lists no word-spelled assignment form)",
+            "assign_form": "var &&= y (the symbol spelling; the Spin2 operator table lists no word-spelled assignment form)",
             "block_usage": "Term in all blocks; assignment form in PUB/PRI only",
             "examples": [
               "IF ready AND enabled\n  start()"
@@ -21142,7 +21142,7 @@
           "/": {
             "operator": "/",
             "type": "operator",
-            "description": "Signed divide, return quotient: x / y (Parallax Spin2 Documentation v55, operator\ntable; assignment form var /= y). The interpreter divides the magnitudes with the\nCORDIC (QDIV) and negates the quotient when the operand signs differ, so it rounds\ntoward zero: -1000 / 3 = -333, 1000 / -3 = -333, -1000 / -3 = 333.\n",
+            "description": "Signed divide, return quotient: x / y. The interpreter divides the magnitudes with the\nCORDIC (QDIV) and negates the quotient when the operand signs differ, so it rounds\ntoward zero: -1000 / 3 = -333, 1000 / -3 = -333, -1000 / -3 = 333.\n",
             "category": "Divide",
             "priority": 7,
             "term_form": "x / y",
@@ -21192,7 +21192,7 @@
             "description": "Logical OR, the word spelling of `||`: x OR y is -1 when x <> 0 or y <> 0, otherwise\n0 (it returns 0 or -1). It is not the bitwise OR (use `|`), and it is not the PASM2\ninstruction OR, which ORs two registers bit by bit.\n",
             "priority": 15,
             "term_form": "x OR y",
-            "assign_form": "var ||= y (the symbol spelling; the v55 operator table lists no word-spelled assignment form)",
+            "assign_form": "var ||= y (the symbol spelling; the Spin2 operator table lists no word-spelled assignment form)",
             "block_usage": "Term in all blocks; assignment form in PUB/PRI only",
             "examples": [
               "IF error OR timeout\n  ABORT"
@@ -21510,7 +21510,7 @@
           "+/": {
             "operator": "+/",
             "type": "operator",
-            "description": "Unsigned divide, return quotient: x +/ y (Parallax Spin2 Documentation v55, operator\ntable; assignment form var +/= y). Both operands are treated as unsigned 32-bit\nvalues.\n",
+            "description": "Unsigned divide, return quotient: x +/ y. Both operands are treated as unsigned 32-bit\nvalues.\n",
             "category": "Divide",
             "priority": 7,
             "term_form": "x +/ y",
@@ -21555,7 +21555,7 @@
           "//": {
             "operator": "//",
             "type": "operator",
-            "description": "Signed divide, return remainder: x // y (Parallax Spin2 Documentation v55, operator\ntable; assignment form var //= y). The remainder takes the sign of x\n(-1000 // 3 = -1, 1000 // -3 = 1).\n",
+            "description": "Signed divide, return remainder: x // y. The remainder takes the sign of x\n(-1000 // 3 = -1, 1000 // -3 = 1).\n",
             "category": "Divide",
             "priority": 7,
             "term_form": "x // y",
@@ -22336,7 +22336,7 @@
             "method": "GETCT",
             "category": "timing",
             "type": "method",
-            "description": "Get the 32-bit system counter. Parallax Spin2 Documentation v55 states it as\n\"GETCT() : Count -- Get 32-bit system counter.\"\nThe counter itself is wider than the value this method returns. The P2 Datasheet\nlists \"64-bit free-running counter which increments every clock, cleared on\nreset\", and Propeller 2 Documentation v35 records the change as \"System counter\nextended to 64 bits. GETCT WC retrieves upper 32-bits.\" The Datasheet's GETCT\nrow states \"Get CT[31:0] or CT[63:32] if WC into D. GETCT WC + GETCT gets full\nCT. CT=0 on reset, CT++ on every clock.\"\nGETCT() in Spin2 returns the CT[31:0] half only. The upper half is reachable\nfrom PASM2 via the GETCT D WC form -- see language/pasm2/getct.yaml.\nBecause the returned value is the low half, any deadline built from GETCT() is\nbounded by that 32-bit span; GETMS and GETSEC read the 64-bit counter instead.\nSee the `pitfalls` block below.\n",
+            "description": "Get the 32-bit system counter. Parallax states it as\n\"GETCT() : Count -- Get 32-bit system counter.\"\nThe counter itself is wider than the value this method returns. The P2 Datasheet\nlists \"64-bit free-running counter which increments every clock, cleared on\nreset\", and the silicon documentation records the change as \"System counter\nextended to 64 bits. GETCT WC retrieves upper 32-bits.\" The Datasheet's GETCT\nrow states \"Get CT[31:0] or CT[63:32] if WC into D. GETCT WC + GETCT gets full\nCT. CT=0 on reset, CT++ on every clock.\"\nGETCT() in Spin2 returns the CT[31:0] half only. The upper half is reachable\nfrom PASM2 via the GETCT D WC form -- see language/pasm2/getct.yaml.\nBecause the returned value is the low half, any deadline built from GETCT() is\nbounded by that 32-bit span; GETMS and GETSEC read the 64-bit counter instead.\nSee the `pitfalls` block below.\n",
             "sources": [
               "Parallax Spin2 Documentation v55, Timing Methods (the GETCT row, and the GETSEC and GETMS rows, each of which \"uses 64-bit system counter and CLKFREQ\").",
               "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES (counter width and behaviour), p.2; PASM2 instruction table (GETCT row), p.45.",
@@ -22749,7 +22749,7 @@
               "placement": "The compiler supplies the stack's starting hub address (the initial dbase) in the program's start-up header. The interpreter's start-up block clears (dbase - vbase) / 4 longs of VAR space, so the stack begins at the first long after VAR space. It then writes the initial pbase and vbase at that address and restarts cog 0 with COGINIT, passing that address as the new cog's PTRA.",
               "first_frame": "The interpreter's launch routine reads pbase and vbase from the first two longs of the stack and writes a 6-long header there: pbase (with the trap flag), vbase, dbase, mrecv, msend, and the return pointer (the bytecodes that stop the task or cog when the top-level method returns). dbase is set 6 longs above the stack base; the method's parameters, results and locals start there. COGSPIN builds the same layout at its StackAddress: pbase and vbase at the address, parameters from 6 longs above it.",
               "growth": "The stack grows upward, toward higher hub addresses: pushes are wrlong with ptra++ and pops are rdlong with --ptra. Every nested call pushes 6 longs at its drop anchor (the caller's stack top, pbase with flags, vbase, dbase, mrecv, msend), plus one long for the return address (a return pops 7 longs), then the called method's parameters, results and local longs, which the call clears to zero.",
-              "size_and_limit": "Not documented. Neither the Spin2 v55 documentation nor the v55 interpreter listing states a size for the top-level stack or an upper bound for it, and the interpreter listing contains no comparison of the stack pointer against a limit, so no overflow check is documented. How far the stack can grow before it reaches other hub data is set by what the compiler places above it, which is not documented either. A COGSPIN or TASKSPIN stack is a hub buffer you provide and size; see stack_requirements above and how to measure it in application-notes/p2an006-sizing-cog-task-stacks.yaml.",
+              "size_and_limit": "Not documented. Neither the Spin2 documentation nor the Spin2 interpreter listing states a size for the top-level stack or an upper bound for it, and the interpreter listing contains no comparison of the stack pointer against a limit, so no overflow check is documented. How far the stack can grow before it reaches other hub data is set by what the compiler places above it, which is not documented either. A COGSPIN or TASKSPIN stack is a hub buffer you provide and size; see stack_requirements above and how to measure it in application-notes/p2an006-sizing-cog-task-stacks.yaml.",
               "source": "Parallax Spin2 Interpreter v55 (2026.05.07), start-up block (dbase_init, var_longs), launch_spin / launch_method, Drop anchor (drophot), callhot, returnh, build_stack"
             },
             "stack_observability": {
@@ -23179,7 +23179,7 @@
                 "Cog becomes available for COGINIT (it returns to the pool of free cogs)"
               ],
               "pin_state_after_stop": [
-                "What a stopped cog leaves on the pins and in smart pin modes it configured is not stated in the Parallax Propeller 2 Documentation v35 or the Spin2 Language Documentation v55; do not rely on it"
+                "What a stopped cog leaves on the pins and in smart pin modes it configured: not documented; do not rely on it"
               ],
               "resources": [
                 "A lock the cog HELD goes free. Ownership stops holding the moment the cog becomes inactive - for any cause, not only COGSTOP - so nothing has to release it",
@@ -26606,7 +26606,7 @@
             ],
             "counter_wrap": {
               "statement": "GETCT and WAITCT use the 32-bit system counter, which wraps every 2^32 clocks: about 53.7 s at 80 MHz",
-              "derived_from": "Parallax Propeller 2 Spin2 Language Documentation v55, Timing Methods (GETCT returns the 32-bit system counter); 2^32 / 80_000_000 = 53.687 s"
+              "source": "Parallax Propeller 2 Spin2 Language Documentation v55, Timing Methods (GETCT returns the 32-bit system counter); 2^32 / 80_000_000 = 53.687 s"
             },
             "timing": {
               "description": "Waits until the counter has passed Tick, not until an exact match",
@@ -27181,6 +27181,7 @@
             "method": "TASKSPIN",
             "type": "method",
             "category": "Task Operations",
+            "source": "taskptr_table_location: Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: task pointers build downward in the last 32 free cog registers, from $11F..$100); IN-LINE PASM CODE (free cog registers $000..$11F)",
             "requires_version": "Spin2_v47",
             "version_directive": "{Spin2_v47}",
             "description": "Start a new Spin2 task within the current cog. Tasks enable cooperative \nmultitasking where multiple execution contexts share the same cog but have \nindependent stacks and program counters.\nREQUIRES: {Spin2_v47} or later version directive at start of source file.\n",
@@ -27203,8 +27204,9 @@
               }
             ],
             "returns": {
+              "source": "Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: TASKSPIN)",
               "type": "integer (as expression) / void (as statement)",
-              "description": "As a statement, TASKSPIN returns nothing. Used as an expression term, it\nreturns the assigned task number (0-31), or -1 if no task slot was free.\nSource: Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: TASKSPIN).\n"
+              "description": "As a statement, TASKSPIN returns nothing. Used as an expression term, it\nreturns the assigned task number (0-31), or -1 if no task slot was free.\n"
             },
             "examples": [
               {
@@ -27229,7 +27231,7 @@
               "Stack size depends on task complexity",
               "Tasks run in round-robin fashion"
             ],
-            "taskptr_table_location": "Each task's pointer (taskptr) is stored in cog registers $100..$11F, with\nthe table building DOWNWARD from $11F (taskptr for task 31 occupies $11F,\ntask 30 at $11E, etc.). Programs using fewer than 32 tasks leave the\nLOWER portion of $100..$11F free for user code as well. This range\noverlaps the ORG..END inline-PASM code area ($000..$11F), so multitasking\nand large inline-PASM blocks compete for the same space.\nSource: Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: task pointers build downward in the last 32 free cog registers, from $11F..$100); IN-LINE PASM CODE (free cog registers $000..$11F).\n",
+            "taskptr_table_location": "Each task's pointer (taskptr) is stored in cog registers $100..$11F, with\nthe table building DOWNWARD from $11F (taskptr for task 31 occupies $11F,\ntask 30 at $11E, etc.). Programs using fewer than 32 tasks leave the\nLOWER portion of $100..$11F free for user code as well. This range\noverlaps the ORG..END inline-PASM code area ($000..$11F), so multitasking\nand large inline-PASM blocks compete for the same space.\n",
             "timing": {
               "execution_model": "Spin2 methods execute via the bytecode interpreter. Clock count: not documented.\n"
             },
@@ -28885,7 +28887,8 @@
           "MULDIV64": {
             "method": "MULDIV64",
             "type": "method",
-            "description": "Multiply then divide with a 64-bit intermediate product. Parallax Spin2\nDocumentation v55: \"Divide the 64-bit product of 'mult1' and 'mult2' by\n'divisor', return quotient (unsigned operation).\" All operands and the quotient\nare UNSIGNED 32-bit values -- an operand with bit 31 set is a large positive\nnumber, not a negative one; handle signs yourself for signed math.\n",
+            "description": "Multiply then divide with a 64-bit intermediate product. Parallax states:\n\"Divide the 64-bit product of 'mult1' and 'mult2' by\n'divisor', return quotient (unsigned operation).\" All operands and the quotient\nare UNSIGNED 32-bit values -- an operand with bit 31 set is a large positive\nnumber, not a negative one; handle signs yourself for signed math.\n",
+            "source": "Parallax Spin2 Documentation v55, MULDIV64 (description quotation; notes: unsigned operation)",
             "category": "Math/CORDIC Operations",
             "syntax": "result := MULDIV64(Multiplier, Multiplicand, Divisor)",
             "parameters": [
@@ -28930,7 +28933,7 @@
             "notes": [
               "Prevents overflow in intermediate calculation",
               "Uses 64-bit intermediate result",
-              "Unsigned operation: all parameters and the result are 32-bit unsigned (Parallax Spin2 Documentation v55, MULDIV64)",
+              "Unsigned operation: all parameters and the result are 32-bit unsigned",
               "Useful for scaling and ratio calculations",
               "More precise than (a*b)/c for large values",
               "Divisor 0 does not trap: MULDIV64(a, b, 0) returns NOT (the upper 32 bits of a*b), every time -- so $FFFF_FFFF whenever a*b < 2^32 (e.g. MULDIV64(1000, 1000, 0)); MULDIV64($FFFF_FFFF, $FFFF_FFFF, 0) = 1. Guard the divisor if a zero is possible. The interpreter runs QMUL then QDIV."
@@ -29609,6 +29612,7 @@
             "directive": "ORGH",
             "type": "assembly_directive",
             "category": "Assembly Directives",
+            "source": "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE (inline_assembly.features: the internal Spin2 procedure copies the method's first 16 long variables to cog registers $1E0..$1EF and restores them afterwards)",
             "description": "Sets the origin address for hub RAM assembly code. In DAT blocks, ORGH positions \ncode/data at a specific hub address. In V50+, ORGH also enables inline hub-execute \nassembly within Spin2 methods for performance-critical code sections.\n",
             "location": "DAT block, or inline within PUB/PRI methods (V50+)",
             "syntax": {
@@ -29621,7 +29625,7 @@
                 "type": "integer",
                 "description": "Hub address for code/data placement (DAT block usage)",
                 "optional": true,
-                "default": "Context-dependent (Spin2 v55): $400 in Spin2+PASM programs; current hub address in PASM-only programs"
+                "default": "Context-dependent: $400 in Spin2+PASM programs; current hub address in PASM-only programs"
               },
               {
                 "name": "limit",
@@ -29665,7 +29669,7 @@
                 "Code executes in hub RAM (hub-execute mode)",
                 "Maximum size: $FFFF longs including auto-added RET",
                 "RET instruction automatically added at end",
-                "First 16 long variables (params + result + locals) buffered at cog $1E0..$1EF on entry and restored to hub on exit, identical to ORG..END inline behavior. Source: Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE (the internal Spin2 procedure copies the method's first 16 long variables to cog registers $1E0..$1EF and restores them afterwards).",
+                "First 16 long variables (params + result + locals) buffered at cog $1E0..$1EF on entry and restored to hub on exit, identical to ORG..END inline behavior. The internal Spin2 procedure copies the method's first 16 long variables to cog registers $1E0..$1EF and restores them afterwards.",
                 "Access to method parameters and local variables"
               ],
               "comparison": [
@@ -29702,7 +29706,7 @@
             ],
             "notes": [
               "In DAT blocks, ORGH sets hub origin for subsequent code/data",
-              "Bare ORGH default address is context-dependent (Spin2 v55): $400 in Spin2+PASM programs (hub-exec code relocated at runtime, uses relative addressing); the current hub address in PASM-only programs (origin matches hub address; ORGH fills hub memory with zeros up to the given address)",
+              "Bare ORGH default address is context-dependent: $400 in Spin2+PASM programs (hub-exec code relocated at runtime, uses relative addressing); the current hub address in PASM-only programs (origin matches hub address; ORGH fills hub memory with zeros up to the given address)",
               "Optional second parameter sets the origin limit (default $100000); ORGH address,limit beyond the ceiling emits 'Hub address exceeds $100000 ceiling (m361)' -- compiler-verified",
               "V50+: ORGH enables inline hub-execute assembly in Spin2 methods",
               "Hub-execute code runs in place, no cog RAM copy required",
@@ -29965,7 +29969,7 @@
             "documentation_level": "comprehensive",
             "source": "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (Miscellaneous commands: the PC_KEY statement, P2-side API and key-code table)",
             "syntax": "PC_KEY(pointer_to_long)",
-            "description": "PC_KEY reads the host PC's keyboard into the P2 from within a graphical DEBUG()\ndisplay. Spin2 v55 states it as: \"FOR USE IN GRAPHICAL DEBUG() DISPLAYS - Must be\nthe last command in a DEBUG() statement. Returns any new host-PC keypress that\noccurred within the last 100ms into a long inside the chip. The DEBUG() Display\nmust have focus for keypresses to be noticed.\"\nThe 100 ms latch is what sets the poll rate: a loop that polls more slowly than\nthat will miss keypresses, and one that polls faster simply reads 0 between them.\n(Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG, Miscellaneous commands, PC_KEY)\n",
+            "description": "PC_KEY reads the host PC's keyboard into the P2 from within a graphical DEBUG()\ndisplay. Parallax states it as: \"FOR USE IN GRAPHICAL DEBUG() DISPLAYS - Must be\nthe last command in a DEBUG() statement. Returns any new host-PC keypress that\noccurred within the last 100ms into a long inside the chip. The DEBUG() Display\nmust have focus for keypresses to be noticed.\"\nThe 100 ms latch is what sets the poll rate: a loop that polls more slowly than\nthat will miss keypresses, and one that polls faster simply reads 0 between them.\n",
             "usage_rules": {
               "source": "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (Miscellaneous commands: the PC_KEY entry); Graphical DEBUG Displays (backtick-escape mechanism)",
               "rules": [
