@@ -43,6 +43,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 - closed 2026-10-05 by the register reconciliation «#386» (130 findings verified closed against the tree and the release tags; 63 emptied section headings moved with them) → `correction-sweeps/2026-10-05-register-reconciliation-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-10-10 by the close-out sprint «#423» (5 findings with nothing left to validate or ship: F-218, F-336, F-364, F-405, F-441) → `correction-sweeps/2026-10-10-close-out-sprint-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-10-11 by the close-out release MCP validation «#398» (34 findings: F-381, F-383, F-386, F-387, F-389, F-392, F-393, F-398, F-421, F-436, F-439, F-454, F-525, F-542, F-543, F-544, F-546, F-547, F-548, F-549, F-550, F-551, F-552, F-553, F-554, F-555, F-556, F-557, F-558, F-559, F-560, F-563, F-568, F-570) → `correction-sweeps/2026-10-11-mcp-validation-P2KB-CORRECTION-FINDINGS-archive.md`
+- closed 2026-10-11 at the v1.24.1 release «#398» (1 finding: F-572) → `correction-sweeps/2026-10-11-v1.24.1-P2KB-CORRECTION-FINDINGS-archive.md`
 
 > **Swept 2026-08-19** per `punch-list-maintenance`, as **rename-then-trim** (the archive is a
 > git-tracked rename of the original; both files are subtractions from a preserved copy — see the
@@ -64,32 +65,6 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 ## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen; + F-571, F-572, found 2026-10-11 by «#398»)
-
-### F-572 — provenance and change history reach agents through indented comments and served prose, where no gate looks — `RESOLVED` (found 2026-10-11 probing v1.24.0, «#398»; applied 2026-10-11; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.1)
-**Validated 2026-10-11** after the v1.24.1 push (`p2kb_refresh flush include_obex`, past the CDN
-window): the selection guide's `audio_video_projects.capabilities` serves no `# Source:` comment;
-`p2kbHwAddonLedMatrixAddonLedMatrix` `description` ends at "(vs ~224 mA if all 56 were on)." with no
-citation; `p2kbPasm2InstructionSkipping` serves no `references:` block; `p2kbSpin2OpFIELD` serves the
-reserved-word note; `p2kbPasm2CogHubExecution` `related:` lists ret/djnz/add/mov.
-The delivery filter strips the provenance keys and **column-0** comments; an indented comment is served
-as part of the body, and so is every value outside the stripped keys. The probes of v1.24.0 on p2kb-mcp
-1.5.0 found both carrying provenance: the hardware selection guide served an indented `# Source: P2 Eval
-Add-on Boards (#64006 Series) … p.9`; `addon-led-matrix.yaml` and `io_pin_timing.yaml` ended their
-`description:` with a document citation and pages; indented comments elsewhere served change history
-("Removed 2026-08-25 …", "read 1224 until 2026-08-26", "cross-checked against …", commit hashes,
-"Sacred Rule #7"). **Why it passed:** the *Internal IDs* and *Change-History Prose* release checks read
-parsed values only — a comment is invisible to them — and none of them looks for a document title with
-an edition or a page locator in a served value.
-**Applied 2026-10-11:** the class across the tree — ≈19 served comments in 14 files and ≈60 served values
-in ≈50 files: real citations moved to the nearest stripped `source:`/`sources:`/`documentation_source:`
-field or a column-0 `# Source:` comment, change history deleted, no fact changed (audited by a fresh
-agent; record `correction-sweeps/2026-10-11-v1.24.1-change-set-audit.md`). Twin found on the way:
-`multi_resource_management.yaml` had lost its only source (the OBEX 4257 octo-serial pointer removed as
-a phantom in `d965a065`); restored as `OBEX 4257 (ISP high-speed 8-port serial subsystem)`.
-**Gates:** `validate_served_comments` (served comments, via `yaml.scan` tokens so `#` inside a literal
-is value text) and a served-value citation check in `validate-dod-release.py`, each with a negative
-control. Closes on the live probe of v1.24.1: the selection guide's audio/video block and the LED
-matrix description serve no citation.
 
 ### F-571 — `p2kb_obex_get` shows a zero quality score and an empty created date for every OBEX object — `PARTIAL` (found 2026-10-11 by the close-out release MCP test, step 5, «#398»; the date moved KB-side 2026-10-11 for v1.24.1; the server half is requested for p2kb-mcp 1.5.1)
 **Applied 2026-10-11 (Stephen: "yes a now"):** the upload date moved from

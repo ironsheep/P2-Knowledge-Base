@@ -107,9 +107,12 @@ objects included) before the file is parsed, cached or returned.
 the rule block, the format-1 engine and its Go reference, the built-in rule, how the rule in effect
 is chosen, empty input, exactness details — is in the agreement, §§3–5.
 
-**Today (2026-10-07)** the live server still applies its original five-field regex, so `sources:`
-blocks and provenance comments reach agents (register finding **F-439**). The agreement replaces that
-filter entirely; F-439 closes when the agreement's live acceptance (§10) passes.
+**p2kb-mcp 1.5.0 implements the agreement** (validated live 2026-10-11, F-439 closed): it reports
+`filter_rule_source: index` and applies the index's rule to every KB and OBEX body. **1.4.0 and
+earlier** apply only the original five-field regex (`documentation_level`, `documentation_source`,
+`enhancement_source`, `last_updated`, `manual_extraction_date`), so on those versions `source:` /
+`sources:` / `source_reference:` / `verified_against:` / `scrape_tracking:` blocks and column-0
+comments still reach agents.
 
 ## 5. Tools — as served today
 
