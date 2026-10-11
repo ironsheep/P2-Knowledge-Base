@@ -176,12 +176,12 @@ notes:
   - "SINC2 supports up to 11,585 clocks/period"
   - "Prescale 27-bit to 32-bit (SHL #5) or post-trim (ZEROX #26) for overflow handling"
   - "Multiple pins can be configured simultaneously using pin group bits"
-  - "A Y override written while DIR is low (before DIRH, as in the SINC3 example) is in force after DIRH: this mode is order-safe (bench-measured on one board, one Y value for this mode)"
+  - "A Y override written while DIR is low (before DIRH, as in the SINC3 example) is in force after DIRH: this mode is order-safe"
   - "Resolution figures are NOMINAL decimation word-widths (theoretical bits), NOT ENOB. ENOB (Effective Number of Bits) is the MEASURED effective resolution after noise and distortion; true effective resolution on P2 is lower than the nominal figures and depends on the reference supply, source impedance, and temperature — it must be characterized on hardware."
   - "The SINC3 column's apparent doubling of resolution over SINC2 is an idealized figure the P2 ADC does not actually deliver; treat SINC3 nominal figures as optimistic upper bounds, not attainable resolution."
 
 sources:
-  - "EF-097"
+  - "EF-097 (Y-before-DIRH order-safety bench-measured on one board, one Y value for this mode)"
 
 power_domain:
   fact: |

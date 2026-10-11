@@ -4,7 +4,7 @@
 component: Smart_Pin_Patterns
 category: practical_patterns
 description: |
-  Production-proven patterns for Smart Pin usage, extracted from
+  Production patterns for Smart Pin usage, extracted from
   Parallax official code and Iron Sheep Productions projects.
   
 documentation_level: comprehensive

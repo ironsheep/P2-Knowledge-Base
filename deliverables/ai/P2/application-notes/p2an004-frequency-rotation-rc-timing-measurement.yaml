@@ -112,13 +112,13 @@ gotchas:
       text: "Sensor-specific electrical figures (supply range, dark output, decoupling) belong to the sensor's own datasheet (the TSL235R-LF Light-to-Frequency Converter Datasheet). They are deliberately not restated here."
 
 hardware_status: |
-  R3 (quadrature) is Tier-0 self-verified: a two-jumper stimulus drives a known detent count (5 fwd,
+  R3 (quadrature) has a Tier-0 known-answer stimulus: a two-jumper stimulus drives a known detent count (5 fwd,
   2 back -> reads 5 then 3) on a bare Edge board with no encoder, exercising the mode config, the
   4x-per-detent normalization, the preset/offset, and the clamp. R1 and R2 show correct BEHAVIOR now
   (R1's count moves with sensor resistance; R2's frequency moves with light), but turning those into
-  a calibrated lux, temperature, or absolute irradiance needs a known reference and DEFERS to a
-  characterization run on real silicon (-> EF ledger when accepted). No invented sensor numbers are
-  printed. Every embedded and example-library program compiles clean under pnut-ts (-d).
+  a calibrated lux, temperature, or absolute irradiance needs a known reference, so calibrated
+  figures are unknown here. No invented sensor numbers are printed.
+
 
 sources:
   - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, measurement modes %10001 (P_HIGH_TICKS), %10101 (P_COUNTER_TICKS), %10111 (P_COUNTER_PERIODS), %01011 (P_QUADRATURE), and the A/B input routing modifiers (period = A-input rise to B-input rise)"

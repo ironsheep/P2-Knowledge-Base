@@ -45,18 +45,18 @@ encoding:
     errors and the compiler sees neither.
   field_notation_caveat_second_proof: >-
     This is not a one-off. The same failure occurs in a different mode family and
-    was proven by a signature no analog rig was needed for: in
+    is shown by a signature that needs no analog rig: in
     X_1ADC8_0P_1DAC8_WFBYTE the template is %1111_DDDD_W000_0010 -- D[22:20] are
     fixed zeros and there is no pin field at all, the ADC channel being selected by
     S[1:0] -- so `adc_pin<<17` landed inside D[19:16] and the add carried. The three
     modes it could reach write 1, 2 and 4 bytes per NCO rollover, so the byte count
     read out which mode the silicon actually ran: adc_pin 0 gave 1,024 bytes, 1 gave
-    2,048, 2 gave 4,096, and the corrected form gave 1,024. Reproduced four times.
+    2,048, 2 gave 4,096, and the corrected form gave 1,024.
     The defect is invisible in testing -- the capture "works", the buffer fills, and
     the data is simply the wrong shape.
   source: >-
     Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (the %a bit in D[16]).
-    EF-065 and EF-059, both real P2, 2026-08-20 and 2026-08-14.
+    EF-065 and EF-059, both real P2; bytes-per-rollover signature reproduced four times.
     field_notation: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB RAM, FAST SEQUENTIAL FIFO INTERFACE (immediate, RDFAST, WRFAST).
     The "a" bit: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER.
   

@@ -81,8 +81,8 @@ architecture:
       source: >-
         Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOOKUP RAM, RAM SHARING BETWEEN PAIRED COGS.
         Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Lookup RAM (Paired-Cog Communication Mechanism), p.14.
-        The measured block: EF-096.
-      measured: >-
+        The behaviour block: EF-096 (measured one pair at a time, in cog execution).
+      behaviour: >-
         Block loads count as writes: a SETQ2 + RDLONG block load into the sending cog's LUT
         arrives in the enabled partner (128 of 128 and 64 of 64 longs). A Spin2 cog's start-up
         image reaches a partner that enabled receiving BEFORE the Spin2 sender was launched (the
@@ -90,8 +90,7 @@ architecture:
         brings nothing that was written earlier. The Spin2 sender's inline WRLUT also arrives.
         A COGINIT of the receiving cog resets its receive enable (writes no longer arrive and
         GETBRK D[26] reads 0); a COGINIT of the sending cog leaves the receiver's enable in
-        force. Limits: one pair at a time, cog execution; the timing of a write against a
-        concurrent enable was not explored.
+        force. The timing of a write against a concurrent enable is not stated.
 
     - feature: "LUT_events"
       description: >-

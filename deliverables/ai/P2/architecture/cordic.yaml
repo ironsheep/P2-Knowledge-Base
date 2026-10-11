@@ -190,9 +190,8 @@ accuracy:
   trigonometric: >-
     Rotate, polar-to-cartesian and cartesian-to-polar are iterative, so the low bits of a
     result are approximate; the magnitude scale factor is corrected in hardware. NO PARALLAX
-    SOURCE STATES A BIT COUNT for that residual and none is asserted here -- a figure would
-    need a bench measurement and an EF entry, not a carried-forward number. Measure it against
-    your own tolerance.
+    SOURCE STATES A BIT COUNT for that residual and none is asserted here -- the bit count
+    is unknown. Check it against your own tolerance.
 
 special_features:
   parallel_operations: |

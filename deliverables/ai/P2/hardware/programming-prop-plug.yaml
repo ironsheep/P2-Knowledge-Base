@@ -73,7 +73,7 @@ header_pinout:
 p2_note: >-
   The guide's Interface figure illustrates a Propeller 1 (DIP-40) target; P2
   programming uses the same four signals against the P2's serial programming pins.
-  Corroborated as the typical P2 Edge programmer by Universal Motor Driver P2 Add-on Board (#64010) v2.0 5/5/2022, Typical connections, p.3 ("A Prop Plug (not shown) is typically required for programming the P2 Edge module").
+  The Prop Plug is the typical P2 Edge programmer: Universal Motor Driver P2 Add-on Board (#64010) v2.0 5/5/2022, Typical connections, p.3 ("A Prop Plug (not shown) is typically required for programming the P2 Edge module").
 
 drivers:
   requirement: "FTDI USB drivers required"

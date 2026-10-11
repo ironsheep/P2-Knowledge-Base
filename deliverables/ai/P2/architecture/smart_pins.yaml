@@ -102,7 +102,7 @@ operating_modes:
 critical_requirements:
   reset_before_configure:
     mandatory: false
-    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (configure while DIR is low); consequences_of_skipping: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS; correct_sequence order: bench-measured, EF-011 (pulse, transition, async TX required; NCO, DAC-noise safe), EF-097 (counter and timing modes %01110, %01111, %10010-%10111 and ADC %11001 order-safe) and EF-090 (sync TX %11100 continuous primes in reset), with the Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %11100 text; Y zeroed in reset for pulse and transition: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %00100 and %00101"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (configure while DIR is low); consequences_of_skipping: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS; correct_sequence order: bench-measured, EF-011 (pulse, transition, async TX required; NCO, DAC-noise safe), EF-097 (counter and timing modes %01110, %01111, %10010-%10111 and ADC %11001 order-safe; bench-measured on one board, one Y value per mode; async TX effect measured on the bench) and EF-090 (sync TX %11100 continuous primes in reset), with the Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %11100 text; Y zeroed in reset for pulse and transition: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %00100 and %00101"
     description: |
       **Configure while DIR is low**: a smart pin should be configured while its DIR
       bit is low, holding it in reset. A WRPIN while DIR
@@ -116,11 +116,10 @@ critical_requirements:
         transition %00101) and asynchronous serial transmit (%11110): a WYPIN issued
         before DIRH does not take effect. For the trigger modes the reason is
         documented -- Y is set to zero during reset; for asynchronous serial transmit
-        the effect is measured on the bench. The value modes measured (NCO %00110,
-        DAC-noise %00001) work in either order, and so do the counter and timing
+        no reason is documented. The value modes NCO %00110 and
+        DAC-noise %00001 work in either order, and so do the counter and timing
         modes %01110, %01111, %10010-%10111 and the external-clock ADC mode %11001: a Y
-        written while DIR is low is in force after DIRH (bench-measured on one board,
-        one Y value per mode).
+        written while DIR is low is in force after DIRH.
         EXCEPTION -- synchronous serial transmit (%11100) in continuous mode needs its
         FIRST word written with WYPIN DURING reset: that write primes the shifter,
         and enabling first loses the word.
@@ -228,9 +227,9 @@ input_routing:
       filt1: {length: "1 (3 flipflops)", tap: "5 (32:1)", low_pass_time: "600ns (6.25ns * 3 * 32)"}
       filt2: {length: "2 (5 flipflops)", tap: "19 (512K:1)", low_pass_time: "16.4ms (6.25ns * 5 * 512K)"}
       filt3: {length: "3 (8 flipflops)", tap: "22 (4M:1)", low_pass_time: "210ms (6.25ns * 8 * 4M)"}
-    measured_delay:
-      fact: "With the timing tap at 0 (every clock), a filter of N flipflops delays the filtered input by N + 1 clocks: 2, 3, 5 and 8 flipflops gave 3, 4, 6 and 9 clocks, rising and falling edges alike, against 0 clocks unfiltered. With 5 flipflops at tap 3 (every 8th clock) the delay measured 37 clocks. Measured through the streamer's pin capture on one board; the tap-0 lengths and one tap-3 point were measured, other taps were not."
-      source: "EF-095"
+    filter_delay:
+      fact: "With the timing tap at 0 (every clock), a filter of N flipflops delays the filtered input by N + 1 clocks: 2, 3, 5 and 8 flipflops give 3, 4, 6 and 9 clocks, rising and falling edges alike, against 0 clocks unfiltered. With 5 flipflops at tap 3 (every 8th clock) the delay is 37 clocks. The delays at other taps are not stated."
+      source: "EF-095 (measured through the streamer's pin capture on one board; the tap-0 lengths and one tap-3 point were measured, other taps were not)"
 
 in_signal_semantics:
   # ONE HOME for what a pin's IN signal MEANS. The %FFF discussion above states
@@ -310,8 +309,8 @@ configuration_format:
       context names — they are not three features. So:
         P_CHANNEL | P_OE  ->  %01  (P_TT_01, unchanged — correct)
         P_CHANNEL + P_OE  ->  %10  (P_BITDAC — a DIFFERENT MODE)
-      Measured on real P2 silicon: the `|` form drove a cog DAC (6,737 ADC counts);
-      the `+` form was dead (1,407, indistinguishable from no drive at all).
+      The `|` form drives a cog DAC (6,737 ADC counts);
+      the `+` form is dead (1,407, indistinguishable from no drive at all).
     reading_the_symbol_list: |
       Three names for one bit is deliberate — each name reads correctly in its own
       context (P_OE for smart-pin output enable, P_CHANNEL for the non-smart-pin DAC's

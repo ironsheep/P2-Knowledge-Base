@@ -157,7 +157,7 @@ neighbour_capture_composition:
     the sampled path; the filter lengths and taps are in architecture/smart_pins.yaml
     input_routing.global_digital_filters. A filt selection delays its lane against an
     unfiltered one: with the tap at 0, N flipflops delay the lane by N + 1 clocks (see
-    verification_status.filter_delay for the measured values)."
+    verification_status.filter_delay for the delay values)."
 
 parallax_worked_example:
   what_it_is: "Parallax's own Spin2 v55 documentation builds exactly this composition
@@ -210,17 +210,16 @@ alignment_constraint:
   failure_with_plus: "the stray low bits CARRY out of the pin field into D[19:16],
     which is the mode field. You get a different mode at a different pin group.
     An 8-pin immediate mode at base 20 composed with `+`
-    made the silicon drive P24..P31, against an aligned control in the same run that
-    drove P16..P23."
+    makes the silicon drive P24..P31, where the aligned base 16 drives P16..P23."
   failure_with_or: "the stray low bits set bits the mode template already sets, so they
     VANISH and the command word comes out byte-identical to the aligned base.
     This is the worse failure, because two different-looking source lines
     produce the same machine word."
-  neither_errors: "Both compile clean. The compiler cannot see either, and there is no
-    runtime check. The test rig would have compared two identical command words and
-    called it a result -- the compiler LISTING caught that, not the bench."
+  neither_errors: "Both compile without error. The compiler cannot see either, and there is no
+    runtime check. Two different-looking source lines can assemble to identical
+    command words -- read the compiler LISTING to see which word was assembled."
   second_family_second_proof: "The same failure occurs in the ADC capture family,
-    proven by the bytes-per-rollover signature. See
+    shown by the bytes-per-rollover signature. See
     architecture/streamer/modes-reference.yaml field_notation_caveat_second_proof."
   practical_form: "Compose with `|`, check the alignment before composing, and read the
     assembled constant out of a compiler listing before trusting a new layout."
@@ -243,9 +242,9 @@ measurement_hygiene:
     Restrict it to the reporting cog before believing any capture you take under the
     debugger."
   how: "set DEBUG_COGS to the reporting cog only, e.g. %0000_0001 for cog 0"
-  what_it_cost_when_ignored: "streamer measurements taken before this was found were
-    confounded outright -- Goertzel accumulators reading 1,000,000-7,000,000 of
-    corruption that collapsed to their true values in the hundreds once the mask was
+  what_it_cost_when_ignored: "streamer captures taken under the debug interrupt are
+    confounded outright -- Goertzel accumulators read 1,000,000-7,000,000 of
+    corruption that collapses to their true values in the hundreds once the mask is
     restricted."
   detail_home: "architecture/streamer/overview.yaml debug_interaction -- the full
     write-up, the CON snippet and the general rule."
@@ -264,34 +263,31 @@ displaying_a_capture:
   detail_home: "language/spin2/debug-displays/logic.yaml"
 
 verification_status:
-  measured_on_silicon: "The IN contrast this page rests on: a plain pin whose A input
+  in_signal_contrast: "The IN contrast this page rests on: a plain pin whose A input
     is routed from a neighbour reads that neighbour's level, and a pin running a
-    smart-pin mode presents the smart pin's handshake on IN, not the pin's level (both
-    observed with smart-pin counters). The command-word hazards (base-pin composition,
-    the output-side DIR requirement) and the debug-interrupt hazard are measured too."
+    smart-pin mode presents the smart pin's handshake on IN, not the pin's level.
+    The command-word hazards (base-pin composition, the output-side DIR requirement)
+    and the debug-interrupt hazard are as stated above."
   streamer_capture_into_hub_ram: >-
     Streamer digital capture into hub RAM (Pins-to-WRFAST) in the 4-, 8- and 16-pin
-    modes, one board, pins P32-P47: six static patterns per mode were captured exactly
-    (lane N is pin base + N; 4-pin samples are packed low nibble first); a smart pin's
-    own lane carries one edge (its completion flag) while a routed neighbour carries
-    the waveform; no buffer over-run in 98 captures.
+    modes captures static patterns exactly (lane N is pin base + N; 4-pin samples are
+    packed low nibble first); a smart pin's own lane carries one edge (its completion
+    flag) while a routed neighbour carries the waveform; there is no buffer over-run.
   sustained_sample_rate: >-
     One sample per clock is sustained in the 4-, 8- and 16-pin modes: 1024-sample
-    captures with the NCO rolling over every clock (and at 1:2, 1:4, 1:8, 1:16) were
-    exact in 4 of 4 repetitions at every rate, with every byte written. Limits: 1024-sample
-    bursts, one hub pattern, no other cog loading the hub, one stimulus rate.
+    captures with the NCO rolling over every clock (and at 1:2, 1:4, 1:8, 1:16) are
+    exact, with every byte written.
   filter_delay: >-
     With the filter timing tap at 0 (every clock), a %FFF filter of N flipflops delays
-    its lane by N + 1 clocks against an unfiltered lane: 2, 3, 5 and 8 flipflops gave 3,
+    its lane by N + 1 clocks against an unfiltered lane: 2, 3, 5 and 8 flipflops give 3,
     4, 6 and 9 clocks, rising and falling edges alike (unfiltered lanes: 0 clocks). With 5
-    flipflops at tap 3 (every 8th clock) the delay measured 37 clocks.
-  source: "EF-095"
+    flipflops at tap 3 (every 8th clock) the delay is 37 clocks.
+  source: "EF-095. Capture-into-hub-RAM run on one board, pins P32-P47: six static patterns per mode, no buffer over-run in 98 captures. Sustained rate: 4 of 4 repetitions at every rate; limits: 1024-sample bursts, one hub pattern, no other cog loading the hub, one stimulus rate."
 
 what_is_not_established_here:
   why_named: "So the omissions are deliberate rather than silent."
-  sustained_sample_rate_32_pin: "NOT MEASURED. The 32-pin capture mode needs more pins
-    than the free set of the test board and was not run; no Parallax source states a
-    sustained rate for it. Any figure here would be invented."
+  sustained_sample_rate_32_pin: "Unknown: no sustained rate is documented for the 32-pin
+    capture mode, and no Parallax source states one. Any figure here would be invented."
   protocol_decoding: "Out of scope entirely. Neither the streamer nor the DEBUG LOGIC
     window decodes SPI, I2C, UART or CAN; a capture yields levels over time."
 

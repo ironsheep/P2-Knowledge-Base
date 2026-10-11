@@ -280,73 +280,8 @@ feature_matrix:
       eval_board: "PC-USB input limited to 500 mA; AUX-USB input limited to 2000 mA"
       edge_carriers: "recommended minimum 100 mA; maximum according to the customer application (the #64020 guide adds 'typical 1000 mA')"
       vio_budget: "3.3 V up to 300 mA per 8 I/O pins, on every board"
-      
-  authored_here_note: >-
-    educational_progression and application_domains below are guidance authored
-    in this knowledge base, not statements from any Parallax document.
-
-  educational_progression:
-    beginner_path: ["breadboard_carrier", "control_board", "mini_prototyping"]
-    intermediate_path: ["p2_eval_board", "led_matrix"]
-    advanced_path: ["mini_breakout", "standard_breakout", "serial_host", "digital_video_out", "av_breakout"]
-    
-  application_domains:
-    education: ["p2_eval_board", "breadboard_carrier", "control_board"]
-    prototyping: ["p2_eval_board", "standard_breakout", "mini_prototyping"]
-    embedded_systems: ["mini_breakout", "standard_breakout"]
-    multimedia: ["p2_eval_board", "av_breakout", "digital_video_out"]
-    communications: ["serial_host", "serial_device"]
-    user_interfaces: ["control_board", "led_matrix"]
-
-selection_criteria:
-  source: >-
-    The part numbers are from P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, cover, p.1.
-    The recommendations and rationales are authored in this knowledge base and
-    have no upstream source.
-  by_experience_level:
-    beginner:
-      recommended: ["P2 Eval Board + Control Board"]
-      rationale: "Complete development environment with simple I/O"
-    intermediate:
-      recommended: ["Standard Breakout + selected add-ons"]
-      rationale: "More flexibility, custom circuit integration"
-    advanced:
-      recommended: ["Mini Breakout or custom carrier"]
-      rationale: "Maximum flexibility, production-ready form factors"
-      
-  by_application_type:
-    learning_embedded_systems:
-      hardware: "P2 Eval Board"
-      addons: ["64006A (Control)", "64006E (Prototyping)"]
-      advantages: "Complete development environment"
-    space_constrained_projects:
-      hardware: "P2 Edge Mini Breakout" 
-      edge_module: "P2-EC standard (sufficient for most)"
-      advantages: "Smallest footprint, production-ready"
-    multimedia_projects:
-      hardware: "P2 Eval Board"
-      addons: ["64006H (A/V Breakout)", "64006D (Digital Video)"]
-      advantages: "Multiple A/V output options"
-    usb_development:
-      hardware: "P2 Eval Board"
-      addons: ["64006B (USB Host)", "64006F (USB Device)"]
-      advantages: "Complete USB ecosystem testing"
-    standard_breakout_projects:
-      hardware: "P2 Edge Standard Breakout"
-      edge_module: "P2-EC standard"
-      advantages: "All 64 pins at accessory headers; the P2-EC module carries the full P2 feature set"
 
 compatibility_matrix:
-  edge_module_carriers:
-    p2_ec_standard:
-      standard_breakout: "perfect"
-      mini_breakout: "perfect"
-      breadboard_carrier: "perfect"
-    p2_ec_32mb:
-      standard_breakout: "perfect"
-      mini_breakout: "optimal"
-      breadboard_carrier: "good"
-      
   source: >-
     Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, Feature Descriptions (I/O Pin Breakout Edge Headers), pp.4-14.
     P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, shared connector / compatibility / mounting facts, p.1.
@@ -373,30 +308,6 @@ compatibility_matrix:
       signals -- avoid it for accessory boards.
     headers_note: "The #64000 has eight headers covering all 64 pins."
 
-  recommended_combinations:
-    education_starter:
-      main: "P2 Eval Board"
-      addons: ["64006A Control", "64006E Prototyping"]
-    multimedia_developer:
-      main: "P2 Eval Board"
-      addons: ["64006H A/V Breakout", "64006C LED Matrix"]
-    embedded_prototype:
-      main: "P2 Edge Standard Breakout"
-      module: "P2-EC standard"
-    production_ready:
-      main: "P2 Edge Mini Breakout"
-      module: "P2-EC (size dependent)"
-
-summary_recommendations:
-  first_time_users: "P2 Eval Board with Control Board add-on - provides complete development environment with simple I/O for learning"
-  general_breakout: "P2 Edge Standard Breakout with P2-EC - all 64 pins at accessory headers with the full P2 feature set"
-  space_critical: "P2 Edge Mini Breakout with P2-EC - smallest footprint while maintaining full functionality"
-  multimedia_focus: "P2 Eval Board with A/V Breakout - comprehensive audio/video development platform"
-  production_transition: "Start with Eval Board for development, transition to appropriate breakout for production"
-  
 notes:
   - "All configurations provide complete P2 functionality (8 COGs, 64 Smart Pins, CORDIC)"
   - "Edge module choice depends on whether you need PSRAM: both carry 16MB flash, but only the P2-EC32MB adds 32MB PSRAM"
-  - "Add-on boards require P2 Eval Board for full functionality"
-  - "Breakout boards offer maximum flexibility but require external programming setup"
-  - "Educational progression: Eval Board → Standard Breakout → Mini Breakout → Custom carrier"

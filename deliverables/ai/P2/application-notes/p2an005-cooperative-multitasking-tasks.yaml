@@ -47,8 +47,7 @@ summary: |
   TASKCHK==halted, plus a synchronized start using TASKSPIN's expression-return id); and R4 a task
   dashboard (a live TASKCHK/TASKHLT census, TASKID self-identification, and a clean TASKSTOP(THISTASK)
   shutdown). The modern replacement for the hand-coded PASM coroutine. TASKWAIT — documented in some
-  older material — was compile-probed, found not to exist in Spin2, and excluded. Every recipe
-  compiles clean under pnut-ts -d; live scheduling behavior defers to a hardware pass.
+  older material — does not exist in Spin2.
 audience: [human, agent]
 
 # ---- CONSUMPTION TIER: the composition recipe (LINKS to existing KB primitives) ----
@@ -117,20 +116,19 @@ gotchas:
     text: "R1: two LEDs blink at independent rates (interleaving proof); only one blinking means a task never yields. R2: the heartbeat line advances between crunch-pass lines (responsiveness). R3: the producer flips TASKCHK state 1<->2 as the ring fills/drains. R4: census shows running=workers+1 (the supervisor counts itself), then worker-census=0 after shutdown."
 
 hardware_status: |
-  Every embedded block and every examples-library program compiles clean under pnut-ts -d (_clkfreq = 200_000_000), and the whole TASK* family (TASKSPIN expression + statement forms,
-  TASKNEXT, TASKHALT/TASKCONT, TASKCHK, TASKID, TASKSTOP, NEWTASK, THISTASK, TASKHLT read/write) was
-  compile-verified. LIVE scheduling behavior — true interleaving, the halt/resume timing, the
+  Live scheduling behavior — true interleaving, the halt/resume timing, the
   "all tasks halted -> wait for interrupt" edge, and "the last task's return stops the cog" — is a
-  runtime property described from the Spin2 v47+ documentation and DEFERS to a bench pass on real
-  silicon (-> EF ledger when accepted). No invented DEBUG captures. TASKWAIT was probed and excluded.
+  runtime property described from the Spin2 v47+ documentation. No invented DEBUG captures.
+  TASKWAIT does not exist in Spin2.
+
 
 sources:
   - "Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: cooperative multitasking) and New Keywords Introduced by New Versions (the authoritative TASK keyword list; TASKWAIT is absent)"
   - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (the TASK method family TASKSPIN, TASKNEXT, TASKHALT, TASKCONT, TASKCHK, TASKID, TASKSTOP), Built-In Symbol for TASKSPIN() Usage (NEWTASK/THISTASK), and the TASKHLT register (halt bits for all tasks, in reverse order)"
   - "Parallax Spin2 Interpreter v55 (2026.05.07), Multitasking (taskhlt 'task halt bits': one register, 12 registers below the pasm-use registers at $1D8, i.e. $1CC)"
 
-tool_ground_truth:
-  - "pnut-ts — every recipe compiled with -d; TASKWAIT(cond) probed and rejected ('Expected an instruction or variable'), confirming it is not a Spin2 keyword"
+language_facts:
+  - "TASKWAIT is not a Spin2 keyword: the compiler rejects TASKWAIT(cond) with 'Expected an instruction or variable'"
 
 related_pages:
   - "P2 Knowledge Base cooperative-tasking pattern (language/spin2/patterns/implementation/spin2_cooperative_tasking.yaml) — the finish-the-transaction-before-you-yield discipline and the many-cadences-on-one-bus worked example"

@@ -196,7 +196,7 @@ internal_pull_resistors:
     high-impedance input with the selection INACTIVE. The authority for that is
     the Datasheet Pin Mode Legend -- "DIR = direction bit; 0: input (float),
     1: output (drive)"
-    -- and NOT a bench measurement. It is the reason the older form of this
+    -- It is the reason the older form of this
     block -- weak drive followed by a float -- does not work.
   ladder_definition_home: architecture/pin-drive-configuration.yaml
   pull_a_line_high:

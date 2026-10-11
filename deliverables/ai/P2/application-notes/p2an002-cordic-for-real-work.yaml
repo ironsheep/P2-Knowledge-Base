@@ -102,14 +102,14 @@ prerequisites:
   - "P2 32-bit signed integer / fixed-point model (no floating-point hardware)"
 
 gotchas:
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (hub features, CORDIC solver) and CORDIC Solver ('a 54-stage pipelined CORDIC solver'; the 55-clock result latency), EVENTS and INTERRUPTS (event 15 = GETQX/GETQY executed without any CORDIC results available), and OVERLAPPING CORDIC COMMANDS (the pipelining/interrupt warning); hardware-verified pipeline behaviour EF-053"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (hub features, CORDIC solver) and CORDIC Solver ('a 54-stage pipelined CORDIC solver'; the 55-clock result latency), EVENTS and INTERRUPTS (event 15 = GETQX/GETQY executed without any CORDIC results available), and OVERLAPPING CORDIC COMMANDS (the pipelining/interrupt warning); hardware-verified pipeline behaviour EF-053; hub-access-in-CORDIC-loops rule run on real P2 at 200 MHz, seven consistent runs (RDLONG in fill fails at FILL=2, WRLONG in drain at FILL=3, register-only clean through FILL=7)"
   items:
     - flag: pitfall
       text: "QMUL/QDIV/QFRAC/QSQRT are UNSIGNED -- a negative operand becomes a huge positive one. For signed data take magnitude and sign separately. QVECTOR/QROTATE ARE signed, being built for coordinates."
     - flag: pitfall
       text: "Read each result before the next overwrites it. Reading with nothing pending raises the documented event: 'GETQX/GETQY executed without any CORDIC results available or in progress' (event 15). Never let an interrupt stall a pipelined sequence -- wrap it in REP."
     - flag: pitfall
-      text: "Keep hub access OUT of both CORDIC loops -- correctness, not optimization. Hardware-verified 2026-08-14 on real P2 at 200 MHz (seven consistent runs): a RDLONG inside the fill loop first gave wrong results at FILL=2; a WRLONG inside the drain at FILL=3; register-only fill AND drain, with hub I/O batched outside, stayed clean through FILL=7. The failure is SILENT -- plausible-looking numbers, no fault and no flag. Scope, from the finding itself: this measures WHERE results are lost, not why; state it as the tested shape -- keep hub access out of both loops -- not as a law about any hub access. Index a cog-RAM buffer with ALTS/ALTD in between."
+      text: "Keep hub access OUT of both CORDIC loops -- correctness, not optimization. At 200 MHz a RDLONG inside the fill loop first gives wrong results at FILL=2; a WRLONG inside the drain at FILL=3; register-only fill AND drain, with hub I/O batched outside, stays clean through FILL=7. The failure is SILENT -- plausible-looking numbers, no fault and no flag. Scope: this identifies WHERE results are lost, not why; the rule is the shape -- keep hub access out of both loops -- not a law about any hub access. Index a cog-RAM buffer with ALTS/ALTD in between."
     - flag: tip
       text: "The angle occupies the whole 32-bit range, so there is no wrap to manage -- add and subtract angles freely; the overflow IS the wrap you want."
     - flag: hardware
@@ -119,8 +119,8 @@ gotchas:
 
 hardware_status: |
   The CORDIC computes deterministic, closed-form math, so every recipe's expected output is
-  derivable by hand and verified against known answers in a DEBUG window (no bench instruments).
-  Values are arithmetic-derived, not measured. This note carries no accuracy-unknown caveat.
+  derivable by hand and checkable against known answers in a DEBUG window (no external instruments).
+  Values are arithmetic-derived. This note carries no accuracy-unknown caveat.
 
 sources:
   - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), CORDIC Solver"

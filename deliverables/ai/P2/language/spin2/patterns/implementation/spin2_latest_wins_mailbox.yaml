@@ -9,9 +9,9 @@ description: |
   THE HANDSHAKE IS LOAD-BEARING. Bump-last only guarantees the reader never sees a
   command before its first publish. It does not stop a SECOND post overwriting the slot
   while the reader is part-way through reading it -- the reader's reads of the id and the
-  args are separate reads of shared memory. Measured: with the writer not waiting for the
+  args are separate reads of shared memory. With the writer not waiting for the
   ack and a reader that does any work between reading the id and the args, every command
-  was torn; with the wait, none was. A tight polling reader wins the race and HIDES the
+  is torn; with the wait, none is. A tight polling reader wins the race and HIDES the
   fault, so the obvious test passes. A writer that must never wait packs the whole command
   into ONE long and publishes it with one store (p2an007 recipe R5).
 
@@ -20,6 +20,8 @@ description: |
   caller to the consumer's worst-case latency. See the data-flow-contracts decomposition
   entry for WHEN to choose this (control plane) versus a buffer (data plane) or a
   freshness counter (event plane).
+
+source: "Torn-command result with and without the writer's ack wait measured on real P2 (see p2an007 recipe R2/R3 and EF-036..EF-039)"
 
 when_use:
   - "A producer cog must hand a command to a consumer cog without the consumer blocking, the producer waiting only for the consumer's copy"

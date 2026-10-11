@@ -306,11 +306,11 @@ usage_pattern:
   dac_output_pin_setup: >-
     For the DDS-output direction the pin must be a COG DAC CHANNEL the streamer can
     override: P_DAC_124R_3V | P_CHANNEL, with COGID in M[3:0] and DIRH on the pin,
-    the channel chosen by the pin's own two low bits. Measured, not reasoned --
-    sweeping %TT on a jumpered cog-DAC pin gave (%00 = 1,408, no drive; %01 = 6,737)
-    and the spread collapsed from 1,305/2,000 samples to 25 once
-    P_CHANNEL was added. See language/pasm2/wrpin.yaml.
-  source: "Shape and constants follow the worked DDS/Goertzel program in Parallax Propeller 2
+    the channel chosen by the pin's own two low bits. Sweeping %TT on a jumpered
+    cog-DAC pin gives (%00 = 1,408, no drive; %01 = 6,737)
+    and the spread collapses from 1,305/2,000 samples to 25 once
+    P_CHANNEL is added. See language/pasm2/wrpin.yaml.
+  source: "The %TT sweep on a jumpered cog-DAC pin was run on real P2 (measured, not reasoned). Shape and constants follow the worked DDS/Goertzel program in Parallax Propeller 2
       Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel (the program's description
       and setup, and the dds_d / dds_s mode and data longs)."
 

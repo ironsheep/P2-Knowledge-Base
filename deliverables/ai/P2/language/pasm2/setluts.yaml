@@ -32,9 +32,8 @@ notes:
   after those writes brings nothing that was written earlier (not retroactive).'
 - "A COGINIT of the receiving cog resets its enable, so SETLUTS #1 must be executed again;
   a COGINIT of the sending cog leaves the receiver's enable in force."
-- 'Measured on one pair at a time, in cog execution; the timing of a write against a
-  concurrent enable was not explored.'
-source: EF-096
+- 'The timing of a write against a concurrent enable is not stated.'
+source: "EF-096 (measured on one pair at a time, in cog execution)"
 related:
 - architecture/lookup_ram.yaml
 - language/pasm2/coginit.yaml

@@ -22,7 +22,7 @@ window_name_rules:
     the window opens -- that is the host's behaviour, and only Trace has been run.
   known_failure: "Under PNut v55, debug(`SCOPE Trace POS 0 0 SIZE 400 220 SAMPLES 256) opened no window, while the same create line named D opened one. The build gave no error."
   not_tested: "Every other directive, color, color-mode and packed-mode word used as a window name; a name starting with a digit; a name of 30 or more characters; names differing only in case; reusing a name after CLOSE. No result is claimed for any of these."
-  guidance: "When generating code, give a window a plain short name that is not a display type, a directive of any window, or a color word (Scan, Panel, Waves, Status, Probe, Mon). Only Trace is proven to fail; the rest are untested, so avoid them rather than rely on them. A directive of ANOTHER window counts too -- TRACE is a SPECTRO and BITMAP directive, and it was the name of a SCOPE when the window failed to open -- so do not take one window's directive list as the whole set to avoid."
+  guidance: "When generating code, give a window a plain short name that is not a display type, a directive of any window, or a color word (Scan, Panel, Waves, Status, Probe, Mon). Only Trace is known to fail; the rest are untested, so avoid them rather than rely on them. A directive of ANOTHER window counts too -- TRACE is a SPECTRO and BITMAP directive, and it was the name of a SCOPE when the window failed to open -- so do not take one window's directive list as the whole set to avoid."
 
 display_types:
   - name: TERM

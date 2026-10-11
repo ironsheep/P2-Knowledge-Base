@@ -32,7 +32,7 @@ specifications:
     form_factor: "dual 2x6-pin female pass-through headers"
     panel_connector: "J7: keyed, shrouded 2x8 (16-pin) IDC header, HUB75E pinout (pin 8 = E; pin 4 not grounded, brought out to through-hole J6)"
     probe_header: "J3: 2x8 logic-analyser header carrying the same buffered HUB75 signals, pin for pin as J7"
-    spare_pin_holes: "J4: offsets 14 and 15 direct from the P2; J5: the same two pins buffered to 5 V; J6: HUB75 pin 4. Through-holes, unpopulated"
+    spare_pin_holes: "J4: offsets 14 and 15 direct from the P2; J5: the same two pins buffered to 5 V; J6: HUB75 pin 4. Through-holes"
   electrical:
     operating_voltage: "+5 VDC, taken from the 5V pin of the lower (offsets 0-7) header only; the upper header's 5V pin and both VIO 3.3 V pins are not connected"
     board_consumption: "under 50 mA (level shifters and support circuitry)"

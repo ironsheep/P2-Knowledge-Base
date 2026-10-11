@@ -9,11 +9,11 @@ guide_paths:
   voice_guide: ../APP-NOTE-VOICE-GUIDE.md
   style_guide: ../APP-NOTE-VOICE-GUIDE.md
 companion_yaml: deliverables/ai/P2/application-notes/p2an006-sizing-cog-task-stacks.yaml
-authoritative_sources: see ../APP-NOTE-CREATION-GUIDE.md §5.1 # Spin2 Language Documentation (cogspin/coginit + TASKSPIN stack params; params->results->locals packing) + P2KB cogspin.yaml (stack floor ~32, typical 64-128, "overflow not detected") + stack_operations.yaml (hardware-stack distinction, cited to keep separate) + isp_stack_check.spin2 (Stephen M. Moraco, MIT — the shipped instrument) + pnut-ts v1.55.0
+authoritative_sources: see ../APP-NOTE-CREATION-GUIDE.md §5.1 # Spin2 Language Documentation (cogspin/coginit + TASKSPIN stack params; params->results->locals packing) + P2KB cogspin.yaml ("overflow not detected"; no stack size is stated by any Parallax document) + stack_operations.yaml (hardware-stack distinction, cited to keep separate) + isp_stack_check.spin2 (Stephen M. Moraco, MIT — the shipped instrument) + pnut-ts v1.55.0
 high_risk_quant:
   - "isp_stack_check constants: NOT_WRITTEN_MARK = $a5a50df0 (fill pattern), DO_NOT_WRITE_MARK = $addee5e5 (sentinel just past the buffer)"
   - "API takes (pStack, nStackLongCt) in LONGS: prepStackForCheck (fill+sentinel, before launch), checkStack (halts on overflow), getStackDepth (high-water count), reportStackUse (prints 'STACK used N of M')"
-  - "Sizing method: start 128 -> exercise deepest path -> reportStackUse reads N -> set buffer ~1.5xN -> keep checkStack guard. Cog stack floor ~32, typical 64-128 (cogspin.yaml)"
+  - "Sizing method: start 128 -> exercise deepest path -> reportStackUse reads N -> set buffer ~1.5xN -> keep checkStack guard. The note states no default stack size: a rule-of-thumb figure would be unsourced"
   - "Stack consumes params -> results -> locals in declaration order, plus nested-call depth (Spin2 v55 text:284)"
   - "Two contexts, one technique: new-cog stack (cogspin) and intra-cog task stack (TASKSPIN); the instrument only watches a hub buffer"
 fragile_areas:

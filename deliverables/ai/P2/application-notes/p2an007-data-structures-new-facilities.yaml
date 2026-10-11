@@ -67,8 +67,7 @@ summary: |
   handed to inline PASM), so a widened member never silently invalidates a hand-counted offset.
   Uses the REAL P2 lock methods LOCKNEW/LOCKTRY/LOCKREL -- never the P1 lockset/lockclr.
   Implementation-only by design: which structure to use and why (copy vs reference, refcount-vs-copy
-  fan-out) is a contract decision the P2 Architect's Guide owns and this note CITES. Every recipe
-  compiles clean under pnut-ts -d.
+  fan-out) is a contract decision the P2 Architect's Guide owns and this note CITES.
 audience: [human, agent]
 
 # ---- CONSUMPTION TIER: the composition recipe (LINKS to existing KB primitives) ----
@@ -147,17 +146,14 @@ gotchas:
     text: "R1: SIZEOF(reading_t)=9, value=i*i. R2: consumed value = seq*10, seq monotonic (a mismatch = publish order wrong). R3: 5 exec lines op 1..5, a0=op*100, a1=op*1000. R4: writer-1/writer-2 jobs interleaved, no duplicated/skipped slot (a collision = enqueue ran without the lock). R5: 5 exec lines op 1..5 with arg=op*100 (an arg belonging to a different op = the record reached the shared long field-by-field instead of staged+stored once). R6: OFFSETOF magic=0 length=4 kind=6 flags=7, SIZEOF(hdr_t)=8, payload at +8."
 
 hardware_status: |
-  Every embedded block and every examples-library program compiles clean under pnut-ts -d (_clkfreq = 200_000_000). Beyond legality, every CROSS-COG claim in this note is CONFIRMED ON REAL P2
-  SILICON with two cogs actually contending.
-  Each discipline was measured against a deliberately-broken control, and the control was REQUIRED to
-  fail before the result was accepted (a rig reporting zero in both arms is INCONCLUSIVE, never a pass).
-  Measured: R2 publish-index-last 0 torn / index-first 200_000 of 200_000 torn. R5 staged
-  one-store publish 0 torn / same fields written in-place into the shared packed long 116_452 of 200_000
-  torn -- fitting in ONE long does NOT make a record atomic; each bitfield write is a
-  read-modify-write of the backing long. R3 seq/ack handshake present 0 bad / handshake removed 20_000 of
-  20_000 bad for a worker that dispatches between reads; a TIGHT-POLLING worker
-  reports zero, which is why the missing ack looks fine under the obvious test. R4 locked 0 anomalies /
-  unlocked 3_331. R6/R1 OFFSETOF+SIZEOF 11/11 layout checks match the numbers the note prints.
+  Observed behaviour with two cogs contending: R2 publish-index-last gives 0 torn reads, index-first
+  gives 200_000 of 200_000 torn. R5 staged one-store publish gives 0 torn; the same fields written
+  in-place into the shared packed long give 116_452 of 200_000 torn -- fitting in ONE long does NOT
+  make a record atomic; each bitfield write is a read-modify-write of the backing long. R3 seq/ack
+  handshake present gives 0 bad; with the handshake removed 20_000 of 20_000 are bad for a worker
+  that dispatches between reads; a TIGHT-POLLING worker reports zero, which is why the missing ack
+  looks fine under the obvious test. R4 locked gives 0 anomalies, unlocked 3_331. R6/R1
+  OFFSETOF+SIZEOF layout matches the numbers the note prints.
   No invented DEBUG captures. Implementation-only: the contract-choice reasoning is deferred to
   the P2 Architect's Guide.
 
@@ -165,8 +161,8 @@ sources:
   - "Parallax Propeller 2 Spin2 Language Documentation v55, DATA STRUCTURES (the STRUCT facility: declaration, typed members, arrays, nesting, SIZEOF, pointers, v49 cross-object export/import, the >15-long struct-pointer bracket rule) and Built-In Methods (the hardware lock methods LOCKNEW/LOCKTRY/LOCKREL/LOCKRET)"
   - "hardware_status (cross-cog measurements on real P2 silicon): EF-036 (publish-index-last ring), EF-037 (one-store packed-record publish), EF-038 (seq/ack handshake), EF-039 (lock-serialized enqueue), EF-040 (STRUCT layout OFFSETOF/SIZEOF)"
 
-tool_ground_truth:
-  - "pnut-ts — every recipe compiled with -d; confirmed the STRUCT + real-P2-lock idioms are legal and that P1 lockset/lockclr are not P2 methods"
+language_facts:
+  - "P1's LOCKSET and LOCKCLR are not Spin2 methods; Spin2 uses LOCKTRY and LOCKREL"
 
 related_pages:
   - "P2 Knowledge Base architecture/locks.yaml (16 locks, atomic test-and-set, deadlock ordering, release-on-all-paths) and architecture/decomposition/data-flow-contracts.yaml + the latest-wins-mailbox / buffer-management patterns (the mechanisms this note implements; the CHOICE among them is an Architect's Guide topic)"

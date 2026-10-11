@@ -97,7 +97,8 @@ gotchas:
     - flag: hardware
       text: "Feed VIO from a clean supply. The ADC references the VIO/GIO rails of its own group -- the datasheet's own words for the grouping are 'for clean analog Vdd reference' -- so a noisy VIO degrades every reading."
     - flag: pitfall
-      text: "Absolute accuracy has a measured floor. Hardware-verified 2026-07-07 on real P2: the ratiometric single-pin absolute error was <=9 mV, reproducible, with a small positive offset at low V and ~0 at mid/high. It is an offset, not noise, so averaging does not remove it -- calibrate each pin once against a known voltage for absolute work. NOTE: the wider '~15 mV pin-to-pin spread' figure is a designer report that the bench has NOT yet reproduced; the multi-pin extension that would settle it is still open. Do not quote 15 mV as a specification."
+      text: "Absolute accuracy has a floor. The ratiometric single-pin absolute error is <=9 mV, reproducible, with a small positive offset at low V and ~0 at mid/high. It is an offset, not noise, so averaging does not remove it -- calibrate each pin once against a known voltage for absolute work. The pin-to-pin spread is unknown; do not quote a '~15 mV pin-to-pin spread' as a specification."
+      source: "EF-024 (companion note: the ratiometric single-pin absolute error; the designer-reported ~15 mV pin-to-pin spread was not reproduced)"
     - flag: pitfall
       text: "Stay inside the clock the datasheet states. The AC characteristics give the PLL system clock as min 3.33 MHz / typ 180 MHz / max 320 MHz, with the footnote 'Nominal PLL frequency (system clock speed) is 180 MHz at up to 105 degC'. Reach for integration time, not clock rate, when you want resolution."
     - flag: tip
@@ -106,10 +107,9 @@ gotchas:
       text: "Mode selection: 'For the internally-clocked mode, the A-input will be sampled on every clock and should be a pin configured for ADC operation (M[12:10] = %100). In the externally-clocked mode, the A-input will be sampled on each B-input rise, so that an external delta-sigma ADC may be employed.'"
 
 hardware_status: |
-  ENOB / resolution claims in the note are QUALITATIVE (mechanism, not measured) — hardware
-  characterization is pending. Do NOT treat any resolution ceiling as a measured/guaranteed
-  figure. When bench measurement lands and is accepted it becomes empirical (top of the trust
-  chain) and this field updates with the measured numbers.
+  ENOB / resolution claims in the note are QUALITATIVE (mechanism only). The ENOB figure is
+  unknown: no figure is documented. Do NOT treat any resolution ceiling as a guaranteed
+  figure.
 
 sources:
   - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS and SMART PIN MODES (ADC modes)"

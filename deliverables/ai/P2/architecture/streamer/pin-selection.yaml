@@ -106,9 +106,8 @@ sub_pin_selection:
     "%111": "group base + 7"
   what_a_misaligned_base_does: "It does not error and it does not round. The stray low
     bits land in D[19:16], which is the MODE field -- see pin_base_encoding below and
-    architecture/streamer/modes-reference.yaml field_notation_caveat. Bench-proven, twice, in two different
-    mode families."
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER: \"In every mode,
+    architecture/streamer/modes-reference.yaml field_notation_caveat."
+  source: "EF-065, EF-059 (misaligned-base hazard bench-proven twice, in two different mode families). Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER: \"In every mode,
     the three %ppp bits in D[22:20] select the pin group, in 8-pin increments\" and \"For
     modes which involve less than 8 pins, lower-order %p bit(s) in D[19:19..17] are
     used to further resolve the pin number(s)\". Per-width templates from the

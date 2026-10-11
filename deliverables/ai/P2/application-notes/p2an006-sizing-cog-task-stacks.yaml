@@ -42,8 +42,7 @@ summary: |
   a TASKSPIN task stack (the identical technique on an intra-cog task buffer -- the instrument only
   watches a hub buffer, so it does not care whether the buffer feeds a cog or a task). Built around
   the isp_stack_check utility (Stephen M. Moraco), shipped in the example library. The
-  hub method stack sized here is NOT the P2 8-level hardware call stack. Every recipe compiles clean
-  under pnut-ts -d; observing the overflow halt fire is a bench step.
+  hub method stack sized here is NOT the P2 8-level hardware call stack.
 audience: [human, agent]
 
 # ---- CONSUMPTION TIER: the composition recipe (LINKS to existing KB primitives) ----
@@ -74,7 +73,7 @@ key_parameters:
   api: "all take (pStack, nStackLongCt) in LONGS: prepStackForCheck(fill+sentinel, call before launch); checkStack(halts + reports if the sentinel was overwritten); getStackDepth(high-water count, bottom-up to first untouched long); reportStackUse(prints 'STACK used N of M')"
   placement_rule: "the sentinel long (endStackMark) MUST abut the stack buffer with no gap — declare it immediately after the stack in the SAME DAT block; prepStackForCheck writes it"
   sizing_method: "start at 128 longs (can't overflow while measuring) -> exercise the DEEPEST call path -> reportStackUse reads N -> set buffer to ~1.5xN -> keep a checkStack guard in a slow loop"
-  cog_stack_defaults: "cog stack floor ~32 longs, typical 64-128 for moderate Spin2 code -- these are HEURISTICS carried by language/spin2/methods/cogspin.yaml, not figures any Parallax source states, so do not treat them as a specification; a task usually needs less than a full cog (one focused job), and the only way to settle a size is to measure the high-water mark of your own code"
+  cog_stack_defaults: "no Parallax document states a stack size for a cog or a task; the only way to settle a size is to measure the high-water mark of your own code with sizing_method"
   top_level_stack: "the first cog's top-level program also runs on a stack, but the compiler places it and no size or overflow check is documented -- see top_level_stack in language/spin2/methods/cogspin.yaml; the sentinel technique here applies only to the hub buffers you pass to cogspin and TASKSPIN"
   stack_consumption: "params -> results -> locals packed in declaration order, plus nested-call depth (Spin2 v55 text:284)"
   two_contexts: "new-cog stack (cogspin, one call stack per cog) and intra-cog task stack (TASKSPIN, one per task) — same sizing job; the instrument only watches a hub buffer"
@@ -103,21 +102,19 @@ gotchas:
     text: "R1/R3/R4: silent guard = pass; shrink the stack below what the code needs and checkStack prints '^^^ STACK Overflow! Depth greater than N longs' and halts. R2: reportStackUse prints '^^^ STACK used N of M'; deepen the call chain and N rises."
 
 hardware_status: |
-  Every recipe and the isp_stack_check instrument compile clean under pnut-ts -d (v1.55.0, _clkfreq =
-  200_000_000); each recipe OBJ-includes the utility from the example library. The overflow DETECTION,
+  Each recipe OBJ-includes the isp_stack_check utility from the example library. The overflow DETECTION,
   the '^^^ STACK Overflow!' message, the high-water 'STACK used N of M' output, and the lockup-for-
-  analysis halt are runtime behaviors described from the utility's design; observing them fire (shrink
-  a stack below what its code needs) is a bench step on real silicon (Stephen runs hardware externally;
-  -> EF ledger when accepted). No invented DEBUG captures.
+  analysis halt are runtime behaviors described from the utility's design. No invented DEBUG captures.
+
 
 sources:
   - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (COGSPIN/COGINIT stack requirements, TASKSPIN task stacks) and Built-In Symbols for COGINIT() Usage, COGSPIN() Usage and TASKSPIN() Usage; the parameters-then-results-then-locals stack layout"
 
-tool_ground_truth:
-  - "pnut-ts — every recipe + the instrument compiled with -d; confirmed `<=` (not `=<`) is the P2 less-than-or-equal operator"
+language_facts:
+  - "`<=` (not `=<`) is the Spin2 less-than-or-equal operator"
 
 related_pages:
-  - "P2 Knowledge Base language/spin2/methods/cogspin.yaml — stack floor ~32 / typical 64-128, and 'stack overflow is not detected'; language/pasm2/concepts/stack_operations.yaml — the P2 hardware 8-level call stack (kept distinct from the hub method stack)"
+  - "P2 Knowledge Base language/spin2/methods/cogspin.yaml — 'stack overflow is not detected'; language/pasm2/concepts/stack_operations.yaml — the P2 hardware 8-level call stack (kept distinct from the hub method stack)"
 
 community_examples:
   - "isp_stack_check.spin2 (Stephen M. Moraco, Iron Sheep Productions, LLC) — the sentinel-fill stack-overflow utility the note is built around; shipped unmodified in the example library"

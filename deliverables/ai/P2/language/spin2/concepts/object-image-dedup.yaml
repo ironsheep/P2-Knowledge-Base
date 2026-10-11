@@ -20,7 +20,7 @@ description: |
   DAT region or get independent ones — the mechanism behind the "DAT singleton" idiom AND
   behind a silent corruption trap when forking N identical shared buses from one driver file.
 
-  THE RULE (measured): pnut-ts de-duplicates object images by COMPILED-IMAGE CONTENT,
+  THE RULE: pnut-ts de-duplicates object images by COMPILED-IMAGE CONTENT,
   not by OBJ override-set identity.
     - Same source, byte-identical image                  -> ONE shared image, ONE shared DAT (singleton).
     - Same source, an override that CHANGES the bytes     -> distinct images, INDEPENDENT DAT.
@@ -38,8 +38,8 @@ singleton_rule:
   effective_means: |
     Resolved through the forwarding constants, not read off the OBJ line. Two sites
     can spell their overrides differently and still be identical — one may name a CON
-    explicitly at its default value while the other omits it. Measured: a direct
-    `| MAX_B = 6` and a tier forwarding `| MAX_A = MID_A, MAX_B = MID_B` produced ONE
+    explicitly at its default value while the other omits it. Example: a direct
+    `| MAX_B = 6` and a tier forwarding `| MAX_A = MID_A, MAX_B = MID_B` produce ONE
     shared image, because the resolved values matched.
   why_state_it_this_way: |
     Identical overrides is the SUFFICIENT, source-checkable condition, and it is the
@@ -72,7 +72,7 @@ forking_a_dat_region:
     program.
       OBJ  a : "drv" | MAX_B = 6
            b : "drv"                 ' <- forgot it here: two images, silently
-    Measured: 3 images with none shared, against 2 images with the driver's shared
+    Result: 3 images with none shared, against 2 images with the driver's shared
     when both declarations carry the override -- and more Code/DAT bytes, for that
     one omission.
 
@@ -98,7 +98,7 @@ cascade_through_tiers:
       CON  MID_A = 4                            ' MAX_B has no forwarding constant
       OBJ  lf : "leaf" | MAX_A = MID_A
       ' a caller needing MAX_B = 6 now cannot make the two declarations agree
-    Measured, forwarding one of two: 4 images, two of them the driver's.
+    Forwarding one of two gives 4 images, two of them the driver's.
     Adding the missing forwarding constant: 3 images, one driver image shared --
     and fewer Code/DAT bytes.
   naming_gotcha: |
@@ -115,7 +115,7 @@ verification:
     VAR bases. The image count is what decides the question below - two instances on one
     image share its DAT; two images do not.
     Compiler-coupled behaviour: re-measure rather than assume if a result surprises you.
-  measured: |
+  image_counts: |
       Image counts, as the .map's SUMMARY reports them:
       - identical overrides (100,100), seeded probe          -> 2 images, one shared DAT
       - differing overrides (100,200), seeded probe          -> 3 images, two independent DAT

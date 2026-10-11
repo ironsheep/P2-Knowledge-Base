@@ -21,15 +21,15 @@ algorithm:
   properties:
     - "2-clock execution"
     - "Reproducible: the same starting state gives the same sequence"
-    - "A zero state is absorbing: the result is 0 and the state stays 0 (hardware-verified)"
+    - "A zero state is absorbing: the result is 0 and the state stays 0"
     - "NOT suitable for cryptography"
-  source: "EF-101; Parallax Propeller 2 (P2X8C4M64P) Datasheet, Release November 1, 2022, p.38"
+  source: "EF-101 (zero-state absorption hardware-verified on real P2 silicon, for XORO32 and the Spin2 ?? operator); Parallax Propeller 2 (P2X8C4M64P) Datasheet, Release November 1, 2022, p.38"
 
 critical_warning:
   issue: "Seed with a non-zero value"
   description: |
     Always give XORO32 a non-zero starting state. A zero state is absorbing: with D = 0 every call
-    returns 0 and D stays 0 (confirmed on real P2 silicon, for XORO32 and for the Spin2 ?? operator).
+    returns 0 and D stays 0 (for XORO32 and for the Spin2 ?? operator).
   solution: |
     ' Ensure non-zero seed
     GETRND  seed           ' Get a pseudo-random seed

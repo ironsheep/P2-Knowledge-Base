@@ -252,10 +252,7 @@ anti_patterns:
 
       PUB start()
         COGSPIN(NEWCOG, complex_method(), @adequate_stack)
-    sizing_guidance:
-      minimum: "32 longs (simple methods)"
-      typical: "64-128 longs"
-      complex: "200+ longs (deep call chains, large locals)"
+    sizing_guidance: "Measure the method's high-water mark; no Parallax document states a stack size. Procedure: application-notes/p2an006-sizing-cog-task-stacks.yaml"
 
   - anti_pattern: "lost_cog_id"
     severity: "resource_leak"
@@ -367,7 +364,7 @@ anti_patterns:
 
 resources:
   cogs: "1+ (max 8 total)"
-  stack: "32-200+ longs per COG depending on method complexity"
+  stack: "one hub buffer per COGSPIN cog, sized by measuring the method's high-water mark (application-notes/p2an006-sizing-cog-task-stacks.yaml)"
   locks: "0-16 (shared across all COGs)"
 
 combines_with:

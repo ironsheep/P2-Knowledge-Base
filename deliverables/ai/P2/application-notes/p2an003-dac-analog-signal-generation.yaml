@@ -107,7 +107,7 @@ gotchas:
   - flag: tip
     text: "Signed sample -> DAC offset-binary is a single `add $8000`; the sawtooth/triangle are already unipolar 0..$FFFF so they skip it. Volume and pan are the same op — a multiply by a weight."
   - flag: verify
-    text: "Tier-0 known answer: a fixed code produces V=(code/65536)*Vfs; jumper the DAC pin to a P2AN001 ADC pin and it reads that voltage back — proves the whole path with no bench gear. reSound (OBEX #2861) is a described reference ceiling, not a starting point."
+    text: "Tier-0 known answer: a fixed code produces V=(code/65536)*Vfs; jumper the DAC pin to a P2AN001 ADC pin and it reads that voltage back — exercises the whole path with no external instruments. reSound (OBEX #2861) is a described reference ceiling, not a starting point."
 
 key_parameters:
   source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %00010 and DAC_MODE = DAC 16-bit with pseudo-random dither and %00011 and DAC_MODE = DAC 16-bit with PWM dither; %11000 ADC sample/filter/capture, internally clocked; DAC pin-mode constants from Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Smart Pin Configuration"
@@ -128,11 +128,11 @@ key_parameters:
 
 hardware_status: |
   The Tier-0 DAC->ADC loopback known-answer (fixed code -> computable DC, read back by a P2AN001
-  ADC on a jumpered pin) proves the code and arithmetic with no bench instruments. Numeric
+  ADC on a jumpered pin) exercises the code and arithmetic with no external instruments. Numeric
   audio-quality figures — SNR, THD, true effective bit depth after filtering — depend on the
-  analog filter and the measurement bench and are NOT asserted here; they defer to a
-  characterization run on real silicon (-> EF ledger when accepted), exactly as P2AN001 defers
-  its ENOB figure. Every embedded and example-library program compiles clean under pnut-ts.
+  analog filter and the measurement setup; they are unknown here and NOT asserted, exactly as
+  P2AN001's ENOB figure is unknown.
+
 
 sources:
   - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %00001/%00010/%00011 DAC modes: the 8-bit DAC and its dithering, the four output configs, the sample-period and IN-flag behavior (incl. the Fclock/256 @ -48 dB PWM-dither line)"

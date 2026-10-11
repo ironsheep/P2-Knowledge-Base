@@ -88,7 +88,7 @@ files:
       - Why direct capture of a smart-pin pin yields the IN handshake
       - The neighbour-routing composition that captures the waveform instead
       - The base-pin alignment constraint at the point of use
-      - What is bench-verified here and what is not
+      - The capture facts that hold (hub-RAM capture, sustained rate, filter delay) and what is undocumented
 
   goertzel:
     path: dds-goertzel.yaml

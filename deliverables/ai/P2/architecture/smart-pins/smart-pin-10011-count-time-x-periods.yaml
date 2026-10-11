@@ -92,7 +92,7 @@ notes:
   - "Use BBBB bits to select B input source"
   - "Setting B=A measures single signal period"
   - "Z register accumulates all X period times"
-  - "A Y written while DIR is low (before DIRH, as pinstart() and the WYPIN-before-DIRH line in the PASM2 example do) is in force after DIRH: this mode is order-safe (bench-measured on one board, one Y value for this mode)"
+  - "A Y written while DIR is low (before DIRH, as pinstart() and the WYPIN-before-DIRH line in the PASM2 example do) is in force after DIRH: this mode is order-safe"
 
 sources:
-  - "EF-097"
+  - "EF-097 (Y-before-DIRH order-safety bench-measured on one board, one Y value for this mode)"

@@ -8,6 +8,6 @@ blocks:
     wrap: spin2-top
     assumes: [count]
   - at: configuration_order.follows_the_general_order
-    fp: "19837f1d398eeff5"
+    fp: "e99eb97cba2944a8"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
