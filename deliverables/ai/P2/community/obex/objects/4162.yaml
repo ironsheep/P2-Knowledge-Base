@@ -54,7 +54,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: https://github.com/IRQsome/MegaYume
     obex_page: https://obex.parallax.com/obex/megayume-mega-drive-emulator/
+  metadata:
+    created_date: '2025-02-16'
   version_tracking:
     obex_version: ''
-    obex_upload_date: '2025-02-16'
     has_github_repo: true

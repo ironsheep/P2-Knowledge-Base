@@ -52,7 +52,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/io-pin-state-detection-demo/
+  metadata:
+    created_date: '2025-02-17'
   version_tracking:
     obex_version: 0.40.0
-    obex_upload_date: '2025-02-17'
     has_github_repo: false

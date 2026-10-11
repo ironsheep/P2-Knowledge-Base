@@ -52,7 +52,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/p2-microsd-fat32-filesystem/
+  metadata:
+    created_date: '2026-06-29'
   version_tracking:
     has_github_repo: false
-    obex_upload_date: '2026-06-29'
     obex_version: ''

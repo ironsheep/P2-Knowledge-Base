@@ -86,27 +86,46 @@ is value text) and a served-value citation check in `validate-dod-release.py`, e
 control. Closes on the live probe of v1.24.1: the selection guide's audio/video block and the LED
 matrix description serve no citation.
 
-### F-571 — `p2kb_obex_get` shows OBEX fields the KB no longer has, and does not show the one that matters — `CONFIRMED` (found 2026-10-11 by the close-out release MCP test, step 5, «#398»; the fix is in the MCP server, not this repo)
+### F-571 — `p2kb_obex_get` shows a zero quality score and an empty created date for every OBEX object — `PARTIAL` (found 2026-10-11 by the close-out release MCP test, step 5, «#398»; the date moved KB-side 2026-10-11 for v1.24.1; the server half is requested for p2kb-mcp 1.5.1)
+**Applied 2026-10-11 (Stephen: "yes a now"):** the upload date moved from
+`version_tracking.obex_upload_date` to `object_metadata.metadata.created_date` in all 129 objects that
+have one (2816 has none: its empty line removed, no block added); `scrape-obex-repos.py` writes it
+there. Proved against HEAD: all 131 files (130 objects and the template) parse equal to before apart from that move (and 2842's
+`known_issues` clearing). **Requested for p2kb-mcp 1.5.1** (Stephen, 2026-10-11):
+`engineering/tools/p2kb-mcp/MCP-OBEX-SUMMARY-CHANGE-REQUEST.md` — remove `quality`, omit empty fields,
+drop dead struct fields, add `full_metadata` (the whole filtered object, ending field-name coupling);
+acceptance probes O1-O6 there. `OBEX-IMPLEMENTATION-SPEC.md` and `P2KB-MCP-SPECIFICATION.md` updated
+to the same contract.
 Probed on p2kb-mcp **1.5.0** against KB v1.24.0, after `p2kb_refresh include_obex` (0 stale entries).
-`p2kb_obex_get 2842` returns a curated summary whose `metadata` block reads object-YAML paths this KB no
-longer has:
-- `metadata.quality: 0` — the KB removed quality scores; the object has no quality field at all, and a
-  zero reads as a rating of the object.
+`p2kb_obex_get 2842` returns a curated summary, not the object. **What the server reads** — the YAML
+tags compiled into the v1.5.0 linux-amd64 binary: `object_metadata` → `title`, `author`,
+`author_username`, `urls.*`, `technical_details.*`, `functionality.*`, and a block `metadata` →
+`created_date`, `quality_score`, `discovery_date`, `last_verified`, `extraction_status`. It parses no
+`compatibility` and no `version_tracking`. (`engineering/tools/p2kb-mcp/OBEX-IMPLEMENTATION-SPEC.md`
+specifies a `full_metadata` field — the whole object — which the server does not return.)
+- `metadata.quality: 0` — the KB removed `quality_score` («#422»; we do not rate OBEX objects), so the
+  server shows Go's zero value, which reads as a rating of zero. **Server-side only:** no KB value can
+  remove it short of inventing a score.
 - `metadata.created_date: ""` — `object_metadata.metadata` was renamed `scrape_tracking` (filtered at
-  delivery; F-545), so the server finds nothing. The object's real publish date is
-  `version_tracking.obex_upload_date` (`'2022-01-04'` for 2842).
-- `compatibility.known_issues` is not in the summary at all. For 2842 that is the CP-010 note that the
-  object as published does not compile with the current compiler (`field` is now reserved).
+  delivery; F-545), so the server finds nothing. The real upload date is served as
+  `version_tracking.obex_upload_date` (`'2022-01-04'` for 2842; 129 of the 130 objects carry one).
+  **KB-side option:** move it to `object_metadata.metadata.created_date` (a fact about the object, not
+  scraper bookkeeping) and have `scrape-obex-repos.py` write it there — the server then shows it with no
+  change. Stephen's call, asked 2026-10-11.
 
-**The KB side is correct.** `p2kb_get p2kbCommunity2842` serves the filtered object body: no
-`scrape_tracking`, no `compatibility.source`, and `known_issues` present. Only the curated
-`p2kb_obex_*` view is wrong; v1.4.0 showed the same mapping (step 3 of the test record,
+**`known_issues` is withdrawn from this finding (Stephen, 2026-10-11):** "It's not up to us to be rating
+OBEX content." The CP-010 compile verdict was removed from object 2842 and from the four pages that
+repeated it (three JonnyMac convention pages, the Spin2 getting-started guide); the language fact it
+rests on — `field` cannot name a method local — now lives on `language/spin2/operators/FIELD.yaml`, and
+CP-010's KB home moved there. Doctrine overlay: *An OBEX entry carries what the catalog says, never our
+verdict on it.*
+
+**The KB body is correct:** `p2kb_get p2kbCommunity2842` serves the filtered object (no
+`scrape_tracking`). v1.4.0 showed the same summary mapping (test record step 3,
 `correction-sweeps/2026-10-11-close-out-release-mcp-test.md`, git-ignored).
-**Owed, in the MCP server:** drop `quality`; take the date from `version_tracking.obex_upload_date` (or
-omit it when empty, never `""`); surface `compatibility.known_issues` when non-empty. Then add the
-curated OBEX field map to `engineering/tools/p2kb-mcp/P2KB-MCP-SPECIFICATION.md` (its `p2kb_obex_get`
-row names no fields, which is why the rename broke nothing visible here). Re-probe 2842 on the release
-that carries it.
+**Owed:** the date per Stephen's call; in the MCP server, drop `quality` (or return the whole filtered
+object as the OBEX spec says, which ends field-name coupling for good). Re-probe 2842 on the release
+that carries each.
 
 ### F-569 — the new provenance-key gate's census: three provenance keys still reach agents, and the OBEX tooling it touched has two defects — `NEEDS-VERIFICATION` (found 2026-10-10, «#422»)
 Found building F-545's gate (`audit-yaml-provenance-key-names.py`, kind `open`). Each is understood but

@@ -52,7 +52,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/ez-max7219/
+  metadata:
+    created_date: '2020-07-01'
   version_tracking:
     obex_version: ''
-    obex_upload_date: '2020-07-01'
     has_github_repo: false

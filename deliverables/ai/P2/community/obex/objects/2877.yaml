@@ -65,7 +65,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/stepper-motor-driver-ver-2/
+  metadata:
+    created_date: '2021-02-09'
   version_tracking:
     obex_version: ''
-    obex_upload_date: '2021-02-09'
     has_github_repo: false

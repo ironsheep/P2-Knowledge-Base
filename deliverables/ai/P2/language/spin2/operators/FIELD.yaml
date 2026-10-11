@@ -169,6 +169,7 @@ notes:
   - "Field pointer encodes both address and bit range"
   - "Pick an array size (BYTE/WORD/LONG) large enough that an indexed access never crosses its boundary: single-bit fields always work within a BYTE array, three-bit fields can span two bytes so they need a WORD array, and anything ten bits or larger needs a LONG array because it may span three bytes"
   - "Fields are NOT aligned - they pack contiguously"
+  - "FIELD is a reserved word: it cannot name a method local (a local list containing `field` is rejected with \"Expected a unique variable name\"); choose another name such as `fld`"
   - "Non-power-of-two field widths work only when the pointer is to a WORD or LONG in hub memory"
   - "V54+: For named bitfields on a single backing byte/word/long (rather than an indexed array), prefer STRUCT named bitfields — see language/spin2/concepts/struct-bitfields.yaml"
 
@@ -179,7 +180,7 @@ related:
   - language/spin2/keywords/STRUCT.yaml
   - language/spin2/concepts/struct-bitfields.yaml
 
-source: "Parallax Propeller 2 Spin2 Language Documentation v55, Field Pointers"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Field Pointers; reserved-word note: CP-010"
 
 aliases:
   - "FIELD"

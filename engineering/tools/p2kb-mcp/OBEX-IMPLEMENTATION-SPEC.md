@@ -54,17 +54,26 @@ object_metadata:
     hardware_support: []               # Hardware platforms
     peripherals: []                    # Connected peripherals
 
+  metadata:                            # served; holds only the upload date
+    created_date: "2020-05-09"         # OBEX upload date; absent when OBEX shows none
+
+  version_tracking:
+    obex_version: ""                   # OBEX-published version, if any
+    has_github_repo: false
+
   scrape_tracking:                     # scraper bookkeeping; removed by the delivery filter
     discovery_date: "2025-09-12..."    # When indexed
-    created_date: "2020-05-09 12:00:00"    # Original upload date
+    created_date: "2022-01-04 12:00:00"  # the scraper's own record; never served
 ```
+
+`metadata.created_date` is the object's OBEX upload date — the field `p2kb_obex_get` reports as
+`metadata.created_date` (moved there from `version_tracking.obex_upload_date` in KB v1.24.1, F-571).
+`metadata` carries nothing else: the KB does not rate objects, so there is no quality score.
 
 `scrape_tracking:` is the scrape bookkeeping (discovery and extraction dates, import source, and
 similar). It stays in the YAML for our own scraper and gates, and the delivery filter removes it
 (`scrape_tracking` is in the index's `remove_fields`; see `MCP-DELIVERY-FILTER-HANDOFF.md`, §3 and the
-2026-10-10 amendment). A `p2kb_obex_*` tool therefore never receives any field under it, including
-`discovery_date` and `created_date`. The upload date a consumer should read is
-`version_tracking.obex_upload_date`.
+2026-10-10 amendment). A `p2kb_obex_*` tool therefore never receives any field under it.
 
 ## Download URL Pattern
 
@@ -111,7 +120,12 @@ interface ObexGetResult {
   languages: string[];
   tags: string[];
   obex_page: string;
-  full_metadata: object;  // Complete YAML content
+  metadata?: {             // each key omitted when empty; the whole block omitted when all are
+    created_date?: string; // object_metadata.metadata.created_date
+    file_size?: string;    // technical_details.file_size
+    version?: string;      // technical_details.version
+  };                       // no quality field: the KB does not rate objects
+  full_metadata: object;   // the object's object_metadata AFTER the delivery filter (from 1.5.1)
 }
 ```
 

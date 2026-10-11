@@ -53,7 +53,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: https://github.com/ironsheep/P2-click-MPU-9dof
     obex_page: https://obex.parallax.com/obex/isp-click-mpu-9dof-driver/
+  metadata:
+    created_date: '2024-03-12'
   version_tracking:
     obex_version: (Repository Latest)
-    obex_upload_date: '2024-03-12'
     has_github_repo: true

@@ -51,5 +51,4 @@ object_metadata:
     obex_page: https://obex.parallax.com/obex/ds1302_full-2/
   version_tracking:
     has_github_repo: false
-    obex_upload_date: ''
     obex_version: ''

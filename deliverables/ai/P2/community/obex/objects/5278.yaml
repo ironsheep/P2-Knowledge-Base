@@ -55,7 +55,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/qmc5883l-driver/
+  metadata:
+    created_date: '2025-07-24'
   version_tracking:
     obex_version: ''
-    obex_upload_date: '2025-07-24'
     has_github_repo: false

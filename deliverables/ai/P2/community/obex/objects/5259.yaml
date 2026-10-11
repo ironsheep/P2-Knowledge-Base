@@ -56,7 +56,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/bno08x-imu-9-dof-rvc-mode/
+  metadata:
+    created_date: '2025-07-01'
   version_tracking:
     obex_version: v2.93
-    obex_upload_date: '2025-07-01'
     has_github_repo: false

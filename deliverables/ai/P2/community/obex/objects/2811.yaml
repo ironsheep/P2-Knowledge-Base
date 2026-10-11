@@ -66,7 +66,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/park-transformation/
+  metadata:
+    created_date: '2020-05-09'
   version_tracking:
     obex_version: ''
-    obex_upload_date: '2020-05-09'
     has_github_repo: false

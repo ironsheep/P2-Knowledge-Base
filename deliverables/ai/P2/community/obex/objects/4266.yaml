@@ -54,7 +54,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/simplest-serial/
+  metadata:
+    created_date: '2023-12-25'
   version_tracking:
     obex_version: ''
-    obex_upload_date: '2023-12-25'
     has_github_repo: false

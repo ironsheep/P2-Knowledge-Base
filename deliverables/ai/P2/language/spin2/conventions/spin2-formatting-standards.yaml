@@ -77,9 +77,6 @@ layout_example:
 
       count := 0
 
-known_issues:
-  - "OBEX 2842 declares a local named field in format(). FIELD is now a reserved Spin2 word, so the object as published does not compile with the current compiler until that local is renamed."
-
 related:
   - language/spin2/conventions/johnny-mac-documentation-style.yaml
   - language/spin2/conventions/spin2-docs-jonnymac.yaml

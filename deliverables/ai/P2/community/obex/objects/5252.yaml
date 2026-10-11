@@ -49,7 +49,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/mavlink-message-parser/
+  metadata:
+    created_date: '2025-07-07'
   version_tracking:
     obex_version: ''
-    obex_upload_date: '2025-07-07'
     has_github_repo: false

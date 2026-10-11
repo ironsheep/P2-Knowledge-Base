@@ -402,7 +402,6 @@ common_patterns:
 
   using_objects:
     description: "Object initialization and method calls"
-    note: "jm_fullduplexserial.spin2 (OBEX 2842) declares a local named field in its format() method; FIELD is now a reserved Spin2 word, so the object as published does not compile with the current compiler until that local is renamed."
     pattern: |
       OBJ
         serial : "jm_fullduplexserial"

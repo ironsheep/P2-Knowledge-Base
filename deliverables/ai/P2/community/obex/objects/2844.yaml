@@ -51,7 +51,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/i2c-devices/
+  metadata:
+    created_date: '2020-12-08'
   version_tracking:
     obex_version: ''
-    obex_upload_date: '2020-12-08'
     has_github_repo: false

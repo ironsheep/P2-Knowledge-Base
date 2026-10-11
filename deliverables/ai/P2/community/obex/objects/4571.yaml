@@ -58,7 +58,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: https://github.com/ironsheep/P2-VL53L5CX-time-of-flight-driver
     obex_page: https://obex.parallax.com/obex/isp-p2-180-field-of-view-tof-sensor/
+  metadata:
+    created_date: '2024-03-12'
   version_tracking:
     obex_version: (Repository latest)
-    obex_upload_date: '2024-03-12'
     has_github_repo: true

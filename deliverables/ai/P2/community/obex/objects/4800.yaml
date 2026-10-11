@@ -54,7 +54,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: https://github.com/bjguillot/qr
     obex_page: https://obex.parallax.com/obex/p2qr/
+  metadata:
+    created_date: '2026-05-06'
   version_tracking:
     obex_version: ''
-    obex_upload_date: '2026-05-06'
     has_github_repo: true

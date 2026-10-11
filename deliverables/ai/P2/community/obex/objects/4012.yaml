@@ -54,7 +54,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/3072-sprites-proof-of-concept/
+  metadata:
+    created_date: '2023-10-18'
   version_tracking:
     obex_version: ''
-    obex_upload_date: '2023-10-18'
     has_github_repo: false

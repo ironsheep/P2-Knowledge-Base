@@ -54,7 +54,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: https://github.com/Wuerfel21/usbnew
     obex_page: https://obex.parallax.com/obex/usbnew/
+  metadata:
+    created_date: '2024-03-28'
   version_tracking:
     obex_version: ''
-    obex_upload_date: '2024-03-28'
     has_github_repo: true

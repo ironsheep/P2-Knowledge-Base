@@ -56,7 +56,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: https://github.com/parallaxinc/propeller
     obex_page: https://obex.parallax.com/obex/nextion_ez/
+  metadata:
+    created_date: '2023-11-16'
   version_tracking:
     obex_version: ''
-    obex_upload_date: '2023-11-16'
     has_github_repo: true

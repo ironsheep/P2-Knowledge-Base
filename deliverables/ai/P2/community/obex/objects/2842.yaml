@@ -6,11 +6,9 @@ object_metadata:
     leaf: uart-serial
   compatibility:
     dependencies: []
-    known_issues:
-    - 'jm_fullduplexserial.spin2 declares a local variable named field in the format() method. FIELD is now a reserved Spin2 word, so the object as published does not compile with the current compiler until that local is renamed.'
+    known_issues: []
     p2_chip_versions:
     - all
-    source: 'known_issues: CP-010'
     tested_platforms: []
   functionality:
     category: communication
@@ -57,7 +55,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/full-duplex-serial-2/
+  metadata:
+    created_date: '2022-01-04'
   version_tracking:
     obex_version: ''
-    obex_upload_date: '2022-01-04'
     has_github_repo: false

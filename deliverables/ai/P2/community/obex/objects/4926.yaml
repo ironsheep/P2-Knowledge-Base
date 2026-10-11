@@ -52,7 +52,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: https://github.com/parallaxinc/P2_PNut_Public
     obex_page: https://obex.parallax.com/obex/pnut-spin2-latest-version/
+  metadata:
+    created_date: '2026-05-08'
   version_tracking:
     obex_version: ''
-    obex_upload_date: '2026-05-08'
     has_github_repo: true

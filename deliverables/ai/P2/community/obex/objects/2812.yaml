@@ -57,7 +57,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/binary-floating-point-routines-ieee-32-subset/
+  metadata:
+    created_date: '2021-12-19'
   version_tracking:
     obex_version: ''
-    obex_upload_date: '2021-12-19'
     has_github_repo: false

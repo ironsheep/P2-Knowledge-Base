@@ -50,7 +50,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/wiznet-5500io-driver/
+  metadata:
+    created_date: '2024-09-17'
   version_tracking:
     obex_version: v2.9.3
-    obex_upload_date: '2024-09-17'
     has_github_repo: false

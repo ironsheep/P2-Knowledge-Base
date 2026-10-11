@@ -49,7 +49,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: https://github.com/ironsheep/P2-BLDC-Motor-Control
     obex_page: https://obex.parallax.com/obex/isp-bldc-motor-control/
+  metadata:
+    created_date: '2024-03-11'
   version_tracking:
     obex_version: 5.0.0
-    obex_upload_date: '2024-03-11'
     has_github_repo: true

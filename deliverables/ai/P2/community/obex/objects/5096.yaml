@@ -48,7 +48,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/autodesk-fusion-model-of-p2-arca8de-8in1/
+  metadata:
+    created_date: '2025-02-16'
   version_tracking:
     has_github_repo: false
-    obex_upload_date: '2025-02-16'
     obex_version: ''

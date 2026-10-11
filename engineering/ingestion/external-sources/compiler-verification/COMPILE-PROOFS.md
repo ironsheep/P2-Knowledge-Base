@@ -639,7 +639,9 @@ compiler version.
 ## Symbols (continued)
 
 ### CP-010 · A method local named `field` is rejected (`Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, "^", ALIGNW, or ALIGNL (m241)`); the same local list with `field` renamed compiles — so OBEX 2842's `jm_fullduplexserial.spin2`, whose `format()` declares that local, does not compile — `LEGALITY`
-*KB:* `community/obex/objects/2842.yaml`
+*KB:* `language/spin2/operators/FIELD.yaml` (notes: FIELD cannot name a method local). Found compiling
+OBEX 2842; the object's entry carries no compile verdict — an OBEX entry mirrors the catalog, it
+does not rate the object (Stephen, 2026-10-11).
 *Class:* legality. `FIELD` is a Spin2 language word, and the name is not free for a local. The failing
 run stops with exit status 1 at the method line; the control compiles.
 *Source:* `proofs/cp-010-local-named-field.spin2` (the local list of `jm_fullduplexserial.spin2`

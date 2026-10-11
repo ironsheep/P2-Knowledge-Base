@@ -56,7 +56,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/accessory-board-buttons/
+  metadata:
+    created_date: '2020-12-06'
   version_tracking:
     obex_version: ''
-    obex_upload_date: '2020-12-06'
     has_github_repo: false

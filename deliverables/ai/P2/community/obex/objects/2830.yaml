@@ -57,7 +57,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/sparkfun-qwiic-twist-encoder/
+  metadata:
+    created_date: '2020-12-18'
   version_tracking:
     obex_version: ''
-    obex_upload_date: '2020-12-18'
     has_github_repo: false
