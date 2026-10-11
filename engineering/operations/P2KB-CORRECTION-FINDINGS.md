@@ -65,7 +65,12 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen; + F-571, F-572, found 2026-10-11 by «#398»)
 
-### F-572 — provenance and change history reach agents through indented comments and served prose, where no gate looks — `PENDING-VALIDATION` (found 2026-10-11 probing v1.24.0, «#398»; applied 2026-10-11; closes when v1.24.1 serves it)
+### F-572 — provenance and change history reach agents through indented comments and served prose, where no gate looks — `RESOLVED` (found 2026-10-11 probing v1.24.0, «#398»; applied 2026-10-11; validated 2026-10-11 on p2kb-mcp 1.5.0 against KB v1.24.1)
+**Validated 2026-10-11** after the v1.24.1 push (`p2kb_refresh flush include_obex`, past the CDN
+window): the selection guide's `audio_video_projects.capabilities` serves no `# Source:` comment;
+`p2kbHwAddonLedMatrixAddonLedMatrix` `description` ends at "(vs ~224 mA if all 56 were on)." with no
+citation; `p2kbPasm2InstructionSkipping` serves no `references:` block; `p2kbSpin2OpFIELD` serves the
+reserved-word note; `p2kbPasm2CogHubExecution` `related:` lists ret/djnz/add/mov.
 The delivery filter strips the provenance keys and **column-0** comments; an indented comment is served
 as part of the body, and so is every value outside the stripped keys. The probes of v1.24.0 on p2kb-mcp
 1.5.0 found both carrying provenance: the hardware selection guide served an indented `# Source: P2 Eval
@@ -95,7 +100,12 @@ there. Proved against HEAD: all 131 files (130 objects and the template) parse e
 `engineering/tools/p2kb-mcp/MCP-OBEX-SUMMARY-CHANGE-REQUEST.md` — remove `quality`, omit empty fields,
 drop dead struct fields, add `full_metadata` (the whole filtered object, ending field-name coupling);
 acceptance probes O1-O6 there. `OBEX-IMPLEMENTATION-SPEC.md` and `P2KB-MCP-SPECIFICATION.md` updated
-to the same contract.
+to the same contract. **Date half validated live 2026-10-11** on p2kb-mcp 1.5.0 against v1.24.1:
+`p2kb_obex_get 2842` → `metadata.created_date: "2022-01-04"`; 2816 → `""` (no date). `quality: 0`
+remains until 1.5.1. **Release-day note:** the first refreshes after the push ran inside GitHub raw's
+5-minute CDN window — a normal refresh reported 0 stale keys and kept pre-release bodies, and a flush
+inside the window made every OBEX object fail verification (old bodies vs new index: "not found",
+"verification failed"). A flush after the window cleared both. Probe a release only after ~5 minutes.
 Probed on p2kb-mcp **1.5.0** against KB v1.24.0, after `p2kb_refresh include_obex` (0 stale entries).
 `p2kb_obex_get 2842` returns a curated summary, not the object. **What the server reads** — the YAML
 tags compiled into the v1.5.0 linux-amd64 binary: `object_metadata` → `title`, `author`,
