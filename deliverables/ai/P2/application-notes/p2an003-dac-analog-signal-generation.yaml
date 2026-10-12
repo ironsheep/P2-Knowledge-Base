@@ -77,7 +77,7 @@ mechanism_reference:
   - "P2 Streamer Programming Guide (a companion P2 Knowledge Base publication) — feeding the DAC from hub memory at high, hardware-paced rates (the Going Further path)"
 
 runnable_code:
-  examples_zip: "P2AN003-src-<YYMMDD>.zip"        # published beside the PDF at release
+  examples_zip: "P2AN003-src.zip"        # published beside the PDF
   recipes:
     - {id: sample-playback,     file: dac-sample-playback.spin2,     note: "Recipe 1 — DDS phase-accumulator playback of a stored buffer at any pitch"}
     - {id: waveform-synthesis,  file: dac-waveform-synthesis.spin2,  note: "Recipe 2 — computed sine (CORDIC QROTATE), sawtooth, triangle from the DDS phase"}

@@ -62,7 +62,7 @@ mechanism_reference:
   - "P2AN005 Cooperative Multitasking with Spin2 TASK Methods (a companion P2 Knowledge Base publication) — how the tasks whose stacks R4 sizes are launched and run; the companion note this one answers"
 
 runnable_code:
-  examples_zip: "P2AN006-src-<YYMMDD>.zip"        # published beside the PDF at release
+  examples_zip: "P2AN006-src.zip"        # published beside the PDF
   recipes:
     - {id: isp_stack_check,      file: isp_stack_check.spin2,      note: "the instrument — sentinel-fill stack-overflow utility (Stephen M. Moraco); shipped unmodified"}
     - {id: instrument-cog-stack, file: instrument-cog-stack.spin2, note: "R1 — guard a cogspin worker: prepStackForCheck (before launch) + checkStack (running guard)"}
@@ -79,7 +79,7 @@ key_parameters:
   sizing_method: "start at 128 longs (can't overflow while measuring) -> exercise the DEEPEST call path -> reportStackUse reads N -> set buffer to ~1.5xN -> keep a checkStack guard in a slow loop"
   cog_stack_defaults: "no Parallax document states a stack size for a cog or a task; the only way to settle a size is to measure the high-water mark of your own code with sizing_method"
   top_level_stack: "the first cog's top-level program also runs on a stack, but the compiler places it and no size or overflow check is documented -- see top_level_stack in language/spin2/methods/cogspin.yaml; the sentinel technique here applies only to the hub buffers you pass to cogspin and TASKSPIN"
-  stack_consumption: "params -> results -> locals packed in declaration order, plus nested-call depth (Spin2 v55 text:284)"
+  stack_consumption: "params -> results -> locals packed in declaration order, plus nested-call depth"
   two_contexts: "new-cog stack (cogspin, one call stack per cog) and intra-cog task stack (TASKSPIN, one per task) — same sizing job; the instrument only watches a hub buffer"
 
 prerequisites:

@@ -65,7 +65,7 @@ mechanism_reference:
   - "P2 Streamer Programming Guide (a companion P2 Knowledge Base publication) — streaming CORDIC-computed samples to pins/DACs (DDS)"
 
 runnable_code:
-  examples_zip: "P2AN002-src-<YYMMDD>.zip"        # published beside the PDF at release
+  examples_zip: "P2AN002-src.zip"        # published beside the PDF
   recipes:
     - {id: distance-heading, file: cordic-distance-heading.spin2, note: "Recipe 1 — QVECTOR/XYPOL: distance + heading from one call"}
     - {id: rotate-point,     file: cordic-rotate-point.spin2,     note: "Recipe 2 — QROTATE/ROTXY: rotate a point about the origin"}

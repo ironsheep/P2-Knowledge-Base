@@ -71,7 +71,7 @@ mechanism_reference:
   - "P2AN007 Data Structures with the New Language Facilities (a companion P2 Knowledge Base publication) — the worked cross-cog form of sharing a value safely across tasks/cogs"
 
 runnable_code:
-  examples_zip: "P2AN005-src-<YYMMDD>.zip"        # published beside the PDF at release
+  examples_zip: "P2AN005-src.zip"        # published beside the PDF
   recipes:
     - {id: two-task-round-robin, file: two-task-round-robin.spin2, note: "R1 — two independent blinkers from one cog (TASKSPIN(NEWTASK)+TASKNEXT; last job runs inline)"}
     - {id: cooperative-yield,    file: cooperative-yield.spin2,    note: "R2 — a long computation yields on a YIELD_EVERY cadence so a second task stays responsive"}

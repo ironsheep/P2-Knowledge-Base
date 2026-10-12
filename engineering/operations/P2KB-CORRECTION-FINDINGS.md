@@ -46,6 +46,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 - closed 2026-10-11 at the v1.24.1 release «#398» (1 finding: F-572) → `correction-sweeps/2026-10-11-v1.24.1-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-10-12 at the v1.24.3 release «#425» (1 finding: F-573) → `correction-sweeps/2026-10-12-v1.24.3-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-10-12 at the v1.24.5 release (1 finding: F-574) → `correction-sweeps/2026-10-12-v1.24.5-P2KB-CORRECTION-FINDINGS-archive.md`
+- closed 2026-10-12 at the P2AN006 v1.0.2 / v1.24.6 release (1 finding: F-575) → `correction-sweeps/2026-10-12-p2an006-v1.0.2-P2KB-CORRECTION-FINDINGS-archive.md`
 
 > **Swept 2026-08-19** per `punch-list-maintenance`, as **rename-then-trim** (the archive is a
 > git-tracked rename of the original; both files are subtractions from a preserved copy — see the
@@ -67,40 +68,6 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 ## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen; + F-571, F-572, F-573, found 2026-10-11 by «#398» and the MCP agent's 1.5.1 review; + F-574, reported 2026-10-12 by Stephen; + F-575, found 2026-10-12 by the debug-techniques study)
-
-### F-575 — P2AN006 ships a stack checker whose depth scan under-reports, and that is not safe for two cogs at once — `CONFIRMED` (found 2026-10-12 by the debug-techniques study; «#426»)
-
-**Where.** P2AN006 *Sizing Cog & Task Stacks* v1.0.1: `app-notes/P2AN006/examples-library/isp_stack_check.spin2`,
-the 2022 version (md5 `f75cbec4…`), shipped verbatim. The same copy sits in the Debug Window manual's
-`REF/robot-dog/` (reference only, not shipped).
-
-**What is wrong.**
-1. `getStackDepth()` scans UPWARD from index 0 and stops at the first long still holding
-   `NOT_WRITTEN_MARK`. That equals the high-water mark only if the used region has no gaps.
-   **Scope, checked 2026-10-12:** the source says a frame that reserves longs it never writes stops
-   the scan early. But Spin2 v55 (`spin2-v55-text.txt:286`) says "Results and local variables are
-   initialized to zero on method entry", so a pure Spin2 frame writes every long it reserves and leaves
-   no gap. The under-report is therefore NOT demonstrated for Spin2 code. A gap needs something that
-   advances the stack without writing, such as PASM using `PTRA` as a stack, which is not measured. The
-   downward scan is equal or better in every case, so it ships. The note describes the new scan and
-   claims nothing about the old one. This goes to the debug-techniques claim ledger («#427»), source
-   §7.3, as a contested claim.
-2. The scratch values, including that scan's loop index `nStkChkIdx`, live in `DAT`. All declarations
-   share one `DAT`, so two cogs scanning at once overwrite each other's index. The note presents
-   "one checker at a time" as the utility's limitation.
-
-**Evidence.** Stephen's current version of the object
-(`appNote-fodder-NO-COMMIT/p2-debug techniques/isp_stack_check.spin2`, updated 2026-09-09) scans
-DOWNWARD and records both defects and their history in its comments. It compiles under `pnut-ts -d`
-1.55.8.
-
-**Correction.**
-- Stephen reviews a cleaned copy (header date updated, the SD project's file names reworded
-  generically) and adopts it as the master.
-- P2AN006 then ships it verbatim, with the note's text updated: the depth semantics, the
-  saturated-reading case, concurrent checkers now safe, and the new `isStackGuardIntact()` and
-  byte-guard methods.
-- Release P2AN006 v1.0.2.
 
 ### F-571 — `p2kb_obex_get` shows a zero quality score and an empty created date for every OBEX object — `PARTIAL` (found 2026-10-11 by the close-out release MCP test, step 5, «#398»; the date moved KB-side 2026-10-11 for v1.24.1; the KB is a pure mirror from v1.24.4; the server half, including dead download links, is requested for p2kb-mcp 1.5.1)
 **Updated 2026-10-12 (KB v1.24.4, "pure mirror"):**
@@ -477,6 +444,12 @@ list, so the drift cannot recur.
 > — F-569. **Needs Stephen on Windows:** `fetch-kb-file.ps1` changed, so *PowerShell Filter Verified*
 > stays red until `verify-ps1-filter.ps1` is re-run and `PS1-VERIFIED.md` updated. *Fetch Script Parity*
 > reads the published index rule and turns green when the index is regenerated after the commit.
+
+## Impact survey — v1.24.6 (`release-yamls` §8, run 2026-10-12)
+
+v1.24.6 changed one file, P2AN006's own YAML companion, which was released with the note (P2AN006
+v1.0.2). No other manual or app note declares it as a source, and the note it mirrors shipped in the
+same push. **No document is flagged.**
 
 ## Impact survey — v1.24.5 (`release-yamls` §8, run 2026-10-12)
 

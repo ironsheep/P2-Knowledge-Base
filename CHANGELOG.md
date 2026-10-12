@@ -20,6 +20,14 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.24.7] - 2026-10-12
+
+**Every application note's digest names the example archive that is actually published.**
+
+### Changed
+
+- **Application notes P2AN001–P2AN007**: `examples_zip` names the published archive (`P2AN00N-src.zip`), the file a download link reaches
+
 ## [1.24.6] - 2026-10-12
 
 **The stack-sizing application note's digest describes the current stack-check utility.**

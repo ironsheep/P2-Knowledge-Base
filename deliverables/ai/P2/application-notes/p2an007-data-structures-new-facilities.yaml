@@ -90,7 +90,7 @@ mechanism_reference:
   - "P2AN005 Cooperative Multitasking with Spin2 TASK Methods (a companion P2 Knowledge Base publication) — when the cogs sharing these structures are cooperative tasks in one cog"
 
 runnable_code:
-  examples_zip: "P2AN007-src-<YYMMDD>.zip"        # published beside the PDF at release
+  examples_zip: "P2AN007-src.zip"        # published beside the PDF
   recipes:
     - {id: in-cog-record,           file: in-cog-record.spin2,           note: "R1 — declare/fill/whole-struct-copy an array of STRUCT records + SIZEOF (in-cog, no lock)"}
     - {id: spsc-ring-buffer,        file: spsc-ring-buffer.spin2,        note: "R2 — lock-free single-producer/single-consumer ring of records; single-owner indices, publish-index-last"}

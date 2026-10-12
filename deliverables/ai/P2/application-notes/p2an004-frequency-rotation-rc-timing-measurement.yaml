@@ -73,7 +73,7 @@ mechanism_reference:
   - "P2 I/O & Smart Pins User Guide, Chapter 15 (frequency and period) (a companion P2 Knowledge Base publication) — the reciprocal frequency counter R2 applies, and the worked frequency-counter/tachometer/time-of-flight instruments this note points to"
 
 runnable_code:
-  examples_zip: "P2AN004-src-<YYMMDD>.zip"        # published beside the PDF at release
+  examples_zip: "P2AN004-src.zip"        # published beside the PDF
   recipes:
     - {id: rc-decay-reader,     file: rc-decay-reader.spin2,     note: "R1 — time a capacitor's discharge through a resistive/capacitive sensor (P_HIGH_TICKS)"}
     - {id: light-to-freq-reader, file: light-to-freq-reader.spin2, note: "R2 — reciprocal frequency counter turns a TSL235R's output frequency into an irradiance"}

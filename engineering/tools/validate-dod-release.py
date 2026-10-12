@@ -1083,6 +1083,11 @@ VALUE_CITATION_PATTERNS = [
         r"(?:tables?|documentation|docs?|wording|sections?|spec|syntax|headings?|statements?|canonical)\b"
         r"|\bSpin2\s+v\d{2}\s+(?:documentation|symbol table|operator table|wording|section|LOGIC|syntax)\b"
         r"|\b(?:Documentation|Reference)\s+v\d{2}\b", re.I)),
+    # A line locator into one of OUR extracted files: "(Spin2 v55 text:284)",
+    # "silicon-doc-text.txt:115". The agent cannot open it, and it is provenance, not fact.
+    # Found 2026-10-12 live in the P2AN006 companion, where no pattern above matched it.
+    ("source-line-locator", re.compile(
+        r"\btext:\d+\b|\.(?:txt|md|yaml|spin2|pdf):\d+\b", re.I)),
 ]
 
 # Key paths whose values are reader resource pointers -- a reader is TOLD to go to the
@@ -1158,6 +1163,9 @@ VALUE_CITATION_CONTROL = [
     ("a:\n  note: v55's own Feeding table advertises it.\n", True),
     ("a:\n  note: Scope is PASM per the v55 table heading.\n", True),
     ("a:\n  note: Visible down the full v35 mode table.\n", True),
+    # A line locator into an extracted source file -- MUST fire.
+    ("a:\n  note: params then results then locals (Spin2 v55 text:284)\n", True),
+    ("a:\n  note: Rev C floats the input (silicon-doc-text.txt:115).\n", True),
     # Language version-gating and tool-version facts -- MUST NOT fire.
     ("a:\n  note: Introduced in the v52 edition.\n", False),
     ("a:\n  note: Available on this form (v48+).\n", False),
