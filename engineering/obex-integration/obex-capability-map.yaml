@@ -8,6 +8,16 @@
 #
 # Moved here verbatim from each object's former object_metadata.capability block.
 # Key = OBEX object id.
+#
+# FROZEN SNAPSHOT -- NOT MAINTAINED, NOT AUDITED (Stephen, 2026-10-12).
+# An agent made these classifications in one pass on 2026-06-29 for the Capability Coverage &
+# App-Note Roster sprint, and nobody has checked them. This file is kept only as the record of
+# what the coverage matrix and the app-note roster (engineering/analysis/) were built from. It is
+# not extended: new OBEX objects are not classified, and no process writes to this file.
+# IF WE EVER FIND OURSELVES USING THIS INFORMATION (re-ranking the app-note roster, a coverage
+# recount, routing, anything): stop and re-decide its disposition with Stephen first. Do not use it
+# as it stands and do not extend it. Stephen prefers the OBEX authors' own categorization to
+# ours, because an automated classification can be wrong.
 
 objects:
   '2811':

@@ -117,7 +117,10 @@ From KB v1.24.2 an OBEX object's `functionality.category` is **OBEX's own catego
 scraper's nine buckets (`display`, `drivers`, `misc`, …), which are gone. From v1.24.4 the
 classification itself is **not** in the object: the served object mirrors the catalog only. The
 classification lives engineering-side in `engineering/obex-integration/obex-capability-map.yaml`,
-one entry per object id.
+one entry per object id. **That map is a frozen snapshot** (Stephen, 2026-10-12): an agent made
+it on 2026-06-29 and nobody has audited it. It is not maintained, and new OBEX objects are not
+classified, because Stephen prefers the authors' own categorization to an automated one. If OBEX
+classification is ever needed again, its disposition is re-decided first.
 
 How OBEX's categories fell across the spine in that map (2026-10-12; an object counts under every
 category it lists, by its primary domain):
@@ -166,7 +169,8 @@ category it lists, by its primary domain):
 
 ## Classification schema (for the catalog YAMLs)
 
-Each artifact carries the block below. For OBEX it is carried in `obex-capability-map.yaml` keyed
+Each artifact carries the block below. **New OBEX objects are no longer classified** (see
+*OBEX categories → domain* above). The existing OBEX entries are carried in `obex-capability-map.yaml` keyed
 by object id, never in the served object (KB v1.24.4: the object mirrors the catalog).
 
 ```yaml

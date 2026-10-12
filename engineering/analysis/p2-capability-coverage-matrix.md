@@ -10,7 +10,7 @@
 ## Column sources
 - **P1** — `engineering/analysis/p1-app-note-spine-mapping.md` (17 app notes).
 - **QB** — `deliverables/ai/P2/community/quick-bytes/` (42 Quick Bytes).
-- **OBEX** — `deliverables/ai/P2/community/obex/objects/` (130 capability objects + 5 design assets excluded); the classifications themselves live in `engineering/obex-integration/obex-capability-map.yaml` from KB v1.24.4.
+- **OBEX** — `deliverables/ai/P2/community/obex/objects/` (130 capability objects + 5 design assets excluded); the classifications themselves live in `engineering/obex-integration/obex-capability-map.yaml` from KB v1.24.4. That map is a frozen, unaudited, agent-made snapshot (Stephen, 2026-10-12). **Before this matrix's OBEX column is recounted or reused, re-decide the map's disposition with Stephen.**
 - **Manual** — `engineering/analysis/p2-manual-coverage-by-domain.md` (live manuals + `deliverables/ai/P2/` reference YAMLs).
 
 ## The matrix (domain level)

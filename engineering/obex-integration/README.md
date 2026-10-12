@@ -7,7 +7,7 @@
 
 ## Tier 1 — At a glance
 - **State:** ✅ **Integrated — a pure mirror** (KB **v1.24.4**, 2026-10-12). Each object holds only what its OBEX catalog page publishes: title, author, category, tags, description (its links keep their URLs), content type, microcontroller, languages, licence, upload date, page and download link. Beside those it has an **authored one-line description**, Stephen-approved and adversarially reviewed. Nothing of ours is carried: no classification, compatibility, version, size, scraper bookkeeping or placeholders. 5 objects have no download link because OBEX offers none.
-- **Coverage:** **130 P2 objects**, which is every P2 object page on the OBEX listing on 2026-10-12. The KB's own capability-spine classification (domains A–K) is kept engineering-side in `obex-capability-map.yaml` and is not served.
+- **Coverage:** **130 P2 objects**, which is every P2 object page on the OBEX listing on 2026-10-12. The KB's own capability-spine classification (domains A–K, made by an agent on 2026-06-29) is in `obex-capability-map.yaml`. It is not served, and it is a **frozen snapshot**: not maintained, not audited, and new objects are not classified. If we ever need it, its disposition is re-decided first (Stephen, 2026-10-12).
   (E comms 25 · G displays 21 · F sensors 20 · B smart-pins 15 · C math/DSP 9 · H motors 9 · I storage 8 · K dev-tools 8 · A core 7 · J audio 7 · D streaming 1).
 - **Served via:** the p2kb MCP — `p2kb_obex_find` / `p2kb_obex_get` / `p2kb_obex_download` (all 130; verified live 2026-10-12 on p2kb-mcp 1.5.0). p2kb-mcp 1.5.1 removes the summary's `quality: 0`, the fixed category list and the dead download links (`engineering/tools/p2kb-mcp/MCP-OBEX-SUMMARY-CHANGE-REQUEST.md`, F-571).
 - **Last release:** **2026-10-12 (KB v1.24.4)** · **catalog mirrored 2026-10-12** · **new-object baseline = 2026-10-12**: the listing was re-scanned, and 130 object pages were listed, all already in the KB, with 0 new.
@@ -17,7 +17,7 @@
 ## Tier 2 — Outstanding work
 | Item | State | Note |
 |------|-------|------|
-| **Pure mirror** | ✅ done 2026-10-12 (KB v1.24.2–v1.24.4) | every field from the page; 130 one-liners (F-573); non-catalog fields removed (Stephen: "pure mirror"), `capability` moved to `obex-capability-map.yaml` |
+| **Pure mirror** | ✅ done 2026-10-12 (KB v1.24.2–v1.24.4) | every field from the page; 130 one-liners (F-573); non-catalog fields removed (Stephen: "pure mirror"), `capability` moved to `obex-capability-map.yaml`, frozen there (not maintained) |
 | **Re-scan for new objects** | ✅ 2026-10-12 | `discover`: 130 listed, 0 new; next re-scan uses the runbook below |
 | **p2kb-mcp 1.5.1** | ⏳ server side | change request ready; F-571 closes on its probes O1-O7 |
 | OBEX adoption outreach | ⏳ community-side | 6 archiver imports await author adoption → `OBEX-ADOPTION-REQUESTS.md` |
@@ -47,9 +47,7 @@ The 2025 scrapers are retired (`archive/`, local).
 3. **One-liners** — author `functionality.description_short` for each new or materially changed object
    from its catalog text (one sentence, ≤120 characters, no verdict), have a fresh agent check each
    against the full description; the release gate *OBEX One-Line Descriptions* fails until done.
-4. **Capability map** — classify each new object in `obex-capability-map.yaml`. This is
-   engineering-side, for the coverage analysis, and is never written into the object.
-5. Release via `release-yamls`; probe live after the CDN window (`p2kb_refresh flush include_obex`).
+4. Release via `release-yamls`; probe live after the CDN window (`p2kb_refresh flush include_obex`).
 
 ### Close-out checklist — DO EVERY re-scan (this is what v2.2 missed) ⚠️
 The YAML/index/release half rides `release-yamls`, but the **status docs do not update themselves** — a

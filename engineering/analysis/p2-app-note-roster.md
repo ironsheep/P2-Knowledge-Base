@@ -8,6 +8,10 @@
 > Inputs: P1 mapping (`p1-app-note-spine-mapping.md`), manual coverage
 > (`p2-manual-coverage-by-domain.md`), the Quick Bytes catalog
 > (`deliverables/ai/P2/community/quick-bytes/`), and the re-scraped OBEX catalog.
+>
+> ⚠ **Re-ranking this roster?** Its OBEX coverage came from an agent's capability classification,
+> now the frozen, unaudited `engineering/obex-integration/obex-capability-map.yaml` (Stephen,
+> 2026-10-12). Before using that classification again, re-decide its disposition with Stephen.
 
 ---
 

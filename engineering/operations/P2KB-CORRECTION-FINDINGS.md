@@ -93,8 +93,13 @@ pass.
   block had no citation. The line is now pinned to the Rev B respin entry (Design Status 2019_04_11,
   `silicon-doc-text.txt:50-62`).
 
-Still owed: the records listed below; then a patch release once Stephen has reviewed it, followed by
-a live probe.
+**The OBEX-side items listed at the end, ruled (Stephen, 2026-10-12):** *"The related obex changes
+are fine."* They stay. The exception is `obex-capability-map.yaml`, which is now a frozen snapshot:
+not maintained, not audited, and no new object is classified. If it is ever used, its disposition
+is re-decided first. The runbook step and the `ingest-source` rule that extended it are removed.
+
+Still owed: the records listed below; then the patch release (Stephen's go, 2026-10-12: release
+with the least change), followed by a live probe.
 
 **What happened.** Stephen asked about one OBEX schema field (*"there is only 1 p2 chip version any
 longer, why do we carry room for more?"*, about `p2_chip_versions: [all]`). I generalized that into a

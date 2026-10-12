@@ -27,7 +27,9 @@ for more?"* Of the fields that were ours and not the catalog's, he then chose **
     `forum_discussion`, which were always empty;
   - `scrape_tracking`, the 2025 scraper bookkeeping, which held two authors' email addresses.
 - **Moved, not lost:** `capability` now lives in `obex-capability-map.yaml`. It is engineering-side,
-  for the coverage analysis, and is not served.
+  for the coverage analysis, and is not served. Stephen, 2026-10-12: it is a **frozen snapshot**.
+  It is not maintained or audited, and new objects are not classified. If it is ever needed again,
+  its disposition is re-decided first.
 - **Links in descriptions keep their URLs.** The catalog's links (GitHub repositories, store pages,
   other OBEX pages) now follow their words in `description_full`, across 24 objects. Before this,
   only the link text came through.
