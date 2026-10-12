@@ -2,7 +2,7 @@
 
 **For:** an agent whose p2kb-mcp install is still **v1.4.0** (check with `p2kb_version`: v1.4.0
 reports no `filter_*` fields). Our own installs run **1.5.0** (installed 2026-10-11).
-**Against:** KB **v1.24.1** (index format 3.6.0, 1137 entries), published 2026-10-11.
+**Against:** KB **v1.24.3** (index format 3.6.0, 1137 entries), published 2026-10-12.
 **Basis:** live probes of v1.4.0 against the v1.24.0 index (2026-10-11, close-out release MCP test,
 step 3), probes of 1.5.0 against v1.24.1, and the server's own CHANGELOG.
 
@@ -44,12 +44,18 @@ what differs is the packaging below.
 5. **The OBEX catalog list comes from the GitHub API** on v1.4.0, so heavy OBEX browsing can hit the
    API rate limit. 1.5.0 builds the list from the KB index.
 
-6. **A multi-target alias returns its first page only** (same on 1.5.0): `p2kb_get "erratum E3"`
+6. **OBEX categories are OBEX's own** (from KB v1.24.2): `Protocol`, `Sensor`, `Display`, `Data
+   Storage`, `Motor Control` and others; 32 objects list several (a list). `p2kb_obex_find`'s
+   `category` parameter still advertises the old nine (`drivers`, `misc`, …) — those match nothing now.
+   Call `p2kb_obex_find` with no parameters for the real list, or search by `term`. Each result's
+   `description` is the object's authored one-line summary; `file_size` is empty (OBEX publishes none).
+
+7. **A multi-target alias returns its first page only** (same on 1.5.0): `p2kb_get "erratum E3"`
    gives the errata hub, though GETCT, GETMS and GETSEC also carry that erratum. `p2kb_find
    term:"erratum E3"` lists every page.
 
 ## Moving that install forward
 
 Installing 1.5.0 on that machine removes items 1, 2, 4 and 5. p2kb-mcp **1.5.1**
-(`MCP-OBEX-SUMMARY-CHANGE-REQUEST.md`) also removes `quality: 0` and adds the whole filtered object
-to `p2kb_obex_get`.
+(`MCP-OBEX-SUMMARY-CHANGE-REQUEST.md`) also removes `quality: 0`, builds the category list from the
+data (item 6), and adds the whole filtered object to `p2kb_obex_get`.

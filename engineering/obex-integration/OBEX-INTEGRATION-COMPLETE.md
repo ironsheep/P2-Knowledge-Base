@@ -1,8 +1,37 @@
 # OBEX Community Integration Complete
 
-**Version**: v2.2 - Re-Scrape Delta (history below is v2.1)  
-**Date**: June 29, 2026 (v2.2 delta) · September 12, 2025 (v2.1 base)  
+**Version**: v2.3 - Catalog Re-Mirror (history below: v2.2 delta, then v2.1)  
+**Date**: October 12, 2026 (v2.3 re-mirror) · June 29, 2026 (v2.2 delta) · September 12, 2025 (v2.1 base)  
 **Status**: ✅ Production Ready - Validated & Complete
+
+---
+
+## 📌 v2.3 Catalog Re-Mirror — 2026-10-12 (KB v1.24.2 + v1.24.3, F-573)
+
+**Why.** The p2kb-mcp agent's review of the 1.5.1 request found `description_short` cut at 100
+characters mid-word. Comparing with the live OBEX pages showed the KB's copy was not a mirror: 17
+placeholder descriptions ("Utility object for P2 development."), 5 garbled, 11 cut near 300 characters,
+and `category`, `tags` and `file_size` filled by our scrapers' own guesses (`file_size` was the first
+"number B" on each page — 88 objects read "5883 B"). Principle (Stephen, 2026-10-11): *an OBEX entry
+carries what the catalog says, never our verdict on it.*
+
+**What was done (all 130 objects; the object set is unchanged — no new-object crawl):**
+- `engineering/tools/obex-integration/obex-catalog-mirror.py` (new) read each object's page and wrote
+  OBEX's own title, author (archive marker and email parentheticals dropped), description, categories
+  (32 objects list several), tags, languages, microcontroller, content type and licence (both new
+  fields), and date. Proved against git (only those fields changed) and by an independent parser
+  (130/130 match the pages).
+- `description_short` became an authored one-line summary for every object: drafted from the catalog
+  text, audited, approved by Stephen, then checked adversarially against each full description (13
+  revised).
+- `file_size` emptied (OBEX publishes none), `languages_confirmed` and `version_tracking.obex_version`
+  removed; the scrapers that wrote the junk retired to the local `archive/`.
+- Gates: *OBEX One-Line Descriptions* (new); the compile, claim-sourcing and cross-reference gates do
+  not treat the authors' catalog prose as KB content.
+- Validated live on p2kb-mcp 1.5.0 (2026-10-12). Records: `engineering/obex-integration/OBEX-ONE-LINER-MASTER-INDEX.md`,
+  `engineering/operations/correction-sweeps/2026-10-12-v1.24.2-change-set-audit.md`, `…-v1.24.3-…`.
+
+**Baselines.** Catalog fields current as of 2026-10-12; **new-object delta baseline still 2026-06-29**.
 
 ---
 

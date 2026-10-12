@@ -423,6 +423,16 @@ list, so the drift cannot recur.
 > stays red until `verify-ps1-filter.ps1` is re-run and `PS1-VERIFIED.md` updated. *Fetch Script Parity*
 > reads the published index rule and turns green when the index is regenerated after the commit.
 
+## Impact survey — v1.24.2 and v1.24.3 (`release-yamls` §8, run 2026-10-12)
+
+Both releases changed the 130 OBEX objects only (catalog re-mirror, one-liners, `file_size` emptied,
+`languages_confirmed` and `obex_version` removed; F-573). The one live document that names OBEX
+objects is P2AN002 (#2811, #2812, #5278, #5361 in its text and Resources): its credits and claims
+still hold against the mirrored data — "ersmith" is Eric R. Smith's handle (OBEX now lists the name),
+and its titles differ from OBEX's only in punctuation and case ("FFT/IFFT" vs "FFT IFFT"). No manual
+quotes an OBEX description, category or size. **No document is flagged.** Published state verified
+live on p2kb-mcp 1.5.0.
+
 ## Impact survey — v1.24.1 (`release-yamls` §8, run 2026-10-11)
 
 v1.24.1 changed one fact: `field` cannot name a method local (FIELD.yaml, CP-010). Every other hunk
