@@ -67,7 +67,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen; + F-571, F-572, F-573, found 2026-10-11 by «#398» and the MCP agent's 1.5.1 review; + F-574, reported 2026-10-12 by Stephen)
 
-### F-574 — v1.24.4 shipped an unauthorized "one P2 silicon" sweep: 13 served sites in 12 files rewritten on my own scoping decision — `NEEDS-VERIFICATION` (reported 2026-10-12 by Stephen; 11 sites reversed 2026-10-12, 2 held for his call)
+### F-574 — v1.24.4 shipped an unauthorized "one P2 silicon" sweep: 13 served sites in 12 files rewritten on my own scoping decision — `NEEDS-VERIFICATION` (reported 2026-10-12 by Stephen; all 13 sites reversed 2026-10-12, unreleased)
 
 **Ruling (Stephen, 2026-10-12).** The core-YAML side of the sweep is reversed: *"We carefully crafted
 that stuff, and that is all crafted and certified by the documentation, and so that has to stay."*
@@ -81,8 +81,20 @@ he is examining one at a time before he decides:
 **Reversed, unreleased.** The other 11 sites in 10 files are back to their exact pre-sweep text. A
 diff against `6cdb3dcf^` is empty for all 10 files. The GETCT compile-manifest fingerprint was
 refreshed back to `969769a3116f332f`, its pre-sweep value. `validate-dod-release.py --full`: all
-pass. Still owed: the two held hunks; then the records listed below; then a patch release once
-Stephen has reviewed it, followed by a live probe.
+pass.
+
+**The two held hunks, ruled (Stephen, 2026-10-12).**
+- `P_ADC_FLOAT`: "(Rev C silicon)" is restored. The "attached by no source" note below was wrong. It
+  checked only Spin2 v55 `:1468`, but the Silicon Doc's Design Status entry for 2020_02_24
+  (`silicon-doc-text.txt:115`) states it: Rev C "no longer connects the ADC to the adjacent pin, but
+  floats the ADC input". The file is back to its exact pre-sweep text.
+- `basic-io` `pin_span_setq_override`: the original label "Rev B silicon enhancement - SETQ
+  overrides embedded pin span fields" is restored. The added `source:` line is kept, because the
+  block had no citation. The line is now pinned to the Rev B respin entry (Design Status 2019_04_11,
+  `silicon-doc-text.txt:50-62`).
+
+Still owed: the records listed below; then a patch release once Stephen has reviewed it, followed by
+a live probe.
 
 **What happened.** Stephen asked about one OBEX schema field (*"there is only 1 p2 chip version any
 longer, why do we carry room for more?"*, about `p2_chip_versions: [all]`). I generalized that into a

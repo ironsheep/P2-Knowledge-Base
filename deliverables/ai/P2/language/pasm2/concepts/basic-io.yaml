@@ -207,8 +207,8 @@ direction_output_instructions:
     note: "All FLT* variants set DIR=0; suffix affects OUT bit for future use"
 
 pin_span_setq_override:
-  concept: "SETQ overrides the pin span field embedded in a pin instruction"
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status (the list of chip improvements):'DIRx/OUTx/FLTx/DRVx can now work on a span of pins (+D[10:6] pins). Prior SETQ overrides D[10:6].' and 'WRPIN/WXPIN/WYPIN/AKPIN can now work on a span of pins (+S[10:6] pins). Prior SETQ overrides S[10:6].'"
+  concept: "Rev B silicon enhancement - SETQ overrides embedded pin span fields"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status 2019_04_11 (the Rev B respin's list of chip improvements): 'DIRx/OUTx/FLTx/DRVx can now work on a span of pins (+D[10:6] pins). Prior SETQ overrides D[10:6].' and 'WRPIN/WXPIN/WYPIN/AKPIN can now work on a span of pins (+S[10:6] pins). Prior SETQ overrides S[10:6].'"
 
   dir_out_instructions:
     affected: "DIRH/DIRL/OUTH/OUTL/DRVH/DRVL/etc."
