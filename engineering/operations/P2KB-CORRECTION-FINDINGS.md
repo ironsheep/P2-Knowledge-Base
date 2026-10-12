@@ -76,9 +76,15 @@ the 2022 version (md5 `f75cbec4…`), shipped verbatim. The same copy sits in th
 
 **What is wrong.**
 1. `getStackDepth()` scans UPWARD from index 0 and stops at the first long still holding
-   `NOT_WRITTEN_MARK`. That equals the high-water mark only if the used region has no gaps. A frame
-   that reserves longs it never writes stops the scan early, so it reports a smaller depth that still
-   looks plausible.
+   `NOT_WRITTEN_MARK`. That equals the high-water mark only if the used region has no gaps.
+   **Scope, checked 2026-10-12:** the source says a frame that reserves longs it never writes stops
+   the scan early. But Spin2 v55 (`spin2-v55-text.txt:286`) says "Results and local variables are
+   initialized to zero on method entry", so a pure Spin2 frame writes every long it reserves and leaves
+   no gap. The under-report is therefore NOT demonstrated for Spin2 code. A gap needs something that
+   advances the stack without writing, such as PASM using `PTRA` as a stack, which is not measured. The
+   downward scan is equal or better in every case, so it ships. The note describes the new scan and
+   claims nothing about the old one. This goes to the debug-techniques claim ledger («#427»), source
+   §7.3, as a contested claim.
 2. The scratch values, including that scan's loop index `nStkChkIdx`, live in `DAT`. All declarations
    share one `DAT`, so two cogs scanning at once overwrite each other's index. The note presents
    "one checker at a time" as the utility's limitation.

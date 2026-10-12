@@ -57,8 +57,9 @@ NOT conflate (guarded against `stack_operations.yaml`'s PTRA/PTRB scope).
 
 - `checkStack` detects the boundary was crossed, not arbitrary corruption (contiguous growth clobbers
   the sentinel first → detection sound) — stated as a pitfall.
-- Reentrancy: `isp_stack_check` keeps working values in shared object DAT vars → built for ONE checker
-  at a time. Every recipe has a single thread do the checking; stated as a 🔧 Hardware note.
+- Reentrancy: up to v1.0.1, `isp_stack_check` kept its working values in shared object DAT vars, so
+  only ONE checker could run at a time (a 🔧 Hardware note). From v1.0.2 the shipped object holds no
+  mutable state: concurrent checkers are safe and the note says so (F-575).
 - High-water mark only counts paths that actually ran → "measure the worst case" pitfall.
 
 ## Sources (P2-native + Stephen's utility — no P1 content read or cited)

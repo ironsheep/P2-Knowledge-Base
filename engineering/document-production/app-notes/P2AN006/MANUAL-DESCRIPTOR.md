@@ -12,7 +12,7 @@ companion_yaml: deliverables/ai/P2/application-notes/p2an006-sizing-cog-task-sta
 authoritative_sources: see ../APP-NOTE-CREATION-GUIDE.md §5.1 # Spin2 Language Documentation (cogspin/coginit + TASKSPIN stack params; params->results->locals packing) + P2KB cogspin.yaml ("overflow not detected"; no stack size is stated by any Parallax document) + stack_operations.yaml (hardware-stack distinction, cited to keep separate) + isp_stack_check.spin2 (Stephen M. Moraco, MIT — the shipped instrument) + pnut-ts v1.55.0
 high_risk_quant:
   - "isp_stack_check constants: NOT_WRITTEN_MARK = $a5a50df0 (fill pattern), DO_NOT_WRITE_MARK = $addee5e5 (sentinel just past the buffer)"
-  - "API takes (pStack, nStackLongCt) in LONGS: prepStackForCheck (fill+sentinel, before launch), checkStack (halts on overflow), getStackDepth (high-water count), reportStackUse (prints 'STACK used N of M')"
+  - "API takes (pStack, nStackLongCt) in LONGS: prepStackForCheck (fill+sentinel, before launch), checkStack (halts on overflow), isStackGuardIntact (non-halting predicate, v1.0.2), getStackDepth (high-water, downward scan), reportStackUse (prints 'STACK used N of M')"
   - "Sizing method: start 128 -> exercise deepest path -> reportStackUse reads N -> set buffer ~1.5xN -> keep checkStack guard. The note states no default stack size: a rule-of-thumb figure would be unsourced"
   - "Stack consumes params -> results -> locals in declaration order, plus nested-call depth (Spin2 v55 text:284)"
   - "Two contexts, one technique: new-cog stack (cogspin) and intra-cog task stack (TASKSPIN); the instrument only watches a hub buffer"
@@ -20,7 +20,8 @@ fragile_areas:
   - "The sentinel long (endStackMark) MUST abut the stack buffer in the SAME DAT block — a gap breaks the technique (the overflow won't hit the sentinel first / the check reads the wrong long)"
   - "getStackDepth high-water only counts paths that ACTUALLY RAN — exercise the worst case before trusting the number (else you size too small)"
   - "checkStack detects the BOUNDARY was crossed (the one long past the buffer), not arbitrary corruption; sound because growth is contiguous, but frame it as 'boundary held/crossed'"
-  - "isp_stack_check keeps working values in shared object DAT vars (pEndStackMark, nStkChkIdx, nStkChkUsed) -> ONE checker at a time; every recipe has a single thread check (reentrancy hazard if multiple cogs self-check concurrently)"
+  - "From v1.0.2 the shipped isp_stack_check (Stephen's 2026-09-09 master) holds NO mutable state: every method works on the caller's buffer, so concurrent checkers are safe. getStackDepth scans DOWNWARD to the deepest long no longer holding the fill pattern. Do NOT claim the old upward scan under-reported in Spin2 code: Spin2 v55 text:286 zeroes results and locals on entry, so a pure Spin2 frame leaves no gap (F-575)"
+  - "A full-size getStackDepth reading is SATURATED (a floor): overflow OR prepStackForCheck never ran -- pair with isStackGuardIntact + a prepared flag"
   - "The HUB Spin2 method stack sized here is NOT the P2 8-level HARDWARE call stack (PASM CALL/RET) — do not conflate; stack_operations.yaml's PTRA/PTRB CMP idiom is a different resource"
   - "R1-R3 are ordinary Spin2 (no directive); ONLY R4 needs {Spin2_v47} (it uses TASKSPIN) — keep the directive off R1-R3"
   - "isp_stack_check.spin2 ships VERBATIM (MIT, Stephen M. Moraco) with its license header retained; do not modify the object — describe it"

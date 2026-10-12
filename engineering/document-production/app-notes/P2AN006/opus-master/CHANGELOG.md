@@ -1,5 +1,15 @@
 # P2AN006 Changelog: Sizing Cog & Task Stacks
 
+## v1.0.2 (2026-10-12)
+
+The stack-check utility at its current version, and two new pitfalls.
+
+- **High-water mark**: `getStackDepth` scans down from the top of the buffer to the deepest long the cog used.
+- **Several cogs at once**: the utility holds no state between calls, so each cog can check its own stack concurrently.
+- **Check without halting**: `isStackGuardIntact` reports an overflow and lets a test carry on.
+- **Byte guards**: `initByteGuard`, `isByteGuardIntact` and `firstCorruptOffset` watch the bytes after any buffer.
+- **New pitfalls**: a reading equal to the buffer size is a floor, not a measurement; two guards must never share an address.
+
 ## v1.0.1 (2026-08-08)
 
 A licensing change. No technical content changed.

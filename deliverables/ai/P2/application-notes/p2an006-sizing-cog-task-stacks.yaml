@@ -25,6 +25,9 @@ aliases:
   - isp_stack_check
   - right-size a stack
   - how big a stack
+  - stack guard
+  - byte guard
+  - buffer overrun detection
 categories:
   - concurrency
   - spin2-language
@@ -34,7 +37,7 @@ summary: |
   Size the hub stack buffer every cog (cogspin) and cooperative task (TASKSPIN) needs, and catch an
   undersized one before it silently overwrites memory. One shared idea (fill the stack with a known
   pattern and watch a sentinel long just past its end: if the sentinel changed, the stack overflowed;
-  the count of still-untouched pattern longs is the high-water mark) applied through four runnable
+  the deepest long no longer holding the pattern is the high-water mark) applied through four runnable
   recipes: R1 instrument a new-cog stack (prepStackForCheck before launch + checkStack as a running
   guard); R2 find the high-water mark and right-size (start 128, exercise the deepest path,
   reportStackUse reads N, set the buffer to ~1.5xN, keep the guard); R3 pinpoint the overflowing
@@ -70,7 +73,8 @@ runnable_code:
 
 key_parameters:
   constants: "isp_stack_check: NOT_WRITTEN_MARK = $a5a50df0 (fill every stack long before launch); DO_NOT_WRITE_MARK = $addee5e5 (sentinel in the long JUST PAST the buffer)"
-  api: "all take (pStack, nStackLongCt) in LONGS: prepStackForCheck(fill+sentinel, call before launch); checkStack(halts + reports if the sentinel was overwritten); getStackDepth(high-water count, bottom-up to first untouched long); reportStackUse(prints 'STACK used N of M')"
+  api: "stack methods all take (pStack, nStackLongCt) in LONGS: prepStackForCheck(fill+sentinel, call before launch); checkStack(halts + reports if the sentinel was overwritten); isStackGuardIntact(TRUE while the sentinel holds; prints and halts nothing, so a test can score an overflow and continue); getStackDepth(high-water mark: scans down from the top to the deepest long no longer holding the fill pattern); reportStackUse(prints 'STACK used N of M'). Byte guard for other buffers: initByteGuard(pGuard, nGuardBytes, guardByte), isByteGuardIntact(...), firstCorruptOffset(...) (offset of the first changed byte, or -1)"
+  concurrency: "the utility holds no state between calls (every method works on the caller's buffer), so any number of cogs may check their own stacks at the same time"
   placement_rule: "the sentinel long (endStackMark) MUST abut the stack buffer with no gap — declare it immediately after the stack in the SAME DAT block; prepStackForCheck writes it"
   sizing_method: "start at 128 longs (can't overflow while measuring) -> exercise the DEEPEST call path -> reportStackUse reads N -> set buffer to ~1.5xN -> keep a checkStack guard in a slow loop"
   cog_stack_defaults: "no Parallax document states a stack size for a cog or a task; the only way to settle a size is to measure the high-water mark of your own code with sizing_method"
@@ -90,8 +94,10 @@ gotchas:
     text: "getStackDepth's high-water mark only counts paths that ACTUALLY RAN. If your test never exercises the deepest branch/handler, you undercount and size the stack too small. Drive the worst case before trusting the number."
   - flag: pitfall
     text: "checkStack proves the BOUNDARY was crossed (the one long past the buffer), not that all memory is intact. Detection is sound because the stack grows contiguously and clobbers the sentinel first — but read it as 'boundary held/crossed'."
-  - flag: hardware
-    text: "isp_stack_check keeps its working values in shared object variables, so two cogs calling checkStack on different stacks at once can interfere. Every recipe here has a single thread do the checking; for concurrent self-checks, give each cog its own copy of the object."
+  - flag: pitfall
+    text: "A getStackDepth reading equal to the buffer size is a FLOOR, not a measurement: the topmost long was used and the scan cannot tell how far past it the cog went. Two causes leave the same memory: the stack overflowed, or prepStackForCheck never ran (the buffer holds zeros, not the pattern). Check isStackGuardIntact to identify an overflow, and confirm the prepare step ran."
+  - flag: pitfall
+    text: "Never let two guards share an address. A byte guard (initByteGuard) and a stack sentinel want different values in the same long; only the last writer wins, and one detector then reports a failure that never happened. Keep a spare long between them."
   - flag: hardware
     text: "The buffer sized here is the HUB Spin2 method call stack — unrelated to the P2's 8-level HARDWARE call stack (PASM CALL/RET). Sizing one has no bearing on the other."
   - flag: tip

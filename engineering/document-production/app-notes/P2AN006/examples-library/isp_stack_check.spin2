@@ -5,7 +5,7 @@
 ''   Author..... Stephen M. Moraco
 ''   E-mail..... stephen@ironsheep.biz
 ''   Started.... Sep 2022
-''   Updated.... 29 Sep 2022
+''   Updated.... 09 Sep 2026
 ''
 '' =========================================================================================
 
@@ -16,60 +16,146 @@ CON { ----- TEST Support ----- }
 
   #0, TST_UNKNOWN, TST_PASS, TST_FAIL
 
-DAT
+DAT { read-only literals ONLY -- this object deliberately holds NO mutable state }
+
+' Every method here works on the CALLER's buffer, passed in by pointer. Nothing is
+' remembered between calls, so any number of declarations of this object in one
+' program are equivalent, and any cog may call any method at any time.
+'
+' It was not always so. Until 2026-08-30 the scratch values below lived in DAT --
+' including nStkChkIdx, which was the LOOP VARIABLE of getStackDepth(). Object images
+' de-duplicate, so every declaration shared one DAT region and two cogs scanning two
+' different stacks concurrently would clobber each other's loop index and both come
+' away with a wrong depth, silently. In a stack-measuring instrument that is the worst
+' possible defect: it does not fail, it lies. They are method locals now. Keep them so.
     rsltPass        BYTE    "pass",0
     rsltFail        BYTE    "FAIL",0
-
-    nStkChkUsed     LONG    0
-    nStkChkIdx      LONG    0
-    pEndStackMark   LONG    0
-    pResult         LONG    0
 
 PUB null()
 '' This is not a top level object
 
-PUB prepStackForCheck(pStack, nStackLongCt)
-'' Reset all failure indicators
+PUB prepStackForCheck(pStack, nStackLongCt) | pEndStackMark
+'' Fill the stack with sentinel marks and write the overflow guard just past its end
+''
+'' @param pStack - pointer to the stack buffer
+'' @param nStackLongCt - size of the stack in longs
+''
+'' THE CALLER MUST DECLARE ONE SPARE LONG IMMEDIATELY AFTER THE STACK BUFFER. That long
+'' is this object's memory and this method writes DO_NOT_WRITE_MARK into it.
+''
+'' *** DO NOT LET THAT SENTINEL SHARE AN ADDRESS WITH ANY OTHER GUARD. *** A consumer
+'' that also keeps a byte-fill guard (see initByteGuard below) must place a spacer long
+'' between the two, because the two detectors demand DIFFERENT VALUES AT THE SAME ADDRESS
+'' ($addee5e5 vs the fill byte) and only the last writer wins. A driver that kept both
+'' learned this the hard way: its byte-fill guard lost every time, its stack-guard check
+'' became a stuck-at-FAIL detector, and once that check was escalated to the caller every
+'' single command reported a stack overflow on a stack that had not overflowed.
     pEndStackMark := @LONG[pStack][nStackLongCt]
     longfill(pStack, NOT_WRITTEN_MARK, nStackLongCt)
     LONG[pEndStackMark] := DO_NOT_WRITE_MARK
 
+PUB isStackGuardIntact(pStack, nStackLongCt) : bIntact
+'' Report whether the end-of-stack sentinel is still in place -- WITHOUT halting.
+''
+'' @param pStack - pointer to the stack buffer (previously prepared with prepStackForCheck)
+'' @param nStackLongCt - size of the stack in longs
+'' @returns bIntact - TRUE if the guard long still holds DO_NOT_WRITE_MARK
+''
+'' This is the predicate form of checkStack(). It emits nothing and halts nothing, so a
+'' TEST can detect an overflow, score it as a failure, and carry on. Added 2026-08-30
+'' because checkStack() only offered the halting form, and five separate consumers had
+'' each hand-rolled this comparison rather than halt their own run.
+    bIntact := (LONG[pStack][nStackLongCt] == DO_NOT_WRITE_MARK)
+
 PUB checkStack(pStack, nStackLongCt)
-'' Ensure didn't exceed stack size
-    pEndStackMark := @LONG[pStack][nStackLongCt]
-    if LONG[pEndStackMark] <> DO_NOT_WRITE_MARK
+'' Ensure the stack was not exceeded - reports and then HALTS this cog if the guard was overwritten
+''
+'' Use isStackGuardIntact() instead when the caller wants to survive the finding.
+    ifnot isStackGuardIntact(pStack, nStackLongCt)
         debug("^^^ STACK Overflow! Depth greater than ", udec(nStackLongCt),  " longs")
         lockupForAnly()
 
-PUB getStackDepth(pStack, nStackLongCt) : depth
+PUB getStackDepth(pStack, nStackLongCt) : depth | idx
 '' Return number of stack longs used (high-water mark).
-'' Counts from bottom up until first sentinel found.
+'' Scans DOWNWARD from the top and stops at the deepest long that is no longer a sentinel.
+''
+'' *** THE DIRECTION IS THE WHOLE MEASUREMENT, AND IT WAS WRONG UNTIL 2026-09-09. ***
+'' A Spin2 stack grows FORWARD, so the deepest long ever touched is the high-water mark.
+'' This scanned UPWARD from index 0 and stopped at the FIRST sentinel, which equals the
+'' high-water mark ONLY if the used region is perfectly contiguous. Any hole -- a frame
+'' that reserves longs it never writes -- stopped the old scan early and UNDER-REPORTED,
+'' silently, as a plausible number. Scanning downward is never worse: with no holes the
+'' two agree exactly, and with holes only this one is right.
+'' Found 2026-09-08, when a second stack scanner written independently was seen to scan in
+'' the OPPOSITE direction -- and its own comment already argued this case.
 ''
 '' @param pStack - Pointer to stack buffer (previously prepared with prepStackForCheck)
 '' @param nStackLongCt - Size of stack in longs
 '' @returns depth - Number of longs used
+''
+'' *** A RETURN OF nStackLongCt IS A SATURATED READING, NOT A MEASUREMENT. *** It means
+'' the TOPMOST long is no longer a sentinel -- the scan stops there, so it says the stack
+'' reached its last long and cannot say how far past it the cog would have gone. That
+'' happens in TWO cases this object cannot tell apart, because both leave the same memory
+'' behind:
+''    1. the stack overflowed -- every sentinel was consumed;
+''    2. prepStackForCheck() was never called -- the buffer holds zeros, and zero is not
+''       NOT_WRITTEN_MARK, so every long counts as used.
+'' Do not report a saturated value as a depth. Pair it with isStackGuardIntact() (which
+'' distinguishes an overflow) and with a caller-owned "have I prepped this stack" flag
+'' (which distinguishes case 2). The object cannot
+'' own that flag: it serves many stacks and holds no per-stack state.
     depth := 0
-    repeat nStkChkIdx from 0 to nStackLongCt - 1
-        if LONG[pStack][nStkChkIdx] <> NOT_WRITTEN_MARK
-            depth++
-        else
+    repeat idx from nStackLongCt - 1 to 0
+        if LONG[pStack][idx] <> NOT_WRITTEN_MARK
+            depth := idx + 1
             quit
 
-PUB reportStackUse(pStack, nStackLongCt)
+PUB reportStackUse(pStack, nStackLongCt) | nUsed
 '' Write stack usage to debug()
-    nStkChkUsed := getStackDepth(pStack, nStackLongCt)
-    debug("^^^ STACK used ", udec(nStkChkUsed), " of ", udec(nStackLongCt))
+    nUsed := getStackDepth(pStack, nStackLongCt)
+    debug("^^^ STACK used ", udec(nUsed), " of ", udec(nStackLongCt))
 
-PUB testReport(pStack, nStackLongCt, pTestId, bPassFail)
-'' Write test pass/fail to debug()
-    pResult := (bPassFail == TST_PASS) ? @rsltPass : @rsltFail
+PUB initByteGuard(pGuard, nGuardBytes, guardByte)
+'' Fill a byte-fill guard zone with its sentinel byte.
+''
+'' @param pGuard - pointer to the first guard byte (immediately after the buffer it protects)
+'' @param nGuardBytes - size of the guard zone in bytes
+'' @param guardByte - the sentinel value to fill with (e.g. $CC)
+''
+'' The byte-fill guard is the SECOND, independent overflow detector in this object -- see the
+'' warning on prepStackForCheck(): its sentinel and this one must never share an address.
+    bytefill(pGuard, guardByte, nGuardBytes)
+
+PUB firstCorruptOffset(pGuard, nGuardBytes, guardByte) : offset
+'' Return the offset of the first guard byte that is NOT the sentinel, or -1 if all are intact.
+''
+'' @returns offset - 0..nGuardBytes-1 of the first corrupted byte, or -1 when the guard is whole
+''
+'' Returning the OFFSET rather than a bool lets each consumer keep its own message wording
+'' while sharing one scan. Added 2026-08-30: the same loop had been written, identically,
+'' in four separate consumers.
+    repeat offset from 0 to nGuardBytes - 1
+        if BYTE[pGuard][offset] <> guardByte
+            return offset
+    return -1
+
+PUB isByteGuardIntact(pGuard, nGuardBytes, guardByte) : bIntact
+'' Report whether every byte of a byte-fill guard zone is still the sentinel -- WITHOUT halting.
+''
+'' @returns bIntact - TRUE when the guard zone is whole
+    bIntact := (firstCorruptOffset(pGuard, nGuardBytes, guardByte) == -1)
+
+PUB testReport(pStack, nStackLongCt, pTestId, testStatus) | pResult
+'' Write test pass/fail to debug(), report stack use, check the guard, then HALT this cog if the test failed
+    pResult := (testStatus == TST_PASS) ? @rsltPass : @rsltFail
     debug("+++ ---------")
     debug("+++ TEST [", zstr_(pTestId), "] - ", zstr_(pResult))
     reportStackUse(pStack, nStackLongCt)
     checkStack(pStack, nStackLongCt)
     'dumpStack()
 
-    if bPassFail == TST_FAIL
+    if testStatus == TST_FAIL
         lockupForAnly()
 
 PUB dumpStack(pStack, nStackLongCt)
@@ -77,7 +163,7 @@ PUB dumpStack(pStack, nStackLongCt)
     dbgMemDump(@"TASK Stack", pStack, (nStackLongCt + 1) * 4)
 
 PUB dbgMemDump(pMessage, pBytes, lenBytes) | rowCount, pCurrByte, lastRowByteCount, bytesSoFar
-'' Dump rows of hex values with address preceeding
+'' Dump rows of hex values with address preceding
 
     if pMessage
         debug("** ", zstr_(pMessage), ":")
@@ -103,7 +189,7 @@ PRI dbgMemDumpRow(pBytes, lenBytes)
     debug(" ", uhex_long_(pBytes), ": ", uhex_byte_array_(pBytes, lenBytes))
 
 PRI lockupForAnly()
-' tell that we are halting then halt (effictivly)
+' tell that we are halting then halt (effectively)
     debug("---- FAIL - stopping here for Analysis of above ^^^")
     repeat      ' hold here for now
 
