@@ -20,6 +20,16 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.24.2] - 2026-10-12
+
+**OBEX objects mirror the OBEX catalog, each with a one-line description of what it is.**
+
+### Changed
+
+- **OBEX catalog fields**: each object carries its title, author, description, categories, tags, languages, microcontroller, content type, licence and date as its OBEX page publishes them
+- **OBEX one-line descriptions**: every object has a one-sentence summary of what it is, the description `p2kb_obex_get` and `p2kb_obex_find` show
+- **OBEX categories**: objects use OBEX's own categories (Protocol, Sensor, Display, Data Storage and others); an object in several categories lists them all
+
 ## [1.24.1] - 2026-10-11
 
 **Entries read as plain facts, and OBEX objects carry their catalog listing with the upload date.**

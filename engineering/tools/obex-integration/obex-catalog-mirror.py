@@ -253,7 +253,7 @@ def parse(page_html):
         v = field(label)
         out[key] = (v[1] or ([v[0]] if v[0] else [])) if v else []  # an empty field is [], never ['']
     tags = field("Tag")
-    out["tags"] = (tags[1] or [t.strip() for t in tags[0].split(",")]) if tags else []
+    out["tags"] = (tags[1] or [t.strip() for t in tags[0].split(",") if t.strip()]) if tags else []
     t = re.search(r"<title>(.*?)</title>", page_html, re.S)
     out["title"] = TITLE_SUFFIX.sub("", text_of(t.group(1))) if t else ""
     d = re.search(r'<div class="markdown-content">(.*?)</div>\s*<hr', page_html, re.S)

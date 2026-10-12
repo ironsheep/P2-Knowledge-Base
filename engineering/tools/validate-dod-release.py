@@ -1249,11 +1249,13 @@ def obex_one_liner_problem(short, full):
     # slash, or at a word boundary. Compared with whitespace collapsed and case folded so spacing
     # or a capital cannot hide it. Only two continuations make it a whole sentence: the catalog's
     # own sentence end ("." "!" "?" then a space or the end) or an aside in parentheses.
+    # A paragraph break in the catalog text ends its opening line even without a full stop, so it
+    # is kept as a marker through the whitespace collapse.
     body = " ".join(short[:-1].split()).casefold()
-    flat = " ".join(str(full or "").split()).casefold()
+    flat = " ".join(re.sub(r"\n\s*\n", " \x00 ", str(full or "")).split()).casefold()
     if len(body) >= 8 and flat.startswith(body) and len(flat) > len(body):
         rest = flat[len(body):]
-        if not (re.match(r"[.!?](\s|$)", rest) or rest.startswith(" (")):
+        if not (re.match(r"[.!?](\s|$)", rest) or re.match(r" (\(|\x00|[—–] |- )", rest)):
             return "a cut of the catalog description, not a sentence"
     return None
 
@@ -1289,6 +1291,9 @@ OBEX_ONE_LINER_CONTROL = [
      "This object is a P2 update to FullDuplexSerial for the P1. There are minor changes.", False),
     ("Driver for 16 channels of servo control via I2C using the PCA9685 16ch PWM chip.",
      "Driver for 16 channels of servo control via I2C using the PCA9685 16ch PWM chip (uses jm_i2c)", False),
+    ("Driver for HUB75-controlled RGB LED Matrix Panels.",
+     "Driver for HUB75-controlled RGB LED Matrix Panels\n\nNOTE: see the repository.", False),
+    ("Ultrasonic range sensor object.", "Ultrasonic range sensor object — accurate to 1 cm.", False),
 ]
 
 
@@ -1299,7 +1304,12 @@ def validate_obex_one_liners(verbose: bool = False) -> ValidationResult:
     in every OBEX lookup and search list. It is an authored sentence restating the catalog
     (the master index engineering/obex-integration/OBEX-ONE-LINER-MASTER-INDEX.md), never a
     cut of the catalog text: the scrapers once set it to the first 100 characters, mid-word.
-    A new object fails here until its line is written. The negative control runs first."""
+    A new object fails here until its line is written. The negative control runs first.
+
+    WHAT A PASS DOES NOT CERTIFY: that the line is a correct summary (the adversarial content
+    review does that, F-573); a cut that ends at an abbreviation or initial ("e.g.", "etc.",
+    "J."), which reads as a sentence end; a cut of a later sentence of the catalog text (only its
+    opening is compared); a line under 8 characters; a catalog text that opens with markup."""
     result = ValidationResult("OBEX One-Line Descriptions")
     bad_control = [(s, want) for s, full, want in OBEX_ONE_LINER_CONTROL
                    if bool(obex_one_liner_problem(s, full)) != want]
