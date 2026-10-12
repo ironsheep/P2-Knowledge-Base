@@ -52,9 +52,7 @@ object_metadata:
       ILI9341_XPT2046 Spin 2 Object is maintained by Greg LaPolla.
 
       This Driver was derived from Cluso''s ST7796 4.0in SPI 480x320 w Touch LCD Driver'
-    description_short: Please change this object's language to Spin 2 instead of Generic.
-      I was looking for this object in the OBEX using the filtersand couldn't find
-      it under
+    description_short: 'Spin2 object that interfaces the ILI9341 Video chip and the XPT2046 chip with the Propeller 2 P2X8C4M64P.'
     hardware_support: []
     peripherals: []
     subcategory: ''

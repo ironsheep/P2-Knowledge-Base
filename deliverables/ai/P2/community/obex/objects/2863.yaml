@@ -94,10 +94,7 @@ object_metadata:
 
       tunes.zip Folder of handful of VGM/YM dumps! But zipped to not pollute the Git
       repo as much.'
-    description_short: 'This is an emulation of the Yamaha "OPNA" YM2608 FM synth
-      chip
-
-      (and by extension, also "OPN" YM2203)'
+    description_short: 'Emulation of the Yamaha "OPNA" YM2608 FM synth chip (also "OPN" YM2203 and "SSG" YM2149F) in one P2 cog.'
     hardware_support: []
     peripherals: []
     subcategory: ''

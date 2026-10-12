@@ -28,8 +28,7 @@ object_metadata:
 
       Also, some delays are nice to add after cogspin() and coginit() to avoid jumbling
       of their serial outputs with those of the code.'
-    description_short: This serial driver has a simple Begin() method with no parameters
-      that starts the serial driver usin
+    description_short: 'Serial driver whose parameterless Begin() starts it on the usual pins at 2 MBaud, for the Prop Tool Debug Window.'
     hardware_support: []
     peripherals: []
     subcategory: ''

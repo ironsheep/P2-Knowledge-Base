@@ -20,8 +20,7 @@ object_metadata:
 
 
       Further reading - https://forums.parallax.com/discussion/175543/propspi-emulation-of-a-generic-spi-ram-chip-using-the-prop2'
-    description_short: Uses a cog.  Runs autonomously.  Master can read and write
-      at will within the handler's specified hubRAM buffer space.
+    description_short: 'SPI RAM emulation that runs autonomously in a cog; the master reads and writes within the handler''s hubRAM buffer.'
     hardware_support: []
     peripherals: []
     subcategory: ''

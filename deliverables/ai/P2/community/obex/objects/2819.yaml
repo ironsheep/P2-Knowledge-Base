@@ -13,7 +13,7 @@ object_metadata:
   functionality:
     category: Sensor
     description_full: Interface for MikroElektronika 4-20mA_R/_T Click boards
-    description_short: Utility object for P2 development.
+    description_short: 'Interface for the MikroElektronika 4-20mA_R/_T Click boards.'
     hardware_support: []
     peripherals: []
     subcategory: ''

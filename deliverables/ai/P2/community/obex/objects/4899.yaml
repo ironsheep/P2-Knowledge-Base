@@ -76,8 +76,7 @@ object_metadata:
       THE SITE OR RELIANCE ON ANY INFORMATION PROVIDED ON THE SITE. YOUR USE OF THE
       SITE AND YOUR RELIANCE ON ANY INFORMATION ON THE SITE IS SOLELY AT YOUR OWN
       RISK.'
-    description_short: Parallax 3D Models are typically available in both STEP and
-      VRML formats.
+    description_short: '3D Model files of the Propeller 2 Evaluation Board; Parallax 3D Models are typically in STEP and VRML formats.'
     hardware_support: []
     peripherals: []
     subcategory: ''

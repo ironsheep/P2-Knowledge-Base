@@ -15,8 +15,7 @@ object_metadata:
     description_full: This [cogless] object provides DC motor control through an L298N
       (or similar) h-bridge circuit. Supports forward and reverse speed control, braking,
       and motor enable/disable.
-    description_short: Supports forward and reverse speed control, braking, and motor
-      enable/disable.
+    description_short: 'Cogless DC motor control through an L298N (or similar) h-bridge, with forward/reverse speed control and braking.'
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -27,9 +27,7 @@ object_metadata:
 
 
       The demos illustrate what the reSound driver can do.'
-    description_short: The reSound object can mix up to 32 audiostreams at once and
-      apply volume, panning, frequency control and different audio formats for each
-      channel independently.
+    description_short: 'Mixes up to 32 audio streams per cog with per-channel volume, panning, frequency and format; 2 to 4 per SD interface.'
     hardware_support: []
     peripherals: []
     subcategory: ''

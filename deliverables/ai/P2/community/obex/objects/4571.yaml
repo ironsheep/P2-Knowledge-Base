@@ -65,8 +65,7 @@ object_metadata:
 
 
       DOWNLOAD: please get this code directly from the repo.'
-    description_short: A collection of P2 Spin2 objects allows us to realize a 180°
-      field-of-view time-of-flight sensor by ganging 4 VL53L5CX TOF sensors
+    description_short: 'P2 Spin2 objects that gang 4 VL53L5CX TOF sensors in 45-degree fields into a single 180° field-of-view sensor.'
     hardware_support: []
     peripherals: []
     subcategory: ''

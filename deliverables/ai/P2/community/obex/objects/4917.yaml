@@ -57,9 +57,7 @@ object_metadata:
       Note: You could use any name you like for the global "PARAM" variable, or the
       elements "ID", "AGE", etc... However, the PTRA keyword within the DAT block
       (PASM2 code) is fixed.'
-    description_short: 'Connect a P2 Propeller Board to your computer
-
-      Load this code into Spin Tools IDE, then press CTRL+F1'
+    description_short: 'Tip showing SPIN2 in Cog0 and PASM2 in Cog1 sharing the same global variables (PARAM), observed via DEBUG output.'
     hardware_support: []
     peripherals: []
     subcategory: ''

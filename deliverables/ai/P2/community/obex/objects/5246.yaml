@@ -17,7 +17,7 @@ object_metadata:
     category: Sensor
     description_full: A simple I2C driver for the BMP390 temperature+pressure sensor.
       Handles 2 if you got 2 on the bus. Uses JonyMac's i2c library.
-    description_short: Handles 2 if you got 2 on the bus. Uses JonyMac's i2c library.
+    description_short: 'I2C driver for the BMP390 temperature+pressure sensor that handles 2 on the bus, using JonyMac''s i2c library.'
     hardware_support: []
     peripherals: []
     subcategory: ''

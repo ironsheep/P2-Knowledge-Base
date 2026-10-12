@@ -15,7 +15,7 @@ object_metadata:
     description_full: 'True mode, unbuffererd serial coms using smart pins
 
       -- same features as original P1 FDS with minor enhancements'
-    description_short: Utility object for P2 development.
+    description_short: 'True mode, unbuffered serial using smart pins, with the features of the original P1 FDS plus minor enhancements.'
     hardware_support: []
     peripherals: []
     subcategory: ''

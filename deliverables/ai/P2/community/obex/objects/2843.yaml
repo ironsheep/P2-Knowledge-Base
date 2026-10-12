@@ -15,7 +15,7 @@ object_metadata:
     description_full: Low-level I2C routines for the P2. The i2c_scanner archive is
       a utility application that scans and reports I2C devices connected to the P2.
       Display options are list and matrix format.
-    description_short: <Overviewn McPhalen.
+    description_short: 'Low-level I2C routines for the P2, with an i2c_scanner utility that reports connected I2C devices.'
     hardware_support: []
     peripherals: []
     subcategory: ''

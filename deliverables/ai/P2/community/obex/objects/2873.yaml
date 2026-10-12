@@ -49,9 +49,7 @@ object_metadata:
 
       - Shop at Amazon: HiLetgo 2pcs PCA9685 16 Channel 12-Bit PWM Servo Motor Driver
       IIC Module'
-    description_short: Driver for 16 channels of servo control via I2C using the PCA9685
-      16ch PWM chip (uses underlying singleton version adapted from jm_i2c driver
-      for I2C access).
+    description_short: 'Driver for 16 channels of servo control via I2C using the PCA9685 16ch PWM chip.'
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -32,8 +32,7 @@ object_metadata:
       the following forum thread:
 
       Forum Thread: 180° Field of View Time-of-Flight sensor for the P2'
-    description_short: The PCF8575 provides general-purpose remote I/O expansion via
-      the two-line bidirectional bus (I2C-bus).
+    description_short: 'Spin2 object for the PCF8575, which provides general-purpose remote I/O expansion via the I2C-bus.'
     hardware_support: []
     peripherals: []
     subcategory: ''

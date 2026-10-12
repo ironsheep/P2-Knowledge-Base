@@ -13,7 +13,7 @@ object_metadata:
   functionality:
     category: Protocol
     description_full: I2C bus scanner; shows connected devices in matrix format
-    description_short: Utility object for P2 development.
+    description_short: 'I2C bus scanner that shows connected devices in matrix format.'
     hardware_support: []
     peripherals: []
     subcategory: ''

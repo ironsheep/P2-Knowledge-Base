@@ -17,7 +17,7 @@ object_metadata:
     - Signals
     description_full: This object allows any P2 pin to be converted to a 0-3.3v analog
       input with a user-scalable output.
-    description_short: 3v analog input with a user-scalable output.
+    description_short: 'Converts any P2 pin to a 0-3.3v analog input with a user-scalable output.'
     hardware_support: []
     peripherals: []
     subcategory: ''

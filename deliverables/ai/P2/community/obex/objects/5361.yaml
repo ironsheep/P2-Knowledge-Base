@@ -116,9 +116,7 @@ object_metadata:
       That''s why it''s 2.5% slower. I felt this was an acceptable trade-off between
       speed, library size, and development effort. The newer cog_ifft_radix4 reverses
       rotation to compute IFFT with no measurable penalty.'
-    description_short: 'Demo Files: real_fft_test.spin2  Spin2 speed and accuracy
-      test, tested with PNut-ts and flexspin fft_demo.spin2   Spin2 example program,
-      tested with Propeller T'
+    description_short: 'Spin2 FFT and IFFT libraries (32 to 16384 points in cog_fft_mixed), with Spin2 and C demo programs.'
     hardware_support: []
     peripherals: []
     subcategory: ''

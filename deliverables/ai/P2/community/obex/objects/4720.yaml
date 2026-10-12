@@ -40,8 +40,7 @@ object_metadata:
       Documentation:
 
       P2GUI_Encoder'
-    description_short: P2GUI is a framework for creating UI’s based on TFT screens
-      driven with ILI9341.
+    description_short: 'Encoder version of P2GUI, a framework for creating UIs based on TFT screens driven with ILI9341.'
     hardware_support: []
     peripherals: []
     subcategory: ''

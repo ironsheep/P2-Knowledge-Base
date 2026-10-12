@@ -21,9 +21,7 @@ object_metadata:
       Note: The LPD880x vendor does not publish a protocol specification for these
       pixels. This code is based on work done by others -- some of whom have reverse-engineered
       the protocol from LPD880x-compatible controllers.'
-    description_short: This object allows the P2 to control LPD880x pixels. The output
-      is auto-updating which allows the programmer to manually manipulate the color
-      buffer for advanced applications.
+    description_short: 'Controls LPD880x pixels from the P2 with auto-updating output and methods for setting pixels to specific colors.'
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -26,8 +26,7 @@ object_metadata:
 
 
       See this demonstration: https://youtu.be/mlhf4FX1j7c'
-    description_short: Example of generating FM radio broadcasts (ab)using the P2's
-      color modulator unit.
+    description_short: 'Example of generating FM radio broadcasts using the P2''s color modulator unit.'
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -15,7 +15,7 @@ object_metadata:
     description_full: 'Driver for the Wiznet W5500, with a web server demo.
 
       Compiled with PropTool v2.9.3'
-    description_short: Compiled with PropTool v2.
+    description_short: 'Driver for the Wiznet W5500, with a web server demo.'
     hardware_support: []
     peripherals: []
     subcategory: ''

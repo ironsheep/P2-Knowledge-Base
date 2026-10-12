@@ -14,7 +14,7 @@ object_metadata:
     category: Display
     description_full: A simple, self contained driver for the MAX7219 LED controller.
       Demo code for use with an 8-digit, 7-segment display.
-    description_short: <Overviewn McPhalen.
+    description_short: 'Self-contained driver for the MAX7219 LED controller, with demo code for an 8-digit, 7-segment display.'
     hardware_support: []
     peripherals: []
     subcategory: ''

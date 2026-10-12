@@ -18,9 +18,7 @@ object_metadata:
     description_full: Object and demo code for the HC-SR04 ultrasonic sensor. Measures
       return pulse with a P2 smart pin (P_HIGH_TICKS mode). Methods in the object
       allow the user to return distance in microseconds, centimeters, or inches.
-    description_short: Object and demo code for the HC-SR04 ultrasonic sensor. Measures
-      return pulse with a P2 smart pin (P_HIGH_TICKS mode). Methods in the object
-      allow the user to r
+    description_short: 'Object and demo code for the HC-SR04 ultrasonic sensor, measuring the return pulse with a P2 smart pin.'
     hardware_support: []
     peripherals: []
     subcategory: ''

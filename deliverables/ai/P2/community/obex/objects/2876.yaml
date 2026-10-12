@@ -15,8 +15,7 @@ object_metadata:
     description_full: Simple servo driver that uses a P2 smart pin to create the servo
       signal. Ramping and other slow motion behavior of the servo is controlled by
       the parent application.
-    description_short: Ramping and other slow motion behavior of the servo is controlled
-      by the parent application.
+    description_short: 'Servo driver that uses a P2 smart pin to create the servo signal; ramping is left to the parent application.'
     hardware_support: []
     peripherals: []
     subcategory: ''

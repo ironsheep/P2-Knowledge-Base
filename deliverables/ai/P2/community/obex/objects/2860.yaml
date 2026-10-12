@@ -14,7 +14,7 @@ object_metadata:
     category: Speech and Sound
     description_full: Sometimes, all you need is beeps, boops, and simple musical
       notes.
-    description_short: Utility object for P2 development.
+    description_short: 'Sound object for beeps, boops, and simple musical notes.'
     hardware_support: []
     peripherals: []
     subcategory: ''

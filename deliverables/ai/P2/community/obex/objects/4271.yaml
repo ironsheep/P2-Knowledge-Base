@@ -61,8 +61,7 @@ object_metadata:
 
       The floating-point operators work on floats, only. Use FLOAT/ROUND/TRUNC to
       go between integers and floats.'
-    description_short: Chip made a StrToFloat method using the built-in Spin2 floating-point
-      operators.
+    description_short: 'Spin2 method that converts number strings in all formats to single-precision IEEE-754 floats, aborting on errors.'
     hardware_support: []
     peripherals: []
     subcategory: ''

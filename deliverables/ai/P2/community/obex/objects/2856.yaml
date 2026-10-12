@@ -13,7 +13,7 @@ object_metadata:
   functionality:
     category: Display
     description_full: Runs P2ES matrix in cog for persistant display
-    description_short: Utility object for P2 development.
+    description_short: 'Runs the P2ES matrix in a cog for persistent display.'
     hardware_support: []
     peripherals: []
     subcategory: ''

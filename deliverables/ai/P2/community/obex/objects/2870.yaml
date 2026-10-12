@@ -15,7 +15,7 @@ object_metadata:
     description_full: This object receives and decodes Sony IRCS (infrared control
       system) signals using a standard active-low receiver module. Auto-detects 12-,
       15-, and 20-bit control codes.
-    description_short: Auto-detects 12-, 15-, and 20-bit control codes.
+    description_short: 'Receives and decodes Sony IRCS signals from an active-low receiver module; auto-detects 12-, 15- and 20-bit codes.'
     hardware_support: []
     peripherals: []
     subcategory: ''

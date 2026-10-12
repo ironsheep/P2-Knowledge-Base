@@ -108,8 +108,7 @@ object_metadata:
 
       - The calculation of the adress for accessing the font data was only working
       for 8x8 fonts and has been fixed.'
-    description_short: Currently it covers some functionality I'd call a 0.6 version
-      ;o) But it is already usable for projects.
+    description_short: 'Graphic display drivers for ST7789 LCD and SSD1327 OLED displays from Waveshare, with a device independent graphics lib.'
     hardware_support: []
     peripherals: []
     subcategory: ''

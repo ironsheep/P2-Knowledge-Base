@@ -43,8 +43,7 @@ object_metadata:
 
 
       Also see forum thread: https://forums.parallax.com/discussion/175326/sorta-optimized-jpeg-decoder'
-    description_short: Optimized/modified/bugfixed version of TJpgDec for FlexC on
-      P2.
+    description_short: 'Modified version of the TJpgDec JPEG decoder for FlexC on P2, decoding baseline JPEG images (no progressive).'
     hardware_support: []
     peripherals: []
     subcategory: ''

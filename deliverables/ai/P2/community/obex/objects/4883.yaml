@@ -39,8 +39,7 @@ object_metadata:
 
       25 MAR 2025: Minor touch-ups of comments and addition of version number (1_0_0).
       Added test program and image of output (from logic analyzer).'
-    description_short: There are four global digital filter settings which can be
-      used by each smart pin to low-pass filter its incoming pin states.
+    description_short: 'Configures the four global digital filter settings each smart pin can use to low-pass filter its incoming pin states.'
     hardware_support: []
     peripherals: []
     subcategory: ''

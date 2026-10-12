@@ -15,7 +15,7 @@ object_metadata:
     description_full: The TM1638 is popular in low-cost LED display driver and switch
       input IC used in low-cost HMIs. The demo code exploits all available features
       of the TM1638 through its 2-wire, SPI-like interface.
-    description_short: <Overviewn McPhalen.
+    description_short: 'Driver for the TM1638 LED display driver and switch input IC, with demo code using its 2-wire, SPI-like interface.'
     hardware_support: []
     peripherals: []
     subcategory: ''

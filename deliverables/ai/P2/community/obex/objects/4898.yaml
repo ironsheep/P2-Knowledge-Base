@@ -43,8 +43,7 @@ object_metadata:
       THE SITE OR RELIANCE ON ANY INFORMATION PROVIDED ON THE SITE. YOUR USE OF THE
       SITE AND YOUR RELIANCE ON ANY INFORMATION ON THE SITE IS SOLELY AT YOUR OWN
       RISK.'
-    description_short: Propeller 2 Evaluation Board (P2-EVAL) Rev C Schematic and
-      PCB Layout files in Diptrace version 5 format
+    description_short: 'Rev C Schematic and PCB Layout files for the Propeller 2 Evaluation Board (P2-EVAL), in Diptrace version 5 format.'
     hardware_support: []
     peripherals: []
     subcategory: ''

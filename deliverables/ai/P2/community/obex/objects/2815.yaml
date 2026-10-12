@@ -16,7 +16,7 @@ object_metadata:
   functionality:
     category: Sensor
     description_full: Provides P2 to bme280 interface
-    description_short: Utility object for P2 development.
+    description_short: 'Interface between the P2 and the BME280.'
     hardware_support: []
     peripherals: []
     subcategory: ''

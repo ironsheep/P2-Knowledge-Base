@@ -13,7 +13,7 @@ object_metadata:
   functionality:
     category: PCB Design
     description_full: This zip includes Schematic Symbol, Footprint, and 3d Model.
-    description_short: This zip includes Schematic Symbol, Footprint, and 3d Model.
+    description_short: 'KiCAD Schematic Symbol, Footprint, and 3d Model files for the P2 Edge.'
     hardware_support: []
     peripherals: []
     subcategory: ''

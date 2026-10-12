@@ -41,8 +41,7 @@ object_metadata:
       the following forum thread:
 
       Forum Thread: 180° Field of View Time-of-Flight sensor for the P2'
-    description_short: P2 VL53L5CX Object - A Port of the VL53L5CX I/F library/downloader
-      to Spin2/Pasm2
+    description_short: 'Spin2/Pasm2 port of the VL53L5CX I/F library/downloader, for the VL53L5CX Time-of-Flight (ToF) multizone ranging sensor.'
     hardware_support: []
     peripherals: []
     subcategory: ''

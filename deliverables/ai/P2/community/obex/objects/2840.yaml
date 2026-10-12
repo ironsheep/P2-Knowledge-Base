@@ -16,7 +16,7 @@ object_metadata:
 
 
       Interface for MikroElektronika RS485 Click 3v3 board'
-    description_short: Utility object for P2 development.
+    description_short: 'Interface for the MikroElektronika RS485 Click 3v3 board.'
     hardware_support: []
     peripherals: []
     subcategory: ''

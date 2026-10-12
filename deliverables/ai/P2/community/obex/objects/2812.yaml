@@ -131,8 +131,7 @@ object_metadata:
 
       SendFloat(x): uses SEND to output float x; selects between scientific and ordinary
       notation based on the size of the float'
-    description_short: These are functions for performing floating point math in Spin2.
-      To use, include a BinFloat object in your code, e.g.
+    description_short: 'Spin2 functions for binary floating point math (an IEEE-32 subset), used by including a BinFloat object.'
     hardware_support: []
     peripherals: []
     subcategory: ''

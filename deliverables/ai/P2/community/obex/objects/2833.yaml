@@ -26,9 +26,7 @@ object_metadata:
 
 
       Demo code runs the low-cost Chauvet LED-Splash lighting fixture.'
-    description_short: The object facilitates DMX signaling from the P2 using a simple,
-      half-duplex interface circuit. The object allows the user toset the universe
-      size for
+    description_short: 'DMX signaling from the P2 through a half-duplex interface circuit, with a settable universe size and channel count.'
     hardware_support: []
     peripherals: []
     subcategory: ''

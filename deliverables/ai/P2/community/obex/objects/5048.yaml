@@ -68,8 +68,7 @@ object_metadata:
 
 
       PS: v2.4 zip file contains both v2.4 and v1.29 drivers'
-    description_short: 4-bit SD mode SD card driver plug-in to Flexspin's FAT filesystem
-      layer.
+    description_short: 'SD card driver for a 4-bit wired SD slot, used as a plugin with the Flexspin compiler from Spin2, Basic, C and others.'
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -26,8 +26,7 @@ object_metadata:
       use this object, import esp32_core to set up serial and interface with the ESP32.
       For wifi functionality, import esp32_wifi. For TCP/IP networking, import esp32_tcpip.
       For TCP server functionality, import esp32_tcpip_tl2_beta.'
-    description_short: This group of modular objects is designed to interface with
-      an ESP32 microcontroller using a 2 pin serial UART.
+    description_short: 'Modular objects that interface with an ESP32 over a 2 pin serial UART, for the default Espressif "AT firmware".'
     hardware_support: []
     peripherals: []
     subcategory: ''

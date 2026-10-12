@@ -25,8 +25,7 @@ object_metadata:
 
       The code remains resident in cog RAM and runs in the background using a small
       number of registers beginning at $1B0.'
-    description_short: This object updates the rctime object from the P1 library for
-      the P2 processor.
+    description_short: 'P2 update of the rctime object from the P1 library, using a Smart pin with Schmitt trigger and an isr.'
     hardware_support: []
     peripherals: []
     subcategory: ''

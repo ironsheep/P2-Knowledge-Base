@@ -19,8 +19,7 @@ object_metadata:
       converter. Provides access to thermocouple temperature, cold junction temperature,
       and fault bits. Includes utility method to convert raw values to 0.01C units,
       and a conversion method to move from 0.01C to 0.01F units.
-    description_short: Simple interface (Spin only) to the MAX31855 thermocouple-to-digital
-      converter. Provides access to thermocouple temperature, cold junction temperature,
+    description_short: 'Spin-only interface to the MAX31855 thermocouple-to-digital converter, reading temperatures and fault bits.'
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -50,8 +50,7 @@ object_metadata:
       even if the number is larger; thus `hexn($123, 2)` prints `23`. This is useful
       for doing things like printing bytes or words, but be aware that if numbers
       overflow there is no indication.'
-    description_short: These are routines intended to be used with the Spin2 SEND
-      function to transmit formatted numbers or text.
+    description_short: 'Routines for the Spin2 SEND function that transmit formatted numbers or text.'
     hardware_support: []
     peripherals: []
     subcategory: ''

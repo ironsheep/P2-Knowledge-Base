@@ -28,8 +28,7 @@ object_metadata:
 
 
       Forum Thread: P2 .spin2 driver for eINK adapter Click board™'
-    description_short: A working driver for the P2 developed in spin2. It started
-      as a port of the C example code for the 2
+    description_short: 'Spin2 driver supporting all eInk displays sold by Parallax or Mikroe, begun as a port of 2.13" eINK C example code.'
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -52,7 +52,7 @@ object_metadata:
 
       - serial-control-archive-set.zip the code for RaspberryPi or Arduino control
       of a two-motor system (includes the dual motor control code)'
-    description_short: BLDC Motor Driver with steering and position tracking
+    description_short: 'BLDC motor driver with steering and position tracking, for the Parallax 64010 Universal Motor Driver P2 Add-on Boards.'
     hardware_support: []
     peripherals: []
     subcategory: ''

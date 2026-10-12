@@ -15,8 +15,7 @@ object_metadata:
     description_full: This object simplifies the configuration of an IO pin for use
       as a digital input. Allows for active-high or active-low, and provides methods
       for direct read and debounced inputs.
-    description_short: Allows for active-high or active-low, and provides methods
-      for direct read and debounced inputs.
+    description_short: 'Configures an IO pin as an active-high or active-low digital input, with direct read and debounced input methods.'
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -16,7 +16,7 @@ object_metadata:
   functionality:
     category: Display
     description_full: LCD via I2C using a PCF8574 or PCF8574A "backpack"
-    description_short: Utility object for P2 development.
+    description_short: 'LCD interface via I2C using a PCF8574 or PCF8574A "backpack".'
     hardware_support: []
     peripherals: []
     subcategory: ''

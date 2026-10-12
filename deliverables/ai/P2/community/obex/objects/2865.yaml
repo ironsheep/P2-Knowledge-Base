@@ -65,8 +65,7 @@ object_metadata:
       synthesizer, Frequency modulation, Frequency synthesis, Amplitude modulation,
       PWM, Pulse Width Modulation, Sound playback, Sound output, Sound synthesis,
       Audio playback, Audio generation, Audio output, Signal generation'
-    description_short: An emulation of the SN76489 programmable sound generator running
-      in a single cog.
+    description_short: 'P2 port of an emulation of the SN76489 programmable sound generator, running in a single cog.'
     hardware_support: []
     peripherals: []
     subcategory: ''

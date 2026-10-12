@@ -28,8 +28,7 @@ object_metadata:
       div33()
 
       Performs a 32-bit integer divide but with rounding to nearest.'
-    description_short: pllset() Calculates appropriate clock mode component values
-      to set a requested clock frequency via clkset().
+    description_short: 'Calculates clock mode component values with pllset() to set a requested clock frequency via clkset().'
     hardware_support: []
     peripherals: []
     subcategory: ''

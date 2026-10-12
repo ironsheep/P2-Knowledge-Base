@@ -25,8 +25,7 @@ object_metadata:
 
       The demo program uses the P2 Debug Terminal window which has been tested with
       Propeller Tool v2.93, PNut v51, and Spin Tools v0.48.1.'
-    description_short: This object takes advantage of the BNO08x RVC (serial) output
-      to provide Yaw, Pitch, Roll, X acceler
+    description_short: 'Reads Yaw, Pitch, Roll and X/Y/Z acceleration from BNO08x RVC (serial) output via Smart Pin serial RX, without a cog.'
     hardware_support: []
     peripherals: []
     subcategory: ''

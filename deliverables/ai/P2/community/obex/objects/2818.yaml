@@ -39,8 +39,7 @@ object_metadata:
 
       DOWNLOAD: while this is in development, please get this code directly from the
       repo.'
-    description_short: Driver for the MPU 9DOF Click module (uses underlying jm_i2c
-      driver for I2C access)
+    description_short: 'Driver for the MPU 9DOF Click module, using the underlying jm_i2c driver for I2C access.'
     hardware_support: []
     peripherals: []
     subcategory: ''

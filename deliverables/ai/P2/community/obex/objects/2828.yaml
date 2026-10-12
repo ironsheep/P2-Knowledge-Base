@@ -23,8 +23,7 @@ object_metadata:
       reset and auto run, put on hold, or allowed to free run. Interface methods give
       access to the timer as a whole, or to the various registers. A string method
       is included to simply output to displays like terminals and LCDs.'
-    description_short: 'This object demonstrates an advanced feature of Spin2: the
-      installation of an ISR (interrupt service'
+    description_short: 'Timer object (1/100th-second resolution) demonstrating an ISR installed into the Spin2 interpreter cog.'
     hardware_support: []
     peripherals: []
     subcategory: ''

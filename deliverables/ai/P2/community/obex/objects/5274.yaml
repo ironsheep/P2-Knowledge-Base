@@ -36,8 +36,7 @@ object_metadata:
 
       The demo program has been tested with Propeller Tool, Spin Tools IDE, and FlexProp
       (see the COMPILER constant setting in the program).'
-    description_short: This object simplifies the use of PING))) and LaserPING sensors
-      with the P1. The interface works in classic pulse mode, and supports
+    description_short: 'Interface for PING))) and LaserPING sensors in pulse mode, plus serial mode for LaserPING and PING))) Rev E or later.'
     hardware_support: []
     peripherals: []
     subcategory: ''

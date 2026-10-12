@@ -27,8 +27,7 @@ object_metadata:
 
       Note that the Qwiic Twist uses I2C clock stretching to manage bus requests;
       the I2C driver included in the demo file supports this feature.'
-    description_short: This object is a C-to-Spin2 translation of the Qwiic Twist
-      library for the Sparkfun Qwiic Twist encoder.
+    description_short: 'C-to-Spin2 translation of the Qwiic Twist library for the Sparkfun Qwiic Twist encoder, which connects via I2C.'
     hardware_support: []
     peripherals: []
     subcategory: ''

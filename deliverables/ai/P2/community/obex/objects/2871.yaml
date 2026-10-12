@@ -16,7 +16,7 @@ object_metadata:
   functionality:
     category: Data Storage
     description_full: R/W routines for AT24C32 (4K) EEPROM
-    description_short: Utility object for P2 development.
+    description_short: 'Read/write routines for the AT24C32 (4K) EEPROM.'
     hardware_support: []
     peripherals: []
     subcategory: ''

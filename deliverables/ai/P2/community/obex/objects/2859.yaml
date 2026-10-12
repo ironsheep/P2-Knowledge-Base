@@ -304,9 +304,7 @@ object_metadata:
       SOFTWARE
 
       OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
-    description_short: A simple object for interfacing with Nextion HMI displays that
-      is compatible with the protocol and HMI code used by the Arduino Easy Nextion
-      Library.
+    description_short: 'Object for Nextion HMI displays, compatible with the Arduino Easy Nextion Library protocol; P1 and P2 versions listed.'
     hardware_support: []
     peripherals: []
     subcategory: ''

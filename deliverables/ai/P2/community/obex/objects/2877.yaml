@@ -44,9 +44,7 @@ object_metadata:
 
 
       MIT (see end of source code)'
-    description_short: 'This object implements a step motor driver.
-
-      The trajectory is sinusoidal, ramp up, a period at const'
+    description_short: 'Step motor driver with a sinusoidal trajectory and a STOP input, in versions for step/direction or cw/ccw drivers.'
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -17,8 +17,7 @@ object_metadata:
     description_full: This simple object enables the P2 to transmit codes corresponding
       to the NEC IR transmission protocol through an IR LED. Standard and Extended
       address codes are supported, with up to four repeat commands for each transmission.
-    description_short: This simple object enables the P2 to transmit codes corresponding
-      to the NEC IR transmission protoco
+    description_short: 'Transmits NEC IR protocol codes from the P2 through an IR LED, with Standard and Extended address codes.'
     hardware_support: []
     peripherals: []
     subcategory: ''

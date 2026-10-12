@@ -25,8 +25,7 @@ object_metadata:
 
       Updated 23 SEP 2024. New version is identified with version # (1.1.1) and has
       Schmitt Trigger inputs enabled on encoder pins. Second demo added as well.'
-    description_short: This object configures a P2 smart pin for quadrature encoder
-      (value/position) mode. The object allow
+    description_short: 'Sets a P2 smart pin to quadrature encoder (value/position) mode, with value limits and four-counts-per-click support.'
     hardware_support: []
     peripherals: []
     subcategory: ''

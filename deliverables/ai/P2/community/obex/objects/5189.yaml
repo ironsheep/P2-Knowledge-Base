@@ -43,8 +43,7 @@ object_metadata:
       LongMSB() - extract long via MSB
 
       LongSHL() - left-shift long to make 64/96/128-bit value'
-    description_short: 'These three objects provide the following unsigned functions
-      for 64, 96, and 128-bit integers:'
+    description_short: 'Three objects providing unsigned functions for 64, 96, and 128-bit integers, such as add, multiply, divide and log2.'
     hardware_support: []
     peripherals: []
     subcategory: ''

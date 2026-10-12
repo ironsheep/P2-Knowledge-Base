@@ -35,8 +35,7 @@ object_metadata:
 
 
       This code was written with: Simple Tools IDE version 0.40.0'
-    description_short: One method to check the pin state of an IO pin is to drive
-      the pin in either direction (high/low) using the P2 smart-pin weak
+    description_short: 'Demo that detects an IO pin''s state by driving it with the P2 smart-pin weak drive, then testing the signal level.'
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -32,10 +32,7 @@ object_metadata:
 
       Update: Forum member EvanH has provided an improved version of the cogless sdspi,
       "sdspi_bashed3.spin2". This can replace "sdspi_bashed2.spin2" for improved performance.'
-    description_short: 'Here two uSD drivers that can both use your choice of three
-      low level drivers.
-
-      One is inline assembl'
+    description_short: 'Two uSD drivers, FSRW and FAT32, each with a choice of three low level drivers: inline assembly, cog, or cog with audio.'
     hardware_support: []
     peripherals: []
     subcategory: ''

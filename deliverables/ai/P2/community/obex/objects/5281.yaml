@@ -16,7 +16,7 @@ object_metadata:
 
 
       Tested with Propeller Tool and with Spin Tools IDE'
-    description_short: Utility object for P2 development.
+    description_short: 'Spin2 demo for the Click Stepper-2 driver accessory.'
     hardware_support: []
     peripherals: []
     subcategory: ''

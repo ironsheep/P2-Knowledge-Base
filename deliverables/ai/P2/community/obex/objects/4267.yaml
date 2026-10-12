@@ -18,8 +18,7 @@ object_metadata:
       (Reduced Media Independant Interface) directly to the PHY chip. The accessory
       board (see forum thread) also has a 24AA025E48 ROM for the MAC address and a
       25MHz crystal on board.
-    description_short: This is the driver for the Ethernet accessory board with LAN8720
-      PHY chip. It can send and receive raw Ethernet packets with 100Mbit/s
+    description_short: 'Driver for the Ethernet accessory board with LAN8720 PHY chip; sends and receives raw packets at 100Mbit/s full duplex.'
     hardware_support: []
     peripherals: []
     subcategory: ''

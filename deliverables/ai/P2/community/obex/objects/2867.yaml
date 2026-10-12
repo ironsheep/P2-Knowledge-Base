@@ -14,7 +14,7 @@ object_metadata:
     category: Human Input
     description_full: 'For use as a On/Off switch: set Switch to true, otherwise the
       buttons will act as momentary switches and not retain there state when released'
-    description_short: Utility object for P2 development.
+    description_short: 'Accessory board buttons that act as momentary switches, or as On/Off switches when Switch is set to true.'
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -20,7 +20,7 @@ object_metadata:
       and low-noise electronics with ambient light rejection. The MAX30102 provides
       a complete system solution to ease the design-in process for mobile and wearable
       devices.
-    description_short: 'The  MAX30102  is  an  integrated  pulse  oximetry  and heart-rate  monitor  module.  It  includes  '
+    description_short: 'Object for the MAX3010X sensors, such as the MAX30102 integrated pulse oximetry and heart-rate monitor module.'
     hardware_support: []
     peripherals: []
     subcategory: ''

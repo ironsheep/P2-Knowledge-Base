@@ -14,7 +14,7 @@ object_metadata:
     category: Math
     description_full: Get pseudo-random (manually-seeded) numbers and random (Xoroshiro128)
       numbers; optionally constrained to a desired range
-    description_short: Utility object for P2 development.
+    description_short: 'Gets pseudo-random (manually-seeded) and random (Xoroshiro128) numbers, optionally constrained to a desired range.'
     hardware_support: []
     peripherals: []
     subcategory: ''

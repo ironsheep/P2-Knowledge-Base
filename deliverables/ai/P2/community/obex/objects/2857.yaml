@@ -16,8 +16,7 @@ object_metadata:
       smart pixels (e.g., WS2812b) -- both 24- and 32-bit variants where applicable.
       Advanced controls allow the application to switch LED buffers for advanced animations
       effects, and to switch output pins for multi-output applications.
-    description_short: This driver provides control of the most popular single-wire
-      smart pixels (e.g., WS2812b) -- both 24
+    description_short: 'Driver for single-wire smart pixels (e.g., WS2812b), 24- and 32-bit, with switchable LED buffers and output pins.'
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -37,8 +37,7 @@ object_metadata:
 
       NOTE: This is a code snippet meant to illustrate the core code, it is not meant
       to compile as-is; ex: variable declarations are needed.'
-    description_short: The Park or d/q-transformation is useful when controlling AC
-      motors or brushless servo motors. It transforms currents or voltages from
+    description_short: 'Code snippet showing how the P2 CORDIC unit does the Park (d/q) transformation and its inverse, for AC motor control.'
     hardware_support: []
     peripherals: []
     subcategory: ''

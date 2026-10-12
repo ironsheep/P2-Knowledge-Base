@@ -16,7 +16,7 @@ object_metadata:
   functionality:
     category: Sensor
     description_full: Interface for PIXY2 Camera.
-    description_short: Utility object for P2 development.
+    description_short: 'Interface for the PIXY2 Camera.'
     hardware_support: []
     peripherals: []
     subcategory: ''

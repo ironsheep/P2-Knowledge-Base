@@ -16,8 +16,7 @@ object_metadata:
     - Signals
     description_full: This simple object uses the P2 ADC smart pin mode to measure
       voltage on an IO pin.
-    description_short: This simple object uses the P2 ADC smart pin mode to measure
-      voltage on an IO pin.
+    description_short: 'Measures voltage on an IO pin using the P2 ADC smart pin mode.'
     hardware_support: []
     peripherals: []
     subcategory: ''

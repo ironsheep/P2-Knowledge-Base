@@ -18,9 +18,7 @@ object_metadata:
     description_full: this is a very simple compass driver for the prop2, not much
       else to say about it. it works and it includes fastatan2 for getting compass
       heading. You should be able to swap them at your leisure.
-    description_short: this is a very simple compass driver for the prop2, not much
-      else to say about it. it works and it includes fastatan2 for getting compass
-      heading. You should be able to swap them at your leisure.
+    description_short: 'Compass drivers for the QMC5883L, HMC5883 and BMM150 on the prop2, including fastatan2 for compass heading.'
     hardware_support: []
     peripherals: []
     subcategory: ''

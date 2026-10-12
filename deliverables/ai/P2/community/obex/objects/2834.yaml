@@ -18,9 +18,7 @@ object_metadata:
       with user-selected PWM frequency. Provided methods accommodate DMX-compatible
       levels (0..255), and user-set levels for greater precision when required (e.g.,
       motor control).
-    description_short: This object converts any P2 pin into a set-and-forget PWM output
-      with user-selected PWM frequency. Provided methods accommodate DMX-compatible
-      levels
+    description_short: 'Converts any P2 pin into a PWM output with user-selected frequency and DMX-compatible (0..255) or user-set levels.'
     hardware_support: []
     peripherals: []
     subcategory: ''

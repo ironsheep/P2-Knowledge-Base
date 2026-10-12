@@ -43,8 +43,7 @@ object_metadata:
       - You can now choose the number of masks used for the calculation of the penalty
       score. Choose 1-8. The masks are ordered from least, to most computationally
       complex.'
-    description_short: This is a P2 QR Code generator based on the work of B.J. Guillot's
-      qr and Vzaa's C90 fork named qrwp
+    description_short: 'P2 QR Code generator that outputs to the SEND() method as ASCII, ANSI, UNICODE or custom characters, or to SSD1331.'
     hardware_support: []
     peripherals: []
     subcategory: ''

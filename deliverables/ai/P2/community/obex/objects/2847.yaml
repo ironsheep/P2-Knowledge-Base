@@ -30,9 +30,7 @@ object_metadata:
 
 
       See Notes.md for more information.'
-    description_short: The ansi.spin2 file provides a VGA text driver that supports
-      standard ANSI escape codes for text effects (like changing colors, flashing,
-      etc.
+    description_short: 'VGA text driver (ansi.spin2) with ANSI escape codes, four resolutions up to 1280x800, and 8x8, 8x16 and 16x32 fonts.'
     hardware_support: []
     peripherals: []
     subcategory: ''

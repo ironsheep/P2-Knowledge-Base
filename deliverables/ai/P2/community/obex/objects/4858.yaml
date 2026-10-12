@@ -19,8 +19,7 @@ object_metadata:
       samples at 16k samples per second on all four channels. Sampling time can be
       roughly doubled to gain another effective bit. All readings are reported in
       microvolts. Longer sampling times increase precision.
-    description_short: This object makes a 4-channel, constant-impedance, high-performance
-      ADC which uses 3 contiguous pins
+    description_short: '4-channel, constant-impedance ADC using 3 contiguous pins per channel, giving 13-bit samples at 16k samples/s at 200MHz.'
     hardware_support: []
     peripherals: []
     subcategory: ''

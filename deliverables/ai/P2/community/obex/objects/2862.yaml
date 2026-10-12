@@ -151,8 +151,7 @@ object_metadata:
       - Compile with flexspin -2 megajuke.c -D_BAUD=2000000
 
       - Load with loadp2 -p [your port here] -t -9 . -b 2000000 megajuke.binary'
-    description_short: This is an emulation of the Yamaha "OPN2" YM2612 FM synth chip
-      that runs in one P2 cog.
+    description_short: 'Emulation of the Yamaha "OPN2" YM2612 FM synth chip that runs in one P2 cog.'
     hardware_support: []
     peripherals: []
     subcategory: ''

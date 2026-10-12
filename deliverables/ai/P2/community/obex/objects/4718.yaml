@@ -36,8 +36,7 @@ object_metadata:
       \ return true if more than 50ms have passed since\n       last time it was read.\n\
       \n        pushbutton := 10\n        timer1.init(50)\n        repeat\n      \
       \      if(timer1.debounce( pinread(pushbutton) ))\n              pintoggle(56)"
-    description_short: Implementation of a non-blocking timer utility for use in common
-      timing and delays use cases
+    description_short: 'Non-blocking timer for Propeller 2, ported from Arduino, for timing and delays without blocking the processor.'
     hardware_support: []
     peripherals: []
     subcategory: ''

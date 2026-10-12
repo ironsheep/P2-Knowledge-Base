@@ -26,8 +26,7 @@ object_metadata:
 
 
       Also see the github page and associated wiki.'
-    description_short: Allows reading keyboard, mouse and gamepads. MD for full usage
-      info. Also see the github page and associated wiki.
+    description_short: 'USB input driver for P2 that reads keyboard, mouse and gamepads.'
     hardware_support: []
     peripherals: []
     subcategory: ''

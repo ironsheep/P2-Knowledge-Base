@@ -13,7 +13,7 @@ object_metadata:
   functionality:
     category: Protocol
     description_full: DMX output for MikroElektronika RS485 Click 3v3 board.
-    description_short: <Overviewn McPhalen.
+    description_short: 'DMX output for the MikroElektronika RS485 Click 3v3 board.'
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -35,8 +35,7 @@ object_metadata:
 
 
       Added temperature reading into demo'
-    description_short: DS3231 RTC interface (uses 24-hr format). P1 and P2 versions
-      attached.
+    description_short: 'Interface to the DS3231 RTC using 24-hr format, with P1 and P2 versions attached.'
     hardware_support: []
     peripherals: []
     subcategory: ''

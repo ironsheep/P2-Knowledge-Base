@@ -24,8 +24,7 @@ object_metadata:
       see picture demo_32 Voltage_Meters.png
 
       demo webserver : Led Control - demo led_control.spin2, see picture demo_led_control.png'
-    description_short: Provides P2 to ESP32 AT Interface (esp_drv, esp_wifi, esp_tcp,
-      esp_logon)
+    description_short: 'P2 to ESP32 AT interface (esp_drv, esp_wifi, esp_tcp, esp_logon), with demo webservers.'
     hardware_support: []
     peripherals: []
     subcategory: ''

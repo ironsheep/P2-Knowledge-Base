@@ -13,7 +13,7 @@ object_metadata:
   functionality:
     category: Human Input
     description_full: Interface code for P2ES Control (buttons & LEDs) PCB
-    description_short: Utility object for P2 development.
+    description_short: 'Interface code for the P2ES Control (buttons & LEDs) PCB.'
     hardware_support: []
     peripherals: []
     subcategory: ''

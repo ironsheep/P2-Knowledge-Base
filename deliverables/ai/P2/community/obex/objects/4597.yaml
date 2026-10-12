@@ -35,8 +35,7 @@ object_metadata:
       the following repository:
 
       GitHub repository: P2 Multi-servo Exerciser'
-    description_short: 'Breadboard Mates (BBM) produces the TIMI line of displays.
-      These are similar to the Nextion devices '
+    description_short: 'Spin2 object that controls Breadboard Mates (BBM) TIMI displays over serial after their screens are programmed.'
     hardware_support: []
     peripherals: []
     subcategory: ''

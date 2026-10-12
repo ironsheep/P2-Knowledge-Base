@@ -41,7 +41,7 @@ object_metadata:
 
       - a video driver supporting many different formats (including HDMI with audio!),
       optimized for scanline rendering'
-    description_short: NeoGeo AES emulator for Parallax P2 + memory expansion.
+    description_short: 'NeoGeo AES emulator for the Parallax P2, needing HyperRAM or PSRAM, USB inputs and VGA/HDMI or other video output.'
     hardware_support: []
     peripherals: []
     subcategory: ''

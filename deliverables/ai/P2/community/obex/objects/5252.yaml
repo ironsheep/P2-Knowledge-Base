@@ -24,8 +24,7 @@ object_metadata:
 
       - Skeleton for a message handler for converting incoming mavlink messages into
       structs so your vehicle or ground control station can use them'
-    description_short: 'This object supports the MAVLink 1.0 and 2.0 protocols for
-      the P2. It provides the following:'
+    description_short: 'Supports the MAVLink 1.0 and 2.0 protocols for the P2, with a COMMON dialect handler, sender and message parser.'
     hardware_support: []
     peripherals: []
     subcategory: ''

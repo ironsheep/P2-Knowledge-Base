@@ -33,8 +33,7 @@ object_metadata:
       See the repository for more detailed documentation, code for exercising two
       P2 edge modules with 8 serial ports wired between them, code for Raspberry Pi
       instead of the 2nd P2, and possibly later releases.'
-    description_short: A single COG services from 1 to 8 Tx/Rx pairs of pins. The
-      pins are configured as smart pins, meanin
+    description_short: 'Serial subsystem in which a single COG services 1 to 8 Tx/Rx smart-pin pairs; pasm2 backend, spin2 interface routines.'
     hardware_support: []
     peripherals: []
     subcategory: ''

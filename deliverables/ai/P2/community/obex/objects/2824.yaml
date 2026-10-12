@@ -16,7 +16,7 @@ object_metadata:
     - Sensor
     description_full: This object is used to receive and decode the NEC IR Transmission
       Protocol. Demonstration code displays the raw input, address, and command.
-    description_short: Demonstration code displays the raw input, address, and command.
+    description_short: 'Receives and decodes the NEC IR Transmission Protocol; demonstration code displays the raw input, address, and command.'
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -14,8 +14,7 @@ object_metadata:
     category: Protocol
     description_full: Drivers for the MCP2517 CANbus FD controller, for the P1 and
       P2
-    description_short: Drivers for the MCP2517 CANbus FD controller, for the P1 and
-      P2
+    description_short: 'Drivers for the MCP2517 CANbus FD controller, for the P1 and P2.'
     hardware_support: []
     peripherals: []
     subcategory: ''

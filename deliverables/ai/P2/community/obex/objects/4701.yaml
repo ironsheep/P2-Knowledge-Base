@@ -14,8 +14,7 @@ object_metadata:
     category: Motor Control
     description_full: Simple driver for DC motors run through an h-bridge. Accepts
       speed control in 0.1% increments for high-resolution control.
-    description_short: Accepts speed control in 0. 1% increments for high-resolution
-      control.
+    description_short: 'Driver for DC motors run through an h-bridge, accepting speed control in 0.1% increments.'
     hardware_support: []
     peripherals: []
     subcategory: ''

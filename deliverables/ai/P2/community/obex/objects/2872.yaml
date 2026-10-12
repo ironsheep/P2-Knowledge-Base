@@ -19,8 +19,7 @@ object_metadata:
       flash ROM of the P2. Can be used to store configuration or user data in free
       pages not used for the software itself. Provides no file system but only simple
       page erase/write/read commands.
-    description_short: Very simple driver for SPI flash devices like the external
-      boot flash ROM of the P2. Can be used to store configuration or user data
+    description_short: 'Driver for SPI flash devices like the P2''s external boot flash ROM, with page erase/write/read commands, no file system.'
     hardware_support: []
     peripherals: []
     subcategory: ''

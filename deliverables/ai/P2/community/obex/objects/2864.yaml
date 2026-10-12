@@ -126,8 +126,7 @@ object_metadata:
       synthesizer, Frequency modulation, Frequency synthesis, Amplitude modulation,
       PWM, Pulse Width Modulation, Sound playback, Sound output, Sound synthesis,
       Audio playback, Audio generation, Audio output, Signal generation, Game'
-    description_short: An emulation of the AY-3-8910/YM-2149F programmable sound generator
-      running in a single cog.
+    description_short: 'P2 port of an emulation of the AY-3-8910/YM-2149F programmable sound generator, running in a single cog.'
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -23,11 +23,7 @@ object_metadata:
       \                         ' DAC settle time is about 1.0 us\n    level |= pinr(\
       \ pinnum ) << bit    ' pin voltage higher than comparator's DAC\n\n  wrpin(\
       \ pinnum, 0 )    ' clean up"
-    description_short: 'com/discussion/174441/measuring-floating-pin-voltage-adc-from-just-the-built-in-comparator/p1
-      pub sar_adc( pinnum ) : level | bit '' This routine makes use of the comparator''s
-      unloaded inputs '' to measure the floating voltage of the pin. '' Returns an
-      unsigned 8-bit value in "level", GIO to VIO volts '' pinf( pinnum ) level :=
-      0 repeat bit from 7 to 0 wrpin( pinnum, P_LEVEL_A | ((level | (1<<bit)) <<'
+    description_short: 'Spin2 routine that uses the comparator''s unloaded inputs to measure a pin''s floating voltage as an unsigned 8-bit value.'
     hardware_support: []
     peripherals: []
     subcategory: ''

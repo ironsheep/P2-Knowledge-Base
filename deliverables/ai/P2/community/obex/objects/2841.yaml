@@ -20,8 +20,7 @@ object_metadata:
 
       A short program connects to the P2 flash memory to demonstrate shiftout() and
       shiftin() at 10MHz using Spin2 code.'
-    description_short: This object enables Mode 0 SPI communications using P2 smart
-      pins. This allows for high-speed SPI without needing PASM2 code.
+    description_short: 'Mode 0 SPI using P2 smart pins without PASM2 code, with shift-out, shift-in and full-duplex shifting methods.'
     hardware_support: []
     peripherals: []
     subcategory: ''

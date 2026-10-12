@@ -15,9 +15,7 @@ object_metadata:
     description_full: This object is a P2 update to FullDuplexSerial for the P1. There
       are minor changes and additions to the numeric output methods, and the inclusion
       of string formatting for complex output as is available in other languages.
-    description_short: This object is a P2 update to FullDuplexSerial for the P1.
-      There are minor changes and additions to the numeric output methods, andthe
-      inclusion of string formatting
+    description_short: 'P2 update to FullDuplexSerial for the P1, with numeric output changes and string formatting for complex output.'
     hardware_support: []
     peripherals: []
     subcategory: ''

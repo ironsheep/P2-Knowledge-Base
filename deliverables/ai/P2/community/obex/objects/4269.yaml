@@ -21,7 +21,7 @@ object_metadata:
       GSKILL 32GB Micro SDHC
 
       cards must be formatted as FAT32'
-    description_short: Utility object for P2 development.
+    description_short: 'Driver for SD cards formatted as FAT32.'
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -27,8 +27,7 @@ object_metadata:
 
       - 50% duty cycle and Dir changes in the middle of the step low-phase avoids
       setup/hold problems'
-    description_short: Step/Dir signal generator for multiple axes, can be used to
-      drive stepper motor or servo drives Supports:.
+    description_short: 'Generates Step/Dir signals for multiple axes, to drive stepper motor or servo drives.'
     hardware_support: []
     peripherals: []
     subcategory: ''

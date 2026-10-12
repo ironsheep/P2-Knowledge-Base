@@ -58,9 +58,7 @@ object_metadata:
 
 
       dsp_tablegen.rb Script for building DSPGAUSS.DAT'
-    description_short: This is an emulation of the Nintendo/Sony sound module used
-      in the Super NES / Super Famicom (consisting of an SPC700 processor and a custom
-      audio DSP) that runs in one P2 cog.
+    description_short: 'Emulation of the Super NES / Super Famicom sound module (SPC700 processor and custom audio DSP) in one P2 cog.'
     hardware_support: []
     peripherals: []
     subcategory: ''

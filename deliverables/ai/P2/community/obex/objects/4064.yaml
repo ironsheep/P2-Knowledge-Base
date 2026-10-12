@@ -22,9 +22,7 @@ object_metadata:
       oscillator and high-accuracy temperature sensor. These features, along with
       a wide power supply range from 2 V to 5.5 V, make the ADS1118 ideally suited
       for power- and space- constrained, sensor-measurement applications.
-    description_short: The ADS1118 is a precision, low power, 16-bit analog-to-digital
-      converter (ADC) that provides all features necessary to measure themost common
-      sensor signals in
+    description_short: 'Object for the ADS1118 16-bit analog-to-digital converter (ADC).'
     hardware_support: []
     peripherals: []
     subcategory: ''

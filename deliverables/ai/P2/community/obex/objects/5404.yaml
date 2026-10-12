@@ -89,9 +89,7 @@ object_metadata:
 
       - This started as Chris Gadd''s #4269 SD Driver updated for OS Interchange and
       write failure protection, and is now certified for high-performance'
-    description_short: This project provides a robust, high-performance SD card driver
-      for the P2 microcontroller with full FAT32 filesystem support. The driver uses
-      P2 smart pins for
+    description_short: 'SD card driver for the P2 with FAT32 filesystem support, smart-pin SPI and multiple simultaneous file handles.'
     hardware_support: []
     peripherals: []
     subcategory: ''

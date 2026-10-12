@@ -32,8 +32,7 @@ object_metadata:
       the 3D model URL to match your local drive structure. Use the Diptrace Pattern
       Editor, open each part and click "3D model" to set the correct URL, then click
       "Load Model" to verify.'
-    description_short: Parallax Propeller 2 Library for Diptrace includes schematic
-      symbols, patterns and 3D models
+    description_short: 'Diptrace library of Parallax Propeller 2 schematic symbols, patterns and 3D models.'
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -14,8 +14,7 @@ object_metadata:
     category: Snippet
     description_full: This is a code snippet created by Claude AI to convert URL Encoded
       text to plain text.
-    description_short: This is a code snippet created by Claude AI to convert URL
-      Encoded text to plain text.
+    description_short: 'Code snippet, created by Claude AI, that converts URL Encoded text to plain text.'
     hardware_support: []
     peripherals: []
     subcategory: ''

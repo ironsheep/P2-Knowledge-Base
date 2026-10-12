@@ -17,9 +17,7 @@ object_metadata:
     description_full: This Spin2 code provides functions for converting floats to
       strings with precision specified. It was converted from existing FloatString.spin
       functions.
-    description_short: This Spin2 code provides functions for converting floats to
-      strings with precision specified. It was converted from existing FloatString.spin
-      functions.
+    description_short: 'Spin2 functions that convert floats to strings with specified precision, converted from FloatString.spin functions.'
     hardware_support: []
     peripherals: []
     subcategory: ''

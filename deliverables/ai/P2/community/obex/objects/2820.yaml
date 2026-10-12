@@ -18,7 +18,7 @@ object_metadata:
     - Protocol
     - Sensor
     description_full: Interface for MikroElektronika RTC 10 Click board
-    description_short: Utility object for P2 development.
+    description_short: 'Interface for the MikroElektronika RTC 10 Click board.'
     hardware_support: []
     peripherals: []
     subcategory: ''

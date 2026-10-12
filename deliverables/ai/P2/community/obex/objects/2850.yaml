@@ -82,8 +82,7 @@ object_metadata:
 
 
       DOWNLOAD: please download "Source code.zip" from the release-notes link above.'
-    description_short: 'NOTE: This P2 HUB75 driver is built to work with the P2 Eval
-      HUB75 Adapter which is available from HUB75 at Parallax.com Store'
+    description_short: 'Driver for HUB75-controlled RGB LED Matrix Panels, built to work with the P2 Eval HUB75 Adapter.'
     hardware_support: []
     peripherals: []
     subcategory: ''

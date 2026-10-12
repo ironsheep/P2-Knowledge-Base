@@ -44,8 +44,7 @@ object_metadata:
 
 
       DOWNLOAD: please get this code directly from the repo.'
-    description_short: This project was created to help me exercise many servos within
-      a single project without re-cabling each servo to characterize it.
+    description_short: 'Menu-based tester/exerciser for many servos, using a rotary controller and a TIMI OLED display, without re-cabling.'
     hardware_support: []
     peripherals: []
     subcategory: ''

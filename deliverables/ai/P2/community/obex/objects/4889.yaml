@@ -39,8 +39,7 @@ object_metadata:
       \ the data to send, and maxlen is the maximum size of the buffer. The function\
       \ returns the actual number of bytes received in the reply from the host.\n\n\
       See the detailed documentation in the .zip file for more details."
-    description_short: HOST FS - code for accessing the host filesystem via the 9P
-      protocol
+    description_short: 'Code for accessing the host filesystem via the 9P protocol, using the serial port by default.'
     hardware_support: []
     peripherals: []
     subcategory: ''

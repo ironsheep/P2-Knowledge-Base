@@ -16,8 +16,7 @@ object_metadata:
       The default Spin2 floating point uses the IEEE binary (base 2) format, which
       has the disadvantage that numbers like 0.1 or 0.02 are not exactly representable;
       this creates confusion and error.
-    description_short: This object provides decimal (base 10) floating point math
-      routines. The default Spin2 floating poin
+    description_short: 'Decimal (base 10) floating point math routines, unlike the IEEE binary (base 2) format of default Spin2 floating point.'
     hardware_support: []
     peripherals: []
     subcategory: ''
