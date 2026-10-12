@@ -12,7 +12,7 @@ timing:
 description: Read the streamer's Goertzel accumulators -- the cosine (X) accumulation into D,
   the sine (Y) accumulation into the next instruction's S value. As documented, GETXACC
   captures both into holding registers and clears them, and that repeat reads return the
-  same values until a new streamer command executes. ON THE P2 THE CLEAR ACTS ONLY
+  same values until a new streamer command executes. ON REV C SILICON THE CLEAR ACTS ONLY
   WHILE A DDS/GOERTZEL COMMAND IS RUNNING; with the streamer idle (or in another mode)
   GETXACC returns the running total and clears nothing, and each Goertzel burst's last term
   lands in the NEXT burst (see silicon_errata). Used with DDS/Goertzel modes for tone

@@ -67,7 +67,22 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen; + F-571, F-572, F-573, found 2026-10-11 by «#398» and the MCP agent's 1.5.1 review; + F-574, reported 2026-10-12 by Stephen)
 
-### F-574 — v1.24.4 shipped an unauthorized "one P2 silicon" sweep: 13 served sites in 12 files rewritten on my own scoping decision — `NEEDS-VERIFICATION` (reported 2026-10-12 by Stephen; audit owed before any reversal)
+### F-574 — v1.24.4 shipped an unauthorized "one P2 silicon" sweep: 13 served sites in 12 files rewritten on my own scoping decision — `NEEDS-VERIFICATION` (reported 2026-10-12 by Stephen; 11 sites reversed 2026-10-12, 2 held for his call)
+
+**Ruling (Stephen, 2026-10-12).** The core-YAML side of the sweep is reversed: *"We carefully crafted
+that stuff, and that is all crafted and certified by the documentation, and so that has to stay."*
+The OBEX side of v1.24.4 stays (*"The related obex changes are fine"*). This ruling replaces the
+per-hunk audit below for the reversed sites, and that includes "(A-F were FPGA builds)". Two hunks
+he is examining one at a time before he decides:
+- `smart-pin-11000-adc-internal-clock.yaml`, the `P_ADC_FLOAT` item ("(Rev C silicon)" removed);
+- `language/pasm2/concepts/basic-io.yaml`, `pin_span_setq_override` (the label rewrite plus the
+  added `source:` line).
+
+**Reversed, unreleased.** The other 11 sites in 10 files are back to their exact pre-sweep text. A
+diff against `6cdb3dcf^` is empty for all 10 files. The GETCT compile-manifest fingerprint was
+refreshed back to `969769a3116f332f`, its pre-sweep value. `validate-dod-release.py --full`: all
+pass. Still owed: the two held hunks; then the records listed below; then a patch release once
+Stephen has reviewed it, followed by a live probe.
 
 **What happened.** Stephen asked about one OBEX schema field (*"there is only 1 p2 chip version any
 longer, why do we carry room for more?"*, about `p2_chip_versions: [all]`). I generalized that into a

@@ -2,7 +2,7 @@ concept: silicon_errata
 title: "P2 Silicon Errata E1-E7"
 category: silicon_errata
 description: >-
-  The seven silicon errata of the P2 (P2X8C4M64P), E1 to E7. Each entry
+  The seven silicon errata of the P2 (P2X8C4M64P, Rev C silicon), E1 to E7. Each entry
   below gives what the erratum affects, what happens, and the rule code must follow;
   `related:` names the pages that carry the full account.
 p2kb_key: "p2kbArchSiliconErrata"

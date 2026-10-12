@@ -176,7 +176,7 @@ reading_results:
     4. Each Goertzel burst's last term is added on the first clock of the NEXT
        Goertzel burst, so a reading after a burst of N clocks holds N-1 terms.
     (The documentation describes capture-and-clear into holding registers on every
-    GETXACC; the silicon clears only during a Goertzel burst -- P2 errata E4 and
+    GETXACC; Rev C silicon clears only during a Goertzel burst -- P2 errata E4 and
     E5, in language/pasm2/getxacc.yaml silicon_errata.)
 
   reading_protocol: |
