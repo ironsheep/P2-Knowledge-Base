@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: G
@@ -11,7 +11,7 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
+    category: Display
     description_full: This driver provides control of the APA102C smart pixel (2 wire,
       data and clock) which is favored by some over the WS2812 due to higher communications
       speed and faster internal PWM (this is especially popular in the film and television
@@ -25,11 +25,7 @@ object_metadata:
     peripherals: []
     subcategory: ''
     tags:
-    - pwm
-    - driver
-    - led
-    - spi
-    - display
+    - PWM
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:05.264488'
     kb_integration: none
@@ -47,11 +43,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: APA102C Smart Pixel Driver
   urls:
     documentation: ''

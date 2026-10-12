@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: G
@@ -11,7 +11,7 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
+    category: Display
     description_full: This driver provides control of the most popular single-wire
       smart pixels (e.g., WS2812b) -- both 24- and 32-bit variants where applicable.
       Advanced controls allow the application to switch LED buffers for advanced animations
@@ -21,12 +21,7 @@ object_metadata:
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - demo
-    - driver
-    - led
-    - spi
-    - display
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:03.845010'
     kb_integration: none
@@ -42,11 +37,14 @@ object_metadata:
     file_format: ZIP
     file_size: 2812B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: RGBX Pixel Driver
   urls:
     documentation: ''

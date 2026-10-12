@@ -11,22 +11,32 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: A working driver for the P2 developed in spin2. It started as
-      a port of the C example code for the 2.13" eINK display, which Parallax ships.
-      It has been extended to add capabilities to create more creative displays.  It
+    category: Display
+    description_full: 'A working driver for the P2 developed in spin2. It started
+      as a port of the C example code for the 2.13" eINK display, which Parallax ships.
+      It has been extended to add capabilities to create more creative displays. It
       supports all eInk displays sold by Parallax.com or by Mikroe.com.
+
+
+      Version: 0.9.2 Release Notes
+
+
+      GitHub repository: P2-Click-eInk
+
+
+      See repository for supported hardware and much more detailed documentation.
+
+
+      Forum Thread: P2 .spin2 driver for eINK adapter Click board™'
     description_short: A working driver for the P2 developed in spin2. It started
       as a port of the C example code for the 2
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - demo
-    - spi
-    - driver
-    - led
-    - display
+    - Click
+    - eInk
+    - SPI
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:00.896204'
     kb_integration: none
@@ -46,6 +56,9 @@ object_metadata:
     microcontroller:
     - P2
     version: 0.9.2
+    content_type:
+    - Code
+    licence: MIT
   title: ISP P2 eInk Driver
   urls:
     documentation: ''

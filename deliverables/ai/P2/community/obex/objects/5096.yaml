@@ -11,10 +11,14 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
-    description_full: This is an Autodesk Fusion model of the P2 Arc8de 8in1 Cabinet.
-      I used 3mm Birch Plywood for it's construction. Link to the original thread
-      on the P2 forum is here .
+    category: 3D Model
+    description_full: 'This is an Autodesk Fusion model of the P2 Arc8de 8in1 Cabinet.
+      I used 3mm Birch Plywood for it''s construction.
+
+      Link to the original thread on the P2 forum is here.
+
+
+      This model is shared under the CC BY-SA 4.0 licence.'
     description_short: This is an Autodesk Fusion model of the P2 Arc8de 8in1 Cabinet.
       I used 3mm Birch Plywood for it's construction. Link to the original thread
       on the P2 forum is h
@@ -41,6 +45,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Hardware
+    licence: Other
   title: Autodesk Fusion model of P2 Arc8de 8in1
   urls:
     documentation: ''

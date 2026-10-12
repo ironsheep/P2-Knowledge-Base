@@ -11,9 +11,27 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
-    description_full: Parallax Propeller 2 Library for Diptrace includes schematic
+    category:
+    - 3D Model
+    - PCB Design
+    description_full: 'Parallax Propeller 2 Library for Diptrace includes schematic
       symbols, patterns and 3D models
+
+
+      Typical installation instructions:
+
+      - Download and unzip the library folder
+
+      - Copy the Diptrace folder into your Windows "My Documents" Diptrace folder
+
+      - Start Diptrace and find the Parallax P2 library listed under User Components
+      and User Patterns (or add the library in the Library Tools menu if required)
+
+
+      Tip: If the 3D models do not appear automatically, you might need to adjust
+      the 3D model URL to match your local drive structure. Use the Diptrace Pattern
+      Editor, open each part and click "3D model" to set the correct URL, then click
+      "Load Model" to verify.'
     description_short: Parallax Propeller 2 Library for Diptrace includes schematic
       symbols, patterns and 3D models
     hardware_support: []
@@ -38,6 +56,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Hardware
+    licence: MIT
   title: Parallax P2 Library for Diptrace
   urls:
     documentation: ''

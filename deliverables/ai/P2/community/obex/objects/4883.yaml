@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: B
@@ -11,19 +11,44 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
-    description_full: There are four global digital filter settings which can be used
-      by each smart pin to low-pass filter its incoming pin states.
+    category: Signals
+    description_full: 'From the P2 Documentation
+
+
+      There are four global digital filter settings which can be used by each smart
+      pin to low-pass filter its incoming pin states.
+
+
+      Each filter setting includes a filter length and a timing tap. The filter length
+      is 2, 3, 5, or 8 flipflops, selected by values 0..3. The flipflops shift pin
+      state data at the timing tap rate and must be unanimously high or low to change
+      the filter output to high or low. The timing tap is one of the lower 32 bits
+      of CT (the free-running 64-bit global counter), selected by values 0..31. Each
+      time the selected tap transitions, the current pin state is shifted into the
+      flipflops and if the flipflops are all in agreement, the filter output goes
+      to that state. The filter will be reflected in the INA/INB bits if no smart
+      pin mode is selected, or the filter states will be used by the smart pin mode
+      as its inputs.
+
+
+      Link: https://docs.google.com/document/d/1gn6oaT5Ib7CytvlZHacmrSbVBJsD9t_-kmvjd7nUR6o/edit#heading=h.m3x88z9a7jkn
+
+
+      This simple object allows the program to reconfigure the P2 digital pin filters.
+
+
+      25 MAR 2025: Minor touch-ups of comments and addition of version number (1_0_0).
+      Added test program and image of output (from logic analyzer).'
     description_short: There are four global digital filter settings which can be
       used by each smart pin to low-pass filter its incoming pin states.
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - spi
-    - demo
-    - driver
+    - filter
+    - jonnymac
+    - p2
+    - pin
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:58.182033'
     kb_integration: none
@@ -45,6 +70,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: P2 Pin Filter Configuration
   urls:
     documentation: ''

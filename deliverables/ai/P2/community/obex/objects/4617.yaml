@@ -11,20 +11,50 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: motors
-    description_full: This project was created to help me exercise many servos within
+    category:
+    - Display
+    - Human Input
+    - Motor Control
+    description_full: 'This project was created to help me exercise many servos within
       a single project without re-cabling each servo to characterize it.
+
+
+      I grabbed a rotary controller and a TIMI OLED display from my parts bin and
+      created this menu-based tester/exerciser.
+
+      At the repo, you''ll find pictures of interaction with the project as well as
+      my objects for the rotary encoder with push button, the TIMI display object,
+      and the PCA9685 interface object as well as a servo object so that we can create
+      an instance of the servo object for each servo in our projects which is connected
+      through the PCA9685. We talk to these servo instances as if we are interacting
+      with the servos directly.
+
+
+      Version (repository Latest)
+
+
+      GItHub repository: P2 Multi-servo Exerciser
+
+
+      See also the OBEX pages:
+
+      - ISP P2 TIMI Spin2 Object
+
+      - ISP PCA9685 16ch PWM Servo Driver
+
+
+      DOWNLOAD: please get this code directly from the repo.'
     description_short: This project was created to help me exercise many servos within
       a single project without re-cabling each servo to characterize it.
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - pwm
-    - driver
-    - motor
-    - spi
-    - display
+    - PCA9685
+    - PWM
+    - Rotary Encoder
+    - Servo
+    - TIMI
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:59.509850'
     kb_integration: none
@@ -40,11 +70,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: (repository Latest)
+    content_type:
+    - Code
+    licence: MIT
   title: ISP P2 Multi Servo Exercisor
   urls:
     documentation: ''

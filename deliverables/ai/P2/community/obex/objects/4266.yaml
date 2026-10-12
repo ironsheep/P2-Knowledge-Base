@@ -11,24 +11,30 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
+    category: Protocol
     description_full: 'This serial driver has a simple Begin() method with no parameters
       that starts the serial driver using the usual pins and 2 MBaud (For use with
       the Prop Tool Debug Window).
 
       It also includes a couple methods that include a Spin2 debug statement that
-      will enable the Prop Tool Debug Window, for cases wh'
+      will enable the Prop Tool Debug Window, for cases where the main code doesn''t
+      have one.
+
+
+      One key caveat for using this is that Begin() must be called after every Spin2
+      debug statement. Otherwise, there are cases where the code will freeze.
+
+      Assembly debug statements do not appear to have this problem in tests to date.
+
+      Also, some delays are nice to add after cogspin() and coginit() to avoid jumbling
+      of their serial outputs with those of the code.'
     description_short: This serial driver has a simple Begin() method with no parameters
       that starts the serial driver usin
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - demo
-    - serial
-    - driver
-    - led
-    - spi
+    - serial debug terminal
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:00.896179'
     kb_integration: none
@@ -47,6 +53,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: Simplest Serial
   urls:
     documentation: ''

@@ -11,17 +11,21 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: Utility object for P2 development.
+    category: Data Storage
+    description_full: 'Verified with Panasonic 512MB SD
+
+      PNY 8GB SDHC
+
+      SanDisk Extreme 32GB SDHC
+
+      GSKILL 32GB Micro SDHC
+
+      cards must be formatted as FAT32'
     description_short: Utility object for P2 development.
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - demo
-    - driver
-    - led
-    - spi
+    tags: []
   scrape_tracking:
     created_date: '2024-01-28 15:42:47'
     discovery_date: '2025-09-12T12:44:00.896158'
@@ -39,11 +43,14 @@ object_metadata:
     file_format: ZIP
     file_size: 512MB
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: FAT32 SD card driver
   urls:
     documentation: ''

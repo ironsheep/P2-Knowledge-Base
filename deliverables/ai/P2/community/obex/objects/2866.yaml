@@ -11,10 +11,53 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: audio
-    description_full: This is an emulation of the Nintendo/Sony sound module used
+    category: Speech and Sound
+    description_full: 'This is an emulation of the Nintendo/Sony sound module used
       in the Super NES / Super Famicom (consisting of an SPC700 processor and a custom
       audio DSP) that runs in one P2 cog.
+
+
+      Features:
+
+      - 8 channels of BRR sample playback
+
+      - 32kHz sample rate, accurate to real S-DSP
+
+      - SPC700 CPU emulation with instruction timings
+
+
+      Misfeatures:
+
+      - Requires ~200 MHz P2 clock or higher
+
+      (If clock isn''t way too low, it fails gracefully by skipping SPC700 cycles)
+
+      - Some tunes exhibit minor clicking..
+
+      - Inaccurate Timer 2 emulation
+
+
+      What''s included
+
+
+      File name Purpose
+
+
+      SPCcog.spin2 SPC/DSP emulation core
+
+
+      DSPGAUSS.DAT DSP gaussian lookup table
+
+
+      ExampleSPCplay.spin2 Simple SPC player. Copy a SPC file from the tunes directory
+      and load it!
+
+
+      tunes.zip Folder of lots of SPC dumps! But zipped to not pollute the Git repo
+      as much.
+
+
+      dsp_tablegen.rb Script for building DSPGAUSS.DAT'
     description_short: This is an emulation of the Nintendo/Sony sound module used
       in the Super NES / Super Famicom (consisting of an SPC700 processor and a custom
       audio DSP) that runs in one P2 cog.
@@ -22,11 +65,7 @@ object_metadata:
     peripherals: []
     subcategory: ''
     tags:
-    - example
-    - demo
-    - led
-    - driver
-    - spi
+    - emulation
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:02.356286'
     kb_integration: none
@@ -42,11 +81,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: SPCcog
   urls:
     documentation: ''

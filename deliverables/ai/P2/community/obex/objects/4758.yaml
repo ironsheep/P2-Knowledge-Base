@@ -11,19 +11,17 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: 9" display sold in the Parallax store (SKU 28084).
+    category: Display
+    description_full: Text & graphics display driver for the Waveshare 2.9" display
+      sold in the Parallax store (SKU 28084).
     description_short: 9" display sold in the Parallax store (SKU 28084).
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - E-i
-    - spi
-    - display
-    - driver
-    - led
-    - demo
+    - E-ink
+    - E-paper
+    - IL-3820
   scrape_tracking:
     created_date: '2024-06-04 02:11:14'
     discovery_date: '2025-09-12T12:43:58.182078'
@@ -46,7 +44,10 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
-  title: Waveshare 2.9" E-paper display driver
+    content_type:
+    - Code
+    licence: MIT
+  title: Waveshare 2.9″ E-paper display driver
   urls:
     documentation: ''
     download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4758

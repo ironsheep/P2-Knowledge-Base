@@ -80,7 +80,21 @@ So on 1.5.0, after KB v1.24.1 and a refresh, `created_date` is already right. 1.
      quoted in the YAML, so they arrive as strings), booleans and lists as parsed, key order not
      significant. No size cap: the largest object YAML is a few kilobytes.
 
-Proceed on all four unless you object.
+5. **Categories come from the data, not the tool description.** `p2kb_obex_find`'s `category`
+   parameter description hard-codes nine values ("drivers, misc, display, demos, audio, motors,
+   communication, sensors, tools"). Those were our scraper's own buckets. From KB v1.24.2 every object
+   carries **OBEX's own category** as the catalog page shows it (e.g. `Protocol`, `Display`,
+   `Data Storage`, `Math`, `Sensor`, `Tool`), a string, or a list when OBEX lists several (F-573). So:
+   - drop the enumerated list from the parameter description; say "an OBEX category — call with no
+     parameters for the current list with counts";
+   - build that no-parameter listing from the objects' `functionality.category` values (a list value
+     counts once per category);
+   - match `category` case-insensitively against the string, or any element of the list.
+   The same KB release also mirrors `tags`, `languages`, `microcontroller`, `title` and `author` from
+   the catalog and adds `technical_details.content_type` and `technical_details.licence` — no server
+   change needed for those beyond what `full_metadata` (4) already carries.
+
+Proceed on all five unless you object.
 
 **Unchanged:** `object_id`, `title`, `author`, `category`, `description` (from
 `functionality.description_short`, exactly as today), `download_url`, `download_instructions`, `languages`, `tags`,

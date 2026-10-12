@@ -5,7 +5,8 @@ object_metadata:
     domain: B
     leaf: pin-modes
     secondary:
-      - { domain: E, leaf: i2c }
+    - domain: E
+      leaf: i2c
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,20 +14,34 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
-    description_full: The PCF8575 provides general-purpose remote I/O expansion via
+    category: Protocol
+    description_full: 'The PCF8575 provides general-purpose remote I/O expansion via
       the two-line bidirectional bus (I2C-bus).
+
+
+      This P2 object supports full interaction with the PCF8575 via a spin2 object.
+
+
+      Version (Repository Latest)
+
+
+      GitHub repository: P2 PCF8575 Object - I2C I/O port Expander
+
+
+      This object (in my case) is used in a larger project, which is referenced in
+      the following forum thread:
+
+      Forum Thread: 180° Field of View Time-of-Flight sensor for the P2'
     description_short: The PCF8575 provides general-purpose remote I/O expansion via
       the two-line bidirectional bus (I2C-bus).
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - i2c
-    - driver
-    - sensor
-    - spi
+    - I2C
+    - PCF8575
+    - Port Expander
+    - Spin2
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:59.509886'
     kb_integration: none
@@ -42,11 +57,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: (Repository Latest)
+    content_type:
+    - Code
+    licence: MIT
   title: ISP P2 PCF8575 I2C I/O Expander Object
   urls:
     documentation: ''

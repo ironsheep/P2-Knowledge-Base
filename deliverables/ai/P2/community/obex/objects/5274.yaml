@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: F
@@ -11,22 +11,42 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: This object simplifies the use of PING))) and LaserPING sensors
+    category: Sensor
+    description_full: 'This object simplifies the use of PING))) and LaserPING sensors
       with the P1. The interface works in classic pulse mode, and supports serial
       mode for LaserPING and PING))) Rev E or later. Helpful object methods provide
       the tools needed by applications.
+
+      - get_us() (distance in microseconds, pulse mode only)
+
+      - get_mm()
+
+      - get_cm()
+
+      - get_tenths() (0.1-inch units)
+
+      - get_inches()
+
+      - in_range()
+
+
+      Note: Using either sensor in serial mode does not require a cog, saving valuable
+      resources. Smart pin modes are used for pulse measurement and serial input.
+
+
+      The demo program has been tested with Propeller Tool, Spin Tools IDE, and FlexProp
+      (see the COMPILER constant setting in the program).'
     description_short: This object simplifies the use of PING))) and LaserPING sensors
       with the P1. The interface works in classic pulse mode, and supports
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - serial
-    - driver
-    - sensor
-    - spi
+    - jonnymac
+    - LaserPING
+    - PING)))
+    - Sensor
+    - smart-pin
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:55.437619'
     kb_integration: none
@@ -48,6 +68,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: PING+ for PING))) and LaserPING
   urls:
     documentation: ''

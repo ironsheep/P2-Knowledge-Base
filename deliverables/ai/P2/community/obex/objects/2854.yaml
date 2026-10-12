@@ -1,11 +1,12 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: G
     leaf: lcd-eink
     secondary:
-      - { domain: E, leaf: i2c }
+    - domain: E
+      leaf: i2c
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,18 +14,14 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
-    description_full: Utility object for P2 development.
+    category: Display
+    description_full: LCD via I2C using a PCF8574 or PCF8574A "backpack"
     description_short: Utility object for P2 development.
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - i2c
-    - driver
-    - led
-    - spi
-    - display
+    - I2C
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:05.264464'
     kb_integration: none
@@ -46,6 +43,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: LCD PCF8574
   urls:
     documentation: ''

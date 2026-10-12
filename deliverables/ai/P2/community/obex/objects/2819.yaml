@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: B
@@ -11,18 +11,13 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: Utility object for P2 development.
+    category: Sensor
+    description_full: Interface for MikroElektronika 4-20mA_R/_T Click boards
     description_short: Utility object for P2 development.
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - led
-    - demo
-    - sensor
-    - driver
-    - spi
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:09.461393'
     kb_integration: none
@@ -45,6 +40,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: Click 4-20 MA
   urls:
     documentation: ''

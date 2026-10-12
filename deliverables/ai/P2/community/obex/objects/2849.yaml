@@ -1,11 +1,12 @@
 object_metadata:
-  author: Greg LaPolla
+  author: Unknown
   author_username: ''
   capability:
     domain: G
     leaf: lcd-eink
     secondary:
-      - { domain: F, leaf: touch }
+    - domain: F
+      leaf: touch
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,10 +14,44 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: Please change this object's language to Spin 2 instead of Generic.
-      I was looking for this object in the OBEX using the filters and couldn't find
-      it under Spin2
+    category: Display
+    description_full: 'Language
+
+
+      Spin2, PASM2
+
+
+      Category
+
+
+      Display
+
+
+      Description
+
+
+      ILI9341_XPT2046 is a spin2 object that interfaces the ILI9341 Video chip and
+      the XPT2046 chip with the Propeller 2 P2X8C4M64P
+
+
+      Learn more about the Propeller 2 at www.parallax.com.
+
+
+      License
+
+
+      Copyright (c) 2021 "Cluso99" (Ray Rodrick), "mwroberts" (Mike Roberts), Greg
+      LaPolla, "ManAtWork" (Nicolas Benezan)
+
+      ILI9341_XPT2046 Spin 2 Object is licensed under the MIT License.
+
+
+      Credits
+
+
+      ILI9341_XPT2046 Spin 2 Object is maintained by Greg LaPolla.
+
+      This Driver was derived from Cluso''s ST7796 4.0in SPI 480x320 w Touch LCD Driver'
     description_short: Please change this object's language to Spin 2 instead of Generic.
       I was looking for this object in the OBEX using the filtersand couldn't find
       it under
@@ -24,11 +59,7 @@ object_metadata:
     peripherals: []
     subcategory: ''
     tags:
-    - demo
-    - led
-    - driver
-    - spi
-    - display
+    - SPI
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:05.264522'
     kb_integration: none
@@ -47,10 +78,12 @@ object_metadata:
     file_size: 5883 B
     languages:
     - SPIN2
-    - PASM2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: ILI9341_XPT2046
   urls:
     documentation: ''

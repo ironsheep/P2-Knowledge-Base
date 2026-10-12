@@ -5,7 +5,8 @@ object_metadata:
     domain: H
     leaf: servo
     secondary:
-      - { domain: E, leaf: i2c }
+    - domain: E
+      leaf: i2c
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,10 +14,41 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: Driver for 16 channels of servo control via I2C using the PCA9685
-      16ch PWM chip  (uses underlying singleton version adapted from jm_i2c driver
+    category: Motor Control
+    description_full: 'Driver for 16 channels of servo control via I2C using the PCA9685
+      16ch PWM chip (uses underlying singleton version adapted from jm_i2c driver
       for I2C access)
+
+
+      Version: (Repository Latest)
+
+
+      GitHub repository: P2-PCA9685-Servo-Driver
+
+
+      This object (in my case) is used in a larger project in which I drive a servo-controlled
+      arm to test orientation sensing chips while developing P2 objects. I also use
+      the FlySky R/C controller to control arm positioning interactively. This code:
+      arm demo with FlySky controller using the PCA9685-controlled servos is all found
+      at the project Repo.
+
+
+      See also the OBEX page(s):
+
+      - ISP P2 Multi Servo Exercisor
+
+
+      Related:
+
+      - See Docs, Example Code at P2 PCA9685 Servo Driver Github Repository
+
+      - NXP Manuf Datasheet: PCA9685: 16-Channel, 12-Bit PWM Fm+ I²C-Bus LED Controller
+
+      - Shop at Adafruit: Adafruit 16-Channel 12-bit PWM/Servo Driver - I2C interface
+      - PCA9685
+
+      - Shop at Amazon: HiLetgo 2pcs PCA9685 16 Channel 12-Bit PWM Servo Motor Driver
+      IIC Module'
     description_short: Driver for 16 channels of servo control via I2C using the PCA9685
       16ch PWM chip (uses underlying singleton version adapted from jm_i2c driver
       for I2C access).
@@ -24,11 +56,9 @@ object_metadata:
     peripherals: []
     subcategory: ''
     tags:
-    - pwm
-    - i2c
-    - driver
-    - motor
-    - spi
+    - I2C
+    - PWM
+    - Servo
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:02.356208'
     kb_integration: none
@@ -44,11 +74,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: (Repository Latest)
+    content_type:
+    - Code
+    licence: Other
   title: ISP PCA9685 16ch PWM Servo Driver
   urls:
     documentation: ''

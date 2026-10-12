@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: E
@@ -11,19 +11,16 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: Demonstration code displays the raw input, address, and command.
+    category:
+    - Protocol
+    - Sensor
+    description_full: This object is used to receive and decode the NEC IR Transmission
+      Protocol. Demonstration code displays the raw input, address, and command.
     description_short: Demonstration code displays the raw input, address, and command.
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - led
-    - spi
-    - demo
-    - sensor
-    - driver
-    - display
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:09.461342'
     kb_integration: none
@@ -40,11 +37,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: NEC RX
   urls:
     documentation: ''

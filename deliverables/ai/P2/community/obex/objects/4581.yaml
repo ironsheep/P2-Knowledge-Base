@@ -5,7 +5,8 @@ object_metadata:
     domain: E
     leaf: iot-gateway
     secondary:
-      - { domain: K, leaf: host-integration }
+    - domain: K
+      leaf: host-integration
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,22 +14,77 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: communication
+    category:
+    - Display
+    - Other
+    - Protocol
     description_full: 'This provides a Spin2/Pasm2 object to be run on the P2. The
       P2 communicates over high-speed bidirectional serial with a connected Raspberry
       Pi (RPi), which runs a Python script that handles the requests from the P2.
-      These requests provide access to many services, providing a rich internet-of-things '
+      These requests provide access to many services, providing a rich internet-of-things
+      (IoT) capability to our P2.
+
+
+      See the system diagram depicting how this all works: System Diagram
+
+
+      Today you can choose from:
+
+      - Sending email from your P2
+
+      - Controlling your P2 from a web page served from the attached RPi
+
+      - Reading data from files on your Raspberry Pi
+
+      - Writing data to files on your Raspberry Pi
+
+      - Querying configuration values of Pi from the P2
+
+
+      A collection of demos with working code for each can be found at: DEMOs
+
+
+      At the Repository, you can find:
+
+      - Full RPi setup and configuration details to get all features of the demo running
+      on your own hardware
+
+      - Wiring instructions for the serial communications from the P2 to the RPi
+
+      - Configuration instructions for the RPi Apache web server
+
+      - PHP-based demonstration web page(s) that shows a display of values received
+      from P2 (and maybe even UI controls that can send values to the P2)
+
+      - Both the P2 Object source and the RPi Python daemon scripts
+
+      - Example code that shows each of the services being exercised
+
+
+      Version (1.0.0) Release Notes
+
+
+      GitHub repository: P2 RPi ioT Gateway
+
+
+      This capability is referenced in the following forum thread:
+
+      Forum Thread: using-a-raspberry-pi-as-an-iot-gateway-for-our-p2-projects
+
+
+      DOWNLOAD: please get this code directly from the repo. as there is both P2 code
+      and Raspberry Pi code there for use.'
     description_short: This provides a Spin2/Pasm2 object to be run on the P2. The
       P2 communicates over high-speed bidirect
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - serial
-    - demo
-    - driver
-    - spi
-    - display
+    - email
+    - Gateway
+    - IoT
+    - Python
+    - Raspberry Pi
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:59.509869'
     kb_integration: none
@@ -43,11 +99,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: ISP P2 RPi IoT Gateway
   urls:
     documentation: ''

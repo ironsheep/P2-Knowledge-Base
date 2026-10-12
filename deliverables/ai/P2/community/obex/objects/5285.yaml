@@ -11,7 +11,9 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
+    category:
+    - Sensor
+    - Signals
     description_full: This simple object uses the P2 ADC smart pin mode to measure
       voltage on an IO pin.
     description_short: This simple object uses the P2 ADC smart pin mode to measure
@@ -39,6 +41,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: P2 ADC
   urls:
     documentation: ''

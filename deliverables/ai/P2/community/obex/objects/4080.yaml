@@ -5,7 +5,8 @@ object_metadata:
     domain: C
     leaf: image-codec
     secondary:
-      - { domain: G, leaf: graphics-lib }
+    - domain: G
+      leaf: graphics-lib
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,18 +14,42 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
-    description_full: Optimized/modified/bugfixed version of TJpgDec for FlexC on
+    category: Display
+    description_full: 'Optimized/modified/bugfixed version of TJpgDec for FlexC on
       P2.
+
+      - Decodes baseline JPEG images (no progressive)
+
+      - Neither source file or destination bitmap need to be fully buffered in RAM
+
+      - Very optimized
+
+      - Can decode to multiple color formats
+
+      - RGB888 (24 bit)
+
+      - ABGR8888 (P2 native 32 bit)
+
+      - RGB565 (P2 native 16 bit)
+
+      - RGB332 (P2 native 8 bit)
+
+      - 8 bit monochrome
+
+      - Can decode at 1/2, 1/4 and 1/8 scale
+
+
+      TODO insert more documentation here.
+
+
+      Also see forum thread: https://forums.parallax.com/discussion/175326/sorta-optimized-jpeg-decoder'
     description_short: Optimized/modified/bugfixed version of TJpgDec for FlexC on
       P2.
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - sensor
-    - display
-    - led
+    - JPEG
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:10.850451'
     kb_integration: none
@@ -39,10 +64,13 @@ object_metadata:
     file_format: ZIP
     file_size: 24 B
     languages:
-    - UNKNOWN
+    - C/C++
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: Optimized JPEG Decoder
   urls:
     documentation: ''

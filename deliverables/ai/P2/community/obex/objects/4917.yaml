@@ -11,24 +11,59 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: display
-    description_full: 'Connect a P2 Propeller Board to your computer
+    category: Snippet
+    description_full: 'Instructions
+
+
+      Connect a P2 Propeller Board to your computer
 
       Load this code into Spin Tools IDE, then press CTRL+F10 to load into RAM with
       DEBUG mode enabled
 
-      Observe the debug output!'
+      Observe the debug output!
+
+
+      Summary of demonstration
+
+
+      The SPIN2 code runs in Cog0, and is contained within the "Main()" routine.
+
+      The PASM2 code runs in Cog1, and is contained within the DAT block
+
+
+      Both Cogs share access to the same global variables, "PARAM"
+
+      The address in memory for the PARAM variables is passed to the PASM2 Cog when
+      it is loaded
+
+
+      SPIN2 accesses the PARAM values directly: PARAM[ID], PARAM[AGE], etc..
+
+      PASM2 accesses the PARAM values with a pointer called PTRA: PTRA[ID], PTRA[AGE],
+      etc..
+
+
+      The PASM2 Cog1 increments the ID value twice a second, and the result is seen
+      in the SPIN2 Cog
+
+      The SPIN2 Cog0 increments the AGE value when ID is divisible by 5, and the result
+      is seem in the PASM2 Cog
+
+
+      This demonstrates how to share any number of global variables when working with
+      SPIN2 and PASM2
+
+
+      Note: You could use any name you like for the global "PARAM" variable, or the
+      elements "ID", "AGE", etc... However, the PTRA keyword within the DAT block
+      (PASM2 code) is fixed.'
     description_short: 'Connect a P2 Propeller Board to your computer
 
       Load this code into Spin Tools IDE, then press CTRL+F1'
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - led
-    - spi
-    - demo
-    - driver
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:56.829308'
     kb_integration: none
@@ -43,11 +78,15 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    - Tip
+    licence: MIT
   title: Sharing variables with SPIN2 and PASM2
   urls:
     documentation: ''

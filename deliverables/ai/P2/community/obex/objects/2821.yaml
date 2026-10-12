@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: F
@@ -11,22 +11,20 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: This object allows the P2 to interface with DHT11 and DHT22/CM2302
+    category: Sensor
+    description_full: 'This object allows the P2 to interface with DHT11 and DHT22/CM2302
       sensors for projects requiring the monitoring of temperature and relative humidity.
       With either sensor type, temperature and humidity is returned in 0.1-degree
       and 0.1% units.
+
+
+      Code is compatible with Parallax PN 28059 (DHT22/CM2302).'
     description_short: This object allows the P2 to interface with DHT11 and DHT22/CM2302
       sensors for projects requiring the monitoring of temperature and relative humidity.
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - led
-    - demo
-    - sensor
-    - driver
-    - spi
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:09.461377'
     kb_integration: none
@@ -43,11 +41,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: DHTxx Temperature/Humidity Sensors
   urls:
     documentation: ''

@@ -11,21 +11,23 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
+    category: Protocol
     description_full: This is the driver for the Ethernet accessory board with LAN8720
       PHY chip. It can send and receive raw Ethernet packets with 100Mbit/s full duplex
       without any bottlenecks. To achieve this it basically bit-bangs the RMII protocol
-      (Reduced Media Independant Interface) directly to the PHY chip. The acc
+      (Reduced Media Independant Interface) directly to the PHY chip. The accessory
+      board (see forum thread) also has a 24AA025E48 ROM for the MAC address and a
+      25MHz crystal on board.
     description_short: This is the driver for the Ethernet accessory board with LAN8720
       PHY chip. It can send and receive raw Ethernet packets with 100Mbit/s
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - demo
-    - driver
-    - led
-    - spi
+    - Ethernet
+    - MAC
+    - PHY
+    - RMII
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:00.896170'
     kb_integration: none
@@ -41,11 +43,14 @@ object_metadata:
     file_format: ZIP
     file_size: 100MB
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: Ethernet RMII driver
   urls:
     documentation: ''

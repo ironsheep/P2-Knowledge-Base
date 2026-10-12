@@ -11,19 +11,31 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
+    category: Protocol
     description_full: 'This object supports the MAVLink 1.0 and 2.0 protocols for
-      the P2. It provides the following:'
+      the P2. It provides the following:
+
+      - Protocol handler for the COMMON dialect (refer to https://mavlink.io/en/messages/#dialects
+      for dialects)
+
+      - Sender for all messages in the common dialect
+
+      - Message parser for receiving incoming mavlink messages
+
+      - Skeleton for a message handler for converting incoming mavlink messages into
+      structs so your vehicle or ground control station can use them'
     description_short: 'This object supports the MAVLink 1.0 and 2.0 protocols for
       the P2. It provides the following:'
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - spi
-    - demo
-    - driver
+    - control
+    - drone
+    - MAVLink
+    - p2
+    - protocol
+    - Spin2
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:55.437638'
     kb_integration: none
@@ -42,6 +54,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: MAVLink Message Parser
   urls:
     documentation: ''

@@ -5,7 +5,8 @@ object_metadata:
     domain: F
     leaf: light-optical
     secondary:
-      - { domain: E, leaf: i2c }
+    - domain: E
+      leaf: i2c
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,20 +14,18 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: display
-    description_full: The  MAX30102  is  an  integrated  pulse  oximetry  and heart-rate  monitor  module.  It  includes  internal  LEDs,
-      photodetectors, optical elements, and low-noise electronics with  ambient  light  rejection.  The  MAX30102  provides  a
-      complete  system  solution  to  ease  the  design-in  process f
+    category: Sensor
+    description_full: The MAX30102 is an integrated pulse oximetry and heart-rate
+      monitor module. It includes internal LEDs, photodetectors, optical elements,
+      and low-noise electronics with ambient light rejection. The MAX30102 provides
+      a complete system solution to ease the design-in process for mobile and wearable
+      devices.
     description_short: 'The  MAX30102  is  an  integrated  pulse  oximetry  and heart-rate  monitor  module.  It  includes  '
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - demo
-    - sensor
-    - driver
-    - spi
+    - Sensor Health
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:12.247185'
     kb_integration: none
@@ -45,6 +44,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: MAX3010X
   urls:
     documentation: ''

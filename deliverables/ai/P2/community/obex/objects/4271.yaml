@@ -11,19 +11,63 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
-    description_full: Chip made a StrToFloat method using the built-in Spin2 floating-point
+    category: Snippet
+    description_full: 'Chip made a StrToFloat method using the built-in Spin2 floating-point
       operators.
+
+
+      It accepts numbers in all formats and converts them to single-precision IEEE-754
+      floats:
+
+
+      123
+
+      123.456
+
+      0.00000000000000000000000012345
+
+      1.0
+
+      1.0e9
+
+      1.0e+9
+
+      1.0e-9
+
+      1e12
+
+      9e+45
+
+      1_000_000_000
+
+
+      So, no decimal point is needed. "E" is allowed for power-of-ten exponents. Underscores
+      are allowed for grouping in the mantissa, but not in the exponent. It also checks
+      for errors and ABORTS with messages.
+
+
+      Full code attached.
+
+
+      Update:
+
+
+      FLOAT(integer) : float
+
+      ROUND(float) : integer
+
+      TRUNC(float) : integer
+
+
+      The floating-point operators work on floats, only. Use FLOAT/ROUND/TRUNC to
+      go between integers and floats.'
     description_short: Chip made a StrToFloat method using the built-in Spin2 floating-point
       operators.
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - spi
-    - demo
-    - driver
+    - Float
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:00.896145'
     kb_integration: none
@@ -42,6 +86,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: StrToFloat
   urls:
     documentation: ''

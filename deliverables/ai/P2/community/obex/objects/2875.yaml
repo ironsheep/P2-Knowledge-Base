@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: H
@@ -11,20 +11,16 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: motors
-    description_full: Supports forward and reverse speed control, braking, and motor
-      enable/disable.
+    category: Motor Control
+    description_full: This [cogless] object provides DC motor control through an L298N
+      (or similar) h-bridge circuit. Supports forward and reverse speed control, braking,
+      and motor enable/disable.
     description_short: Supports forward and reverse speed control, braking, and motor
       enable/disable.
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - demo
-    - motor
-    - led
-    - driver
-    - spi
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:02.356177'
     kb_integration: none
@@ -47,6 +43,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: DC Motor
   urls:
     documentation: ''

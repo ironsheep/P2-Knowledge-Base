@@ -11,8 +11,23 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: 'This object implements a step motor driver.
+    category: Motor Control
+    description_full: 'Language
+
+
+      Spin2, PASM2
+
+
+      Category
+
+
+      Motor control
+
+
+      Description
+
+
+      This object implements a step motor driver.
 
       The trajectory is sinusoidal, ramp up, a period at constant speed, ramp down.
 
@@ -22,19 +37,20 @@ object_metadata:
       There are two versions. One for drivers that use step and direction inputs and
       one for drivers with cw and ccw inputs.
 
-      A demo program in spin2 is included.'
+      A demo program in spin2 is included.
+
+
+      License
+
+
+      MIT (see end of source code)'
     description_short: 'This object implements a step motor driver.
 
       The trajectory is sinusoidal, ramp up, a period at const'
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - demo
-    - driver
-    - motor
-    - led
-    - spi
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:00.896213'
     kb_integration: none
@@ -53,11 +69,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: Stepper Motor Driver Ver 2
   urls:
     documentation: ''

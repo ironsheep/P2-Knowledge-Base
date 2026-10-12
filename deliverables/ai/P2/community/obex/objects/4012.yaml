@@ -5,7 +5,8 @@ object_metadata:
     domain: G
     leaf: graphics-lib
     secondary:
-      - { domain: D, leaf: pixel-gen }
+    - domain: D
+      leaf: pixel-gen
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,20 +14,33 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
-    description_full: Draws 3072 16x16 sprites at 640x480 in 32bpp mode (using WMLONG-style
-      transparency) using 4 cogs at 252 MHz.
+    category:
+    - Display
+    - Fun
+    description_full: 'A small example that shows:
+
+      - How to set up a scanline renderer with p2videodrv (in full-res VGA modes,
+      anyways...)
+
+      - How to draw thousands of small sprites using optimized data structures
+
+
+      Draws 3072 16x16 sprites at 640x480 in 32bpp mode (using WMLONG-style transparency)
+      using 4 cogs at 252 MHz.
+
+
+      Also see associated forum thread: https://forums.parallax.com/discussion/175535/3072-sprites-demo/p1
+
+
+      Note: If your sprites are stuck and don''t move, update your flexspin 🙂'
     description_short: Draws 3072 16x16 sprites at 640x480 in 32bpp mode (using WMLONG-style
       transparency) using 4 cogs at 252 MHz.
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - demo
-    - led
-    - adc
-    - spi
-    - display
+    - sprites
+    - VGA
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:12.247320'
     kb_integration: none
@@ -42,11 +56,13 @@ object_metadata:
     file_format: ZIP
     file_size: 32B
     languages:
-    - SPIN2
     - PASM2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: 3072 Sprites Proof-of-Concept
   urls:
     documentation: ''

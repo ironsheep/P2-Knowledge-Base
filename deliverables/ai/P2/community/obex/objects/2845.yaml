@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: E
@@ -11,18 +11,15 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: communication
-    description_full: Utility object for P2 development.
+    category: Protocol
+    description_full: 'True mode, unbuffererd serial coms using smart pins
+
+      -- same features as original P1 FDS with minor enhancements'
     description_short: Utility object for P2 development.
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - serial
-    - demo
-    - led
-    - driver
-    - spi
+    tags: []
   scrape_tracking:
     created_date: '2024-03-16 16:12:07'
     discovery_date: '2025-09-12T12:44:06.662777'
@@ -44,6 +41,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: Serial
   urls:
     documentation: ''

@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: G
@@ -11,18 +11,14 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: <Overviewn McPhalen.
+    category: Display
+    description_full: A simple, self contained driver for the MAX7219 LED controller.
+      Demo code for use with an 8-digit, 7-segment display.
     description_short: <Overviewn McPhalen.
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - demo
-    - driver
-    - spi
-    - led
-    - display
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:05.264477'
     kb_integration: none
@@ -45,6 +41,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: EZ MAX7219
   urls:
     documentation: ''

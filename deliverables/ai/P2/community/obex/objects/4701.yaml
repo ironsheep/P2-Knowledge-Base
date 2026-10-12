@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: H
@@ -11,21 +11,17 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: Accepts speed control in 0. 1% increments for high-resolution
-      control.
+    category: Motor Control
+    description_full: Simple driver for DC motors run through an h-bridge. Accepts
+      speed control in 0.1% increments for high-resolution control.
     description_short: Accepts speed control in 0. 1% increments for high-resolution
       control.
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - pwm
-    - spi
+    - jonnymac
     - motor
-    - jo
-    - driver
-    - led
   scrape_tracking:
     created_date: '2024-03-16 16:46:37'
     discovery_date: '2025-09-12T12:43:59.509831'
@@ -46,6 +42,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: DC Motor Control
   urls:
     documentation: ''

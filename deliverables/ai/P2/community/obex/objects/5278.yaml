@@ -5,7 +5,8 @@ object_metadata:
     domain: F
     leaf: compass
     secondary:
-      - { domain: E, leaf: i2c }
+    - domain: E
+      leaf: i2c
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,7 +14,7 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
+    category: Sensor
     description_full: this is a very simple compass driver for the prop2, not much
       else to say about it. it works and it includes fastatan2 for getting compass
       heading. You should be able to swap them at your leisure.
@@ -24,11 +25,8 @@ object_metadata:
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - demo
-    - driver
-    - sensor
-    - spi
+    - control
+    - Sensor
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:55.437608'
     kb_integration: none
@@ -48,6 +46,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: QMC5883L HMC5883 BMM150 compass drivers
   urls:
     documentation: ''

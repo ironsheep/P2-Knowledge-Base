@@ -1,11 +1,12 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: B
     leaf: quadrature-decode
     secondary:
-      - { domain: H, leaf: encoder-feedback }
+    - domain: H
+      leaf: encoder-feedback
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,21 +14,28 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
-    description_full: This object configures a P2 smart pin for quadrature encoder
+    category:
+    - Human Input
+    - Protocol
+    - Sensor
+    description_full: 'This object configures a P2 smart pin for quadrature encoder
       (value/position) mode. The object allows for value limits and dealing with encoders
       that change four counts per "click."
+
+
+      Updated 23 SEP 2024. New version is identified with version # (1.1.1) and has
+      Schmitt Trigger inputs enabled on encoder pins. Second demo added as well.'
     description_short: This object configures a P2 smart pin for quadrature encoder
       (value/position) mode. The object allow
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - demo
-    - sensor
-    - driver
-    - spi
+    - Encoder
+    - jonnymac
+    - p2
+    - quadrature
+    - smart-pin
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:08.056905'
     kb_integration: none
@@ -47,6 +55,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: Quadrature Encoder
   urls:
     documentation: ''

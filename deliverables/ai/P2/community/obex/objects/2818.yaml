@@ -5,7 +5,8 @@ object_metadata:
     domain: F
     leaf: imu
     secondary:
-      - { domain: E, leaf: i2c }
+    - domain: E
+      leaf: i2c
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,20 +14,41 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: Driver for the MPU 9DOF Click module (uses underlying jm_i2c
+    category: Sensor
+    description_full: 'Driver for the MPU 9DOF Click module (uses underlying jm_i2c
       driver for I2C access)
+
+
+      Version (Repository Latest)
+
+
+      GitHub repository: P2-click-MPU-9dof
+
+
+      This driver is still in development and final testing...
+
+
+      Related:
+
+      - See Docs, Example Code at P2 Click MPU 9dof Github Repository
+
+      - Shop at Parallax: MPU 9DOF Click store page
+
+      - Click Module main page: Mikroe Module Page
+
+
+      DOWNLOAD: while this is in development, please get this code directly from the
+      repo.'
     description_short: Driver for the MPU 9DOF Click module (uses underlying jm_i2c
       driver for I2C access)
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - i2c
-    - driver
-    - sensor
-    - spi
+    - 9DOF
+    - Click
+    - I2C
+    - motion tracking
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:09.461402'
     kb_integration: none
@@ -41,11 +63,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: (Repository Latest)
+    content_type:
+    - Code
+    licence: MIT
   title: ISP P2 Click MPU 9DOF Driver
   urls:
     documentation: ''

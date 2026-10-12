@@ -11,9 +11,63 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: 4-bit SD mode SD card driver plug-in to Flexspin's FAT filesystem
-      layer.
+    category: Data Storage
+    description_full: 'NOTE: Version 2.x has a small change to driver loading. See
+      examples and the readme.md
+
+
+      Driver versions 1.x use a C++ like object instantiating to hold device state.
+      This requires more memory than C based pointer passing.
+
+      Driver versions 2.x use regular C allocations and pointer passing to hold device
+      state. This also has advantage of being more portable.
+
+
+      Can be used with Spin2, Basic, C and any languages supported by the Flexspin
+      compiler. Propeller 2 only.
+
+
+      Requires Flexspin compiler version 7.0.0 or later. The example tester uses the
+      newly added _vfs_open_fat_handle() API, replacing the older preset list of vfs
+      device open functions. The driver itself uses newly added features around "inline"
+      assembly.
+
+      Recommend Flexspin v7.7.2 or later. Various little fixes and additions have
+      been made to support the driver as compiler limitations came to light.
+
+
+      Requires a 4-bit wired SD slot. Main restriction is the four DAT pins have to
+      be in-order on 4-bit pin boundary. Pull-ups are also recommended. Example can
+      be found here - https://forums.parallax.com/discussion/174988/new-sd-mode-p2-accessory-board/p1
+
+      I made a basic 4-bit SD slot, without power switch nor LED, by hand wiring a
+      pillaged SD slot - https://forums.parallax.com/discussion/comment/1563018/#Comment_1563018
+
+      As of v1.14, schematic and photo of hand-wired SD slot are included in the zip
+      file.
+
+
+      Also included is two other drivers, using 1-bit SPI mode. One is just a copy
+      of Flexspin''s built-in sdmm.cc driver repackaged to be a plugin. The other
+      is rehash of the same that plainly bit-bashes the SPI instead of using any smartpins.
+      Both use v1.x interface.
+
+
+      There is two example programs that demonstrate mounting and use of the drivers
+      as plugins. You''ll need to dig around them to eke out the details. They are
+      defaulted to using 1-bit SPI mode driver and the boot slot pin-out.
+
+      As of v1.14, there is now four example programs. And they default to 4-bit SD
+      mode now.
+
+
+      Performance wise, with lazy-CMD12 enabled, sysclock set at 300 MHz and clock
+      divider at 3 (100 MHz SD clock), reads can exceed 40 MB/s and writes aren''t
+      far behind at maybe 38 MB/s assuming the SD card is good for it. Default divider
+      is sysclock/4.
+
+
+      PS: v2.4 zip file contains both v2.4 and v1.29 drivers'
     description_short: 4-bit SD mode SD card driver plug-in to Flexspin's FAT filesystem
       layer.
     hardware_support: []
@@ -37,10 +91,13 @@ object_metadata:
     file_format: ZIP
     file_size: ''
     languages:
-    - SPIN2
+    - Generic
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: 4-bit SD driver
   urls:
     documentation: ''
@@ -49,6 +106,6 @@ object_metadata:
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/sdsd-cc/
   metadata:
-    created_date: '2026-04-25'
+    created_date: '2026-09-09'
   version_tracking:
     has_github_repo: false

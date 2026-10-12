@@ -5,8 +5,10 @@ object_metadata:
     domain: A
     leaf: emulation
     secondary:
-      - { domain: G, leaf: led-matrix }
-      - { domain: J, leaf: synthesis }
+    - domain: G
+      leaf: led-matrix
+    - domain: J
+      leaf: synthesis
   compatibility:
     dependencies: []
     known_issues: []
@@ -14,18 +16,38 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
-    description_full: NeoGeo AES emulator for Parallax P2 + memory expansion.
+    category:
+    - Display
+    - Fun
+    description_full: 'NeoGeo AES emulator for Parallax P2 + memory expansion.
+
+
+      Requires some amount of HyperRAM or PSRAM, USB for inputs and VGA/HDMI or other
+      video output.
+
+
+      See README.MD for full details on usage.
+
+
+      This OBEX entry is updated infrequently, see github for new bleeding edge versions:
+      https://github.com/IRQsome/NeoYume/
+
+
+      If you want, you may rip out, among other things...
+
+      - a Motorola 68000 emulation
+
+      - a Z80 emulation
+
+      - a video driver supporting many different formats (including HDMI with audio!),
+      optimized for scanline rendering'
     description_short: NeoGeo AES emulator for Parallax P2 + memory expansion.
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - driver
-    - motor
-    - led
-    - spi
-    - display
+    - emulation
+    - gaming
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:10.850442'
     kb_integration: none
@@ -40,12 +62,15 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
-  title: NeoYume - NeoGeo emulator
+    content_type:
+    - Code
+    licence: Other
+  title: NeoYume – NeoGeo emulator
   urls:
     documentation: ''
     download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4087

@@ -11,7 +11,9 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
+    category:
+    - Display
+    - Math
     description_full: This Spin2 code provides functions for converting floats to
       strings with precision specified. It was converted from existing FloatString.spin
       functions.
@@ -41,6 +43,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: FloatToString.spin2
   urls:
     documentation: ''

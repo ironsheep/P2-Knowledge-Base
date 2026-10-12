@@ -11,23 +11,36 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: A single COG services from 1 to 8 Tx/Rx pairs of pins. The pins
-      are configured as smart pins, meaning that the driver feeds bytes to transmit
-      pins when needed and gets bytes from receiving pins when bytes are available.
-      This backend driver is written in pasm2. The interface routines are written
-      in s
+    category: Protocol
+    description_full: '8 Serial Ports using a single COG
+
+
+      A single COG services from 1 to 8 Tx/Rx pairs of pins. The pins are configured
+      as smart pins, meaning that the driver feeds bytes to transmit pins when needed
+      and gets bytes from receiving pins when bytes are available. This backend driver
+      is written in pasm2. The interface routines are written in spin2.
+
+
+      Version: 1.0.2 Release Notes
+
+
+      This is a fully qualified driver. Performance Measurement - see timing information
+      from measurements taken on 8-port test system.
+
+
+      GitHub Repository: P2 OctoSerial Subsystem
+
+      See the repository for more detailed documentation, code for exercising two
+      P2 edge modules with 8 serial ports wired between them, code for Raspberry Pi
+      instead of the 2nd P2, and possibly later releases.'
     description_short: A single COG services from 1 to 8 Tx/Rx pairs of pins. The
       pins are configured as smart pins, meanin
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - demo
-    - serial
-    - driver
-    - led
-    - spi
+    - Serial
+    - smart-pin
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:00.896196'
     kb_integration: none
@@ -43,11 +56,14 @@ object_metadata:
     file_format: ZIP
     file_size: 2.9MB
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: 1.0.2
+    content_type:
+    - Code
+    licence: MIT
   title: ISP high-speed 8-port serial subsystem
   urls:
     documentation: ''

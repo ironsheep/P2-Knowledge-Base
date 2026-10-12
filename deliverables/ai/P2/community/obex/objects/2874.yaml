@@ -11,18 +11,54 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: BLDC Motor Driver with steering and position tracking
+    category: Motor Control
+    description_full: 'BLDC Motor Driver with steering and position tracking
+
+
+      Ready-to-use objects easily incorporated into your code that control Brushless
+      DC (BLDC) motors via the Parallax 64010 Universal Motor Driver P2 Add-on Boards
+
+
+      Version: 5.0.0 Release Info
+
+
+      GitHub repository: P2 BLDC Motor Control
+
+      - See Docs, Setup Instructions at Developing a P2 Application interacting with
+      the new motor objects
+
+      - Buy BLDC Motors at Parallax Online Store
+
+      - Buy BLDC Motor Control Boards at Parallax Online Store
+
+
+      NOTE: Always check for more recent releases at the project P2 BLDC Motor Control
+      Repository - Releases Page
+
+
+      Forum Thread: Universal Motor Driver - Dual wheel steering, motor control, and
+      position tracking Objects for P2
+
+
+      What to download:
+
+
+      There are three files available for download. Choose one or more of the three:
+
+      - demo-1mot-archive-set.zip all the code needed to demo single-motor control
+      and integrate one motor into your project.
+
+      - demo-2mot-archive-set.zip the code for dual motor control
+
+      - serial-control-archive-set.zip the code for RaspberryPi or Arduino control
+      of a two-motor system (includes the dual motor control code)'
     description_short: BLDC Motor Driver with steering and position tracking
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - serial
-    - driver
+    - BLDC smart-pin
     - motor
-    - led
-    - spi
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:02.356197'
     kb_integration: none
@@ -37,11 +73,14 @@ object_metadata:
     file_format: ZIP
     file_size: 2 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: 5.0.0
+    content_type:
+    - Code
+    licence: Other
   title: ISP BLDC Motor Control
   urls:
     documentation: ''

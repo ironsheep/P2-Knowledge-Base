@@ -5,7 +5,8 @@ object_metadata:
     domain: F
     leaf: light-optical
     secondary:
-      - { domain: E, leaf: i2c }
+    - domain: E
+      leaf: i2c
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,20 +14,32 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: Driver for BH1750 Ambient Light Sensor accessed via I2C - (uses
+    category: Sensor
+    description_full: 'Driver for BH1750 Ambient Light Sensor accessed via I2C - (uses
       underlying jm_i2c object for I2C access)
+
+
+      Version: (repository Latest)
+
+
+      GitHub repository: P2 HUB75 Panel Light Measure
+
+
+      This object (in my case) is used in a larger project where I''m measuring the
+      light output of our HUB75 matrix panels. I created 3D-printed fixtures to hang
+      on the panels, which contain the BH1750 sensors.
+
+      All of the code I used, the STL files for the fixtures, and the entire project
+      description are found at the Repo.'
     description_short: Driver for BH1750 Ambient Light Sensor accessed via I2C - (uses
       underlying jm_i2c object for I2C access)
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - i2c
-    - driver
-    - sensor
-    - spi
+    - Ambient Light Sensor
+    - BH1750
+    - I2C
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:09.461410'
     kb_integration: none
@@ -42,11 +55,14 @@ object_metadata:
     file_format: ZIP
     file_size: 2 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: (repository Latest)
+    content_type:
+    - Code
+    licence: MIT
   title: ISP P2 BH1750 I2C Ambient Light Object
   urls:
     documentation: ''

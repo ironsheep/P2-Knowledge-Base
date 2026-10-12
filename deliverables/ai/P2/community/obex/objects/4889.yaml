@@ -5,7 +5,8 @@ object_metadata:
     domain: K
     leaf: host-integration
     secondary:
-      - { domain: E, leaf: networking }
+    - domain: E
+      leaf: networking
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,20 +14,37 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: HOST FS - code for accessing the host filesystem via the 9P
-      protocol
+    category:
+    - Data Storage
+    - Protocol
+    description_full: "P2-HOST-FS\n\nHOST FS - code for accessing the host filesystem\
+      \ via the 9P protocol\n\nHost Filesystem Features\n\nKey features of this filesystem\
+      \ for the P2 chip:\n- Read and write files and directories directly on the host\
+      \ PC\n- Transport agnostic; defaults to using the serial port, but can easily\
+      \ be modified to use ethernet or other connections\n- Uses the 9P protocol,\
+      \ which is a widely used and simple protocol for network file systems\n\nAPI\n\
+      \nThe API for the host file system is very straightforward, and heavily inspired\
+      \ by Stephen Moraco's and Chip Gracey's Parallax Flash File system\n\nAdding\
+      \ the Host FS to your own project\n\nThis section describes how to quickly get\
+      \ the host filesystem working in your project.\n\nInclude the Host FS object\
+      \ in your top file\n\nPlace the downloaded hostfs.spin2 in your project and\
+      \ in your top-level object include the flash object:\n\nOBJ { Objects Used by\
+      \ this Object }\n\n    host  : \"hostfs\"               ' the host filesystem\n\
+      \nProvide a Serial (or other) Interface for the File System\n\nHostfs needs\
+      \ to talk to the host by some mechanism. The actual interface is very simple:\
+      \ it needs to be able to send a block of data and receive another block as response.\
+      \ The API for this is:\n\npub sendrecv(bufstart, bufend, maxlen) : reply_len\n\
+      \nwhere bufstart is a pointer to the start of the data to send (and is also\
+      \ where the received data will be placed), bufend is a pointer to the end of\
+      \ the data to send, and maxlen is the maximum size of the buffer. The function\
+      \ returns the actual number of bytes received in the reply from the host.\n\n\
+      See the detailed documentation in the .zip file for more details."
     description_short: HOST FS - code for accessing the host filesystem via the 9P
       protocol
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - serial
-    - demo
-    - led
-    - driver
-    - spi
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:58.182018'
     kb_integration: none
@@ -45,6 +63,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: HostFS
   urls:
     documentation: ''

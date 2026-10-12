@@ -5,7 +5,8 @@ object_metadata:
     domain: C
     leaf: cordic
     secondary:
-      - { domain: H, leaf: bldc }
+    - domain: H
+      leaf: bldc
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,7 +14,11 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: motors
+    category:
+    - Math
+    - Motor Control
+    - Protocol
+    - Snippet
     description_full: 'The Park or d/q-transformation is useful when controlling AC
       motors or brushless servo motors. It transforms currents or voltages from a
       three phase system with stator reference into a rectangular coordinate system
@@ -27,18 +32,18 @@ object_metadata:
       for all current and voltage values. This should be sufficient for most applications.
       The CORDIC even could do full 32 bit resolution, only the scaling had to use
       32 bit multiplication instead of the SCAS instructions. The angle (theta) has
-      to be left adjusted.'
+      to be left adjusted.
+
+
+      NOTE: This is a code snippet meant to illustrate the core code, it is not meant
+      to compile as-is; ex: variable declarations are needed.'
     description_short: The Park or d/q-transformation is useful when controlling AC
       motors or brushless servo motors. It transforms currents or voltages from
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - servo
-    - led
-    - motor
-    - adc
-    - spi
+    - Servo
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:10.850413'
     kb_integration: none
@@ -54,11 +59,13 @@ object_metadata:
     file_format: ZIP
     file_size: 16 B
     languages:
-    - SPIN2
     - PASM2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: Park transformation
   urls:
     documentation: ''

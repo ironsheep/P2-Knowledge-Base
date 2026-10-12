@@ -11,12 +11,27 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
+    category: Data Storage
     description_full: 'Here two uSD drivers that can both use your choice of three
       low level drivers.
 
       One is inline assembly and doesn''t need a cog, one uses a cog, and the other
-      also uses a cog but adds audio output.'
+      also uses a cog but adds audio output.
+
+
+      FSRW is a very minimalistic with only root directory access
+
+      FAT32 has more features and can access sub-directories
+
+
+      Tested with Propeller Tool 2.9.3
+
+
+      Note: I am not the author of most of this, just maintainer...
+
+
+      Update: Forum member EvanH has provided an improved version of the cogless sdspi,
+      "sdspi_bashed3.spin2". This can replace "sdspi_bashed2.spin2" for improved performance.'
     description_short: 'Here two uSD drivers that can both use your choice of three
       low level drivers.
 
@@ -24,11 +39,7 @@ object_metadata:
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - demo
-    - driver
-    - led
-    - spi
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:58.181998'
     kb_integration: none
@@ -43,11 +54,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: FRSW and FAT32 for P2
   urls:
     documentation: ''

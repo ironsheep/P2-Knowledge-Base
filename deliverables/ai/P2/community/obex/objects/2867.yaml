@@ -11,17 +11,14 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
-    description_full: Utility object for P2 development.
+    category: Human Input
+    description_full: 'For use as a On/Off switch: set Switch to true, otherwise the
+      buttons will act as momentary switches and not retain there state when released'
     description_short: Utility object for P2 development.
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - led
-    - spi
-    - demo
-    - driver
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:02.356277'
     kb_integration: none
@@ -49,6 +46,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: Accessory Board Buttons
   urls:
     documentation: ''

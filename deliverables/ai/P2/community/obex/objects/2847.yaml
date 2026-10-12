@@ -1,5 +1,5 @@
 object_metadata:
-  author: ersmith
+  author: Eric R. Smith
   author_username: ''
   capability:
     domain: G
@@ -11,23 +11,32 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: The ansi.spin2 file provides a VGA text driver that supports
+    category: Display
+    description_full: 'The ansi.spin2 file provides a VGA text driver that supports
       standard ANSI escape codes for text effects (like changing colors, flashing,
       etc.). Resolutions of 640x480, 800x600, 1024x768, and 1280x800 are supported,
       as well as fonts at a variety of sizes (8x8, 8x16, and 16x32 ones are included).
+
+
+      The default configuration is 1280x800 with a 16x32 font and 8bpp color; edit
+      ansi.spin2 to modify this.
+
+
+      demo.spin2 is a simple demo using the VGA tile driver directly as well as using
+      the ANSI text object
+
+
+      basdemo.bas is a demo in BASIC
+
+
+      See Notes.md for more information.'
     description_short: The ansi.spin2 file provides a VGA text driver that supports
       standard ANSI escape codes for text effects (like changing colors, flashing,
       etc.
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - demo
-    - driver
-    - led
-    - spi
-    - display
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:05.264541'
     kb_integration: none
@@ -53,6 +62,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: VGA Text routines
   urls:
     documentation: ''

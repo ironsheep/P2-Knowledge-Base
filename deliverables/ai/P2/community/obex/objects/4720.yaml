@@ -5,7 +5,8 @@ object_metadata:
     domain: G
     leaf: gui-widgets
     secondary:
-      - { domain: F, leaf: human-input }
+    - domain: F
+      leaf: human-input
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,23 +14,42 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: P2GUI  is a framework for creating UI’s based on TFT screens
-      driven with ILI9341. This framework is based on the driver created by Greg LaPolla
-      which includes a Touchscreen driver for the XPT2046. There are two versions
-      of this framework, one that uses the touchscreen and this one which uses an
-      enco
+    category:
+    - Display
+    - Human Input
+    description_full: 'P2GUI
+
+
+      P2GUI  is a framework for creating UI’s based on TFT screens driven with ILI9341.
+      This framework is based on the driver created by Greg LaPolla which includes
+      a Touchscreen driver for the XPT2046. There are two versions of this framework,
+      one that uses the touchscreen and this one which uses an encoder with a push
+      button to interact with the UI. Because most TFT displays that use the ILI9341
+      chipset are usually small in size, it makes sense to use an encoder as the interaction
+      method to avoid inaccuracies when using touchscreen, specially with small widgets.
+      The encoder is handled using jm_quadrature object from JonnyMac.
+
+
+      This project uses one cog for the display driver. Everything else is handled
+      in the user application cog with non-blocking timers (using Neotimer).
+
+
+      Demo Video
+
+
+      Documentation:
+
+      P2GUI_Encoder'
     description_short: P2GUI is a framework for creating UI’s based on TFT screens
       driven with ILI9341.
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - demo
-    - driver
-    - led
-    - spi
-    - display
+    - Display
+    - Encoder
+    - GUI
+    - ILI9341
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:59.509801'
     kb_integration: none
@@ -46,11 +66,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: P2GUI (Encoder Version)
   urls:
     documentation: ''

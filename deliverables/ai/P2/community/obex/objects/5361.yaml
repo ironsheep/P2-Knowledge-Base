@@ -11,11 +11,111 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
-    description_full: 'Demo Files: real_fft_test.spin2  Spin2 speed and accuracy test,
-      tested with PNut-ts and flexspin fft_demo.spin2   Spin2 example program, tested
-      with Propeller Tool and PNut-ts comparefftbench.c   C example program, tested
-      with flexcc (spin2cpp)'
+    category:
+    - Math
+    - Signals
+    - Speech and Sound
+    description_full: 'Demo Files:
+
+      real_fft_test.spin2 Spin2 speed and accuracy test, tested with PNut-ts and flexspin
+
+      fft_demo.spin2 Spin2 example program, tested with Propeller Tool and PNut-ts
+
+      comparefftbench.c C example program, tested with flexcc (spin2cpp)
+
+
+      Library Files:
+
+      cog_fft_mixed.spin2 The latest version supporting FFT and IFFT from 32 to 16384
+      points, out-of-place output only.
+
+      cog_fft.spin2 The original library with FFT and IFFT support.
+
+      cog_ifft_radix4.spin2 New faster library which supports only power of 4 sizes.
+
+      inline_fft.spin2 Inline PASM2 FFT for when cogs or memory is limited, or when
+      performance doesn''t matter.
+
+      sa_fft7.spin2 An independently created FFT library by Mark Tillotson. Has built-in
+      windowing.
+
+      dft4.spin2 Discrete Fourier Transform library for educational and testing purposes.
+
+
+      Other Files:
+
+      SimplestSerial.spin2
+
+      thread_factory.c
+
+      thread_factory.h
+
+
+      It''s not mentioned in the source files but cog_fft will always modify the source
+      array.
+
+      cog_ifft_radix4 will not modify the source array unless INPLACE is active.
+
+
+      Please note that IFFT on cog_fft behaves like forward FFT on cog_ifft_radix4
+      and dft4, and vice versa. This may cause a spectral inversion. I am investigating.
+
+
+      Performance at 160MHz
+
+      cog_fft_mixed, new library 2026-03-14
+
+      FFT size: 512 DFT uS: 49233 FFT uS: 419 max_error: 31 avg_error: 11
+
+      REAL size: 1024 DFT uS: 196766 FFT uS: 561 max_error: 47 avg_error: 7
+
+      FFT size: 1024 DFT uS: 196766 FFT uS: 879 max_error: 53 avg_error: 15
+
+      IFFT size: 1024 DFT uS: 196766 FFT uS: 879 max_error: 52 avg_error: 15
+
+
+      New 2026-03-04 radix 4 version
+
+      1024 point butterfly run time = 831 us FFT ONLY, no bit reversal
+
+      1024 point bit-reversal and butterfly run time = 1132 us IFFT In-Place Algorithm
+
+      1024 point bit-reversal and butterfly run time = 1132 us In-Place Algorithm
+
+      1024 point bit-reversal and butterfly run time = 879 us IFFT
+
+      1024 point bit-reversal and butterfly run time = 879 us Cog
+
+      1024 point bit-reversal and butterfly run time = 1965 us Inline
+
+      1024 point bit-reversal and butterfly run time = 196803 us Discrete Fourier
+      Transform 4 points at a time
+
+
+      Old cog_fft
+
+      1024 point butterfly run time = 1018 us FFT ONLY, no bit reversal
+
+      1024 point bit-reversal and butterfly run time = 1328 us IFFT In-Place Algorithm
+
+      1024 point bit-reversal and butterfly run time = 1297 us In-Place Algorithm
+
+      1024 point bit-reversal and butterfly run time = 1204 us IFFT Out-of-Place Algorithm
+
+      1024 point bit-reversal and butterfly run time = 1174 us Out-of-Place Algorithm
+
+      1024 point bit-reversal and butterfly run time = 664 us Real Input
+
+      1024 point bit-reversal and butterfly run time = 3764 us Inline
+
+      1024 point bit-reversal and butterfly run time = 12991 us flexcc -2 comparefftbench.c
+      -O3
+
+
+      The cog_fft IFFT is implemented as an FFT with the inputs and outputs conjugated.
+      That''s why it''s 2.5% slower. I felt this was an acceptable trade-off between
+      speed, library size, and development effort. The newer cog_ifft_radix4 reverses
+      rotation to compute IFFT with no measurable penalty.'
     description_short: 'Demo Files: real_fft_test.spin2  Spin2 speed and accuracy
       test, tested with PNut-ts and flexspin fft_demo.spin2   Spin2 example program,
       tested with Propeller T'
@@ -35,10 +135,14 @@ object_metadata:
     file_format: ZIP
     file_size: ''
     languages:
-    - SPIN2
+    - C/C++
+    - SPIN2 PASM2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: FFT IFFT
   urls:
     documentation: ''

@@ -506,7 +506,14 @@ def kb_files(root):
         dn[:] = sorted(d for d in dn if not d.startswith("."))
         for f in sorted(fn):
             if f.endswith(".yaml"):
-                out.append(os.path.relpath(os.path.join(dp, f), base).replace(os.sep, "/"))
+                rel = os.path.relpath(os.path.join(dp, f), base).replace(os.sep, "/")
+                # OBEX objects mirror the OBEX catalog: their text is the authors', code examples
+                # included. Compiling it would pass a verdict on someone else's object, which the KB
+                # does not do (doctrine: an OBEX entry carries what the catalog says; F-573). The
+                # claim-sourcing gate skips them for the same reason (S-308c).
+                if rel.startswith("community/obex/objects/"):
+                    continue
+                out.append(rel)
     return out
 
 

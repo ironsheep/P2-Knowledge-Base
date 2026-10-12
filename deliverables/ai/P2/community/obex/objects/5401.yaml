@@ -5,7 +5,8 @@ object_metadata:
     domain: F
     leaf: distance
     secondary:
-      - { domain: B, leaf: pulse-measurement }
+    - domain: B
+      leaf: pulse-measurement
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,7 +14,7 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: sensors
+    category: Sensor
     description_full: Object and demo code for the HC-SR04 ultrasonic sensor. Measures
       return pulse with a P2 smart pin (P_HIGH_TICKS mode). Methods in the object
       allow the user to return distance in microseconds, centimeters, or inches.
@@ -44,6 +45,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: HC-SR04 Ultrasonic Sensor for P2
   urls:
     documentation: ''

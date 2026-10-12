@@ -11,20 +11,86 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: 'NOTE: This P2 HUB75 driver is built to work with the P2 Eval
-      HUB75 Adapter which is available from HUB75 at Parallax.com Store'
+    category: Display
+    description_full: 'Driver for HUB75-controlled RGB LED Matrix Panels
+
+
+      NOTE: This P2 HUB75 driver is built to work with the P2 Eval HUB75 Adapter which
+      is available from HUB75 at Parallax.com Store
+
+
+      A selection of the driver features:
+
+      - Up to 3 HUB75 cards supported on a single P2
+
+      - Compile-time selectable color depth from 3 to 8-bits per color (9 to 24-bit
+      color per pixel), per hub75 card
+
+      - P2 P2 Cube support (display on all six surfaces of the cube)
+
+      - Single panel support working well for supported chips, up to 8192 LEDs (128x64)
+
+      - Supported Panel Driver Chips: DP5125D, FM6126A, FM6124, GS6238S, ICN2037,
+      ICN2038S, and MBI5124 (1/8 scan)
+
+      - Multi-panel support is working well for ICN2037 chip only (we''re trying to
+      figure out the panel initialization sequences for chips like the FM6126A. Until
+      we do, Multi-panel won''t work for these panels)
+
+      - Displaying text in 5x7 and 8x8 fonts (including Chip''s dithered 5x7 fonts
+      and with descenders!)
+
+      - Initial version of scrolling text - will get more performant in future updates
+      (now up, down, right, and left scroll!)
+
+      - Basic color pixel placement at row and column (whole panel-set and Single-panel-of-set
+      forms)
+
+      - Basic drawing primitives (whole panel-set and Single-panel-of-set forms)
+
+      - Loading and displaying images from .bmp files (that are identically sized
+      to your single panel)
+
+
+      At the Repository, you''ll find documentation on:
+
+      - HardwareTurnon - Describes the initial turn-on effort of this driver
+
+      - Driver Details - Provides more detail about the driver and driver-configuration
+
+      - Panel Config/Timing Details - Notes about each panel-driver chip this P2 driver
+      supports
+
+      - HUB75 Card Details - Pins and Probing Support provided by HUB75 card
+
+      - P2 P2 Cube testing - Author''s test hardware - Flat P2 P2 Cube Configuration
+
+
+      Version: 3.0.2 Release Notes
+
+
+      GitHub repository: P2 HUB75 LED Matrix Driver
+
+
+      Related:
+
+      - See Docs, Setup Instructions at HUB75 LED Matrix Driver Github Repository
+
+      - Buy P2 Eval HUB75 Driver Board at Parallax Online Store
+
+      - See also the OBEX page: ISP P2 HUB75 Matrix - Morphing Digits
+
+
+      DOWNLOAD: please download "Source code.zip" from the release-notes link above.'
     description_short: 'NOTE: This P2 HUB75 driver is built to work with the P2 Eval
       HUB75 Adapter which is available from HUB75 at Parallax.com Store'
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - demo
-    - driver
-    - led
-    - spi
-    - display
+    - HUB75
+    - LED
+    - Matrix
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:05.264513'
     kb_integration: none
@@ -40,11 +106,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: 3.0.2
+    content_type:
+    - Code
+    licence: Other
   title: ISP Hub75 Matrix Driver
   urls:
     documentation: ''

@@ -5,7 +5,8 @@ object_metadata:
     domain: F
     leaf: rtc
     secondary:
-      - { domain: E, leaf: i2c }
+    - domain: E
+      leaf: i2c
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,9 +14,27 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: DS3231 RTC interface (uses 24-hr format). P1 and P2 versions
+    category:
+    - Protocol
+    - Sensor
+    description_full: 'DS3231 RTC interface (uses 24-hr format). P1 and P2 versions
       attached.
+
+
+      08 APR 2025
+
+      - Updated to 1.1.1
+
+      - is_leap_year() method
+
+      - last_date() method
+
+      - ordinal() method
+
+      - julian() method
+
+
+      Added temperature reading into demo'
     description_short: DS3231 RTC interface (uses 24-hr format). P1 and P2 versions
       attached.
     hardware_support: []
@@ -38,10 +57,16 @@ object_metadata:
     file_format: ZIP
     file_size: ''
     languages:
+    - SPIN
     - SPIN2
+    - SPIN2 PASM2
     microcontroller:
+    - P1
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: DS3231
   urls:
     documentation: ''

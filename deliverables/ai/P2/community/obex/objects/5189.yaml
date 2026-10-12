@@ -11,18 +11,44 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
+    category: Math
     description_full: 'These three objects provide the following unsigned functions
-      for 64, 96, and 128-bit integers:'
+      for 64, 96, and 128-bit integers:
+
+
+      NEGQ() - negate
+
+      ADDQ() - add
+
+      SUBQ() - subtract
+
+      CMPQ() - compare
+
+      MAGQ() - magnitude
+
+      SHLQ() - shift left
+
+      SHRQ() - shift right
+
+      MULQ() - multiply
+
+      DIVQ() - divide
+
+      LOGQ() - log2
+
+      EXPQ() - exp2
+
+      LongLSB() - extract long via LSB
+
+      LongMSB() - extract long via MSB
+
+      LongSHL() - left-shift long to make 64/96/128-bit value'
     description_short: 'These three objects provide the following unsigned functions
       for 64, 96, and 128-bit integers:'
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - led
-    - spi
-    - driver
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:55.437655'
     kb_integration: none
@@ -37,11 +63,13 @@ object_metadata:
     file_format: ZIP
     file_size: ''
     languages:
-    - SPIN2
-    - PASM2
+    - SPIN2 PASM2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: 64/96/128-Bit Unsigned Integer Math
   urls:
     documentation: ''

@@ -11,7 +11,7 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
+    category: Protocol
     description_full: Drivers for the MCP2517 CANbus FD controller, for the P1 and
       P2
     description_short: Drivers for the MCP2517 CANbus FD controller, for the P1 and
@@ -34,10 +34,15 @@ object_metadata:
     file_format: ZIP
     file_size: ''
     languages:
+    - SPIN
     - SPIN2
     microcontroller:
+    - P1
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: mcp2517 CAN FD controller drivers
   urls:
     documentation: ''

@@ -5,7 +5,8 @@ object_metadata:
     domain: B
     leaf: usb-pins
     secondary:
-      - { domain: F, leaf: human-input }
+    - domain: F
+      leaf: human-input
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,19 +14,25 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: Allows reading keyboard, mouse and gamepads. MD for full usage
-      info. Also see the github page and associated wiki.
+    category:
+    - Fun
+    - Human Input
+    - Protocol
+    description_full: 'USB input driver for P2. Allows reading keyboard, mouse and
+      gamepads.
+
+
+      See README.MD for full usage info.
+
+
+      Also see the github page and associated wiki.'
     description_short: Allows reading keyboard, mouse and gamepads. MD for full usage
       info. Also see the github page and associated wiki.
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - demo
-    - driver
-    - led
-    - spi
+    - USB
   scrape_tracking:
     created_date: '2024-03-28 16:13:28'
     discovery_date: '2025-09-12T12:44:10.850424'
@@ -42,11 +49,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: USBnew
   urls:
     documentation: ''

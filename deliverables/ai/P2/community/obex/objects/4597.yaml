@@ -5,7 +5,8 @@ object_metadata:
     domain: G
     leaf: hmi-display
     secondary:
-      - { domain: E, leaf: uart-serial }
+    - domain: E
+      leaf: uart-serial
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,23 +14,36 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: display
-    description_full: Breadboard Mates (BBM) produces the TIMI line of displays. These
-      are similar to the Nextion devices we've seen in that we select the screens
+    category: Display
+    description_full: 'Breadboard Mates (BBM) produces the TIMI line of displays.
+      These are similar to the Nextion devices we''ve seen in that we select the screens
       to be displayed and upload them to the device (essentially flashing the device.)
       Then, we connect the device containing the screens to our project via serial
-      a
+      and simply send values to the screen fields or labels.
+
+
+      This object provides full control over the TIMI displays after they are programmed.
+
+
+      Version (repository latest)
+
+
+      GitHub repository: P2 TIMI Spin2 Object
+
+
+      This object (in my case) is used in a larger project, which is referenced in
+      the following repository:
+
+      GitHub repository: P2 Multi-servo Exerciser'
     description_short: 'Breadboard Mates (BBM) produces the TIMI line of displays.
       These are similar to the Nextion devices '
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - spi
-    - serial
-    - driver
-    - led
-    - display
+    - BreadBoard Mates
+    - Serial
+    - TIMI
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:59.509860'
     kb_integration: none
@@ -44,11 +58,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: (repository latest)
+    content_type:
+    - Code
+    licence: MIT
   title: ISP P2 TIMI Spin2 Object
   urls:
     documentation: ''

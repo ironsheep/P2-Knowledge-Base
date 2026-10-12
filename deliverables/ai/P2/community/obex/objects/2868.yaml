@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: F
@@ -11,19 +11,16 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
-    description_full: Allows for active-high or active-low, and provides methods for
-      direct read and debounced inputs.
+    category: Human Input
+    description_full: This object simplifies the configuration of an IO pin for use
+      as a digital input. Allows for active-high or active-low, and provides methods
+      for direct read and debounced inputs.
     description_short: Allows for active-high or active-low, and provides methods
       for direct read and debounced inputs.
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - led
-    - spi
-    - demo
-    - driver
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:02.356266'
     kb_integration: none
@@ -46,6 +43,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: EZ Button
   urls:
     documentation: ''

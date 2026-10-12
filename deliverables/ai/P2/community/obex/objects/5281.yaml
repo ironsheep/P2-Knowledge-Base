@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: H
@@ -11,20 +11,20 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: Utility object for P2 development.
+    category: Motor Control
+    description_full: 'Simple Spin2 demo for the Click Stepper-2 driver accessory.
+
+
+      Tested with Propeller Tool and with Spin Tools IDE'
     description_short: Utility object for P2 development.
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
     - Click
-    - spi
+    - jonnymac
     - motor
-    - jo
-    - driver
-    - led
-    - demo
+    - stepper
   scrape_tracking:
     created_date: '2025-08-20 18:38:30'
     discovery_date: '2025-09-12T12:43:55.437586'
@@ -46,6 +46,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: Click Stepper-2 Demo
   urls:
     documentation: ''

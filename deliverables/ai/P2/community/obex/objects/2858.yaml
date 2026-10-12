@@ -1,5 +1,5 @@
 object_metadata:
-  author: Greg LaPolla
+  author: glapolla
   author_username: ''
   capability:
     domain: G
@@ -11,20 +11,48 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: MAX7219 Dot Matrix is a spin object that interfaces the MAX7219
-      chip with the Propeller 2 P2X8C4M64P
+    category: Display
+    description_full: 'Language
+
+
+      Spin2
+
+
+      Category
+
+
+      Display
+
+
+      Description
+
+
+      MAX7219 Dot Matrix is a spin object that interfaces the MAX7219 chip with the
+      Propeller 2 P2X8C4M64P
+
+
+      Learn more about the Propeller 2 at www.parallax.com.
+
+
+      License
+
+
+      Copyright © 2021 Greg LaPolla MAX7219 Dot Matrix Spin 2 Object is licensed under
+      the MIT License.
+
+
+      Credits
+
+
+      MAX7219 Spin 2 Object is developed by Greg LaPolla.
+
+      This object is based on the arduino LedControl by Eberhard Fahle'
     description_short: MAX7219 Dot Matrix is a spin object that interfaces the MAX7219
       chip with the Propeller 2 P2X8C4M64P
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - pwm
-    - driver
-    - led
-    - spi
-    - display
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:03.845001'
     kb_integration: none
@@ -39,10 +67,13 @@ object_metadata:
     file_format: ZIP
     file_size: ''
     languages:
-    - SPIN2
+    - Generic
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: MAX7219 Dot Matrix
   urls:
     documentation: ''

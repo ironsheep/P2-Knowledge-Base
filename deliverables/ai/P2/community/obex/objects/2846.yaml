@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: E
@@ -11,17 +11,15 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
-    description_full: <Overviewn McPhalen.
+    category: Protocol
+    description_full: This object receives and decodes Sony IRCS (infrared control
+      system) signals using a standard active-low receiver module. Auto-detects 12-,
+      15-, and 20-bit control codes.
     description_short: <Overviewn McPhalen.
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - led
-    - spi
-    - demo
-    - driver
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:05.264550'
     kb_integration: none
@@ -38,11 +36,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: Sony IRCS Rx (infrared control system receiver)
   urls:
     documentation: ''

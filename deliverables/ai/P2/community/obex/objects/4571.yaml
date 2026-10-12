@@ -5,7 +5,8 @@ object_metadata:
     domain: F
     leaf: distance
     secondary:
-      - { domain: E, leaf: i2c }
+    - domain: E
+      leaf: i2c
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,23 +14,68 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: sensors
-    description_full: A collection of P2 Spin2 objects allows us to realize a 180°
+    category: Sensor
+    description_full: 'A collection of P2 Spin2 objects allows us to realize a 180°
       field-of-view time-of-flight sensor by ganging 4 VL53L5CX TOF sensors in 45-degree
       fields to form a single 180-degree sensor. Additionally, we use a PCV8575 I2C
       I/O Expander to handle most of the I/O with the four sensors, thus reducing
-      th
+      the number of pins needed to drive the sensor complex from the P2. My goal is
+      to minimize the signals between the P2 and the Sensor. With this plan, there
+      are 3.3V and 5V power and ground, an I2C bus with an Interrupt line for the
+      PCF8575 (400KHz), and two I2C busses (1MHz, ea.) with two TOF sensors on each
+      bus. This then is ten wires running between the P2 and the Sensor mechanism.
+
+
+      For more sensor detail and schematics, see: TOF Sensor: 180° Field of View
+
+
+      For logic analysis traces (showing what this all looks like on the I2C busses)
+      and turn-on related documentation, See: Turning on the DIY Robotic Sensor w/180°
+      Field of View
+
+
+      The demo uses an HDMI display to show sensor values. The schematics, pictures,
+      and further documentation are provided at the GitHub repo.
+
+
+      Key features of this sensor driver are:
+
+      - Uses 1 COG for communication with the 4x Satel boards and the PCF8575.
+
+      - Uses six pins for I2C (could be reduced to 4) and one pin for sensing interrupts
+      from the PCF8575
+
+      - Maintains in-HUB RAM image of all sensor data (4 sets of data, 1 for ea. TOF
+      sensor)
+
+      - Full 180° frame unloads: 4x4 resolution at 12 Hz (12 full frames every second,
+      a new frame every 83 mSec.)
+
+      - Full 180° frame unloads: 8x8 resolution at 7 Hz (7 full frames every second,
+      a new frame every 143 mSec.!)
+
+
+      Version (Repository latest)
+
+
+      GitHub repository: P2-VL53L5CX-time-of-flight-driver and more...
+
+
+      Forum Thread: 180° Field of View Time-of-Flight sensor for the P2
+
+
+      DOWNLOAD: please get this code directly from the repo.'
     description_short: A collection of P2 Spin2 objects allows us to realize a 180°
       field-of-view time-of-flight sensor by ganging 4 VL53L5CX TOF sensors
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - i2c
-    - driver
-    - sensor
-    - spi
-    - display
+    - I2C
+    - PCF8575
+    - Port Expander
+    - TOF
+    - VL53L5CX
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:59.509878'
     kb_integration: none
@@ -46,11 +92,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: (Repository latest)
+    content_type:
+    - Code
+    licence: MIT
   title: ISP P2 180° Field of View TOF Sensor
   urls:
     documentation: ''

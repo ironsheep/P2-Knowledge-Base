@@ -5,7 +5,8 @@ object_metadata:
     domain: B
     leaf: usb-pins
     secondary:
-      - { domain: F, leaf: human-input }
+    - domain: F
+      leaf: human-input
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,22 +14,24 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
+    category:
+    - Human Input
+    - Protocol
     description_full: 'USB Human-Interface-Device (HID) driver with a demo and descriptors
       for a mouse, keyboard, and joystick.
 
       Operates at Low (1.5Mbps) and Full (12Mbps) speeds with all clkfreqs from 80MHz
-      to 320MHz.'
+      to 320MHz.
+
+
+      Compiled with Propeller Tool v2.9.3'
     description_short: USB Human-Interface-Device (HID) driver with a demo and descriptors
       for a mouse, keyboard, and joyst
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - demo
-    - led
-    - driver
-    - spi
+    - USB
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:58.182095'
     kb_integration: none
@@ -43,11 +46,14 @@ object_metadata:
     file_format: ZIP
     file_size: 1.5MB
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: v2.9.3
+    content_type:
+    - Code
+    licence: MIT
   title: USB Human-Interface-Device Driver
   urls:
     documentation: ''

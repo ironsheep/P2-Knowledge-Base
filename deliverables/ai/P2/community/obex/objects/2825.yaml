@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: E
@@ -11,7 +11,9 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
+    category:
+    - Protocol
+    - Sensor
     description_full: This simple object enables the P2 to transmit codes corresponding
       to the NEC IR transmission protocol through an IR LED. Standard and Extended
       address codes are supported, with up to four repeat commands for each transmission.
@@ -20,12 +22,7 @@ object_metadata:
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - led
-    - demo
-    - sensor
-    - driver
-    - spi
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:09.461322'
     kb_integration: none
@@ -45,6 +42,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: NEC TX
   urls:
     documentation: ''

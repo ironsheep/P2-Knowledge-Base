@@ -11,7 +11,7 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
+    category: Math
     description_full: This object provides decimal (base 10) floating point math routines.
       The default Spin2 floating point uses the IEEE binary (base 2) format, which
       has the disadvantage that numbers like 0.1 or 0.02 are not exactly representable;
@@ -22,10 +22,7 @@ object_metadata:
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - spi
-    - demo
-    - driver
+    - float decimal math
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:12.247294'
     kb_integration: none
@@ -44,6 +41,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: DecFloat
   urls:
     documentation: ''

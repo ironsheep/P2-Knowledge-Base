@@ -11,19 +11,43 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: demos
+    category: Tool
     description_full: 'Latest PNut Documentation:
 
-      https://docs.google.com/document/d/16qVkmA6Co5fUNKJHF6pBfGfDupuRwDtf-wyieh_fbqw/edit'
+      https://docs.google.com/document/d/16qVkmA6Co5fUNKJHF6pBfGfDupuRwDtf-wyieh_fbqw/edit
+
+
+      Propeller 2 Silicon Documentation:
+
+      https://docs.google.com/document/d/1gn6oaT5Ib7CytvlZHacmrSbVBJsD9t_-kmvjd7nUR6o/edit?usp=sharing
+
+
+      Propeller 2 Assembly Language Instructions:
+
+      https://docs.google.com/spreadsheets/d/1_vJk-Ad569UMwgXTKTdfJkHYHpc1rZwxB-DcIiAZNdk/edit?usp=sharing
+
+
+      General Propeller 2 Documentation:
+
+      https://www.parallax.com/propeller-2/documentation/
+
+
+      PNut GitHub Repository:
+
+      https://github.com/parallaxinc/P2_PNut_Public
+
+
+      Version 55 - Each bitfield read/write now takes one less bytecode, same for
+      ++/-- word/long/structure-pointer steps'
     description_short: 'Latest PNut Documentation: https://docs.'
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - spi
-    - demo
-    - driver
+    - Matrix
+    - p2
+    - Parallax
+    - Pasm2
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:56.829272'
     kb_integration: none
@@ -40,11 +64,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: PNut/Spin2 Latest Version (v55)
   urls:
     documentation: ''

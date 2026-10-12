@@ -5,7 +5,8 @@ object_metadata:
     domain: F
     leaf: distance
     secondary:
-      - { domain: E, leaf: i2c }
+    - domain: E
+      leaf: i2c
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,20 +14,44 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: P2 VL53L5CX Object - A Port of the VL53L5CX I/F library/downloader
+    category: Sensor
+    description_full: 'P2 VL53L5CX Object - A Port of the VL53L5CX I/F library/downloader
       to Spin2/Pasm2
+
+
+      (...Excerpt from STMicroelectronics webpage)
+
+
+      The VL53L5CX is a state-of-the-art, Time-of-Flight (ToF), multizone ranging
+      sensor. Unlike conventional IR sensors, the VL53L5CX allows absolute distance
+      measurement whatever the target color and reflectance. It provides accurate
+      ranging up to 400 cm and can work at fast speeds (60 Hz). Multizone distance
+      measurements are possible up to 8x8 zones with a wide 63° diagonal FoV, which
+      can be reduced by software. The VL53L5CX is able to detect different objects
+      within the FoV.
+
+
+      Version (repository latest)
+
+
+      GitHub repository: P2-VL53L5CX-time-of-flight-driver
+
+
+      This object (in my case) is used in a larger project which is referenced in
+      the following forum thread:
+
+      Forum Thread: 180° Field of View Time-of-Flight sensor for the P2'
     description_short: P2 VL53L5CX Object - A Port of the VL53L5CX I/F library/downloader
       to Spin2/Pasm2
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - demo
-    - driver
-    - sensor
-    - spi
+    - Pasm2
+    - Sensor
+    - Spin2
+    - TOF
+    - VL53L5CX
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:59.509895'
     kb_integration: none
@@ -42,11 +67,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: (repository latest)
+    content_type:
+    - Code
+    licence: MIT
   title: ISP P2 VL53L5CX time of flight driver
   urls:
     documentation: ''

@@ -5,7 +5,8 @@ object_metadata:
     domain: D
     leaf: video-signal
     secondary:
-      - { domain: J, leaf: synthesis }
+    - domain: J
+      leaf: synthesis
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,20 +14,24 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: demos
-    description_full: Example of generating FM radio broadcasts (ab)using the P2's
+    category:
+    - Signals
+    - Speech and Sound
+    description_full: 'Example of generating FM radio broadcasts (ab)using the P2''s
       color modulator unit.
+
+
+      Included here is a bare-bones example of a periodic tone and a modified version
+      of OPNACog (https://obex.parallax.com/obex/opnacog/)
+
+
+      See this demonstration: https://youtu.be/mlhf4FX1j7c'
     description_short: Example of generating FM radio broadcasts (ab)using the P2's
       color modulator unit.
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - example
-    - demo
-    - led
-    - adc
-    - spi
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:12.247268'
     kb_integration: none
@@ -41,11 +46,13 @@ object_metadata:
     file_format: ZIP
     file_size: ''
     languages:
-    - SPIN2
     - PASM2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: FM Radio broadcasting
   urls:
     documentation: ''

@@ -11,22 +11,32 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: motors
+    category:
+    - Motor Control
+    - Signals
     description_full: 'Step/Dir signal generator for multiple axes, can be used to
       drive stepper motor or servo drives
 
-      Supports:'
+      Supports:
+
+      - filtering to avoid acceleration peaks and allow smooth and jolt-free movement
+
+      - Anti-aliasing with fractional steps per calculation cycle reduces jitter
+
+      - high frequencies up to several MHz
+
+      - 50% duty cycle and Dir changes in the middle of the step low-phase avoids
+      setup/hold problems'
     description_short: Step/Dir signal generator for multiple axes, can be used to
       drive stepper motor or servo drives Supports:.
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - servo
-    - driver
-    - motor
-    - led
-    - spi
+    - motion
+    - Servo
+    - smart-pin
+    - stepper motor
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:56.829290'
     kb_integration: none
@@ -42,11 +52,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: Step/Dir signal generator
   urls:
     documentation: ''

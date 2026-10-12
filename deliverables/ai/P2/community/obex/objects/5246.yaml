@@ -5,7 +5,8 @@ object_metadata:
     domain: F
     leaf: temp-humidity
     secondary:
-      - { domain: E, leaf: i2c }
+    - domain: E
+      leaf: i2c
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,20 +14,16 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: Handles 2 if you got 2 on the bus. Uses JonyMac's i2c library.
+    category: Sensor
+    description_full: A simple I2C driver for the BMP390 temperature+pressure sensor.
+      Handles 2 if you got 2 on the bus. Uses JonyMac's i2c library.
     description_short: Handles 2 if you got 2 on the bus. Uses JonyMac's i2c library.
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - i2c
-    - spi
-    - Temperature ADC Se
-    - sensor
-    - adc
-    - driver
     - I2C
+    - Temperature ADC Sensor
   scrape_tracking:
     created_date: '2025-05-30 06:33:41'
     discovery_date: '2025-09-12T12:43:55.437646'
@@ -43,14 +40,16 @@ object_metadata:
     file_format: ZIP
     file_size: ''
     languages:
-    - SPIN2
-    - PASM2
+    - SPIN2 PASM2
     languages_confirmed:
     - SPIN2
     - PASM2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: BMP390 driver
   urls:
     documentation: ''

@@ -5,7 +5,8 @@ object_metadata:
     domain: E
     leaf: spi
     secondary:
-      - { domain: A, leaf: cogs }
+    - domain: A
+      leaf: cogs
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,9 +14,12 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: Uses a cog.  Runs autonomously.  Master can read and write at
-      will within the handler's specified hubRAM buffer space.
+    category: Protocol
+    description_full: 'Uses a cog. Runs autonomously. Master can read and write at
+      will within the handler''s specified hubRAM buffer space.
+
+
+      Further reading - https://forums.parallax.com/discussion/175543/propspi-emulation-of-a-generic-spi-ram-chip-using-the-prop2'
     description_short: Uses a cog.  Runs autonomously.  Master can read and write
       at will within the handler's specified hubRAM buffer space.
     hardware_support: []
@@ -36,11 +40,13 @@ object_metadata:
     file_format: ZIP
     file_size: ''
     languages:
-    - SPIN2
-    - PASM2
+    - SPIN2 PASM2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: PropSPI
   urls:
     documentation: ''

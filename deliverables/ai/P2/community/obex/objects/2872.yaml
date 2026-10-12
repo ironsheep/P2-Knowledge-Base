@@ -5,7 +5,8 @@ object_metadata:
     domain: I
     leaf: spi-flash
     secondary:
-      - { domain: E, leaf: spi }
+    - domain: E
+      leaf: spi
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,7 +14,7 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
+    category: Data Storage
     description_full: Very simple driver for SPI flash devices like the external boot
       flash ROM of the P2. Can be used to store configuration or user data in free
       pages not used for the software itself. Provides no file system but only simple
@@ -24,10 +25,7 @@ object_metadata:
     peripherals: []
     subcategory: ''
     tags:
-    - demo
-    - driver
-    - led
-    - spi
+    - SPI
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:02.356217'
     kb_integration: none
@@ -47,6 +45,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: Simple SPI flash driver
   urls:
     documentation: ''

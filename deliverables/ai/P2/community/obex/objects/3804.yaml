@@ -11,23 +11,31 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
+    category: Tool
     description_full: 'pllset()
 
       Calculates appropriate clock mode component values to set a requested clock
-      frequency via clkset().  Based heavily on Chip''s original Delphi code but with
-      added runtime determination of board crystal mode and frequency.  Relies on
-      compile time clock config correctly matching the actual boar'
+      frequency via clkset(). Based heavily on Chip''s original Delphi code but with
+      added runtime determination of board crystal mode and frequency. Relies on compile
+      time clock config correctly matching the actual board.
+
+
+      muldiv65()
+
+      Performs same function as muldiv64() but with rounding to nearest.
+
+
+      div33()
+
+      Performs a 32-bit integer divide but with rounding to nearest.'
     description_short: pllset() Calculates appropriate clock mode component values
       to set a requested clock frequency via clkset().
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - spi
-    - demo
-    - driver
+    - clkset
+    - muldiv64
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:12.247345'
     kb_integration: none
@@ -47,6 +55,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: Pllset
   urls:
     documentation: ''

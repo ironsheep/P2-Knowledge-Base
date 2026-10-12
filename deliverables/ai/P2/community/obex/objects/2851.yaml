@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: G
@@ -11,18 +11,15 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: <Overviewn McPhalen.
+    category: Display
+    description_full: The TM1638 is popular in low-cost LED display driver and switch
+      input IC used in low-cost HMIs. The demo code exploits all available features
+      of the TM1638 through its 2-wire, SPI-like interface.
     description_short: <Overviewn McPhalen.
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - demo
-    - driver
-    - spi
-    - led
-    - display
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:05.264502'
     kb_integration: none
@@ -39,11 +36,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: TM1638 LED Display Driver
   urls:
     documentation: ''

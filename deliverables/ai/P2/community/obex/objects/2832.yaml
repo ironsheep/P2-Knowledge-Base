@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: B
@@ -11,17 +11,13 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
-    description_full: Utility object for P2 development.
+    category: Signals
+    description_full: Interface for MikroElektronika Relay2 Click board
     description_short: Utility object for P2 development.
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - led
-    - spi
-    - demo
-    - driver
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:08.056879'
     kb_integration: none
@@ -44,6 +40,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: Click Relay2
   urls:
     documentation: ''

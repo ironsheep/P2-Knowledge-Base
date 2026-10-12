@@ -11,7 +11,7 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
+    category: PCB Design
     description_full: This zip includes Schematic Symbol, Footprint, and 3d Model.
     description_short: This zip includes Schematic Symbol, Footprint, and 3d Model.
     hardware_support: []
@@ -35,6 +35,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Hardware
+    licence: MIT
   title: P2 Edge KiCAD Symbols
   urls:
     documentation: ''

@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: H
@@ -11,20 +11,17 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: Ramping and other slow motion behavior of the servo is controlled
-      by the parent application.
+    category: Motor Control
+    description_full: Simple servo driver that uses a P2 smart pin to create the servo
+      signal. Ramping and other slow motion behavior of the servo is controlled by
+      the parent application.
     description_short: Ramping and other slow motion behavior of the servo is controlled
       by the parent application.
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - pwm
-    - driver
-    - motor
-    - led
-    - spi
+    - Servo
   scrape_tracking:
     created_date: '2024-03-15 14:30:20'
     discovery_date: '2025-09-12T12:44:00.896221'
@@ -47,6 +44,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: Servo
   urls:
     documentation: ''

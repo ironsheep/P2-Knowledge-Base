@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: B
@@ -11,18 +11,17 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
-    description_full: 3v analog input with a user-scalable output.
+    category:
+    - Human Input
+    - Sensor
+    - Signals
+    description_full: This object allows any P2 pin to be converted to a 0-3.3v analog
+      input with a user-scalable output.
     description_short: 3v analog input with a user-scalable output.
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - led
-    - demo
-    - sensor
-    - driver
-    - spi
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:09.461353'
     kb_integration: none
@@ -45,6 +44,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: EZ Analog
   urls:
     documentation: ''

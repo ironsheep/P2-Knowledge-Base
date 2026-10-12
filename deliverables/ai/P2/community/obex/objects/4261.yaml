@@ -11,24 +11,45 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: tools
+    category: Data Storage
     description_full: 'A wear-leveling filesystem for the P2 Edge on-board flash chip.
       Supports multi-cog access without consuming a Cog.
 
       This is the formal release of Chips Flash Filesystem with a standard filesystem
       API.
 
-      It compiles with FlexProp and Parallax tools.'
+      It compiles with FlexProp and Parallax tools.
+
+
+      This fully qualified driver is supported by hundreds of regression test steps
+      covering all functionality. The tests and test logs can be found in the GitHub
+      repo.
+
+
+      Jon McPhalens'' shell demo is included in cgsm_flash_file_demo.zip.
+
+
+      Version 2.0.0 Release Info
+
+
+      GitHub repository: P2 Flash FS
+
+
+      See the repository for detailed documentation such as How to use in your code,
+      the Theory of Operation, Regression Testing Status, etc.
+
+
+      Forum Thread: On-Board Flash File System'
     description_short: A wear-leveling filesystem for the P2 Edge on-board flash chip.
       Supports multi-cog access without consuming a Cog.
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - spi
-    - demo
-    - driver
+    - Filesystem
+    - FLASH
+    - FlexProp
+    - P2 EDGE
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:00.896187'
     kb_integration: none
@@ -45,11 +66,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: 2.0.0
+    content_type:
+    - Code
+    licence: MIT
   title: P2 FLASH Filesystem
   urls:
     documentation: ''

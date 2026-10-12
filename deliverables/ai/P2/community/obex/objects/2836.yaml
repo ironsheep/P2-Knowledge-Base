@@ -11,19 +11,25 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: Provides P2 to ESP32 AT Interface (esp_drv, esp_wifi, esp_tcp,
+    category: Protocol
+    description_full: 'Provides P2 to ESP32 AT Interface (esp_drv, esp_wifi, esp_tcp,
       esp_logon)
+
+
+      Also : get_info.spin2 : gets esp32 firmware version
+
+      webserver : esp_webserver.spin2
+
+      demo webserver : 32 Voltage Monitor with analog meters - demo_meter32.spin2,
+      see picture demo_32 Voltage_Meters.png
+
+      demo webserver : Led Control - demo led_control.spin2, see picture demo_led_control.png'
     description_short: Provides P2 to ESP32 AT Interface (esp_drv, esp_wifi, esp_tcp,
       esp_logon)
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - led
-    - spi
-    - demo
-    - driver
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:06.662872'
     kb_integration: none
@@ -46,6 +52,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: Cricket ESP32 AT
   urls:
     documentation: ''

@@ -5,7 +5,8 @@ object_metadata:
     domain: I
     leaf: sd-fat
     secondary:
-      - { domain: E, leaf: spi }
+    - domain: E
+      leaf: spi
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,11 +14,81 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: This project provides a robust, high-performance SD card driver
+    category: Data Storage
+    description_full: 'This project provides a robust, high-performance SD card driver
       for the P2 microcontroller with full FAT32 filesystem support. The driver uses
       P2 smart pins for hardware-accelerated SPI communication and supports multiple
       simultaneous file handles.
+
+
+      Features
+
+      - FAT32 Filesystem Support: Full read/write access to FAT32-formatted SD cards
+
+      - High-Performance SPI: Smart pin hardware acceleration with streamer DMA
+
+      - Multi-File Handles: Up to 6 simultaneous file and directory handles (configurable)
+
+      - Cross-OS Compatibility: Works with cards formatted on Windows, macOS, and
+      Linux
+
+      - SDHC/SDXC Support: Block-addressed cards tested up to 128GB (reformatted as
+      FAT32)
+
+      - CRC Validation: Hardware-accelerated CRC-16 on all data transfers
+
+      - Directory Operations: Create, navigate, and enumerate directories (index-based
+      and handle-based)
+
+      - File Operations: Create, open, read, write, seek, rename, delete
+
+      - Live Timestamps: setDate()/getDate() with 2-second auto-advance for file creation
+      and modification stamps
+
+      - Auto-Flush: Dirty handles flushed after 200ms idle — protects against card
+      removal data loss
+
+      - Non-Blocking Async I/O: Optional startReadHandle()/startWriteHandle() for
+      overlapping computation with SD I/O (SD_INCLUDE_ASYNC)
+
+      - Defragmentation: compactFile() relocates fragmented files into contiguous
+      clusters; createFileContiguous() pre-allocates contiguous space (SD_INCLUDE_DEFRAG)
+
+      - Built-in Card Formatter: Format any SD card as FAT32 directly from the P2
+      — no PC required
+
+      - Filesystem Repair: Integrated read-only audit (39 checks) and 4-pass fsck
+      with auto-repair
+
+      - Multi-Cog Safe: Dedicated worker cog with hardware lock serialization
+
+      - Per-Cog Working Directory: Each cog maintains its own CWD for safe concurrent
+      navigation
+
+      - Regression Tested: 465 automated tests across 25 test suites
+
+
+      Hardware Requirements
+
+      - Parallax Propeller 2 (P2) microcontroller
+
+      - P2 Edge Module (P2-EC or P2-EC32MB)
+
+      - microSD Add-on Board (#64009) - provides the microSD card slot
+
+      - microSD card (SDHC or SDXC — format with the included format utility or any
+      OS formatter)
+
+
+      Notes
+
+      - This is a regression test certified driver for the P2 Edge boards.
+
+      - This object v1.5.3 will be updated periodically. For the latest release, visit
+      the Releases Page
+
+      - This started as Chris Gadd''s #4269 SD Driver updated for OS Interchange and
+      write failure protection, and is now certified for high-performance'
     description_short: This project provides a robust, high-performance SD card driver
       for the P2 microcontroller with full FAT32 filesystem support. The driver uses
       P2 smart pins for
@@ -40,11 +111,13 @@ object_metadata:
     file_format: ZIP
     file_size: ''
     languages:
-    - SPIN2
-    - PASM2
+    - SPIN2 PASM2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: P2 microSD FAT32 Filesystem
   urls:
     documentation: ''

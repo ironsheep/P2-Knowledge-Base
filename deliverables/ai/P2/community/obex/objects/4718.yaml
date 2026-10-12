@@ -11,20 +11,40 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
-    description_full: Implementation of a non-blocking timer utility for use in common
-      timing and delays use cases
+    category: Other
+    description_full: "neotimer\n\nNon blocking timer for Propeller 2 (Ported from\
+      \ Arduino)\n\nWhen you use a waitms() function in a Spin program, the processor\
+      \ stops everything it is doing until this delay is completed.\nThat is called\
+      \ a blocking delay, because it blocks the processor until it finishes. Many\
+      \ times we don't want this to happen.\nThis timer provides a way to use time\
+      \ delays without blocking the processor, so it can do other things while the\
+      \ timer ends up.\nThis is called a non-blocking delay timer.\n\nThe timer provides\
+      \ basic functionality to implement different ways of timing in a Spin2 program.\n\
+      You can use the timer in the following ways:\n\nA) Start-Stop-Restart Timer\
+      \ - You can start, stop and restart the timer until done.\n\n       start()\
+      \          will reset the time (counting time) and set is_started and is_waiting\
+      \ true.\n\n       done()           will return true if the timer has reached\
+      \ the preset\n\n       done_one_shot()  will return true only the first time\
+      \ it detects timer has reached preset\n\n       stop()           will set is_started\
+      \ and is_waiting false.\n                        It will also return the elapsed\
+      \ milliseconds since it was started\n\n       restart()        will set the\
+      \ timer to is_started and is_waiting but will not reset the time.\n\n    B)\
+      \ Periodic trigger - The following example will toggle pin 56 every 500ms\n\n\
+      \        timer1.init(500)\n        repeat\n            if(timer1.repeat_execution())\n\
+      \              pintoggle(56)\n\n    C) Debouncer for signals - The following\
+      \ example shows how to debounce a signal\n       coming from pin 10. Will only\
+      \ return true if more than 50ms have passed since\n       last time it was read.\n\
+      \n        pushbutton := 10\n        timer1.init(50)\n        repeat\n      \
+      \      if(timer1.debounce( pinread(pushbutton) ))\n              pintoggle(56)"
     description_short: Implementation of a non-blocking timer utility for use in common
       timing and delays use cases
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - example
-    - demo
-    - led
-    - driver
-    - spi
+    - delay
+    - Spin2
+    - timer
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:59.509820'
     kb_integration: none
@@ -43,6 +63,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: Neotimer (Non-blocking timer)
   urls:
     documentation: ''

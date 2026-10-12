@@ -11,7 +11,7 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: demos
+    category: Sensor
     description_full: 'The MFRC522’s internal transmitter is able to drive a reader/writer
       antenna designed to
 
@@ -35,11 +35,7 @@ object_metadata:
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - demo
-    - sensor
-    - driver
-    - spi
+    - RFID Sensor
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:10.850460'
     kb_integration: none
@@ -58,6 +54,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: MFRC522
   urls:
     documentation: ''

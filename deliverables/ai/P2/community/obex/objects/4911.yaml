@@ -11,21 +11,36 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: demos
-    description_full: One method to check the pin state of an IO pin is to drive the
-      pin in either direction (high/low) using the P2 smart-pin weak drive feature,
+    category:
+    - Signals
+    - Snippet
+    description_full: 'One method to check the pin state of an IO pin is to drive
+      the pin in either direction (high/low) using the P2 smart-pin weak drive feature,
       and then test the signal level to determine if an external signal is pulling
       the IO pin in either direction.
+
+
+      The attached demo uses a method called "check_pinstate" and shows the result
+      on the P2 Edge Module on-board LEDs
+
+
+      Tips:
+
+      - When using the P2-EC Edge module, make sure the LED dipswitch is turned on.
+
+      - If using the P2-EC32MB Edge module, adjust the code to use LED pins 38 & 39
+      (instead of 56 and 57)
+
+      - If using the P2-EVAL board, the LED state will be inverted!
+
+
+      This code was written with: Simple Tools IDE version 0.40.0'
     description_short: One method to check the pin state of an IO pin is to drive
       the pin in either direction (high/low) using the P2 smart-pin weak
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - demo
-    - led
-    - driver
-    - spi
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:56.829317'
     kb_integration: none
@@ -45,6 +60,9 @@ object_metadata:
     microcontroller:
     - P2
     version: 0.40.0
+    content_type:
+    - Code
+    licence: MIT
   title: IO Pin State Detection Demo
   urls:
     documentation: ''

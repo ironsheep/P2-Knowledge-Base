@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: E
@@ -11,21 +11,22 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: communication
-    description_full: This object enables Mode 0 SPI communications using P2 smart
+    category: Protocol
+    description_full: 'This object enables Mode 0 SPI communications using P2 smart
       pins. This allows for high-speed SPI without needing PASM2 code. The object
       includes methods for shifting out, shifting in, and full-duplex shifting of
       output and input data. LSBFIRST and MSBFIRST bit order modes are supported.
+
+
+      A short program connects to the P2 flash memory to demonstrate shiftout() and
+      shiftin() at 10MHz using Spin2 code.'
     description_short: This object enables Mode 0 SPI communications using P2 smart
       pins. This allows for high-speed SPI without needing PASM2 code.
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - spi
-    - demo
-    - driver
+    - SPI
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:06.662828'
     kb_integration: none
@@ -43,10 +44,12 @@ object_metadata:
     file_size: 5883 B
     languages:
     - SPIN2
-    - PASM2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: EZ SPI
   urls:
     documentation: ''

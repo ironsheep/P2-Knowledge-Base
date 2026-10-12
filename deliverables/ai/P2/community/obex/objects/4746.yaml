@@ -11,17 +11,16 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: Compiled with PropTool v2.
+    category: Protocol
+    description_full: 'Driver for the Wiznet W5500, with a web server demo.
+
+      Compiled with PropTool v2.9.3'
     description_short: Compiled with PropTool v2.
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - demo
-    - led
-    - driver
-    - spi
+    - Ethernet
   scrape_tracking:
     created_date: '2024-09-17 20:01:08'
     discovery_date: '2025-09-12T12:43:58.182087'
@@ -38,11 +37,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: v2.9.3
+    content_type:
+    - Code
+    licence: MIT
   title: WizNet W5500 Driver
   urls:
     documentation: ''

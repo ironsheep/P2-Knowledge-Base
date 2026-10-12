@@ -5,7 +5,8 @@ object_metadata:
     domain: B
     leaf: adc
     secondary:
-      - { domain: E, leaf: spi }
+    - domain: E
+      leaf: spi
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,11 +14,14 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: sensors
+    category: Sensor
     description_full: The ADS1118 is a precision, low power, 16-bit analog-to-digital
       converter (ADC) that provides all features necessary to measure the most common
       sensor signals in an ultra-small, leadless X2QFN-10 package or a VSSOP-10 package.
-      The ADS1118 integrates a programmable gain amplifier (PGA), voltage refer
+      The ADS1118 integrates a programmable gain amplifier (PGA), voltage reference,
+      oscillator and high-accuracy temperature sensor. These features, along with
+      a wide power supply range from 2 V to 5.5 V, make the ADS1118 ideally suited
+      for power- and space- constrained, sensor-measurement applications.
     description_short: The ADS1118 is a precision, low power, 16-bit analog-to-digital
       converter (ADC) that provides all features necessary to measure themost common
       sensor signals in
@@ -25,11 +29,7 @@ object_metadata:
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - driver
-    - sensor
-    - adc
-    - spi
+    - Temperature ADC Sensor
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:12.247238'
     kb_integration: none
@@ -49,6 +49,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: ADS1118
   urls:
     documentation: ''

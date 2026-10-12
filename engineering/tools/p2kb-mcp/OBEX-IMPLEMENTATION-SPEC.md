@@ -39,18 +39,21 @@ object_metadata:
     documentation: ""                  # External docs
 
   technical_details:
-    languages: ["SPIN2", "PASM2"]      # Code languages used
-    microcontroller: ["P2"]            # Always P2 for this KB
-    version: ""                        # Version string
+    languages: ["PASM2"]               # OBEX "Language(s)"
+    microcontroller: ["P2"]            # OBEX "Microcontroller(s)"
+    content_type: ["Code"]             # OBEX "Content": Code, Hardware or Tip
+    licence: "Other"                   # OBEX "Licence": MIT or Other
+    version: ""                        # Version string (the only version field)
     file_format: "ZIP"                 # Usually ZIP
     file_size: "16 B"                  # Size string
 
   functionality:
-    category: "motors"                 # Primary category
+    category: ["Math", "Motor Control", "Protocol", "Snippet"]  # OBEX "Category"/"Categories":
+                                       # a string when one, a list when several
     subcategory: ""                    # Optional subcategory
-    description_short: "..."           # Brief description
-    description_full: "..."            # Full description
-    tags: ["servo", "motor", "adc"]    # Searchable tags
+    description_short: "..."           # authored one-liner, ≤120 chars (served as `description`)
+    description_full: "..."            # the catalog description, as text
+    tags: ["Servo"]                    # OBEX "Tag(s)" ([] when none)
     hardware_support: []               # Hardware platforms
     peripherals: []                    # Connected peripherals
 
@@ -85,18 +88,25 @@ Note: The URL uses `OB` prefix (e.g., `OB2811`), but the object_id in YAML is ju
 
 ## Categories
 
-Current OBEX categories and counts:
-- `drivers`: 49 objects
-- `misc`: 34 objects
-- `display`: 7 objects
-- `demos`: 5 objects
-- `audio`: 5 objects
-- `motors`: 5 objects
-- `communication`: 4 objects
-- `sensors`: 3 objects
-- `tools`: 1 object
+From KB v1.24.2 every object carries **OBEX's own categories**, mirrored from its catalog page by
+`engineering/tools/obex-integration/obex-catalog-mirror.py` (F-573); 32 of the 130 objects list
+several, so `category` is a string or a list. Objects per category on 2026-10-12 (an object counts
+once in each category it lists):
 
-**Important**: Many objects are miscategorized. Always search across ALL objects, not just by category.
+| Category | Objects | Category | Objects |
+|---|---|---|---|
+| Protocol | 32 | Data Storage | 9 |
+| Sensor | 30 | Math | 7 |
+| Display | 26 | Fun | 5 |
+| Human Input | 13 | Snippet | 5 |
+| Signals | 13 | 3D Model | 3 |
+| Motor Control | 11 | PCB Design | 3 |
+| Speech and Sound | 9 | Tool | 3 |
+| | | Other | 2 |
+
+The list changes when OBEX changes; a tool reads it from the objects, never from a fixed list
+(`MCP-OBEX-SUMMARY-CHANGE-REQUEST.md` §3.5). The earlier nine values (`drivers`, `misc`, …) were
+our scraper's own buckets and are gone.
 
 ## Suggested MCP Tools
 

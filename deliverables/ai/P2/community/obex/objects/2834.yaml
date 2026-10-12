@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: B
@@ -11,7 +11,9 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: motors
+    category:
+    - Motor Control
+    - Signals
     description_full: This object converts any P2 pin into a set-and-forget PWM output
       with user-selected PWM frequency. Provided methods accommodate DMX-compatible
       levels (0..255), and user-set levels for greater precision when required (e.g.,
@@ -23,11 +25,8 @@ object_metadata:
     peripherals: []
     subcategory: ''
     tags:
-    - pwm
-    - driver
-    - motor
-    - led
-    - spi
+    - DMX
+    - PWM
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:08.056858'
     kb_integration: none
@@ -48,6 +47,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: PWM
   urls:
     documentation: ''

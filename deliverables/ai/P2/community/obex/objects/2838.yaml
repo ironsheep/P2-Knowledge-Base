@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: E
@@ -11,7 +11,7 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: misc
+    category: Protocol
     description_full: This [cogless] object allows the P2 to communicate with 1-Wire
       devices. Using the P2 pin configuration modes, the P2 can provide the required
       pullup if an external pull-up is not available.
@@ -21,10 +21,7 @@ object_metadata:
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - spi
-    - demo
-    - driver
+    - 1-Wire
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:06.662855'
     kb_integration: none
@@ -40,11 +37,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: 1-Wire
   urls:
     documentation: ''

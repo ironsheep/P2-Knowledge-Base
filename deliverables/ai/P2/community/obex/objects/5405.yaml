@@ -5,7 +5,8 @@ object_metadata:
     domain: I
     leaf: sd-fat
     secondary:
-      - { domain: I, leaf: spi-flash }
+    - domain: I
+      leaf: spi-flash
   compatibility:
     dependencies: []
     known_issues: []
@@ -13,10 +14,77 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: drivers
-    description_full: A unified filesystem driver for the Parallax Propeller 2 (P2)
+    category: Data Storage
+    description_full: 'A unified filesystem driver for the Parallax Propeller 2 (P2)
       that provides simultaneous access to both the onboard 16MB FLASH chip and a
       microSD card through a single cog and a single API.
+
+
+      When to Use This Driver
+
+
+      This driver is larger than either standalone driver because it includes both
+      filesystems. There are several ways to use it depending on your project needs:
+
+      - Dual-device product — Your application uses both SD and Flash at runtime.
+      One cog, one API, both devices always available.
+
+      - Provisioning tool — Use the SD card to load configuration files, firmware
+      images, or data onto Flash during manufacturing or field setup. Once Flash is
+      populated, ship the product with the smaller standalone Flash driver for a reduced
+      image size.
+
+      - Development and testing — Use the SD card as a convenient way to get data
+      onto the board during development, then switch to Flash-only for production.
+
+
+      If your product only ever needs one device, the standalone drivers (Flash-only,
+      SD-only) produce smaller binaries.
+
+
+      Features
+
+      - One worker cog, two devices — a dedicated cog owns all SPI I/O for both SD
+      and Flash, eliminating bus contention
+
+      - Unified API — mount, open, read, write, close, and copy files on either device
+      with the same calls
+
+      - Cross-device copy — copy files between Flash and SD through one driver with
+      copyFile()
+
+      - Shared SPI bus management — automatic bus switching between SD (Mode 0) and
+      Flash (Mode 3) with proper smart pin reconfiguration
+
+      - Flash directory emulation — per-cog current working directory on the flat
+      Flash filesystem using slash-delimited filename convention
+
+      - Multi-cog safety — hardware lock serializes access from up to 8 cogs
+
+      - Defragmentation — query file fragmentation, compact files in-place, create
+      pre-allocated contiguous files (SD_INCLUDE_DEFRAG)
+
+      - Conditional compilation — SD_INCLUDE_RAW, SD_INCLUDE_REGISTERS, SD_INCLUDE_SPEED,
+      SD_INCLUDE_DEBUG, SD_INCLUDE_DEFRAG for minimal or full builds
+
+      - 1,350 regression tests across 32 standard test suites verified on real P2
+      hardware
+
+
+      Hardware Requirements
+
+      - Parallax Propeller 2 — P2-EC or P2-EC32MB
+
+      - microSD card (SDHC or SDXC) — the included format utility can format cards
+      that are not already FAT32
+
+
+      Notes
+
+      - This is a regression test certified driver for the P2 Edge boards.
+
+      This object v1.3.0 will be updated periodically. For the latest release, visit
+      the Releases Page'
     description_short: A unified filesystem driver for the Parallax Propeller 2 (P2)
       that provides simultaneous access to both the onboard 16MB FLASH chip and a
       microSD card through a
@@ -41,11 +109,13 @@ object_metadata:
     file_format: ZIP
     file_size: ''
     languages:
-    - SPIN2
-    - PASM2
+    - SPIN2 PASM2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: P2 Dual uSD FAT32 and FLASH FS
   urls:
     documentation: ''

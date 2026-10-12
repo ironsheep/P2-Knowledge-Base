@@ -11,22 +11,24 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: display
+    category:
+    - Sensor
+    - Signals
     description_full: This object makes a 4-channel, constant-impedance, high-performance
       ADC which uses 3 contiguous pins per channel. At 200MHz, it can generate 13-bit
       samples at 16k samples per second on all four channels. Sampling time can be
       roughly doubled to gain another effective bit. All readings are reported in
+      microvolts. Longer sampling times increase precision.
     description_short: This object makes a 4-channel, constant-impedance, high-performance
       ADC which uses 3 contiguous pins
     hardware_support: []
     peripherals: []
     subcategory: ''
     tags:
-    - led
-    - driver
-    - sensor
-    - adc
-    - spi
+    - ADC
+    - microvolts
+    - Pasm2
+    - Spin2
   scrape_tracking:
     discovery_date: '2025-09-12T12:43:58.182053'
     kb_integration: none
@@ -41,11 +43,14 @@ object_metadata:
     file_format: ZIP
     file_size: 5883 B
     languages:
-    - SPIN2
     - PASM2
+    - SPIN2
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: MIT
   title: 3-pin-per-channel, 4-channel, hi-res ADC
   urls:
     documentation: ''

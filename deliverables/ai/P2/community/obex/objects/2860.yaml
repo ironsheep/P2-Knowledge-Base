@@ -1,5 +1,5 @@
 object_metadata:
-  author: Jon McPhalen (jonnymac)
+  author: Jon McPhalen
   author_username: ''
   capability:
     domain: J
@@ -11,17 +11,14 @@ object_metadata:
     - all
     tested_platforms: []
   functionality:
-    category: audio
-    description_full: Utility object for P2 development.
+    category: Speech and Sound
+    description_full: Sometimes, all you need is beeps, boops, and simple musical
+      notes.
     description_short: Utility object for P2 development.
     hardware_support: []
     peripherals: []
     subcategory: ''
-    tags:
-    - led
-    - spi
-    - demo
-    - driver
+    tags: []
   scrape_tracking:
     discovery_date: '2025-09-12T12:44:03.844984'
     kb_integration: none
@@ -44,6 +41,9 @@ object_metadata:
     microcontroller:
     - P2
     version: ''
+    content_type:
+    - Code
+    licence: Other
   title: EZ Sound
   urls:
     documentation: ''
