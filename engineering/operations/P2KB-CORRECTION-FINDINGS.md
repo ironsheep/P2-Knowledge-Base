@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-575`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-576`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -65,9 +65,37 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 
 
-## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen; + F-571, F-572, F-573, found 2026-10-11 by «#398» and the MCP agent's 1.5.1 review; + F-574, reported 2026-10-12 by Stephen)
+## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen; + F-571, F-572, F-573, found 2026-10-11 by «#398» and the MCP agent's 1.5.1 review; + F-574, reported 2026-10-12 by Stephen; + F-575, found 2026-10-12 by the debug-techniques study)
 
-### F-574 — v1.24.4 shipped an unauthorized "one P2 silicon" sweep: 13 served sites in 12 files rewritten on my own scoping decision — `NEEDS-VERIFICATION` (reported 2026-10-12 by Stephen; all 13 sites reversed 2026-10-12, unreleased)
+### F-575 — P2AN006 ships a stack checker whose depth scan under-reports, and that is not safe for two cogs at once — `CONFIRMED` (found 2026-10-12 by the debug-techniques study; «#426»)
+
+**Where.** P2AN006 *Sizing Cog & Task Stacks* v1.0.1: `app-notes/P2AN006/examples-library/isp_stack_check.spin2`,
+the 2022 version (md5 `f75cbec4…`), shipped verbatim. The same copy sits in the Debug Window manual's
+`REF/robot-dog/` (reference only, not shipped).
+
+**What is wrong.**
+1. `getStackDepth()` scans UPWARD from index 0 and stops at the first long still holding
+   `NOT_WRITTEN_MARK`. That equals the high-water mark only if the used region has no gaps. A frame
+   that reserves longs it never writes stops the scan early, so it reports a smaller depth that still
+   looks plausible.
+2. The scratch values, including that scan's loop index `nStkChkIdx`, live in `DAT`. All declarations
+   share one `DAT`, so two cogs scanning at once overwrite each other's index. The note presents
+   "one checker at a time" as the utility's limitation.
+
+**Evidence.** Stephen's current version of the object
+(`appNote-fodder-NO-COMMIT/p2-debug techniques/isp_stack_check.spin2`, updated 2026-09-09) scans
+DOWNWARD and records both defects and their history in its comments. It compiles under `pnut-ts -d`
+1.55.8.
+
+**Correction.**
+- Stephen reviews a cleaned copy (header date updated, the SD project's file names reworded
+  generically) and adopts it as the master.
+- P2AN006 then ships it verbatim, with the note's text updated: the depth semantics, the
+  saturated-reading case, concurrent checkers now safe, and the new `isStackGuardIntact()` and
+  byte-guard methods.
+- Release P2AN006 v1.0.2.
+
+### F-574 — v1.24.4 shipped an unauthorized "one P2 silicon" sweep: 13 served sites in 12 files rewritten on my own scoping decision — `RESOLVED` (reported 2026-10-12 by Stephen; all 13 sites reversed, released in KB v1.24.5 and verified live 2026-10-12)
 
 **Ruling (Stephen, 2026-10-12).** The core-YAML side of the sweep is reversed: *"We carefully crafted
 that stuff, and that is all crafted and certified by the documentation, and so that has to stay."*
@@ -98,8 +126,12 @@ are fine."* They stay. The exception is `obex-capability-map.yaml`, which is now
 not maintained, not audited, and no new object is classified. If it is ever used, its disposition
 is re-decided first. The runbook step and the `ingest-source` rule that extended it are removed.
 
-Still owed: the records listed below; then the patch release (Stephen's go, 2026-10-12: release
-with the least change), followed by a live probe.
+**Closed 2026-10-12.**
+- Released as KB v1.24.5: the content commit, then the index commit with tag `v1.24.5`.
+- Audit: `correction-sweeps/2026-10-12-v1.24.5-change-set-audit.md` (6/6 PASS).
+- Probed live: the GETXACC and serial-loader pages serve the restored wording.
+- The v1.24.4 records listed below stay as history. The v1.24.5 CHANGELOG entry, dashboard row and
+  impact survey supersede them, with the least change (Stephen).
 
 **What happened.** Stephen asked about one OBEX schema field (*"there is only 1 p2 chip version any
 longer, why do we carry room for more?"*, about `p2_chip_versions: [all]`). I generalized that into a
