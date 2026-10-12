@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.6.0",
-    "generated": "2026-10-12T22:59:03.637239",
+    "generated": "2026-10-12T23:22:29.812884",
     "total_entries": 1137,
     "total_categories": 60,
     "total_aliases": 3598,
@@ -11778,38 +11778,38 @@
   "files": {
     "p2kbAppNoteP2an001SinglePinInstrumentationAdc": {
       "path": "deliverables/ai/P2/application-notes/p2an001-single-pin-instrumentation-adc.yaml",
-      "mtime": 1791746602,
-      "sha256": "24181794b1ad5eb7c53072c9cbecae304973ae90b672099f02bf60246c6cbbb8"
+      "mtime": 1791847327,
+      "sha256": "960c5c56085ccb12d42023bb2fd13a27b3bf733ab9ef5de37d823d6173d3d3e8"
     },
     "p2kbAppNoteP2an002CordicForRealWork": {
       "path": "deliverables/ai/P2/application-notes/p2an002-cordic-for-real-work.yaml",
-      "mtime": 1791752670,
-      "sha256": "7929d423824dc3fecaf9b978d020884a433d634bf7a9228b00d17fc049decd09"
+      "mtime": 1791847327,
+      "sha256": "7669f386572d306134240c1fe557a44aeb6bb1b8c14287d0d30e7f5db10e29b4"
     },
     "p2kbAppNoteP2an003DacAnalogSignalGeneration": {
       "path": "deliverables/ai/P2/application-notes/p2an003-dac-analog-signal-generation.yaml",
-      "mtime": 1791746602,
-      "sha256": "dbb7a9a42d1ca9acd09a1cf4f50dea2f191bc688644d9aa9e3ee5cca48dfb82d"
+      "mtime": 1791847327,
+      "sha256": "c8240a416bf3cde53d9a02a6e4c743d1d78e19aaf5b44f337bb31495c8427bd3"
     },
     "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement": {
       "path": "deliverables/ai/P2/application-notes/p2an004-frequency-rotation-rc-timing-measurement.yaml",
-      "mtime": 1791752670,
-      "sha256": "7f31b6f4449afa93ac9c3534d19c3cdce2990d903788bbd82f824b01dd15f746"
+      "mtime": 1791847327,
+      "sha256": "a11244592dd97963d5bb54d155264291ea08a2000343dfcdb2b43a88a2ae6b95"
     },
     "p2kbAppNoteP2an005CooperativeMultitaskingTasks": {
       "path": "deliverables/ai/P2/application-notes/p2an005-cooperative-multitasking-tasks.yaml",
-      "mtime": 1791752670,
-      "sha256": "9622062986a5e2c03aba509591fd121f1800d0014b82b2ac5fd535ebac0b589d"
+      "mtime": 1791847327,
+      "sha256": "0a7653d664a47d24a2c507cb790c6fd98bf2fcd322a4b20efa96575c10710525"
     },
     "p2kbAppNoteP2an006SizingCogTaskStacks": {
       "path": "deliverables/ai/P2/application-notes/p2an006-sizing-cog-task-stacks.yaml",
-      "mtime": 1791844876,
-      "sha256": "7922896ed5a88a0f9f9f6d19330c91ce3d0fb5db66d130fd58541b174771f614"
+      "mtime": 1791847327,
+      "sha256": "894fd56d99de6cb5793e692f560bd2bc8ccf5d217db2af7624e05bcebc63f110"
     },
     "p2kbAppNoteP2an007DataStructuresNewFacilities": {
       "path": "deliverables/ai/P2/application-notes/p2an007-data-structures-new-facilities.yaml",
-      "mtime": 1791746602,
-      "sha256": "5b4a23a3a80876ccfbe3a01cc4178ff0575001604e94420d1fa730091f4e2a8c"
+      "mtime": 1791847327,
+      "sha256": "5e7f431626c26dfd43bee8f84ba1543a6dd03b96ade7d392de87ab83a6820420"
     },
     "p2kbArchIndex": {
       "path": "deliverables/ai/P2/architecture/boot-rom/_index.yaml",
