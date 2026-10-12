@@ -20,6 +20,15 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.24.6] - 2026-10-12
+
+**The stack-sizing application note's digest describes the current stack-check utility.**
+
+### Changed
+
+- **P2AN006 companion**: the high-water mark scans down from the top of the stack; the utility holds no state, so several cogs can check their own stacks at once
+- **P2AN006 companion**: `isStackGuardIntact` reports an overflow without halting; a byte guard watches the bytes after any buffer; two new pitfalls (a full-size reading is a floor; two guards never share an address)
+
 ## [1.24.5] - 2026-10-12
 
 **Silicon notes name the revision each behaviour belongs to.**
