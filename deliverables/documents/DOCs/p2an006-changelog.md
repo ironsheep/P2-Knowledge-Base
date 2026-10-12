@@ -1,5 +1,21 @@
 # P2AN006 Changelog: Sizing Cog & Task Stacks
 
+## v1.0.2 (2026-10-12)
+
+**The stack-check utility at its current version: several cogs can check at once, with two new pitfalls.**
+
+### Changed
+
+- **High-water mark**: `getStackDepth` scans down from the top of the buffer to the deepest long the cog used
+- **Several cogs at once**: the utility holds no state between calls, so each cog can check its own stack concurrently
+
+### Added
+
+- **Check without halting**: `isStackGuardIntact` reports an overflow and lets a test carry on
+- **Byte guards**: `initByteGuard`, `isByteGuardIntact` and `firstCorruptOffset` watch the bytes after any buffer
+- **Pitfalls**: a reading equal to the buffer size is a floor, not a measurement; two guards must never share an address
+- **Example library**: each example file opens with a header naming its purpose and this note's version
+
 ## v1.0.1 (2026-08-08)
 
 A licensing change. No technical content changed.
@@ -16,6 +32,6 @@ stack with a known pattern and watch a sentinel just past its end) applied throu
 recipes: instrument a new-cog stack against overflow, find the high-water mark and right-size,
 pinpoint which routine overran the stack, and size a cooperative task's stack (the companion to
 P2AN005). Built around the MIT-licensed `isp_stack_check` utility (Stephen M. Moraco), which ships
-in the example library. Every recipe compiles clean under `pnut_ts -d`; the overflow-detection and
+in the example library. Every recipe compiles clean under `pnut-ts -d`; the overflow-detection and
 halt behavior is described from the utility's design, with observing it fire noted as a bench step.
 Ships with a downloadable example library of the utility plus all four programs.

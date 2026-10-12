@@ -144,11 +144,11 @@ Run several cooperative jobs in one cog with Spin2's TASK methods. Each job runs
 *August 2026 - Community Review Edition* | [Changelog](DOCs/p2an005-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN005-src.zip)
 
 #### [Size Cog and Task Stacks, and Catch Overflow Before It Corrupts Memory](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN006.pdf)
-**Application Note P2AN006 · Sizing Cog & Task Stacks** · *Version 1.0.1*
+**Application Note P2AN006 · Sizing Cog & Task Stacks** · *Version 1.0.2*
 
 Size the stack buffers that new cogs and cooperative tasks need, where an undersized stack silently overwrites hub memory with no hardware trap. One shared idea comes first (fill the stack with a known pattern and watch a sentinel just past its end), then four runnable recipes: instrument a new-cog stack against overflow, find the high-water mark and right-size, pinpoint which routine overran the stack, and size a cooperative task's stack. Built around a small MIT-licensed stack-check utility that ships in the example library; every recipe compiles clean under the P2 toolchain. The companion to the cooperative-multitasking note.
 
-*August 2026 - Community Review Edition* | [Changelog](DOCs/p2an006-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN006-src.zip)
+*October 2026 - Community Review Edition* | [Changelog](DOCs/p2an006-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN006-src.zip)
 
 #### [Share Data Between Cogs Without Ever Reading It Half-Written](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN007.pdf)
 **Application Note P2AN007 · Data Structures with the New Language Facilities** · *Version 1.0.2*
