@@ -1226,6 +1226,81 @@ def validate_served_value_citations(verbose: bool = False) -> ValidationResult:
     return result
 
 
+OBEX_OBJECTS = Path("deliverables/ai/P2/community/obex/objects")
+ONE_LINER_MAX = 120
+
+
+def obex_one_liner_problem(short, full):
+    """Why `short` is not a usable one-liner, or None. `full` is the catalog description."""
+    if not isinstance(short, str) or not short.strip():
+        return "missing"
+    if "\n" in short:
+        return "more than one line"
+    if len(short) > ONE_LINER_MAX:
+        return f"{len(short)} characters (max {ONE_LINER_MAX})"
+    if not short.endswith("."):
+        return "does not end with a period"
+    if re.search(r"https?://|www\.", short):
+        return "contains a URL"
+    body = short[:-1]
+    flat = " ".join(str(full or "").split())
+    if len(body) >= 20 and flat.startswith(body) and len(flat) > len(body) and flat[len(body)].isalnum():
+        return "a cut of the catalog description, not a sentence"
+    return None
+
+
+OBEX_ONE_LINER_CONTROL = [
+    ("", "Driver for the DS1302 timekeeping chip.", True),
+    ("Driver for the DS1302 timekeeping chip", "x", True),
+    ("A single COG services from 1 to 8 Tx/Rx pairs of pins. The pins are configured as smart pins, meanin.",
+     "A single COG services from 1 to 8 Tx/Rx pairs of pins. The pins are configured as smart pins, meaning that", True),
+    ("Driver for the DS1302 chip; see https://example.com.", "x", True),
+    ("Two lines.\nSecond.", "x", True),
+    ("x" * 121 + ".", "x", True),
+    ("Driver for the DS1302 timekeeping chip, converted from the Propeller 1 object by BR.",
+     "A full-featured DS1302 timekeeping chip driver. Based on the original Propeller 1 object by BR.", False),
+    ("Text & graphics display driver for the Waveshare 2.9\" display sold in the Parallax store.",
+     "Text & graphics display driver for the Waveshare 2.9\" display sold in the Parallax store (SKU 28084).", False),
+]
+
+
+def validate_obex_one_liners(verbose: bool = False) -> ValidationResult:
+    """Every OBEX object carries a usable one-line description (F-573, 2026-10-12).
+
+    `functionality.description_short` is what p2kb-mcp shows as an object's `description`
+    in every OBEX lookup and search list. It is an authored sentence restating the catalog
+    (the master index engineering/obex-integration/OBEX-ONE-LINER-MASTER-INDEX.md), never a
+    cut of the catalog text: the scrapers once set it to the first 100 characters, mid-word.
+    A new object fails here until its line is written. The negative control runs first."""
+    result = ValidationResult("OBEX One-Line Descriptions")
+    bad_control = [(s, want) for s, full, want in OBEX_ONE_LINER_CONTROL
+                   if bool(obex_one_liner_problem(s, full)) != want]
+    if bad_control:
+        result.fail(f"negative control FAILED on {len(bad_control)} case(s) -- do not trust this run")
+        for s, want in bad_control:
+            result.info(f"  must_fire={want}: {s[:80]!r}")
+        return result
+    result.ok(f"Negative control: {sum(w for *_, w in OBEX_ONE_LINER_CONTROL)} bad lines fire, "
+              f"{sum(not w for *_, w in OBEX_ONE_LINER_CONTROL)} good lines do not")
+    problems, n = [], 0
+    for path in sorted(OBEX_OBJECTS.glob("[0-9]*.yaml")):
+        n += 1
+        om = (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get("object_metadata", {})
+        fn = om.get("functionality", {}) or {}
+        why = obex_one_liner_problem(fn.get("description_short"), fn.get("description_full"))
+        if why:
+            problems.append(f"{path.name}: {why}")
+    result.info(f"OBEX objects checked: {n}")
+    if problems:
+        result.fail(f"{len(problems)} object(s) without a usable one-liner -- author it in "
+                    f"description_short from the catalog text")
+        for p in problems:
+            result.info(f"  {p}")
+    else:
+        result.ok("Every OBEX object has a one-line description of its own")
+    return result
+
+
 LEDGERS = [
     Path("engineering/ingestion/external-sources/hardware-verification/P2-EMPIRICAL-FINDINGS.md"),
     Path("engineering/ingestion/external-sources/hardware-verification/EXTERNAL-HARDWARE-FINDINGS.md"),
@@ -1886,6 +1961,7 @@ def run_all_validations(verbose: bool = False, incremental: bool = False) -> boo
         validate_history_prose,
         validate_served_comments,
         validate_served_value_citations,
+        validate_obex_one_liners,
         validate_ledger_kb_home,
         validate_cross_references,
         validate_constant_fidelity,
