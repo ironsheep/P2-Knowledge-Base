@@ -77,7 +77,8 @@ formatting_functions:
     - "FDEC(value) - floating-point decimal"
   string:
     - "ZSTR(address) - zero-terminated string"
-    - "LSTR(address, length) - length-specified string"
+    - "LSTR(address, size) - the first 'size' characters of a string"
+    - "ZSTR_ / LSTR_ (and every output command's underscore form) - the value alone, without the 'name = ' before it"
   special:
     - "DLY(ms) - inter-update pacing delay. MUST be the LAST element in the DEBUG() statement. It RELEASES LOCK[15] while it waits, so other cogs can emit DEBUG output during the delay."
     - "PC_KEY / PC_MOUSE - read host keyboard / mouse (see language/spin2/debug-commands/pc_key.yaml, language/spin2/debug-commands/pc_mouse.yaml)"

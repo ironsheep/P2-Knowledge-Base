@@ -44,8 +44,29 @@ aliases:
   - "FDEC_"
   - "FDEC_ARRAY"
   - "ZSTR"
+  - "ZSTR_"
   - "LSTR"
+  - "LSTR_"
   - "BOOL"
+  - "BOOL_"
+  - "UDEC_BYTE_"
+  - "UDEC_WORD_"
+  - "UDEC_LONG_"
+  - "SDEC_BYTE_"
+  - "SDEC_WORD_"
+  - "SDEC_LONG_"
+  - "UHEX_BYTE_"
+  - "UHEX_WORD_"
+  - "UHEX_LONG_"
+  - "SHEX_BYTE_"
+  - "SHEX_WORD_"
+  - "SHEX_LONG_"
+  - "UBIN_BYTE_"
+  - "UBIN_WORD_"
+  - "UBIN_LONG_"
+  - "SBIN_BYTE_"
+  - "SBIN_WORD_"
+  - "SBIN_LONG_"
 
 underscore_rule: "name = value → value"
 
@@ -110,10 +131,13 @@ boolean:
 flags:
   C_Z: {use: "show C and Z flag values", example: "C=1 Z=0", note: "no underscore variant"}
 
-# STRINGS (text - no underscore variants)
+# STRINGS (text) - like every output command, each has an underscore form
 strings:
-  ZSTR: {use: "zero-terminated string", syntax: "ZSTR(@message)"}
-  LSTR: {use: "length-prefixed string", syntax: "LSTR(@text, length)"}
+  ZSTR: {use: "zero-terminated string at a hub address, with its name: name = string", syntax: "ZSTR(@message)"}
+  ZSTR_: {use: "just the string: the underscore suppresses the 'name = ' before it", syntax: "ZSTR_(@message)"}
+  LSTR: {use: "the first 'size' characters of a string at a hub address, with its name", syntax: "LSTR(@text, size)"}
+  LSTR_: {use: "just those characters: the underscore suppresses the 'name = ' before them", syntax: "LSTR_(@text, size)"}
+  note: "LSTR takes the character count as an argument. It is not the length-prefixed string LSTRING() builds."
 
 # CONTROL
 control:
