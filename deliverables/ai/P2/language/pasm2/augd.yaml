@@ -55,7 +55,7 @@ silicon_errata:
       AUGD   #$123456      ' AUGD here cancels the block-size PTRx delta!
       RDLONG 0,ptra++      ' ptra incremented by 4 (1 long), not 16*4
     workaround: "Do not place AUGD (or ALTx/AUGS) between SETQ/SETQ2 and the RDLONG/WRLONG/WMLONG-PTRx instruction; keep SETQ adjacent to the block transfer."
-    status: "Active in Rev C silicon (current production)."
+    status: "Present in the P2 silicon."
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS ('Intervening ALTx/AUGS/AUGD instructions between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG-PTRx instructions will cancel the special-case block-size PTRx deltas')"
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, AUGD, p.50"
 documentation_level: comprehensive

@@ -230,7 +230,9 @@ class _Text(HTMLParser):
                 href, start = self.anchors.pop()
                 url = link_target(href)
                 words = "".join(x for x in self.out[start:] if not x.startswith("\x00")).strip()
-                if url and norm_url(url) not in norm_url(words):
+                # skip only when the words already carry this exact URL (not a longer one)
+                shown = re.search(re.escape(norm_url(url)) + r"(?![\w/%.-])", norm_url(words))
+                if url and not shown:
                     # "the repo." -> "the repo (URL)." : the URL belongs to the words, not the stop
                     end = len(self.out) - 1
                     while end >= start and not self.out[end].strip():
@@ -238,8 +240,11 @@ class _Text(HTMLParser):
                     m = re.search(r"[.,;:!?]+\s*$", self.out[end]) if end >= start else None
                     if m:
                         self.out[end] = self.out[end][:m.start()] + " (%s)" % url + self.out[end][m.start():]
-                    else:
-                        self.out.append(" (%s)" % url if words else url)
+                    elif words:
+                        self.out.append(" (%s)" % url)
+                    else:  # an image-only link: the URL stands alone, never glued to a word
+                        before = "".join(self.out)[-1:]
+                        self.out.append(url if not before or before.isspace() else " " + url)
         elif tag == "pre":
             self.pre -= 1
             if self.pre == 0:

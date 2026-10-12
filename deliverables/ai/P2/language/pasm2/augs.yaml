@@ -55,7 +55,7 @@ silicon_errata:
       correctly, but PTRx advances by only a single-long (normal PTRx-expression)
       delta instead of the block-size delta.
     workaround: "Do not place AUGS (or ALTx/AUGD) between SETQ/SETQ2 and the RDLONG/WRLONG/WMLONG-PTRx instruction; keep SETQ adjacent to the block transfer."
-    status: "Active in Rev C silicon (current production)."
+    status: "Present in the P2 silicon."
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS ('Intervening ALTx/AUGS/AUGD instructions between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG-PTRx instructions will cancel the special-case block-size PTRx deltas')"
   intervening_altx_immediate_s_consumes_augs:
     erratum: "E2"
@@ -75,7 +75,7 @@ silicon_errata:
       ALTD  index,#base       ' Look out! AUGS augments this #base too. Use a register instead.
       ADD   0-0,#$123         ' #$123 is augmented by the AUGS and cancels the AUGS
     workaround: "Use a register (not an immediate #S) for the S operand of any ALTx placed between AUGS and its target."
-    status: "Active in Rev C silicon (current production)."
+    status: "Present in the P2 silicon."
     scope_note: "Applies to a pending AUGS. A pending AUGD survived an intervening immediate-S ALTS and reached its #D target intact (AUGD / ALTS idxs,#0 / WRLONG #$13C wrote $1357_9B3C, idxs unchanged); an ALTx has no immediate-D form, so it cannot consume a pending AUGD. Distinct from the block-size PTRx-delta erratum above (E1), which an intervening ALTx, AUGS or AUGD each trigger."
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS (the AUGS / immediate-#S ALTx entry and its example); the ALTD/ALTR auto-increment effect, the register-S workaround and the AUGD half of scope_note hardware-verified on Rev C (EF-066); the AUGD half was tested with one ALTx variant (ALTS)."
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, AUGS, p.51"
