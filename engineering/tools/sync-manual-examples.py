@@ -207,6 +207,27 @@ def heading_text(ln: str, level: int) -> str:
     return re.sub(r"\s*\{#[^}]*\}\s*$", "", ln[level + 1:]).strip()
 
 
+def not_examples(lib: Path) -> set:
+    """Files declared under '## Not examples' in examples-library/PURPOSES.md.
+
+    A corpus may ship a file that is not an example: P2AN006's isp_stack_check is
+    a utility object shipped verbatim with its own header. Such a file gets no
+    generated header and is not required to have a printed block. Keep in step
+    with verify-example-corpus-identity.py's not_examples().
+    """
+    pf = lib / "PURPOSES.md"
+    names, inside = set(), False
+    if pf.is_file():
+        for ln in pf.read_text(encoding="utf-8").split("\n"):
+            if ln.startswith("#"):
+                inside = ln.strip().lower() == "## not examples"
+                continue
+            m = re.match(r"^\s*[-*]\s*`?([\w.\-]+\.spin2)`?", ln) if inside else None
+            if m:
+                names.add(m.group(1))
+    return names
+
+
 def blocks_with_context(md: Path):
     """Yield (caption, body_text, enclosing_heading) per captioned fence.
 
@@ -475,7 +496,10 @@ def main():
                 purposes[m.group(1)] = m.group(2)
 
     title, version = doc_meta(doc)
-    files = sorted(lib.glob("*.spin2"))
+    utilities = not_examples(lib)
+    for name in sorted(utilities):
+        print(f"  SKIP  {name}: declared not an example (PURPOSES.md); header untouched")
+    files = sorted(f for f in lib.glob("*.spin2") if f.name not in utilities)
     if not files:
         print(f"GREEN: {doc.name} has no example files."); return 0
 

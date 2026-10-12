@@ -120,7 +120,13 @@ def top_changelog_version(path: Path):
 
 def check(slug: str, quiet: bool) -> int:
     req = DOCPROD / "workspace" / slug / "request.json"
-    log = DOCPROD / "manuals" / slug / "opus-master" / "CHANGELOG.md"
+    # A document lives under manuals/ or app-notes/ (the same resolution
+    # validate-manual-release.py's doc_dirs() makes). Until 2026-10-12 this read
+    # manuals/ only, so the first app-note release after the gate landed (P2AN006
+    # v1.0.2) hit exit 2: the gate could not run, not a defect in the document.
+    log = next((p for p in (DOCPROD / parent / slug / "opus-master" / "CHANGELOG.md"
+                            for parent in ("manuals", "app-notes")) if p.is_file()),
+               DOCPROD / "manuals" / slug / "opus-master" / "CHANGELOG.md")
 
     if not req.is_file():
         print(f"ERROR: no request.json at {req}", file=sys.stderr)

@@ -147,6 +147,25 @@ def contains_contiguous(hay, needle) -> bool:
     return k > 0 and any(hay[p:p + k] == needle for p in range(len(hay) - k + 1))
 
 
+def not_examples(lib: Path) -> set:
+    """Files declared under '## Not examples' in examples-library/PURPOSES.md.
+
+    Keep in step with sync-manual-examples.py's not_examples(): both tools must
+    agree on which corpus files are not examples, or one gates what the other skips.
+    """
+    pf = lib / "PURPOSES.md"
+    names, inside = set(), False
+    if pf.is_file():
+        for ln in pf.read_text(encoding="utf-8").split("\n"):
+            if ln.startswith("#"):
+                inside = ln.strip().lower() == "## not examples"
+                continue
+            m = re.match(r"^\s*[-*]\s*`?([\w.\-]+\.spin2)`?", ln) if inside else None
+            if m:
+                names.add(m.group(1))
+    return names
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="Verify examples-library files are byte-identical to their opus-master code blocks."
@@ -182,6 +201,13 @@ def main():
                 blocks[caption] = (block, src, line)
 
     lib_files = {p.name: p for p in sorted(lib.glob("*.spin2"))}
+    # A corpus may ship a file that is not an example (P2AN006's isp_stack_check,
+    # a utility object shipped verbatim with its own header). It is declared under
+    # "## Not examples" in examples-library/PURPOSES.md, the same declaration
+    # sync-manual-examples.py reads, and it is neither compared nor an orphan.
+    utilities = not_examples(lib)
+    for name in utilities:
+        lib_files.pop(name, None)
 
     # Compare.
     identical, mismatched, orphan_block, orphan_lib = [], [], [], []
@@ -221,6 +247,8 @@ def main():
     out.append("")
     out.append(f"- captioned `.spin2` blocks: **{len(blocks)}**")
     out.append(f"- `examples-library/*.spin2` files: **{len(lib_files)}**")
+    if utilities:
+        out.append(f"- declared not examples (PURPOSES.md, skipped): {', '.join(sorted(utilities))}")
     out.append(f"- identical: **{len(identical)}** · mismatched: **{len(mismatched)}** · "
                f"orphan blocks: **{len(orphan_block)}** · orphan library files: **{len(orphan_lib)}** · "
                f"duplicate captions: **{len(duplicates)}**")

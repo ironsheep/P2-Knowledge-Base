@@ -55,7 +55,8 @@ each feature's *mechanism* stays in its own document, linked below.
 | **P2AN002** | app-note | **✅** ¹⁹ | **✅** ¹⁹ | **✅** ¹⁹ | **✅** ¹⁹ | — |
 | **P2AN004** | app-note | **✅** ²⁰ | **✅** ²⁰ | **✅** ²⁰ | **✅** ²⁰ | — |
 | **P2AN007** | app-note | **✅** ²⁷ | **✅** ²⁷ | **✅** ²⁷ | **✅** ²⁷ | — |
-| P2AN003 · P2AN005 · P2AN006 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ | — |
+| P2AN006 | app-note | 🔧 ²⁹ | 🔧 ²⁹ | 🔧 ²⁹ | 🔧 ²⁹ | — |
+| P2AN003 · P2AN005 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ | — |
 | Layout Torture Test | instrument | — | — | — | — | — |
 | AI Privacy Guide | guide | — | ⏳ | — | — | — |
 
@@ -145,8 +146,11 @@ Two cautions for whoever does it. **Do not run `build-example-library.py` on an 
 before its captions exist** — dry-run against P2AN003 found ZERO of its six examples and would
 have written an empty library over a good corpus; use `--repack` until then. And
 `P2AN006/examples-library/isp_stack_check.spin2` is a shipped **utility object** carrying its
-own hand-written header, not an example — it is why P2AN006 reads 4+1 rather than 5, and
-whatever convention lands must let a corpus hold a non-example file without flagging it.
+own hand-written header, not an example — it is why P2AN006 reads 4+1 rather than 5. **The
+convention landed 2026-10-12 (P2AN006 v1.0.2):** a `## Not examples` section in
+`examples-library/PURPOSES.md` names such files. `sync-manual-examples.py` skips them (no header,
+printed as `SKIP`) and `verify-example-corpus-identity.py` neither compares them nor counts them
+as orphans. Negative control: drop the declaration and the utility reads `ORPHAN-LIB` again.
 
 
 ¹⁵ **Adopted 2026-09-10 in the v1.18.0 wave, under the standing rule** — six documents took
@@ -637,6 +641,19 @@ CC BY-SA 4.0); `pdf-metadata` gate PASS. **Cross-ref filter:** wired before tabl
 writes its 113 references as explicit `[Chapter N](#ch-N)` links, which the filter leaves alone, so internal
 links went 600 → 601 (the one added PLOT paragraph's page); no mislink seen on the pages read. **Silicon
 notes:** the ch14 `DEBUG_TIMESTAMP` chip renders on p136 (rendered and read); one note, so no index.
+
+²⁹ **P2AN006 — all four wired 2026-10-12 for v1.0.2 (F-575 release), under the standing rule;
+split out of the shared app-note row.** Following P2AN007's pattern:
+- **Metadata single-source:** the cover reads `\DocDate` / `\DocVersion`, and `request.json`
+  `metadata.version` is now the bare `1.0.2`.
+- **Rights:** `copyright` + `license` are in `request.json` metadata.
+- **Cross-ref filter:** `p2kb-platform-crossref` sits before `p2kb-platform-tables`.
+- **Generated headers:** the four recipe fences are captioned; `PURPOSES.md` is written;
+  `sync --check` is GREEN; corpus identity is 4/4, gated for real (no longer the app-note KNOWN gap);
+  the utility object is declared not an example.
+
+The prepare runner clears all 12 gates. Each feature flips to ✅ only after it is proven on the
+returned PDF.
 
 ²⁸ **Silicon notes — column added 2026-10-04** (Stephen, choosing it over a coloured box: errata
 "important and yet can't be distracting"). Seeded from detected state: a document owes the feature
