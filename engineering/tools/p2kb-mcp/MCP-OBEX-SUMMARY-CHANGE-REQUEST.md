@@ -32,9 +32,9 @@ The YAML tags compiled into the 1.5.0 binary show the summary is built from a fi
 tool, and any rename on our side silently empties a field on yours. That coupling is the real defect;
 §3 removes it.
 
-## 2. What the KB does (KB v1.24.1 — shipping before 1.5.1)
+## 2. What the KB has done (KB v1.24.1 and v1.24.2 — both published 2026-10-11/12)
 
-The upload date moves to the place the server already reads:
+**v1.24.1** moved the upload date to the place the server already reads:
 
 ```yaml
 object_metadata:
@@ -51,7 +51,22 @@ object_metadata:
 - `metadata` holds **only** `created_date`. `quality_score`, `discovery_date`, `last_verified` and
   `extraction_status` are not in any served object and will not return.
 
-So on 1.5.0, after KB v1.24.1 and a refresh, `created_date` is already right. 1.5.1 is about §3.
+So on 1.5.0, after KB v1.24.1 and a refresh, `created_date` is already right.
+
+**v1.24.2** makes every OBEX object a mirror of its OBEX catalog page (F-573), with no server change
+needed for any of it:
+- `title`, `author`, `functionality.description_full`, `functionality.tags`,
+  `technical_details.languages`, `technical_details.microcontroller` and `metadata.created_date` carry
+  OBEX's own values; `technical_details.content_type` (`Code`, `Hardware`, `Tip`) and
+  `technical_details.licence` (`MIT`, `Other`) are new.
+- `functionality.category` is **OBEX's own category** — a string, or a **list** for the 32 objects
+  OBEX files under several (§3.5 is the one change this asks of you).
+- `functionality.description_short` — the field you serve as `description` — is now an authored
+  one-sentence summary (≤120 characters) for every object, never a cut of the catalog text. Keep
+  reading it exactly as today.
+- `version_tracking.obex_version` is gone; `technical_details.version` is the only version field.
+
+1.5.1 is about §3.
 
 ## 3. The changes for 1.5.1
 
@@ -123,13 +138,15 @@ Proceed on all five unless you object.
 
 ## 5. Order
 
-KB v1.24.1 publishes first (the date is in place). 1.5.1 can be built and unit-tested against it at
-any time after; it does not depend on any other KB change.
+Both KB releases are published (v1.24.2, 2026-10-12). 1.5.1 can be built and tested against the
+live KB now; it depends on no further KB change.
 
 ## 6. Acceptance probes
 
-**Precondition:** KB v1.24.1 is published (its tag on the remote), 1.5.1 is installed, and
-`p2kb_refresh include_obex` has been run. Without v1.24.1, O2 fails for a reason that is not 1.5.1's.
+**Precondition:** KB v1.24.2 or later is published (it is), 1.5.1 is installed, and
+`p2kb_refresh flush:true include_obex:true` has been run at least 5 minutes after the last KB push
+(GitHub raw's CDN holds files for 300 s; inside that window the server can fetch old bodies against
+the new index and fail verification).
 
 | # | Probe | Expect |
 |---|---|---|
@@ -149,13 +166,14 @@ F-571 closes in the register on O1-O7, with the server version.
    with a value; mark it breaking in the 1.5.1 changelog entry despite the patch number.
 2. **Two version fields — `technical_details.version` is authoritative.** `version_tracking.obex_version`
    is a second copy the scraper writes from the same scrape; it equals `technical_details.version` in
-   all 130 objects today (20 carry a value), and nothing reads it. The KB removes it in its next
-   release so there is one field, not two. Read `technical_details.version` only, as §3.2 says.
+   all 130 objects (20 carry a value), and nothing reads it. **Removed in KB v1.24.2** — there is
+   one field, not two. Read `technical_details.version` only, as §3.2 says.
 3. **The shared spec — updated.** `engineering/tools/p2kb-mcp/P2KB-MCP-SPECIFICATION.md`'s
    `p2kb_obex_get` row now states the 1.5.0 shape and the 1.5.1 contract (breaking, field sources,
    `full_metadata`). Re-import it byte-identical from the KB's `main`; `DOCs/API.md` and
    `docs-src/data/tools.yml` are yours as you said.
 4. **2842's cut-off `description_short` ("andthe") — the KB's to fix, no server change.** Our scraper
    builds `description_short` as the first 100 characters of the description, cutting mid-word (50 of
-   130 objects), and 2842's also lost a space. The KB corrects the field in its next release; keep
-   reading `functionality.description_short` for `description` exactly as today.
+   130 objects), and 2842's also lost a space. **Fixed in KB v1.24.2**: every object now has an
+   authored one-line summary there, and the KB's copy of each object mirrors its catalog page (§2).
+   Keep reading `functionality.description_short` for `description` exactly as today.
