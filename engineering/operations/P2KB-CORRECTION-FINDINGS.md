@@ -66,7 +66,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen; + F-571, F-572, F-573, found 2026-10-11 by «#398» and the MCP agent's 1.5.1 review)
 
-### F-573 — OBEX `description_short` is our 100-character cut of the catalog text, and `version_tracking.obex_version` duplicates `technical_details.version` — `PENDING-VALIDATION` (found 2026-10-11 by the p2kb-mcp agent reviewing the 1.5.1 request; widened 2026-10-11 to a full catalog re-mirror; applied 2026-10-12; closes on the live probe of KB v1.24.2)
+### F-573 — OBEX `description_short` is our 100-character cut of the catalog text, and `version_tracking.obex_version` duplicates `technical_details.version` — `RESOLVED` (found 2026-10-11 by the p2kb-mcp agent reviewing the 1.5.1 request; widened 2026-10-11 to a full catalog re-mirror; applied 2026-10-12 in v1.24.2 and v1.24.3; validated live 2026-10-12 on p2kb-mcp 1.5.0: `p2kb_obex_get 4758` → `file_size: ""`, mirrored languages, tags, date and one-liner)
 **Applied 2026-10-12 (KB v1.24.2).** Checking OBEX showed the copy was not a mirror at all: 17
 placeholder descriptions ("Utility object for P2 development."), 5 garbled, 11 cut near 300 characters,
 and `category`/`tags` from our scraper's own classifier. Stephen chose to re-take every catalog field.
