@@ -443,6 +443,29 @@ list, so the drift cannot recur.
 > stays red until `verify-ps1-filter.ps1` is re-run and `PS1-VERIFIED.md` updated. *Fetch Script Parity*
 > reads the published index rule and turns green when the index is regenerated after the commit.
 
+## Impact survey — v1.24.4 (`release-yamls` §8, run 2026-10-12)
+
+**What v1.24.4 changed:**
+- The 130 OBEX objects became a pure catalog mirror. No document quotes the removed fields.
+- 12 content YAMLs dropped their silicon-revision framing: GETCT ×2, `special_registers`,
+  `serial_loader`, the errata status on AUGS/AUGD/SETQ blocks, GETXACC, the Goertzel page,
+  `P_ADC_FLOAT`, `silicon_errata` and `basic-io`. Stephen, 2026-10-12: Rev C is the only P2 silicon.
+
+**By manual:**
+- **Declared sources:** P2AN001 and P2AN003 declare the ADC smart-pin page. Its only change is the
+  `P_ADC_FLOAT` parenthetical, which neither note uses, so neither is affected.
+- **Flagged: re-audit against HEAD, the P2 Assembly Language Manual.** Its opus-master states the
+  same framing the KB dropped:
+  - `special-registers.md:534`, `instructions-g.md:94,106` and `chapter-04-timing.md:545`: "64-bit
+    counter (Rev B/C silicon)";
+  - `appendix-j-known-bugs.md:86`: "affect all P2X8C4M64P Rev B/C silicon";
+  - its `[Rev C]{.silicon-note}` markers, e.g. `appendix-e-constants.md:687`, a deliberate device of
+    the manual (its CHANGELOG: "Rev C silicon notes").
+
+  Whether that device stays is decided at the manual's re-audit; the KB side is done.
+- **Not affected:** the P2 Errata's "confirmed on Rev C silicon by a test program" is a true record
+  of what was run. The other "Rev B/C" hits are citations of the P2 Documentation's own title.
+
 ## Impact survey — v1.24.2 and v1.24.3 (`release-yamls` §8, run 2026-10-12)
 
 Both releases changed the 130 OBEX objects only (catalog re-mirror, one-liners, `file_size` emptied,
