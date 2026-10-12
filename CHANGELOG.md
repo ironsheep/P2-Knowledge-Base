@@ -20,6 +20,17 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.24.4] - 2026-10-12
+
+**Each OBEX object is a pure mirror of its OBEX catalog page.**
+
+### Changed
+
+- **OBEX objects**: each carries only what its OBEX page publishes (title, author, category, tags, description, content type, microcontroller, languages, licence, date, page and download) plus its one-line description; compatibility, version, file size, file format, GitHub repository, capability classification and the always-empty fields are gone
+- **OBEX descriptions**: a link in an object's description now keeps its URL, written after the link's words (repositories, store pages, related OBEX objects)
+- **OBEX downloads**: the 5 objects OBEX offers no download for (4442, 4571, 4581, 4616, 4617) no longer carry a download link; their descriptions say where the code is
+- **One P2 silicon**: facts are stated for the P2 as it is, with no silicon-revision framing — SETQ pin spans (`basic-io`, now sourced), the status of errata E1/E2 (AUGS, AUGD, SETQ block transfers), GETXACC's clear and the Goertzel page, `P_ADC_FLOAT`, and the errata page's title line
+
 ## [1.24.3] - 2026-10-12
 
 **OBEX objects carry only what the OBEX catalog publishes.**
