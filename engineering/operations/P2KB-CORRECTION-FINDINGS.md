@@ -545,6 +545,14 @@ list, so the drift cannot recur.
 > stays red until `verify-ps1-filter.ps1` is re-run and `PS1-VERIFIED.md` updated. *Fetch Script Parity*
 > reads the published index rule and turns green when the index is regenerated after the commit.
 
+## Impact survey — v1.24.5 (`release-yamls` §8, run 2026-10-12)
+
+v1.24.5 reverses v1.24.4's silicon sweep (F-574). The 12 YAMLs are back to their pre-sweep served
+text. `basic-io`'s one addition is a `source:` line, which the delivery filter strips. So every
+manual's declared sources match what the manual was written against. **The v1.24.4 survey's
+Assembly-manual re-audit flag below is withdrawn**: the KB again states the "(Rev B/C silicon)" and
+"Rev C" framing the manual uses. **No document is flagged.**
+
 ## Impact survey — v1.24.4 (`release-yamls` §8, run 2026-10-12)
 
 **What v1.24.4 changed:**
