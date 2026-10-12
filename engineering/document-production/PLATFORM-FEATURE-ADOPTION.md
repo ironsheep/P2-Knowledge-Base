@@ -55,7 +55,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | **P2AN002** | app-note | **✅** ¹⁹ | **✅** ¹⁹ | **✅** ¹⁹ | **✅** ¹⁹ | — |
 | **P2AN004** | app-note | **✅** ²⁰ | **✅** ²⁰ | **✅** ²⁰ | **✅** ²⁰ | — |
 | **P2AN007** | app-note | **✅** ²⁷ | **✅** ²⁷ | **✅** ²⁷ | **✅** ²⁷ | — |
-| P2AN006 | app-note | 🔧 ²⁹ | 🔧 ²⁹ | 🔧 ²⁹ | 🔧 ²⁹ | — |
+| **P2AN006** | app-note | **✅** ²⁹ | **✅** ²⁹ | **✅** ²⁹ | **✅** ²⁹ | — |
 | P2AN003 · P2AN005 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ | — |
 | Layout Torture Test | instrument | — | — | — | — | — |
 | AI Privacy Guide | guide | — | ⏳ | — | — | — |
@@ -642,8 +642,19 @@ writes its 113 references as explicit `[Chapter N](#ch-N)` links, which the filt
 links went 600 → 601 (the one added PLOT paragraph's page); no mislink seen on the pages read. **Silicon
 notes:** the ch14 `DEBUG_TIMESTAMP` chip renders on p136 (rendered and read); one note, so no index.
 
-²⁹ **P2AN006 — all four wired 2026-10-12 for v1.0.2 (F-575 release), under the standing rule;
-split out of the shared app-note row.** Following P2AN007's pattern:
+²⁹ **P2AN006 — all four proven on the released v1.0.2 PDF, 2026-10-12** (23:09 build, 14pp; prior 13).
+- **Metadata single-source + rights:** the cover reads `\DocDate` / `\DocVersion` (page 1: "October
+  2026", "Version 1.0.2"). `audit-pdf-metadata.py --require-rights --request` verified Title, Subject,
+  Author, Keywords (copyright + licence) and page 1's date and version: CLEAN. With `--prior 1.0.1`
+  it flags only the Revision History's own "v1.0.1 (August 2026)" line, which is history, as with
+  P2AN007 (²⁷).
+- **Cross-ref filter:** loaded (named in the compile log), and correctly silent: the source holds 0
+  `Chapter N` / `Appendix X` references to link.
+- **Captions + generated headers:** the four captions print under their listings (pp 7–10, text
+  located). Corpus identity 4/4. The ZIP was repacked from the headed corpus: currency 6/6 GREEN.
+
+Wired 2026-10-12 for v1.0.2 (the F-575 release) under the standing rule, and split out of the shared
+app-note row. Following P2AN007's pattern:
 - **Metadata single-source:** the cover reads `\DocDate` / `\DocVersion`, and `request.json`
   `metadata.version` is now the bare `1.0.2`.
 - **Rights:** `copyright` + `license` are in `request.json` metadata.
