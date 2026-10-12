@@ -605,7 +605,11 @@ class CrossRefChecker:
         r['total_files'] += 1
         if content is None:
             return
-        for keypath, s in iter_strings(content):
+        # OBEX objects mirror the OBEX catalog: their text is the authors' prose, and a file name in
+        # it ("megajuke_tracks.yml") names a file in the author's download, not a KB path. Their
+        # reference fields (none today) are still checked below (F-573).
+        catalog_text = rel.replace("\\", "/").startswith("community/obex/objects/")
+        for keypath, s in ([] if catalog_text else iter_strings(content)):
             for m in PATH_TOKEN.finditer(s):
                 self.check_path_token(rel, keypath, m.group(1))
         has_refs = False

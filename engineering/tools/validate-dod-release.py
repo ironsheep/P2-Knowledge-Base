@@ -1423,13 +1423,14 @@ def validate_cross_references(verbose: bool = False) -> ValidationResult:
             if 'Resolution rate' in line:
                 rate_seen = True
                 result.info(line.strip())
-                if '100.0%' in line:
-                    # F-340/F-373 closed 2026-09-13: the validator now reads every
-                    # string (KB path tokens) and every reference field at every
-                    # depth, so 100% is a statement about ALL references.
+                # The verdict is the validator's own exit status and summary, never the rate:
+                # one miss in ~4,200 references prints "100.0%" (2026-10-12, v1.24.2 -- a
+                # missing reference passed this check while the validator itself failed).
+                if proc.returncode == 0 and 'ALL CROSS-REFERENCES RESOLVE' in proc.stdout:
                     result.ok("All cross-references resolve (every string, every reference field, every depth)")
                 else:
-                    result.fail("Some cross-references failed to resolve")
+                    result.fail("Some cross-references failed to resolve (validator exit "
+                                f"{proc.returncode}; run validate-crossref-keys.py for the list)")
                 break
             if 'SCOPE:' in line:
                 result.info(line.strip())
