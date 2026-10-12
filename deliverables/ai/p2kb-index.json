@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.6.0",
-    "generated": "2026-10-12T06:47:16.503799",
+    "generated": "2026-10-12T20:43:40.829618",
     "total_entries": 1137,
     "total_categories": 60,
     "total_aliases": 3592,
@@ -12030,13 +12030,13 @@
     },
     "p2kbArchSerialLoader": {
       "path": "deliverables/ai/P2/architecture/serial_loader.yaml",
-      "mtime": 1791784532,
-      "sha256": "c114ab6c0b9e304fa2a53550a3d1674746e331b4e6ad4eccf3f6647a57878594"
+      "mtime": 1791834588,
+      "sha256": "731d9292371029d5333c96309fb80348a5c4136332e216cee74142753e474f70"
     },
     "p2kbArchSiliconErrata": {
       "path": "deliverables/ai/P2/architecture/silicon_errata.yaml",
-      "mtime": 1791784432,
-      "sha256": "a36b389019272aaab74b5c07f4324ddf955ccd3836bc0752cb1d0baeb164e973"
+      "mtime": 1791834588,
+      "sha256": "fb9a2a7b0cbf73a7112cb88f2ad5d13604227ffe59288b407198e3eff6d028a2"
     },
     "p2kbArchSmartPin00000NormalMode": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-00000-normal-mode.yaml",
@@ -12160,8 +12160,8 @@
     },
     "p2kbArchSmartPin11000AdcInternalClock": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml",
-      "mtime": 1791784432,
-      "sha256": "71d6f8f4d420e60f651a9f1634bddb7dd936d661af0ebe7e3d8532433e8aee02"
+      "mtime": 1791835937,
+      "sha256": "8ba82f516fc0866b0f89cebf531057ae08c82ab25d0071f3d74240ec656d63c2"
     },
     "p2kbArchSmartPin11001AdcExternalClock": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11001-adc-external-clock.yaml",
@@ -12225,8 +12225,8 @@
     },
     "p2kbArchDdsGoertzel": {
       "path": "deliverables/ai/P2/architecture/streamer/dds-goertzel.yaml",
-      "mtime": 1791784432,
-      "sha256": "c85f26b352b5bebae39fd3746588465a73a9dd33f06e98460a2392967ab7cc59"
+      "mtime": 1791834588,
+      "sha256": "2852f71e96b52319c531e556bea587897a1b53fc27490c26e06d3bc2cadc6cc9"
     },
     "p2kbArchModesReference": {
       "path": "deliverables/ai/P2/architecture/streamer/modes-reference.yaml",
@@ -13475,13 +13475,13 @@
     },
     "p2kbPasm2Augd": {
       "path": "deliverables/ai/P2/language/pasm2/augd.yaml",
-      "mtime": 1791784432,
-      "sha256": "b8f3e0fdbea7a7c490a6e2a3e44c09f1a946cf065662ecf9217bc1a2653326d0"
+      "mtime": 1791834588,
+      "sha256": "e9f6a6f14d609d4311753d6c687fef91fec3550dc3cd94d9e63700580cbc4b2e"
     },
     "p2kbPasm2Augs": {
       "path": "deliverables/ai/P2/language/pasm2/augs.yaml",
-      "mtime": 1791784432,
-      "sha256": "c9df8c28812ae217a5873d25b43afdbfd6d69d150c44162bcb99746ee58774e8"
+      "mtime": 1791834588,
+      "sha256": "1f5d1a4e551d9bdaf318184afbf491e61d384599918ff95aee3ab19824fec476"
     },
     "p2kbPasm2Bitc": {
       "path": "deliverables/ai/P2/language/pasm2/bitc.yaml",
@@ -13650,8 +13650,8 @@
     },
     "p2kbPasm2BasicIo": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/basic-io.yaml",
-      "mtime": 1791784230,
-      "sha256": "d18095e376116a0958dc68648d64fa493e49cce18dd5b8015b480a4aebc7bcae"
+      "mtime": 1791835937,
+      "sha256": "2bb4fcd9d4a03e337f552a33e41c2f1d45ea0e03c2a6654ead991d132b932010"
     },
     "p2kbPasm2BranchAddressing": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/branch_addressing.yaml",
@@ -13710,8 +13710,8 @@
     },
     "p2kbPasm2SetqBlockOps": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/setq_block_ops.yaml",
-      "mtime": 1791784432,
-      "sha256": "f16fc6b8e33f203215023fa8154a582955c12ac0cf9b1924e73668afa6ce11ec"
+      "mtime": 1791834588,
+      "sha256": "b52b868356597cd120afb297581bc3e35f33accfb4480a02c596823f06044c1a"
     },
     "p2kbPasm2SkipfBranching": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/skipf_branching.yaml",
@@ -13720,8 +13720,8 @@
     },
     "p2kbPasm2SpecialRegisters": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/special_registers.yaml",
-      "mtime": 1791784532,
-      "sha256": "eee60f2443bcb4378ced1f296695c7002580703007037537b7d886c5424bec9e"
+      "mtime": 1791834588,
+      "sha256": "d85b53c0ab3097ff31ecd12513e3c0dc475041dbc890b6e5880a74d56f7e8d88"
     },
     "p2kbPasm2StackOperations": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/stack_operations.yaml",
@@ -13965,8 +13965,8 @@
     },
     "p2kbPasm2Getct": {
       "path": "deliverables/ai/P2/language/pasm2/getct.yaml",
-      "mtime": 1791784532,
-      "sha256": "42c6e48b4e8317dd930fdfabd464bbfac3136e1a22172243bf3316d601bad6f2"
+      "mtime": 1791834588,
+      "sha256": "ec9b3d05a315dfe173241595ad032d6c2c65c77bf3cc94ddfe7368fc6ef2422c"
     },
     "p2kbPasm2Getnib": {
       "path": "deliverables/ai/P2/language/pasm2/getnib.yaml",
@@ -14005,8 +14005,8 @@
     },
     "p2kbPasm2Getxacc": {
       "path": "deliverables/ai/P2/language/pasm2/getxacc.yaml",
-      "mtime": 1791784432,
-      "sha256": "f38dd7764a1a3ecc9c847a36e60204aef718ef31a663de5f5008734c34bc1e78"
+      "mtime": 1791834588,
+      "sha256": "2fa74af9f44191759402c34d7cd6ce5e24f0c8edb9b6cfed34cf3cbb289af0d2"
     },
     "p2kbPasm2CounterEventJumps": {
       "path": "deliverables/ai/P2/language/pasm2/groups/counter_event_jumps.yaml",
@@ -16120,8 +16120,8 @@
     },
     "p2kbSpin2Getct": {
       "path": "deliverables/ai/P2/language/spin2/methods/getct.yaml",
-      "mtime": 1791784532,
-      "sha256": "0199f11fa6d41d745ea32955f8cc6b5a09defc382845bd577c07b2b2b8500bc2"
+      "mtime": 1791834588,
+      "sha256": "af1ee1ed925111a8ededf8f3e5cd0c6e20d53a7816e586c5bf5fa9d6283b9460"
     },
     "p2kbSpin2Getms": {
       "path": "deliverables/ai/P2/language/spin2/methods/getms.yaml",

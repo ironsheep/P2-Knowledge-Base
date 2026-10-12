@@ -1,7 +1,7 @@
 {
   "meta": {
     "release_date": "2026-10-12",
-    "last_updated": "2026-10-12T06:47:16.562219",
+    "last_updated": "2026-10-12T20:43:40.890344",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-10-12T06:47:16.562219",
+    "extraction_date": "2026-10-12T20:43:40.890344",
     "categories": {
       "Math and Logic": {
         "count": 109,
@@ -12020,7 +12020,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Read the system counter into D. The underlying counter is a free-running 64-bit counter\nthat increments every clock, cleared on reset.\nWithout WC: D receives the lower 32 bits of the 64-bit counter.\nWith WC:    D receives the upper 32 bits of the 64-bit counter.\nGETCT WC followed by GETCT reads the full 64-bit value -- except in a cog whose group of\nfour has missed a wrap of the lower long (see silicon_errata). The WC bit is a mode\nselector, not a flag-write -- C and Z flags are always unchanged.\n",
+            "description": "Read the system counter into D. The underlying counter is a free-running 64-bit counter\n(Rev B/C silicon) that increments every clock, cleared on reset.\nWithout WC: D receives the lower 32 bits of the 64-bit counter.\nWith WC:    D receives the upper 32 bits of the 64-bit counter.\nGETCT WC followed by GETCT reads the full 64-bit value -- except in a cog whose group of\nfour has missed a wrap of the lower long (see silicon_errata). The WC bit is a mode\nselector, not a flag-write -- C and Z flags are always unchanged.\n",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -16996,7 +16996,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "Read the streamer's Goertzel accumulators -- the cosine (X) accumulation into D, the sine (Y) accumulation into the next instruction's S value. As documented, GETXACC captures both into holding registers and clears them, and that repeat reads return the same values until a new streamer command executes. ON THE P2 THE CLEAR ACTS ONLY WHILE A DDS/GOERTZEL COMMAND IS RUNNING; with the streamer idle (or in another mode) GETXACC returns the running total and clears nothing, and each Goertzel burst's last term lands in the NEXT burst (see silicon_errata). Used with DDS/Goertzel modes for tone detection (DTMF) or signal analysis; X,Y are the real/imaginary components of the Goertzel output. Follow with QVECTOR to compute magnitude and phase.",
+            "description": "Read the streamer's Goertzel accumulators -- the cosine (X) accumulation into D, the sine (Y) accumulation into the next instruction's S value. As documented, GETXACC captures both into holding registers and clears them, and that repeat reads return the same values until a new streamer command executes. ON REV C SILICON THE CLEAR ACTS ONLY WHILE A DDS/GOERTZEL COMMAND IS RUNNING; with the streamer idle (or in another mode) GETXACC returns the running total and clears nothing, and each Goertzel burst's last term lands in the NEXT burst (see silicon_errata). Used with DDS/Goertzel modes for tone detection (DTMF) or signal analysis; X,Y are the real/imaginary components of the Goertzel output. Follow with QVECTOR to compute magnitude and phase.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -18487,7 +18487,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-10-12T06:47:16.562219",
+    "extraction_date": "2026-10-12T20:43:40.890344",
     "categories": {
       "keywords": {
         "count": 37,
@@ -22399,7 +22399,7 @@
             ],
             "notes": [
               "Counter runs continuously from boot",
-              "Underlying hardware counter is 64-bit; GETCT() returns the lower 32 bits",
+              "Underlying hardware counter is 64-bit (Rev B/C silicon); GETCT() returns the lower 32 bits",
               "The upper 32 bits are accessible via the PASM2 GETCT D WC instruction",
               "Wraps around every 2^32 clocks (lower 32 bits)",
               "Subtraction handles wrap correctly",
