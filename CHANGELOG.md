@@ -20,6 +20,14 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.24.5] - 2026-10-12
+
+**Silicon notes name the revision each behaviour belongs to.**
+
+### Changed
+
+- **Silicon revisions**: the pages state which silicon a behaviour belongs to, as the P2 Documentation does. The 64-bit system counter (GETCT) is Rev B/C. SETQ pin spans are a Rev B enhancement. `P_ADC_FLOAT` floating the ADC input, GETXACC's clear and the Goertzel page are Rev C. Errata E1/E2 (AUGS, AUGD, SETQ block transfers) are active in Rev C. The errata page's title line and the serial loader's `Prop_Chk` reply also name the revision
+
 ## [1.24.4] - 2026-10-12
 
 **Each OBEX object is a pure mirror of its OBEX catalog page.**
