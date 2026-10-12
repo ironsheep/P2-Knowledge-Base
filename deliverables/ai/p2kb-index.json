@@ -1,10 +1,10 @@
 {
   "system": {
     "version": "3.6.0",
-    "generated": "2026-10-12T20:43:40.829618",
+    "generated": "2026-10-12T22:59:03.637239",
     "total_entries": 1137,
     "total_categories": 60,
-    "total_aliases": 3592,
+    "total_aliases": 3598,
     "multi_target_aliases": 221,
     "source": "deliverables/ai/P2/"
   },
@@ -1622,6 +1622,9 @@
     "BRUSHLESS MOTOR DRIVER": [
       "p2kbHwAddonMotorDriverAddonMotorDriver"
     ],
+    "BUFFER OVERRUN DETECTION": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
     "BUS ARBITER COG": [
       "p2kbArchSharedBusBroker"
     ],
@@ -1636,6 +1639,9 @@
       "p2kbSpin2AsmByte",
       "p2kbSpin2KwBYTE",
       "p2kbSpin2Byte"
+    ],
+    "BYTE GUARD": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
     "BYTECOMP": [
       "p2kbSpin2Bytecomp"
@@ -6747,6 +6753,9 @@
     "STACK CORRUPTION": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
+    "STACK GUARD": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
     "STACK HIGH-WATER MARK": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
@@ -8620,6 +8629,9 @@
     "brushless motor driver": [
       "p2kbHwAddonMotorDriverAddonMotorDriver"
     ],
+    "buffer overrun detection": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
     "buffer_management": [
       "p2kbArchBufferManagementAnalysis",
       "p2kbSpin2Spin2BufferManagement"
@@ -8635,6 +8647,9 @@
     ],
     "byte": [
       "p2kbSpin2Byte"
+    ],
+    "byte guard": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
     "bytecomp": [
       "p2kbSpin2Bytecomp"
@@ -11111,6 +11126,9 @@
     "stack corruption": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
+    "stack guard": [
+      "p2kbAppNoteP2an006SizingCogTaskStacks"
+    ],
     "stack high-water mark": [
       "p2kbAppNoteP2an006SizingCogTaskStacks"
     ],
@@ -11785,8 +11803,8 @@
     },
     "p2kbAppNoteP2an006SizingCogTaskStacks": {
       "path": "deliverables/ai/P2/application-notes/p2an006-sizing-cog-task-stacks.yaml",
-      "mtime": 1791746602,
-      "sha256": "0b841415856bf8669a08213b1c621ca11373fefdf785f20ef68b33a780a95927"
+      "mtime": 1791844876,
+      "sha256": "7922896ed5a88a0f9f9f6d19330c91ce3d0fb5db66d130fd58541b174771f614"
     },
     "p2kbAppNoteP2an007DataStructuresNewFacilities": {
       "path": "deliverables/ai/P2/application-notes/p2an007-data-structures-new-facilities.yaml",
