@@ -108,7 +108,7 @@ related_methods:
 
 notes:
   - "Counter runs continuously from boot"
-  - "Underlying hardware counter is 64-bit (Rev B/C silicon); GETCT() returns the lower 32 bits"
+  - "Underlying hardware counter is 64-bit; GETCT() returns the lower 32 bits"
   - "The upper 32 bits are accessible via the PASM2 GETCT D WC instruction"
   - "Wraps around every 2^32 clocks (lower 32 bits)"
   - "Subtraction handles wrap correctly"

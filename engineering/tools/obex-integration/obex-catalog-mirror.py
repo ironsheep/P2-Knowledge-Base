@@ -231,7 +231,8 @@ class _Text(HTMLParser):
                 url = link_target(href)
                 words = "".join(x for x in self.out[start:] if not x.startswith("\x00")).strip()
                 # skip only when the words already carry this exact URL (not a longer one)
-                shown = re.search(re.escape(norm_url(url)) + r"(?![\w/%.-])", norm_url(words))
+                # (a sentence's closing stop after the URL still counts as shown)
+                shown = re.search(re.escape(norm_url(url)) + r"(?![\w/%-]|\.[\w/])", norm_url(words))
                 if url and not shown:
                     # "the repo." -> "the repo (URL)." : the URL belongs to the words, not the stop
                     end = len(self.out) - 1

@@ -12,7 +12,8 @@ object_metadata:
     category: ""               # Category; a list when the page lists several; "" when none
     tags: []                   # Tag(s)
     description_short: ""      # authored one-liner, <= 120 chars (gate: OBEX One-Line Descriptions)
-    description_full: ""       # the page's description as text; a link's URL follows its words
+    description_full: ""       # the page's description as text; a link's URL follows its words,
+                               # unless the words already show it (relative links stay text)
   technical_details:
     content_type: []           # Content, e.g. ["Code"]
     microcontroller: []        # Microcontroller, e.g. ["P2"]

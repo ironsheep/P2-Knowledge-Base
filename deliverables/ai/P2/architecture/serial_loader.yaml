@@ -51,7 +51,7 @@ protocol_commands:
 
   prop_chk:
     syntax: "Prop_Chk <INAmask> <INAdata> <INBmask> <INBdata>"
-    response: "CR+LF+\"Prop_Ver\"+SPACE+<version_character>+CR+LF, where <version_character> is \"A\"..\"Z\" and indicates the version of Propeller 2. The Rev B/C silicon responds with \"G\" (A-F were FPGA builds)."
+    response: "CR+LF+\"Prop_Ver\"+SPACE+<version_character>+CR+LF, where <version_character> is \"A\"..\"Z\" and indicates the version of Propeller 2. The P2 silicon responds with \"G\"."
     purpose: "Verify the Propeller 2 connection and retrieve its version"
     exchange: "Sender: \"> Prop_Chk 0 0 0 0\"+CR / Loader: CR+LF+\"Prop_Ver G\"+CR+LF"
 
