@@ -1450,7 +1450,7 @@ def validate_cross_references(verbose: bool = False) -> ValidationResult:
                 if 'FAIL' in line:
                     result.info(line.strip())
 
-        if proc.returncode != 0 and 'Resolution rate: 100.0%' not in proc.stdout:
+        if proc.returncode != 0 and result.passed:  # never trust the rounded rate (see above)
             result.fail("Cross-reference validation failed")
             if verbose:
                 for line in proc.stdout.split('\n')[-10:]:

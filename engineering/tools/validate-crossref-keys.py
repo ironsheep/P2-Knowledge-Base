@@ -469,6 +469,12 @@ def is_schema_descriptor(value) -> bool:
             and any(k in value for k in ('items', 'description', 'required', 'properties')))
 
 
+OBEX_CATALOG_PROSE = {  # the OBEX catalog text obex-catalog-mirror.py writes (F-573)
+    "object_metadata.title", "object_metadata.author",
+    "object_metadata.functionality.description_full", "object_metadata.functionality.description_short",
+}
+
+
 def iter_strings(node, path=()):
     if isinstance(node, dict):
         for k, v in node.items():
@@ -605,11 +611,14 @@ class CrossRefChecker:
         r['total_files'] += 1
         if content is None:
             return
-        # OBEX objects mirror the OBEX catalog: their text is the authors' prose, and a file name in
-        # it ("megajuke_tracks.yml") names a file in the author's download, not a KB path. Their
-        # reference fields (none today) are still checked below (F-573).
-        catalog_text = rel.replace("\\", "/").startswith("community/obex/objects/")
-        for keypath, s in ([] if catalog_text else iter_strings(content)):
+        # OBEX objects mirror the OBEX catalog: their prose fields are the authors' text, and a file
+        # name in them ("megajuke_tracks.yml") names a file in the author's download, not a KB
+        # path. Only those mirrored prose fields are skipped; every other string in an OBEX
+        # object -- a related:/see_also/yaml_file reference included -- is still scanned (F-573).
+        obex = rel.replace("\\", "/").startswith("community/obex/objects/")
+        for keypath, s in iter_strings(content):
+            if obex and keypath in OBEX_CATALOG_PROSE:
+                continue
             for m in PATH_TOKEN.finditer(s):
                 self.check_path_token(rel, keypath, m.group(1))
         has_refs = False
@@ -670,6 +679,11 @@ def run_negative_control(base_path: Path, index: Dict) -> int:
         ('nc/yaml_file_dangling.yaml',
          {'registers': [{'yaml_file': 'architecture/system-registers/no-such-register.yaml'}]}, 'missing'),
         ('nc/yaml_file_bare.yaml', {'registers': [{'yaml_file': 'dual-pa-register.yaml'}]}, 'missing'),
+        # F-573: OBEX catalog prose is skipped, an OBEX object's reference field is not
+        ('community/obex/objects/nc_related.yaml',
+         {'object_metadata': {'related': ['language/pasm2/no_such_file.yaml']}}, 'missing'),
+        ('community/obex/objects/nc_prose.yaml',
+         {'object_metadata': {'functionality': {'description_full': 'unzip megajuke_tracks.yml first'}}}, None),
         ('nc/yaml_file_good.yaml',
          {'registers': [{'yaml_file': 'architecture/system-registers/ptra-register.yaml'}]}, None),
         ('nc/positive_control.yaml', {
