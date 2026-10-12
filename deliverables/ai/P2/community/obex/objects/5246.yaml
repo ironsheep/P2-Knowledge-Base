@@ -41,9 +41,6 @@ object_metadata:
     file_size: ''
     languages:
     - SPIN2 PASM2
-    languages_confirmed:
-    - SPIN2
-    - PASM2
     microcontroller:
     - P2
     version: ''

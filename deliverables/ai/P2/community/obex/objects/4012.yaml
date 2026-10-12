@@ -53,7 +53,7 @@ object_metadata:
   object_id: '4012'
   technical_details:
     file_format: ZIP
-    file_size: 32B
+    file_size: ''
     languages:
     - PASM2
     microcontroller:

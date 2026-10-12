@@ -32,7 +32,7 @@ object_metadata:
   object_id: '2839'
   technical_details:
     file_format: ZIP
-    file_size: 3 B
+    file_size: ''
     languages:
     - PASM2
     - SPIN2

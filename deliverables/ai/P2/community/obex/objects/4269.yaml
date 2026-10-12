@@ -41,7 +41,7 @@ object_metadata:
   object_id: '4269'
   technical_details:
     file_format: ZIP
-    file_size: 512MB
+    file_size: ''
     languages:
     - PASM2
     - SPIN2

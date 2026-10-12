@@ -46,7 +46,7 @@ object_metadata:
   object_id: '4266'
   technical_details:
     file_format: ZIP
-    file_size: 2 MB
+    file_size: ''
     languages:
     - SPIN2
     microcontroller:

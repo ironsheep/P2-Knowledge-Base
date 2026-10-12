@@ -33,10 +33,8 @@ object_metadata:
   object_id: '2853'
   technical_details:
     file_format: ZIP
-    file_size: 5883 B
+    file_size: ''
     languages:
-    - SPIN2
-    languages_confirmed:
     - SPIN2
     microcontroller:
     - P2

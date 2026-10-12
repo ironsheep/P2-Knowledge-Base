@@ -41,7 +41,7 @@ object_metadata:
   object_id: '4080'
   technical_details:
     file_format: ZIP
-    file_size: 24 B
+    file_size: ''
     languages:
     - C/C++
     microcontroller:

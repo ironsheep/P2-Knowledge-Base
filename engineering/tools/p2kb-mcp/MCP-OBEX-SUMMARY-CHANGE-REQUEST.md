@@ -77,6 +77,9 @@ needed for any of it:
    leave the key out; same for `version` and `file_size`. If all three are empty, omit `metadata`.
    Sources, as today: `created_date` ← `object_metadata.metadata.created_date`; `file_size` ←
    `object_metadata.technical_details.file_size`; `version` ← `object_metadata.technical_details.version`.
+   (`file_size` is empty on every object from KB v1.24.3 — the old values were scraped junk and OBEX
+   publishes no size — so in practice it is always omitted; keep reading the field in case a real
+   size is ever recorded.)
 3. **Drop the dead struct fields** `discovery_date`, `last_verified`, `extraction_status` and
    `quality_score` from whichever struct holds them (the binary shows their YAML tags beside
    `created_date`; no served object has any of them).
@@ -130,7 +133,7 @@ Proceed on all five unless you object.
   "languages": ["SPIN2", "PASM2"],
   "tags": ["serial", "demo", "led", "driver", "spi"],
   "obex_page": "https://obex.parallax.com/obex/full-duplex-serial-2/",
-  "metadata": { "created_date": "2022-01-04", "file_size": "5883 B" },
+  "metadata": { "created_date": "2022-01-04" },
   "full_metadata": { "object_id": "2842", "title": "Full Duplex Serial", "...": "the whole filtered object_metadata" },
   "type": "obex_object"
 }
@@ -151,7 +154,7 @@ the new index and fail verification).
 | # | Probe | Expect |
 |---|---|---|
 | O1 | `p2kb_version` | `mcp_version 1.5.1`; `filter_rule_source: index` and `filter_engine_version: 1` as 1.5.0 reports them today |
-| O2 | `p2kb_obex_get 2842` | `metadata` is exactly `{created_date: "2022-01-04", file_size: "5883 B"}` — no `quality` key anywhere, no `version` key (OBEX publishes none) |
+| O2 | `p2kb_obex_get 2842` | `metadata` is exactly `{created_date: "2022-01-04"}` (OBEX publishes no file size; from KB v1.24.3 `file_size` is empty on every object, so it is omitted) — no `quality` key anywhere, no `version` key (OBEX publishes none) |
 | O3 | `p2kb_obex_get 2816` | no `metadata` key at all (2816 has no date, and its `file_size` and `version` are empty) |
 | O4 | `p2kb_obex_get 2842` → `full_metadata` | present; contains `compatibility`, `version_tracking`, `metadata`; contains no `scrape_tracking` and no `source` key at any depth |
 | O5 | `p2kb_obex_get "full duplex serial"` (a multi-match search) | as on 1.5.0: `type: suggestions`, a `suggestions` list of `{author, category, description, match_type, object_id, title}`; no `metadata` or `full_metadata` in suggestions |

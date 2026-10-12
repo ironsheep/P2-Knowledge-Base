@@ -45,7 +45,7 @@ object_metadata:
     licence: "Other"                   # OBEX "Licence": MIT or Other
     version: ""                        # Version string (the only version field)
     file_format: "ZIP"                 # Usually ZIP
-    file_size: "16 B"                  # Size string
+    file_size: ""                      # empty: OBEX publishes no size (old values were scrape junk)
 
   functionality:
     category: ["Math", "Motor Control", "Protocol", "Snippet"]  # OBEX "Category"/"Categories":

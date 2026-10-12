@@ -76,9 +76,18 @@ languages, microcontroller, `content_type`, `licence` and the date from the 130 
 and by an independent parser (130/130). One-liners authored, audited, approved by Stephen, written to
 `description_short`; an adversarial pass against each full description revised 13. Release gate
 *OBEX One-Line Descriptions*; compile gate scopes out OBEX objects. Record:
-`correction-sweeps/2026-10-12-v1.24.2-change-set-audit.md`. **Closes when** `p2kb_get
-p2kbCommunity2842` serves the mirrored description and its one-liner, and `p2kb_obex_find term:serial`
-shows one-liners, after the v1.24.2 push.
+`correction-sweeps/2026-10-12-v1.24.2-change-set-audit.md`. **v1.24.2 validated live 2026-10-12**
+(p2kb-mcp 1.5.0, after the CDN window and a flush): `p2kb_obex_get 2842` → `description` "P2 update to
+FullDuplexSerial for the P1, with numeric output changes and string formatting for complex output.",
+`category` "Protocol", `created_date` "2022-01-04"; `p2kb_obex_find term:serial` lists one-liners;
+`p2kb_get p2kbCommunity4758` serves the mirrored catalog fields. **The same probe found one more
+scraper field passed off as catalog data:** `technical_details.file_size` — `author_extraction.py`
+took the first "number B" anywhere on the page, so 88 objects read "5883 B" and others "2 B", "16 B"
+(OBEX publishes no size); and `languages_confirmed` (25 objects), a page-text guess duplicating OBEX's
+language list. **Applied 2026-10-12 (v1.24.3):** `file_size` emptied on every object,
+`languages_confirmed` removed; `author_extraction.py` and `complete_author_extraction.py` (which also
+overwrote author, description and tags) retired to the local `archive/`. MCP request O2 and the OBEX
+spec say `file_size` is empty. **Closes when** v1.24.3's `p2kb_obex_get 4758` serves no file size.
 **Decided 2026-10-11 (Stephen):** each object gets a useful single-line description authored from its
 catalog text — restating only the title and catalog description, no added facts, no verdict — kept
 in `description_short` (the field the server shows; no MCP change), reviewed through a master index
