@@ -20,6 +20,14 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.24.3] - 2026-10-12
+
+**OBEX objects carry only what the OBEX catalog publishes.**
+
+### Changed
+
+- **OBEX technical details**: an object's languages are the ones its OBEX page lists; file size is left empty, as OBEX publishes none
+
 ## [1.24.2] - 2026-10-12
 
 **OBEX objects mirror the OBEX catalog, each with a one-line description of what it is.**
