@@ -26,7 +26,7 @@ object_metadata:
 
 
       Demo code runs the low-cost Chauvet LED-Splash lighting fixture.'
-    description_short: 'DMX signaling from the P2 through a half-duplex interface circuit, with a settable universe size and channel count.'
+    description_short: 'Transmits DMX from the P2 through a half-duplex interface circuit, with settable universe size (channel count).'
     hardware_support: []
     peripherals: []
     subcategory: ''

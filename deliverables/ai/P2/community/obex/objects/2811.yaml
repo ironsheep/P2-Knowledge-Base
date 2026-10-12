@@ -37,7 +37,7 @@ object_metadata:
 
       NOTE: This is a code snippet meant to illustrate the core code, it is not meant
       to compile as-is; ex: variable declarations are needed.'
-    description_short: 'Code snippet showing how the P2 CORDIC unit does the Park (d/q) transformation and its inverse, for AC motor control.'
+    description_short: 'Code snippet showing how the P2 CORDIC does the Park (d/q) transform and its inverse, for AC or brushless servo motors.'
     hardware_support: []
     peripherals: []
     subcategory: ''

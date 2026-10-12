@@ -20,7 +20,7 @@ object_metadata:
       \ delays without blocking the processor, so it can do other things while the\
       \ timer ends up.\nThis is called a non-blocking delay timer.\n\nThe timer provides\
       \ basic functionality to implement different ways of timing in a Spin2 program.\n\
-      You can use the timer in the following ways:\n\nA) Start-Stop-Restart Timer\
+      You can use the timer in the following ways:\n\n    A) Start-Stop-Restart Timer\
       \ - You can start, stop and restart the timer until done.\n\n       start()\
       \          will reset the time (counting time) and set is_started and is_waiting\
       \ true.\n\n       done()           will return true if the timer has reached\
@@ -31,12 +31,14 @@ object_metadata:
       \ timer to is_started and is_waiting but will not reset the time.\n\n    B)\
       \ Periodic trigger - The following example will toggle pin 56 every 500ms\n\n\
       \        timer1.init(500)\n        repeat\n            if(timer1.repeat_execution())\n\
-      \              pintoggle(56)\n\n    C) Debouncer for signals - The following\
-      \ example shows how to debounce a signal\n       coming from pin 10. Will only\
-      \ return true if more than 50ms have passed since\n       last time it was read.\n\
-      \n        pushbutton := 10\n        timer1.init(50)\n        repeat\n      \
-      \      if(timer1.debounce( pinread(pushbutton) ))\n              pintoggle(56)"
-    description_short: 'Non-blocking timer for Propeller 2, ported from Arduino, for timing and delays without blocking the processor.'
+      \              pintoggle(56)                  \n\n    C) Debouncer for signals\
+      \ - The following example shows how to debounce a signal\n       coming from\
+      \ pin 10. Will only return true if more than 50ms have passed since\n      \
+      \ last time it was read.\n\n        pushbutton := 10\n        timer1.init(50)\n\
+      \        repeat\n            if(timer1.debounce( pinread(pushbutton) ))\n  \
+      \            pintoggle(56)"
+    description_short: Non-blocking timer for Propeller 2, ported from Arduino, for
+      timing and delays without blocking the processor.
     hardware_support: []
     peripherals: []
     subcategory: ''

@@ -41,8 +41,8 @@ object_metadata:
 
       Differences between the Arduino library and this library
 
-      - The original Easy Nextion library automatically calls trigger functions, stored
-      in a separate file,
+      1. The original Easy Nextion library automatically calls trigger functions,
+      stored in a separate file,
 
       in response to Nextion commands.
 
@@ -50,28 +50,28 @@ object_metadata:
 
       to retreave the command packets sent from the Nextion.
 
-      - The original library uses a single overloaded function writeStr() to send
+      2. The original library uses a single overloaded function writeStr() to send
       commands and
 
       update string values on the Nextion.
 
       This object uses separate methods sendCmd() and writeStr().
 
-      - An argument fifo has been added to allow a new method pushCmdArg() that can
+      3. An argument fifo has been added to allow a new method pushCmdArg() that can
       be used to
 
       provide a variable number of arguments to sendCmd().
 
-      - The the original library''s NextionListen() function has been named listen()
+      4. The the original library''s NextionListen() function has been named listen()
 
       in this implementation.
 
-      - This object adds a method called addWave() to create a quick and easy interface
+      5. This object adds a method called addWave() to create a quick and easy interface
       to the
 
       Nextion waveform add command.
 
-      - In this object the currentPageId and lastCurrentPageId variables can be accessed
+      6. In this object the currentPageId and lastCurrentPageId variables can be accessed
       with the
 
       functions getCurrentPage(), getLastPage(), setCurrentPage() and setLastPage()
@@ -304,7 +304,8 @@ object_metadata:
       SOFTWARE
 
       OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'
-    description_short: 'Object for Nextion HMI displays, compatible with the Arduino Easy Nextion Library protocol; P1 and P2 versions listed.'
+    description_short: Object for Nextion HMI displays, compatible with the Arduino
+      Easy Nextion Library protocol and HMI code.
     hardware_support: []
     peripherals: []
     subcategory: ''

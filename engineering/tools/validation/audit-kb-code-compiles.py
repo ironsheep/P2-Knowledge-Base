@@ -507,14 +507,18 @@ def kb_files(root):
         for f in sorted(fn):
             if f.endswith(".yaml"):
                 rel = os.path.relpath(os.path.join(dp, f), base).replace(os.sep, "/")
-                # OBEX objects mirror the OBEX catalog: their text is the authors', code examples
-                # included. Compiling it would pass a verdict on someone else's object, which the KB
-                # does not do (doctrine: an OBEX entry carries what the catalog says; F-573). The
-                # claim-sourcing gate skips them for the same reason (S-308c).
-                if rel.startswith("community/obex/objects/"):
-                    continue
-                out.append(rel)
+                if in_gate_scope(rel):
+                    out.append(rel)
     return out
+
+
+def in_gate_scope(rel):
+    """False for a KB file this gate does not compile. OBEX objects mirror the OBEX catalog: their
+    text is the authors', code examples included, and compiling it would pass a verdict on someone
+    else's object, which the KB does not do (doctrine: an OBEX entry carries what the catalog says;
+    F-573). The claim-sourcing gate skips them for the same reason (S-308c). Every way of choosing
+    files -- the full sweep, --since and --files -- applies this one rule."""
+    return not rel.startswith("community/obex/objects/")
 
 
 def find_candidates(root, rels, code_keys, oneline_keys=frozenset()):
@@ -1971,7 +1975,7 @@ def since_scope(root, rev):
             if rel not in NET_DATA_FILES:
                 scope.add(rel)
     rc, stat = run_cmd(["git", "diff", "--stat", "%s..HEAD" % rev, "--", MANIFEST_DIR], cwd=root, timeout=60)
-    return sorted(scope), stat.strip()
+    return sorted(r for r in scope if in_gate_scope(r)), stat.strip()
 
 
 def norm_files(root, files):
@@ -1992,7 +1996,7 @@ def norm_files(root, files):
                 out.append(rel)  # a deleted KB file whose sidecar remains
             else:
                 raise CannotAudit("not a KB YAML file: %s" % f)
-    return out
+    return [r for r in out if in_gate_scope(r)]
 
 
 # ============================================================ negative controls (7.3)

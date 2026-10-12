@@ -20,11 +20,11 @@ object_metadata:
 
       Typical installation instructions:
 
-      - Download and unzip the library folder
+      1. Download and unzip the library folder
 
-      - Copy the Diptrace folder into your Windows "My Documents" Diptrace folder
+      2. Copy the Diptrace folder into your Windows "My Documents" Diptrace folder
 
-      - Start Diptrace and find the Parallax P2 library listed under User Components
+      3. Start Diptrace and find the Parallax P2 library listed under User Components
       and User Patterns (or add the library in the Library Tools menu if required)
 
 
@@ -32,7 +32,8 @@ object_metadata:
       the 3D model URL to match your local drive structure. Use the Diptrace Pattern
       Editor, open each part and click "3D model" to set the correct URL, then click
       "Load Model" to verify.'
-    description_short: 'Diptrace library of Parallax Propeller 2 schematic symbols, patterns and 3D models.'
+    description_short: Diptrace library of Parallax Propeller 2 schematic symbols,
+      patterns and 3D models.
     hardware_support: []
     peripherals: []
     subcategory: ''

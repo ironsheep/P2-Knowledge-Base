@@ -74,7 +74,7 @@ object_metadata:
 
       DOWNLOAD: please get this code directly from the repo. as there is both P2 code
       and Raspberry Pi code there for use.'
-    description_short: 'Spin2/Pasm2 object that sends requests over serial to a connected Raspberry Pi, where a Python script handles them.'
+    description_short: 'P2 object using a serial-linked Raspberry Pi as an IoT gateway: email, web-page control, RPi files and config values.'
     hardware_support: []
     peripherals: []
     subcategory: ''

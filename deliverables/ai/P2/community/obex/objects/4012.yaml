@@ -33,7 +33,7 @@ object_metadata:
 
 
       Note: If your sprites are stuck and don''t move, update your flexspin 🙂'
-    description_short: 'Proof of concept drawing 3072 16x16 sprites at 640x480 in 32bpp mode on 4 cogs, using a p2videodrv scanline renderer.'
+    description_short: 'Example drawing 3072 16x16 sprites at 640x480 32bpp on 4 cogs at 252 MHz, using a p2videodrv scanline renderer.'
     hardware_support: []
     peripherals: []
     subcategory: ''

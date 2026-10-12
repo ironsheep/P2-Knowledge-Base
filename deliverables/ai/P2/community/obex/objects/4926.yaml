@@ -39,7 +39,7 @@ object_metadata:
 
       Version 55 - Each bitfield read/write now takes one less bytecode, same for
       ++/-- word/long/structure-pointer steps'
-    description_short: 'PNut/Spin2 version 55 release, in which each bitfield read/write takes one less bytecode.'
+    description_short: 'PNut/Spin2 v55 release: each bitfield read/write, and ++/-- word/long/structure-pointer step, takes one less bytecode.'
     hardware_support: []
     peripherals: []
     subcategory: ''

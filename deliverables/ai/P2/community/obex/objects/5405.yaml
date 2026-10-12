@@ -85,7 +85,7 @@ object_metadata:
 
       This object v1.3.0 will be updated periodically. For the latest release, visit
       the Releases Page'
-    description_short: 'Unified filesystem driver giving the P2 simultaneous access to its onboard 16MB FLASH chip and a microSD card.'
+    description_short: 'Unified filesystem driver giving the P2 Edge one-cog, one-API access to its onboard 16MB FLASH chip and a microSD card.'
     hardware_support: []
     peripherals: []
     subcategory: ''

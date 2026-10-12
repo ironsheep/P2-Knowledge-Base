@@ -14,7 +14,7 @@ object_metadata:
     category: Display
     description_full: Text & graphics display driver for the Waveshare 2.9" display
       sold in the Parallax store (SKU 28084).
-    description_short: 'Text & graphics display driver for the Waveshare 2.9" display sold in the Parallax store (SKU 28084).'
+    description_short: 'Text & graphics driver for the Waveshare 2.9" e-paper display sold in the Parallax store (SKU 28084).'
     hardware_support: []
     peripherals: []
     subcategory: ''

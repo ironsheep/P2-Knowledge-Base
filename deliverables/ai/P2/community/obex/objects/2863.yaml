@@ -62,39 +62,31 @@ object_metadata:
       What''s included
 
 
-      File name Purpose
+      File name | Purpose
 
+      OPNAcog.spin2 | OPNA emulation core
 
-      OPNAcog.spin2 OPNA emulation core
+      OPNAcog_ultra.spin2 | OPNA emulation core (higher quality version)
 
+      OPN2_ROM.DAT | OPN logsin/exponent ROM
 
-      OPNAcog_ultra.spin2 OPNA emulation core (higher quality version)
+      RHYTHM.DAT | OPNA rhythm samples
 
+      ExampleSpinAPI.spin2 | Example that plays a weird little tune using the Spin
+      API and VGI patch files
 
-      OPN2_ROM.DAT OPN logsin/exponent ROM
+      *.vgi | VGI patch files used by the Spin API example
 
+      ExampleVGMPlay.spin2 | In-memory VGM player. Copy a VGM file from the tunes
+      directory and load it!
 
-      RHYTHM.DAT OPNA rhythm samples
+      ExampleAyDumpPlay.spin2 | In-memory AY/YM player. Mostly to demonstrate that
+      the SSG component is equivalent to AYcog
 
-
-      ExampleSpinAPI.spin2 Example that plays a weird little tune using the Spin API
-      and VGI patch files
-
-
-      *.vgi VGI patch files used by the Spin API example
-
-
-      ExampleVGMPlay.spin2 In-memory VGM player. Copy a VGM file from the tunes directory
-      and load it!
-
-
-      ExampleAyDumpPlay.spin2 In-memory AY/YM player. Mostly to demonstrate that the
-      SSG component is equivalent to AYcog
-
-
-      tunes.zip Folder of handful of VGM/YM dumps! But zipped to not pollute the Git
-      repo as much.'
-    description_short: 'Emulation of the Yamaha "OPNA" YM2608 FM synth chip (also "OPN" YM2203 and "SSG" YM2149F) in one P2 cog.'
+      tunes.zip | Folder of handful of VGM/YM dumps! But zipped to not pollute the
+      Git repo as much.'
+    description_short: Emulation of the Yamaha "OPNA" YM2608 FM synth chip (also "OPN"
+      YM2203 and "SSG" YM2149F) in one P2 cog.
     hardware_support: []
     peripherals: []
     subcategory: ''

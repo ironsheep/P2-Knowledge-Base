@@ -27,7 +27,7 @@ object_metadata:
       and
 
       error detection (parity and CRC) functionality.'
-    description_short: 'Object for the MFRC522, whose transmitter drives an antenna for ISO/IEC 14443 A/MIFARE cards and transponders.'
+    description_short: 'Object for the MFRC522, which drives a reader/writer antenna to talk to ISO/IEC 14443 A/MIFARE cards and transponders.'
     hardware_support: []
     peripherals: []
     subcategory: ''

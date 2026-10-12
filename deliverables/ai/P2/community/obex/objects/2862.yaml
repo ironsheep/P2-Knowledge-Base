@@ -79,59 +79,43 @@ object_metadata:
       What''s included
 
 
-      File name Purpose
+      File name | Purpose
 
+      OPN2cog.spin2 | OPN2 emulation core
 
-      OPN2cog.spin2 OPN2 emulation core
+      OPN2cog_ultra.spin2 | OPN2 emulation core (higher quality version)
 
+      OPN2_ROM.DAT | OPN2 logsin/exponent ROM
 
-      OPN2cog_ultra.spin2 OPN2 emulation core (higher quality version)
+      megajuke.c | MEGA JUKE program.
 
+      MEGAJUKE.DAT | MEGA JUKE data file.
 
-      OPN2_ROM.DAT OPN2 logsin/exponent ROM
+      megajuke_builder.rb | Script for building MEGAJUKE.DAT
 
+      megajuke_tracks.yml | Track list for MEGA JUKE. Add your own favorite tunes!
 
-      megajuke.c MEGA JUKE program.
+      ExampleSpinAPI.spin2 | Example that plays a weird little tune using the Spin
+      API and VGI patch files
 
+      *.vgi | VGI patch files used by the Spin API example
 
-      MEGAJUKE.DAT MEGA JUKE data file.
+      ExampleVGMPlay.spin2 | In-memory VGM player. Copy a VGM file from the tunes
+      directory and load it!
 
+      ExampleSSG-EG.spin2 | Example/test that plays a note normally and then with
+      all 8 SSG-EG modes
 
-      megajuke_builder.rb Script for building MEGAJUKE.DAT
-
-
-      megajuke_tracks.yml Track list for MEGA JUKE. Add your own favorite tunes!
-
-
-      ExampleSpinAPI.spin2 Example that plays a weird little tune using the Spin API
-      and VGI patch files
-
-
-      *.vgi VGI patch files used by the Spin API example
-
-
-      ExampleVGMPlay.spin2 In-memory VGM player. Copy a VGM file from the tunes directory
-      and load it!
-
-
-      ExampleSSG-EG.spin2 Example/test that plays a note normally and then with all
-      8 SSG-EG modes
-
-
-      tunes.zip Folder of lots of VGM dumps! But zipped to not pollute the Git repo
+      tunes.zip | Folder of lots of VGM dumps! But zipped to not pollute the Git repo
       as much.
 
+      romgen.rb | Script for building OPN2_ROM.DAT
 
-      romgen.rb Script for building OPN2_ROM.DAT
+      eg_analyzer.rb | Script for computing the EG rate lookup tables
 
+      lfo_analyzer.rb | Script for computing the LFO FM lookup table
 
-      eg_analyzer.rb Script for computing the EG rate lookup tables
-
-
-      lfo_analyzer.rb Script for computing the LFO FM lookup table
-
-
-      logo.gal GraphicsGale layered file for the logo
+      logo.gal | GraphicsGale layered file for the logo
 
 
       Running MEGA JUKE
@@ -151,7 +135,8 @@ object_metadata:
       - Compile with flexspin -2 megajuke.c -D_BAUD=2000000
 
       - Load with loadp2 -p [your port here] -t -9 . -b 2000000 megajuke.binary'
-    description_short: 'Emulation of the Yamaha "OPN2" YM2612 FM synth chip that runs in one P2 cog.'
+    description_short: Emulation of the Yamaha "OPN2" YM2612 FM synth chip that runs
+      in one P2 cog.
     hardware_support: []
     peripherals: []
     subcategory: ''

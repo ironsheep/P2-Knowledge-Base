@@ -27,7 +27,7 @@ object_metadata:
 
 
       The demos illustrate what the reSound driver can do.'
-    description_short: 'Mixes up to 32 audio streams per cog with per-channel volume, panning, frequency and format; 2 to 4 per SD interface.'
+    description_short: 'Audio driver mixing up to 32 streams in one cog, per-channel volume/pan/frequency/format; SD limits 2-4 per interface.'
     hardware_support: []
     peripherals: []
     subcategory: ''
