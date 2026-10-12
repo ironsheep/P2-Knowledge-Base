@@ -1,25 +1,21 @@
 object_metadata:
+  object_id: '4597'
+  title: ISP P2 TIMI Spin2 Object
   author: Stephen M Moraco
-  author_username: ''
-  capability:
-    domain: G
-    leaf: hmi-display
-    secondary:
-    - domain: E
-      leaf: uart-serial
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Display
-    description_full: 'Breadboard Mates (BBM) produces the TIMI line of displays.
-      These are similar to the Nextion devices we''ve seen in that we select the screens
-      to be displayed and upload them to the device (essentially flashing the device.)
-      Then, we connect the device containing the screens to our project via serial
-      and simply send values to the screen fields or labels.
+    tags:
+    - BreadBoard Mates
+    - Serial
+    - TIMI
+    description_short: Spin2 object that controls Breadboard Mates (BBM) TIMI displays
+      over serial after their screens are programmed.
+    description_full: 'Breadboard Mates (BBM) (https://breadboardmates.com/) produces
+      the TIMI line of displays. These are similar to the Nextion devices we''ve seen
+      in that we select the screens to be displayed and upload them to the device
+      (essentially flashing the device.) Then, we connect the device containing the
+      screens to our project via serial and simply send values to the screen fields
+      or labels.
 
 
       This object provides full control over the TIMI displays after they are programmed.
@@ -28,51 +24,24 @@ object_metadata:
       Version (repository latest)
 
 
-      GitHub repository: P2 TIMI Spin2 Object
+      GitHub repository: P2 TIMI Spin2 Object (https://github.com/ironsheep/P2-mult-servo-exerciser/blob/main/TIMI.md)
 
 
       This object (in my case) is used in a larger project, which is referenced in
       the following repository:
 
-      GitHub repository: P2 Multi-servo Exerciser'
-    description_short: 'Spin2 object that controls Breadboard Mates (BBM) TIMI displays over serial after their screens are programmed.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - BreadBoard Mates
-    - Serial
-    - TIMI
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:43:59.509860'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:17.274449'
-    last_complete_extraction: '2025-09-12T13:30:06.995262'
-    page_discovered: 5
-    created_date: '2024-03-13 04:23:50'
-    last_created_date_fix: 2025-09-12T15:27:4
-    version_last_scraped: '2025-09-26T11:34:23.675037'
-  object_id: '4597'
+      GitHub repository: P2 Multi-servo Exerciser (https://github.com/ironsheep/P2-mult-servo-exerciser/tree/main)'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: (repository latest)
-    content_type:
-    - Code
     licence: MIT
-  title: ISP P2 TIMI Spin2 Object
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4597
-    forum_discussion: ''
-    github_repo: https://github.com/ironsheep/P2-mult-servo-exerciser
-    obex_page: https://obex.parallax.com/obex/p2-timi-spin2-object/
   metadata:
     created_date: '2024-03-13'
-  version_tracking:
-    has_github_repo: true
+  urls:
+    obex_page: https://obex.parallax.com/obex/p2-timi-spin2-object/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4597

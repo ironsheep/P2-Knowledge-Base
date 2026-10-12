@@ -1,20 +1,13 @@
 object_metadata:
+  object_id: '4080'
+  title: Optimized JPEG Decoder
   author: Wuerfel_21
-  author_username: ''
-  capability:
-    domain: C
-    leaf: image-codec
-    secondary:
-    - domain: G
-      leaf: graphics-lib
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Display
+    tags:
+    - JPEG
+    description_short: Modified version of the TJpgDec JPEG decoder for FlexC on P2,
+      decoding baseline JPEG images (no progressive).
     description_full: "Optimized/modified/bugfixed version of TJpgDec for FlexC on\
       \ P2.\n- Decodes baseline JPEG images (no progressive)\n- Neither source file\
       \ or destination bitmap need to be fully buffered in RAM\n- Very optimized\n\
@@ -22,42 +15,16 @@ object_metadata:
       \ native 32 bit)\n  - RGB565 (P2 native 16 bit)\n  - RGB332 (P2 native 8 bit)\n\
       \  - 8 bit monochrome\n- Can decode at 1/2, 1/4 and 1/8 scale\n\nTODO insert\
       \ more documentation here.\n\nAlso see forum thread: https://forums.parallax.com/discussion/175326/sorta-optimized-jpeg-decoder"
-    description_short: Modified version of the TJpgDec JPEG decoder for FlexC on P2,
-      decoding baseline JPEG images (no progressive).
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - JPEG
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:10.850451'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:22:09.675659'
-    page_discovered: 13
-    last_author_deep_search: 2025-09-12T13:39:2
-    created_date: '2023-10-21 16:07:31'
-    last_created_date_fix: 2025-09-12T15:27:1
-    version_last_scraped: '2025-09-26T11:33:59.049566'
-  object_id: '4080'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - C/C++
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - C/C++
     licence: Other
-  title: Optimized JPEG Decoder
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4080
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/optimized-jpeg-decoder/
   metadata:
     created_date: '2023-10-21'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/optimized-jpeg-decoder/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4080

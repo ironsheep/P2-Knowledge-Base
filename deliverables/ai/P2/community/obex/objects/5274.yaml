@@ -1,17 +1,17 @@
 object_metadata:
+  object_id: '5274'
+  title: PING+ for PING))) and LaserPING
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: F
-    leaf: distance
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Sensor
+    tags:
+    - jonnymac
+    - LaserPING
+    - PING)))
+    - Sensor
+    - smart-pin
+    description_short: Interface for PING))) and LaserPING sensors in pulse mode,
+      plus serial mode for LaserPING and PING))) Rev E or later.
     description_full: 'This object simplifies the use of PING))) and LaserPING sensors
       with the P1. The interface works in classic pulse mode, and supports serial
       mode for LaserPING and PING))) Rev E or later. Helpful object methods provide
@@ -36,48 +36,16 @@ object_metadata:
 
       The demo program has been tested with Propeller Tool, Spin Tools IDE, and FlexProp
       (see the COMPILER constant setting in the program).'
-    description_short: 'Interface for PING))) and LaserPING sensors in pulse mode, plus serial mode for LaserPING and PING))) Rev E or later.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - jonnymac
-    - LaserPING
-    - PING)))
-    - Sensor
-    - smart-pin
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:43:55.437619'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:22:31.204435'
-    last_complete_extraction: '2025-09-12T13:30:07.117948'
-    page_discovered: 1
-    last_author_re_extraction: 2025-09-12T14:04:1
-    last_author_consolidation: 2025-09-12T14:06:0
-    last_description_fix: 2025-09-12T14:20:1
-    created_date: '2025-07-04 01:58:49'
-    last_created_date_fix: 2025-09-12T15:28:1
-    version_last_scraped: '2025-09-26T11:34:57.378651'
-  object_id: '5274'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: MIT
-  title: PING+ for PING))) and LaserPING
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5274
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/ping-for-ping-and-laserping-2/
   metadata:
     created_date: '2025-07-04'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/ping-for-ping-and-laserping-2/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5274

@@ -1,21 +1,18 @@
 object_metadata:
+  object_id: '4800'
+  title: P2QR
   author: Terry Trapp
-  author_username: ''
-  capability:
-    domain: G
-    leaf: graphics-lib
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Display
+    tags:
+    - QRCODE SSD1331
+    description_short: P2 QR Code generator that outputs to the SEND() method as ASCII,
+      ANSI, UNICODE or custom characters, or to SSD1331.
     description_full: 'This is a P2 QR Code generator based on the work of B.J. Guillot''s
-      qr and Vzaa''s C90 fork named qrwpa. It outputs to the SEND() method and supports
-      ASCII, ANSI, UNICODE, custom characters or will output to SSD1331. Additionally,
-      there is a debug output.
+      (https://github.com/bjguillot) qr (https://github.com/bjguillot/qr) and Vzaa''s
+      (https://github.com/Vzaa/qrwpa/commits?author=Vzaa) C90 fork named qrwpa (https://github.com/Vzaa/qrwpa).
+      It outputs to the SEND() method and supports ASCII, ANSI, UNICODE, custom characters
+      or will output to SSD1331. Additionally, there is a debug output.
 
 
       Some things of note about this code:
@@ -43,43 +40,17 @@ object_metadata:
       - You can now choose the number of masks used for the calculation of the penalty
       score. Choose 1-8. The masks are ordered from least, to most computationally
       complex.'
-    description_short: 'P2 QR Code generator that outputs to the SEND() method as ASCII, ANSI, UNICODE or custom characters, or to SSD1331.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - QRCODE SSD1331
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:43:58.182070'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:20:55.395744'
-    last_complete_extraction: '2025-09-12T13:30:06.959689'
-    page_discovered: 4
-    last_author_re_extraction: 2025-09-12T14:04:1
-    created_date: '2024-07-09 15:16:10'
-    last_created_date_fix: 2025-09-12T15:27:5
-    version_last_scraped: '2026-06-29T00:00:00'
-  object_id: '4800'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: ''
-    content_type:
-    - Code
     licence: MIT
-  title: P2QR
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4800
-    forum_discussion: ''
-    github_repo: https://github.com/bjguillot/qr
-    obex_page: https://obex.parallax.com/obex/p2qr/
   metadata:
     created_date: '2026-05-06'
-  version_tracking:
-    has_github_repo: true
+  urls:
+    obex_page: https://obex.parallax.com/obex/p2qr/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4800

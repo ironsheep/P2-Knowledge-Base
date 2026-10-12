@@ -1,54 +1,22 @@
 object_metadata:
+  object_id: '2856'
+  title: P2ES Matrix
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: G
-    leaf: led-matrix
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Display
-    description_full: Runs P2ES matrix in cog for persistant display
-    description_short: 'Runs the P2ES matrix in a cog for persistent display.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
     tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:03.845018'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:22:13.212243'
-    last_complete_extraction: '2025-09-12T13:30:07.085928'
-    page_discovered: 8
-    last_html_corruption_fix: 2025-09-12T14:32:2
-    last_license_corruption_fix: 2025-09-12T14:34:2
-    created_date: '2020-06-18 12:00:00'
-    last_created_date_fix: 2025-09-12T15:33:3
-    version_last_scraped: '2025-09-26T11:33:14.425179'
-  object_id: '2856'
+    description_short: Runs the P2ES matrix in a cog for persistent display.
+    description_full: Runs P2ES matrix in cog for persistant display
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: Other
-  title: P2ES Matrix
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2856
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/p2es-matrix/
   metadata:
     created_date: '2020-06-18'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/p2es-matrix/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2856

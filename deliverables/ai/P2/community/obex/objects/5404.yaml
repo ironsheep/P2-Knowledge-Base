@@ -1,20 +1,15 @@
 object_metadata:
+  object_id: '5404'
+  title: P2 microSD FAT32 Filesystem
   author: Stephen M Moraco
-  author_username: ''
-  capability:
-    domain: I
-    leaf: sd-fat
-    secondary:
-    - domain: E
-      leaf: spi
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Data Storage
+    tags:
+    - FAT32
+    - Filesystem
+    - SD card
+    description_short: SD card driver for the P2 with FAT32 filesystem support, smart-pin
+      SPI and multiple simultaneous file handles.
     description_full: 'This project provides a robust, high-performance SD card driver
       for the P2 microcontroller with full FAT32 filesystem support. The driver uses
       P2 smart pins for hardware-accelerated SPI communication and supports multiple
@@ -72,9 +67,11 @@ object_metadata:
 
       - Parallax Propeller 2 (P2) microcontroller
 
-      - P2 Edge Module (P2-EC or P2-EC32MB)
+      - P2 Edge Module (P2-EC (https://www.parallax.com/product/p2-edge-module/) or
+      P2-EC32MB (https://www.parallax.com/product/p2-edge-module-32mb/))
 
-      - microSD Add-on Board (#64009) - provides the microSD card slot
+      - microSD Add-on Board (#64009 (https://www.parallax.com/product/micro-sd-card-add-on-board/))
+      - provides the microSD card slot
 
       - microSD card (SDHC or SDXC — format with the included format utility or any
       OS formatter)
@@ -85,45 +82,20 @@ object_metadata:
       - This is a regression test certified driver for the P2 Edge boards.
 
       - This object v1.5.3 will be updated periodically. For the latest release, visit
-      the Releases Page
+      the Releases Page (https://github.com/ironsheep/P2-uSD-FAT32-FS/releases)
 
       - This started as Chris Gadd''s #4269 SD Driver updated for OS Interchange and
       write failure protection, and is now certified for high-performance'
-    description_short: 'SD card driver for the P2 with FAT32 filesystem support, smart-pin SPI and multiple simultaneous file handles.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - FAT32
-    - Filesystem
-    - SD card
-  scrape_tracking:
-    created_date: '2026-06-29 22:46:02'
-    discovery_date: '2026-06-29T00:00:00'
-    kb_integration: none
-    last_scraped: '2026-06-29T00:00:00'
-    rescrape_source: v2.2 re-scrape 2026-06-29
-    version_last_scraped: '2026-06-29T00:00:00'
-  object_id: '5404'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2 PASM2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2 PASM2
     licence: MIT
-  title: P2 microSD FAT32 Filesystem
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5404
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/p2-microsd-fat32-filesystem/
   metadata:
     created_date: '2026-06-29'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/p2-microsd-fat32-filesystem/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5404

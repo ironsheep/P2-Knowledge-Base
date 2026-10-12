@@ -1,55 +1,24 @@
 object_metadata:
+  object_id: '2853'
+  title: EZ MAX7219
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: G
-    leaf: led-matrix
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Display
+    tags: []
+    description_short: Self-contained driver for the MAX7219 LED controller, with
+      demo code for an 8-digit, 7-segment display.
     description_full: A simple, self contained driver for the MAX7219 LED controller.
       Demo code for use with an 8-digit, 7-segment display.
-    description_short: 'Self-contained driver for the MAX7219 LED controller, with demo code for an 8-digit, 7-segment display.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:05.264477'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:20:04.638186'
-    last_complete_extraction: '2025-09-12T13:30:06.881335'
-    page_discovered: 9
-    last_html_corruption_fix: 2025-09-12T14:32:2
-    last_license_corruption_fix: 2025-09-12T14:34:2
-    created_date: '2020-07-01 12:00:00'
-    last_created_date_fix: 2025-09-12T15:33:3
-    version_last_scraped: '2025-09-26T11:33:09.764469'
-  object_id: '2853'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: Other
-  title: EZ MAX7219
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2853
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/ez-max7219/
   metadata:
     created_date: '2020-07-01'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/ez-max7219/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2853

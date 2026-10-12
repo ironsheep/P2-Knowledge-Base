@@ -1,20 +1,18 @@
 object_metadata:
+  object_id: '5259'
+  title: BNO08x IMU (9 DOF) (RVC Mode)
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: F
-    leaf: imu
-    secondary:
-    - domain: E
-      leaf: uart-serial
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Sensor
+    tags:
+    - BNO08x
+    - IMU
+    - jonnymac
+    - Sensor
+    - Serial
+    - smart-pin
+    description_short: Reads Yaw, Pitch, Roll and X/Y/Z acceleration from BNO08x RVC
+      (serial) output via Smart Pin serial RX, without a cog.
     description_full: 'This object takes advantage of the BNO08x RVC (serial) output
       to provide Yaw, Pitch, Roll, X acceleration, Y acceleration, and Z acceleration
       using Smart Pin serial RX without a cog. This is possible because each packet
@@ -25,48 +23,16 @@ object_metadata:
 
       The demo program uses the P2 Debug Terminal window which has been tested with
       Propeller Tool v2.93, PNut v51, and Spin Tools v0.48.1.'
-    description_short: 'Reads Yaw, Pitch, Roll and X/Y/Z acceleration from BNO08x RVC (serial) output via Smart Pin serial RX, without a cog.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - BNO08x
-    - IMU
-    - jonnymac
-    - Sensor
-    - Serial
-    - smart-pin
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:43:55.437629'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:53.196185'
-    last_complete_extraction: '2025-09-12T13:30:07.057783'
-    page_discovered: 1
-    last_author_re_extraction: 2025-09-12T14:04:1
-    last_author_consolidation: 2025-09-12T14:06:0
-    created_date: '2025-07-01 21:08:49'
-    last_created_date_fix: 2025-09-12T15:28:1
-    version_last_scraped: '2025-09-26T11:34:55.865224'
-  object_id: '5259'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: v2.93
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: MIT
-  title: BNO08x IMU (9 DOF) (RVC Mode)
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5259
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/bno08x-imu-9-dof-rvc-mode/
   metadata:
     created_date: '2025-07-01'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/bno08x-imu-9-dof-rvc-mode/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5259

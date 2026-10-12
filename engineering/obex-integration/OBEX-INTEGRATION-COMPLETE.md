@@ -1,8 +1,48 @@
 # OBEX Community Integration Complete
 
-**Version**: v2.3 - Catalog Re-Mirror (history below: v2.2 delta, then v2.1)  
-**Date**: October 12, 2026 (v2.3 re-mirror) · June 29, 2026 (v2.2 delta) · September 12, 2025 (v2.1 base)  
+**Version**: v2.4 - Pure Mirror (history below: v2.3 re-mirror, v2.2 delta, then v2.1)  
+**Date**: October 12, 2026 (v2.3 re-mirror and v2.4 pure mirror) · June 29, 2026 (v2.2 delta) · September 12, 2025 (v2.1 base)  
 **Status**: ✅ Production Ready - Validated & Complete
+
+---
+
+## 📌 v2.4 Pure Mirror — 2026-10-12 (KB v1.24.4)
+
+**Why.** Stephen, 2026-10-12, asked: *"there is only 1 p2 chip version any longer, why do we carry room
+for more?"* Of the fields that were ours and not the catalog's, he then chose **"pure mirror"**.
+
+**What was done (all 130 objects):**
+- **Each object now holds the catalog's fields and nothing else:** id, title, author, category, tags,
+  description, content type, microcontroller, languages, licence, date, page and download link. The
+  authored one-liner is the one exception.
+- **Removed:**
+  - the `capability` classification;
+  - `compatibility`, including `p2_chip_versions: [all]`, a default for silicon revisions that no
+    longer exist;
+  - `version`, which the scraper guessed from the description text; on 4911, 4727 and 4746 it was a
+    tool's version;
+  - `github_repo` and `version_tracking`;
+  - `file_format` and `file_size`;
+  - `author_username`, `subcategory`, `hardware_support`, `peripherals`, `documentation` and
+    `forum_discussion`, which were always empty;
+  - `scrape_tracking`, the 2025 scraper bookkeeping, which held two authors' email addresses.
+- **Moved, not lost:** `capability` now lives in `obex-capability-map.yaml`. It is engineering-side,
+  for the coverage analysis, and is not served.
+- **Links in descriptions keep their URLs.** The catalog's links (GitHub repositories, store pages,
+  other OBEX pages) now follow their words in `description_full`, across 24 objects. Before this,
+  only the link text came through.
+- **Download links match the catalog.** 5 objects (4442, 4571, 4581, 4616, 4617) have no download
+  on OBEX: the page says so and the ZIP link answers `invalid!`. They no longer carry a link that
+  goes nowhere. The 3 objects whose pages show only a folder browser keep OBEX's ZIP link, which
+  serves the same folder (checked live on 2822, 4800 and 4883).
+- **`obex-catalog-mirror.py` writes each object whole** and is the only writer. It gained `discover`
+  (listing only) and `add`. The other 28 scripts from 2025 are retired to the local `archive/`.
+- **Re-scan:** `discover` read the 15-page P2 listing: 130 object pages, every one already in the KB,
+  0 new, 0 gone.
+- **Proved against HEAD:** every kept value is unchanged except the URLs added to descriptions and the
+  5 removed links. All release gates pass.
+
+**Baselines.** Catalog mirrored 2026-10-12; **new-object baseline 2026-10-12**.
 
 ---
 
@@ -31,7 +71,7 @@ carries what the catalog says, never our verdict on it.*
 - Validated live on p2kb-mcp 1.5.0 (2026-10-12). Records: `engineering/obex-integration/OBEX-ONE-LINER-MASTER-INDEX.md`,
   `engineering/operations/correction-sweeps/2026-10-12-v1.24.2-change-set-audit.md`, `…-v1.24.3-…`.
 
-**Baselines.** Catalog fields current as of 2026-10-12; **new-object delta baseline still 2026-06-29**.
+**Baselines.** Catalog fields current as of 2026-10-12; new-object delta baseline still 2026-06-29 (moved to 2026-10-12 by v2.4).
 
 ---
 

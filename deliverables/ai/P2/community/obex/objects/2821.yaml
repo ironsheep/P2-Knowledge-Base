@@ -1,17 +1,12 @@
 object_metadata:
+  object_id: '2821'
+  title: DHTxx Temperature/Humidity Sensors
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: F
-    leaf: temp-humidity
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Sensor
+    tags: []
+    description_short: Interfaces the P2 with DHT11 and DHT22/CM2302 sensors, returning
+      temperature and humidity in 0.1-degree and 0.1% units.
     description_full: 'This object allows the P2 to interface with DHT11 and DHT22/CM2302
       sensors for projects requiring the monitoring of temperature and relative humidity.
       With either sensor type, temperature and humidity is returned in 0.1-degree
@@ -19,43 +14,17 @@ object_metadata:
 
 
       Code is compatible with Parallax PN 28059 (DHT22/CM2302).'
-    description_short: 'Interfaces the P2 with DHT11 and DHT22/CM2302 sensors, returning temperature and humidity in 0.1-degree and 0.1% units.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:09.461377'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:22:29.432036'
-    page_discovered: 12
-    last_author_deep_search: 2025-09-12T13:39:2
-    last_author_consolidation: 2025-09-12T14:06:0
-    last_description_fix: 2025-09-12T14:20:1
-    created_date: '2021-01-14 12:00:00'
-    last_created_date_fix: 2025-09-12T15:32:4
-    version_last_scraped: '2025-09-26T11:32:21.677258'
-  object_id: '2821'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: ''
-    content_type:
-    - Code
     licence: Other
-  title: DHTxx Temperature/Humidity Sensors
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2821
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/dhtxx-temperature-humidity-sensors/
   metadata:
     created_date: '2021-01-14'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/dhtxx-temperature-humidity-sensors/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2821

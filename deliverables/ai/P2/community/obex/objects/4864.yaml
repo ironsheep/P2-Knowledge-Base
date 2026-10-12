@@ -1,51 +1,24 @@
 object_metadata:
+  object_id: '4864'
+  title: P2 Edge KiCAD Symbols
   author: Terry Trapp
-  author_username: ''
-  capability:
-    domain: K
-    leaf: hardware-design
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: PCB Design
-    description_full: This zip includes Schematic Symbol, Footprint, and 3d Model.
-    description_short: 'KiCAD Schematic Symbol, Footprint, and 3d Model files for the P2 Edge.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
     tags:
     - kicad
     - P2 EDGE
-  scrape_tracking:
-    created_date: '2024-09-13 21:29:14'
-    discovery_date: '2026-06-29T00:00:00'
-    kb_integration: none
-    last_scraped: '2026-06-29T00:00:00'
-    rescrape_source: v2.2 re-scrape 2026-06-29
-    version_last_scraped: '2026-06-29T00:00:00'
-  object_id: '4864'
+    description_short: KiCAD Schematic Symbol, Footprint, and 3d Model files for the
+      P2 Edge.
+    description_full: This zip includes Schematic Symbol, Footprint, and 3d Model.
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages: []
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Hardware
+    microcontroller:
+    - P2
+    languages: []
     licence: MIT
-  title: P2 Edge KiCAD Symbols
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4864
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/p2-edge-kicad-symbols/
   metadata:
     created_date: '2024-09-13'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/p2-edge-kicad-symbols/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4864

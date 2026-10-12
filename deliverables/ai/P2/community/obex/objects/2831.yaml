@@ -1,19 +1,14 @@
 object_metadata:
+  object_id: '2831'
+  title: P2_rctime
   author: phonoclese
-  author_username: ''
-  capability:
-    domain: B
-    leaf: pulse-measurement
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category:
     - Human Input
     - Sensor
+    tags: []
+    description_short: P2 update of the rctime object from the P1 library, using a
+      Smart pin with Schmitt trigger and an isr.
     description_full: 'This object updates the rctime object from the P1 library for
       the P2 processor.
 
@@ -25,44 +20,16 @@ object_metadata:
 
       The code remains resident in cog RAM and runs in the background using a small
       number of registers beginning at $1B0.'
-    description_short: 'P2 update of the rctime object from the P1 library, using a Smart pin with Schmitt trigger and an isr.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:08.056888'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:22:54.620698'
-    last_complete_extraction: '2025-09-12T13:30:07.156007'
-    page_discovered: 11
-    last_author_re_extraction: 2025-09-12T14:04:1
-    created_date: '2023-07-19 12:00:00'
-    last_created_date_fix: 2025-09-12T15:32:5
-    import_source: github_archiver
-    original_platform: github
-    last_archiver_fix: 2025-09-12T15:53:3
-    version_last_scraped: '2025-09-26T11:32:35.505532'
-  object_id: '2831'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: Other
-  title: P2_rctime
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2831
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/p2_rctime/
   metadata:
     created_date: '2023-07-19'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/p2_rctime/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2831

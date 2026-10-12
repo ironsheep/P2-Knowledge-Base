@@ -1,22 +1,20 @@
 object_metadata:
+  object_id: '2850'
+  title: ISP Hub75 Matrix Driver
   author: Stephen M Moraco
-  author_username: ''
-  capability:
-    domain: G
-    leaf: led-matrix
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Display
+    tags:
+    - HUB75
+    - LED
+    - Matrix
+    description_short: Driver for HUB75-controlled RGB LED Matrix Panels, built to
+      work with the P2 Eval HUB75 Adapter.
     description_full: 'Driver for HUB75-controlled RGB LED Matrix Panels
 
 
       NOTE: This P2 HUB75 driver is built to work with the P2 Eval HUB75 Adapter which
-      is available from HUB75 at Parallax.com Store
+      is available from HUB75 at Parallax.com Store (https://www.parallax.com/product/p2-eval-hub75-adapter-board/)
 
 
       A selection of the driver features:
@@ -54,73 +52,50 @@ object_metadata:
 
       At the Repository, you''ll find documentation on:
 
-      - HardwareTurnon - Describes the initial turn-on effort of this driver
+      - HardwareTurnon (https://github.com/ironsheep/P2-HUB75-LED-Matrix-Driver/blob/main/HardwareTurnon.md)
+      - Describes the initial turn-on effort of this driver
 
-      - Driver Details - Provides more detail about the driver and driver-configuration
+      - Driver Details (https://github.com/ironsheep/P2-HUB75-LED-Matrix-Driver/blob/main/THEOPS.md)
+      - Provides more detail about the driver and driver-configuration
 
-      - Panel Config/Timing Details - Notes about each panel-driver chip this P2 driver
-      supports
+      - Panel Config/Timing Details (https://github.com/ironsheep/P2-HUB75-LED-Matrix-Driver/blob/main/HUB75-Driver-SWver1.md)
+      - Notes about each panel-driver chip this P2 driver supports
 
-      - HUB75 Card Details - Pins and Probing Support provided by HUB75 card
+      - HUB75 Card Details (https://github.com/ironsheep/P2-HUB75-LED-Matrix-Driver/blob/main/HUB75-brd-config.md)
+      - Pins and Probing Support provided by HUB75 card
 
-      - P2 P2 Cube testing - Author''s test hardware - Flat P2 P2 Cube Configuration
+      - P2 P2 Cube testing (https://github.com/ironsheep/P2-HUB75-LED-Matrix-Driver/blob/main/CubePix.md)
+      - Author''s test hardware - Flat P2 P2 Cube Configuration
 
 
-      Version: 3.0.2 Release Notes
+      Version: 3.0.2 Release Notes (https://github.com/ironsheep/P2-HUB75-LED-Matrix-Driver/releases/tag/v3.0.2)
 
 
-      GitHub repository: P2 HUB75 LED Matrix Driver
+      GitHub repository: P2 HUB75 LED Matrix Driver (https://github.com/ironsheep/P2-HUB75-LED-Matrix-Driver)
 
 
       Related:
 
       - See Docs, Setup Instructions at HUB75 LED Matrix Driver Github Repository
+      (https://github.com/ironsheep/p2-LED-Matrix-Driver)
 
-      - Buy P2 Eval HUB75 Driver Board at Parallax Online Store
+      - Buy P2 Eval HUB75 Driver Board at Parallax Online Store (https://www.parallax.com/product/p2-eval-hub75-adapter-board/)
 
-      - See also the OBEX page: ISP P2 HUB75 Matrix - Morphing Digits
+      - See also the OBEX page: ISP P2 HUB75 Matrix - Morphing Digits (https://obex.parallax.com/obex/isp-p2-hub75-matrix-morphing-digits/)
 
 
       DOWNLOAD: please download "Source code.zip" from the release-notes link above.'
-    description_short: 'Driver for HUB75-controlled RGB LED Matrix Panels, built to work with the P2 Eval HUB75 Adapter.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - HUB75
-    - LED
-    - Matrix
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:05.264513'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:23:14.346664'
-    last_complete_extraction: '2025-09-12T13:30:07.188035'
-    page_discovered: 9
-    last_description_fix: 2025-09-12T15:39:2
-    created_date: '2024-03-26 19:01:36'
-    last_created_date_fix: 2025-09-12T15:26:0
-    version_last_scraped: '2025-09-26T11:33:05.115945'
-  object_id: '2850'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: 3.0.2
-    content_type:
-    - Code
     licence: Other
-  title: ISP Hub75 Matrix Driver
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2850
-    forum_discussion: ''
-    github_repo: https://github.com/ironsheep/P2-HUB75-LED-Matrix-Driver
-    obex_page: https://obex.parallax.com/obex/isp-hub75-matrix-driver/
   metadata:
     created_date: '2024-03-26'
-  version_tracking:
-    has_github_repo: true
+  urls:
+    obex_page: https://obex.parallax.com/obex/isp-hub75-matrix-driver/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2850

@@ -81,7 +81,6 @@ ALLOW = {
     "source_chip":            ("content", "P1 ROM font page: the P1 chip the font was read from"),
     "source_package":         ("content", "AV breakout: the named zip of the driver source"),
     "open_source":            ("content", "a marker that a fact is not stated by any Parallax source (a content note, not a citation)"),
-    "version_tracking":       ("content", "OBEX version, upload date and repository flag of the object"),
     "source_document":        ("content", "code-example schema (optional field; F-545 2026-10-10 kept it)"),
     "source_metadata":        ("content", "code-example schema block that holds source_document / source_page / source_section"),
     "source_page":            ("content", "code-example schema field"),

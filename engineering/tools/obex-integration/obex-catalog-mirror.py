@@ -10,28 +10,40 @@ WHY THIS EXISTS (F-573, 2026-10-11)
     did not parse, and filled category and tags from their own classifier. This tool reads the
     catalog fields straight from each object's page and writes OBEX's own values.
 
+    It is the ONLY tool that writes an object YAML (KB v1.24.4, Stephen 2026-10-12: "pure mirror"):
+    it writes each object whole, so nothing of ours -- classification, compatibility, scraper
+    bookkeeping, placeholders -- can ride beside the catalog's fields.
+
 WHAT IT READS (per page)
     <ul id="obexinformation">  -- Object ID (date), Author, Content, Microcontroller, Language(s),
                                   Category, Licence, Tag(s)
-    <div class="markdown-content"> -- the description, as text (paragraphs, list items)
+    <div class="markdown-content"> -- the description, as text (paragraphs, list items; a link
+                                  keeps its URL, written after its text)
     <title>                     -- "<object title> – Propeller OBEX"
+    the Downloads section       -- the ZIP download (see download_link)
 
-WHAT IT WRITES (object_metadata.*)
+WHAT IT WRITES -- the whole object, in this order (object_metadata.*)
+    object_id                             <- the file's id (checked against the page's Object ID)
     title, author                         <- page title, Author
-    functionality.description_full        <- the description
     functionality.category                <- Category (a list when the page lists several)
     functionality.tags                    <- Tag(s) ([] when none)
-    technical_details.languages           <- Language(s)
-    technical_details.microcontroller     <- Microcontroller
+    functionality.description_short       <- kept as it is: the authored one-liner (F-573)
+    functionality.description_full        <- the description
     technical_details.content_type        <- Content (e.g. Code, PCB files)
+    technical_details.microcontroller     <- Microcontroller
+    technical_details.languages           <- Language(s)
     technical_details.licence             <- Licence
     metadata.created_date                 <- the Object ID line's date (YYYY-MM-DD)
-    It never writes description_short: that is an authored one-liner (F-573), not catalog text.
+    urls.obex_page                        <- kept as it is: the page this was read from
+    urls.download_direct                  <- the ZIP download; no key when OBEX offers none
 
 USAGE
-    obex-catalog-mirror.py fetch  --pages DIR            # polite: one page every 2.5 s
+    obex-catalog-mirror.py discover --pages DIR          # object pages on the listing with no YAML
+    obex-catalog-mirror.py add --url URL --pages DIR     # start a YAML for a new object page
+    obex-catalog-mirror.py fetch  --pages DIR            # save every object's page
     obex-catalog-mirror.py report --pages DIR [--json F] # what would change; writes nothing
     obex-catalog-mirror.py apply  --pages DIR            # write the YAMLs
+    Every request is polite: one every 2.5 s, a neutral User-Agent, and a saved page is reused.
     A page that is missing, or whose field list does not parse, is reported and its YAML is left
     untouched -- never a fallback value.
 """
@@ -43,6 +55,7 @@ import os
 import re
 import sys
 import time
+import urllib.parse
 import urllib.request
 from html.parser import HTMLParser
 
@@ -51,6 +64,8 @@ import yaml
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 OBJ_DIR = os.path.join(ROOT, "deliverables", "ai", "P2", "community", "obex", "objects")
 USER_AGENT = "P2-Knowledge-Base catalog mirror (github.com/ironsheep/P2-Knowledge-Base)"
+OBEX_SITE = "https://obex.parallax.com/"
+ZIP_LINK = "wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB%s"
 TITLE_SUFFIX = re.compile(r"\s+[–-]\s+Propeller OBEX\s*$")
 
 
@@ -66,16 +81,88 @@ def fetch(pages):
     os.makedirs(pages, exist_ok=True)
     for f in object_files():
         oid = os.path.splitext(os.path.basename(f))[0]
-        dest = os.path.join(pages, oid + ".html")
-        if os.path.exists(dest) and os.path.getsize(dest) > 0:
-            continue
         with open(f) as fh:
-            url = page_url(yaml.safe_load(fh))
+            get(page_url(yaml.safe_load(fh)), os.path.join(pages, oid + ".html"))
+        print(oid, os.path.getsize(os.path.join(pages, oid + ".html")))
+
+
+def link_target(href):
+    """An absolute http(s) link the reader can follow, or "" for one they cannot: a relative link
+    points into the object's own ZIP (the page renders its README), and mailto: would publish a
+    personal address."""
+    href = html.unescape(href or "").strip()
+    return href if re.match(r"https?://", href, re.I) else ""
+
+
+def norm_url(s):
+    """For "is this URL already in the link text": scheme, www. and a trailing slash ignored."""
+    s = re.sub(r"https?://(www\.)?", "", s.strip().lower())
+    return re.sub(r"/(?=\s|$|\))", "", s)
+
+
+LISTING = OBEX_SITE + "microcontroller/propeller-2/"
+
+
+def get(url, dest):
+    """Fetch url into dest once; a saved non-empty copy is reused."""
+    if not (os.path.exists(dest) and os.path.getsize(dest) > 0):
         req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
         with urllib.request.urlopen(req, timeout=30) as r, open(dest, "wb") as out:
             out.write(r.read())
-        print(oid, os.path.getsize(dest))
         time.sleep(2.5)
+    with open(dest, encoding="utf-8", errors="replace") as fh:
+        return fh.read()
+
+
+def discover(pages):
+    """Print every P2 object page on the OBEX listing that has no object YAML yet.
+
+    The listing (LISTING, then page/2/ ... page/N/) shows ten entries a page. An entry that links
+    outside /obex/<slug>/ (a Chips & Tips article) is not an object. A new object is one whose page
+    URL no object YAML carries; add it with `add --url`, then `apply`. Listing pages are saved under
+    <pages>/listing/ and reused, so delete that folder to see the catalog afresh."""
+    os.makedirs(os.path.join(pages, "listing"), exist_ok=True)
+    first = get(LISTING, os.path.join(pages, "listing", "1.html"))
+    last = max([int(n) for n in re.findall(r'/microcontroller/propeller-2/page/(\d+)/', first)] or [1])
+    found = re.findall(r'href="(%sobex/[^"/]+/)"' % re.escape(OBEX_SITE), first)
+    for n in range(2, last + 1):
+        t = get(LISTING + "page/%d/" % n, os.path.join(pages, "listing", "%d.html" % n))
+        found += re.findall(r'href="(%sobex/[^"/]+/)"' % re.escape(OBEX_SITE), t)
+    have = set()
+    for f in object_files():
+        with open(f) as fh:
+            have.add(page_url(yaml.safe_load(fh)))
+    listed = sorted(set(found))
+    new = [u for u in listed if u not in have]
+    print("listing pages:", last, " object pages listed:", len(listed), " with a YAML:",
+          len(listed) - len(new), " new:", len(new))
+    for u in new:
+        print("NEW", u)
+    gone = sorted(have - set(listed))
+    for u in gone:
+        print("NOT LISTED", u)
+    return 0
+
+
+def add(url, pages):
+    """Start an object YAML for a new catalog page: its id and page URL only. `apply` then
+    writes every catalog field; description_short is authored afterwards (F-573 gate)."""
+    saved = os.path.join(pages, "new-%s.html" % re.sub(r"\W+", "-", url.rstrip("/").rsplit("/", 1)[-1]))
+    cat = parse(get(url, saved))
+    if not cat or not cat["object_id"].isdigit():
+        print("PROBLEM", url, "no Object ID on the page")
+        return 1
+    oid = cat["object_id"]
+    f = os.path.join(OBJ_DIR, oid + ".yaml")
+    if os.path.exists(f):
+        print("PROBLEM", url, "object", oid, "already has a YAML")
+        return 1
+    os.replace(saved, os.path.join(pages, oid + ".html"))  # where fetch/apply look for it
+    with open(f, "w") as fh:
+        yaml.dump({"object_metadata": {"object_id": oid, "urls": {"obex_page": url}}}, fh,
+                  sort_keys=False, default_flow_style=False)
+    print("added", oid, url)
+    return 0
 
 
 def text_of(fragment):
@@ -97,6 +184,7 @@ class _Text(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.out, self.pre, self.line_start = [], 0, False
         self.lists, self.pres, self.buf, self.first_cell, self.mark = [], [], [], False, ""
+        self.anchors = []
 
     def _brk(self, s):
         self.out.append(s)
@@ -104,7 +192,9 @@ class _Text(HTMLParser):
     def handle_starttag(self, tag, attrs):
         if self.pre and tag != "pre":
             return  # markup inside <pre> (e.g. <code>) adds nothing to the text
-        if tag == "pre":
+        if tag == "a":
+            self.anchors.append((dict(attrs).get("href") or "", len(self.out)))
+        elif tag == "pre":
             self.pre += 1
             if self.pre == 1:
                 self.buf = []
@@ -135,7 +225,22 @@ class _Text(HTMLParser):
     def handle_endtag(self, tag):
         if self.pre and tag != "pre":
             return
-        if tag == "pre":
+        if tag == "a":
+            if self.anchors:
+                href, start = self.anchors.pop()
+                url = link_target(href)
+                words = "".join(x for x in self.out[start:] if not x.startswith("\x00")).strip()
+                if url and norm_url(url) not in norm_url(words):
+                    # "the repo." -> "the repo (URL)." : the URL belongs to the words, not the stop
+                    end = len(self.out) - 1
+                    while end >= start and not self.out[end].strip():
+                        end -= 1
+                    m = re.search(r"[.,;:!?]+\s*$", self.out[end]) if end >= start else None
+                    if m:
+                        self.out[end] = self.out[end][:m.start()] + " (%s)" % url + self.out[end][m.start():]
+                    else:
+                        self.out.append(" (%s)" % url if words else url)
+        elif tag == "pre":
             self.pre -= 1
             if self.pre == 0:
                 self.pres.append("".join(self.buf).strip("\n"))
@@ -258,7 +363,32 @@ def parse(page_html):
     out["title"] = TITLE_SUFFIX.sub("", text_of(t.group(1))) if t else ""
     d = re.search(r'<div class="markdown-content">(.*?)</div>\s*<hr', page_html, re.S)
     out["description"] = description_text(d.group(1)) if d else ""
+    out["download"] = download_link(page_html, out["object_id"], problems)
     return out
+
+
+def download_link(page_html, oid, problems):
+    """The page's ZIP download, or "" when OBEX offers none.
+
+    A page shows its download in one of three ways (checked 2026-10-12 against OBEX):
+      - a "Zip archive download" button -> its link;
+      - only a folder browser ("Download folder") -> OBEX's ZIP link for the object, which serves
+        the same folder as one ZIP (it redirects to the folder's file; 2822, 4800, 4883);
+      - "There are no downloads available for this object." -> none: the ZIP link answers
+        "invalid!" (4442, 4571, 4581, 4616, 4617 point the reader to GitHub in the description).
+    Anything else is a page shape we have not seen: reported, YAML left untouched."""
+    dl = sorted(set(re.findall(r'href="([^"]*action=download_obex_zip[^"]*)"', page_html)))
+    if len(dl) == 1:
+        return urllib.parse.urljoin(OBEX_SITE, html.unescape(dl[0]))
+    if len(dl) > 1:
+        problems.append("%d ZIP download links on the page" % len(dl))
+    elif "There are no downloads available for this object" in page_html:
+        return ""
+    elif "all-files-to-zip" in page_html:
+        return OBEX_SITE + ZIP_LINK % oid
+    else:
+        problems.append("no download section of a known shape")
+    return ""
 
 
 def one(v):
@@ -266,37 +396,62 @@ def one(v):
     return v[0] if len(v) == 1 else v
 
 
-def planned(om, cat):
-    """(path, old, new) for every field this tool owns that differs from the catalog."""
-    fn = om.setdefault("functionality", {})
-    td = om.setdefault("technical_details", {})
-    md = om.get("metadata", {})
-    pairs = [
-        (("title",), om.get("title"), cat["title"]),
-        (("author",), om.get("author"), cat["author"]),
-        (("functionality", "description_full"), fn.get("description_full"), cat["description"]),
-        (("functionality", "category"), fn.get("category"), one(cat["category"]) if cat["category"] else ""),
-        (("functionality", "tags"), fn.get("tags"), cat["tags"]),
-        (("technical_details", "languages"), td.get("languages"), cat["languages"]),
-        (("technical_details", "microcontroller"), td.get("microcontroller"), cat["microcontroller"]),
-        (("technical_details", "content_type"), td.get("content_type"), cat["content_type"]),
-        (("technical_details", "licence"), td.get("licence"), one(cat["licence"]) if cat["licence"] else ""),
-        (("metadata", "created_date"), md.get("created_date"), cat["created_date"]),
-    ]
-    # A field the page leaves empty is written empty: keeping our old value would present our own
-    # classification as the catalog's (32 objects carry no OBEX category). Only the description and
-    # the date are never blanked -- a page without them is a parse problem, reported in run().
-    keep_if_empty = {("functionality", "description_full"), ("metadata", "created_date"),
-                     ("title",), ("author",)}
-    return [(p, o, n) for p, o, n in pairs
-            if o != n and not (p in keep_if_empty and n in ("", None))]
+def mirrored(om, cat):
+    """The whole object as the catalog gives it -- the only shape an object YAML has.
+
+    Every field is the catalog's, except two that are not catalog fields but are kept: the
+    object's own page URL (how we found it) and description_short, the authored one-liner
+    (F-573). Nothing of ours rides beside them -- no classification, no compatibility, no scraper
+    bookkeeping, no placeholder (Stephen, 2026-10-12: "pure mirror")."""
+    fn = om.get("functionality") or {}
+    md = om.get("metadata") or {}
+
+    def got(new, old):
+        # Title, author, description and date are never blanked: a page without them is a parse
+        # problem, reported in run(). Every other field the page leaves empty is written empty --
+        # keeping our old value would present our own classification as the catalog's.
+        return new if new not in ("", None) else (old or "")
+
+    urls = {"obex_page": om["urls"]["obex_page"]}
+    if cat["download"]:  # no key at all when OBEX offers no download -- never a dead link
+        urls["download_direct"] = cat["download"]
+    return {
+        "object_id": str(om["object_id"]),
+        "title": got(cat["title"], om.get("title")),
+        "author": got(cat["author"], om.get("author")),
+        "functionality": {
+            "category": one(cat["category"]) if cat["category"] else "",
+            "tags": cat["tags"],
+            "description_short": fn.get("description_short", ""),
+            "description_full": got(cat["description"], fn.get("description_full")),
+        },
+        "technical_details": {
+            "content_type": cat["content_type"],
+            "microcontroller": cat["microcontroller"],
+            "languages": cat["languages"],
+            "licence": one(cat["licence"]) if cat["licence"] else "",
+        },
+        "metadata": {"created_date": got(cat["created_date"], md.get("created_date"))},
+        "urls": urls,
+    }
 
 
-def set_path(om, path, value):
-    node = om
-    for k in path[:-1]:
-        node = node.setdefault(k, {})
-    node[path[-1]] = value
+def flat(d, prefix=""):
+    out = {}
+    for k, v in d.items():
+        p = prefix + "." + k if prefix else k
+        if isinstance(v, dict) and v:
+            out.update(flat(v, p))
+        else:
+            out[p] = v
+    return out
+
+
+def planned(om, new):
+    """(field, old, new) for every value that changes; a removed field has new = REMOVED."""
+    a, b = flat(om), flat(new)
+    return [(k, a.get(k, "ABSENT"), b.get(k, "REMOVED"))
+            for k in list(a) + [k for k in b if k not in a] if a.get(k, "ABSENT") != b.get(k, "REMOVED")]
 
 
 def run(pages, write, json_out=None):
@@ -323,15 +478,18 @@ def run(pages, write, json_out=None):
         with open(f) as fh:
             data = yaml.safe_load(fh)
         om = data["object_metadata"]
-        diffs = planned(om, cat)
+        new = mirrored(om, cat)
+        diffs = planned(om, new)
         if diffs:
-            changes[oid] = [{"field": ".".join(p), "old": o, "new": n} for p, o, n in diffs]
-        if write and diffs:
-            for p, _, n in diffs:
-                set_path(om, p, n)
+            changes[oid] = [{"field": p, "old": o, "new": n} for p, o, n in diffs]
+        out = yaml.dump({"object_metadata": new}, sort_keys=False, allow_unicode=True,
+                        default_flow_style=False)
+        with open(f) as fh:
+            current = fh.read()
+        if write and out != current:  # also lays out a file whose values already match
             tmp = f + ".tmp"
             with open(tmp, "w") as fh:  # write whole, then swap in: an interrupt leaves the original
-                yaml.dump(data, fh, sort_keys=False, allow_unicode=True, default_flow_style=False)
+                fh.write(out)
             os.replace(tmp, f)
     if json_out:
         with open(json_out, "w") as fh:
@@ -350,10 +508,17 @@ def run(pages, write, json_out=None):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[1])
-    ap.add_argument("mode", choices=("fetch", "report", "apply"))
+    ap.add_argument("mode", choices=("discover", "add", "fetch", "report", "apply"))
     ap.add_argument("--pages", required=True)
     ap.add_argument("--json")
+    ap.add_argument("--url", help="add: the new object's OBEX page URL, as discover printed it")
     a = ap.parse_args()
+    if a.mode == "discover":
+        return discover(a.pages)
+    if a.mode == "add":
+        if not a.url:
+            ap.error("add needs --url")
+        return add(a.url, a.pages)
     if a.mode == "fetch":
         fetch(a.pages)
         return 0

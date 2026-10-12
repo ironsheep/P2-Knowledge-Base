@@ -1,17 +1,13 @@
 object_metadata:
+  object_id: '4266'
+  title: Simplest Serial
   author: Ray Allen
-  author_username: ''
-  capability:
-    domain: E
-    leaf: uart-serial
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Protocol
+    tags:
+    - serial debug terminal
+    description_short: Serial driver whose parameterless Begin() starts it on the
+      usual pins at 2 MBaud, for the Prop Tool Debug Window.
     description_full: 'This serial driver has a simple Begin() method with no parameters
       that starts the serial driver using the usual pins and 2 MBaud (For use with
       the Prop Tool Debug Window).
@@ -28,41 +24,16 @@ object_metadata:
 
       Also, some delays are nice to add after cogspin() and coginit() to avoid jumbling
       of their serial outputs with those of the code.'
-    description_short: 'Serial driver whose parameterless Begin() starts it on the usual pins at 2 MBaud, for the Prop Tool Debug Window.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - serial debug terminal
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:00.896179'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:20:15.384653'
-    page_discovered: 6
-    last_author_deep_search: 2025-09-12T13:39:2
-    created_date: '2023-12-25 19:56:27'
-    last_created_date_fix: 2025-09-12T15:27:2
-    version_last_scraped: '2025-09-26T11:34:09.842267'
-  object_id: '4266'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: MIT
-  title: Simplest Serial
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4266
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/simplest-serial/
   metadata:
     created_date: '2023-12-25'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/simplest-serial/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4266

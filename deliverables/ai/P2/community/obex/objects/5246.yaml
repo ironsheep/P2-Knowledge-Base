@@ -1,60 +1,26 @@
 object_metadata:
+  object_id: '5246'
+  title: BMP390 driver
   author: m.k. borri
-  author_username: ''
-  capability:
-    domain: F
-    leaf: temp-humidity
-    secondary:
-    - domain: E
-      leaf: i2c
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Sensor
-    description_full: A simple I2C driver for the BMP390 temperature+pressure sensor.
-      Handles 2 if you got 2 on the bus. Uses JonyMac's i2c library.
-    description_short: 'I2C driver for the BMP390 temperature+pressure sensor that handles 2 on the bus, using JonyMac''s i2c library.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
     tags:
     - I2C
     - Temperature ADC Sensor
-  scrape_tracking:
-    created_date: '2025-05-30 06:33:41'
-    discovery_date: '2025-09-12T12:43:55.437646'
-    kb_integration: none
-    last_author_cleanup: '2025-09-12T13:31:14.485074'
-    last_author_extraction: '2025-09-12T13:20:58.992134'
-    last_complete_extraction: '2025-09-12T13:30:06.967288'
-    page_discovered: 1
-    last_description_fix: 2025-09-12T14:20:1
-    last_html_corruption_fix: 2025-09-12T14:32:2
-    version_last_scraped: '2025-09-26T11:34:52.794175'
-  object_id: '5246'
+    description_short: I2C driver for the BMP390 temperature+pressure sensor that
+      handles 2 on the bus, using JonyMac's i2c library.
+    description_full: A simple I2C driver for the BMP390 temperature+pressure sensor.
+      Handles 2 if you got 2 on the bus. Uses JonyMac's i2c library.
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2 PASM2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2 PASM2
     licence: MIT
-  title: BMP390 driver
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5246
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/bmp390-driver/
   metadata:
     created_date: '2025-05-30'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/bmp390-driver/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5246

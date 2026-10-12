@@ -1,22 +1,18 @@
 object_metadata:
+  object_id: '2822'
+  title: DS3231
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: F
-    leaf: rtc
-    secondary:
-    - domain: E
-      leaf: i2c
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category:
     - Protocol
     - Sensor
+    tags:
+    - DS3231
+    - I2C
+    - jonnymac
+    - rtc
+    description_short: Interface to the DS3231 RTC using 24-hr format, with P1 and
+      P2 versions attached.
     description_full: 'DS3231 RTC interface (uses 24-hr format). P1 and P2 versions
       attached.
 
@@ -35,45 +31,19 @@ object_metadata:
 
 
       Added temperature reading into demo'
-    description_short: 'Interface to the DS3231 RTC using 24-hr format, with P1 and P2 versions attached.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - DS3231
-    - I2C
-    - jonnymac
-    - rtc
-  scrape_tracking:
-    created_date: '2025-04-08 23:09:19'
-    discovery_date: '2026-06-29T00:00:00'
-    kb_integration: none
-    last_scraped: '2026-06-29T00:00:00'
-    rescrape_source: v2.2 re-scrape 2026-06-29
-    version_last_scraped: '2026-06-29T00:00:00'
-  object_id: '2822'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P1
+    - P2
     languages:
     - SPIN
     - SPIN2
     - SPIN2 PASM2
-    microcontroller:
-    - P1
-    - P2
-    version: ''
-    content_type:
-    - Code
     licence: MIT
-  title: DS3231
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2822
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/ds3231/
   metadata:
     created_date: '2025-04-08'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/ds3231/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2822

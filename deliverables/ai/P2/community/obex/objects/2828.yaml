@@ -1,17 +1,12 @@
 object_metadata:
+  object_id: '2828'
+  title: Soft Timer
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: A
-    leaf: timing
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Sensor
+    tags: []
+    description_short: Timer object (1/100th-second resolution) demonstrating an ISR
+      installed into the Spin2 interpreter cog.
     description_full: 'This object demonstrates an advanced feature of Spin2: the
       installation of an ISR (interrupt service routine) into the Spin2 interpreter
       cog. This allows the programmer to create and install "background" code without
@@ -23,42 +18,17 @@ object_metadata:
       reset and auto run, put on hold, or allowed to free run. Interface methods give
       access to the timer as a whole, or to the various registers. A string method
       is included to simply output to displays like terminals and LCDs.'
-    description_short: 'Timer object (1/100th-second resolution) demonstrating an ISR installed into the Spin2 interpreter cog.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:08.056914'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:20:02.831255'
-    page_discovered: 11
-    last_author_deep_search: 2025-09-12T13:39:2
-    last_author_consolidation: 2025-09-12T14:06:0
-    created_date: '2020-11-30 12:00:00'
-    last_created_date_fix: 2025-09-12T15:32:5
-    version_last_scraped: '2025-09-26T11:32:30.958921'
-  object_id: '2828'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: ''
-    content_type:
-    - Code
     licence: Other
-  title: Soft Timer
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2828
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/soft-timer/
   metadata:
     created_date: '2020-11-30'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/soft-timer/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2828

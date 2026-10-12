@@ -1,23 +1,15 @@
 object_metadata:
+  object_id: '4198'
+  title: USBnew
   author: Wuerfel_21
-  author_username: ''
-  capability:
-    domain: B
-    leaf: usb-pins
-    secondary:
-    - domain: F
-      leaf: human-input
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category:
     - Fun
     - Human Input
     - Protocol
+    tags:
+    - USB
+    description_short: USB input driver for P2 that reads keyboard, mouse and gamepads.
     description_full: 'USB input driver for P2. Allows reading keyboard, mouse and
       gamepads.
 
@@ -25,45 +17,19 @@ object_metadata:
       See README.MD for full usage info.
 
 
-      Also see the github page and associated wiki.'
-    description_short: 'USB input driver for P2 that reads keyboard, mouse and gamepads.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - USB
-  scrape_tracking:
-    created_date: '2024-03-28 16:13:28'
-    discovery_date: '2025-09-12T12:44:10.850424'
-    kb_integration: none
-    last_author_cleanup: '2025-09-12T13:31:14.608046'
-    last_author_extraction: '2025-09-12T13:22:41.904872'
-    last_complete_extraction: '2025-09-12T13:30:07.136160'
-    page_discovered: 13
-    last_description_fix: 2025-09-12T14:20:1
-    last_html_corruption_fix: 2025-09-12T14:27:0
-    version_last_scraped: '2025-09-26T11:34:03.632679'
-  object_id: '4198'
+      Also see the github page (https://github.com/Wuerfel21/usbnew) and associated
+      wiki (https://github.com/Wuerfel21/usbnew/wiki).'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: ''
-    content_type:
-    - Code
     licence: MIT
-  title: USBnew
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4198
-    forum_discussion: ''
-    github_repo: https://github.com/Wuerfel21/usbnew
-    obex_page: https://obex.parallax.com/obex/usbnew/
   metadata:
     created_date: '2024-03-28'
-  version_tracking:
-    has_github_repo: true
+  urls:
+    obex_page: https://obex.parallax.com/obex/usbnew/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4198

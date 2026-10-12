@@ -1,20 +1,15 @@
 object_metadata:
+  object_id: '5361'
+  title: FFT IFFT
   author: James Smith
-  author_username: ''
-  capability:
-    domain: C
-    leaf: fft
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category:
     - Math
     - Signals
     - Speech and Sound
+    tags: []
+    description_short: Spin2 FFT and IFFT libraries (32 to 16384 points in cog_fft_mixed),
+      with Spin2 and C demo programs.
     description_full: 'Demo Files:
 
       real_fft_test.spin2 Spin2 speed and accuracy test, tested with PNut-ts and flexspin
@@ -116,39 +111,17 @@ object_metadata:
       That''s why it''s 2.5% slower. I felt this was an acceptable trade-off between
       speed, library size, and development effort. The newer cog_ifft_radix4 reverses
       rotation to compute IFFT with no measurable penalty.'
-    description_short: 'Spin2 FFT and IFFT libraries (32 to 16384 points in cog_fft_mixed), with Spin2 and C demo programs.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    created_date: '2026-03-15 06:03:24'
-    discovery_date: '2026-06-29T00:00:00'
-    kb_integration: none
-    last_scraped: '2026-06-29T00:00:00'
-    rescrape_source: v2.2 re-scrape 2026-06-29
-    version_last_scraped: '2026-06-29T00:00:00'
-  object_id: '5361'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - C/C++
     - SPIN2 PASM2
-    microcontroller:
-    - P2
-    version: ''
-    content_type:
-    - Code
     licence: MIT
-  title: FFT IFFT
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5361
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/fft-ifft/
   metadata:
     created_date: '2026-03-15'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/fft-ifft/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5361

@@ -1,61 +1,30 @@
 object_metadata:
+  object_id: '2834'
+  title: PWM
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: B
-    leaf: pwm-nco
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category:
     - Motor Control
     - Signals
+    tags:
+    - DMX
+    - PWM
+    description_short: Converts any P2 pin into a PWM output with user-selected frequency
+      and DMX-compatible (0..255) or user-set levels.
     description_full: This object converts any P2 pin into a set-and-forget PWM output
       with user-selected PWM frequency. Provided methods accommodate DMX-compatible
       levels (0..255), and user-set levels for greater precision when required (e.g.,
       motor control).
-    description_short: 'Converts any P2 pin into a PWM output with user-selected frequency and DMX-compatible (0..255) or user-set levels.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - DMX
-    - PWM
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:08.056858'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:00.864382'
-    page_discovered: 11
-    last_author_deep_search: 2025-09-12T13:39:2
-    last_author_consolidation: 2025-09-12T14:06:0
-    last_description_fix: 2025-09-12T14:20:1
-    created_date: '2024-03-16 16:20:08'
-    last_created_date_fix: 2025-09-12T15:25:3
-    version_last_scraped: '2025-09-26T11:32:40.241560'
-  object_id: '2834'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: MIT
-  title: PWM
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2834
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/pwm/
   metadata:
     created_date: '2024-03-16'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/pwm/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2834

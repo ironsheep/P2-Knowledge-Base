@@ -1,17 +1,12 @@
 object_metadata:
+  object_id: '2837'
+  title: ESP32
   author: Riley August
-  author_username: ''
-  capability:
-    domain: E
-    leaf: wireless
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Protocol
+    tags: []
+    description_short: Modular objects that interface with an ESP32 over a 2 pin serial
+      UART, for the default Espressif "AT firmware".
     description_full: 'This group of modular objects is designed to interface with
       an ESP32 microcontroller using a 2 pin serial UART. It is designed for the default
       ESP32 "AT firmware", by Espressif, which is the default on most modules.
@@ -26,47 +21,16 @@ object_metadata:
       use this object, import esp32_core to set up serial and interface with the ESP32.
       For wifi functionality, import esp32_wifi. For TCP/IP networking, import esp32_tcpip.
       For TCP server functionality, import esp32_tcpip_tl2_beta.'
-    description_short: 'Modular objects that interface with an ESP32 over a 2 pin serial UART, for the default Espressif "AT firmware".'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:06.662863'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:22:24.073536'
-    last_complete_extraction: '2025-09-12T13:30:07.105545'
-    page_discovered: 10
-    last_author_re_extraction: 2025-09-12T14:04:1
-    last_description_fix: 2025-09-12T14:20:1
-    created_date: '2020-09-17 12:00:00'
-    last_created_date_fix: 2025-09-12T15:33:0
-    import_source: github_archiver
-    original_platform: github
-    last_archiver_fix: 2025-09-12T15:53:3
-    last_author_consolidation: 2025-09-12T16:09:5
-    original_archiver_name: Riley August (riley@robots-everywhere.com)
-    version_last_scraped: '2025-09-26T11:32:44.896795'
-  object_id: '2837'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: Other
-  title: ESP32
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2837
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/esp32/
   metadata:
     created_date: '2020-09-17'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/esp32/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2837

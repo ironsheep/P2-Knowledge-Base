@@ -1,22 +1,16 @@
 object_metadata:
+  object_id: '4012'
+  title: 3072 Sprites Proof-of-Concept
   author: Wuerfel_21
-  author_username: ''
-  capability:
-    domain: G
-    leaf: graphics-lib
-    secondary:
-    - domain: D
-      leaf: pixel-gen
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category:
     - Display
     - Fun
+    tags:
+    - sprites
+    - VGA
+    description_short: Example drawing 3072 16x16 sprites at 640x480 32bpp on 4 cogs
+      at 252 MHz, using a p2videodrv scanline renderer.
     description_full: 'A small example that shows:
 
       - How to set up a scanline renderer with p2videodrv (in full-res VGA modes,
@@ -33,43 +27,16 @@ object_metadata:
 
 
       Note: If your sprites are stuck and don''t move, update your flexspin 🙂'
-    description_short: 'Example drawing 3072 16x16 sprites at 640x480 32bpp on 4 cogs at 252 MHz, using a p2videodrv scanline renderer.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - sprites
-    - VGA
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:12.247320'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:22:38.332043'
-    page_discovered: 14
-    last_author_deep_search: 2025-09-12T13:39:2
-    last_description_fix: 2025-09-12T14:20:1
-    created_date: '2023-10-18 19:57:19'
-    last_created_date_fix: 2025-09-12T15:27:0
-    version_last_scraped: '2025-09-26T11:33:49.893775'
-  object_id: '4012'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - PASM2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - PASM2
     licence: MIT
-  title: 3072 Sprites Proof-of-Concept
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4012
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/3072-sprites-proof-of-concept/
   metadata:
     created_date: '2023-10-18'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/3072-sprites-proof-of-concept/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4012

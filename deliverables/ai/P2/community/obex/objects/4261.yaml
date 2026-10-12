@@ -1,17 +1,16 @@
 object_metadata:
+  object_id: '4261'
+  title: P2 FLASH Filesystem
   author: Stephen M Moraco
-  author_username: ''
-  capability:
-    domain: I
-    leaf: spi-flash
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Data Storage
+    tags:
+    - Filesystem
+    - FLASH
+    - FlexProp
+    - P2 EDGE
+    description_short: Wear-leveling filesystem for the P2 Edge on-board flash chip,
+      with a standard filesystem API and multi-cog access.
     description_full: 'A wear-leveling filesystem for the P2 Edge on-board flash chip.
       Supports multi-cog access without consuming a Cog.
 
@@ -29,58 +28,31 @@ object_metadata:
       Jon McPhalens'' shell demo is included in cgsm_flash_file_demo.zip.
 
 
-      Version 2.0.0 Release Info
+      Version 2.0.0 Release Info (https://github.com/ironsheep/P2-FLASH-FS/releases)
 
 
-      GitHub repository: P2 Flash FS
+      GitHub repository: P2 Flash FS (https://github.com/ironsheep/P2-FLASH-FS)
 
 
-      See the repository for detailed documentation such as How to use in your code,
-      the Theory of Operation, Regression Testing Status, etc.
+      See the repository for detailed documentation such as How to use in your code
+      (https://github.com/ironsheep/P2-FLASH-FS#adding-the-flash-fs-to-your-own-project),
+      the Theory of Operation (https://github.com/ironsheep/P2-FLASH-FS/blob/main/THEOPS.md),
+      Regression Testing Status (https://github.com/ironsheep/P2-FLASH-FS/blob/main/RegresssionTests),
+      etc.
 
 
-      Forum Thread: On-Board Flash File System'
-    description_short: 'Wear-leveling filesystem for the P2 Edge on-board flash chip, with a standard filesystem API and multi-cog access.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - Filesystem
-    - FLASH
-    - FlexProp
-    - P2 EDGE
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:00.896187'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:47.753587'
-    last_complete_extraction: '2025-09-12T13:30:07.048636'
-    page_discovered: 6
-    last_author_re_extraction: 2025-09-12T14:04:1
-    last_description_fix: 2025-09-12T14:20:1
-    created_date: '2024-03-11 05:32:53'
-    last_created_date_fix: 2025-09-12T15:27:2
-    version_last_scraped: '2025-09-26T11:34:08.271538'
-  object_id: '4261'
+      Forum Thread: On-Board Flash File System (https://forums.parallax.com/discussion/175470/on-board-flash-file-system#latest)'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: 2.0.0
-    content_type:
-    - Code
     licence: MIT
-  title: P2 FLASH Filesystem
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4261
-    forum_discussion: ''
-    github_repo: https://github.com/ironsheep/P2-FLASH-FS
-    obex_page: https://obex.parallax.com/obex/p2-flash-filesystem/
   metadata:
     created_date: '2024-03-11'
-  version_tracking:
-    has_github_repo: true
+  urls:
+    obex_page: https://obex.parallax.com/obex/p2-flash-filesystem/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4261

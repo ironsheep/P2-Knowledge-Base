@@ -1,57 +1,27 @@
 object_metadata:
+  object_id: '2825'
+  title: NEC TX
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: E
-    leaf: ir-remote
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category:
     - Protocol
     - Sensor
+    tags: []
+    description_short: Transmits NEC IR protocol codes from the P2 through an IR LED,
+      with Standard and Extended address codes.
     description_full: This simple object enables the P2 to transmit codes corresponding
       to the NEC IR transmission protocol through an IR LED. Standard and Extended
       address codes are supported, with up to four repeat commands for each transmission.
-    description_short: 'Transmits NEC IR protocol codes from the P2 through an IR LED, with Standard and Extended address codes.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:09.461322'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:20:33.561432'
-    page_discovered: 12
-    last_author_deep_search: 2025-09-12T13:39:2
-    last_author_consolidation: 2025-09-12T14:06:0
-    created_date: '2020-12-15 12:00:00'
-    last_created_date_fix: 2025-09-12T15:32:4
-    version_last_scraped: '2025-09-26T11:32:26.316681'
-  object_id: '2825'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: Other
-  title: NEC TX
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2825
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/nec-tx/
   metadata:
     created_date: '2020-12-15'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/nec-tx/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2825

@@ -1,0 +1,657 @@
+# OBEX capability map -- the KB's own classification of each OBEX object.
+#
+# Engineering-side only: it is NOT served to agents. The served OBEX objects
+# (deliverables/ai/P2/community/obex/objects/) mirror the OBEX catalog and carry nothing of
+# ours (KB v1.24.4, Stephen 2026-10-12: "pure mirror"). This map keeps the classification
+# the capability-coverage analysis uses (engineering/analysis/p2-capability-coverage-matrix.md);
+# domains and leaves are defined in engineering/standards/p2-capability-taxonomy.md.
+#
+# Moved here verbatim from each object's former object_metadata.capability block.
+# Key = OBEX object id.
+
+objects:
+  '2811':
+    title: Park transformation
+    domain: C
+    leaf: cordic
+    secondary:
+    - domain: H
+      leaf: bldc
+  '2812':
+    title: Binary Floating Point Routines (IEEE-32 subset)
+    domain: C
+    leaf: fixed-float
+  '2813':
+    title: Psuedo-random and random numbers
+    domain: C
+    leaf: prng
+  '2814':
+    title: Simple formatted text routines
+    domain: G
+    leaf: terminal-ansi
+  '2815':
+    title: Cricket BME280
+    domain: F
+    leaf: temp-humidity
+    secondary:
+    - domain: E
+      leaf: i2c
+  '2816':
+    title: DS1302_full
+    domain: F
+    leaf: rtc
+  '2817':
+    title: ISP P2 BH1750 I2C Ambient Light Object
+    domain: F
+    leaf: light-optical
+    secondary:
+    - domain: E
+      leaf: i2c
+  '2818':
+    title: ISP P2 Click MPU 9DOF Driver
+    domain: F
+    leaf: imu
+    secondary:
+    - domain: E
+      leaf: i2c
+  '2819':
+    title: Click 4-20 MA
+    domain: B
+    leaf: adc
+  '2820':
+    title: Click RTC10
+    domain: F
+    leaf: rtc
+    secondary:
+    - domain: E
+      leaf: i2c
+  '2821':
+    title: DHTxx Temperature/Humidity Sensors
+    domain: F
+    leaf: temp-humidity
+  '2822':
+    title: DS3231
+    domain: F
+    leaf: rtc
+    secondary:
+    - domain: E
+      leaf: i2c
+  '2823':
+    title: EZ Analog
+    domain: B
+    leaf: adc
+  '2824':
+    title: NEC RX
+    domain: E
+    leaf: ir-remote
+  '2825':
+    title: NEC TX
+    domain: E
+    leaf: ir-remote
+  '2826':
+    title: MAX31855 Thermocouple Interface
+    domain: F
+    leaf: temp-humidity
+    secondary:
+    - domain: E
+      leaf: spi
+  '2827':
+    title: PIXY2
+    domain: F
+    leaf: vision
+    secondary:
+    - domain: E
+      leaf: spi
+  '2828':
+    title: Soft Timer
+    domain: A
+    leaf: timing
+  '2829':
+    title: Quadrature Encoder
+    domain: B
+    leaf: quadrature-decode
+    secondary:
+    - domain: H
+      leaf: encoder-feedback
+  '2830':
+    title: Sparkfun Qwiic Twist Encoder
+    domain: F
+    leaf: human-input
+    secondary:
+    - domain: E
+      leaf: i2c
+  '2831':
+    title: P2_rctime
+    domain: B
+    leaf: pulse-measurement
+  '2832':
+    title: Click Relay2
+    domain: B
+    leaf: pin-modes
+  '2833':
+    title: DMX TX
+    domain: E
+    leaf: dmx
+    secondary:
+    - domain: G
+      leaf: led-matrix
+  '2834':
+    title: PWM
+    domain: B
+    leaf: pwm-nco
+  '2835':
+    title: Sony IRCS Tx (infrared control system transmitter)
+    domain: E
+    leaf: ir-remote
+  '2836':
+    title: Cricket ESP32 AT
+    domain: E
+    leaf: wireless
+  '2837':
+    title: ESP32
+    domain: E
+    leaf: wireless
+  '2838':
+    title: 1-Wire
+    domain: E
+    leaf: one-wire
+  '2839':
+    title: Click DMX-TX
+    domain: E
+    leaf: dmx
+  '2840':
+    title: Click RS485_3v3
+    domain: E
+    leaf: uart-serial
+  '2841':
+    title: EZ SPI
+    domain: E
+    leaf: spi
+  '2842':
+    title: Full Duplex Serial
+    domain: E
+    leaf: uart-serial
+  '2843':
+    title: I2C
+    domain: E
+    leaf: i2c
+  '2844':
+    title: I2C Devices
+    domain: E
+    leaf: i2c
+  '2845':
+    title: Serial
+    domain: E
+    leaf: uart-serial
+  '2846':
+    title: Sony IRCS Rx (infrared control system receiver)
+    domain: E
+    leaf: ir-remote
+  '2847':
+    title: VGA Text routines
+    domain: G
+    leaf: vga-dvi-hdmi
+  '2848':
+    title: Graphics Display Driver Architecture
+    domain: G
+    leaf: graphics-lib
+  '2849':
+    title: ILI9341_XPT2046
+    domain: G
+    leaf: lcd-eink
+    secondary:
+    - domain: F
+      leaf: touch
+  '2850':
+    title: ISP Hub75 Matrix Driver
+    domain: G
+    leaf: led-matrix
+  '2851':
+    title: TM1638 LED Display Driver
+    domain: G
+    leaf: led-matrix
+  '2852':
+    title: APA102C Smart Pixel Driver
+    domain: G
+    leaf: led-matrix
+  '2853':
+    title: EZ MAX7219
+    domain: G
+    leaf: led-matrix
+  '2854':
+    title: LCD PCF8574
+    domain: G
+    leaf: lcd-eink
+    secondary:
+    - domain: E
+      leaf: i2c
+  '2855':
+    title: LPD8806 “Smart” Pixel Driver
+    domain: G
+    leaf: led-matrix
+  '2856':
+    title: P2ES Matrix
+    domain: G
+    leaf: led-matrix
+  '2857':
+    title: RGBX Pixel Driver
+    domain: G
+    leaf: led-matrix
+  '2858':
+    title: MAX7219 Dot Matrix
+    domain: G
+    leaf: led-matrix
+  '2859':
+    title: nextion_ez
+    domain: G
+    leaf: hmi-display
+    secondary:
+    - domain: E
+      leaf: uart-serial
+  '2860':
+    title: EZ Sound
+    domain: J
+    leaf: synthesis
+  '2861':
+    title: reSound
+    domain: J
+    leaf: dac-playback
+  '2862':
+    title: OPN2cog
+    domain: J
+    leaf: synthesis
+  '2863':
+    title: OPNAcog
+    domain: J
+    leaf: synthesis
+  '2864':
+    title: AYcog (P2 Port)
+    domain: J
+    leaf: synthesis
+  '2865':
+    title: SNEcog (P2 Port)
+    domain: J
+    leaf: synthesis
+  '2866':
+    title: SPCcog
+    domain: J
+    leaf: synthesis
+  '2867':
+    title: Accessory Board Buttons
+    domain: F
+    leaf: human-input
+  '2868':
+    title: EZ Button
+    domain: F
+    leaf: human-input
+  '2869':
+    title: P2ES Control
+    domain: K
+    leaf: host-integration
+  '2870':
+    title: Sony IRCS Rx (infrared control system receiver)
+    domain: E
+    leaf: ir-remote
+  '2871':
+    title: AT24C32
+    domain: I
+    leaf: eeprom
+    secondary:
+    - domain: E
+      leaf: i2c
+  '2872':
+    title: Simple SPI flash driver
+    domain: I
+    leaf: spi-flash
+    secondary:
+    - domain: E
+      leaf: spi
+  '2873':
+    title: ISP PCA9685 16ch PWM Servo Driver
+    domain: H
+    leaf: servo
+    secondary:
+    - domain: E
+      leaf: i2c
+  '2874':
+    title: ISP BLDC Motor Control
+    domain: H
+    leaf: bldc
+  '2875':
+    title: DC Motor
+    domain: H
+    leaf: stepper-dc
+  '2876':
+    title: Servo
+    domain: H
+    leaf: servo
+  '2877':
+    title: Stepper Motor Driver Ver 2
+    domain: H
+    leaf: stepper-dc
+  '3804':
+    title: Pllset
+    domain: A
+    leaf: timing
+  '4012':
+    title: 3072 Sprites Proof-of-Concept
+    domain: G
+    leaf: graphics-lib
+    secondary:
+    - domain: D
+      leaf: pixel-gen
+  '4047':
+    title: DecFloat
+    domain: C
+    leaf: fixed-float
+  '4060':
+    title: FM Radio broadcasting
+    domain: D
+    leaf: video-signal
+    secondary:
+    - domain: J
+      leaf: synthesis
+  '4064':
+    title: ADS1118
+    domain: B
+    leaf: adc
+    secondary:
+    - domain: E
+      leaf: spi
+  '4068':
+    title: MAX3010X
+    domain: F
+    leaf: light-optical
+    secondary:
+    - domain: E
+      leaf: i2c
+  '4070':
+    title: MFRC522
+    domain: E
+    leaf: rfid
+  '4080':
+    title: Optimized JPEG Decoder
+    domain: C
+    leaf: image-codec
+    secondary:
+    - domain: G
+      leaf: graphics-lib
+  '4087':
+    title: NeoYume – NeoGeo emulator
+    domain: A
+    leaf: emulation
+    secondary:
+    - domain: G
+      leaf: led-matrix
+    - domain: J
+      leaf: synthesis
+  '4162':
+    title: MegaYume – Mega Drive emulator
+    domain: A
+    leaf: emulation
+    secondary:
+    - domain: G
+      leaf: led-matrix
+    - domain: J
+      leaf: synthesis
+  '4198':
+    title: USBnew
+    domain: B
+    leaf: usb-pins
+    secondary:
+    - domain: F
+      leaf: human-input
+  '4254':
+    title: ISP P2 eInk Driver
+    domain: G
+    leaf: lcd-eink
+  '4257':
+    title: ISP high-speed 8-port serial subsystem
+    domain: E
+    leaf: uart-serial
+  '4261':
+    title: P2 FLASH Filesystem
+    domain: I
+    leaf: spi-flash
+  '4266':
+    title: Simplest Serial
+    domain: E
+    leaf: uart-serial
+  '4267':
+    title: Ethernet RMII driver
+    domain: E
+    leaf: networking
+  '4269':
+    title: FAT32 SD card driver
+    domain: I
+    leaf: sd-fat
+  '4271':
+    title: StrToFloat
+    domain: C
+    leaf: fixed-float
+  '4442':
+    title: 8-bit SAR ADC
+    domain: B
+    leaf: adc
+  '4564':
+    title: ISP P2 VL53L5CX time of flight driver
+    domain: F
+    leaf: distance
+    secondary:
+    - domain: E
+      leaf: i2c
+  '4570':
+    title: ISP P2 PCF8575 I2C I/O Expander Object
+    domain: B
+    leaf: pin-modes
+    secondary:
+    - domain: E
+      leaf: i2c
+  '4571':
+    title: ISP P2 180° Field of View TOF Sensor
+    domain: F
+    leaf: distance
+    secondary:
+    - domain: E
+      leaf: i2c
+  '4581':
+    title: ISP P2 RPi IoT Gateway
+    domain: E
+    leaf: iot-gateway
+    secondary:
+    - domain: K
+      leaf: host-integration
+  '4597':
+    title: ISP P2 TIMI Spin2 Object
+    domain: G
+    leaf: hmi-display
+    secondary:
+    - domain: E
+      leaf: uart-serial
+  '4616':
+    title: ISP P2 HUB75 Matrix – Morphing Digits
+    domain: G
+    leaf: led-matrix
+  '4617':
+    title: ISP P2 Multi Servo Exercisor
+    domain: H
+    leaf: servo
+  '4701':
+    title: DC Motor Control
+    domain: H
+    leaf: stepper-dc
+  '4718':
+    title: Neotimer (Non-blocking timer)
+    domain: A
+    leaf: timing
+  '4720':
+    title: P2GUI (Encoder Version)
+    domain: G
+    leaf: gui-widgets
+    secondary:
+    - domain: F
+      leaf: human-input
+  '4727':
+    title: USB Human-Interface-Device Driver
+    domain: B
+    leaf: usb-pins
+    secondary:
+    - domain: F
+      leaf: human-input
+  '4746':
+    title: WizNet W5500 Driver
+    domain: E
+    leaf: networking
+  '4758':
+    title: Waveshare 2.9″ E-paper display driver
+    domain: G
+    leaf: lcd-eink
+  '4800':
+    title: P2QR
+    domain: G
+    leaf: graphics-lib
+  '4808':
+    title: mcp2517 CAN FD controller drivers
+    domain: E
+    leaf: can-bus
+  '4858':
+    title: 3-pin-per-channel, 4-channel, hi-res ADC
+    domain: B
+    leaf: adc
+  '4864':
+    title: P2 Edge KiCAD Symbols
+    domain: K
+    leaf: hardware-design
+  '4883':
+    title: P2 Pin Filter Configuration
+    domain: B
+    leaf: pin-modes
+  '4889':
+    title: HostFS
+    domain: K
+    leaf: host-integration
+    secondary:
+    - domain: E
+      leaf: networking
+  '4894':
+    title: FRSW and FAT32 for P2
+    domain: I
+    leaf: sd-fat
+  '4898':
+    title: Propeller 2 Evaluation Board – PCB files
+    domain: K
+    leaf: hardware-design
+  '4899':
+    title: Propeller 2 Evaluation Board – 3D Model
+    domain: K
+    leaf: hardware-design
+  '4905':
+    title: Parallax P2 Library for Diptrace
+    domain: K
+    leaf: hardware-design
+  '4911':
+    title: IO Pin State Detection Demo
+    domain: B
+    leaf: pin-modes
+  '4917':
+    title: Sharing variables with SPIN2 and PASM2
+    domain: A
+    leaf: inline-pasm
+  '4918':
+    title: Step/Dir signal generator
+    domain: H
+    leaf: stepper-dc
+  '4926':
+    title: PNut/Spin2 Latest Version (v55)
+    domain: K
+    leaf: toolchain
+  '4933':
+    title: FloatToString.spin2
+    domain: C
+    leaf: fixed-float
+  '5048':
+    title: 4-bit SD driver
+    domain: I
+    leaf: sd-fat
+  '5071':
+    title: PropSPI
+    domain: E
+    leaf: spi
+    secondary:
+    - domain: A
+      leaf: cogs
+  '5096':
+    title: Autodesk Fusion model of P2 Arc8de 8in1
+    domain: K
+    leaf: hardware-design
+  '5189':
+    title: 64/96/128-Bit Unsigned Integer Math
+    domain: C
+    leaf: fixed-float
+  '5246':
+    title: BMP390 driver
+    domain: F
+    leaf: temp-humidity
+    secondary:
+    - domain: E
+      leaf: i2c
+  '5252':
+    title: MAVLink Message Parser
+    domain: E
+    leaf: mavlink
+  '5259':
+    title: BNO08x IMU (9 DOF) (RVC Mode)
+    domain: F
+    leaf: imu
+    secondary:
+    - domain: E
+      leaf: uart-serial
+  '5274':
+    title: PING+ for PING))) and LaserPING
+    domain: F
+    leaf: distance
+  '5278':
+    title: QMC5883L HMC5883 BMM150 compass drivers
+    domain: F
+    leaf: compass
+    secondary:
+    - domain: E
+      leaf: i2c
+  '5281':
+    title: Click Stepper-2 Demo
+    domain: H
+    leaf: stepper-dc
+  '5285':
+    title: P2 ADC
+    domain: B
+    leaf: adc
+  '5348':
+    title: URLDecode
+    domain: A
+    leaf: data-structures
+  '5361':
+    title: FFT IFFT
+    domain: C
+    leaf: fft
+  '5401':
+    title: HC-SR04 Ultrasonic Sensor for P2
+    domain: F
+    leaf: distance
+    secondary:
+    - domain: B
+      leaf: pulse-measurement
+  '5404':
+    title: P2 microSD FAT32 Filesystem
+    domain: I
+    leaf: sd-fat
+    secondary:
+    - domain: E
+      leaf: spi
+  '5405':
+    title: P2 Dual uSD FAT32 and FLASH FS
+    domain: I
+    leaf: sd-fat
+    secondary:
+    - domain: I
+      leaf: spi-flash
+

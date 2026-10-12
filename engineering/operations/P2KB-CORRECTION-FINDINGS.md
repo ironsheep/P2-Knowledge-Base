@@ -67,11 +67,22 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen; + F-571, F-572, F-573, found 2026-10-11 by «#398» and the MCP agent's 1.5.1 review)
 
-### F-571 — `p2kb_obex_get` shows a zero quality score and an empty created date for every OBEX object — `PARTIAL` (found 2026-10-11 by the close-out release MCP test, step 5, «#398»; the date moved KB-side 2026-10-11 for v1.24.1; the server half is requested for p2kb-mcp 1.5.1)
+### F-571 — `p2kb_obex_get` shows a zero quality score and an empty created date for every OBEX object — `PARTIAL` (found 2026-10-11 by the close-out release MCP test, step 5, «#398»; the date moved KB-side 2026-10-11 for v1.24.1; the KB is a pure mirror from v1.24.4; the server half, including dead download links, is requested for p2kb-mcp 1.5.1)
+**Updated 2026-10-12 (KB v1.24.4, "pure mirror"):**
+- Every object is now the catalog's fields only. `version`, `file_size`, `author_username` and the
+  other fields the server's struct reads are gone. The change request (§2, §3.2, §3.3) now asks the
+  server to drop them too.
+- All 130 objects carry a date: 2816's came back with the v1.24.2 mirror.
+- **New for 1.5.1 (§3.6):** 5 objects (4442, 4571, 4581, 4616, 4617) have no download on OBEX, and
+  their YAML now has no `download_direct`. A server that builds the URL from the id hands agents a
+  link that answers `invalid!`. The request asks the server to take `download_url` from
+  `urls.download_direct` and omit it when absent. Probe O3 now tests this (4581), replacing the
+  2816 no-date probe.
+- `scrape-obex-repos.py` is retired; `obex-catalog-mirror.py` writes the date.
+
 **Applied 2026-10-11 (Stephen: "yes a now"):** the upload date moved from
 `version_tracking.obex_upload_date` to `object_metadata.metadata.created_date` in all 129 objects that
-have one (2816 has none: its empty line removed, no block added); `scrape-obex-repos.py` writes it
-there. Proved against HEAD: all 131 files (130 objects and the template) parse equal to before apart from that move (and 2842's
+had one then. Proved against HEAD: all 131 files (130 objects and the template) parse equal to before apart from that move (and 2842's
 `known_issues` clearing). **Requested for p2kb-mcp 1.5.1** (Stephen, 2026-10-11):
 `engineering/tools/p2kb-mcp/MCP-OBEX-SUMMARY-CHANGE-REQUEST.md` — remove `quality`, omit empty fields,
 drop dead struct fields, add `full_metadata` (the whole filtered object, ending field-name coupling);
@@ -163,6 +174,15 @@ needs a call or a record that is not in hand:
   OBEX 4800 and 4926 (`2024-07-09` / `2026-05-06`; `2025-04-07` / `2026-05-08`); only the latter is
   served. And `original_archiver_name` (now filtered) carried one credit that is nowhere else on its
   page: OBEX 2816, "based on BR's original in the Propeller 1 Object repo".
+  **APPLIED 2026-10-12 (KB v1.24.4, Stephen: "pure mirror"):** all three parts are gone.
+  - `obex_discovery.py` and the other 28 scripts from 2025 are retired to the local `archive/`.
+    Discovery is now `obex-catalog-mirror.py discover`, proved live: 130 object pages listed, 0 new.
+  - `scrape_tracking` is removed from every object. Each date is now the catalog's own, from the
+    Object ID line: 4800 is `2026-05-06` and 4926 is `2026-05-08`.
+  - The 2816 credit was in fact on its page: the catalog's Author line reads "Dennis Gately based on
+    BR's original in the Propeller 1 Object repo", and the mirror serves it as `author`.
+
+  Closes with the v1.24.4 release; the compile-record item above stays open.
 
 ### F-567 — `hardware/hub75_adapter.yaml` is an Iron Sheep board no Parallax document describes, so it fails the claim-sourcing gate (3 Tier 1) and the source-lock ratchet — `PENDING-VALIDATION` (applied 2026-10-10, «#422»; Q-012 answered the same day; closes when the next KB release serves it)
 

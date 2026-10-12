@@ -1,55 +1,25 @@
-# OBEX Object Metadata Template
-# Copy and customize for each discovered object
+# OBEX object -- the shape of every object YAML in this folder.
+#
+# Each object mirrors its OBEX catalog page and carries nothing of ours. The files are written
+# only by engineering/tools/obex-integration/obex-catalog-mirror.py (`add` starts one, `apply`
+# fills it); do not write one by hand. The one hand-authored field is description_short.
 
 object_metadata:
-  object_id: "XXXX"
-  title: ""
-  author: ""
-  author_username: ""
-  
-  urls:
-    obex_page: ""
-    download_direct: ""  # Constructed from object_id
-    forum_discussion: ""
-    github_repo: ""
-    documentation: ""
-  
-  technical_details:
-    languages: []  # ["SPIN2", "PASM2"]
-    microcontroller: ["P2"]  # Always P2 for our index
-    version: ""
-    file_format: ""  # ZIP, individual files, etc.
-    file_size: ""
-    
+  object_id: "XXXX"            # OBEX Object ID; also the file name
+  title: ""                    # page title
+  author: ""                   # Author (OBEX's "| added by Archiver" mark dropped)
   functionality:
-    category: ""  # drivers, sensors, communication, audio, tools, demos
-    subcategory: ""
-    description_short: ""
-    description_full: ""
-    tags: []
-    hardware_support: []
-    peripherals: []
-    
-  architecture:
-    multi_cog: false
-    cog_count: 1
-    memory_requirements:
-      hub_ram: ""
-      cog_ram: ""
-    performance_notes: ""
-    
-  compatibility:
-    p2_chip_versions: ["all"]  # ES, Rev A, Rev B, Rev C, etc.
-    tested_platforms: []
-    known_issues: []
-    dependencies: []
-    
-  community:
-    forum_posts: []
-    user_reviews: []
-    modification_notes: []
-    related_objects: []
-    
-  scrape_tracking:
-    discovery_date: ""
-    kb_integration: "none"  # none, referenced, integrated
+    category: ""               # Category; a list when the page lists several; "" when none
+    tags: []                   # Tag(s)
+    description_short: ""      # authored one-liner, <= 120 chars (gate: OBEX One-Line Descriptions)
+    description_full: ""       # the page's description as text; a link's URL follows its words
+  technical_details:
+    content_type: []           # Content, e.g. ["Code"]
+    microcontroller: []        # Microcontroller, e.g. ["P2"]
+    languages: []              # Language(s), e.g. ["SPIN2", "PASM2"]
+    licence: ""                # Licence
+  metadata:
+    created_date: ""           # the Object ID line's date, YYYY-MM-DD
+  urls:
+    obex_page: ""              # the catalog page this object is read from
+    download_direct: ""        # the ZIP download; the key is absent when OBEX offers no download

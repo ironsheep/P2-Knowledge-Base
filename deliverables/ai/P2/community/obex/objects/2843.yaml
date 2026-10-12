@@ -1,57 +1,27 @@
 object_metadata:
+  object_id: '2843'
+  title: I2C
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: E
-    leaf: i2c
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Protocol
+    tags:
+    - I2C
+    description_short: Low-level I2C routines for the P2, with an i2c_scanner utility
+      that reports connected I2C devices.
     description_full: Low-level I2C routines for the P2. The i2c_scanner archive is
       a utility application that scans and reports I2C devices connected to the P2.
       Display options are list and matrix format.
-    description_short: 'Low-level I2C routines for the P2, with an i2c_scanner utility that reports connected I2C devices.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - I2C
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:06.662809'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:20.866845'
-    last_complete_extraction: '2025-09-12T13:30:07.001980'
-    page_discovered: 10
-    last_html_corruption_fix: 2025-09-12T14:32:2
-    created_date: '2022-02-24 12:00:00'
-    last_created_date_fix: 2025-09-12T15:33:1
-    version_last_scraped: '2025-09-26T11:32:54.158033'
-  object_id: '2843'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: ''
-    content_type:
-    - Code
     licence: Other
-  title: I2C
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2843
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/i2c/
   metadata:
     created_date: '2022-02-24'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/i2c/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2843

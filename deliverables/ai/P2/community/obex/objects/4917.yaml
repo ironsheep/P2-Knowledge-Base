@@ -1,24 +1,19 @@
 object_metadata:
+  object_id: '4917'
+  title: Sharing variables with SPIN2 and PASM2
   author: Michael
-  author_username: ''
-  capability:
-    domain: A
-    leaf: inline-pasm
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Snippet
+    tags: []
+    description_short: Tip showing SPIN2 in Cog0 and PASM2 in Cog1 sharing the same
+      global variables (PARAM), observed via DEBUG output.
     description_full: 'Instructions
 
 
       Connect a P2 Propeller Board to your computer
 
-      Load this code into Spin Tools IDE, then press CTRL+F10 to load into RAM with
-      DEBUG mode enabled
+      Load this code into Spin Tools IDE (https://www.maccasoft.com/spin-tools-ide/),
+      then press CTRL+F10 to load into RAM with DEBUG mode enabled
 
       Observe the debug output!
 
@@ -57,42 +52,18 @@ object_metadata:
       Note: You could use any name you like for the global "PARAM" variable, or the
       elements "ID", "AGE", etc... However, the PTRA keyword within the DAT block
       (PASM2 code) is fixed.'
-    description_short: 'Tip showing SPIN2 in Cog0 and PASM2 in Cog1 sharing the same global variables (PARAM), observed via DEBUG output.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:43:56.829308'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:22:11.420856'
-    page_discovered: 3
-    last_author_re_extraction: 2025-09-12T14:04:1
-    created_date: '2024-11-11 18:11:17'
-    last_created_date_fix: 2025-09-12T15:28:0
-    version_last_scraped: '2025-09-26T11:34:46.513489'
-  object_id: '4917'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - PASM2
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
     - Tip
+    microcontroller:
+    - P2
+    languages:
+    - PASM2
+    - SPIN2
     licence: MIT
-  title: Sharing variables with SPIN2 and PASM2
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4917
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/sharing-variables-with-spin2-and-pasm2/
   metadata:
     created_date: '2024-11-11'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/sharing-variables-with-spin2-and-pasm2/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4917

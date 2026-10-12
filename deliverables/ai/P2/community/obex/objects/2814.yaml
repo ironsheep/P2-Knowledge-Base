@@ -1,17 +1,12 @@
 object_metadata:
+  object_id: '2814'
+  title: Simple formatted text routines
   author: Eric R. Smith
-  author_username: ''
-  capability:
-    domain: G
-    leaf: terminal-ansi
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Tool
+    tags: []
+    description_short: Routines for the Spin2 SEND function that transmit formatted
+      numbers or text.
     description_full: 'These are routines intended to be used with the Spin2 SEND
       function to transmit formatted numbers or text. Set the SEND pointer to a function
       to transmit any single character, and then you can do things like:
@@ -50,47 +45,16 @@ object_metadata:
       even if the number is larger; thus `hexn($123, 2)` prints `23`. This is useful
       for doing things like printing bytes or words, but be aware that if numbers
       overflow there is no indication.'
-    description_short: 'Routines for the Spin2 SEND function that transmit formatted numbers or text.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:10.850376'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:19.066303'
-    last_complete_extraction: '2025-09-12T13:30:06.998397'
-    page_discovered: 13
-    last_author_re_extraction: 2025-09-12T14:04:1
-    last_description_fix: 2025-09-12T14:20:1
-    created_date: '2020-08-14 12:00:00'
-    last_created_date_fix: 2025-09-12T15:32:3
-    import_source: github_archiver
-    original_platform: github
-    last_archiver_fix: 2025-09-12T15:53:2
-    last_author_consolidation: 2025-09-12T16:06:1
-    original_archiver_name: Eric R. Smith
-    version_last_scraped: '2025-09-26T11:32:12.273440'
-  object_id: '2814'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: Other
-  title: Simple formatted text routines
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2814
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/simple-formatted-text-routines/
   metadata:
     created_date: '2020-08-14'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/simple-formatted-text-routines/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2814

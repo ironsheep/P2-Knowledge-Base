@@ -1,20 +1,15 @@
 object_metadata:
+  object_id: '2817'
+  title: ISP P2 BH1750 I2C Ambient Light Object
   author: Stephen M Moraco
-  author_username: ''
-  capability:
-    domain: F
-    leaf: light-optical
-    secondary:
-    - domain: E
-      leaf: i2c
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Sensor
+    tags:
+    - Ambient Light Sensor
+    - BH1750
+    - I2C
+    description_short: Driver for the BH1750 Ambient Light Sensor accessed via I2C,
+      using the underlying jm_i2c object.
     description_full: 'Driver for BH1750 Ambient Light Sensor accessed via I2C - (uses
       underlying jm_i2c object for I2C access)
 
@@ -22,7 +17,7 @@ object_metadata:
       Version: (repository Latest)
 
 
-      GitHub repository: P2 HUB75 Panel Light Measure
+      GitHub repository: P2 HUB75 Panel Light Measure (https://github.com/ironsheep/P2-Panel-Light-Measure)
 
 
       This object (in my case) is used in a larger project where I''m measuring the
@@ -30,46 +25,18 @@ object_metadata:
       on the panels, which contain the BH1750 sensors.
 
       All of the code I used, the STL files for the fixtures, and the entire project
-      description are found at the Repo.'
-    description_short: 'Driver for the BH1750 Ambient Light Sensor accessed via I2C, using the underlying jm_i2c object.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - Ambient Light Sensor
-    - BH1750
-    - I2C
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:09.461410'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:22:16.871540'
-    last_complete_extraction: '2025-09-12T13:30:07.091121'
-    page_discovered: 12
-    last_description_fix: 2025-09-12T14:20:1
-    created_date: '2024-03-12 22:08:05'
-    last_created_date_fix: 2025-09-12T15:24:5
-    version_last_scraped: '2025-09-26T11:32:15.396613'
-  object_id: '2817'
+      description are found at the Repo (https://github.com/ironsheep/P2-Panel-Light-Measure).'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: (repository Latest)
-    content_type:
-    - Code
     licence: MIT
-  title: ISP P2 BH1750 I2C Ambient Light Object
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2817
-    forum_discussion: ''
-    github_repo: https://github.com/ironsheep/P2-Panel-Light-Measure
-    obex_page: https://obex.parallax.com/obex/isp-bh1750-driver/
   metadata:
     created_date: '2024-03-12'
-  version_tracking:
-    has_github_repo: true
+  urls:
+    obex_page: https://obex.parallax.com/obex/isp-bh1750-driver/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2817

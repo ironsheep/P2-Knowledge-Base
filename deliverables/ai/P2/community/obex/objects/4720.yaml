@@ -1,86 +1,53 @@
 object_metadata:
+  object_id: '4720'
+  title: P2GUI (Encoder Version)
   author: Jose Rullan
-  author_username: ''
-  capability:
-    domain: G
-    leaf: gui-widgets
-    secondary:
-    - domain: F
-      leaf: human-input
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category:
     - Display
     - Human Input
-    description_full: 'P2GUI
-
-
-      P2GUI  is a framework for creating UI’s based on TFT screens driven with ILI9341.
-      This framework is based on the driver created by Greg LaPolla which includes
-      a Touchscreen driver for the XPT2046. There are two versions of this framework,
-      one that uses the touchscreen and this one which uses an encoder with a push
-      button to interact with the UI. Because most TFT displays that use the ILI9341
-      chipset are usually small in size, it makes sense to use an encoder as the interaction
-      method to avoid inaccuracies when using touchscreen, specially with small widgets.
-      The encoder is handled using jm_quadrature object from JonnyMac.
-
-
-      This project uses one cog for the display driver. Everything else is handled
-      in the user application cog with non-blocking timers (using Neotimer).
-
-
-      Demo Video
-
-
-      Documentation:
-
-      P2GUI_Encoder'
-    description_short: 'Encoder version of P2GUI, a framework for creating UIs based on TFT screens driven with ILI9341.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
     tags:
     - Display
     - Encoder
     - GUI
     - ILI9341
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:43:59.509801'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:56.851397'
-    last_complete_extraction: '2025-09-12T13:30:07.064502'
-    page_discovered: 5
-    last_author_re_extraction: 2025-09-12T14:04:1
-    last_description_fix: 2025-09-12T14:20:1
-    created_date: '2024-04-08 03:34:06'
-    last_created_date_fix: 2025-09-12T15:27:4
-    version_last_scraped: '2025-09-26T11:34:31.254466'
-  object_id: '4720'
+    description_short: Encoder version of P2GUI, a framework for creating UIs based
+      on TFT screens driven with ILI9341.
+    description_full: 'P2GUI
+
+
+      P2GUI  is a framework for creating UI’s based on TFT screens driven with ILI9341.
+      This framework is based on the driver created by Greg LaPolla (https://obex.parallax.com/obex/ili9341_xpt2046/)
+      which includes a Touchscreen driver for the XPT2046. There are two versions
+      of this framework, one that uses the touchscreen and this one which uses an
+      encoder with a push button to interact with the UI. Because most TFT displays
+      that use the ILI9341 chipset are usually small in size, it makes sense to use
+      an encoder as the interaction method to avoid inaccuracies when using touchscreen,
+      specially with small widgets. The encoder is handled using jm_quadrature object
+      from JonnyMac.
+
+
+      This project uses one cog for the display driver. Everything else is handled
+      in the user application cog with non-blocking timers (using Neotimer (https://obex.parallax.com/obex/neotimer-non-blocking-timer/)).
+
+
+      Demo Video (https://youtu.be/BeWfJdWvDSI?si=IQvldnaHIP5XKTW3)
+
+
+      Documentation:
+
+      P2GUI_Encoder (https://docs.google.com/document/d/1wt4jYC5TFeXyjOAGZO4CwaMJQyyFV21zKpH-aUASRCQ/edit?usp=sharing)'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: ''
-    content_type:
-    - Code
     licence: MIT
-  title: P2GUI (Encoder Version)
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4720
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/p2gui-encoder-version/
   metadata:
     created_date: '2024-04-08'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/p2gui-encoder-version/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4720

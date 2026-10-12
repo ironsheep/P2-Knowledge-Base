@@ -1,58 +1,27 @@
 object_metadata:
+  object_id: '2824'
+  title: NEC RX
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: E
-    leaf: ir-remote
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category:
     - Protocol
     - Sensor
+    tags: []
+    description_short: Receives and decodes the NEC IR Transmission Protocol; demonstration
+      code displays the raw input, address, and command.
     description_full: This object is used to receive and decode the NEC IR Transmission
       Protocol. Demonstration code displays the raw input, address, and command.
-    description_short: 'Receives and decodes the NEC IR Transmission Protocol; demonstration code displays the raw input, address, and command.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:09.461342'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:20:20.878088'
-    last_complete_extraction: '2025-09-12T13:30:06.912205'
-    page_discovered: 12
-    last_html_corruption_fix: 2025-09-12T14:32:2
-    last_license_corruption_fix: 2025-09-12T14:34:2
-    created_date: '2020-12-15 12:00:00'
-    last_created_date_fix: 2025-09-12T15:32:4
-    version_last_scraped: '2025-09-26T11:32:24.790842'
-  object_id: '2824'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: ''
-    content_type:
-    - Code
     licence: Other
-  title: NEC RX
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2824
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/nec-rx/
   metadata:
     created_date: '2020-12-15'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/nec-rx/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2824

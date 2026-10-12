@@ -4,7 +4,7 @@ This document provides implementation details for adding OBEX (Parallax Object E
 
 ## Overview
 
-OBEX is Parallax's community repository of P2 code objects. The P2 Knowledge Base contains metadata for ~113 OBEX objects, stored as individual YAML files.
+OBEX is Parallax's community repository of P2 code objects. The P2 Knowledge Base mirrors the catalog entry of every P2 object on OBEX (130 on 2026-10-12), one YAML file per object.
 
 **Important**: OBEX objects are served through OBEX-specific tools (`p2kb_obex_*`), separate from the key-based `p2kb_get`. *(Corrected 2026-10-07: this line used to say the objects are NOT in the main `p2kb-index.json`. They are — all 131 files under `community/obex/objects/`, including `_template.yaml`, are listed there as `p2kbCommunity<id>` keys. Like every KB file, they are subject to the delivery filter — `MCP-DELIVERY-FILTER-HANDOFF.md` §5.1.)*
 
@@ -22,69 +22,60 @@ Example: deliverables/ai/P2/community/obex/objects/2811.yaml
 
 ## YAML Schema
 
-Each OBEX object has this structure:
+Each OBEX object is a **pure mirror** of its catalog page (KB v1.24.4): the catalog's fields and
+nothing of ours. Every object has exactly this shape, keys in this order:
 
 ```yaml
 object_metadata:
-  object_id: "2811"                    # Unique numeric ID (string)
-  title: "Park transformation"         # Human-readable name
-  author: "ManAtWork"                  # Author display name
-  author_username: ""                  # Forum username if different
-
+  object_id: "2811"                    # OBEX Object ID (string); also the file name
+  title: "Park transformation"         # page title
+  author: "ManAtWork"                  # OBEX "Author"
+  functionality:
+    category: ["Math", "Motor Control", "Protocol", "Snippet"]  # OBEX "Category"/"Categories":
+                                       # a string when one, a list when several, "" when none
+    tags: ["Servo"]                    # OBEX "Tag(s)" ([] when none)
+    description_short: "..."           # authored one-liner, ≤120 chars (served as `description`)
+    description_full: "..."            # the catalog description as text; a link's URL follows its words
+  technical_details:
+    content_type: ["Code"]             # OBEX "Content": Code, Hardware or Tip
+    microcontroller: ["P2"]            # OBEX "Microcontroller(s)"
+    languages: ["PASM2"]               # OBEX "Language(s)"
+    licence: "Other"                   # OBEX "Licence": MIT or Other
+  metadata:
+    created_date: "2020-05-09"         # OBEX upload date (the Object ID line's date)
   urls:
     obex_page: "https://obex.parallax.com/obex/park-transformation/"
     download_direct: "https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2811"
-    forum_discussion: ""               # Related forum thread
-    github_repo: ""                    # GitHub mirror if exists
-    documentation: ""                  # External docs
-
-  technical_details:
-    languages: ["PASM2"]               # OBEX "Language(s)"
-    microcontroller: ["P2"]            # OBEX "Microcontroller(s)"
-    content_type: ["Code"]             # OBEX "Content": Code, Hardware or Tip
-    licence: "Other"                   # OBEX "Licence": MIT or Other
-    version: ""                        # Version string (the only version field)
-    file_format: "ZIP"                 # Usually ZIP
-    file_size: ""                      # empty: OBEX publishes no size (old values were scrape junk)
-
-  functionality:
-    category: ["Math", "Motor Control", "Protocol", "Snippet"]  # OBEX "Category"/"Categories":
-                                       # a string when one, a list when several
-    subcategory: ""                    # Optional subcategory
-    description_short: "..."           # authored one-liner, ≤120 chars (served as `description`)
-    description_full: "..."            # the catalog description, as text
-    tags: ["Servo"]                    # OBEX "Tag(s)" ([] when none)
-    hardware_support: []               # Hardware platforms
-    peripherals: []                    # Connected peripherals
-
-  metadata:                            # served; holds only the upload date
-    created_date: "2020-05-09"         # OBEX upload date; absent when OBEX shows none
-
-  version_tracking:
-    has_github_repo: false
-
-  scrape_tracking:                     # scraper bookkeeping; removed by the delivery filter
-    discovery_date: "2025-09-12..."    # When indexed
-    created_date: "2022-01-04 12:00:00"  # the scraper's own record; never served
+                                       # ABSENT when OBEX offers no download (5 objects)
 ```
 
-`metadata.created_date` is the object's OBEX upload date — the field `p2kb_obex_get` reports as
-`metadata.created_date` (moved there from `version_tracking.obex_upload_date` in KB v1.24.1, F-571).
-`metadata` carries nothing else: the KB does not rate objects, so there is no quality score.
+`description_short` is the one field that is not catalog text: an authored one-sentence summary
+(F-573), checked by the release gate "OBEX One-Line Descriptions". Every other field is written only
+by `engineering/tools/obex-integration/obex-catalog-mirror.py`, from the object's page.
 
-`scrape_tracking:` is the scrape bookkeeping (discovery and extraction dates, import source, and
-similar). It stays in the YAML for our own scraper and gates, and the delivery filter removes it
-(`scrape_tracking` is in the index's `remove_fields`; see `MCP-DELIVERY-FILTER-HANDOFF.md`, §3 and the
-2026-10-10 amendment). A `p2kb_obex_*` tool therefore never receives any field under it.
+**Not in any object (removed in KB v1.24.4):**
+- `author_username`, `version`, `file_size` and `file_format`;
+- `github_repo`, `documentation` and `forum_discussion`;
+- `subcategory`, `hardware_support` and `peripherals`;
+- the `compatibility`, `version_tracking`, `capability` and `scrape_tracking` blocks.
+
+The KB rates no object and records no compatibility or version of its own. The `capability`
+classification is the KB's own; it moved to an engineering-side file that is not served. A link
+OBEX shows in the description (a GitHub repository, a store page) is in `description_full` with its
+URL.
 
 ## Download URL Pattern
 
-All OBEX downloads follow this pattern:
+Use `urls.download_direct`; never build the URL from the id. OBEX's ZIP link has this form:
 ```
 https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB{object_id}
 ```
+The URL uses the `OB` prefix (e.g., `OB2811`), but the object_id in YAML is just the number (`2811`).
 
-Note: The URL uses `OB` prefix (e.g., `OB2811`), but the object_id in YAML is just the number (`2811`).
+**Some objects have no download.** For five objects (4442, 4571, 4581, 4616, 4617 on 2026-10-12)
+the OBEX page says "There are no downloads available for this object", and the ZIP link answers
+`invalid!`. Their YAML has no `download_direct`. A tool reports "no download; see the page"
+for them and fetches nothing. Their descriptions say where the code is, usually a GitHub repository.
 
 ## Categories
 
@@ -125,15 +116,13 @@ interface ObexGetResult {
   author: string;
   category: string;
   description: string;
-  download_url: string;
+  download_url?: string;   // urls.download_direct; omitted when the object has no download
   languages: string[];
   tags: string[];
   obex_page: string;
-  metadata?: {             // each key omitted when empty; the whole block omitted when all are
-    created_date?: string; // object_metadata.metadata.created_date
-    file_size?: string;    // technical_details.file_size
-    version?: string;      // technical_details.version
-  };                       // no quality field: the KB does not rate objects
+  metadata?: {             // omitted when created_date is absent or empty
+    created_date: string;  // object_metadata.metadata.created_date
+  };                       // no quality, version or size: the KB rates nothing, OBEX publishes neither
   full_metadata: object;   // the object's object_metadata AFTER the delivery filter (from 1.5.1)
 }
 ```
@@ -243,7 +232,7 @@ GET https://api.github.com/repos/ironsheep/P2-Knowledge-Base/contents/deliverabl
 
 - Cache individual object YAML files (they rarely change)
 - Cache the object ID list (refresh with main index)
-- No need to cache download URLs (they're constructed from object_id)
+- Download URLs come from each object's `urls.download_direct` (absent when OBEX offers no download)
 
 ### Error Handling
 

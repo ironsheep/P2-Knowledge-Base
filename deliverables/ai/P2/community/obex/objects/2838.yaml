@@ -1,57 +1,27 @@
 object_metadata:
+  object_id: '2838'
+  title: 1-Wire
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: E
-    leaf: one-wire
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Protocol
+    tags:
+    - 1-Wire
+    description_short: Cogless object for 1-Wire devices; the P2 can provide the required
+      pullup when no external pull-up is available.
     description_full: This [cogless] object allows the P2 to communicate with 1-Wire
       devices. Using the P2 pin configuration modes, the P2 can provide the required
       pullup if an external pull-up is not available.
-    description_short: 'Cogless object for 1-Wire devices; the P2 can provide the required pullup when no external pull-up is available.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - 1-Wire
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:06.662855'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:13.623454'
-    page_discovered: 10
-    last_author_deep_search: 2025-09-12T13:39:2
-    last_author_consolidation: 2025-09-12T14:06:0
-    created_date: '2020-07-02 12:00:00'
-    last_created_date_fix: 2025-09-12T15:33:0
-    version_last_scraped: '2025-09-26T11:32:46.421804'
-  object_id: '2838'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: ''
-    content_type:
-    - Code
     licence: Other
-  title: 1-Wire
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2838
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/1-wire/
   metadata:
     created_date: '2020-07-02'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/1-wire/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2838

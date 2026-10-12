@@ -1,57 +1,26 @@
 object_metadata:
+  object_id: '2876'
+  title: Servo
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: H
-    leaf: servo
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Motor Control
+    tags:
+    - Servo
+    description_short: Servo driver that uses a P2 smart pin to create the servo signal;
+      ramping is left to the parent application.
     description_full: Simple servo driver that uses a P2 smart pin to create the servo
       signal. Ramping and other slow motion behavior of the servo is controlled by
       the parent application.
-    description_short: 'Servo driver that uses a P2 smart pin to create the servo signal; ramping is left to the parent application.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - Servo
-  scrape_tracking:
-    created_date: '2024-03-15 14:30:20'
-    discovery_date: '2025-09-12T12:44:00.896221'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:22:27.650057'
-    last_complete_extraction: '2025-09-12T13:30:07.112510'
-    page_discovered: 6
-    last_author_re_extraction: 2025-09-12T14:04:1
-    last_author_consolidation: 2025-09-12T14:06:0
-    last_html_corruption_fix: 2025-09-12T14:32:2
-    version_last_scraped: '2025-09-26T11:33:45.156068'
-  object_id: '2876'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: MIT
-  title: Servo
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2876
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/servo/
   metadata:
     created_date: '2024-03-15'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/servo/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2876

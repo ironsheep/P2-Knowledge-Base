@@ -1,63 +1,34 @@
 object_metadata:
+  object_id: '4858'
+  title: 3-pin-per-channel, 4-channel, hi-res ADC
   author: Chip Gracey
-  author_username: ''
-  capability:
-    domain: B
-    leaf: adc
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category:
     - Sensor
     - Signals
-    description_full: This object makes a 4-channel, constant-impedance, high-performance
-      ADC which uses 3 contiguous pins per channel. At 200MHz, it can generate 13-bit
-      samples at 16k samples per second on all four channels. Sampling time can be
-      roughly doubled to gain another effective bit. All readings are reported in
-      microvolts. Longer sampling times increase precision.
-    description_short: '4-channel, constant-impedance ADC using 3 contiguous pins per channel, giving 13-bit samples at 16k samples/s at 200MHz.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
     tags:
     - ADC
     - microvolts
     - Pasm2
     - Spin2
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:43:58.182053'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:22:47.306754'
-    page_discovered: 4
-    last_author_deep_search: 2025-09-12T13:39:2
-    created_date: '2024-08-26 19:18:16'
-    last_created_date_fix: 2025-09-12T15:27:5
-    version_last_scraped: '2025-09-26T11:34:38.847098'
-  object_id: '4858'
+    description_short: 4-channel, constant-impedance ADC using 3 contiguous pins per
+      channel, giving 13-bit samples at 16k samples/s at 200MHz.
+    description_full: This object makes a 4-channel, constant-impedance, high-performance
+      ADC which uses 3 contiguous pins per channel. At 200MHz, it can generate 13-bit
+      samples at 16k samples per second on all four channels. Sampling time can be
+      roughly doubled to gain another effective bit. All readings are reported in
+      microvolts. Longer sampling times increase precision.
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: ''
-    content_type:
-    - Code
     licence: MIT
-  title: 3-pin-per-channel, 4-channel, hi-res ADC
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4858
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/3-pin-per-channel-4-channel-hi-res-adc/
   metadata:
     created_date: '2024-08-26'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/3-pin-per-channel-4-channel-hi-res-adc/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4858

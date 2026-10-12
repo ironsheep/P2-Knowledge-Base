@@ -1,24 +1,17 @@
 object_metadata:
+  object_id: '2811'
+  title: Park transformation
   author: ManAtWork
-  author_username: ''
-  capability:
-    domain: C
-    leaf: cordic
-    secondary:
-    - domain: H
-      leaf: bldc
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category:
     - Math
     - Motor Control
     - Protocol
     - Snippet
+    tags:
+    - Servo
+    description_short: Code snippet showing how the P2 CORDIC does the Park (d/q)
+      transform and its inverse, for AC or brushless servo motors.
     description_full: 'The Park or d/q-transformation is useful when controlling AC
       motors or brushless servo motors. It transforms currents or voltages from a
       three phase system with stator reference into a rectangular coordinate system
@@ -37,42 +30,16 @@ object_metadata:
 
       NOTE: This is a code snippet meant to illustrate the core code, it is not meant
       to compile as-is; ex: variable declarations are needed.'
-    description_short: 'Code snippet showing how the P2 CORDIC does the Park (d/q) transform and its inverse, for AC or brushless servo motors.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - Servo
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:10.850413'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:23:19.663296'
-    page_discovered: 13
-    last_author_deep_search: 2025-09-12T13:39:2
-    last_description_fix: 2025-09-12T14:20:1
-    created_date: '2020-05-09 12:00:00'
-    last_created_date_fix: 2025-09-12T15:32:2
-    version_last_scraped: '2025-09-26T11:32:07.571460'
-  object_id: '2811'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - PASM2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - PASM2
     licence: Other
-  title: Park transformation
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2811
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/park-transformation/
   metadata:
     created_date: '2020-05-09'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/park-transformation/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2811

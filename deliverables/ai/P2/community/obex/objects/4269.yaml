@@ -1,17 +1,11 @@
 object_metadata:
+  object_id: '4269'
+  title: FAT32 SD card driver
   author: Chris Gadd
-  author_username: ''
-  capability:
-    domain: I
-    leaf: sd-fat
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Data Storage
+    tags: []
+    description_short: Driver for SD cards formatted as FAT32.
     description_full: 'Verified with Panasonic 512MB SD
 
       PNY 8GB SDHC
@@ -21,44 +15,17 @@ object_metadata:
       GSKILL 32GB Micro SDHC
 
       cards must be formatted as FAT32'
-    description_short: 'Driver for SD cards formatted as FAT32.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    created_date: '2024-01-28 15:42:47'
-    discovery_date: '2025-09-12T12:44:00.896158'
-    kb_integration: none
-    last_author_cleanup: '2025-09-12T13:31:14.642990'
-    last_author_extraction: '2025-09-12T13:23:09.004037'
-    last_complete_extraction: '2025-09-12T13:30:07.180822'
-    page_discovered: 6
-    last_description_fix: 2025-09-12T14:20:1
-    last_html_corruption_fix: 2025-09-12T14:32:2
-    last_license_corruption_fix: 2025-09-12T14:34:2
-    version_last_scraped: '2025-09-26T11:34:12.957885'
-  object_id: '4269'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: ''
-    content_type:
-    - Code
     licence: MIT
-  title: FAT32 SD card driver
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4269
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/fat32-sd-card-driver/
   metadata:
     created_date: '2024-01-28'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/fat32-sd-card-driver/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4269

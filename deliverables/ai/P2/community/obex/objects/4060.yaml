@@ -1,22 +1,14 @@
 object_metadata:
+  object_id: '4060'
+  title: FM Radio broadcasting
   author: Wuerfel_21
-  author_username: ''
-  capability:
-    domain: D
-    leaf: video-signal
-    secondary:
-    - domain: J
-      leaf: synthesis
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category:
     - Signals
     - Speech and Sound
+    tags: []
+    description_short: Example of generating FM radio broadcasts using the P2's color
+      modulator unit.
     description_full: 'Example of generating FM radio broadcasts (ab)using the P2''s
       color modulator unit.
 
@@ -26,40 +18,16 @@ object_metadata:
 
 
       See this demonstration: https://youtu.be/mlhf4FX1j7c'
-    description_short: 'Example of generating FM radio broadcasts using the P2''s color modulator unit.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:12.247268'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:38.789357'
-    page_discovered: 14
-    last_author_deep_search: 2025-09-12T13:39:2
-    created_date: '2023-10-18 21:29:22'
-    last_created_date_fix: 2025-09-12T15:27:0
-    version_last_scraped: '2025-09-26T11:33:52.904891'
-  object_id: '4060'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - PASM2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - PASM2
     licence: MIT
-  title: FM Radio broadcasting
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4060
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/fm-radio-broadcasting/
   metadata:
     created_date: '2023-10-18'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/fm-radio-broadcasting/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4060

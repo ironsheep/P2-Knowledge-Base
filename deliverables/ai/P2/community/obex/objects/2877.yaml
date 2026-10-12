@@ -1,17 +1,12 @@
 object_metadata:
+  object_id: '2877'
+  title: Stepper Motor Driver Ver 2
   author: Bill Tuss
-  author_username: ''
-  capability:
-    domain: H
-    leaf: stepper-dc
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Motor Control
+    tags: []
+    description_short: Step motor driver with a sinusoidal trajectory and a STOP input,
+      in versions for step/direction or cw/ccw drivers.
     description_full: 'Language
 
 
@@ -44,45 +39,17 @@ object_metadata:
 
 
       MIT (see end of source code)'
-    description_short: 'Step motor driver with a sinusoidal trajectory and a STOP input, in versions for step/direction or cw/ccw drivers.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:00.896213'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:55.059636'
-    last_complete_extraction: '2025-09-12T13:30:07.061112'
-    page_discovered: 6
-    last_author_re_extraction: 2025-09-12T14:04:1
-    created_date: '2021-02-09 20:17:07'
-    last_created_date_fix: 2025-09-12T15:26:5
-    import_source: github_archiver
-    original_platform: github
-    last_archiver_fix: 2025-09-12T15:53:4
-    version_last_scraped: '2025-09-26T11:33:46.728391'
-  object_id: '2877'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: ''
-    content_type:
-    - Code
     licence: MIT
-  title: Stepper Motor Driver Ver 2
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2877
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/stepper-motor-driver-ver-2/
   metadata:
     created_date: '2021-02-09'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/stepper-motor-driver-ver-2/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2877

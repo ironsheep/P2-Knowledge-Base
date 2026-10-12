@@ -1,17 +1,12 @@
 object_metadata:
+  object_id: '5189'
+  title: 64/96/128-Bit Unsigned Integer Math
   author: Chip Gracey
-  author_username: ''
-  capability:
-    domain: C
-    leaf: fixed-float
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Math
+    tags: []
+    description_short: Three objects providing unsigned functions for 64, 96, and
+      128-bit integers, such as add, multiply, divide and log2.
     description_full: 'These three objects provide the following unsigned functions
       for 64, 96, and 128-bit integers:
 
@@ -43,40 +38,16 @@ object_metadata:
       LongMSB() - extract long via MSB
 
       LongSHL() - left-shift long to make 64/96/128-bit value'
-    description_short: 'Three objects providing unsigned functions for 64, 96, and 128-bit integers, such as add, multiply, divide and log2.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:43:55.437655'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:22:00.423678'
-    page_discovered: 1
-    last_author_deep_search: 2025-09-12T13:39:2
-    created_date: '2025-03-12 21:14:04'
-    last_created_date_fix: 2025-09-12T15:28:1
-    version_last_scraped: '2025-09-26T11:34:51.250906'
-  object_id: '5189'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2 PASM2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2 PASM2
     licence: MIT
-  title: 64/96/128-Bit Unsigned Integer Math
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5189
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/64-96-128-bit-integer-math/
   metadata:
     created_date: '2025-03-12'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/64-96-128-bit-integer-math/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5189

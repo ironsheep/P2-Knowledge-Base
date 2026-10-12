@@ -1,5 +1,10 @@
 # OBEX Execution Plan for Sonnet
 
+> **Historical (2025-09).** The tools this plan names (`obex_discovery.py`, `discover_obex.sh`) are
+> retired, and the object schema it describes is gone. Today each object is a pure mirror of its
+> catalog page, written by `engineering/tools/obex-integration/obex-catalog-mirror.py` (KB v1.24.4).
+> The live runbook is in `README.md`, this folder.
+
 **Target Model**: Claude Sonnet 4 (claude-sonnet-4-20250514)  
 **Task Type**: Systematic implementation of download-on-demand OBEX integration  
 **Execution Style**: Step-by-step with validation checkpoints  

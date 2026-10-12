@@ -4,8 +4,9 @@
 **To:** the agent maintaining `P2-Knowledge-Base-MCP` (the `p2kb-mcp` server).
 **Target release:** p2kb-mcp **1.5.1** (Stephen, 2026-10-11).
 **Closes:** register finding **F-571** (`engineering/operations/P2KB-CORRECTION-FINDINGS.md`) when §6 passes.
-**Scope:** `p2kb_obex_get` only. `p2kb_obex_find`, `p2kb_obex_download`, the delivery filter, the
-index and every `p2kb_get` path are unchanged.
+**Scope:** `p2kb_obex_get`, plus `p2kb_obex_find`'s category list (§3.5) and an object with no
+download (§3.6, which also touches `p2kb_obex_download`). The delivery filter, the index and every
+`p2kb_get` path are unchanged.
 
 ---
 
@@ -45,7 +46,7 @@ object_metadata:
     has_github_repo: false
 ```
 
-- 129 of the 130 objects carry a date; one (2816) has none and has **no** `metadata:` block.
+- From v1.24.2 all 130 objects carry a date (2816's came back with the catalog mirror).
   (`_template.yaml`, the 131st file in the folder, is a template, not an object.)
 - `version_tracking.obex_upload_date` no longer exists. The scraper writes `metadata.created_date`.
 - `metadata` holds **only** `created_date`. `quality_score`, `discovery_date`, `last_verified` and
@@ -60,11 +61,48 @@ needed for any of it:
   OBEX's own values; `technical_details.content_type` (`Code`, `Hardware`, `Tip`) and
   `technical_details.licence` (`MIT`, `Other`) are new.
 - `functionality.category` is **OBEX's own category** — a string, or a **list** for the 32 objects
-  OBEX files under several (§3.5 is the one change this asks of you).
+  OBEX files under several (§3.5).
 - `functionality.description_short` — the field you serve as `description` — is now an authored
   one-sentence summary (≤120 characters) for every object, never a cut of the catalog text. Keep
   reading it exactly as today.
-- `version_tracking.obex_version` is gone; `technical_details.version` is the only version field.
+- `version_tracking.obex_version` is gone.
+
+**v1.24.4** makes each object a **pure mirror** (Stephen, 2026-10-12): it holds the catalog's fields
+and nothing of ours. Every object now has exactly this shape:
+
+```yaml
+object_metadata:
+  object_id: '2842'
+  title: Full Duplex Serial
+  author: Jon McPhalen
+  functionality:
+    category: Protocol              # a string, or a list where OBEX lists several
+    tags: []
+    description_short: P2 update to FullDuplexSerial for the P1, with ...   # authored one-liner
+    description_full: This object is a P2 update to FullDuplexSerial ...    # links keep their URL
+  technical_details:
+    content_type: [Code]
+    microcontroller: [P2]
+    languages: [PASM2, SPIN2]
+    licence: Other
+  metadata:
+    created_date: '2022-01-04'
+  urls:
+    obex_page: https://obex.parallax.com/obex/full-duplex-serial-2/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2842
+```
+
+- **Gone from every object:** `author_username`; `technical_details.version`, `file_size`,
+  `file_format`; `urls.github_repo`, `documentation`, `forum_discussion`; `functionality.subcategory`,
+  `hardware_support`, `peripherals`; and the whole `compatibility`, `version_tracking`, `capability`
+  and `scrape_tracking` blocks.
+  - `version` was a scraper's guess from the description text, and on three objects it was a tool's
+    version, not the object's.
+  - `github_repo` was also taken from the description. The description now keeps every link's URL
+    after its words, so the repository link reaches the reader as OBEX shows it.
+- **`urls.download_direct` is absent on 5 objects** (4442, 4571, 4581, 4616, 4617). OBEX offers no
+  download for them: the page says "There are no downloads available for this object", and the ZIP
+  link answers `invalid!`. Their descriptions point to GitHub instead (§3.6).
 
 1.5.1 is about §3.
 
@@ -73,16 +111,15 @@ needed for any of it:
 1. **Remove `quality`** from the `p2kb_obex_get` result, and the `quality_score` field from the
    struct. The KB does not rate OBEX objects and never will (KB doctrine, 2026-10-11: *an OBEX entry
    carries what the catalog says, never our verdict on it*).
-2. **Omit an empty field instead of returning `""`.** In `metadata`: `created_date` absent or empty →
-   leave the key out; same for `version` and `file_size`. If all three are empty, omit `metadata`.
-   Sources, as today: `created_date` ← `object_metadata.metadata.created_date`; `file_size` ←
-   `object_metadata.technical_details.file_size`; `version` ← `object_metadata.technical_details.version`.
-   (`file_size` is empty on every object from KB v1.24.3 — the old values were scraped junk and OBEX
-   publishes no size — so in practice it is always omitted; keep reading the field in case a real
-   size is ever recorded.)
-3. **Drop the dead struct fields** `discovery_date`, `last_verified`, `extraction_status` and
-   `quality_score` from whichever struct holds them (the binary shows their YAML tags beside
-   `created_date`; no served object has any of them).
+2. **Omit an empty field instead of returning `""`.** `metadata` is `{created_date}` from
+   `object_metadata.metadata.created_date`; when that is absent or empty, omit `metadata`. **Drop
+   `version` and `file_size` from `metadata`**: from KB v1.24.4 no object has either field (§2).
+   OBEX publishes no size and no version field, and the old values were scraper guesses.
+3. **Drop the dead struct fields**: `discovery_date`, `last_verified`, `extraction_status` and
+   `quality_score` (the binary shows their YAML tags beside `created_date`), plus every field §2
+   lists as gone (`author_username`, `version`, `file_size`, `file_format`, `github_repo`,
+   `documentation`, `forum_discussion`, `subcategory`, `hardware_support`, `peripherals`). No
+   served object has any of them.
 4. **Add `full_metadata`: the whole object, as delivered.** The `object_metadata` mapping of the
    object YAML **after the delivery filter** (the same filtered body `p2kb_get p2kbCommunity<id>`
    returns), parsed and emitted as a JSON object. This is the field our OBEX spec has always specified
@@ -92,7 +129,7 @@ needed for any of it:
    that need more read `full_metadata`.
    - **Filtering:** exactly the delivery filter you already apply to every KB body
      (`MCP-DELIVERY-FILTER-HANDOFF.md` §4, §5.1) — `remove_fields` at every depth (so
-     `scrape_tracking` and any `source` key, e.g. `compatibility.source`, are gone) and column-0
+     any `source` or `scrape_tracking` key is gone; from KB v1.24.4 an OBEX object has neither) and column-0
      comments. Build `full_metadata` from the filtered body, never the raw one.
    - **Encoding:** the parsed YAML mapping emitted as JSON as-is — strings stay strings (dates are
      quoted in the YAML, so they arrive as strings), booleans and lists as parsed, key order not
@@ -112,11 +149,21 @@ needed for any of it:
    the catalog and adds `technical_details.content_type` and `technical_details.licence` — no server
    change needed for those beyond what `full_metadata` (4) already carries.
 
-Proceed on all five unless you object.
+6. **An object with no download has no download URL.** Take `download_url` from
+   `object_metadata.urls.download_direct`, never build it from the object id. When the key is absent
+   (5 objects, §2):
+   - `p2kb_obex_get` leaves out `download_url` and `download_instructions`;
+   - `p2kb_obex_download` fetches nothing and says so: *"OBEX offers no download for object <id>;
+     see its page <obex_page> — the description says where the code is."*
+
+   Building the URL from the id gives these objects a link that answers `invalid!`, which an agent
+   would read as a broken server or a corrupt ZIP.
+
+Proceed on all six unless you object.
 
 **Unchanged:** `object_id`, `title`, `author`, `category`, `description` (from
-`functionality.description_short`, exactly as today), `download_url`, `download_instructions`, `languages`, `tags`,
-`obex_page`, `metadata.file_size`; the multi-match `type: suggestions` response; search/browse output; caching (an object whose YAML changed has a new
+`functionality.description_short`, exactly as today), `download_url` and `download_instructions`
+where the object has a download, `languages`, `tags`, `obex_page`; the multi-match `type: suggestions` response; search/browse output; caching (an object whose YAML changed has a new
 `sha256`/`mtime` in the index and is re-fetched as today).
 
 ## 4. Result shape after 1.5.1
@@ -125,13 +172,13 @@ Proceed on all five unless you object.
 {
   "object_id": "2842",
   "title": "Full Duplex Serial",
-  "author": "Jon McPhalen (jonnymac)",
-  "category": "communication",
-  "description": "This object is a P2 update to FullDuplexSerial for the P1. ...",
+  "author": "Jon McPhalen",
+  "category": "Protocol",
+  "description": "P2 update to FullDuplexSerial for the P1, with numeric output changes and string formatting for complex output.",
   "download_url": "https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2842",
   "download_instructions": { "...": "unchanged" },
-  "languages": ["SPIN2", "PASM2"],
-  "tags": ["serial", "demo", "led", "driver", "spi"],
+  "languages": ["PASM2", "SPIN2"],
+  "tags": [],
   "obex_page": "https://obex.parallax.com/obex/full-duplex-serial-2/",
   "metadata": { "created_date": "2022-01-04" },
   "full_metadata": { "object_id": "2842", "title": "Full Duplex Serial", "...": "the whole filtered object_metadata" },
@@ -141,12 +188,12 @@ Proceed on all five unless you object.
 
 ## 5. Order
 
-Both KB releases are published (v1.24.2, 2026-10-12). 1.5.1 can be built and tested against the
-live KB now; it depends on no further KB change.
+The KB side is complete from **v1.24.4** (2026-10-12). Build and test 1.5.1 against v1.24.4 or
+later; it depends on no further KB change.
 
 ## 6. Acceptance probes
 
-**Precondition:** KB v1.24.2 or later is published (it is), 1.5.1 is installed, and
+**Precondition:** KB v1.24.4 or later is published, 1.5.1 is installed, and
 `p2kb_refresh flush:true include_obex:true` has been run at least 5 minutes after the last KB push
 (GitHub raw's CDN holds files for 300 s; inside that window the server can fetch old bodies against
 the new index and fail verification).
@@ -154,9 +201,9 @@ the new index and fail verification).
 | # | Probe | Expect |
 |---|---|---|
 | O1 | `p2kb_version` | `mcp_version 1.5.1`; `filter_rule_source: index` and `filter_engine_version: 1` as 1.5.0 reports them today |
-| O2 | `p2kb_obex_get 2842` | `metadata` is exactly `{created_date: "2022-01-04"}` (OBEX publishes no file size; from KB v1.24.3 `file_size` is empty on every object, so it is omitted) — no `quality` key anywhere, no `version` key (OBEX publishes none) |
-| O3 | `p2kb_obex_get 2816` | no `metadata` key at all (2816 has no date, and its `file_size` and `version` are empty) |
-| O4 | `p2kb_obex_get 2842` → `full_metadata` | present; contains `compatibility`, `version_tracking`, `metadata`; contains no `scrape_tracking` and no `source` key at any depth |
+| O2 | `p2kb_obex_get 2842` | `metadata` is exactly `{created_date: "2022-01-04"}`; no `quality`, `version` or `file_size` key anywhere; `download_url` as in §4 |
+| O3 | `p2kb_obex_get 4581`, then `p2kb_obex_download 4581` | the get has no `download_url` and no `download_instructions` (OBEX offers no download, §3.6); the download fetches nothing and returns the "no download" message naming the page |
+| O4 | `p2kb_obex_get 2842` → `full_metadata` | present; its keys are exactly `object_id`, `title`, `author`, `functionality`, `technical_details`, `metadata`, `urls` (KB v1.24.4 shape, §2) |
 | O5 | `p2kb_obex_get "full duplex serial"` (a multi-match search) | as on 1.5.0: `type: suggestions`, a `suggestions` list of `{author, category, description, match_type, object_id, title}`; no `metadata` or `full_metadata` in suggestions |
 | O6 | `p2kb_obex_find term:serial limit:2` | same shape as on 1.5.0: `{count: 2, objects: [{author, category, description, match_type, object_id, title}, …], term: "serial", type: "objects"}`; from KB v1.24.2 each `description` is the object's one-line description and `category` is OBEX's own (a list where the object has several) |
 | O7 | `p2kb_obex_find` (no parameters), then `p2kb_obex_find category:"Protocol"` | the category list is OBEX's own names with counts, built from the objects (§3.5); the filter returns every object whose category is, or includes, Protocol |
@@ -169,8 +216,10 @@ F-571 closes in the register on O1-O7, with the server version.
    with a value; mark it breaking in the 1.5.1 changelog entry despite the patch number.
 2. **Two version fields — `technical_details.version` is authoritative.** `version_tracking.obex_version`
    is a second copy the scraper writes from the same scrape; it equals `technical_details.version` in
-   all 130 objects (20 carry a value), and nothing reads it. **Removed in KB v1.24.2** — there is
-   one field, not two. Read `technical_details.version` only, as §3.2 says.
+   all 130 objects (20 carry a value), and nothing reads it. **Removed in KB v1.24.2.** *Superseded
+   by KB v1.24.4:* `technical_details.version` is gone too. OBEX publishes no version field, and the
+   scraper's values were guesses from the description, three of them a tool's version. There is no
+   version field; drop it (§3.2).
 3. **The shared spec — updated.** `engineering/tools/p2kb-mcp/P2KB-MCP-SPECIFICATION.md`'s
    `p2kb_obex_get` row now states the 1.5.0 shape and the 1.5.1 contract (breaking, field sources,
    `full_metadata`). Re-import it byte-identical from the KB's `main`; `DOCs/API.md` and

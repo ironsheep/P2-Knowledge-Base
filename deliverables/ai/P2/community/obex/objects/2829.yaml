@@ -1,23 +1,20 @@
 object_metadata:
+  object_id: '2829'
+  title: Quadrature Encoder
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: B
-    leaf: quadrature-decode
-    secondary:
-    - domain: H
-      leaf: encoder-feedback
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category:
     - Human Input
     - Protocol
     - Sensor
+    tags:
+    - Encoder
+    - jonnymac
+    - p2
+    - quadrature
+    - smart-pin
+    description_short: Sets a P2 smart pin to quadrature encoder (value/position)
+      mode, with value limits and four-counts-per-click support.
     description_full: 'This object configures a P2 smart pin for quadrature encoder
       (value/position) mode. The object allows for value limits and dealing with encoders
       that change four counts per "click."
@@ -25,46 +22,16 @@ object_metadata:
 
       Updated 23 SEP 2024. New version is identified with version # (1.1.1) and has
       Schmitt Trigger inputs enabled on encoder pins. Second demo added as well.'
-    description_short: 'Sets a P2 smart pin to quadrature encoder (value/position) mode, with value limits and four-counts-per-click support.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - Encoder
-    - jonnymac
-    - p2
-    - quadrature
-    - smart-pin
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:08.056905'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:20:51.774817'
-    page_discovered: 11
-    last_author_deep_search: 2025-09-12T13:39:2
-    last_author_consolidation: 2025-09-12T14:06:0
-    created_date: '2024-09-23 17:48:33'
-    last_created_date_fix: 2025-09-12T15:25:1
-    version_last_scraped: '2025-09-26T11:32:32.453961'
-  object_id: '2829'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: Other
-  title: Quadrature Encoder
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2829
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/quadrature-encoder-2/
   metadata:
     created_date: '2024-09-23'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/quadrature-encoder-2/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2829

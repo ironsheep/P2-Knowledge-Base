@@ -1,23 +1,20 @@
 object_metadata:
+  object_id: '4581'
+  title: ISP P2 RPi IoT Gateway
   author: Stephen M Moraco
-  author_username: ''
-  capability:
-    domain: E
-    leaf: iot-gateway
-    secondary:
-    - domain: K
-      leaf: host-integration
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category:
     - Display
     - Other
     - Protocol
+    tags:
+    - email
+    - Gateway
+    - IoT
+    - Python
+    - Raspberry Pi
+    description_short: 'P2 object using a serial-linked Raspberry Pi as an IoT gateway:
+      email, web-page control, RPi files and config values.'
     description_full: 'This provides a Spin2/Pasm2 object to be run on the P2. The
       P2 communicates over high-speed bidirectional serial with a connected Raspberry
       Pi (RPi), which runs a Python script that handles the requests from the P2.
@@ -25,7 +22,7 @@ object_metadata:
       (IoT) capability to our P2.
 
 
-      See the system diagram depicting how this all works: System Diagram
+      See the system diagram depicting how this all works: System Diagram (https://github.com/ironsheep/P2-RPi-IoT-gateway/tree/main#system-diagram)
 
 
       Today you can choose from:
@@ -41,7 +38,7 @@ object_metadata:
       - Querying configuration values of Pi from the P2
 
 
-      A collection of demos with working code for each can be found at: DEMOs
+      A collection of demos with working code for each can be found at: DEMOs (https://github.com/ironsheep/P2-RPi-ioT-gateway#demos)
 
 
       At the Repository, you can find:
@@ -61,59 +58,29 @@ object_metadata:
       - Example code that shows each of the services being exercised
 
 
-      Version (1.0.0) Release Notes
+      Version (1.0.0) Release Notes (https://github.com/ironsheep/P2-RPi-IoT-gateway/releases/tag/v1.0.0)
 
 
-      GitHub repository: P2 RPi ioT Gateway
+      GitHub repository: P2 RPi ioT Gateway (https://github.com/ironsheep/P2-RPi-IoT-gateway)
 
 
       This capability is referenced in the following forum thread:
 
-      Forum Thread: using-a-raspberry-pi-as-an-iot-gateway-for-our-p2-projects
+      Forum Thread: using-a-raspberry-pi-as-an-iot-gateway-for-our-p2-projects (https://forums.parallax.com/discussion/174283/using-a-raspberry-pi-as-an-iot-gateway-for-our-p2-projects#latest)
 
 
-      DOWNLOAD: please get this code directly from the repo. as there is both P2 code
-      and Raspberry Pi code there for use.'
-    description_short: 'P2 object using a serial-linked Raspberry Pi as an IoT gateway: email, web-page control, RPi files and config values.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - email
-    - Gateway
-    - IoT
-    - Python
-    - Raspberry Pi
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:43:59.509869'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:22.618963'
-    last_complete_extraction: '2025-09-12T13:30:07.005558'
-    page_discovered: 5
-    created_date: '2024-03-12 23:46:19'
-    last_created_date_fix: 2025-09-12T15:27:3
-    version_last_scraped: '2025-09-26T11:34:22.171834'
-  object_id: '4581'
+      DOWNLOAD: please get this code directly from the repo (https://github.com/ironsheep/P2-RPi-IoT-gateway).
+      as there is both P2 code and Raspberry Pi code there for use.'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: ''
-    content_type:
-    - Code
     licence: MIT
-  title: ISP P2 RPi IoT Gateway
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4581
-    forum_discussion: ''
-    github_repo: https://github.com/ironsheep/P2-RPi-IoT-gateway
-    obex_page: https://obex.parallax.com/obex/isp-p2-rpi-iot-gateway/
   metadata:
     created_date: '2024-03-12'
-  version_tracking:
-    has_github_repo: true
+  urls:
+    obex_page: https://obex.parallax.com/obex/isp-p2-rpi-iot-gateway/

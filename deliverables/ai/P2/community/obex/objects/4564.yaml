@@ -1,25 +1,22 @@
 object_metadata:
+  object_id: '4564'
+  title: ISP P2 VL53L5CX time of flight driver
   author: Stephen M Moraco
-  author_username: ''
-  capability:
-    domain: F
-    leaf: distance
-    secondary:
-    - domain: E
-      leaf: i2c
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Sensor
+    tags:
+    - Pasm2
+    - Sensor
+    - Spin2
+    - TOF
+    - VL53L5CX
+    description_short: Spin2/Pasm2 port of the VL53L5CX I/F library/downloader, for
+      the VL53L5CX Time-of-Flight (ToF) multizone ranging sensor.
     description_full: 'P2 VL53L5CX Object - A Port of the VL53L5CX I/F library/downloader
       to Spin2/Pasm2
 
 
-      (...Excerpt from STMicroelectronics webpage)
+      (...Excerpt from STMicroelectronics webpage (https://www.st.com/en/imaging-and-photonics-solutions/vl53l5cx.html))
 
 
       The VL53L5CX is a state-of-the-art, Time-of-Flight (ToF), multizone ranging
@@ -34,54 +31,24 @@ object_metadata:
       Version (repository latest)
 
 
-      GitHub repository: P2-VL53L5CX-time-of-flight-driver
+      GitHub repository: P2-VL53L5CX-time-of-flight-driver (https://github.com/ironsheep/P2-VL53L5CX-time-of-flight-driver/blob/main/VL53L5CX.md)
 
 
       This object (in my case) is used in a larger project which is referenced in
       the following forum thread:
 
-      Forum Thread: 180° Field of View Time-of-Flight sensor for the P2'
-    description_short: 'Spin2/Pasm2 port of the VL53L5CX I/F library/downloader, for the VL53L5CX Time-of-Flight (ToF) multizone ranging sensor.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - Pasm2
-    - Sensor
-    - Spin2
-    - TOF
-    - VL53L5CX
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:43:59.509895'
-    kb_integration: none
-    last_author_cleanup: '2025-09-12T13:31:14.446328'
-    last_author_extraction: '2025-09-12T13:20:24.435406'
-    last_complete_extraction: '2025-09-12T13:30:06.918655'
-    page_discovered: 5
-    created_date: '2024-03-11 23:37:14'
-    last_created_date_fix: 2025-09-12T15:27:3
-    version_last_scraped: '2025-09-26T11:34:17.590285'
-  object_id: '4564'
+      Forum Thread: 180° Field of View Time-of-Flight sensor for the P2 (https://forums.parallax.com/discussion/174860/180-field-of-view-time-of-flight-sensor-for-the-p2#latest)'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: (repository latest)
-    content_type:
-    - Code
     licence: MIT
-  title: ISP P2 VL53L5CX time of flight driver
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4564
-    forum_discussion: ''
-    github_repo: https://github.com/ironsheep/P2-VL53L5CX-time-of-flight-driver
-    obex_page: https://obex.parallax.com/obex/p2-vl53l5cx-time-of-flight-driver/
   metadata:
     created_date: '2024-03-11'
-  version_tracking:
-    has_github_repo: true
+  urls:
+    obex_page: https://obex.parallax.com/obex/p2-vl53l5cx-time-of-flight-driver/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4564

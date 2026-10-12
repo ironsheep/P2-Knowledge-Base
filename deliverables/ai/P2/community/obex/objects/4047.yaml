@@ -1,56 +1,27 @@
 object_metadata:
+  object_id: '4047'
+  title: DecFloat
   author: ersmith
-  author_username: ''
-  capability:
-    domain: C
-    leaf: fixed-float
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Math
+    tags:
+    - float decimal math
+    description_short: Decimal (base 10) floating point math routines, unlike the
+      IEEE binary (base 2) format of default Spin2 floating point.
     description_full: This object provides decimal (base 10) floating point math routines.
       The default Spin2 floating point uses the IEEE binary (base 2) format, which
       has the disadvantage that numbers like 0.1 or 0.02 are not exactly representable;
       this creates confusion and error.
-    description_short: 'Decimal (base 10) floating point math routines, unlike the IEEE binary (base 2) format of default Spin2 floating point.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - float decimal math
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:12.247294'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:20:01.013062'
-    page_discovered: 14
-    last_author_deep_search: 2025-09-12T13:39:2
-    created_date: '2023-10-18 20:20:44'
-    last_created_date_fix: 2025-09-12T15:27:0
-    version_last_scraped: '2025-09-26T11:33:51.371169'
-  object_id: '4047'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: MIT
-  title: DecFloat
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4047
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/decfloat/
   metadata:
     created_date: '2023-10-18'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/decfloat/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4047

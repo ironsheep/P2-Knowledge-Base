@@ -1,55 +1,25 @@
 object_metadata:
+  object_id: '2845'
+  title: Serial
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: E
-    leaf: uart-serial
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Protocol
+    tags: []
+    description_short: True mode, unbuffered serial using smart pins, with the features
+      of the original P1 FDS plus minor enhancements.
     description_full: 'True mode, unbuffererd serial coms using smart pins
 
       -- same features as original P1 FDS with minor enhancements'
-    description_short: 'True mode, unbuffered serial using smart pins, with the features of the original P1 FDS plus minor enhancements.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    created_date: '2024-03-16 16:12:07'
-    discovery_date: '2025-09-12T12:44:06.662777'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:20:11.778611'
-    last_complete_extraction: '2025-09-12T13:30:06.896495'
-    page_discovered: 10
-    last_html_corruption_fix: 2025-09-12T14:32:2
-    last_license_corruption_fix: 2025-09-12T14:34:2
-    version_last_scraped: '2025-09-26T11:32:57.254305'
-  object_id: '2845'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: Other
-  title: Serial
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2845
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/serial/
   metadata:
     created_date: '2024-03-16'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/serial/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2845

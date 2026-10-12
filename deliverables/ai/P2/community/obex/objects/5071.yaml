@@ -1,59 +1,29 @@
 object_metadata:
+  object_id: '5071'
+  title: PropSPI
   author: evanh
-  author_username: ''
-  capability:
-    domain: E
-    leaf: spi
-    secondary:
-    - domain: A
-      leaf: cogs
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Protocol
+    tags:
+    - SPI
+    - SPI RAM emulation
+    description_short: SPI RAM emulation that runs autonomously in a cog; the master
+      reads and writes within the handler's hubRAM buffer.
     description_full: 'Uses a cog. Runs autonomously. Master can read and write at
       will within the handler''s specified hubRAM buffer space.
 
 
       Further reading - https://forums.parallax.com/discussion/175543/propspi-emulation-of-a-generic-spi-ram-chip-using-the-prop2'
-    description_short: 'SPI RAM emulation that runs autonomously in a cog; the master reads and writes within the handler''s hubRAM buffer.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - SPI
-    - SPI RAM emulation
-  scrape_tracking:
-    created_date: '2025-02-15 00:20:00'
-    discovery_date: '2026-06-29T00:00:00'
-    kb_integration: none
-    last_scraped: '2026-06-29T00:00:00'
-    rescrape_source: v2.2 re-scrape 2026-06-29
-    version_last_scraped: '2026-06-29T00:00:00'
-  object_id: '5071'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2 PASM2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2 PASM2
     licence: MIT
-  title: PropSPI
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5071
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/propspi/
   metadata:
     created_date: '2025-02-15'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/propspi/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5071

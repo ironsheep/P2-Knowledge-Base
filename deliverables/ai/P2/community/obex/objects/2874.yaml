@@ -1,43 +1,42 @@
 object_metadata:
+  object_id: '2874'
+  title: ISP BLDC Motor Control
   author: Stephen M Moraco
-  author_username: ''
-  capability:
-    domain: H
-    leaf: bldc
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Motor Control
+    tags:
+    - BLDC smart-pin
+    - motor
+    description_short: BLDC motor driver with steering and position tracking, for
+      the Parallax 64010 Universal Motor Driver P2 Add-on Boards.
     description_full: 'BLDC Motor Driver with steering and position tracking
 
 
       Ready-to-use objects easily incorporated into your code that control Brushless
       DC (BLDC) motors via the Parallax 64010 Universal Motor Driver P2 Add-on Boards
+      (https://www.parallax.com/product/universal-motor-driver-p2-add-on-board/)
 
 
-      Version: 5.0.0 Release Info
+      Version: 5.0.0 Release Info (https://github.com/ironsheep/P2-BLDC-Motor-Control/releases)
 
 
-      GitHub repository: P2 BLDC Motor Control
+      GitHub repository: P2 BLDC Motor Control (https://github.com/ironsheep/P2-BLDC-Motor-Control)
 
       - See Docs, Setup Instructions at Developing a P2 Application interacting with
-      the new motor objects
+      the new motor objects (https://github.com/ironsheep/P2-BLDC-Motor-Control/blob/main/DEVELOP.md)
 
-      - Buy BLDC Motors at Parallax Online Store
+      - Buy BLDC Motors at Parallax Online Store (https://www.parallax.com/product/6-5-hub-motors-with-encoders-and-mounting-blocks-bundle/)
 
-      - Buy BLDC Motor Control Boards at Parallax Online Store
+      - Buy BLDC Motor Control Boards at Parallax Online Store (https://www.parallax.com/product/universal-motor-driver-p2-add-on-board/)
 
 
       NOTE: Always check for more recent releases at the project P2 BLDC Motor Control
-      Repository - Releases Page
+      Repository (https://github.com/ironsheep/P2-BLDC-Motor-Control) - Releases Page
+      (https://github.com/ironsheep/P2-BLDC-Motor-Control/releases)
 
 
       Forum Thread: Universal Motor Driver - Dual wheel steering, motor control, and
-      position tracking Objects for P2
+      position tracking Objects for P2 (https://forums.parallax.com/discussion/174516/universal-motor-driver-dual-wheel-steering-motor-control-and-position-tracking-objects-for-p2)
 
 
       What to download:
@@ -52,43 +51,17 @@ object_metadata:
 
       - serial-control-archive-set.zip the code for RaspberryPi or Arduino control
       of a two-motor system (includes the dual motor control code)'
-    description_short: 'BLDC motor driver with steering and position tracking, for the Parallax 64010 Universal Motor Driver P2 Add-on Boards.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - BLDC smart-pin
-    - motor
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:02.356197'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:44.169997'
-    last_complete_extraction: '2025-09-12T13:30:07.042574'
-    page_discovered: 7
-    created_date: '2024-03-11 05:20:32'
-    last_created_date_fix: 2025-09-12T15:26:5
-    version_last_scraped: '2025-09-26T11:33:42.074641'
-  object_id: '2874'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: 5.0.0
-    content_type:
-    - Code
     licence: Other
-  title: ISP BLDC Motor Control
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2874
-    forum_discussion: ''
-    github_repo: https://github.com/ironsheep/P2-BLDC-Motor-Control
-    obex_page: https://obex.parallax.com/obex/isp-bldc-motor-control/
   metadata:
     created_date: '2024-03-11'
-  version_tracking:
-    has_github_repo: true
+  urls:
+    obex_page: https://obex.parallax.com/obex/isp-bldc-motor-control/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2874

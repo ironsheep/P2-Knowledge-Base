@@ -6,21 +6,19 @@
 > _Linked from `engineering/README.md` (the heads board)._
 
 ## Tier 1 — At a glance
-- **State:** ✅ **Integrated** — every object **mirrors its OBEX catalog page** (re-mirrored 2026-10-12, KB **v1.24.2/v1.24.3**, F-573: title, author, description, categories, tags, languages, microcontroller, content type, licence, date — OBEX's own values; no scraped size or guesses) and carries an **authored one-line description** (Stephen-approved, adversarially reviewed). Object set from the **v2.2 Delta Re-Scrape (2026-06-29)**, first released in KB v1.13.3. (v2.1 base was 2025-09-12.)
-- **Coverage:** **130 P2 objects** (100% P2-specific; P1 filtered out), all capability-spine classified across domains A–K
+- **State:** ✅ **Integrated — a pure mirror** (KB **v1.24.4**, 2026-10-12). Each object holds only what its OBEX catalog page publishes: title, author, category, tags, description (its links keep their URLs), content type, microcontroller, languages, licence, upload date, page and download link. Beside those it has an **authored one-line description**, Stephen-approved and adversarially reviewed. Nothing of ours is carried: no classification, compatibility, version, size, scraper bookkeeping or placeholders. 5 objects have no download link because OBEX offers none.
+- **Coverage:** **130 P2 objects**, which is every P2 object page on the OBEX listing on 2026-10-12. The KB's own capability-spine classification (domains A–K) is kept engineering-side in `obex-capability-map.yaml` and is not served.
   (E comms 25 · G displays 21 · F sensors 20 · B smart-pins 15 · C math/DSP 9 · H motors 9 · I storage 8 · K dev-tools 8 · A core 7 · J audio 7 · D streaming 1).
-  v2.2 added **17 new / 3 changed** vs the v2.1 (113-object) baseline.
-- **Served via:** the p2kb MCP — `p2kb_obex_find` / `p2kb_obex_get` / `p2kb_obex_download` (all 130; verified live 2026-10-12 on p2kb-mcp 1.5.0). The summary's `quality: 0` and fixed category list go in p2kb-mcp 1.5.1 (`engineering/tools/p2kb-mcp/MCP-OBEX-SUMMARY-CHANGE-REQUEST.md`, F-571).
-- **Last release:** **2026-10-12 (KB v1.24.3)** · **catalog fields mirrored 2026-10-12** · **new-object delta baseline = 2026-06-29** (the OBEX listing has not been re-scanned for new objects since v2.2).
+- **Served via:** the p2kb MCP — `p2kb_obex_find` / `p2kb_obex_get` / `p2kb_obex_download` (all 130; verified live 2026-10-12 on p2kb-mcp 1.5.0). p2kb-mcp 1.5.1 removes the summary's `quality: 0`, the fixed category list and the dead download links (`engineering/tools/p2kb-mcp/MCP-OBEX-SUMMARY-CHANGE-REQUEST.md`, F-571).
+- **Last release:** **2026-10-12 (KB v1.24.4)** · **catalog mirrored 2026-10-12** · **new-object baseline = 2026-10-12**: the listing was re-scanned, and 130 object pages were listed, all already in the KB, with 0 new.
 - **Why this head:** community code agents were never trained on, surfaced on-demand with authentic
   attribution + provenance — extends the KB beyond Parallax's own docs.
 
 ## Tier 2 — Outstanding work
 | Item | State | Note |
 |------|-------|------|
-| **Catalog re-mirror** | ✅ done 2026-10-12 (KB v1.24.2/v1.24.3) | all 130 objects' catalog fields from their pages; 130 one-liners; F-573 |
-| **Re-scan for new objects** | ⏳ due | listing not re-crawled since **2026-06-29** (v2.2: 17 new / 3 changed); run the runbook below |
-| **Non-catalog fields** | ❓ Stephen's call | our `capability` taxonomy, a default `p2_chip_versions: [all]`, and six always-empty placeholders — keep, drop or move |
+| **Pure mirror** | ✅ done 2026-10-12 (KB v1.24.2–v1.24.4) | every field from the page; 130 one-liners (F-573); non-catalog fields removed (Stephen: "pure mirror"), `capability` moved to `obex-capability-map.yaml` |
+| **Re-scan for new objects** | ✅ 2026-10-12 | `discover`: 130 listed, 0 new; next re-scan uses the runbook below |
 | **p2kb-mcp 1.5.1** | ⏳ server side | change request ready; F-571 closes on its probes O1-O7 |
 | OBEX adoption outreach | ⏳ community-side | 6 archiver imports await author adoption → `OBEX-ADOPTION-REQUESTS.md` |
 | Forum announcement follow-through | ◐ | drafts `FORUM-POST-1/2` (KB announcement + integration) |
@@ -35,20 +33,23 @@
 
 ## Re-scan runbook (the OBEX head has no dedicated skill — this IS the runbook)
 
-**Run a delta re-scan** against the current baseline (**2026-06-29**):
-1. **New objects** — crawl the live OBEX P2 listing (`obex_discovery_fixed.py`) and diff its IDs against
-   `deliverables/ai/P2/community/obex/objects/`; create a YAML for each new ID (template
-   `_template.yaml`, capability-spine classification).
-2. **Catalog fields** — `engineering/tools/obex-integration/obex-catalog-mirror.py fetch --pages DIR`
-   (polite, 2.5 s apart; a neutral project User-Agent, never a personal address), then `report` (read
-   every change; any PROBLEM line means a page shape the tool does not know — fix the tool, never
-   force), then `apply`. It is the **only** writer of the catalog fields; the old author/description
-   scrapers are retired (`archive/`, local). Prove the run against git: only owned fields changed.
+**Run a delta re-scan** against the current baseline (**2026-10-12**). One tool does it all:
+`engineering/tools/obex-integration/obex-catalog-mirror.py`, the **only** writer of the object YAMLs.
+Its requests are polite: 2.5 s apart, with a neutral project User-Agent and never a personal address.
+The 2025 scrapers are retired (`archive/`, local).
+1. **New objects** — `discover --pages DIR` lists every P2 object page on the OBEX listing that has
+   no YAML. For each one, run `add --url <page> --pages DIR`, which writes the id and page only.
+   `NOT LISTED` lines are objects OBEX no longer lists; that is Stephen's call, so never delete one
+   unasked.
+2. **Catalog fields** — `fetch`, then `report` (read every change; a PROBLEM line is a page shape
+   the tool does not know, so fix the tool, never force), then `apply`, which writes each object
+   whole. Prove the run against git: every value outside the reported changes is unchanged.
 3. **One-liners** — author `functionality.description_short` for each new or materially changed object
    from its catalog text (one sentence, ≤120 characters, no verdict), have a fresh agent check each
    against the full description; the release gate *OBEX One-Line Descriptions* fails until done.
-4. `scrape-obex-repos.py` for GitHub repo, version and upload date; then regen the index and release
-   via `release-yamls`; probe live after the CDN window (`p2kb_refresh flush include_obex`).
+4. **Capability map** — classify each new object in `obex-capability-map.yaml`. This is
+   engineering-side, for the coverage analysis, and is never written into the object.
+5. Release via `release-yamls`; probe live after the CDN window (`p2kb_refresh flush include_obex`).
 
 ### Close-out checklist — DO EVERY re-scan (this is what v2.2 missed) ⚠️
 The YAML/index/release half rides `release-yamls`, but the **status docs do not update themselves** — a

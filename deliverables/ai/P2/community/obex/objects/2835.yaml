@@ -1,61 +1,30 @@
 object_metadata:
+  object_id: '2835'
+  title: Sony IRCS Tx (infrared control system transmitter)
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: E
-    leaf: ir-remote
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category:
     - Protocol
     - Signals
+    tags: []
+    description_short: Modulates an IR LED with the Sony IRCS command protocol using
+      P2 smart pins, inline (blocking) or in the background.
     description_full: This object takes advantage of the P2 smart pins to modulate
       an IR LED using the Sony IRCS command protocol. Output can be inline (blocking)
       or run in the background if a spare cog is available. The tx() method allows
       the program to define the code, the number of bits for that code (usually 12,
       15, or 20), and the number of times to repeat the code (at typical TV remote
       will repeat a code three to five times).
-    description_short: 'Modulates an IR LED with the Sony IRCS command protocol using P2 smart pins, inline (blocking) or in the background.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:08.056833'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:49.658383'
-    page_discovered: 11
-    last_author_deep_search: 2025-09-12T13:39:2
-    last_author_consolidation: 2025-09-12T14:06:0
-    last_description_fix: 2025-09-12T14:20:1
-    created_date: '2020-07-22 12:00:00'
-    last_created_date_fix: 2025-09-12T15:33:0
-    version_last_scraped: '2025-09-26T11:32:41.788726'
-  object_id: '2835'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: Other
-  title: Sony IRCS Tx (infrared control system transmitter)
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2835
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/sony-ircs-tx-infrared-control-system-transmitter/
   metadata:
     created_date: '2020-07-22'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/sony-ircs-tx-infrared-control-system-transmitter/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2835

@@ -1,20 +1,16 @@
 object_metadata:
+  object_id: '4570'
+  title: ISP P2 PCF8575 I2C I/O Expander Object
   author: Stephen M Moraco
-  author_username: ''
-  capability:
-    domain: B
-    leaf: pin-modes
-    secondary:
-    - domain: E
-      leaf: i2c
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Protocol
+    tags:
+    - I2C
+    - PCF8575
+    - Port Expander
+    - Spin2
+    description_short: Spin2 object for the PCF8575, which provides general-purpose
+      remote I/O expansion via the I2C-bus.
     description_full: 'The PCF8575 provides general-purpose remote I/O expansion via
       the two-line bidirectional bus (I2C-bus).
 
@@ -25,53 +21,24 @@ object_metadata:
       Version (Repository Latest)
 
 
-      GitHub repository: P2 PCF8575 Object - I2C I/O port Expander
+      GitHub repository: P2 PCF8575 Object - I2C I/O port Expander (https://github.com/ironsheep/P2-VL53L5CX-time-of-flight-driver/blob/main/PCF8575.md)
 
 
       This object (in my case) is used in a larger project, which is referenced in
       the following forum thread:
 
-      Forum Thread: 180° Field of View Time-of-Flight sensor for the P2'
-    description_short: 'Spin2 object for the PCF8575, which provides general-purpose remote I/O expansion via the I2C-bus.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - I2C
-    - PCF8575
-    - Port Expander
-    - Spin2
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:43:59.509886'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:22:43.728262'
-    last_complete_extraction: '2025-09-12T13:30:07.139605'
-    page_discovered: 5
-    last_description_fix: 2025-09-12T14:20:1
-    created_date: '2024-03-11 23:04:37'
-    last_created_date_fix: 2025-09-12T15:27:3
-    version_last_scraped: '2025-09-26T11:34:19.134027'
-  object_id: '4570'
+      Forum Thread: 180° Field of View Time-of-Flight sensor for the P2 (https://forums.parallax.com/discussion/174860/180-field-of-view-time-of-flight-sensor-for-the-p2#latest)'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: (Repository Latest)
-    content_type:
-    - Code
     licence: MIT
-  title: ISP P2 PCF8575 I2C I/O Expander Object
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4570
-    forum_discussion: ''
-    github_repo: https://github.com/ironsheep/P2-VL53L5CX-time-of-flight-driver
-    obex_page: https://obex.parallax.com/obex/isp-p2-pcf8575-i2c-i-o-expander-object/
   metadata:
     created_date: '2024-03-11'
-  version_tracking:
-    has_github_repo: true
+  urls:
+    obex_page: https://obex.parallax.com/obex/isp-p2-pcf8575-i2c-i-o-expander-object/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4570

@@ -1,57 +1,26 @@
 object_metadata:
+  object_id: '2846'
+  title: Sony IRCS Rx (infrared control system receiver)
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: E
-    leaf: ir-remote
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Protocol
+    tags: []
+    description_short: Receives and decodes Sony IRCS signals from an active-low receiver
+      module; auto-detects 12-, 15- and 20-bit codes.
     description_full: This object receives and decodes Sony IRCS (infrared control
       system) signals using a standard active-low receiver module. Auto-detects 12-,
       15-, and 20-bit control codes.
-    description_short: 'Receives and decodes Sony IRCS signals from an active-low receiver module; auto-detects 12-, 15- and 20-bit codes.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:05.264550'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:23:21.405001'
-    last_complete_extraction: '2025-09-12T13:30:07.200252'
-    page_discovered: 9
-    last_html_corruption_fix: 2025-09-12T14:32:2
-    last_license_corruption_fix: 2025-09-12T14:34:2
-    created_date: '2020-07-19 12:00:00'
-    last_created_date_fix: 2025-09-12T15:33:2
-    version_last_scraped: '2025-09-26T11:32:58.811111'
-  object_id: '2846'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: ''
-    content_type:
-    - Code
     licence: Other
-  title: Sony IRCS Rx (infrared control system receiver)
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2846
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/sony-ircs-rx-infrared-control-system-receiver/
   metadata:
     created_date: '2020-07-19'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/sony-ircs-rx-infrared-control-system-receiver/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2846

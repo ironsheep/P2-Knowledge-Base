@@ -1,22 +1,14 @@
 object_metadata:
+  object_id: '4889'
+  title: HostFS
   author: ersmith
-  author_username: ''
-  capability:
-    domain: K
-    leaf: host-integration
-    secondary:
-    - domain: E
-      leaf: networking
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category:
     - Data Storage
     - Protocol
+    tags: []
+    description_short: Code for accessing the host filesystem via the 9P protocol,
+      using the serial port by default.
     description_full: "P2-HOST-FS\n\nHOST FS - code for accessing the host filesystem\
       \ via the 9P protocol\n\nHost Filesystem Features\n\nKey features of this filesystem\
       \ for the P2 chip:\n- Read and write files and directories directly on the host\
@@ -39,40 +31,16 @@ object_metadata:
       \ the data to send, and maxlen is the maximum size of the buffer. The function\
       \ returns the actual number of bytes received in the reply from the host.\n\n\
       See the detailed documentation in the .zip file for more details."
-    description_short: 'Code for accessing the host filesystem via the 9P protocol, using the serial port by default.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:43:58.182018'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:11.796340'
-    last_complete_extraction: '2025-09-12T13:30:06.987279'
-    page_discovered: 4
-    created_date: '2024-09-29 12:01:43'
-    last_created_date_fix: 2025-09-12T15:27:5
-    version_last_scraped: '2026-06-29T00:00:00'
-  object_id: '4889'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: MIT
-  title: HostFS
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4889
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/hostfs/
   metadata:
     created_date: '2024-09-29'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/hostfs/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4889

@@ -1,20 +1,17 @@
 object_metadata:
+  object_id: '5405'
+  title: P2 Dual uSD FAT32 and FLASH FS
   author: Stephen M Moraco
-  author_username: ''
-  capability:
-    domain: I
-    leaf: sd-fat
-    secondary:
-    - domain: I
-      leaf: spi-flash
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Data Storage
+    tags:
+    - FAT32
+    - Filesystem
+    - FLASH
+    - P2 EDGE
+    - SD card
+    description_short: Unified filesystem driver giving the P2 Edge one-cog, one-API
+      access to its onboard 16MB FLASH chip and a microSD card.
     description_full: 'A unified filesystem driver for the Parallax Propeller 2 (P2)
       that provides simultaneous access to both the onboard 16MB FLASH chip and a
       microSD card through a single cog and a single API.
@@ -31,15 +28,16 @@ object_metadata:
 
       - Provisioning tool — Use the SD card to load configuration files, firmware
       images, or data onto Flash during manufacturing or field setup. Once Flash is
-      populated, ship the product with the smaller standalone Flash driver for a reduced
-      image size.
+      populated, ship the product with the smaller standalone Flash driver (https://github.com/ironsheep/P2-FLASH-FS)
+      for a reduced image size.
 
       - Development and testing — Use the SD card as a convenient way to get data
       onto the board during development, then switch to Flash-only for production.
 
 
-      If your product only ever needs one device, the standalone drivers (Flash-only,
-      SD-only) produce smaller binaries.
+      If your product only ever needs one device, the standalone drivers (Flash-only
+      (https://github.com/ironsheep/P2-FLASH-FS), SD-only (https://github.com/ironsheep/P2-uSD-FAT32-FS))
+      produce smaller binaries.
 
 
       Features
@@ -73,7 +71,8 @@ object_metadata:
 
       Hardware Requirements
 
-      - Parallax Propeller 2 — P2-EC or P2-EC32MB
+      - Parallax Propeller 2 — P2-EC (https://www.parallax.com/product/p2-edge-module/)
+      or P2-EC32MB (https://www.parallax.com/product/p2-edge-module-32mb/)
 
       - microSD card (SDHC or SDXC) — the included format utility can format cards
       that are not already FAT32
@@ -84,44 +83,17 @@ object_metadata:
       - This is a regression test certified driver for the P2 Edge boards.
 
       This object v1.3.0 will be updated periodically. For the latest release, visit
-      the Releases Page'
-    description_short: 'Unified filesystem driver giving the P2 Edge one-cog, one-API access to its onboard 16MB FLASH chip and a microSD card.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - FAT32
-    - Filesystem
-    - FLASH
-    - P2 EDGE
-    - SD card
-  scrape_tracking:
-    created_date: '2026-06-29 22:42:39'
-    discovery_date: '2026-06-29T00:00:00'
-    kb_integration: none
-    last_scraped: '2026-06-29T00:00:00'
-    rescrape_source: v2.2 re-scrape 2026-06-29
-    version_last_scraped: '2026-06-29T00:00:00'
-  object_id: '5405'
+      the Releases Page (https://github.com/ironsheep/P2-Dual-uSD-FAT32-n-FLASH-FS/releases)'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2 PASM2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2 PASM2
     licence: MIT
-  title: P2 Dual uSD FAT32 and FLASH FS
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5405
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/p2-dual-usd-fat32-and-flash-fs/
   metadata:
     created_date: '2026-06-29'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/p2-dual-usd-fat32-and-flash-fs/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5405

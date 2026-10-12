@@ -1,20 +1,20 @@
 object_metadata:
+  object_id: '4617'
+  title: ISP P2 Multi Servo Exercisor
   author: Stephen M Moraco
-  author_username: ''
-  capability:
-    domain: H
-    leaf: servo
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category:
     - Display
     - Human Input
     - Motor Control
+    tags:
+    - PCA9685
+    - PWM
+    - Rotary Encoder
+    - Servo
+    - TIMI
+    description_short: Menu-based tester/exerciser for many servos, using a rotary
+      controller and a TIMI OLED display, without re-cabling.
     description_full: 'This project was created to help me exercise many servos within
       a single project without re-cabling each servo to characterize it.
 
@@ -33,58 +33,27 @@ object_metadata:
       Version (repository Latest)
 
 
-      GItHub repository: P2 Multi-servo Exerciser
+      GItHub repository: P2 Multi-servo Exerciser (https://github.com/ironsheep/P2-mult-servo-exerciser)
 
 
       See also the OBEX pages:
 
-      - ISP P2 TIMI Spin2 Object
+      - ISP P2 TIMI Spin2 Object (https://obex.parallax.com/obex/p2-timi-spin2-object/)
 
-      - ISP PCA9685 16ch PWM Servo Driver
+      - ISP PCA9685 16ch PWM Servo Driver (https://obex.parallax.com/obex/isp-pca9685-16ch-pwm-servo-driver/)
 
 
-      DOWNLOAD: please get this code directly from the repo.'
-    description_short: 'Menu-based tester/exerciser for many servos, using a rotary controller and a TIMI OLED display, without re-cabling.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - PCA9685
-    - PWM
-    - Rotary Encoder
-    - Servo
-    - TIMI
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:43:59.509850'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:20:46.291697'
-    last_complete_extraction: '2025-09-12T13:30:06.947627'
-    page_discovered: 5
-    last_description_fix: 2025-09-12T14:20:1
-    created_date: '2024-03-13 04:48:17'
-    last_created_date_fix: 2025-09-12T15:27:4
-    version_last_scraped: '2025-09-26T11:34:26.693005'
-  object_id: '4617'
+      DOWNLOAD: please get this code directly from the repo (https://github.com/ironsheep/P2-mult-servo-exerciser).'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: (repository Latest)
-    content_type:
-    - Code
     licence: MIT
-  title: ISP P2 Multi Servo Exercisor
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4617
-    forum_discussion: ''
-    github_repo: https://github.com/ironsheep/P2-mult-servo-exerciser
-    obex_page: https://obex.parallax.com/obex/isp-p2-multi-servo-exercisor/
   metadata:
     created_date: '2024-03-13'
-  version_tracking:
-    has_github_repo: true
+  urls:
+    obex_page: https://obex.parallax.com/obex/isp-p2-multi-servo-exercisor/

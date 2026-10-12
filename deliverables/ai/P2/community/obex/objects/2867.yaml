@@ -1,60 +1,24 @@
 object_metadata:
+  object_id: '2867'
+  title: Accessory Board Buttons
   author: Bryan Thomas
-  author_username: ''
-  capability:
-    domain: F
-    leaf: human-input
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Human Input
+    tags: []
+    description_short: 'Code for accessory board buttons: momentary switches by default,
+      or On/Off switches when Switch is set to true.'
     description_full: 'For use as a On/Off switch: set Switch to true, otherwise the
       buttons will act as momentary switches and not retain there state when released'
-    description_short: 'Code for accessory board buttons: momentary switches by default, or On/Off switches when Switch is set to true.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:02.356277'
-    kb_integration: none
-    last_author_cleanup: '2025-09-12T13:31:14.620058'
-    last_author_extraction: '2025-09-12T13:22:50.944640'
-    last_complete_extraction: '2025-09-12T13:30:07.150486'
-    page_discovered: 7
-    last_author_re_extraction: 2025-09-12T14:04:1
-    last_html_corruption_fix: 2025-09-12T14:32:2
-    last_license_corruption_fix: 2025-09-12T14:34:2
-    created_date: '2020-12-06 12:00:00'
-    last_created_date_fix: 2025-09-12T15:33:4
-    import_source: github_archiver
-    original_platform: github
-    last_archiver_fix: 2025-09-12T15:53:4
-    version_last_scraped: '2025-09-26T11:33:31.394316'
-  object_id: '2867'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: Other
-  title: Accessory Board Buttons
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2867
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/accessory-board-buttons/
   metadata:
     created_date: '2020-12-06'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/accessory-board-buttons/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2867

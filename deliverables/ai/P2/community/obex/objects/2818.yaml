@@ -1,20 +1,16 @@
 object_metadata:
+  object_id: '2818'
+  title: ISP P2 Click MPU 9DOF Driver
   author: Stephen M Moraco
-  author_username: ''
-  capability:
-    domain: F
-    leaf: imu
-    secondary:
-    - domain: E
-      leaf: i2c
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Sensor
+    tags:
+    - 9DOF
+    - Click
+    - I2C
+    - motion tracking
+    description_short: Driver for the MPU 9DOF Click module, using the underlying
+      jm_i2c driver for I2C access.
     description_full: 'Driver for the MPU 9DOF Click module (uses underlying jm_i2c
       driver for I2C access)
 
@@ -22,7 +18,7 @@ object_metadata:
       Version (Repository Latest)
 
 
-      GitHub repository: P2-click-MPU-9dof
+      GitHub repository: P2-click-MPU-9dof (https://github.com/ironsheep/P2-click-MPU-9dof)
 
 
       This driver is still in development and final testing...
@@ -30,54 +26,26 @@ object_metadata:
 
       Related:
 
-      - See Docs, Example Code at P2 Click MPU 9dof Github Repository
+      - See Docs, Example Code at P2 Click MPU 9dof Github Repository (https://github.com/ironsheep/P2-click-MPU-9dof)
 
-      - Shop at Parallax: MPU 9DOF Click store page
+      - Shop at Parallax: MPU 9DOF Click store page (https://www.parallax.com/product/mpu-9dof-click)
 
-      - Click Module main page: Mikroe Module Page
+      - Click Module main page: Mikroe Module Page (https://www.mikroe.com/mpu-9dof-click)
 
 
       DOWNLOAD: while this is in development, please get this code directly from the
-      repo.'
-    description_short: 'Driver for the MPU 9DOF Click module, using the underlying jm_i2c driver for I2C access.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - 9DOF
-    - Click
-    - I2C
-    - motion tracking
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:09.461402'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:09.990933'
-    last_complete_extraction: '2025-09-12T13:30:06.984352'
-    page_discovered: 12
-    created_date: '2024-03-12 23:14:08'
-    last_created_date_fix: 2025-09-12T15:24:5
-    version_last_scraped: '2025-09-26T11:32:17.050234'
-  object_id: '2818'
+      repo (https://github.com/ironsheep/P2-click-MPU-9dof).'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: (Repository Latest)
-    content_type:
-    - Code
     licence: MIT
-  title: ISP P2 Click MPU 9DOF Driver
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2818
-    forum_discussion: ''
-    github_repo: https://github.com/ironsheep/P2-click-MPU-9dof
-    obex_page: https://obex.parallax.com/obex/isp-click-mpu-9dof-driver/
   metadata:
     created_date: '2024-03-12'
-  version_tracking:
-    has_github_repo: true
+  urls:
+    obex_page: https://obex.parallax.com/obex/isp-click-mpu-9dof-driver/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2818

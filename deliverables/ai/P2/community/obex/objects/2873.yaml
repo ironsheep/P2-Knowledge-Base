@@ -1,20 +1,15 @@
 object_metadata:
+  object_id: '2873'
+  title: ISP PCA9685 16ch PWM Servo Driver
   author: Stephen M Moraco
-  author_username: ''
-  capability:
-    domain: H
-    leaf: servo
-    secondary:
-    - domain: E
-      leaf: i2c
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Motor Control
+    tags:
+    - I2C
+    - PWM
+    - Servo
+    description_short: Driver for 16 channels of servo control via I2C using the PCA9685
+      16ch PWM chip.
     description_full: 'Driver for 16 channels of servo control via I2C using the PCA9685
       16ch PWM chip (uses underlying singleton version adapted from jm_i2c driver
       for I2C access)
@@ -23,71 +18,44 @@ object_metadata:
       Version: (Repository Latest)
 
 
-      GitHub repository: P2-PCA9685-Servo-Driver
+      GitHub repository: P2-PCA9685-Servo-Driver (https://github.com/ironsheep/P2-PCA9685-Servo-Driver/tree/main)
 
 
       This object (in my case) is used in a larger project in which I drive a servo-controlled
       arm to test orientation sensing chips while developing P2 objects. I also use
       the FlySky R/C controller to control arm positioning interactively. This code:
       arm demo with FlySky controller using the PCA9685-controlled servos is all found
-      at the project Repo.
+      at the project Repo (https://github.com/ironsheep/P2-PCA9685-Servo-Driver/tree/main).
 
 
       See also the OBEX page(s):
 
-      - ISP P2 Multi Servo Exercisor
+      - ISP P2 Multi Servo Exercisor (https://obex.parallax.com/obex/isp-p2-multi-servo-exercisor/)
 
 
       Related:
 
-      - See Docs, Example Code at P2 PCA9685 Servo Driver Github Repository
+      - See Docs, Example Code at P2 PCA9685 Servo Driver Github Repository (https://github.com/ironsheep/P2-PCA9685-Servo-Driver)
 
       - NXP Manuf Datasheet: PCA9685: 16-Channel, 12-Bit PWM Fm+ I²C-Bus LED Controller
+      (https://www.nxp.com/products/power-management/lighting-driver-and-controller-ics/ic-led-controllers/16-channel-12-bit-pwm-fm-plus-ic-bus-led-controller:PCA9685)
 
       - Shop at Adafruit: Adafruit 16-Channel 12-bit PWM/Servo Driver - I2C interface
-      - PCA9685
+      - PCA9685 (https://www.adafruit.com/product/815)
 
       - Shop at Amazon: HiLetgo 2pcs PCA9685 16 Channel 12-Bit PWM Servo Motor Driver
-      IIC Module'
-    description_short: 'Driver for 16 channels of servo control via I2C using the PCA9685 16ch PWM chip.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - I2C
-    - PWM
-    - Servo
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:02.356208'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:20:19.063928'
-    last_complete_extraction: '2025-09-12T13:30:06.908191'
-    page_discovered: 7
-    last_description_fix: 2025-09-12T14:20:1
-    created_date: '2024-03-13 22:03:31'
-    last_created_date_fix: 2025-09-12T15:26:5
-    version_last_scraped: '2025-09-26T11:33:40.530667'
-  object_id: '2873'
+      IIC Module (https://www.amazon.com/HiLetgo-PCA9685-Channel-12-Bit-Arduino/dp/B07BRS249H)'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: (Repository Latest)
-    content_type:
-    - Code
     licence: Other
-  title: ISP PCA9685 16ch PWM Servo Driver
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2873
-    forum_discussion: ''
-    github_repo: https://github.com/ironsheep/P2-PCA9685-Servo-Driver
-    obex_page: https://obex.parallax.com/obex/isp-pca9685-16ch-pwm-servo-driver/
   metadata:
     created_date: '2024-03-13'
-  version_tracking:
-    has_github_repo: true
+  urls:
+    obex_page: https://obex.parallax.com/obex/isp-pca9685-16ch-pwm-servo-driver/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2873

@@ -1,5 +1,10 @@
 # OBEX Integration Plan: P2 Master Object Index
 
+> **Historical (2025-09).** The tools this plan names (`obex_discovery.py`, `discover_obex.sh`) are
+> retired, and the object schema it describes is gone. Today each object is a pure mirror of its
+> catalog page, written by `engineering/tools/obex-integration/obex-catalog-mirror.py` (KB v1.24.4).
+> The live runbook is in `README.md`, this folder.
+
 **Status**: Implementation Ready  
 **Created**: 2025-09-11  
 **Goal**: Build comprehensive, searchable index of P2 community objects from Parallax OBEX

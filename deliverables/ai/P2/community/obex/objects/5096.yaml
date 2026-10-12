@@ -1,59 +1,33 @@
 object_metadata:
+  object_id: '5096'
+  title: Autodesk Fusion model of P2 Arc8de 8in1
   author: Graham Cole
-  author_username: ''
-  capability:
-    domain: K
-    leaf: hardware-design
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: 3D Model
-    description_full: 'This is an Autodesk Fusion model of the P2 Arc8de 8in1 Cabinet.
-      I used 3mm Birch Plywood for it''s construction.
-
-      Link to the original thread on the P2 forum is here.
-
-
-      This model is shared under the CC BY-SA 4.0 licence.'
-    description_short: '3D model, in Autodesk Fusion, of the P2 Arc8de 8in1 Cabinet built from 3mm Birch Plywood.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
     tags:
     - 3D Model
     - emulation
     - Fusion
     - P2 EDGE
-  scrape_tracking:
-    created_date: '2025-02-16 15:54:43'
-    discovery_date: '2026-06-29T00:00:00'
-    kb_integration: none
-    last_scraped: '2026-06-29T00:00:00'
-    rescrape_source: v2.2 re-scrape 2026-06-29
-    version_last_scraped: '2026-06-29T00:00:00'
-  object_id: '5096'
+    description_short: 3D model, in Autodesk Fusion, of the P2 Arc8de 8in1 Cabinet
+      built from 3mm Birch Plywood.
+    description_full: 'This is an Autodesk Fusion model of the P2 Arc8de 8in1 Cabinet.
+      I used 3mm Birch Plywood for it''s construction.
+
+      Link to the original thread on the P2 forum is here (https://forums.parallax.com/discussion/173341/p2-arc8de-project/p1?new=1).
+
+
+      This model is shared under the CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/)
+      licence.'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages: []
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Hardware
+    microcontroller:
+    - P2
+    languages: []
     licence: Other
-  title: Autodesk Fusion model of P2 Arc8de 8in1
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5096
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/autodesk-fusion-model-of-p2-arca8de-8in1/
   metadata:
     created_date: '2025-02-16'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/autodesk-fusion-model-of-p2-arca8de-8in1/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5096

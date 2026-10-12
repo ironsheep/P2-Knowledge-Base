@@ -1,17 +1,12 @@
 object_metadata:
+  object_id: '2858'
+  title: MAX7219 Dot Matrix
   author: glapolla
-  author_username: ''
-  capability:
-    domain: G
-    leaf: led-matrix
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Display
+    tags: []
+    description_short: Spin2 object interfacing the MAX7219 chip with the P2 for dot
+      matrix display, based on the Arduino LedControl.
     description_full: 'Language
 
 
@@ -47,40 +42,16 @@ object_metadata:
       MAX7219 Spin 2 Object is developed by Greg LaPolla.
 
       This object is based on the arduino LedControl by Eberhard Fahle'
-    description_short: 'Spin2 object interfacing the MAX7219 chip with the P2 for dot matrix display, based on the Arduino LedControl.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:03.845001'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:36.987576'
-    last_complete_extraction: '2025-09-12T13:30:07.032461'
-    page_discovered: 8
-    created_date: '2023-11-16 20:07:54'
-    last_created_date_fix: 2025-09-12T15:26:1
-    version_last_scraped: '2025-09-26T11:33:17.525464'
-  object_id: '2858'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - Generic
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - Generic
     licence: Other
-  title: MAX7219 Dot Matrix
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2858
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/max7219-dot-matrix/
   metadata:
     created_date: '2023-11-16'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/max7219-dot-matrix/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2858

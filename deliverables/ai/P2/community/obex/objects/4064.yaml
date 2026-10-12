@@ -1,20 +1,12 @@
 object_metadata:
+  object_id: '4064'
+  title: ADS1118
   author: glapolla
-  author_username: ''
-  capability:
-    domain: B
-    leaf: adc
-    secondary:
-    - domain: E
-      leaf: spi
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Sensor
+    tags:
+    - Temperature ADC Sensor
+    description_short: Object for the ADS1118 16-bit analog-to-digital converter (ADC).
     description_full: The ADS1118 is a precision, low power, 16-bit analog-to-digital
       converter (ADC) that provides all features necessary to measure the most common
       sensor signals in an ultra-small, leadless X2QFN-10 package or a VSSOP-10 package.
@@ -22,42 +14,16 @@ object_metadata:
       oscillator and high-accuracy temperature sensor. These features, along with
       a wide power supply range from 2 V to 5.5 V, make the ADS1118 ideally suited
       for power- and space- constrained, sensor-measurement applications.
-    description_short: 'Object for the ADS1118 16-bit analog-to-digital converter (ADC).'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - Temperature ADC Sensor
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:12.247238'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:23:03.687946'
-    page_discovered: 14
-    last_author_deep_search: 2025-09-12T13:39:2
-    last_description_fix: 2025-09-12T15:39:2
-    created_date: '2023-10-18 20:37:42'
-    last_created_date_fix: 2025-09-12T15:27:0
-    version_last_scraped: '2025-09-26T11:33:54.408202'
-  object_id: '4064'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: MIT
-  title: ADS1118
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4064
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/ads1118-3/
   metadata:
     created_date: '2023-10-18'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/ads1118-3/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4064

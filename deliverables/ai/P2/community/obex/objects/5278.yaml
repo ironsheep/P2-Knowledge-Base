@@ -1,60 +1,27 @@
 object_metadata:
+  object_id: '5278'
+  title: QMC5883L HMC5883 BMM150 compass drivers
   author: m.k. borri
-  author_username: ''
-  capability:
-    domain: F
-    leaf: compass
-    secondary:
-    - domain: E
-      leaf: i2c
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Sensor
-    description_full: this is a very simple compass driver for the prop2, not much
-      else to say about it. it works and it includes fastatan2 for getting compass
-      heading. You should be able to swap them at your leisure.
-    description_short: 'Compass drivers for the QMC5883L, HMC5883 and BMM150 on the prop2, including fastatan2 for compass heading.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
     tags:
     - control
     - Sensor
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:43:55.437608'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:22:15.078102'
-    page_discovered: 1
-    last_author_deep_search: 2025-09-12T13:39:2
-    last_description_fix: 2025-09-12T15:39:2
-    created_date: '2025-07-24 20:04:32'
-    last_created_date_fix: 2025-09-12T15:28:1
-    version_last_scraped: '2025-09-26T11:34:58.897461'
-  object_id: '5278'
+    description_short: Compass drivers for the QMC5883L, HMC5883 and BMM150 on the
+      prop2, including fastatan2 for compass heading.
+    description_full: this is a very simple compass driver for the prop2, not much
+      else to say about it. it works and it includes fastatan2 for getting compass
+      heading. You should be able to swap them at your leisure.
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: MIT
-  title: QMC5883L HMC5883 BMM150 compass drivers
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5278
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/qmc5883l-driver/
   metadata:
     created_date: '2025-07-24'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/qmc5883l-driver/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5278

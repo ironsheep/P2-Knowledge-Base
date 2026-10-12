@@ -1,17 +1,13 @@
 object_metadata:
+  object_id: '2862'
+  title: OPN2cog
   author: Wuerfel_21
-  author_username: ''
-  capability:
-    domain: J
-    leaf: synthesis
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Speech and Sound
+    tags:
+    - emulation
+    description_short: Emulation of the Yamaha "OPN2" YM2612 FM synth chip that runs
+      in one P2 cog.
     description_full: '(or SEGA Genesis if you''re in yankland...)
 
 
@@ -135,44 +131,17 @@ object_metadata:
       - Compile with flexspin -2 megajuke.c -D_BAUD=2000000
 
       - Load with loadp2 -p [your port here] -t -9 . -b 2000000 megajuke.binary'
-    description_short: Emulation of the Yamaha "OPN2" YM2612 FM synth chip that runs
-      in one P2 cog.
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - emulation
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:03.844968'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:45.956872'
-    last_complete_extraction: '2025-09-12T13:30:07.045570'
-    page_discovered: 8
-    last_author_re_extraction: 2025-09-12T14:04:1
-    created_date: '2024-03-13 21:12:44'
-    last_created_date_fix: 2025-09-12T15:26:2
-    version_last_scraped: '2025-09-26T11:33:23.682633'
-  object_id: '2862'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM2
     - SPIN2
-    microcontroller:
-    - P2
-    version: ''
-    content_type:
-    - Code
     licence: Other
-  title: OPN2cog
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2862
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/opn2cog/
   metadata:
     created_date: '2024-03-13'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/opn2cog/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2862

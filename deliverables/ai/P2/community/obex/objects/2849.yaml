@@ -1,20 +1,13 @@
 object_metadata:
+  object_id: '2849'
+  title: ILI9341_XPT2046
   author: Unknown
-  author_username: ''
-  capability:
-    domain: G
-    leaf: lcd-eink
-    secondary:
-    - domain: F
-      leaf: touch
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Display
+    tags:
+    - SPI
+    description_short: Display object interfacing the ILI9341 video chip and XPT2046
+      chip with the P2, derived from Cluso's ST7796 LCD driver.
     description_full: 'Language
 
 
@@ -52,44 +45,16 @@ object_metadata:
       ILI9341_XPT2046 Spin 2 Object is maintained by Greg LaPolla.
 
       This Driver was derived from Cluso''s ST7796 4.0in SPI 480x320 w Touch LCD Driver'
-    description_short: 'Display object interfacing the ILI9341 video chip and XPT2046 chip with the P2, derived from Cluso''s ST7796 LCD driver.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - SPI
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:44:05.264522'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:20:22.656260'
-    last_complete_extraction: '2025-09-12T13:30:06.915643'
-    page_discovered: 9
-    last_author_re_extraction: 2025-09-12T14:04:1
-    last_author_fix: 2025-09-12T14:11:4
-    last_description_fix: 2025-09-12T15:39:2
-    created_date: '2023-11-16 20:02:29'
-    last_created_date_fix: 2025-09-12T15:25:5
-    version_last_scraped: '2025-09-26T11:33:03.559721'
-  object_id: '2849'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: MIT
-  title: ILI9341_XPT2046
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2849
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/ili9341_xpt2046/
   metadata:
     created_date: '2023-11-16'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/ili9341_xpt2046/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2849

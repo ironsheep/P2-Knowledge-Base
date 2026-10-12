@@ -10,7 +10,7 @@
 ## Why one axis
 
 OBEX, Quick Bytes, and the P1 app notes each speak their own vocabulary
-(OBEX has 9 categories; Quick Bytes ~21 tags; P1 app notes their own topics).
+(OBEX has 15 categories of its own; Quick Bytes ~21 tags; P1 app notes their own topics).
 You cannot ask "what does the P2 ecosystem already cover, and where are the
 holes" until every artifact is normalized to **one shared notion of the
 task/capability it addresses.** That shared notion is this spine. Each artifact
@@ -111,19 +111,28 @@ How each existing corpus's categories/tags resolve onto the spine. **Cross-cutti
 categories don't map to one domain — each artifact under them is classified by its
 own content.**
 
-### OBEX `functionality.category` (9) → domain
+### OBEX categories → domain
+
+From KB v1.24.2 an OBEX object's `functionality.category` is **OBEX's own category**, not our
+scraper's nine buckets (`display`, `drivers`, `misc`, …), which are gone. From v1.24.4 the
+classification itself is **not** in the object: the served object mirrors the catalog only. The
+classification lives engineering-side in `engineering/obex-integration/obex-capability-map.yaml`,
+one entry per object id.
+
+How OBEX's categories fell across the spine in that map (2026-10-12; an object counts under every
+category it lists, by its primary domain):
 
 | OBEX category | Spine domain |
 |---|---|
-| `display` | G |
-| `audio` | J |
-| `motors` | H |
-| `communication` | E |
-| `sensors` | F |
-| `tools` | K |
-| `drivers` | **cross-cutting** — a *role*, not a domain; classify per object by what it drives (a SPI flash driver → I; a VGA driver → G; a servo driver → H) |
-| `demos` | **cross-cutting** — classify per object by what it demonstrates |
-| `misc` | **cross-cutting** — classify per object |
+| `Math` | C (7 of 7) |
+| `Speech and Sound` | J (7 of 9) |
+| `Data Storage` | I (8 of 9) |
+| `Motor Control` | H (9 of 11) |
+| `Display` | G (20 of 26) |
+| `Protocol` | E (22 of 32) — a sensor's or a smart pin's protocol driver goes to F or B |
+| `Sensor` | F (18 of 30) — 8 are smart-pin measurement (B) |
+| `3D Model`, `PCB Design` | K — hardware-design resources (see *Non-capability resources* below) |
+| `Signals`, `Human Input`, `Fun`, `Snippet`, `Tool`, `Other` | **cross-cutting** — classify per object by what it does |
 
 ### Quick Bytes tags (~21) → domain
 
@@ -157,7 +166,8 @@ own content.**
 
 ## Classification schema (for the catalog YAMLs)
 
-Each artifact carries:
+Each artifact carries the block below. For OBEX it is carried in `obex-capability-map.yaml` keyed
+by object id, never in the served object (KB v1.24.4: the object mirrors the catalog).
 
 ```yaml
 capability:

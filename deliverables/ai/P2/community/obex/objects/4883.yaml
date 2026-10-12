@@ -1,17 +1,16 @@
 object_metadata:
+  object_id: '4883'
+  title: P2 Pin Filter Configuration
   author: Jon McPhalen
-  author_username: ''
-  capability:
-    domain: B
-    leaf: pin-modes
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Signals
+    tags:
+    - filter
+    - jonnymac
+    - p2
+    - pin
+    description_short: Configures the four global digital filter settings each smart
+      pin can use to low-pass filter its incoming pin states.
     description_full: 'From the P2 Documentation
 
 
@@ -39,47 +38,16 @@ object_metadata:
 
       25 MAR 2025: Minor touch-ups of comments and addition of version number (1_0_0).
       Added test program and image of output (from logic analyzer).'
-    description_short: 'Configures the four global digital filter settings each smart pin can use to low-pass filter its incoming pin states.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - filter
-    - jonnymac
-    - p2
-    - pin
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:43:58.182033'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:20:09.987344'
-    last_complete_extraction: '2025-09-12T13:30:06.892729'
-    page_discovered: 4
-    last_author_re_extraction: 2025-09-12T14:04:1
-    last_author_consolidation: 2025-09-12T14:06:0
-    last_description_fix: 2025-09-12T14:20:1
-    created_date: '2025-03-25 17:51:10'
-    last_created_date_fix: 2025-09-12T15:27:5
-    version_last_scraped: '2025-09-26T11:34:40.357964'
-  object_id: '4883'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: MIT
-  title: P2 Pin Filter Configuration
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4883
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/p2-pin-filter-configuration/
   metadata:
     created_date: '2025-03-25'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/p2-pin-filter-configuration/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4883

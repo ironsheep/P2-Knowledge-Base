@@ -1,17 +1,15 @@
 object_metadata:
+  object_id: '4718'
+  title: Neotimer (Non-blocking timer)
   author: Jose Rullan
-  author_username: ''
-  capability:
-    domain: A
-    leaf: timing
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Other
+    tags:
+    - delay
+    - Spin2
+    - timer
+    description_short: Non-blocking timer for Propeller 2, ported from Arduino, for
+      timing and delays without blocking the processor.
     description_full: "neotimer\n\nNon blocking timer for Propeller 2 (Ported from\
       \ Arduino)\n\nWhen you use a waitms() function in a Spin program, the processor\
       \ stops everything it is doing until this delay is completed.\nThat is called\
@@ -37,44 +35,16 @@ object_metadata:
       \ last time it was read.\n\n        pushbutton := 10\n        timer1.init(50)\n\
       \        repeat\n            if(timer1.debounce( pinread(pushbutton) ))\n  \
       \            pintoggle(56)"
-    description_short: Non-blocking timer for Propeller 2, ported from Arduino, for
-      timing and delays without blocking the processor.
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags:
-    - delay
-    - Spin2
-    - timer
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:43:59.509820'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:21:08.208694'
-    page_discovered: 5
-    last_author_deep_search: 2025-09-12T13:39:2
-    created_date: '2024-04-06 12:26:19'
-    last_created_date_fix: 2025-09-12T15:27:4
-    version_last_scraped: '2025-09-26T11:34:29.701538'
-  object_id: '4718'
   technical_details:
-    file_format: ZIP
-    file_size: ''
-    languages:
-    - SPIN2
-    microcontroller:
-    - P2
-    version: ''
     content_type:
     - Code
+    microcontroller:
+    - P2
+    languages:
+    - SPIN2
     licence: MIT
-  title: Neotimer (Non-blocking timer)
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4718
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/neotimer-non-blocking-timer/
   metadata:
     created_date: '2024-04-06'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/neotimer-non-blocking-timer/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4718

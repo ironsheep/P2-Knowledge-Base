@@ -1,17 +1,12 @@
 object_metadata:
+  object_id: '4894'
+  title: FRSW and FAT32 for P2
   author: Ray Allen
-  author_username: ''
-  capability:
-    domain: I
-    leaf: sd-fat
-  compatibility:
-    dependencies: []
-    known_issues: []
-    p2_chip_versions:
-    - all
-    tested_platforms: []
   functionality:
     category: Data Storage
+    tags: []
+    description_short: 'Two uSD drivers, FSRW and FAT32, each with a choice of three
+      low level drivers: inline assembly, cog, or cog with audio.'
     description_full: 'Here two uSD drivers that can both use your choice of three
       low level drivers.
 
@@ -32,41 +27,17 @@ object_metadata:
 
       Update: Forum member EvanH has provided an improved version of the cogless sdspi,
       "sdspi_bashed3.spin2". This can replace "sdspi_bashed2.spin2" for improved performance.'
-    description_short: 'Two uSD drivers, FSRW and FAT32, each with a choice of three low level drivers: inline assembly, cog, or cog with audio.'
-    hardware_support: []
-    peripherals: []
-    subcategory: ''
-    tags: []
-  scrape_tracking:
-    discovery_date: '2025-09-12T12:43:58.181998'
-    kb_integration: none
-    last_author_extraction: '2025-09-12T13:20:48.103059'
-    page_discovered: 4
-    last_author_deep_search: 2025-09-12T13:39:2
-    created_date: '2025-02-17 16:35:36'
-    last_created_date_fix: 2025-09-12T15:27:5
-    version_last_scraped: '2025-09-26T11:34:43.436765'
-  object_id: '4894'
   technical_details:
-    file_format: ZIP
-    file_size: ''
+    content_type:
+    - Code
+    microcontroller:
+    - P2
     languages:
     - PASM
     - SPIN2
-    microcontroller:
-    - P2
-    version: ''
-    content_type:
-    - Code
     licence: MIT
-  title: FRSW and FAT32 for P2
-  urls:
-    documentation: ''
-    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4894
-    forum_discussion: ''
-    github_repo: ''
-    obex_page: https://obex.parallax.com/obex/frsw-and-fat32-for-p2/
   metadata:
     created_date: '2025-02-17'
-  version_tracking:
-    has_github_repo: false
+  urls:
+    obex_page: https://obex.parallax.com/obex/frsw-and-fat32-for-p2/
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4894
