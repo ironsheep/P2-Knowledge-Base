@@ -66,7 +66,19 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ## Found during the 2026-10 manual releases, the register reconciliation and the pre-release audit (2026-10-04/07) — F-546 … F-562 (+ F-563, found 2026-10-09 by the VO-J-035 rework; + F-564, found 2026-10-09 by «#414»; + F-565, found 2026-10-09 by «#415»; + F-566, found 2026-10-10 by «#422»; + F-567, found 2026-10-10 by «#422»/«#423»; + F-568, F-569, found 2026-10-10 by «#422»; + F-570, reported 2026-10-10 by Stephen; + F-571, F-572, F-573, found 2026-10-11 by «#398» and the MCP agent's 1.5.1 review)
 
-### F-573 — OBEX `description_short` is our 100-character cut of the catalog text, and `version_tracking.obex_version` duplicates `technical_details.version` — `PARTIAL` (found 2026-10-11 by the p2kb-mcp agent reviewing the 1.5.1 request; being fixed now, ships as KB v1.24.2)
+### F-573 — OBEX `description_short` is our 100-character cut of the catalog text, and `version_tracking.obex_version` duplicates `technical_details.version` — `PENDING-VALIDATION` (found 2026-10-11 by the p2kb-mcp agent reviewing the 1.5.1 request; widened 2026-10-11 to a full catalog re-mirror; applied 2026-10-12; closes on the live probe of KB v1.24.2)
+**Applied 2026-10-12 (KB v1.24.2).** Checking OBEX showed the copy was not a mirror at all: 17
+placeholder descriptions ("Utility object for P2 development."), 5 garbled, 11 cut near 300 characters,
+and `category`/`tags` from our scraper's own classifier. Stephen chose to re-take every catalog field.
+New `engineering/tools/obex-integration/obex-catalog-mirror.py` writes title, author (OBEX's archive
+marker and email parentheticals dropped), `description_full`, category (32 objects list several), tags,
+languages, microcontroller, `content_type`, `licence` and the date from the 130 pages; proved vs HEAD
+and by an independent parser (130/130). One-liners authored, audited, approved by Stephen, written to
+`description_short`; an adversarial pass against each full description revised 13. Release gate
+*OBEX One-Line Descriptions*; compile gate scopes out OBEX objects. Record:
+`correction-sweeps/2026-10-12-v1.24.2-change-set-audit.md`. **Closes when** `p2kb_get
+p2kbCommunity2842` serves the mirrored description and its one-liner, and `p2kb_obex_find term:serial`
+shows one-liners, after the v1.24.2 push.
 **Decided 2026-10-11 (Stephen):** each object gets a useful single-line description authored from its
 catalog text — restating only the title and catalog description, no added facts, no verdict — kept
 in `description_short` (the field the server shows; no MCP change), reviewed through a master index
@@ -91,7 +103,7 @@ successor is `obex_discovery_fixed.py`. Known open item, not changed by this fix
   reads `obex_version`. Two copies of one fact is the rename-drift F-571 just paid for. Fix: remove
   `obex_version` from the objects and the scraper; the server reads `technical_details.version`
   (`MCP-OBEX-SUMMARY-CHANGE-REQUEST.md` §7).
-No server change for either. Ships in the next KB release.
+No server change for either; categories becoming OBEX's own is request item 5 for p2kb-mcp 1.5.1.
 
 ### F-571 — `p2kb_obex_get` shows a zero quality score and an empty created date for every OBEX object — `PARTIAL` (found 2026-10-11 by the close-out release MCP test, step 5, «#398»; the date moved KB-side 2026-10-11 for v1.24.1; the server half is requested for p2kb-mcp 1.5.1)
 **Applied 2026-10-11 (Stephen: "yes a now"):** the upload date moved from
@@ -101,7 +113,7 @@ there. Proved against HEAD: all 131 files (130 objects and the template) parse e
 `known_issues` clearing). **Requested for p2kb-mcp 1.5.1** (Stephen, 2026-10-11):
 `engineering/tools/p2kb-mcp/MCP-OBEX-SUMMARY-CHANGE-REQUEST.md` — remove `quality`, omit empty fields,
 drop dead struct fields, add `full_metadata` (the whole filtered object, ending field-name coupling);
-acceptance probes O1-O6 there. `OBEX-IMPLEMENTATION-SPEC.md` and `P2KB-MCP-SPECIFICATION.md` updated
+acceptance probes O1-O7 there. `OBEX-IMPLEMENTATION-SPEC.md` and `P2KB-MCP-SPECIFICATION.md` updated
 to the same contract. **Date half validated live 2026-10-11** on p2kb-mcp 1.5.0 against v1.24.1:
 `p2kb_obex_get 2842` → `metadata.created_date: "2022-01-04"`; 2816 → `""` (no date). `quality: 0`
 remains until 1.5.1. **Release-day note:** the first refreshes after the push ran inside GitHub raw's

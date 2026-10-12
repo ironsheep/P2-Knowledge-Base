@@ -1,6 +1,12 @@
 # OBEX One-Liner Master Index
 
-**Status:** proposed — awaiting audit and Stephen's review
+**Status:** applied 2026-10-12 (Stephen approved the set). **The object YAMLs are now the source of
+truth; this table is the review record and is not kept in step.** After approval, an adversarial pass
+of the served lines against each full catalog description revised 13 of them in the YAML (2811, 2833,
+2849, 2858, 2859, 2861, 2867, 4012, 4070, 4581, 4758, 4926, 5405; 2858, 2861, 4070, 4581 checked and
+revised a second time);
+the table below shows the approved wording. A new object's line is written in its YAML when the object
+is added; the release gate *OBEX One-Line Descriptions* fails until it is.
 **Date:** 2026-10-11
 **Finding:** F-573 (`engineering/operations/P2KB-CORRECTION-FINDINGS.md`)
 

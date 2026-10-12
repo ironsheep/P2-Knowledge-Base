@@ -138,9 +138,10 @@ any time after; it does not depend on any other KB change.
 | O3 | `p2kb_obex_get 2816` | no `metadata` key at all (2816 has no date, and its `file_size` and `version` are empty) |
 | O4 | `p2kb_obex_get 2842` → `full_metadata` | present; contains `compatibility`, `version_tracking`, `metadata`; contains no `scrape_tracking` and no `source` key at any depth |
 | O5 | `p2kb_obex_get "full duplex serial"` (a multi-match search) | as on 1.5.0: `type: suggestions`, a `suggestions` list of `{author, category, description, match_type, object_id, title}`; no `metadata` or `full_metadata` in suggestions |
-| O6 | `p2kb_obex_find term:serial limit:2` | as on 1.5.0: `{count: 2, objects: [{author, category, description, match_type, object_id, title}, …], term: "serial", type: "objects"}` — 2837 (ESP32) then 2842 (Full Duplex Serial) |
+| O6 | `p2kb_obex_find term:serial limit:2` | same shape as on 1.5.0: `{count: 2, objects: [{author, category, description, match_type, object_id, title}, …], term: "serial", type: "objects"}`; from KB v1.24.2 each `description` is the object's one-line description and `category` is OBEX's own (a list where the object has several) |
+| O7 | `p2kb_obex_find` (no parameters), then `p2kb_obex_find category:"Protocol"` | the category list is OBEX's own names with counts, built from the objects (§3.5); the filter returns every object whose category is, or includes, Protocol |
 
-F-571 closes in the register on O1-O6, with the server version.
+F-571 closes in the register on O1-O7, with the server version.
 
 ## 7. Your review (2026-10-11) — our answers
 

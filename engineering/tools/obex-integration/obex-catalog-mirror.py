@@ -114,7 +114,7 @@ class _Text(HTMLParser):
         elif tag == "li":
             kind = self.lists[-1] if self.lists else ["ul", 0]
             kind[1] += 1
-            indent = "  " * max(len(self.lists) - 1, 0)
+            indent = "\x05" * max(len(self.lists) - 1, 0)  # two spaces each, placed in text()
             # the marker waits for the item's first text, so a <p> inside the <li> cannot split
             # the marker from its words
             self.mark = indent + ("%d. " % kind[1] if kind[0] == "ol" else "- ")
@@ -163,7 +163,7 @@ class _Text(HTMLParser):
 
     def text(self):
         s = "".join(self.out)
-        item = r"(?=\n *(?:- |\d+\. ))"
+        item = r"(?=\n\x05*(?:- |\d+\. ))"
         s = re.sub(r"[ \t]*\x00E[ \t]*", "\x00E", s)
         # a <p> directly inside an <li> belongs to the item, not a new paragraph
         s = re.sub(r"(?:\s*\x00[PE])*\s*\x00L(?:\s*\x00P)*\s*", "\n", s)
@@ -174,7 +174,7 @@ class _Text(HTMLParser):
         s = "\n".join(ln.strip() if " | " in ln and "\x02" not in ln else ln.rstrip()
                       for ln in s.split("\n"))
         s = re.sub(r"\n{3,}", "\n\n", s)
-        s = s.strip()
+        s = s.strip().replace("\x05", "  ")  # nested-list indent, after whitespace clean-up
         # restore each <pre> block exactly as written
         return re.sub(r"\x02(\d+)\x03", lambda m: self.pres[int(m.group(1))], s)
 
@@ -224,7 +224,7 @@ def parse(page_html):
         label = m.group(1)
         if label not in KNOWN_LABELS:
             problems.append("unknown field label %r" % label)
-        links = [text_of(a) for a in re.findall(r"<a\b[^>]*>(.*?)</a>", li, re.S)]
+        links = [x for x in (text_of(a) for a in re.findall(r"<a\b[^>]*>(.*?)</a>", li, re.S)) if x]
         fields[label] = (m.group(2).strip(), links)
     for alternatives in REQUIRED_LABELS:
         if not any(a in fields for a in alternatives):
@@ -251,7 +251,7 @@ def parse(page_html):
                        ("Category", "category"), ("Licence", "licence"),
                        ("Language", "languages")):
         v = field(label)
-        out[key] = (v[1] or [v[0]]) if v else []
+        out[key] = (v[1] or ([v[0]] if v[0] else [])) if v else []  # an empty field is [], never ['']
     tags = field("Tag")
     out["tags"] = (tags[1] or [t.strip() for t in tags[0].split(",")]) if tags else []
     t = re.search(r"<title>(.*?)</title>", page_html, re.S)

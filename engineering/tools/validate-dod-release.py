@@ -1242,18 +1242,19 @@ def obex_one_liner_problem(short, full):
         return "does not end with a period"
     if re.search(r"https?://|www\.", short):
         return "contains a URL"
-    if re.search(r"(\.\.\.|…)\s*\.?$", short):
+    if re.search(r"(\.\s*\.\s*\.|…)\s*\.?$", short):
         return "ends with an ellipsis (a cut, not a sentence)"
     # A line that is the catalog text's opening words, stopped anywhere but at the end of one of
-    # its sentences, is a cut -- mid-word or at a word boundary. Compared with whitespace
-    # collapsed and case folded so spacing or a capital cannot hide it.
+    # its sentences, is a cut -- mid-word, at a comma, colon, quote, decimal point, hyphen or
+    # slash, or at a word boundary. Compared with whitespace collapsed and case folded so spacing
+    # or a capital cannot hide it. Only two continuations make it a whole sentence: the catalog's
+    # own sentence end ("." "!" "?" then a space or the end) or an aside in parentheses.
     body = " ".join(short[:-1].split()).casefold()
     flat = " ".join(str(full or "").split()).casefold()
-    rest = flat[len(body):] if len(body) >= 20 and flat.startswith(body) else ""
-    # mid-word ("meanin") or mid-sentence ("configured as" + " smart pins"); a line that stops
-    # before the catalog's own aside ("… chip" + " (uses …)") or at its full stop is a sentence
-    if rest and (rest[0].isalnum() or (rest[0] == " " and rest[1:2].isalnum())):
-        return "a cut of the catalog description, not a sentence"
+    if len(body) >= 8 and flat.startswith(body) and len(flat) > len(body):
+        rest = flat[len(body):]
+        if not (re.match(r"[.!?](\s|$)", rest) or rest.startswith(" (")):
+            return "a cut of the catalog description, not a sentence"
     return None
 
 
@@ -1277,6 +1278,13 @@ OBEX_ONE_LINER_CONTROL = [
      "A full-featured DS1302 timekeeping chip driver. Based on the original Propeller 1 object by BR.", False),
     ("Text & graphics display driver for the Waveshare 2.9\" display sold in the Parallax store (SKU 28084).",
      "Text & graphics display driver for the Waveshare 2.9\" display sold in the Parallax store (SKU 28084).", False),
+    ("The pins are configured as smart pins.",
+     "The pins are configured as smart pins, meaning that the driver feeds bytes.", True),
+    ("Driver for the Waveshare 2.", "Driver for the Waveshare 2.9\" e-paper display.", True),
+    ("Services 1 to 8 Tx.", "Services 1 to 8 Tx/Rx pairs of pins.", True),
+    ("Talks to the sensor using an I2C.", "Talks to the sensor using an I2C-based bus.", True),
+    ("Driver for the thing.", "Driver for the thing: it does many things.", True),
+    ("A single COG services from 1 to 8 Tx/Rx pairs. . .", "A single COG services from 1 to 8 Tx/Rx pairs of pins.", True),
     ("This object is a P2 update to FullDuplexSerial for the P1.",
      "This object is a P2 update to FullDuplexSerial for the P1. There are minor changes.", False),
     ("Driver for 16 channels of servo control via I2C using the PCA9685 16ch PWM chip.",

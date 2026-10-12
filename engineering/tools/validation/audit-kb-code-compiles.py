@@ -1975,7 +1975,13 @@ def since_scope(root, rev):
             if rel not in NET_DATA_FILES:
                 scope.add(rel)
     rc, stat = run_cmd(["git", "diff", "--stat", "%s..HEAD" % rev, "--", MANIFEST_DIR], cwd=root, timeout=60)
-    return sorted(r for r in scope if in_gate_scope(r)), stat.strip()
+    kept = sorted(r for r in scope if in_gate_scope(r))
+    global SINCE_OUT_OF_SCOPE
+    SINCE_OUT_OF_SCOPE = len(scope) - len(kept)
+    return kept, stat.strip()
+
+
+SINCE_OUT_OF_SCOPE = 0  # files --since found changed but in_gate_scope() leaves out
 
 
 def norm_files(root, files):
@@ -2513,6 +2519,10 @@ def main(argv=None):
         if args.since:
             files, stat = since_scope(root, args.since)
             strict = True
+            if not files and SINCE_OUT_OF_SCOPE:
+                raise CannotAudit("nothing audited: the %d KB file(s) changed in %s..HEAD are all outside "
+                                  "this gate's scope (OBEX objects, see in_gate_scope); the full sweep "
+                                  "remains the release check" % (SINCE_OUT_OF_SCOPE, args.since))
             if not files:
                 raise CannotAudit("nothing audited: no KB or manifest file changed in %s..HEAD" % args.since)
         elif args.files:
