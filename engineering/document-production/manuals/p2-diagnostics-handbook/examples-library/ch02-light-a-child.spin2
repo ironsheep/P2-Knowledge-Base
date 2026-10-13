@@ -3,7 +3,8 @@
 ''   File.......  ch02-light-a-child.spin2
 ''   Purpose....  A parent turning on a child's debug channel where it
 ''                declares the object
-''   Manual.....  p2-diagnostics-handbook
+''   Manual.....  P2 Diagnostics Handbook
+''   Version....  v0.1.0 (2026-10-13)
 ''   Appears in.  Chapter 2: Staying Inside the Debug Limits -- 2.6
 ''                Compiling less
 ''   Authors....  Iron Sheep Productions, LLC

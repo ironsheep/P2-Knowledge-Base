@@ -49,6 +49,7 @@ each feature's *mechanism* stays in its own document, linked below.
 | **Architect's Guide** | manual | **✅** ²⁶ | **✅** ²⁶ | **✅** ²⁶ | — | — |
 | **Interpreters & Emulators (XBYTE)** | manual | **✅** ³¹ | **✅** ³¹ | **✅** ³¹ | ✅ | **✅** ³¹ |
 | **P2 Errata** | manual | **✅** ²⁵ | **✅** ²⁵ | **✅** ²⁵ | **✅** ²⁵ | — |
+| P2 Diagnostics Handbook *(prototype)* | guide | 🔧 | 🔧 | 🔧 | ✅ | — |
 | **Single-Step Debugger** | manual | **✅** | **✅** ¹³ | **✅** ¹⁴ | — | — |
 | **PNut-Term-TS User Guide** | guide | **✅** | **✅** ¹² | **✅** ⁶ | — | — |
 | **P2AN001** | app-note | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁷ | **✅** ¹⁸ | — |

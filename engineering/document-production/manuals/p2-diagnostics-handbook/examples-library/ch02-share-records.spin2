@@ -3,7 +3,8 @@
 ''   File.......  ch02-share-records.spin2
 ''   Purpose....  Identical statements sharing one record, and labelled
 ''                statements that look alike becoming separate records
-''   Manual.....  p2-diagnostics-handbook
+''   Manual.....  P2 Diagnostics Handbook
+''   Version....  v0.1.0 (2026-10-13)
 ''   Appears in.  Chapter 2: Staying Inside the Debug Limits -- 2.5 Fewer
 ''                records
 ''   Authors....  Iron Sheep Productions, LLC

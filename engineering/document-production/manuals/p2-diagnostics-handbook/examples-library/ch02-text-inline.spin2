@@ -3,7 +3,8 @@
 ''   File.......  ch02-text-inline.spin2
 ''   Purpose....  Two statements carrying their descriptive text inline,
 ''                so every character of it is DEBUG data
-''   Manual.....  p2-diagnostics-handbook
+''   Manual.....  P2 Diagnostics Handbook
+''   Version....  v0.1.0 (2026-10-13)
 ''   Appears in.  Chapter 2: Staying Inside the Debug Limits -- 2.4 Moving
 ''                text out of debug()
 ''   Authors....  Iron Sheep Productions, LLC

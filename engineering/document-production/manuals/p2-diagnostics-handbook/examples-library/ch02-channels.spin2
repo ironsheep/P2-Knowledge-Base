@@ -3,7 +3,8 @@
 ''   File.......  ch02-channels.spin2
 ''   Purpose....  One channel per subsystem under DEBUG_MASK, with the
 ''                masked-off channel compiled out of the build
-''   Manual.....  p2-diagnostics-handbook
+''   Manual.....  P2 Diagnostics Handbook
+''   Version....  v0.1.0 (2026-10-13)
 ''   Appears in.  Chapter 2: Staying Inside the Debug Limits -- 2.6
 ''                Compiling less
 ''   Authors....  Iron Sheep Productions, LLC
