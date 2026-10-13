@@ -11,14 +11,14 @@ description: |
   it; #PRAGMA EXPORTDEF makes the symbol defined in the child objects named in OBJ
   and their descendants, the way -D SYMNAME does for every file. The difference is the
   file that holds the pragma: with -D the symbol is defined in that top file too, but
-  the pragma only exports, so that file sees the symbol only if it also #DEFINEs it.
+  the pragma does not define it there.
   #PRAGMA is a PNut-TS extension -- the original PNut does not provide it, and
   it uses wording of its own rather than PNut's shared diagnostic text.
   Source that must also build under PNut cannot rely on this directive.
 
   What is exported is the FACT THAT THE SYMBOL IS DEFINED, not its value. An
-  exported symbol tests true with #IFDEF/#IFNDEF in every file, but it does not
-  text-substitute in those other files. Use it to select configuration branches
+  exported symbol tests true with #IFDEF/#IFNDEF in the child objects (the file that
+  holds the pragma does not see it as defined), but it does not text-substitute there. Use it to select configuration branches
   in child objects, not to pass data to them.
 
 syntax:
@@ -34,7 +34,7 @@ behavior:
   - "In child object compilation the symbol is defined as if -D had been given; the file holding the pragma is not affected (-D would define it there too)"
   - "Symbol propagates to the entire dependency tree"
   - "PRESENCE only -- the symbol's value, if it has one, does NOT cross into the other files"
-  - "The pragma exports; it does not define. The exporting file sees the symbol only if it also #DEFINEs it"
+  - "The pragma exports; it does not define the symbol in the file that holds it"
   - "Command-line -U blocks the export, keeping the symbol private to the file that defined it"
   - "A symbol may be exported only once -- if #PRAGMA EXPORTDEF appears more than once for the same symbol, only the first takes effect"
   - "If the symbol was defined on the command line with -D, the pragma has no additional effect -- it is already defined everywhere"
@@ -161,10 +161,10 @@ common_patterns:
 
 notes:
   - "#PRAGMA is a PNut-TS extension; the original PNut does not provide it -- source that must build under PNut cannot use it"
-  - "Exports PRESENCE, not value: the symbol tests true with #IFDEF in every later file, but its text does NOT substitute there. To vary a VALUE per configuration, export flag symbols and let each object define its own constants"
+  - "Exports PRESENCE, not value: the symbol tests true with #IFDEF in the child objects, but its text does NOT substitute there. To vary a VALUE per configuration, export flag symbols and let each object define its own constants"
   - "Exported symbols affect all child objects in the OBJ section"
   - "Propagation is recursive - affects the entire dependency tree"
-  - "The pragma exports the symbol; it does not define it locally -- #DEFINE it in the exporting file if that file also needs to test it"
+  - "The pragma exports the symbol; it does not define it in the file that holds the pragma"
   - "Command-line -U blocks #PRAGMA EXPORTDEF of that symbol -- this is the ONLY thing -U does"
   - "A symbol may be exported only once; a second #PRAGMA EXPORTDEF of the same symbol has no effect"
 

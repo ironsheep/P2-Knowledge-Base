@@ -1,0 +1,7 @@
+CON _clkfreq = 200_000_000
+
+PUB go()
+  debug(zstr_(@msg))
+
+DAT
+msg byte "01abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzABCDEFGHIJKL", 0

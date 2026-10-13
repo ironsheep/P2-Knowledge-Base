@@ -1,7 +1,7 @@
 title: "Debug Strategy Guide: Keeping a Debug Build Within the Compiler's Limits"
 type: guide
 category: Debugging
-documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (Things to know about the DEBUG system); DEBUG() memory utilization; DEBUG and interrupts; CP-014 (a child's DEBUG_MASK set in OBJ); CP-015 (plain DEBUG() compiled under DEBUG_MASK = 0)"
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (Things to know about the DEBUG system); DEBUG() memory utilization; DEBUG and interrupts; CP-014 (a child's DEBUG_MASK set in OBJ); CP-015 (plain DEBUG() compiled under DEBUG_MASK = 0); CP-025 (debug[N]() with DEBUG_MASK defined compiles with no version directive)"
 documentation_level: comprehensive
 
 aliases:
@@ -103,14 +103,15 @@ what_a_debug_build_takes_from_your_program:
     by that cog's 64-byte initial debug ISR. The per-cog blocks are fixed in silicon
     (see architecture/debug_interrupt.yaml); how the debugger arranges the rest is
     its own and can change with the tool.
-  a_lock: "LOCK[15] is held, so LOCKNEW has one fewer lock available — only when debugging. See architecture/locks.yaml."
-  pins_62_63: "P62 (TX) and P63 (the clock-frequency repository). A clock change that does not rewrite P63 makes the debugger emit garbage. CLKSET keeps the debugger's frequency current; any other way of changing the clock must update P63 itself (long-repository mode, WXPIN)."
+  a_lock: "LOCK[15] is allocated by the debugger, so LOCKNEW has one fewer lock available — only when debugging. See architecture/locks.yaml."
+  pins_62_63: "The debug serial pins: TX is P62 and RX is P63 by default (the defaults of DEBUG_PIN_TX and DEBUG_PIN_RX); what this section says about P62 and P63 holds for the configured pins. The RX pin is also the clock-frequency repository. A clock change that does not rewrite that value makes the debugger emit garbage. CLKSET keeps the debugger's frequency current; any other way of changing the clock must update the repository itself (long-repository mode, WXPIN)."
   p62_is_reconfigured_by_every_debug_call: |
-    Not merely occupied — RECONFIGURED. A smart pin placed on P62 is destroyed by the
-    next debug() call. A counter on P62 can count correctly and still read as dead,
-    because the print that reports it is what destroyed it: read such a pin BEFORE the
-    program's first debug(), or do not put it on P62.
-  cog_start_traffic: "A debug-enabled cog emits frames on P62 as it starts, which corrupts serial output from a program sharing that pin. A demo or shell that owns the serial line should not be built with -d."
+    Not merely occupied — RECONFIGURED. A smart pin placed on the debug TX pin (P62
+    by default) is destroyed by the next debug() call. A counter on that pin can count
+    correctly and still read as dead, because the print that reports it is what
+    destroyed it: read such a pin BEFORE the program's first debug(), or do not put it
+    on the debug TX pin.
+  cog_start_traffic: "A debug-enabled cog emits frames on the debug TX pin (P62 by default) as it starts, which corrupts serial output from a program sharing that pin. A demo or shell that owns the serial line should not be built with -d."
   a_debug_interrupt_per_enabled_cog: "Every enabled cog takes the highest-priority interrupt at every COGINIT, with the register save and restore that implies — see DEBUG_COGS in language/spin2/constants/special-configuration-symbols.yaml. The default is all eight cogs."
   hubset_enables_locked: "The debugger applies the per-cog enables with HUBSET, whose L bit locks them until reset."
   interrupt_retrigger_can_stop_for_good: >-
@@ -124,9 +125,17 @@ what_a_debug_build_takes_from_your_program:
     cogs that are not running ISRs in the background; if the ISRs tolerate skew and
     nothing depends on the interrupt continuing to cycle, DEBUG is usable with understood
     timing degradation. CT-based interrupts are not prone to it.
-  source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (IF() inside DEBUG() statements; value-only '_' forms; Things to know about the DEBUG system, hub RAM use); DEBUG and interrupts (interrupt_retrigger_can_stop_for_good); DEBUG dynamic clock frequency adaptation and version history v36 (pins_62_63, clock_source); Symbols you can define to modify DEBUG behavior (DEBUG_MASK); protected_region_use: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT (upper-hub buffer; per-cog save/restore map). The compiler limits and listing behaviour (the_compilers_limits, reducing_bytes_and_records, mechanisms_overview, mechanism_details.debug_mask.per_object) were observed with pnut-ts 1.55.8 (-d -l listing lines and compile errors m150/m151/m153), 2026-10-07; figures deliberately not stated (Stephen, 2026-10-07: tool limits are soft and change with each compiler release -- teach the techniques, not the limits)"
-  clock_source: "RCFAST and RCSLOW become illegal; DEBUG needs a crystal-derived or external clock of at least 10 MHz. A run-time clock change must stay within that, and must go through CLKSET or update P63."
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (IF() inside DEBUG() statements; value-only '_' forms; Things to know about the DEBUG system, hub RAM use); DEBUG and interrupts (interrupt_retrigger_can_stop_for_good); DEBUG dynamic clock frequency adaptation and version history v36 (pins_62_63, clock_source); Symbols you can define to modify DEBUG behavior (DEBUG_MASK; DEBUG_COGS enables debug interrupts per cog; DEBUG_PIN_TX and DEBUG_PIN_RX defaults 62 and 63); over_on_bytes: CP-022; protected_region_use: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT (upper-hub buffer; per-cog save/restore map). The compiler limits and listing behaviour (the_compilers_limits, reducing_bytes_and_records, mechanisms_overview, mechanism_details.debug_mask.per_object) were observed with pnut-ts 1.55.8 (-d -l listing lines and compile errors m150/m151/m153), 2026-10-07; figures deliberately not stated (Stephen, 2026-10-07: tool limits are soft and change with each compiler release -- teach the techniques, not the limits)"
+  clock_source: "RCFAST and RCSLOW become illegal; DEBUG needs a crystal-derived or external clock of at least 10 MHz. A run-time clock change must go through CLKSET or update P63."
   measuring_with_debug_on: "If you are measuring anything timing-sensitive, restrict DEBUG_COGS to the reporting cog and report from a cog that is not measuring. Leaving the default corrupted streamer accumulators by 1,000,000-7,000,000."
+
+lock_15_per_statement:
+  description: |
+    The debug interrupt takes LOCK[15] on entry and releases it on exit. LOCK[15] is
+    used among all cogs during their debug interrupts to time-share the DEBUG serial TX
+    and RX pins.
+  dly_is_the_release_point: "DLY(milliseconds), allowed only as the last command of a debug() statement, releases LOCK[15] before its delay so that other cogs can take the lock and send their own messages. It is the documented point at which another cog may take over the serial pin."
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts; the DLY command releases LOCK[15]); Parallax Spin2 debugger v51 (the debug interrupt takes LOCK[15] on entry and releases it on exit)"
 
 deduplication:
   description: |
@@ -295,7 +304,8 @@ mechanism_details:
       because they still compile the debug record. They only suppress output.
     debug_cogs:
       description: |
-        8-bit mask controlling which cogs produce debug output at runtime.
+        8-bit mask that enables the debug interrupt per cog at runtime. A cog whose bit
+        is clear takes no debug interrupt, so its debug() statements produce nothing.
         Every debug statement on every cog is still compiled.
       example: |
         CON
@@ -333,8 +343,7 @@ decision_guide:
         channel assignments.
     - condition: "Multi-cog project with too much debug output at runtime"
       recommendation: |
-        Use DEBUG_COGS to silence cogs you're not investigating. Use
-        debug(IF(...), ...) / IFNOT for conditional runtime filtering. (These don't
+        Use debug(IF(...), ...) / IFNOT for conditional runtime filtering. (These don't
         reduce what is compiled, only runtime output.)
 
 recommended_setups:

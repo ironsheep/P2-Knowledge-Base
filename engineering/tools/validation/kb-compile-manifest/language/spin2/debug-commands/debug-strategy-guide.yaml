@@ -51,10 +51,6 @@ blocks:
     fp: "4f309655a95977cb"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
-  - at: decision_guide.scenarios[5].recommendation
-    fp: "d122ab26936530a6"
-    compile: not-code
-    reason: "YAML description prose (English sentences), not code"
   - at: recommended_setups.small_project.code
     fp: "808293d99b39c3c1"
     compile: fragment

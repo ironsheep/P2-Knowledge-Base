@@ -3,6 +3,8 @@
 
 component: HUB
 category: shared_memory
+aliases:
+  - "what can write hub RAM"
 description: |
   Central shared memory and resource hub providing RAM storage, boot ROM, inter-COG
   communication, and the "Egg Beater" round-robin access mechanism for deterministic
@@ -49,6 +51,14 @@ memory_organization:
       - "HUBSET ##$2000_0001 -- enable the debug interrupt for cog 0"
       - "HUBSET ##$2001_FFFF -- enable debug interrupts for cogs 15..0 and write-protect the last 16KB"
       - "HUBSET ##$2003_00FF -- enable debug interrupts for cogs 7..0, write-protect, and disallow subsequent changes"
+
+write_paths:
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), THE COG-to-HUB RAM INTERFACE; FAST SEQUENTIAL FIFO INTERFACE; DEBUG INTERRUPT (the protected last 16KB)"
+  paths: |
+    A cog's write instructions (WRBYTE, WRWORD, WRLONG, and their block forms).
+    A cog's FIFO writes (WFBYTE, WFWORD, WFLONG after WRFAST).
+    The streamer's capture modes, which write through the FIFO.
+    The protected last 16KB, once write-protected, is writable only from within debug ISRs.
 
 egg_beater_architecture:
   description: |
@@ -261,7 +271,7 @@ related_components:
   cogs: "Eight processors sharing hub"
   fifo: "Streaming interface to hub"
   locks: "Synchronization primitives"
-  smart_pins: "Can access hub via repository modes"
+  smart_pins: "A smart pin in a long repository mode (%00001..%00011) holds a long that a cog writes with WXPIN and reads with RDPIN or RQPIN"
   architecture/streamer/overview.yaml: "DMA to/from hub"
 
 see_also:

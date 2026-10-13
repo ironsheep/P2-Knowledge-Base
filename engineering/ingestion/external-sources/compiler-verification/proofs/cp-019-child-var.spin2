@@ -1,0 +1,6 @@
+VAR
+  long ledger
+
+PUB bump() : r
+  ledger++
+  return ledger

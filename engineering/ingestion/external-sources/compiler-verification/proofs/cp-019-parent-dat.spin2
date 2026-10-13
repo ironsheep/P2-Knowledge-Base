@@ -1,0 +1,9 @@
+CON _clkfreq = 200_000_000
+
+OBJ
+  a : "cp-019-child-dat"
+  b : "cp-019-child-dat"
+
+PUB go() | x
+  x := a.bump()
+  x += b.bump()

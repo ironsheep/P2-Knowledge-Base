@@ -1,0 +1,4 @@
+CON DEBUG_MASK = %1000
+
+PUB go()
+  debug[3]("indexed")

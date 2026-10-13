@@ -131,7 +131,7 @@ common_pitfalls:
         ' Different names for different variables
   
   - pitfall: "name_matches_a_pasm_register"
-    description: "Because case is ignored, a cog register name in any case (PA, pA, ptra, DirA, ina) is taken, and cannot be used as a method parameter or local variable name. The compile stops with \"Expected a unique parameter name\" for a parameter, or \"Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, ^, ALIGNW, or ALIGNL\" for a local"
+    description: "A cog register name (PA, pA, ptra, DirA, ina) used as a method parameter name stops the compile with \"Expected a unique parameter name\"; used as a local variable name it stops the compile with \"Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, ^, ALIGNW, or ALIGNL\""
     wrong: |
       PRI m(pA)
         ' compile error: Expected a unique parameter name - pA is register PA

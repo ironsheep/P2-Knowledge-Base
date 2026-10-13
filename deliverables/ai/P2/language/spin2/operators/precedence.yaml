@@ -46,8 +46,8 @@ precedence_table:
   - level: 11
     operators: ["<", "+<", "<.", "<=", "+<=", "<=.", "==", "==.", "<>", "<>.", ">=", "+>=", ">=.", ">", "+>", ">.", "<=>"]
     type: "Compare/Equality"
-    note: "Signed, unsigned (+) and floating-point (.) comparison, (in)equality and the signed three-way <=> — all one priority"
-    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+    note: "Signed, unsigned (+) and floating-point (.) comparison, (in)equality and the signed three-way <=> — all one priority. The relational operators are >= and <=; => and =< are not operators and are rejected"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators; CP-021 (=> and =< are rejected by the compiler, >= and <= compile)"
   - level: 12
     operators: ["!!", "NOT"]
     type: "Logical NOT"
@@ -84,6 +84,7 @@ examples:
 notes:
   - "Lower numbers = higher priority (execute first); numbering follows the Spin2 operator table"
   - "Spin2 groups *, / at one priority (7); +, - at one (8); all comparisons/equality at one (11)"
+  - "Write greater-or-equal as >= and less-or-equal as <=; the reversed spellings => and =< are not Spin2 operators and do not compile"
   - "Level 12 is the unary !! / NOT; the binary logical operators start at level 13"
   - "Assignment operators have lowest priority"
   - "Assignment is PUB/PRI only (the CON equate = is CON only); the ternary is a term in all blocks"

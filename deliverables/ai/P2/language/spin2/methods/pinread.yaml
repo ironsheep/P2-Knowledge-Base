@@ -3,6 +3,7 @@
 # Purpose: Read pin(s) state
 
 method: "PINREAD"
+documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (in smart pin modes the IN bit serves as a flag)"
 aliases: ["PINR"]
 category: "pin_control"
 type: "method"
@@ -101,7 +102,7 @@ notes:
   - "Works regardless of pin direction (input or output)"
   - "When reading output pins, returns the driven state"
   - "Does not affect pin configuration"
-  - "Can read pins configured as smart pins. In a smart-pin mode the IN bit is the smart pin's flag (a function completed or an event occurred), not the pin's logic level; read the measurement with RDPIN or RQPIN. See architecture/smart_pins.yaml"
+  - "Can read pins configured as smart pins. In a smart-pin mode the IN bit serves as a flag. See architecture/smart_pins.yaml"
   - "Atomic read - all pins sampled simultaneously"
   - "No debouncing - returns instantaneous state"
 

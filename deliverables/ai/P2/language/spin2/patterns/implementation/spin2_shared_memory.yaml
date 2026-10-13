@@ -8,7 +8,7 @@ implementation: |
     long lock_id
 
   PUB start()
-    lock_id := LOCKNEW()                  ' allocate one lock (0-15), or -1 if none free
+    lock_id := LOCKNEW()                  ' allocate one lock (0-15), or a negative value if none free
 
   PUB write_shared(index, value)
     repeat until LOCKTRY(lock_id)         ' acquire — spins until this cog owns the lock

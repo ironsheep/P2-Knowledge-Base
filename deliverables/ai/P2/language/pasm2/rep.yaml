@@ -15,7 +15,7 @@ constraints:
   - "Instruction count is D[8:0] only (maximum 511 instructions, whether D is #immediate or a register); it does not extend beyond 9 bits"
   - "Maximum 511 iterations with #immediate; use ## or register for S up to 2^32-1"
   - REP cannot be nested (single hardware counter)
-  - Interrupts stalled during execution
+  - Interrupts are ignored during REP looping, the debug interrupt included
   - Cannot use WC, WZ, or WCZ effects
   - Branches within block cancel REP immediately
 sources:

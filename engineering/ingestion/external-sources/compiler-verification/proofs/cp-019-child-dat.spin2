@@ -1,0 +1,6 @@
+DAT
+ledger  long 0
+
+PUB bump() : r
+  ledger++
+  return ledger

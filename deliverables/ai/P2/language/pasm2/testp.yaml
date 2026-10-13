@@ -90,7 +90,7 @@ related_instructions:
 - FLTH: Float pin high
 notes:
 - TESTP reads actual pin state, not output register
-- On a pin in a smart-pin mode the IN bit that TESTP returns is the smart pin's flag (a function completed or an event occurred, acknowledgment perhaps needed), not the pin's logic level. See architecture/smart_pins.yaml
+- On a pin in a smart-pin mode the IN bit that TESTP returns serves as a flag. See architecture/smart_pins.yaml
 - XORC/XORZ combine the pin with the existing flag (C or Z, matching the suffix)
 - Efficient for building multi-bit values from pins
 - Critical for real-time sensor reading like Hall sensors

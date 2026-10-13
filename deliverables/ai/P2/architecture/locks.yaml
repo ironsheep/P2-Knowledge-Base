@@ -61,7 +61,8 @@ state_versus_allocation:
   the_leak: >-
     Stopping a cog that owns a lock therefore frees the lock and LEAKS its number.
     Anyone can now take that lock, but nobody can ever be ISSUED it again. Sixteen such
-    leaks and LOCKNEW returns nothing for the rest of the run, and the failure appears at
+    leaks (one fewer in a -d build, where the debugger allocates lock 15) and LOCKNEW returns nothing for
+    the rest of the run, and the failure appears at
     some later LOCKNEW in code that never touched the lock that leaked.
   the_rule: >-
     Every LOCKNEW needs a LOCKRET on EVERY path out, including error and shutdown paths.
@@ -83,8 +84,8 @@ pattern_prerequisite:
     returned, held in a register or a VAR, and LOCKRET'd on every path out. Do not
     substitute a literal lock number.
   lock_15: >-
-    Do not use lock 15 in examples or code: a DEBUG build holds it, so it may not be
-    allocatable at all.
+    Do not use lock 15 in examples or code: a DEBUG build allocates it for the debugger,
+    so it may not be allocatable at all.
   allocate_first: |
     ' every pattern below depends on this having run
             LOCKNEW lock_num  WC         ' C=1 means none were available
@@ -132,7 +133,7 @@ instructions:
 
   - instruction: "LOCKNEW"
     encoding: "EEEE 1101011 C00 DDDDDDDDD 000000100"
-    description: "Find and acquire first available lock"
+    description: "Allocate (check out) a free lock number; does not take the lock"
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOCKS, Allocating Locks; encoding: Assembly Language (instruction encodings).
       Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.41.
@@ -349,7 +350,7 @@ debugging_tips:
       ' Lock assignments for this project (the numbers are whatever LOCKNEW returned):
       ' mailbox_lock - protects the hub mailbox
       ' buffer_lock  - protects the shared buffer pool
-      ' (a DEBUG build holds lock 15)
+      ' (a DEBUG build allocates lock 15 for the debugger)
 
 related_topics:
   - topic: "cog_synchronization"

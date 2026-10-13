@@ -144,7 +144,7 @@ blocks:
     compile: fragment
     wrap: spin2-top
   - at: usage_examples.selective_debug
-    fp: "6766e5777c6ac21d"
+    fp: "84ba9b0b0942a972"
     compile: program
   - at: usage_examples.debugger_control
     fp: "98d16eb092dfb7cb"

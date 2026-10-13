@@ -73,8 +73,7 @@ underlying_implementation:
     (CLKFREQ/1_000_000) * microseconds, ADDS the current counter to make an ABSOLUTE
     TARGET, and then waits the way WAITCT does - looping while the MSB of
     (CT - target) is set.
-    That distinction is the whole reason the $8000_0000-clock bound exists, and
-    it is what the method does when you exceed it: see limitations.past_the_bound.
+    The $8000_0000-clock bound: see limitations.past_the_bound.
     Automatically adjusts for system clock frequency.
     At lower frequencies, resolution degrades.
   related_pasm: "language/pasm2/waitx.yaml"
@@ -103,16 +102,13 @@ notes:
   blocking: "The cog is stopped in the wait for its duration."
 
 limitations:
-  source: "Parallax Spin2 Documentation v55, Timing Methods (the WAITUS row)"
+  source: "Parallax Spin2 Language Documentation v55, Timing Methods; Parallax Spin2 interpreter v55 (WAITMS/WAITUS compute an absolute target and wait in the WAITCT loop)"
   hard_bound: "duration must not exceed $8000_0000 clocks"
   ceiling_formula: "max Microseconds = $8000_0000 / (CLKFREQ / 1_000_000)"
   past_the_bound: |
-    Exceeding the bound does NOT clamp, and does not wait a partial time - the call
-    RETURNS IMMEDIATELY, with no error and nothing in the build to say so. Code that
-    asks for 10 s at 350 MHz gets no wait at all and looks exactly like code that works.
-    WHY, and it follows from the implementation above: the wait is against an absolute
-    COUNTER TARGET tested by the MSB rule, so a target more than 2^31 clocks ahead reads
-    as ALREADY PASSED on the first comparison.
+    The bound is $8000_0000 clocks. The call computes an absolute counter target from
+    the duration and waits for it as WAITCT does; what a call past the bound does is
+    not documented. Keep every call within the bound.
   long_waits: |
     For a wait longer than the bound, loop on GETMS()/GETCT() against a deadline in
     slices of at most a second, rather than asking for the whole span at once.

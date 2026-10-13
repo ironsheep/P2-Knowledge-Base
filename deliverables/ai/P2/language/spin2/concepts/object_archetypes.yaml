@@ -135,7 +135,7 @@ archetypes:
         shared_counter LONG  0
 
       PUB init() : ok
-        IF shared_lock == -1
+        IF shared_lock < 0
           shared_lock := LOCKNEW()
         ok := (shared_lock >= 0)
 

@@ -47,7 +47,7 @@ encoding:
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TESTP / TESTPN, p.136; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (in smart pin modes the IN bit serves as a flag)"
 documentation_level: comprehensive
 notes:
-- On a pin in a smart-pin mode the IN bit that TESTPN inverts is the smart pin's flag (a function completed or an event occurred), not the pin's logic level. See architecture/smart_pins.yaml
+- On a pin in a smart-pin mode the IN bit that TESTPN inverts serves as a flag. See architecture/smart_pins.yaml
 compiler_operand_format:
   name: operand_testp
   pattern: D/#0..511 WC/ANDC/ORC/XORC | WZ/ANDZ/ORZ/XORZ

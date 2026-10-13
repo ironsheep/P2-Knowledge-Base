@@ -12,7 +12,9 @@ compiler's **verbatim** output, and the fact's KB home. The lifecycle and field 
 > ([`../hardware-verification/P2-EMPIRICAL-FINDINGS.md`](../hardware-verification/P2-EMPIRICAL-FINDINGS.md),
 > `EF-NNN`).
 
-**Class legend:** `LEGALITY` (whether the compiler accepts a form; stays CP) · `BEHAVIOUR` (what
+**Class legend:** `LEGALITY` (whether the compiler accepts a form; stays CP) · `LAYOUT` (what the
+compiler emits for a form it accepts: image bytes, object-image counts, DEBUG listing figures, an
+assembled word; stays CP) · `BEHAVIOUR` (what
 compiled code does; the compile does not prove it) · `BEHAVIOUR → EF-NNN` (a P2 run has since
 proved it; the KB cites the EF).
 
@@ -887,4 +889,237 @@ fills hub memory with zeros up to the address (`spin2-v55-text.txt:322-327`). It
 messages; the record supplies them.
 *Limits:* one address of each kind; the debug-mirror case is run at its first address only. One
 compiler version.
+
+## Debug-techniques proofs («#430» batch 2)
+
+Entries CP-018 to CP-025. A listing figure, byte count or image count below is evidence for the
+record only and is never carried into the KB (tool limits are not KB facts). The `.bin`, `.lst` and
+`.map` files each run writes are not kept; only the `.spin2` sources are.
+
+### CP-018 · `DEBUG_COGS` is compiled into the program image: two otherwise identical programs, one setting `DEBUG_COGS = %0000_0001` and one leaving it default, produce binaries that differ — `LAYOUT`
+*KB:* `language/spin2/constants/special-configuration-symbols.yaml` (`DEBUG_COGS`)
+*Class:* layout — the setting reaches the binary. What the mask does at run time (a cog with its bit
+clear takes no debug interrupt) is the documented meaning (Spin2 v55, `DEBUG_COGS`), not shown here.
+*Source:* `proofs/cp-018-cogs-set.spin2` (`DEBUG_COGS = %0000_0001`), `proofs/cp-018-cogs-default.spin2`
+(the same program without the symbol — the control). Both: `debug("hello", udec(1))`.
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026, with `-d`.
+
+*Command (set):* `pnut-ts -d engineering/ingestion/external-sources/compiler-verification/proofs/cp-018-cogs-set.spin2`
+*Output (2026-10-13; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts -d engineering/ingestion/external-sources/compiler-verification/proofs/cp-018-cogs-set.spin2
+pnut-ts: Compiling with DEBUG
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-018-cogs-set.bin (9244 bytes)
+pnut-ts: Done
+```
+*Command (control, default):* `pnut-ts -d engineering/ingestion/external-sources/compiler-verification/proofs/cp-018-cogs-default.spin2`
+*Output (2026-10-13; exit status 0):* the same three banner lines, then `Compiling with DEBUG`,
+`Wrote … cp-018-cogs-default.bin (9244 bytes)`, `Done`.
+*Command (compare):* `cmp -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-018-cogs-set.bin engineering/ingestion/external-sources/compiler-verification/proofs/cp-018-cogs-default.bin`
+*Output (2026-10-13; exit status 1, the files differ):*
+```text
+ 233   1 377
+```
+One byte differs (byte 233, octal values: `1` with the symbol set, `377` = $FF by default). The two
+binaries have the same size. **Grounds:** Spin2 v55 gives `DEBUG_COGS` a default of all cogs
+(`spin2-v55-text.txt:1011`). The byte offset is this compiler's and is not carried into the KB; the
+KB states only that the value is compiled into the image, so two builds with different values give
+different binaries. *Limits:* one value; one program; one compiler version. *→ EF:* none.
+
+### CP-019 · A child's VAR is per instance and its DAT is shared, yet the memory map's image count is the same either way — `LAYOUT`
+*KB:* `language/spin2/concepts/object-image-dedup.yaml`
+*Class:* layout — the `-m` memory map of two builds that differ only in where the child keeps its ledger.
+*Source:* `proofs/cp-019-parent-var.spin2` and `proofs/cp-019-parent-dat.spin2` (each: `OBJ a, b` both
+the same child; `x := a.bump()`, `x += b.bump()`), `proofs/cp-019-child-var.spin2` (`VAR long ledger`)
+and `proofs/cp-019-child-dat.spin2` (`DAT ledger long 0`). The two children are otherwise identical.
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026, with `-m`.
+
+*Command (VAR ledger):* `pnut-ts -m engineering/ingestion/external-sources/compiler-verification/proofs/cp-019-parent-var.spin2`
+*Output (2026-10-13; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts -m engineering/ingestion/external-sources/compiler-verification/proofs/cp-019-parent-var.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-019-parent-var.map
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-019-parent-var.bin (6336 bytes)
+pnut-ts: Done
+```
+*Command (DAT ledger):* `pnut-ts -m engineering/ingestion/external-sources/compiler-verification/proofs/cp-019-parent-dat.spin2`
+*Output (2026-10-13; exit status 0):* the same shape, writing `cp-019-parent-dat.map` and
+`cp-019-parent-dat.bin (6344 bytes)`.
+The map's SUMMARY line, identical in both:
+```text
+  The top object and 2 OBJ declarations became 3 instances, built from 2 images; 1 image is shared by more than one instance.
+```
+What differs is the ledger. VAR build — one `LEDGER` entry per instance, in the map's VAR section:
+```text
+  A         LONG  LEDGER     4  +$00004  $00040
+  B         LONG  LEDGER     4  +$00004  $00048
+```
+DAT build — one `LEDGER` entry, in the map's DAT section, for the one shared image:
+```text
+  LONG  LEDGER  +$00008  $00030
+```
+**Grounds:** Spin2 v55 says each object instance has its own VAR and that DAT is shared
+(`spin2-v55-text.txt:174`, `:181`, `:238`). The record adds what the map shows: the image count does
+not separate the two cases, so a split VAR ledger cannot be seen from the count; the map's VAR
+entries show it. *Limits:* one child shape; one compiler version. *→ EF:* none.
+
+### CP-020 · Inline PASM reaches only the first 16 longs of a method's locals: a 17th local used by the PASM is rejected (`Local variable must be LONG and within first 16 longs (m451)`) at the PASM line; declared first, it compiles — `LEGALITY`
+*KB:* `language/spin2/constructs/inline_pasm.yaml`
+*Class:* legality. The failing run stops with exit status 1; both controls compile.
+*Source:* `proofs/cp-020-loc16-ok.spin2` (16 locals, the PASM uses the 16th), `proofs/cp-020-loc17-bad.spin2`
+(17 locals, the PASM uses the 17th), `proofs/cp-020-loc17-first.spin2` (the same 17 locals with the one the
+PASM uses declared first).
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026.
+
+*Command (17th local, used by the PASM):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-020-loc17-bad.spin2`
+*Output (2026-10-13; exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-020-loc17-bad.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-020-loc17-bad.spin2:3:error:Local variable must be LONG and within first 16 longs (m451)
+```
+The error line is the PASM instruction that names the variable (`mov a17, #1`, line 3), not the method line.
+*Command (control, 16 locals):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-020-loc16-ok.spin2` — exit status 0 (`Wrote … cp-020-loc16-ok.bin (6304 bytes)`).
+*Command (control, declared first):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-020-loc17-first.spin2` — exit status 0 (`Wrote … cp-020-loc17-first.bin (6304 bytes)`).
+(Banner lines of the two controls omitted, as in CP-016.) **Grounds:** Spin2 v55 limits inline PASM to
+the first 16 long variables of the method (`spin2-v55-text.txt:285`). The record adds the error
+text and where it is reported. *Limits:* long locals only; one compiler version. *→ EF:* none — legality stays CP.
+
+### CP-021 · `=>` and `=<` are not Spin2 operators and are rejected (`Expected end of line (m281)`); `>=` and `<=` compile — `LEGALITY`
+*KB:* `language/spin2/operators/precedence.yaml`, `language/spin2/concepts/operators.yaml`
+*Class:* legality. The two failing runs stop with exit status 1; the control compiles.
+*Source:* `proofs/cp-021-op-ge-bad.spin2` (`r := x => y`), `proofs/cp-021-op-le-bad.spin2` (`r := x =< y`),
+and the control `proofs/cp-021-op-ok.spin2` (`r := x >= y`, `r += x <= y`).
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026.
+
+*Command (`=>`):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-021-op-ge-bad.spin2`
+*Output (2026-10-13; exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-021-op-ge-bad.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-021-op-ge-bad.spin2:2:error:Expected end of line (m281)
+```
+*Command (`=<`):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-021-op-le-bad.spin2`
+*Output (2026-10-13; exit status 1):* the same banner, then
+`engineering/ingestion/external-sources/compiler-verification/proofs/cp-021-op-le-bad.spin2:2:error:Expected end of line (m281)`.
+*Command (control):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-021-op-ok.spin2` — exit status 0 (`Wrote … cp-021-op-ok.bin (6300 bytes)`).
+**Grounds:** the Spin2 v55 operator table lists `>=` and `<=` (`spin2-v55-text.txt:482`) and no reversed forms. *Limits:* signed
+forms only (not `+>=` `+<=`); one compiler version. *→ EF:* none — legality stays CP.
+
+### CP-022 · Text moved out of a `debug()` string into DAT and emitted with `zstr_` leaves the DEBUG data budget: the same message costs 226 bytes of DEBUG data inline and 3 bytes from DAT, one record each — `LAYOUT`
+*KB:* `language/spin2/debug-commands/debug-strategy-guide.yaml` (`over_on_bytes`)
+*Class:* listing — which figures the compiler reports for DEBUG. The figures are this compiler's and
+never go into the KB; the KB states only that moved text leaves the budget.
+*Source:* `proofs/cp-022-text-in-debug.spin2` (the message as a string in `debug("…")`),
+`proofs/cp-022-text-in-dat.spin2` (the message in DAT, `debug(zstr_(@msg))`).
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026, with `-d -l`.
+
+*Command (inline):* `pnut-ts -d -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-022-text-in-debug.spin2` — exit status 0; listing:
+```text
+DEBUG records:           1 of 255 (0.4%)
+DEBUG data:            226 of 15872 bytes (1.4%)
+```
+*Command (in DAT):* `pnut-ts -d -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-022-text-in-dat.spin2` — exit status 0; listing:
+```text
+DEBUG records:           1 of 255 (0.4%)
+DEBUG data:              3 of 15872 bytes (0.0%)
+```
+**Grounds:** none beyond the compile; the DEBUG budget is the compiler's. *Limits:* one message of
+about 200 characters; one compiler version. *→ EF:* none.
+
+### CP-023 · A streamer count above $FFFF is accepted silently: `XINIT`'s count spills into the command field, and a count of 131,072 assembles to the word for the next pin with count 0 — `LAYOUT`
+*KB:* `language/pasm2/xinit.yaml` (notes)
+*Class:* layout — an assembled word. What the streamer then does with that word is not shown.
+*Source:* `proofs/cp-023-streamer-count-spill.spin2`: three DAT longs built from `X_IMM_32X1_1DAC1 +
+X_PINS_ON` plus a pin field at bit 17 plus a count — $FFFE (control, fits), 131,072, and the control
+for the spill, "pin + 1, count 0".
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026, with `-l`.
+
+*Command:* `pnut-ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-023-streamer-count-spill.spin2`
+*Output (2026-10-13; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-023-streamer-count-spill.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-023-streamer-count-spill.lst
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-023-streamer-count-spill.bin (6304 bytes)
+pnut-ts: Done
+```
+The listing's three DAT longs, as bytes: `FE FF 90 40` ($4090_FFFE, count $FFFE), `00 00 92 40` ($4092_0000, count
+131,072) and `00 00 92 40` ($4092_0000, pin + 1 with count 0). The spilled word equals the
+pin-plus-one, count-0 word. No error or warning is printed. **Grounds:** Propeller 2 Documentation
+v35 gives the command field above the 16-bit count (`silicon-doc-text.txt:1313`, `:1327`, `:1401`,
+`:1403`). *Limits:* one mode; one count; one compiler version. *→ EF:* none; what the streamer does
+with the word is the bench's (the instruction's own EF records).
+
+### CP-024 · `pnut-ts` shares one object image among declarations that compile to the same bytes; a constant override that changes the child's bytes forks a second image with its own DAT, and an override on one of two siblings splits a DAT singleton — `LAYOUT`
+*KB:* `language/spin2/concepts/object-image-dedup.yaml`
+*Class:* layout — the `-m` memory map's image counts and DAT entries.
+*Source:* `proofs/cp-024-child.spin2` (`CON INC = 1`; `DAT ledger long 0`; `bump()` adds `INC`);
+three parents each declaring the child twice: `proofs/cp-024-parent-control.spin2` (no override, the
+control), `proofs/cp-024-parent-one-override.spin2` (`a` with `| INC = 2`, `b` plain),
+`proofs/cp-024-parent-same-override.spin2` (both with `| INC = 2`).
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026, with `-m`.
+
+*Command (control):* `pnut-ts -m engineering/ingestion/external-sources/compiler-verification/proofs/cp-024-parent-control.spin2`
+*Output (2026-10-13; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts -m engineering/ingestion/external-sources/compiler-verification/proofs/cp-024-parent-control.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-024-parent-control.map
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-024-parent-control.bin (6344 bytes)
+pnut-ts: Done
+```
+*Command (one override):* `pnut-ts -m engineering/ingestion/external-sources/compiler-verification/proofs/cp-024-parent-one-override.spin2`
+*Output (2026-10-13; exit status 0):* the same shape, `cp-024-parent-one-override.bin (6368 bytes)`.
+*Command (both override):* `pnut-ts -m engineering/ingestion/external-sources/compiler-verification/proofs/cp-024-parent-same-override.spin2`
+*Output (2026-10-13; exit status 0):* the same shape, `cp-024-parent-same-override.bin (6344 bytes)`.
+
+The map's SUMMARY line and object tree, per build:
+```text
+control:   3 instances, built from 2 images; 1 image is shared by more than one instance.
+             A #2 -, B #2 -            one DAT entry (LEDGER), in image #2
+one:       3 instances, built from 3 images; no image is shared.
+             A #2 INC=2, B #3 -        two DAT entries (LEDGER), one in each of images #2 and #3
+both:      3 instances, built from 2 images; 1 image is shared by more than one instance.
+             A #2 INC=2, B #2 INC=2    one DAT entry (LEDGER), in image #2
+```
+**Grounds:** Spin2 v55 says object parameters override CON symbols within the child
+(`spin2-v55-text.txt:29`); it does not describe how identical children are shared. The record shows
+the sharing follows the compiled content: two declarations of one child share an image and its DAT;
+an override that changes the bytes forks an image (and a DAT); an override applied identically to
+both siblings does not. *Limits:* one constant, one child, two siblings; one compiler version.
+*→ EF:* none.
+
+### CP-025 · `debug[N]()` with no `DEBUG_MASK` defined is rejected (`DEBUG_MASK symbol must be defined for DEBUG[0..31] usage`); with `DEBUG_MASK` defined it compiles — `LEGALITY`
+*KB:* `language/spin2/constants/debug-mask.yaml`
+*Class:* legality, compiled with DEBUG (`-d`). The failing run stops with exit status 1; the control compiles.
+*Source:* `proofs/cp-025-index-no-mask.spin2` (`debug[3]("indexed")`, no `DEBUG_MASK`),
+`proofs/cp-025-index-with-mask.spin2` (the same with `CON DEBUG_MASK = %1000`).
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026, with `-d`.
+
+*Command (no mask):* `pnut-ts -d engineering/ingestion/external-sources/compiler-verification/proofs/cp-025-index-no-mask.spin2`
+*Output (2026-10-13; exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts -d engineering/ingestion/external-sources/compiler-verification/proofs/cp-025-index-no-mask.spin2
+pnut-ts: Compiling with DEBUG
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-025-index-no-mask.spin2:2:error:DEBUG_MASK symbol must be defined for DEBUG[0..31] usage
+```
+*Command (control, mask defined):* `pnut-ts -d engineering/ingestion/external-sources/compiler-verification/proofs/cp-025-index-with-mask.spin2` — exit status 0 (`Wrote … cp-025-index-with-mask.bin (9243 bytes)`).
+(Banner lines of the control omitted, as in CP-016.) The error line is the `debug[3]` statement (line 2).
+*No version directive (2026-10-13):* `proofs/cp-025-index-with-mask.spin2` (and CP-014's and CP-015's `.spin2`
+files) carry no `{Spin2_v##}` line (`grep -n -i "{Spin2_v"` over them finds nothing), and `debug[N]()` with
+`DEBUG_MASK` defined compiles — so neither `DEBUG_MASK` nor `debug[N]()` needs a version directive.
+**Grounds:** Spin2 v55 gates `DEBUG[bitnumber]` on `DEBUG_MASK` (`spin2-v55-text.txt:38`, `:1027`);
+it names no error text; the record supplies it. *Limits:* one index; one compiler version.
+*→ EF:* none — legality stays CP.
 *→ EF:* none — legality stays CP.

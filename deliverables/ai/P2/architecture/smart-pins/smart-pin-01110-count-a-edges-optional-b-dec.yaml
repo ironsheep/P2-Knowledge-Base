@@ -1,3 +1,7 @@
+aliases:
+  - "count edges on a neighbouring pin without driving it"
+  - "smart pin counts edges of the pin next to it"
+
 title: "Edge Counter with Optional Up/Down"
 subtitle: "Smart Pin Mode %01110 (P_COUNT_RISES)"
 language_reference: "combined"
@@ -12,6 +16,14 @@ detailed_description:
     creating independent up/down counter. Both inputs count edges independently - not gated or
     dependent on each other's state.
   
+  observer_use: |
+    The counter can watch a neighbouring pin without driving anything. Select the A input
+    as a relative neighbour (A = relative -3..+3 pin), leave the smart pin's output-enable
+    bit clear so the pin never drives (the pin is then an input whatever DIR holds), raise
+    DIR to start it, and read the total with RDPIN or RQPIN. A counter with A = the pin
+    below it (relative -1) counted the edges driven on that pin as a plain pin.
+  source: "observer_use: XF-002; Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS"
+
   timing: |
     Continuous mode (X=0): Z register always holds current net count
     Periodic mode (X>0): Net count over X clock cycles

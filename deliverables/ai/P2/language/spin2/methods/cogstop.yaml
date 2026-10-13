@@ -3,6 +3,7 @@
 # Purpose: Stop a running cog
 
 method: "COGSTOP"
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, REPEAT ('if you don't want the cog to stop and cease driving its I/O's'); DEBUG (LOCK[15] is allocated by the debugger)"
 category: "cog_management"
 type: "method"
 description: |
@@ -66,12 +67,13 @@ effects:
     - "Cog becomes available for COGINIT (it returns to the pool of free cogs)"
 
   pin_state_after_stop:
-    - "What a stopped cog leaves on the pins and in smart pin modes it configured: not documented; do not rely on it"
+    - "A stopped cog stops driving its I/O pins"
+    - "What a smart pin the cog configured does afterwards is not documented; do not rely on it"
 
   resources:
     - "A lock the cog HELD goes free. Ownership stops holding the moment the cog becomes inactive - for any cause, not only COGSTOP - so nothing has to release it"
     - "The lock's ALLOCATION does not go free. The number stays issued and LOCKNEW will not hand it out again. Only LOCKRET returns a lock number to the pool"
-    - "So stopping a cog that holds locks LEAKS lock numbers: sixteen leaks and LOCKNEW returns nothing, ever, and the failure surfaces at some later LOCKNEW in unrelated code"
+    - "So stopping a cog that holds locks LEAKS lock numbers: sixteen leaks (one fewer in a -d build, where the debugger allocates lock 15) and LOCKNEW returns nothing, ever, and the failure surfaces at some later LOCKNEW in unrelated code"
     - "Hub RAM is NOT affected"
     - "Other cogs continue running"
 

@@ -139,7 +139,7 @@ strings:
   ZSTR_: {use: "just the string: the underscore suppresses the 'name = ' before it", syntax: "ZSTR_(@message)"}
   LSTR: {use: "the first 'size' characters of a string at a hub address, with its name", syntax: "LSTR(@text, size)"}
   LSTR_: {use: "just those characters: the underscore suppresses the 'name = ' before them", syntax: "LSTR_(@text, size)"}
-  note: "LSTR takes the character count as an argument. It is not the length-prefixed string LSTRING() builds."
+  note: "LSTR takes the character count as an argument."
 
 # CONTROL
 control:

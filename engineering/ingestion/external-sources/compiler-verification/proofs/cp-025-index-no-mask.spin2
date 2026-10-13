@@ -1,0 +1,2 @@
+PUB go()
+  debug[3]("indexed")

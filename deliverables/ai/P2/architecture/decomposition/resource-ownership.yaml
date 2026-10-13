@@ -1,6 +1,7 @@
 concept: resource_ownership
 title: "Force 1 — Resource Ownership and Timing Domains"
 category: decomposition_reasoning
+source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (cog buses OR'd 'in the same way DIR and OUT bits are OR'd before going to the pins')"
 
 summary: |
   The primary decomposition force, and the only one that is a CORRECTNESS rule rather
@@ -37,6 +38,9 @@ why_on_p2:
     interleaving on the same SDA/SCL is not "a race you might lose," it is guaranteed
     protocol corruption, because a bus transaction is a multi-step sequence that assumes
     a single agent.
+
+    [PHYSICS] Each cog's DIR and OUT bits for a pin are OR'd with every other cog's
+    before they reach the pin.
 
     [PHYSICS] A single-long hub read or write is atomic, and the P2 provides 16 locks
     and cog-attention signalling to coordinate explicitly — but these protect a shared

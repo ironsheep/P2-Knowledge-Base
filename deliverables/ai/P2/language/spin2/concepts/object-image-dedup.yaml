@@ -14,6 +14,10 @@ aliases:
   - hardware driver singleton
   - accidental second instance
   - guarantee one instance
+  - "VAR ledger split across instances"
+  - "each instance has its own counter"
+
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, Spin2 Program Structure (each object instance gets its own set of variables; each instance has its own VAR memory) and VAR Blocks (each instance of an object gets its own set of variables); CP-019 (the .map image count is the same whether a child keeps its ledger in VAR or DAT); CP-024 (identical declarations share one image and one DAT; an override that changes the bytes forks a second image with its own DAT; an override applied identically to both siblings does not)"
 
 description: |
   How pnut-ts decides whether two OBJ instantiations of the same source file share one
@@ -47,6 +51,8 @@ singleton_rule:
     but reasoning "my overrides differ yet I believe the bytes match" is exactly what
     produces the accidental second instance. Check the override sets; do not predict
     the bytes.
+  dat_versus_var: |
+    DAT is shared by the instances built from one image; VAR is per instance.
   which_cons_matter: |
     Only an override that CHANGES THE IMAGE BYTES can fork an object — in practice,
     any CON that sizes a DAT array. A CON affecting only runtime values (a loop bound,
@@ -115,6 +121,12 @@ verification:
     VAR bases. The image count is what decides the question below - two instances on one
     image share its DAT; two images do not.
     Compiler-coupled behaviour: re-measure rather than assume if a result surprises you.
+  var_ledger_across_instances: |
+    VAR is per instance. The image count cannot show a VAR ledger
+    that has been split across instances: the SUMMARY reports the same image count
+    whether a child keeps its ledger in VAR (one copy per instance) or in DAT (one copy
+    per image). To see a split VAR ledger, read the OBJECT TREE and the VAR entries in
+    OBJECT DETAILS, which list the variable once per instance.
   image_counts: |
       Image counts, as the .map's SUMMARY reports them:
       - identical overrides (100,100), seeded probe          -> 2 images, one shared DAT

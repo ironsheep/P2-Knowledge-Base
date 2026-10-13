@@ -1,0 +1,3 @@
+PUB go(x, y) : r
+  r := x >= y
+  r += x <= y

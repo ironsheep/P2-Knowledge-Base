@@ -1,0 +1,9 @@
+CON _clkfreq = 200_000_000
+
+OBJ
+  a : "cp-024-child" | INC = 2
+  b : "cp-024-child" | INC = 2
+
+PUB go() | x
+  x := a.bump()
+  x += b.bump()

@@ -1,0 +1,9 @@
+CON
+  INC = 1
+
+DAT
+ledger  long 0
+
+PUB bump() : r
+  ledger += INC
+  return ledger

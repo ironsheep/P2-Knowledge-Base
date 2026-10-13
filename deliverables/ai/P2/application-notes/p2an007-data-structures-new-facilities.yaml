@@ -76,7 +76,7 @@ cross_references:
   composes:
     - language/spin2/keywords/STRUCT.yaml             # the record facility (decl, typed members, arrays, SIZEOF, pointers, cross-object export/import)
     - language/spin2/methods/sizeof.yaml              # SIZEOF(structName) -> packed byte size (R1)
-    - language/spin2/methods/locknew.yaml             # allocate one of 16 hardware locks (R4); returns -1 if none free
+    - language/spin2/methods/locknew.yaml             # allocate one of 16 hardware locks (R4); returns a negative value if none free
     - language/spin2/methods/locktry.yaml             # non-blocking test-and-set; REPEAT UNTIL LOCKTRY = spin-acquire (R4)
     - language/spin2/methods/lockrel.yaml             # release the captured lock (R4)
     - language/spin2/methods/lockret.yaml             # return a lock to the pool when done
@@ -109,7 +109,7 @@ key_parameters:
   struct_ops: "member access var.member; whole-struct copy a := b; SIZEOF(name) -> byte size; pass-by-value <=15 longs (larger uses BYTEMOVE)"
   atomicity_model: "a single hub LONG is read/written atomically; a multi-field record is NOT. Publish a record: write its fields FIRST, then flip ONE long (an index or a sequence counter) LAST"
   lock_rule: "single writer of the publish long -> NO lock (R2 ring: producer owns head, consumer owns tail; R3 mailbox: one writer bumps seq). Several writers of the same index -> ONE hardware lock (R4)"
-  locks: "P2 has 16 hardware locks. LOCKNEW() -> 0..15 or -1 (check it); REPEAT UNTIL LOCKTRY(id) spin-acquires; LOCKREL(id) releases; LOCKRET(id) frees. Release on EVERY exit path; two locks -> acquire in the SAME (ascending) order"
+  locks: "P2 has 16 hardware locks. LOCKNEW() -> 0..15 or a negative value (check it with < 0); REPEAT UNTIL LOCKTRY(id) spin-acquires; LOCKREL(id) releases; LOCKRET(id) frees. Release on EVERY exit path; two locks -> acquire in the SAME (ascending) order"
   ring_indexing: "power-of-2 QSIZE -> `& QMASK` is one-instruction modulo; full test ((head+1)&MASK) == tail (or <> for not-full)"
 
 prerequisites:
@@ -139,7 +139,7 @@ gotchas:
   - flag: pitfall
     text: "Receiving a struct POINTER from a CHILD object needs bracket notation: `[pRec] := child.method()`. Without it a record larger than 15 longs is treated as a full-struct return and fails to compile. (Only across OBJ boundaries.)"
   - flag: hardware
-    text: "The P2 has 16 hardware locks; LOCKNEW returns -1 when they're exhausted — always check. Keep the locked section tiny (never hold a lock across debug()/waitms)."
+    text: "The P2 has 16 hardware locks; LOCKNEW returns a negative value when they're exhausted — always check (< 0). Keep the locked section tiny (never hold a lock across debug()/waitms)."
   - flag: tip
     text: "A STRUCT array replaces parallel arrays kept in lockstep — one records[] copies and indexes as a unit, fewer indices to keep aligned. A deque is a ring with both ends live (no new primitive)."
   - flag: verify

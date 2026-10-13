@@ -1,0 +1,16 @@
+{ CP-023 proof: a streamer count above $FFFF carries into the command field D[31:16].
+  Mode X_IMM_32X1_1DAC1: D[31:16] = %0100_dddd_eppp_pppa, pin number in D[22:16]
+  (pin bits start at bit 17 in this mode: ppp pppa, a = bit 16).
+  Compile with:  pnut-ts -l cp-023-streamer-count-spill.spin2  }
+CON
+  BASE   = X_IMM_32X1_1DAC1 + X_PINS_ON            ' mode + output enable, pin 0, count 0
+  PIN    = 8                                       ' intended pin base (group %001, sub-pin 0)
+
+PUB main()
+  repeat
+
+DAT
+  org
+cmd_control   long BASE + (PIN << 17) + 65_534     ' control: count fits D[15:0] ($FFFE)
+cmd_spill     long BASE + (PIN << 17) + 131_072    ' count $2_0000: bit 17 lands in the command field
+cmd_pin_plus1 long BASE + ((PIN + 1) << 17) + 0    ' what the spilled word should equal if bit 17 is a pin bit and count is 0

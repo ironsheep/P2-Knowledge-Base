@@ -56,6 +56,8 @@ aliases:
   - "pull-down resistor"
   - "pull resistor"
   - "bias resistor"
+  # symptom-shaped
+  - "which drive rung for a digital output"
 
 description: |
   Thirteen bits of the WRPIN D operand -- %M..M, D[20:8] -- set the low-level pin

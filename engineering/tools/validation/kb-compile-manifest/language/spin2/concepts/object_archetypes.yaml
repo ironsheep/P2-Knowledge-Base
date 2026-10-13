@@ -14,7 +14,7 @@ blocks:
     fp: "81eadabdcafdf2e0"
     compile: program
   - at: archetypes[3].template
-    fp: "b623fa16b60591b1"
+    fp: "10918bc7e5aaf123"
     compile: program
   - at: archetypes[4].child_template
     fp: "f08b72326e539943"

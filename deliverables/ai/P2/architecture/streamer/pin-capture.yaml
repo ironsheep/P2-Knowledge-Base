@@ -44,6 +44,8 @@ aliases:
   - "capture a bus pin"
   - "streamer capture"
   - "pins to WRFAST"
+  - "streamer output not visible"
+  - "capture a bus pin without a monitor pin"
 
 description: |
   The streamer can record digital pin state into hub RAM at up to one sample set
@@ -158,6 +160,14 @@ neighbour_capture_composition:
     input_routing.global_digital_filters. A filt selection delays its lane against an
     unfiltered one: with the tap at 0, N flipflops delay the lane by N + 1 clocks (see
     verification_status.filter_delay for the delay values)."
+
+alternative_smart_pin_off:
+  when: "The bus pin's smart pin is not needed during the burst."
+  do: "Set that pin's smart-pin mode to off (%SSSSS = %00000) and name the pin directly in
+    the streamer command. With the smart pin off the pin's own level drives its IN, so the
+    capture records the waveform with no neighbour monitor pin."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (the
+    resultant 'A' drives IN in non-smart-pin modes); EF-095; XF-003"
 
 parallax_worked_example:
   what_it_is: "Parallax's own Spin2 documentation builds exactly this composition

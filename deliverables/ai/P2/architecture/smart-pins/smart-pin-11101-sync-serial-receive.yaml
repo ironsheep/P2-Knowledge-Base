@@ -49,7 +49,7 @@ z_register: |
   - 16-bit: Z[31:16]=data, use SHR #16  
   - 32-bit: Z[31:0]=data, no shift needed
 
-in_flag: "High when reception complete"
+in_flag: "Raised when a full word (X[4:0]+1 bits) has been shifted in. Shifting is clocked by the positive edges of the B input; the A input is only sampled at those edges."
 
 # Pin Usage
 pins:

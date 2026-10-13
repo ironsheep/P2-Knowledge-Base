@@ -98,6 +98,6 @@ blocks:
     wrap: pasm2-dat
     assumes: [lock_num]
   - at: debugging_tips[2].example
-    fp: "2b8bcb3d21242df0"
+    fp: "733ba1ec7e270633"
     compile: not-code
     reason: "comment-only block (a list of \"system lock assignments\" in `'` lines); there is no statement to compile (the assignments themselves are unsourced, see the observations)"

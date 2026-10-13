@@ -1,0 +1,5 @@
+CON _clkfreq = 200_000_000
+    DEBUG_COGS = %0000_0001
+
+PUB go()
+  debug("hello", udec(1))

@@ -3,13 +3,15 @@ type: constant
 category: Debug Constants
 
 introduced_in_version: "v46"  # edition of introduction; NOT an enforced compiler gate (boundary-probed)
-documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, Symbols you can define to modify DEBUG behavior (DEBUG_MASK) and version history v46; object parameters override child CON symbols (version history); CP-014 (setting a child's DEBUG_MASK in OBJ); CP-015 (plain DEBUG() compiled under DEBUG_MASK = 0)"
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, Symbols you can define to modify DEBUG behavior (DEBUG_MASK) and version history v46; object parameters override child CON symbols (version history); CP-014 (setting a child's DEBUG_MASK in OBJ); CP-015 (plain DEBUG() compiled under DEBUG_MASK = 0); CP-025 (debug[N]() with no DEBUG_MASK is a compile error, with the compiler's message)"
 
 aliases:
   - DEBUG_MASK
   - "set a child object's DEBUG_MASK"
   - "override DEBUG_MASK in an object"
   - "object has DEBUG_MASK = 0 but still prints"
+  - "DEBUG_MASK symbol must be defined for DEBUG[0..31] usage"
+  - "debug[3] will not compile"
 
 description: |
   User-defined constant that enables selective DEBUG output by channel. When
@@ -17,8 +19,8 @@ description: |
   (DEBUG[n]). Each bit in the mask corresponds to a channel (0-31). Only channels
   with their corresponding bit set are compiled; others are completely omitted.
 
-  Available in PNut/pnut-ts v46 and later compilers. No {Spin2_v##} version directive
-  is required -- DEBUG_MASK is a CON constant, not a new keyword subject to keyword gating.
+  No {Spin2_v##} version directive is required -- DEBUG_MASK is a CON constant, not a
+  new keyword subject to keyword gating.
   Standard DEBUG() statements (without channel numbers) likewise require no directive.
 
 value: "User-defined bitmask (0 to $FFFF_FFFF)"
@@ -122,11 +124,10 @@ compilation_behavior:
   - "DEBUG[n] with bit n NOT set: Entire statement omitted (no code generated)"
   - "DEBUG[n] with bit n SET: Statement compiled normally"
   - "Without DEBUG_MASK defined: DEBUG[n] syntax is an error"
-  - "Plain DEBUG() (no channel): Always compiled, ignores DEBUG_MASK -- even with DEBUG_MASK = 0 it is still compiled, is not silenced by the mask, and still spends records and DEBUG data"
+  - "Plain DEBUG() (no channel): Always compiled, ignores DEBUG_MASK; it is compiled even with DEBUG_MASK = 0"
 
 notes:
-  - "Introduced in PNut/pnut-ts v46; no {Spin2_v##} version directive required"
-  - "Available in PNut/pnut-ts v46 and later compilers"
+  - "No {Spin2_v##} version directive required"
   - "DEBUG_MASK must be defined for DEBUG[n] syntax to work"
   - "Channel numbers must be 0-31"
   - "DEBUG_MASK belongs to the file that defines it. A parent can set a child object's mask where it declares the object, like any other overridable constant: OBJ drv : \"driver\" | DEBUG_MASK = %1"
@@ -175,7 +176,7 @@ error_messages:
   - error: "DEBUG mask bit-number must be 0..31"
     cause: "Channel number outside valid range (e.g., debug[32])"
   - error: "DEBUG_MASK symbol must be defined for DEBUG[0..31] usage"
-    cause: "Using debug[N]() without defining DEBUG_MASK constant"
+    cause: "Using debug[N]() without defining DEBUG_MASK constant; the build stops at the debug[N] statement (a plain debug() needs no mask)"
   - error: "DEBUG_MASK can only be defined as an integer constant"
     cause: "Non-integer value used for DEBUG_MASK (e.g., float or string)"
 
@@ -189,4 +190,4 @@ see_also:
   - "Conditional compilation"
   - "Multi-cog debugging"
 
-oneliner: "Bitmask constant for selective DEBUG channel compilation (v46+)"
+oneliner: "Bitmask constant for selective DEBUG channel compilation"

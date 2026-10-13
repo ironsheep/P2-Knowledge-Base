@@ -86,7 +86,7 @@ and says nothing about the write side at all.
 *Submitted:* staged 2026-08-29; delivery to this tree not recorded before 2026-09-19.
 
 ### XF-002 · Neighbour routing into a counter works from a plain driven pin — `CONFIRMED`
-*KB:* `architecture/streamer/pin-capture.yaml`
+*KB:* `architecture/streamer/pin-capture.yaml`; `architecture/smart-pins/smart-pin-01110-count-a-edges-optional-b-dec.yaml` (observer_use)
 
 A counter on P62 routed relative −1 from P61 counted **1,009 of 1,009** driven edges, with a
 matched control on P57 ← P56 counting **601 of 601** (2026-08-28). P61 was driven as a **plain

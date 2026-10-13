@@ -1,5 +1,7 @@
 concept: streamer_smartpin_control
 title: Streamer and Smart Pin Control
+aliases:
+  - "SPI write corrupts sectors silently at some clock rates"
 category: peripheral_control
 description: Hardware streaming engine and autonomous Smart Pin configuration for high-speed I/O
 documentation_level: comprehensive

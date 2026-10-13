@@ -67,7 +67,7 @@ key_features:
     - 'Maximum 511 iterations with a # immediate; up to 2^32-1 with ## or a register; a count of 0 repeats forever'
     - No branches within REP block (branches cancel REP)
     - No REP nesting allowed (single hardware counter)
-    - Interrupts stalled during REP execution
+    - Interrupts are ignored during REP looping, the debug interrupt included
     - Cannot use WC, WZ, or WCZ effects
 
 operational_details:
@@ -98,7 +98,9 @@ restrictions:
 
   special_cases:
     - DJNZ in REP block: Works but exits REP early
-    - Interrupts: Disabled during REP block
+    - Interrupts: Ignored during REP looping
+    - S = 0 repeats the block indefinitely
+    - A REP block is shielded from interrupts, including the debug interrupt
     - Debug: Cannot single-step through REP
     - Hub execution: REP works in hubexec mode
 

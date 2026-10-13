@@ -14,3 +14,7 @@ blocks:
     fp: "7fa8f9ff2891e697"
     compile: not-code
     reason: "two-file listing: the mid-tier file (CON/OBJ leaf/DAT) and the top file (OBJ a/b overriding MID_TAG) printed one after the other under comments; the two parts are separate source files and cannot be one compilation unit"
+  - at: verification.var_ledger_across_instances
+    fp: "c8d9516ffeab3507"
+    compile: not-code
+    reason: "YAML prose (English sentences), not code"

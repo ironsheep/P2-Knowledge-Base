@@ -5,6 +5,8 @@ aliases:
   - "edge module no RAM"
   - "standard edge module"
   - "P2 Edge standard module"
+  - "smart pin neighbour reaches only 3 pins"
+  - "which pins can observe P62 or P63"
 # Part Number: P2-EC
 # Revision: Rev D
 # Source Document: P2-EC Edge Module Rev D Product Guide v3.0 (June 3, 2022)
@@ -122,6 +124,7 @@ pin_mapping:
   source: >-
     P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, Edge Connector Pin Assignments, p.10; Other Pins, p.11; 12. microSD card socket, p.7; 3. LDO regulators for I/O Pin Voltage, p.4.
     boot_pin_direction_note: Parallax Propeller 2 ROM Booter v33_01j, CON block (spi_cs, spi_ck, spi_di, spi_do pin definitions with their sd_ aliases) and Try to load from SPI memory (try_spi).
+    neighbour_pin_reach: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (A and B input selectors).
   summary: >-
     "Smart I/O pins P0-P55 are fully free; P56-P63 are routed to peripheral
     circuits and/or have special functions related to Propeller 2 boot sequence
@@ -159,6 +162,12 @@ pin_mapping:
     (flash/card data IN, i.e. MOSI). P60 and P61 SWAP roles between the two
     boot sources: flash SPI CLK on P60 and flash SPI CS on P61, but microSD CS on P60
     and microSD CLK on P61.
+  neighbour_pin_reach: >-
+    A smart-pin observer reaches only the pins within three of its own: the WRPIN
+    A and B input selectors name this pin or the pin 1, 2 or 3 above or below it.
+    For a signal on P62 or P63 the candidate observer pins P59-P61 are the
+    boot-flash and microSD lines on this module (P59 MOSI / CMD, P60 flash CLK /
+    microSD CS, P61 flash CS / microSD CLK).
   microsd_socket:
     added_in: "Rev C"
     power: "supplied by the VIO5663 LDO regulator"

@@ -24,6 +24,7 @@ aliases:
   - "X_PINS_ON"
   - "X_WRITE_ON"
   - "alternate bit order"
+  - "streamer output not visible on the pin"
 
 # Pin group selection (32-pin blocks)
 pin_groups:

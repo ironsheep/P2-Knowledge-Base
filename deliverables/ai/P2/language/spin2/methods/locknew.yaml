@@ -8,7 +8,8 @@ syntax: "lock_id := LOCKNEW()"
 parameters: []
 returns:
   type: "integer"
-  description: "Lock ID (0..15) if successful, -1 if no locks available"
+  description: "Lock ID (0..15) if successful; a negative value (< 0) if no lock is available"
+source: "Spin2 v55 documentation (LOCKNEW: < 0 if no LOCK available; LOCK[15] is allocated by the debugger); Parallax Spin2 interpreter v55 (LOCKNEW)"
 
 examples:
   - description: "Allocate lock with error checking"
@@ -37,7 +38,7 @@ examples:
         shared_counter := 0
 
       PUB cleanup()
-        if counter_lock <> NO_LOCK
+        if counter_lock >= 0
           LOCKRET(counter_lock)
           counter_lock := NO_LOCK
 
@@ -79,15 +80,15 @@ anti_patterns:
     description: "Not checking if lock allocation succeeded"
     wrong: |
       lock := LOCKNEW()
-      ' Assume lock is valid - may be -1!
-      REPEAT UNTIL LOCKTRY(lock)  ' Undefined behavior with lock=-1
+      ' Assume lock is valid - may be negative!
+      REPEAT UNTIL LOCKTRY(lock)  ' Undefined behavior with a negative lock
     correct: |
       lock := LOCKNEW()
       if lock < 0
         ABORT  ' Or handle error appropriately
 
 best_practices:
-  - "Always check return value for -1 (no locks available)"
+  - "Check the return value with < 0 (a negative value means no lock is available)"
   - "Store lock ID in VAR or DAT for later LOCKRET"
   - "Return locks in cleanup/stop methods"
   - "Document which lock protects which resource"
@@ -96,7 +97,8 @@ best_practices:
 notes:
   - "P2 has 16 hardware locks (0-15)"
   - "Returns next available lock ID"
-  - "Returns -1 if all 16 locks in use"
+  - "Returns a negative value (< 0) if no lock is available"
+  - "A -d build allocates lock 15 for the debugger before the program runs, so LOCKNEW has one fewer lock available there"
   - "Lock is allocated but NOT captured (call LOCKTRY to acquire)"
   - "Must call LOCKRET when done to free lock for reuse"
   - "Locks are shared across all 8 COGs"
@@ -116,6 +118,4 @@ related:
   - language/spin2/methods/lockchk.yaml
   - architecture/locks.yaml
   - language/spin2/patterns/implementation/spin2_cog_management.yaml
-  # A DEBUG build takes one of the sixteen locks before your program runs, so LOCKNEW
-  # has one fewer available under -d than without it. See the debug-build cost list.
   - language/spin2/debug-commands/debug-strategy-guide.yaml
