@@ -132,6 +132,91 @@ driven edges counting 137.
 *What it grounds:* nothing in the KB today. Recorded because it is a clean worked example of
 instrumenting a bus with a spare pin, and because it is the calibration behind `XF-002`.
 
+### From the project's debug and instrumentation write-up — graded 2026-10-13 («#429»)
+
+The project's write-up of its debug techniques (dated 2026-09-08, ingested as `p2-debug-techniques`)
+tags many claims *"measured on P2 silicon with a recorded run"*, but carries **no run record**: no
+board, attachments or control arm, and a clock only where a claim is about the clock. Every silicon
+claim below is therefore `UNGRADED`, with the missing rules named. The project has been asked for the
+records (one request, all items); no test of ours is written for any of these until that answer is
+in. Claims that were tool behaviour, host-tool behaviour or method, and claims a Parallax document,
+an `EF` or `XF-001`–`XF-004` already settles, were not entered (the «#429» grading pass recorded
+which). Each entry gives the claim at the project's own scope.
+
+### XF-005 · A formatted number can print as an endless digit run while the value is right — `UNGRADED`
+A formatted field printed as endless `0_000_…` groups, sometimes with a letter inside the digits;
+two consecutive prints of one variable read `0` then `7`; a run passed every assertion and never
+reached its end marker because a display was still emitting. *Scope, in their words:* "Each of
+these was observed on silicon." *Gap:* rules 1, 2, 3 — no occurrence count, board, clock or log;
+rule 4 unknown. Not a VO candidate: a symptom with no named cause.
+
+### XF-006 · The last line is lost if the program ends before the debug transmitter drains — `UNGRADED`
+A program that printed its end marker or stopped without waiting for the transmitter lost its
+final line mid-transmission. *Scope:* one incident ("That cost an audit its whole `STATUS:`
+line"). *Gap:* rules 1, 2 — no with/without-drain arm. *VO-P candidate* if no paired run exists: a
+bare `-d` program that prints, then ends or stops, with and without the drain.
+
+### XF-007 · A board read as hung was emitting one character about every 98 s — `UNGRADED`
+Every cog's debug output stopped at the same moment, and the chip kept emitting about one character
+per 98 s "across many intervals". *Gap:* rules 1, 2, 3 (given as an example), 4.
+
+### XF-008 · Stopping a worker cog killed debug output mid-word — `UNGRADED`
+Debug output died mid-word at the call that stopped the driver's worker cog, with no payload lines
+after it. *Scope, in their words:* "No mechanism is established." *Gap:* rules 1, 2, 4 (seen as
+their driver's stop). *VO-P candidate* after the records: a bare `COGSTOP` of a debug-enabled cog
+in a `-d` build, with `DEBUG_COGS` restricted as the control arm.
+
+### XF-009 · A `-d` build adds no per-instruction overhead; timing differences come from layout — `UNGRADED`
+*Gap:* rules 1, 2 — tagged measured, no run given. *VO-P candidate* if the records are empty
+(`EF-034`/`EF-035` show the timing-rig pattern).
+
+### XF-010 · A sync-serial data pin left in smart mode is clocked by a streamer burst on another pin — `UNGRADED`
+A `P_SYNC_RX` pin's `IN` rises on B-clock edges, not on data; a data pin left in smart mode counts
+every clock of a burst it is not part of; a burst that is not a multiple of the word size leaves the
+shifter mid-word and misframes every later word until the pin is reset; the reset is `PINFLOAT`
+then `WRPIN`/`WXPIN`/`PINH`, while re-arming with `WXPIN`/`WYPIN` or `AKPIN`/`DIRH` is not one.
+*Gap:* rules 1, 2, 4 (localised in their driver). *VO-P candidate* for the burst, misframe and
+reset claims if no isolated run exists (`EF-017`, `EF-019`, `EF-090` are the nearest rigs).
+
+### XF-011 · `P_HIGH_15K` on an actively driven line is not a substitute for `P_HIGH_FAST` — `UNGRADED`
+*Gap:* rules 1, 2 — no failing and passing run given.
+
+### XF-012 · On the P2 Edge the boot ROM drives P58–P61 at every reset — `UNGRADED`
+A device on those pins sees its chip-select toggle with arbitrary data at every reset, and the
+flash and microSD roles on P60/P61 are exchanged. *Gap:* rules 1, 2 — no capture given. The ROM
+booter listing is the authority for what it drives.
+
+### XF-013 · A streamer count past 16 bits spills into the pin-base field — `UNGRADED`
+A count of 131,072 gave a different pin base and a count of 0; nothing transferred and `WAITXFI`
+never returned. Consistent with `EF-065`'s carry mechanism. *Gap:* rules 1, 2. *VO-P candidate*
+if the records are empty.
+
+### XF-014 · A neighbour counter and an independent streamer decode agreed on 4,576 clock edges — `UNGRADED`
+A counter at relative −3 read 4,576 SCK edges for one transfer, matching a streamer decode of the
+same transfer. *Gap:* rules 1, 2 — the subject pin, its smart-pin mode and the board are not given.
+If the subject pin was in `P_TRANSITION`, the run bears on `VO-J-005` (see `XF-002`).
+
+### XF-015 · `WAITMS` past `$8000_0000` clocks returns at once — `UNGRADED`
+`waitms(45_000)` returned in about 250 ms at 350 MHz. The Spin2 v55 documentation states the bound
+("duration must not exceed $8000_0000 clocks"), not what happens past it. *Gap:* rule 1 (board),
+rule 2.
+
+### XF-016 · Delays and effects do not scale by the clock ratio — `UNGRADED`
+A delay measured at one sysclk did not scale by the ratio, a step at 350 MHz was absent or inverted
+at 300, 250 and 200 MHz, and code layout (42 bytes of dead code) changed which tests passed. *Gap:*
+rules 1, 2, 3 (units unnamed), 4. Folds into `XF-001`'s open question (whether the quantity is in
+sysclks) and `VO-P-001`.
+
+### XF-017 · A cog stopped while holding a lock frees the lock but not its number — `UNGRADED`
+After sixteen such stops `LOCKNEW` returns −1. The lock state at stop was measured 3 of 3; the leak
+itself was never run to exhaustion. *Gap:* rule 1 for the leak. *VO-P candidate* — load-bearing
+and with no bench evidence anywhere: stop-leak sixteen times, then `LOCKNEW`, with a `LOCKRET` arm
+as the control.
+
+### XF-018 · One hung run can break the next run on the same power-up — `UNGRADED`
+A byte-identical binary passed 25 of 25 as the first program after a power cycle and was silent as
+the fifth. *Gap:* rules 1, 2, 4 — the cause (card or peripheral state) is not isolated.
+
 ---
 
 ## Lifecycle
