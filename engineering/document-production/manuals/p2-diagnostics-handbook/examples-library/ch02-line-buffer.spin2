@@ -1,0 +1,85 @@
+'' ===========================================================================
+''
+''   File.......  ch02-line-buffer.spin2
+''   Purpose....  A whole line built in a hub buffer from DAT labels and
+''                digits, then printed by one debug() statement
+''   Manual.....  p2-diagnostics-handbook
+''   Appears in.  Chapter 2: Staying Inside the Debug Limits -- 2.4 Moving
+''                text out of debug()
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Oct 2026
+''   Updated....  Oct 2026
+''
+''   This file is an EXAMPLE from the manual above. Everything below
+''   this header is byte-identical to the listing printed there --
+''   what you read in the manual is what builds here.
+''
+'' ===========================================================================
+
+CON
+  _clkfreq = 200_000_000
+  LINE_MAX = 80                 ' longest line, in characters
+
+VAR
+  long lineLen
+  byte lineBuf[LINE_MAX + 1]    ' room for the terminating zero
+
+PUB main() | count, errors
+  count := 1_250
+  errors := 3
+  lineStart()
+  lineText(@sCount)
+  lineDec(count)
+  lineText(@sErrors)
+  lineDec(errors)
+  lineEmit()
+
+PRI lineStart()
+  lineLen := 0
+  lineBuf[0] := 0
+
+PRI lineChar(c)
+  if lineLen < LINE_MAX         ' never write past the buffer
+    lineBuf[lineLen++] := c
+    lineBuf[lineLen] := 0
+
+PRI lineText(pStr)
+  repeat strsize(pStr)
+    lineChar(byte[pStr++])
+
+PRI lineDec(value) | divisor, started
+  divisor := 1_000_000_000      ' value must not be negative
+  started := false
+  repeat until divisor == 0
+    if value / divisor or started or divisor == 1
+      lineChar("0" + value / divisor)
+      started := true
+    value //= divisor
+    divisor /= 10
+
+PRI lineEmit()
+  debug(zstr_(@lineBuf))        ' the whole line, one statement
+
+DAT
+  sCount   byte  "count=", 0
+  sErrors  byte  " errors=", 0
+
+{{
+ ---------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ ---------------------------------------------------------------------------
+}}

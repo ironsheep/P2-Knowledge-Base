@@ -422,6 +422,21 @@ pin 4 state") look intentional, so the measure is block comments specifically.
 
 ---
 
+## Prose "call" before an inline code span prints as **CALL** (cross-manual, platform) — OPEN (cause traced)
+
+**Found 2026-10-13** on the P2 Diagnostics Handbook prototype daemon render («#428»): "However many
+places in a program call `lineEmit()`" printed as "… program **CALL** `lineEmit()`". **Cause, read in
+`p2kb-platform-mnemonic-bold.lua`, the `w == "call"` branch:** "call" counts as English only when the
+word before is in a fixed list (`to`, `the`, `each`, `method`, `object` …) or the word after is (`the`,
+`a`, `it`, `to` …). Here the word before is `program` and the next token is an inline code span, which
+matches neither list, so the default (`return false`, instruction) wins. **Any manual** with "<noun>
+call `name()`" or "<noun> call" before code is exposed. The handbook sentence was reworded ("use"), so
+the prototype is clean; the filter is unchanged. **Fix candidate:** treat a following inline code span
+that ends in `()` (a Spin2 method name) as English context. A filter change re-renders every manual, so
+it is a scope call for Stephen before it is made.
+
+---
+
 ## A line after an inline code span that ends a line can start with a visible space (cross-manual, platform) — OPEN (finding, cause unknown)
 
 **Found 2026-09-29** verifying the P2 Errata v0.2.0 render (E3 scope update), by eye at 70 dpi.

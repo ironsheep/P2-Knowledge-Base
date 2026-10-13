@@ -1,0 +1,63 @@
+% P2KB Diagnostics Handbook LaTeX Template
+% Main template for the P2 Diagnostics Handbook (slug p2-diagnostics-handbook)
+% Author: Iron Sheep Productions, LLC
+% Version: 0.1 (shape prototype)
+%
+% LAYOUT: One-sided for PDF screen viewing
+% For physical print with binding, change to: twoside,openany
+%
+% Template Stack (PLATFORM-UNIFIED — see methodology/presentation-platform-unification-STUDY.md):
+%   1. p2kb-platform-foundation.sty        - shared: geometry, penalties, titlespacing, hyperref
+%   2. p2kb-platform-content.sty           - shared: code/reference box family, contmarkers, keep-together
+%   3. p2kb-diagnostics-handbook-local.sty - per-manual override (thin — empty for the prototype)
+%
+% No per-manual diagrams package: the prototype carries no figures. Add
+% p2kb-diagnostics-handbook-diagrams.sty (on p2kb-platform-diagrams) when the
+% first figure is authored, modelled on the Streamer guide's.
+
+\documentclass[11pt,letterpaper,oneside]{book}
+
+% ==================== LOAD PLATFORM FOUNDATION LAYER (shared) ====================
+\usepackage{p2kb-platform-foundation}
+
+% ==================== LOAD PLATFORM CONTENT LAYER (shared) ====================
+\usepackage{p2kb-platform-content}
+
+% ==================== LOAD PER-MANUAL OVERRIDE (skins / local tail) ====================
+\usepackage{p2kb-diagnostics-handbook-local}
+
+% ==================== DOCUMENT METADATA ====================
+% Single-source (F-300): every identity string lives once, in request.json
+% metadata, and reaches BOTH the PDF info dictionary and the cover page.
+% \renewcommand, not \newcommand -- p2kb-platform-foundation has already
+% \providecommand'd these. The platform fills the PDF info dictionary from \Doc*,
+% not from \@title/\@author, so without this binding Title, Subject and Author
+% ship EMPTY.
+\renewcommand{\DocTitle}{$title$}
+\renewcommand{\DocSubtitle}{$subtitle$}
+\renewcommand{\DocVersion}{$version$}
+\renewcommand{\DocDate}{$date$}
+\renewcommand{\DocAuthor}{$author$}
+\renewcommand{\DocCopyright}{$copyright$}
+\renewcommand{\DocLicense}{$license$}
+
+\title{\DocTitle}
+\author{\DocAuthor}
+\date{\DocDate}
+
+% ==================== ADDITIONAL SETUP ====================
+
+% Tighter spacing for prose
+\setlength{\parskip}{6pt}
+
+% ==================== DOCUMENT STRUCTURE ====================
+\begin{document}
+
+% Title page - no headers/footers
+\thispagestyle{empty}
+\enlargethispage{2cm}
+
+% Main content from Pandoc (includes title page at beginning)
+$body$
+
+\end{document}

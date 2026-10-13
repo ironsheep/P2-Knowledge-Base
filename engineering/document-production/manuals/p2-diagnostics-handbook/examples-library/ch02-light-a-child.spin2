@@ -1,0 +1,47 @@
+'' ===========================================================================
+''
+''   File.......  ch02-light-a-child.spin2
+''   Purpose....  A parent turning on a child's debug channel where it
+''                declares the object
+''   Manual.....  p2-diagnostics-handbook
+''   Appears in.  Chapter 2: Staying Inside the Debug Limits -- 2.6
+''                Compiling less
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Oct 2026
+''   Updated....  Oct 2026
+''
+''   This file is an EXAMPLE from the manual above. Everything below
+''   this header is byte-identical to the listing printed there --
+''   what you read in the manual is what builds here.
+''
+'' ===========================================================================
+
+CON
+  _clkfreq = 200_000_000
+
+OBJ
+  sensor : "ch02-sensor-driver" | DEBUG_MASK = %1   ' channel 0 on
+
+PUB main() | reading
+  reading := sensor.sample(21)
+  debug(udec(reading))
+
+{{
+ ---------------------------------------------------------------------------
+  MIT License -- Copyright (c) 2026 Iron Sheep Productions, LLC
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED. See the repository LICENSE file for the full text.
+ ---------------------------------------------------------------------------
+}}

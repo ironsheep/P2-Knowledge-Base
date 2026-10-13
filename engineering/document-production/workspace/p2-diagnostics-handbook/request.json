@@ -1,0 +1,33 @@
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2-Diagnostics-Handbook.md",
+      "output": "P2-Diagnostics-Handbook.pdf",
+      "template": "p2kb-diagnostics-handbook-reference",
+      "pandoc_args": [
+        "--top-level-division=chapter",
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=2"
+      ],
+      "lua_filters": [
+        "p2kb-platform-figures",
+        "p2kb-platform-crossref",
+        "p2kb-platform-tables",
+        "p2kb-platform-mnemonic-bold",
+        "p2kb-platform-code-coloring",
+        "p2kb-platform-pagination"
+      ],
+      "metadata": {
+        "title": "P2 Diagnostics Handbook",
+        "subtitle": "Getting Output Out, Supervising a Run, and Trusting What You Measure",
+        "author": "Iron Sheep Productions, LLC",
+        "version": "0.1.0-prototype",
+        "date": "2026-10-13",
+        "copyright": "Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.",
+        "license": "CC BY-SA 4.0"
+      }
+    }
+  ]
+}
