@@ -36,3 +36,13 @@ blocks:
     fp: "15ed8fa49805cc41"
     compile: fragment
     wrap: spin2-top
+  - at: common_pitfalls[1].wrong
+    fp: "410152f328cdc09e"
+    compile: never
+    wrap: spin2-top
+    reason: "a `wrong:` block whose teaching point is the compile error: `PRI m(pA)` names cog register PA (case is ignored); pnut-ts rejects line 1 with m220 \"Expected a unique parameter name\" (CP-016)"
+    fails_at: 1
+  - at: common_pitfalls[1].correct
+    fp: "e6f59c953e014fc5"
+    compile: fragment
+    wrap: spin2-top

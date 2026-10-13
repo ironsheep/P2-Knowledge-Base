@@ -38,6 +38,9 @@ notes:
   - "Affects all timing-dependent operations"
   - "Maximum frequency depends on chip specs"
   - "The compiler defines clkmode_ and clkfreq_ from the CON clock symbols; there are no other predefined clkmode_ constants"
+in_a_debug_build:
+  note: "CLKSET also keeps the debugger's stored clock frequency (P63, held in long-repository mode) current, so DEBUG output stays at the right baud rate after the change. DEBUG needs a clock of at least 10 MHz derived from a crystal or an external input, so the RCFAST and RCSLOW examples here cannot be used in a DEBUG build"
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (to use the debugger, at least a 10 MHz clock derived from a crystal or external input; DEBUG dynamic clock frequency adaptation) and version history v36 (CLKSET supports the P63 clock-frequency repository)"
 timing:
   description: "Clock stabilization delay"
   cycles: "~10 ms (20_000_000/100 clocks at RCFAST), only when the new clkmode selects the crystal or PLL (bit 1 of the mode set); otherwise no wait"

@@ -225,7 +225,7 @@ synchronization:
   source: "OBEX 4261 (P2 FLASH Filesystem), object description. A community object, not a Parallax publication."
 
 notes:
-  - "Method runs until it returns or cog is stopped"
+  - "Method runs until it returns or cog is stopped. When the top-level method returns, the effect is TASKSTOP(-1): the task ends, and with no other task remaining the cog is stopped and freed."
   - "Stack overflow causes undefined behavior"
   - "Each cog has independent method call stack"
   - "Parameters are passed by value"

@@ -1,0 +1,5 @@
+{Spin2_v44}
+' CP-017: DEBUG BOOL under the v44 gate the v55 table names.
+PUB main() | x
+  x := 1
+  debug(bool(x))

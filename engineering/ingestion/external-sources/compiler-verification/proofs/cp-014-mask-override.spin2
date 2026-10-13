@@ -1,0 +1,10 @@
+' CP-014: the parent sets the child's DEBUG_MASK where it declares the object.
+CON
+  _clkfreq = 200_000_000
+
+OBJ
+  child : "cp-014-mask-child" | DEBUG_MASK = %1
+
+PUB main() | r
+  r := child.probe(21)
+  debug(udec(r))

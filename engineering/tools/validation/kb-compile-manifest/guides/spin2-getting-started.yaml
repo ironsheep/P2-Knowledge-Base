@@ -146,7 +146,7 @@ blocks:
     compile: fragment
     wrap: spin2-top
   - at: language_version_directives.version_requirements.Spin2_v46.example
-    fp: "5fcc175b13476792"
+    fp: "e32d02a35ac91c41"
     compile: program
   - at: language_version_directives.version_requirements.Spin2_v50.example
     fp: "7886038125b6b7c2"

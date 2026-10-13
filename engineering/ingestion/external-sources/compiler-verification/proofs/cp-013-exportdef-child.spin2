@@ -1,0 +1,8 @@
+' CP-013 child: compiles only if CP013_FLAG IS defined here (the #else
+' branch names an undefined identifier).
+PUB probe() : r
+#ifdef CP013_FLAG
+  r := 1
+#else
+  r := no_such_name_in_child
+#endif

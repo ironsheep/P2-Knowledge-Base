@@ -1,0 +1,14 @@
+' CP-013: #PRAGMA EXPORTDEF defines the symbol for child objects only.
+' This file compiles only if CP013_FLAG is NOT defined here (the #ifdef
+' branch names an undefined identifier) AND the child sees it defined.
+#pragma exportdef CP013_FLAG
+
+OBJ
+  child : "cp-013-exportdef-child"
+
+PUB main() | r
+#ifdef CP013_FLAG
+  r := no_such_name_in_parent
+#else
+  r := child.probe()
+#endif

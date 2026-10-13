@@ -1,0 +1,5 @@
+' CP-016 control: the same program with a name that is not a register.
+PUB main()
+  m(1)
+
+PRI m(pinA)

@@ -1,0 +1,10 @@
+' CP-014 control: the same parent without the override.
+CON
+  _clkfreq = 200_000_000
+
+OBJ
+  child : "cp-014-mask-child"
+
+PUB main() | r
+  r := child.probe(21)
+  debug(udec(r))

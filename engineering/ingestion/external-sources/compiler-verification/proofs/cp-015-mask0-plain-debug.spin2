@@ -1,0 +1,10 @@
+' CP-015: with DEBUG_MASK = 0 a plain debug() is still compiled; the
+' channelled one is not.
+CON
+  _clkfreq = 200_000_000
+  DEBUG_MASK = 0
+
+PUB main() | x
+  x := 1
+  debug("plain")
+  debug[0](udec(x))

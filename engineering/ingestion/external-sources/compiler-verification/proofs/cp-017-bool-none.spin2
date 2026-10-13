@@ -1,0 +1,4 @@
+' CP-017: DEBUG BOOL with no version directive.
+PUB main() | x
+  x := 1
+  debug(bool(x))

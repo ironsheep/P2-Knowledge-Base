@@ -44,7 +44,7 @@ description: 'Test the state of pin D[5:0] and write it to C or Z (WC/WZ), or co
 flags_affected:
   C: Set to IN[D[5:0]] (pin state), or AND/OR/XOR with C
   Z: Set to IN[D[5:0]] (pin state), or AND/OR/XOR with Z
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TESTP / TESTPN, p.136; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), I/O PIN TIMING (TESTP/TESTPN read the state of the pin registered two clocks before the start of the instruction)"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TESTP / TESTPN, p.136; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), I/O PIN TIMING (TESTP/TESTPN read the state of the pin registered two clocks before the start of the instruction); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (in smart pin modes the IN bit serves as a flag)"
 documentation_level: comprehensive
 examples:
 - name: Hall Sensor Reading
@@ -90,6 +90,7 @@ related_instructions:
 - FLTH: Float pin high
 notes:
 - TESTP reads actual pin state, not output register
+- On a pin in a smart-pin mode the IN bit that TESTP returns is the smart pin's flag (a function completed or an event occurred, acknowledgment perhaps needed), not the pin's logic level. See architecture/smart_pins.yaml
 - XORC/XORZ combine the pin with the existing flag (C or Z, matching the suffix)
 - Efficient for building multi-bit values from pins
 - Critical for real-time sensor reading like Hall sensors

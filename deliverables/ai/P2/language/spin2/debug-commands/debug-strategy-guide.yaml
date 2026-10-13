@@ -1,7 +1,7 @@
 title: "Debug Strategy Guide: Keeping a Debug Build Within the Compiler's Limits"
 type: guide
 category: Debugging
-documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (Things to know about the DEBUG system); DEBUG() memory utilization; DEBUG and interrupts"
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (Things to know about the DEBUG system); DEBUG() memory utilization; DEBUG and interrupts; CP-014 (a child's DEBUG_MASK set in OBJ); CP-015 (plain DEBUG() compiled under DEBUG_MASK = 0)"
 documentation_level: comprehensive
 
 aliases:
@@ -14,6 +14,11 @@ aliases:
   - "debug byte budget"
   - "what a debug build costs"
   - "debug resource usage"
+  - "object has DEBUG_MASK = 0 but still prints"
+  - "debug statements still compile with DEBUG_MASK 0"
+  - "DEBUG_MASK needs a version directive"
+  - "debug output garbled after changing the clock"
+  - "debug stops working after clkset"
 
 description: |
   Strategic guide for choosing the right debug mechanism in P2 projects.
@@ -99,7 +104,7 @@ what_a_debug_build_takes_from_your_program:
     (see architecture/debug_interrupt.yaml); how the debugger arranges the rest is
     its own and can change with the tool.
   a_lock: "LOCK[15] is held, so LOCKNEW has one fewer lock available — only when debugging. See architecture/locks.yaml."
-  pins_62_63: "P62 (TX) and P63 (the clock-frequency repository). A clock change that does not rewrite P63 makes the debugger emit garbage."
+  pins_62_63: "P62 (TX) and P63 (the clock-frequency repository). A clock change that does not rewrite P63 makes the debugger emit garbage. CLKSET keeps the debugger's frequency current; any other way of changing the clock must update P63 itself (long-repository mode, WXPIN)."
   p62_is_reconfigured_by_every_debug_call: |
     Not merely occupied — RECONFIGURED. A smart pin placed on P62 is destroyed by the
     next debug() call. A counter on P62 can count correctly and still read as dead,
@@ -119,8 +124,8 @@ what_a_debug_build_takes_from_your_program:
     cogs that are not running ISRs in the background; if the ISRs tolerate skew and
     nothing depends on the interrupt continuing to cycle, DEBUG is usable with understood
     timing degradation. CT-based interrupts are not prone to it.
-  source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (IF() inside DEBUG() statements; value-only '_' forms; Things to know about the DEBUG system, hub RAM use); DEBUG and interrupts (interrupt_retrigger_can_stop_for_good); protected_region_use: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT (upper-hub buffer; per-cog save/restore map). The compiler limits and listing behaviour (the_compilers_limits, reducing_bytes_and_records, mechanisms_overview, mechanism_details.debug_mask.per_object) were observed with pnut-ts 1.55.8 (-d -l listing lines and compile errors m150/m151/m153), 2026-10-07; figures deliberately not stated (Stephen, 2026-10-07: tool limits are soft and change with each compiler release -- teach the techniques, not the limits)"
-  clock_source: "RCFAST and RCSLOW become illegal; DEBUG needs a crystal-derived clock of at least 10 MHz."
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (IF() inside DEBUG() statements; value-only '_' forms; Things to know about the DEBUG system, hub RAM use); DEBUG and interrupts (interrupt_retrigger_can_stop_for_good); DEBUG dynamic clock frequency adaptation and version history v36 (pins_62_63, clock_source); Symbols you can define to modify DEBUG behavior (DEBUG_MASK); protected_region_use: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT (upper-hub buffer; per-cog save/restore map). The compiler limits and listing behaviour (the_compilers_limits, reducing_bytes_and_records, mechanisms_overview, mechanism_details.debug_mask.per_object) were observed with pnut-ts 1.55.8 (-d -l listing lines and compile errors m150/m151/m153), 2026-10-07; figures deliberately not stated (Stephen, 2026-10-07: tool limits are soft and change with each compiler release -- teach the techniques, not the limits)"
+  clock_source: "RCFAST and RCSLOW become illegal; DEBUG needs a crystal-derived or external clock of at least 10 MHz. A run-time clock change must stay within that, and must go through CLKSET or update P63."
   measuring_with_debug_on: "If you are measuring anything timing-sensitive, restrict DEBUG_COGS to the reporting cog and report from a cog that is not measuring. Leaving the default corrupted streamer accumulators by 1,000,000-7,000,000."
 
 deduplication:
@@ -169,7 +174,7 @@ mechanisms_overview:
       granularity: "Per channel (32 channels)"
       eliminates_code: "Yes (disabled channels)"
       requires_code_changes: "CON constant + debug[N] syntax"
-      version_requirement: "{Spin2_v46}"
+      version_requirement: "Base (no version directive)"
     - mechanism: DEBUG_COGS
       level: runtime
       reduces_record_count: false
@@ -230,7 +235,7 @@ mechanism_details:
       32-bit constant where each bit enables a debug channel (0-31). Debug
       statements written as debug[N](...) are only compiled if bit N is set
       in the mask. Disabled channels compile no records and no code.
-    requires: "{Spin2_v46} or later version directive"
+    requires: "A DEBUG_MASK constant in the CON block. No {Spin2_v##} version directive is needed."
     when_to_use:
       - "Large projects approaching the compiler's record limit"
       - "Multi-subsystem projects where you only need to debug one area at a time"
@@ -240,6 +245,10 @@ mechanism_details:
       Regular debug() statements (without a channel number) are NOT controlled
       by DEBUG_MASK. They compile whenever -d is used and DEBUG_DISABLE is not set.
       Use debug[N]() for everything you want to be maskable.
+      So an object that "ships with DEBUG_MASK = 0" is not silent if it has plain
+      debug() statements: the mask does not reach them, so they still compile and
+      still spend the program's records and DEBUG data. Setting the mask to 0 does not take back what
+      plain statements already spent.
     per_object: |
       DEBUG_MASK belongs to the file that defines it, and a parent can set a child's
       mask at instantiation like any other overridable constant:
@@ -249,7 +258,6 @@ mechanism_details:
       AND no DEBUG data, which is what decides whether a large library is safe to include.
     example_subsystem:
       code: |
-        {Spin2_v46}
         CON
           CH_ERROR  = 0                 ' Error reporting
           CH_MOTOR  = 1                 ' Motor control
@@ -266,7 +274,6 @@ mechanism_details:
           debug[CH_COMM]("Packet TX")                        ' SKIPPED (bit 3 clear)
     example_verbosity:
       code: |
-        {Spin2_v46}
         CON
           LVL_ERROR = 0
           LVL_WARN  = 1
@@ -345,7 +352,6 @@ recommended_setups:
   medium_project:
     size: "Several subsystems, counts climbing"
     code: |
-      {Spin2_v46}
       CON
         _clkfreq = 200_000_000
 
@@ -367,7 +373,6 @@ recommended_setups:
   large_project:
     size: "Many subsystems, near a maximum"
     code: |
-      {Spin2_v46}
       CON
         _clkfreq = 200_000_000
 
@@ -411,7 +416,9 @@ common_mistakes:
     solution: "Use DEBUG_MASK + debug[N]() instead"
   - mistake: "Forgetting that regular debug() ignores the mask"
     explanation: |
-      DEBUG_MASK = 0 disables all channels, but debug("hello") still compiles.
+      DEBUG_MASK = 0 disables all channels, but debug("hello") still compiles, the
+      mask does not silence it, and its record and DEBUG data stay in the budget. This
+      is how an object with DEBUG_MASK = 0 can still be chatty and still use up the limits.
     solution: "Use debug[N]() syntax for statements you want to be maskable"
   - mistake: "Not defining DEBUG_MASK before using debug[N]()"
     explanation: |
@@ -444,5 +451,6 @@ related:
   - language/spin2/constants/special-configuration-symbols.yaml
   - language/spin2/statements/debug.yaml
   - language/spin2/debug-commands/debug-new-user-guide.yaml
+  - language/spin2/methods/clkset.yaml
 
 last_updated: '2026-02-27'

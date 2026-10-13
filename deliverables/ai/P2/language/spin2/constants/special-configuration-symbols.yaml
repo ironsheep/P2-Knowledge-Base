@@ -128,6 +128,8 @@ clock_configuration:
       - "Overrides other clock settings"
       - "Minimal external components"
       - "Not suitable for precise timing requirements"
+      - "Cannot be used in a DEBUG (-d) build: the debugger needs a clock of at least 10 MHz derived from a crystal or an external input"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (to use the debugger, at least a 10 MHz clock derived from a crystal or external input; RCFAST and RCSLOW cannot be used)"
     use_cases:
       - "Crystal accuracy not required"
       - "Minimal BOM cost"
@@ -143,6 +145,8 @@ clock_configuration:
       - "Overrides other clock settings"
       - "Ultra-low power consumption"
       - "Timing accuracy not critical"
+      - "Cannot be used in a DEBUG (-d) build: the debugger needs a clock of at least 10 MHz derived from a crystal or an external input"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (to use the debugger, at least a 10 MHz clock derived from a crystal or external input; RCFAST and RCSLOW cannot be used)"
     use_cases:
       - "Sleep modes"
       - "RTC applications"

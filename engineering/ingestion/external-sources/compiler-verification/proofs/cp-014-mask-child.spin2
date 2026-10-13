@@ -1,0 +1,7 @@
+' CP-014 child: silent unless its parent sets DEBUG_MASK.
+CON
+  DEBUG_MASK = 0
+
+PUB probe(v) : r
+  r := v * 2
+  debug[0](udec(v), udec(r))

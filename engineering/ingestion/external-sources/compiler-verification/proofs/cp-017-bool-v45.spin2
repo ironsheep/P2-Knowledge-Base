@@ -1,0 +1,5 @@
+{Spin2_v45}
+' CP-017: DEBUG BOOL and BOOL_ under {Spin2_v45}.
+PUB main() | x
+  x := 1
+  debug(bool(x), bool_(x))

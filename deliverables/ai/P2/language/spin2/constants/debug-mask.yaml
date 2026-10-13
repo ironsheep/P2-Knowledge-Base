@@ -3,9 +3,13 @@ type: constant
 category: Debug Constants
 
 introduced_in_version: "v46"  # edition of introduction; NOT an enforced compiler gate (boundary-probed)
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, Symbols you can define to modify DEBUG behavior (DEBUG_MASK) and version history v46; object parameters override child CON symbols (version history); CP-014 (setting a child's DEBUG_MASK in OBJ); CP-015 (plain DEBUG() compiled under DEBUG_MASK = 0)"
 
 aliases:
   - DEBUG_MASK
+  - "set a child object's DEBUG_MASK"
+  - "override DEBUG_MASK in an object"
+  - "object has DEBUG_MASK = 0 but still prints"
 
 description: |
   User-defined constant that enables selective DEBUG output by channel. When
@@ -118,13 +122,14 @@ compilation_behavior:
   - "DEBUG[n] with bit n NOT set: Entire statement omitted (no code generated)"
   - "DEBUG[n] with bit n SET: Statement compiled normally"
   - "Without DEBUG_MASK defined: DEBUG[n] syntax is an error"
-  - "Plain DEBUG() (no channel): Always compiled, ignores DEBUG_MASK"
+  - "Plain DEBUG() (no channel): Always compiled, ignores DEBUG_MASK -- even with DEBUG_MASK = 0 it is still compiled, is not silenced by the mask, and still spends records and DEBUG data"
 
 notes:
-  - "Introduced in PNut/pnut-ts v46; no {Spin2_v##} version directive required (boundary-probe verified)"
+  - "Introduced in PNut/pnut-ts v46; no {Spin2_v##} version directive required"
   - "Available in PNut/pnut-ts v46 and later compilers"
   - "DEBUG_MASK must be defined for DEBUG[n] syntax to work"
   - "Channel numbers must be 0-31"
+  - "DEBUG_MASK belongs to the file that defines it. A parent can set a child object's mask where it declares the object, like any other overridable constant: OBJ drv : \"driver\" | DEBUG_MASK = %1"
   - "Unset channels generate NO code (complete elimination)"
   - "Use constants to name channels for readability"
   - "Plain DEBUG() without channel index ignores the mask"

@@ -424,6 +424,42 @@ that it is stored untruncated (a name that differed after character 32 is not ru
 compiler version.
 *→ EF:* none — legality stays CP.
 
+### CP-013 · `#PRAGMA EXPORTDEF` defines its symbol in the child objects and not in the file that holds the pragma; `-D` defines it in that file too — `LEGALITY`
+*KB:* `language/spin2/preprocessor/pragma-exportdef.yaml`
+*Class:* legality — which files see the symbol as defined. The parent's `#ifdef` branch and the
+child's `#else` branch each name an undefined identifier, so the program compiles only if the
+symbol is undefined in the parent **and** defined in the child.
+*Source:* `proofs/cp-013-exportdef-parent.spin2` (holds `#pragma exportdef CP013_FLAG`) and
+`proofs/cp-013-exportdef-child.spin2`.
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026.
+
+*Command (pragma only):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-013-exportdef-parent.spin2`
+*Output (2026-10-13; exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-013-exportdef-parent.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-013-exportdef-parent.bin (6316 bytes)
+pnut-ts: Done
+```
+*Command (the same files with `-D`):* `pnut-ts -D CP013_FLAG engineering/ingestion/external-sources/compiler-verification/proofs/cp-013-exportdef-parent.spin2`
+*Output (2026-10-13; exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.8, Build date: 9/19/2026
+pnut-ts: * pnut_ts -D CP013_FLAG engineering/ingestion/external-sources/compiler-verification/proofs/cp-013-exportdef-parent.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-013-exportdef-parent.spin2:11:error:Expected an expression term (m172)
+```
+Line 11 is the parent's `#ifdef` branch: with `-D` the symbol is defined in the top file too.
+**Grounds:** none ingested — `#PRAGMA` is a PNut-TS extension that no Parallax document covers,
+so this record is the proof.
+*Command (grandchild arm):* `pnut-ts -d engineering/ingestion/external-sources/compiler-verification/proofs/cp-013-exportdef-grandparent.spin2`
+— exit status 0 (`Wrote … cp-013-exportdef-grandparent.bin (9274 bytes)`): the pragma is held in
+`cp-013-exportdef-grandparent.spin2`, `cp-013-exportdef-mid.spin2` only passes the call down, and
+the same `cp-013-exportdef-child.spin2` (legal only if the symbol is defined) compiles two levels
+below. *Limits:* two levels; one compiler version.
+*→ EF:* none — legality stays CP.
+
 ---
 
 ## Operators (continued)
@@ -586,6 +622,70 @@ colour, colour-mode and packed-mode words, the other directives, and the reuse o
 `CLOSE` are not run here. One compiler version.
 *→ EF:* none — legality stays CP; the run-time result is EF-103.
 
+### CP-014 · A parent sets a child object's `DEBUG_MASK` where it declares the object (`OBJ c : "child" | DEBUG_MASK = %1`), and the child's channel-0 statement is then compiled — `LEGALITY`
+*KB:* `language/spin2/constants/debug-mask.yaml`, `language/spin2/debug-commands/debug-strategy-guide.yaml`
+*Class:* legality and listing — the override is accepted, and the child's `debug[0]()` record
+appears in the program's `DEBUG records:` count. Whether it prints is behaviour and is not shown.
+*Source:* `proofs/cp-014-mask-child.spin2` (`DEBUG_MASK = 0`, one `debug[0]()`),
+`proofs/cp-014-mask-override.spin2` (declares it with `| DEBUG_MASK = %1`), and the control
+`proofs/cp-014-mask-no-override.spin2` (the same parent without the override). Each parent has one
+plain `debug()` of its own.
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026, with `-d -l`.
+
+*Command (override):* `pnut-ts -d -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-014-mask-override.spin2` — exit status 0; listing:
+```text
+DEBUG records:           2 of 255 (0.8%)
+DEBUG data:             13 of 15872 bytes (0.1%)
+```
+*Command (control):* `pnut-ts -d -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-014-mask-no-override.spin2` — exit status 0; listing:
+```text
+DEBUG records:           1 of 255 (0.4%)
+DEBUG data:              5 of 15872 bytes (0.0%)
+```
+**Grounds:** Spin2 v55 says `DEBUG_MASK` is defined "for the file/object" (`spin2-v55-text.txt:38`,
+`:1027`) and that object parameters "override CON symbols by the same name within the child
+object" (`:29`); it does not name `DEBUG_MASK` as one. *Limits:* one child, one channel. The listing figures are this compiler's and
+are never carried into the KB. One compiler version. *→ EF:* none — legality stays CP.
+
+### CP-015 · With `DEBUG_MASK = 0`, a plain `debug()` is still compiled and a `debug[0]()` is not — `LEGALITY`
+*KB:* `language/spin2/constants/debug-mask.yaml`, `language/spin2/debug-commands/debug-strategy-guide.yaml`
+*Class:* listing — which statements become records. That a compiled statement prints when reached
+is the documented meaning of `debug()` (v55, DEBUG); the record shows only that it is compiled.
+*Source:* `proofs/cp-015-mask0-plain-debug.spin2` (one plain `debug("plain")`, one `debug[0]()`).
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026, with `-d -l`.
+
+*Command:* `pnut-ts -d -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-015-mask0-plain-debug.spin2` — exit status 0; listing:
+```text
+DEBUG records:           1 of 255 (0.4%)
+DEBUG data:              9 of 15872 bytes (0.1%)
+```
+One record: the plain statement. **Grounds:** v55 gates only the bracketed form,
+`DEBUG[bitnumber]{(parameters…)}` (`spin2-v55-text.txt:38`, `:1027`). *Limits:* one of each form.
+One compiler version. *→ EF:* none — legality stays CP.
+
+### CP-017 · DEBUG `BOOL` and `BOOL_` compile only under `{Spin2_v45}` or later: with no directive they are not recognised, and the `{Spin2_v44}` gate the v55 table names is refused — `LEGALITY`
+*KB:* `language/spin2/debug-commands/debug-formatters-complete.yaml`
+*Class:* legality, compiled with DEBUG (`-d`). The failing runs stop with exit status 1.
+*Source:* `proofs/cp-017-bool-none.spin2` (no directive), `proofs/cp-017-bool-v44.spin2`,
+`proofs/cp-017-bool-v45.spin2` (`debug(bool(x), bool_(x))`).
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026, with `-d`.
+
+*Command (no directive):* `pnut-ts -d engineering/ingestion/external-sources/compiler-verification/proofs/cp-017-bool-none.spin2`
+*Output (2026-10-13; exit status 1):*
+```text
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-017-bool-none.spin2:4:error:Expected an expression term (m172)
+```
+*Command (`{Spin2_v44}`):* `pnut-ts -d engineering/ingestion/external-sources/compiler-verification/proofs/cp-017-bool-v44.spin2`
+*Output (2026-10-13; exit status 1):*
+```text
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-017-bool-v44.spin2:3:error:{Spin2_v44} is no longer supported due to changes in data structures beginning in v45]
+```
+*Command (`{Spin2_v45}`):* `pnut-ts -d engineering/ingestion/external-sources/compiler-verification/proofs/cp-017-bool-v45.spin2` — exit status 0 (`Wrote … cp-017-bool-v45.bin (9242 bytes)`).
+(Banner lines omitted, as in CP-016.) **Grounds:** the Parallax *Spin2 Language Documentation* v55,
+symbol table by version, row v44: "BOOL, BOOL_ … DEBUG" (`spin2-v55-text.txt:146`) — the same
+refused-gate shape as CP-011. *Limits:* one site; one compiler version.
+*→ EF:* none — legality stays CP.
+
 ---
 
 ## Comments
@@ -673,6 +773,30 @@ construct, `FIELD[fieldpointer]` (FIELD POINTERS, `spin2-v55-text.txt:871-876`);
 whether the word may also be a local name. The record decides only that it may not.
 *Limits:* one local position; VAR and CON names called `field` are not run here. One compiler
 version.
+*→ EF:* none — legality stays CP.
+
+### CP-016 · A cog register name in any case cannot be a method parameter (`m220`) or a local variable (`m241`) — `LEGALITY`
+*KB:* `language/fundamentals/case-sensitivity.yaml`
+*Class:* legality. Each failing run stops with exit status 1; the control compiles.
+*Source:* `proofs/cp-016-register-param.spin2` (`PRI m(pA)`), `proofs/cp-016-register-local.spin2`
+(`PUB main() | dira`), and the control `proofs/cp-016-control-param.spin2` (`PRI m(pinA)`).
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026.
+
+*Command (parameter):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-016-register-param.spin2`
+*Output (2026-10-13; exit status 1):*
+```text
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-016-register-param.spin2:5:error:Expected a unique parameter name (m220)
+```
+*Command (local):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-016-register-local.spin2`
+*Output (2026-10-13; exit status 1):*
+```text
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-016-register-local.spin2:2:error:Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, "^", ALIGNW, or ALIGNL (m241)
+```
+*Command (control):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-016-control-param.spin2` — exit status 0 (`Wrote … cp-016-control-param.bin (6300 bytes)`).
+(The banner lines of each run are omitted; they are the same three lines as every record above.)
+Also run in scratch, as parameters, with the same `m220`: `pb`, `ptra`, `dirA`, `outb`, `ina`,
+`ijmp1`. **Grounds:** v55, "Source code is case-insensitive" (Spin2 Overview); it does not say
+register names are taken as local names. *Limits:* the names listed; one compiler version.
 *→ EF:* none — legality stays CP.
 
 ## Version gating

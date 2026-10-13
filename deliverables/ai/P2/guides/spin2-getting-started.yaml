@@ -451,15 +451,13 @@ language_version_directives:
     Spin2_v46:
       directive: "{Spin2_v46}"
       features:
-        - "DEBUG_MASK - selective debug channel compilation"
-        - "debug[N]() - channel-specific debug statements"
+        - "DEBUG(C_Z) - output the Carry and Zero flag states from a Spin2 DEBUG statement"
+      note: "DEBUG_MASK and debug[N]() arrived in v46 too but need NO version directive (see language/spin2/constants/debug-mask.yaml)"
       example: |
         {Spin2_v46}
-        CON
-          DEBUG_MASK = %0011          ' Enable channels 0 and 1
-        PUB main()
-          debug[0]("Channel 0 message")
-          debug[1]("Channel 1 message")
+        PUB flag_demo() | x
+          x := 0
+          DEBUG(C_Z)
           
     Spin2_v50:
       directive: "{Spin2_v50}"

@@ -31,10 +31,10 @@ blocks:
     compile: not-code
     reason: "YAML text block (`per_object`) of English sentences with one embedded override line (`OBJ  drv : \"driver\" | DEBUG_MASK = %1 ...`); mixed prose + excerpt, not one compilable unit"
   - at: mechanism_details.debug_mask.example_subsystem.code
-    fp: "986b60f99ce9a29b"
+    fp: "07513dc0bfaf3ed5"
     compile: program
   - at: mechanism_details.debug_mask.example_verbosity.code
-    fp: "2c3a0031af0dc4d8"
+    fp: "7b5e275ae9fc40b4"
     compile: program
   - at: mechanism_details.runtime_mechanisms.debug_cogs.example
     fp: "9e8ecf1a30a818f8"
@@ -61,12 +61,12 @@ blocks:
     wrap: spin2-top
     assumes: [readSensor()->1/0]
   - at: recommended_setups.medium_project.code
-    fp: "90a38a3c7372202a"
+    fp: "73b430a52f52887e"
     compile: fragment
     wrap: spin2-top
     assumes: [readTemp()->1/0, dutyCycle]
   - at: recommended_setups.large_project.code
-    fp: "d01852b6d115d4e7"
+    fp: "cf2bbfda0418f1fd"
     compile: fragment
     wrap: spin2-top
     assumes: [ax, rpm, addr]
@@ -78,3 +78,7 @@ blocks:
     fp: "e78caa9a5d4fe019"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
+  - at: mechanism_details.debug_mask.critical_note
+    fp: "2977c04aa1e0f423"
+    compile: not-code
+    reason: "prose: the consequence of DEBUG_MASK = 0 for plain debug() statements, no code"

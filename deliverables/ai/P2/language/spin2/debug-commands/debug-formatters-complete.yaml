@@ -126,6 +126,8 @@ arrays:
 boolean:
   BOOL: {use: "display as TRUE/FALSE with name", example: "enabled = TRUE"}
   BOOL_: {use: "just TRUE/FALSE", example: "TRUE"}
+  requires: "a {Spin2_v45} or later version directive; without a version directive BOOL and BOOL_ are not recognised (Expected an expression term), and {Spin2_v44} is no longer accepted"
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, symbol table by version (v44: BOOL, BOOL_); CP-017"
 
 # FLAGS (processor state)
 flags:

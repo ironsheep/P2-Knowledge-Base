@@ -1,0 +1,5 @@
+' CP-016: a cog register name in any case cannot be a parameter name.
+PUB main()
+  m(1)
+
+PRI m(pA)

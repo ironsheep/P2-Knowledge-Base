@@ -1,0 +1,6 @@
+' CP-013 (grandchild arm): the middle object only passes the call down.
+OBJ
+  child : "cp-013-exportdef-child"
+
+PUB probe() : r
+  r := child.probe()

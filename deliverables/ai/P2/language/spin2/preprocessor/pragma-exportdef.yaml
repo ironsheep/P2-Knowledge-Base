@@ -3,13 +3,15 @@ type: preprocessor
 category: Preprocessor Directives
 
 minimum_version: "PNut-TS only"
+documentation_source: "CP-013 (the exported symbol is defined in the child objects and not in the file that holds the pragma; -D defines it there too)"
 
 description: |
   Exports the PRESENCE of a preprocessor symbol to the rest of the compilation.
   Normally a preprocessor symbol takes effect only in the single file that defined
-  it; #PRAGMA EXPORTDEF makes the symbol defined in all subsequent files, including
-  child objects named in OBJ -- exactly as if -D SYMNAME had been given on the
-  command line.
+  it; #PRAGMA EXPORTDEF makes the symbol defined in the child objects named in OBJ
+  and their descendants, the way -D SYMNAME does for every file. The difference is the
+  file that holds the pragma: with -D the symbol is defined in that top file too, but
+  the pragma only exports, so that file sees the symbol only if it also #DEFINEs it.
   #PRAGMA is a PNut-TS extension -- the original PNut does not provide it, and
   it uses wording of its own rather than PNut's shared diagnostic text.
   Source that must also build under PNut cannot rely on this directive.
@@ -29,7 +31,7 @@ parameters:
 
 behavior:
   - "Exported symbols are visible in all child objects (OBJ declarations)"
-  - "Acts as if -D was specified for child object compilation"
+  - "In child object compilation the symbol is defined as if -D had been given; the file holding the pragma is not affected (-D would define it there too)"
   - "Symbol propagates to the entire dependency tree"
   - "PRESENCE only -- the symbol's value, if it has one, does NOT cross into the other files"
   - "The pragma exports; it does not define. The exporting file sees the symbol only if it also #DEFINEs it"

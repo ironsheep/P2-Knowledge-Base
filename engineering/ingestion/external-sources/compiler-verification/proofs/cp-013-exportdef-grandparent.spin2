@@ -1,0 +1,9 @@
+' CP-013 (grandchild arm): the pragma is held two levels above the file
+' that tests the symbol. Compiles only if the grandchild sees it defined.
+#pragma exportdef CP013_FLAG
+
+OBJ
+  mid : "cp-013-exportdef-mid"
+
+PUB main() | r
+  r := mid.probe()
