@@ -62,7 +62,7 @@ Start here when the output stops partway through, or a run never reaches its end
 | A caller waiting on a worker cog never returns | Section 7.3, Section 7.6 |
 | A diagnostic call to a worker cog hangs | Section 6.4 |
 | The run after a failed run fails too | Section 6.8 |
-| `LOCKNEW` returns -1 | Section 6.7 |
+| `LOCKNEW` fails (returns a negative value) | Section 6.7 |
 
 ## The numbers look wrong
 
