@@ -78,7 +78,7 @@ related_instructions:
 - COGID: Get current COG ID
 notes:
 - 16 locks available (0-15)
-- Lock 15 traditionally used for debug
+- LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts (architecture/locks.yaml)
 - Non-blocking - check C flag for success
 - Always release locks when done
 compiler_operand_format:

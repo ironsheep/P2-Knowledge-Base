@@ -381,7 +381,7 @@ best_practices:
     - "Keep critical sections minimal"
     - "Always release locks on all exit paths"
     - "Use timeout to prevent infinite wait"
-    - "Reserve lock[15] for debug"
+    - "LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts (architecture/locks.yaml)"
     
   communication:
     - "Use mailboxes for complex messages"
@@ -405,3 +405,4 @@ sources:
   - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LOCKS"
   - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG ATTENTION"
   - "Parallax Spin2/PASM Debugger v51, debug entry and debug_exit (LOCKTRY #15 / LOCKREL #15 give one cog at a time ownership of the save buffer and tx/rx pins)"
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts)"

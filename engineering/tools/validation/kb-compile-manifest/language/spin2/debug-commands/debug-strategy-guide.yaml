@@ -48,7 +48,7 @@ blocks:
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: decision_guide.scenarios[3].recommendation
-    fp: "4f309655a95977cb"
+    fp: "1c8c8514db54eee8"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: recommended_setups.small_project.code

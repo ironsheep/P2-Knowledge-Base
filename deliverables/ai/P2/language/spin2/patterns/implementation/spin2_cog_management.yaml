@@ -238,8 +238,8 @@ patterns:
 
 anti_patterns:
   - anti_pattern: "insufficient_stack"
-    severity: "crash_risk"
-    description: "Stack too small causes stack overflow - hard to debug crashes"
+    severity: "overflow_not_detected"
+    description: "A COGSPIN stack is a hub buffer you provide and size; a stack overflow is not detected (language/spin2/methods/cogspin.yaml)"
     wrong: |
       VAR
         long tiny_stack[10]   ' TOO SMALL!

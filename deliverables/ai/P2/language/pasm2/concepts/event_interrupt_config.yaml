@@ -297,7 +297,7 @@ best_practices:
     - "Use interrupts for time-critical events"
     - "Configure before enabling interrupts"
     - "Document event assignments clearly"
-    - "Use lock[15] with debug interrupts"
+    - "LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts (architecture/locks.yaml)"
     
   debugging:
     - "Add markers at ISR entry/exit"
@@ -318,3 +318,4 @@ limitations:
 sources:
   - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS"
   - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INTERRUPTS"
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts)"

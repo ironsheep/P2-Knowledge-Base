@@ -272,10 +272,9 @@ debug_architecture:
     name: "Code Instrumentation (Compile-Time)"
     description: |
       These constants control whether debug() statements are compiled into your program.
-      They are evaluated during compilation. When debug is disabled, statements produce
-      ZERO code - no runtime overhead whatsoever.
+      They are evaluated during compilation.
     symbols:
-      - "DEBUG_DISABLE - Globally disable ALL debug statements"
+      - "DEBUG_DISABLE - a non-0 value disables all DEBUG statements in the file/object"
       - "DEBUG_MASK - 32-bit mask for selective debug[N]() channels (NO {Spin2_v##} directive required)"
 
   level_2_output_infrastructure:
@@ -362,23 +361,21 @@ debug_output_control:
     
   DEBUG_DISABLE:
     description: |
-      Globally disables ALL debug statements at compile time. When defined as
-      any non-zero value, debug code is not compiled at all, resulting in smaller
-      binary size and zero runtime overhead.
+      Assigning a non-0 value to this symbol will disable all DEBUG statements in
+      the file/object.
     default: "undefined (debug enabled)"
     behavior:
       undefined: "Debug statements compile normally (when -d flag used)"
       zero: "Debug statements compile normally"
-      non_zero: "ALL debug statements skipped during compilation"
-    usage: "CON DEBUG_DISABLE = 1  ' Turn off all DEBUG"
+      non_zero: "All DEBUG statements in the file/object are disabled"
+    usage: "CON DEBUG_DISABLE = 1  ' Disable all DEBUG statements in this file/object"
     example: |
       CON
         RELEASE_BUILD = 1
         DEBUG_DISABLE = RELEASE_BUILD   ' Disable debug for release builds
     notes:
-      - "Must be defined as an integer constant (not float or string)"
-      - "Check is performed at compile time - disabled debug adds zero overhead"
-      - "Works in both Spin2 and PASM2 code"
+      - "Must be an integer constant: a float value is rejected with 'DEBUG_DISABLE can only be defined as an integer constant'"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG, Symbols you can define to modify DEBUG behavior (DEBUG_DISABLE: \"Assigning a non-0 value to this symbol will disable all DEBUG statements in the file/object\"). The zero case and the float rejection: CP-026."
 
 debug_debugger_control:
   DEBUG_COGINIT:

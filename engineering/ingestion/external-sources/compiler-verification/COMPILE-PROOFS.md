@@ -18,6 +18,9 @@ assembled word; stays CP) · `BEHAVIOUR` (what
 compiled code does; the compile does not prove it) · `BEHAVIOUR → EF-NNN` (a P2 run has since
 proved it; the KB cites the EF).
 
+**Next record ID: `CP-027`** — take the number from this line and advance it in the same edit
+that files the record.
+
 **Commands** are run from the repository root with the repository-relative path, so each output
 reproduces exactly. The `.bin` a passing run writes is git-ignored here and never committed.
 
@@ -1122,4 +1125,31 @@ files) carry no `{Spin2_v##}` line (`grep -n -i "{Spin2_v"` over them finds noth
 **Grounds:** Spin2 v55 gates `DEBUG[bitnumber]` on `DEBUG_MASK` (`spin2-v55-text.txt:38`, `:1027`);
 it names no error text; the record supplies it. *Limits:* one index; one compiler version.
 *→ EF:* none — legality stays CP.
-*→ EF:* none — legality stays CP.
+
+### CP-026 · `DEBUG_DISABLE = 0` compiles a file's `debug()` statements exactly as when the symbol is undefined; `DEBUG_DISABLE = 1` compiles none; a float value is rejected (`DEBUG_DISABLE can only be defined as an integer constant`) — `LAYOUT` + `LEGALITY`
+*KB:* `language/spin2/constants/special-configuration-symbols.yaml` (`DEBUG_DISABLE.behavior`)
+*Class:* layout, compiled with DEBUG (`-d`) and a listing (`-l`); the figures are the listing's
+`DEBUG records` / `DEBUG data` lines. All three runs exit 0.
+*Source:* `proofs/cp-026-disable-undefined.spin2` (one `debug("disable undefined")`, no symbol),
+`proofs/cp-026-disable-zero.spin2` (`CON DEBUG_DISABLE = 0`, one `debug("disable zero")`),
+`proofs/cp-026-disable-one.spin2` (`CON DEBUG_DISABLE = 1`, one `debug("disable one")`).
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026, with `-d -l`.
+
+*Commands (2026-10-15):* `pnut-ts -d -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-026-disable-<undefined|zero|one>.spin2`
+*Output (the listing's DEBUG lines):*
+```text
+undefined:  DEBUG records:           1 of 255 (0.4%)    DEBUG data:             21 of 15872 bytes (0.1%)
+zero:       DEBUG records:           1 of 255 (0.4%)    DEBUG data:             16 of 15872 bytes (0.1%)
+one:        DEBUG records:           0 of 255 (0.0%)    DEBUG data:              0 of 15872 bytes (0.0%)
+```
+(The undefined and zero data figures differ by the five-character difference in their strings.)
+*Float value (2026-10-15):* `pnut-ts -d -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-026-disable-float.spin2`
+(`CON DEBUG_DISABLE = 1.0`) — exit status 1:
+```text
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-026-disable-float.spin2:4:error:DEBUG_DISABLE can only be defined as an integer constant
+```
+(The compiler reports line 4 of a three-line file.)
+**Grounds:** Spin2 v55 states only the non-0 case ("Assigning a non-0 value to this symbol will
+disable all DEBUG statements in the file/object", `spin2-v55-text.txt:1028`); the record supplies the
+0 case. *Limits:* one statement per file; one compiler version.
+*→ EF:* none — layout stays CP.

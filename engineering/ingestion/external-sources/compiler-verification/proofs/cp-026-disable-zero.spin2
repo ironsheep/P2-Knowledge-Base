@@ -1,0 +1,3 @@
+CON DEBUG_DISABLE = 0
+PUB main()
+  debug("disable zero")

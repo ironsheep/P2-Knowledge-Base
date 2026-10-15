@@ -405,9 +405,9 @@ performance:
 debugging:
   monitoring:
     - "Use RDPIN to check status"
-    - "TESTP for pin state"
+    - "On a pin in a smart-pin mode the IN bit that TESTP returns serves as a flag (language/pasm2/testp.yaml)"
     - "Add LED indicators"
-    - "Use lock[15] for debug monitor"
+    - "LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts (architecture/locks.yaml)"
     
   common_issues:
     - "Missing ADC calibration"
@@ -420,7 +420,7 @@ best_practices:
   - "Calibrate ADC before measurements"
   - "Include dead-time for motor control"
   - "Use repository mode for COG communication"
-  - "Reserve lock[15] for debug"
+  - "LOCK[15] is allocated by the debugger (architecture/locks.yaml)"
   - "Document Smart Pin assignments"
   - "Test timing with oscilloscope"
   - "Use LUT for lookup tables"
@@ -431,6 +431,7 @@ sources:
   - "Parallax SPI Flash Programmer and Boot Loader v51, Programmer and Loader (SPI coordination)"
   - "OBEX 2874 (ISP BLDC Motor Control), isp_bldc_motor.spin2 (example code, not a Parallax document): PWM and ADC patterns"
   - "Parallax Spin2/PASM Debugger v51, debug infrastructure"
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts)"
 
 protocol_client_code_note:
   source: "Parallax Spin2 Documentation v55, Timing Methods (GETCT and GETMS rows)"

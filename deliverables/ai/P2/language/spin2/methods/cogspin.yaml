@@ -226,7 +226,6 @@ synchronization:
 
 notes:
   - "Method runs until it returns or cog is stopped. When the top-level method returns, the effect is TASKSTOP(-1): the task ends, and with no other task remaining the cog is stopped and freed."
-  - "Stack overflow causes undefined behavior"
   - "Each cog has independent method call stack"
   - "Parameters are passed by value"
   - "Cannot share local variables between cogs"
@@ -242,7 +241,6 @@ best_practices:
 
 warnings:
   - "Stack overflow is not detected"
-  - "Insufficient stack causes crashes"
   - "VAR variables need synchronization"
   - "No automatic resource cleanup"
 

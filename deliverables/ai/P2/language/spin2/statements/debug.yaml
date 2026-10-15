@@ -214,8 +214,7 @@ usage_notes:
   - "Windows persist across program runs until closed"
   - "Use meaningful titles for multiple displays"
   - "Backtick introduces a DISPLAY command, e.g. DEBUG(`SCOPE ...); plain DEBUG(\"text\", value) needs no backtick and prints to the default TERM"
-  - "Can be globally disabled with DEBUG_DISABLE directive"
-  - "Performance impact is minimal when disabled"
+  - "Assigning a non-0 value to DEBUG_DISABLE disables all DEBUG statements in the file/object"
   - "Useful for both development and field diagnostics"
 
 best_practices:

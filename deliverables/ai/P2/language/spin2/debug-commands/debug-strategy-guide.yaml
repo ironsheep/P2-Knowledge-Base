@@ -209,7 +209,7 @@ mechanism_details:
       records are compiled regardless of anything else in your source.
     when_to_use:
       - "Always required to enable any debug output"
-      - "Omit for final production builds to guarantee zero debug overhead"
+      - "Omit it and no debug records are compiled"
     examples:
       - code: |
           # Development: debug enabled
@@ -221,8 +221,8 @@ mechanism_details:
   debug_disable:
     name: DEBUG_DISABLE
     description: |
-      Source-level kill switch. When set to any non-zero value, ALL debug
-      statements are excluded from compilation, even when building with -d.
+      Assigning a non-0 value to this symbol disables all DEBUG statements in the
+      file/object.
     when_to_use:
       - "Release builds from source: toggle without changing build command"
       - "Library/object files: disable debug so child object statements don't count against the parent's records"
@@ -334,8 +334,8 @@ decision_guide:
         only the channels you're actively debugging.
     - condition: "Shipping a release build"
       recommendation: |
-        Either omit -d flag, or set DEBUG_DISABLE = 1. Both produce zero
-        debug overhead.
+        Either omit the -d flag, or set DEBUG_DISABLE = 1 (which disables the
+        DEBUG statements in that file/object).
     - condition: "Writing a reusable object/library"
       recommendation: |
         Use DEBUG_DISABLE in the object so its debug statements don't count

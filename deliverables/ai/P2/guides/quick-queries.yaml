@@ -196,7 +196,6 @@ troubleshooting:
   "why won't my COG start":
     checklist:
       - "Check the stack passed to COGSPIN against the method's worst case (no source states a minimum; measure the high-water mark -- see language/spin2/methods/cogspin.yaml)"
-      - "Verify COG code is in DAT section"
       - "Check COGINIT return value"
     keys:
       - p2kbArchCog
@@ -205,8 +204,6 @@ troubleshooting:
   "why is my timing wrong":
     checklist:
       - "Verify _CLKFREQ setting"
-      - "Account for hub access timing"
-      - "Check for blocking operations"
     keys:
       - p2kbArchClockSystem
       - p2kbArchHub

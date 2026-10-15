@@ -104,7 +104,7 @@ blocks:
     compile: fragment
     wrap: spin2-top
   - at: debug_output_control.DEBUG_DISABLE.usage
-    fp: "e216e394cf506175"
+    fp: "ac609a28bfc4f73b"
     compile: fragment
     wrap: spin2-top
   - at: debug_output_control.DEBUG_DISABLE.example
