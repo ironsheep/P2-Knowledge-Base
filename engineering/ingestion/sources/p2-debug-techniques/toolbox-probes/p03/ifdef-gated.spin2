@@ -1,0 +1,18 @@
+' probe p03c: the reporter and its call site under the arm's #ifdef
+CON
+  _clkfreq = 200_000_000
+
+PUB main()
+  work(1)
+
+PRI work(arm)
+  if arm == 1
+    return
+#ifdef REPORT_ARM
+  report()
+#endif
+
+#ifdef REPORT_ARM
+PRI report()
+  debug("a long reporter line that should cost DEBUG data whether or not it runs")
+#endif

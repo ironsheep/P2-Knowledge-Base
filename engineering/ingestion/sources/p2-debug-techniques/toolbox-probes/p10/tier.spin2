@@ -1,0 +1,18 @@
+' probe p10 (DT-190): a getter whose only writer sits under a flag that is not defined still compiles
+CON
+  _clkfreq = 200_000_000
+
+VAR
+  long timeouts
+
+PUB main()
+  work()
+  debug("timeouts ", udec(getTimeouts()))
+
+PRI work()
+#ifdef INSTRUMENT
+  timeouts++
+#endif
+
+PUB getTimeouts() : n
+  n := timeouts

@@ -1,0 +1,13 @@
+' probe p05 child (DT-068, DT-069): DEBUG_DISABLE removes every debug() here; a getter passes the value out
+CON
+  DEBUG_DISABLE = 1
+
+VAR
+  long depth
+
+PUB work()
+  depth := 42
+  debug("reporter inside a disabled object ", udec(depth))
+
+PUB getDepth() : d
+  d := depth

@@ -1,0 +1,37 @@
+' probe p04 driver (DT-250, DT-242): publish what was compiled as a CON bitmask
+' FEAT_TRACE guards a definition only; FEAT_FULL guards the call site and defines FEAT_TRACE itself.
+#ifdef FEAT_FULL
+#define FEAT_TRACE
+#endif
+
+CON
+  F_TRACE_BIT = 1 << 0
+  F_FULL_BIT  = 1 << 1
+#ifdef FEAT_TRACE
+  F_TRACE = F_TRACE_BIT
+#else
+  F_TRACE = 0
+#endif
+#ifdef FEAT_FULL
+  F_FULL = F_FULL_BIT
+#else
+  F_FULL = 0
+#endif
+  COMPILED_FEATURES = F_TRACE | F_FULL
+
+VAR
+  long hits
+
+PUB tick()
+  hits++
+#ifdef FEAT_FULL
+  trace()
+#endif
+
+PUB getHits() : n
+  n := hits
+
+#ifdef FEAT_TRACE
+PRI trace()
+  hits += 100
+#endif

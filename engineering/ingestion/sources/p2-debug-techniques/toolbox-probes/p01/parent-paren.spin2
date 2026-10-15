@@ -1,0 +1,10 @@
+' probe p01 variant: the OR expression in parentheses
+CON
+  _clkfreq = 200_000_000
+
+OBJ
+  c : "child" | DEBUG_MASK = (%01 | %10)
+
+PUB main()
+  c.run(5)
+  debug("parent")

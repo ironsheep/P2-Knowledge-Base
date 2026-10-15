@@ -1,0 +1,7 @@
+' probe p01 child: two masked channels and one plain debug
+CON
+  DEBUG_MASK = 0
+
+PUB run(v)
+  debug[0]("child channel zero ", udec(v))
+  debug[1]("child channel one ", udec(v))

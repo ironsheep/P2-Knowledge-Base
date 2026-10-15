@@ -1,0 +1,15 @@
+' probe p08 (PATTERN scoping, DT-202/203): count a pin's rising edges from its neighbour, never driving either pin
+CON
+  _clkfreq = 200_000_000
+  SUBJECT  = 16
+  OBSERVER = SUBJECT + 1          ' within +/-3 of the subject; A input = OBSERVER-1 = SUBJECT
+
+PUB main() | n
+  n := countRises(100)
+  debug("rises ", udec(n))
+
+PUB countRises(ms) : n
+  pinstart(OBSERVER, P_COUNT_RISES | P_MINUS1_A, 0, 0)   ' no P_OE: the observer never drives
+  waitms(ms)
+  n := rdpin(OBSERVER)
+  pinclear(OBSERVER)

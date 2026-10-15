@@ -17,6 +17,9 @@ graded on its four admission rules, and gaps are asked of the project before any
 
 **What this folder holds (committed, with no project names or paths):**
 - `CLAIM-LEDGER.md`: every claim, with its kind, KB status, verification route and destinations.
+- `TOOLBOX-PLAN.md`: the debug toolbox plan («#433», 2026-10-15): a KB home for every trap,
+  technique and fact an agent needs (point of use, symptom hubs, patterns), its Standard A proof,
+  and the execution batches. `toolbox-probes/` holds the compile probes it cites.
 
 **How it is used.** These are Stephen's decisions of 2026-10-12, recorded in todo-mcp key
 `debug_techniques_decisions`:

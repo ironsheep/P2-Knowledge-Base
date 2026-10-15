@@ -1,0 +1,39 @@
+' probe p06 (PATTERN scoping, DT-132/133/179/182/141): a worker publishes a heartbeat and a phase word
+' in hub; an observer cog that never touches the worker's hardware reads them and reports.
+CON
+  _clkfreq = 200_000_000
+
+  PH_IDLE     = 0
+  PH_DISPATCH = 1
+  PH_IO       = 2
+  ARMED_MAGIC = $A5A5_0001
+
+VAR
+  long heartbeat, phase, phaseArg, armed
+  long workerStack[64], observerStack[64]
+
+PUB main() | w, o
+  armed := ARMED_MAGIC
+  w := cogspin(NEWCOG, worker(), @workerStack)
+  o := cogspin(NEWCOG, observer(5), @observerStack)
+  repeat
+
+PRI worker() | blk
+  repeat
+    phase := PH_DISPATCH
+    repeat blk from 0 to 9
+      phaseArg := blk
+      phase := PH_IO
+      waitus(100)
+    heartbeat++
+
+PRI observer(ticks) | last, now, i
+  last := heartbeat
+  repeat i from 1 to ticks
+    waitms(100)
+    if armed <> ARMED_MAGIC
+      debug("NOT ARMED")
+      next
+    now := heartbeat
+    debug("hb ", udec(now - last), " phase ", udec(phase), " arg ", udec(phaseArg))
+    last := now

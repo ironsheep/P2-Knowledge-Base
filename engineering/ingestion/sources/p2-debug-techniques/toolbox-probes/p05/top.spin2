@@ -1,0 +1,10 @@
+' probe p05 top: the parent prints what the disabled child cannot
+CON
+  _clkfreq = 200_000_000
+
+OBJ
+  q : "quiet"
+
+PUB main()
+  q.work()
+  debug("depth from getter ", udec(q.getDepth()))

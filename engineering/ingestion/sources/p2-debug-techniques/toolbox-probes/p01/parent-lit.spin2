@@ -1,0 +1,10 @@
+' probe p01 control: the same override written as one literal
+CON
+  _clkfreq = 200_000_000
+
+OBJ
+  c : "child" | DEBUG_MASK = %11
+
+PUB main()
+  c.run(5)
+  debug("parent")

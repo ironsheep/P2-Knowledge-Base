@@ -1,0 +1,14 @@
+' probe p03a (DT-064): an arm returns before the reporter runs; the reporter is still called from the code
+CON
+  _clkfreq = 200_000_000
+
+PUB main()
+  work(1)
+
+PRI work(arm)
+  if arm == 1
+    return
+  report()
+
+PRI report()
+  debug("a long reporter line that should cost DEBUG data whether or not it runs")

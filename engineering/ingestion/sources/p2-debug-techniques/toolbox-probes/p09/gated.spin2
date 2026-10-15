@@ -1,0 +1,10 @@
+' probe p09 (DT-105): a debug[N]() inside an #ifdef block compiles only with the symbol defined AND bit N set
+CON
+  _clkfreq = 200_000_000
+  DEBUG_MASK = %1
+
+PUB main()
+#ifdef TRACE_ARM
+  debug[0]("arm trace")
+#endif
+  debug[1]("channel one is off")

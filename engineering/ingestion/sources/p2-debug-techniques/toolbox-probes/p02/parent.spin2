@@ -1,0 +1,10 @@
+' probe p02 parent: no override; the child's mask follows the command-line -D symbol
+CON
+  _clkfreq = 200_000_000
+
+OBJ
+  c : "child"
+
+PUB main()
+  c.run(5)
+  debug("parent")

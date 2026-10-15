@@ -1,0 +1,13 @@
+' probe p03b: the reporter exists but nothing calls it
+CON
+  _clkfreq = 200_000_000
+
+PUB main()
+  work(1)
+
+PRI work(arm)
+  if arm == 1
+    return
+
+PRI report()
+  debug("a long reporter line that should cost DEBUG data whether or not it runs")

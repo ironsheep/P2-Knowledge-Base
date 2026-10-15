@@ -1,0 +1,10 @@
+' probe p01 (DT-012): an OBJ override of DEBUG_MASK written as an OR expression
+CON
+  _clkfreq = 200_000_000
+
+OBJ
+  c : "child" | DEBUG_MASK = %01 | %10
+
+PUB main()
+  c.run(5)
+  debug("parent")

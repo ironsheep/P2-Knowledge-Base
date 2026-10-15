@@ -1,0 +1,11 @@
+' probe p02 child (DT-013): the child's mask chosen by a preprocessor symbol
+#ifdef CHILD_DEBUG
+CON
+  DEBUG_MASK = %1
+#else
+CON
+  DEBUG_MASK = 0
+#endif
+
+PUB run(v)
+  debug[0]("child channel zero ", udec(v))

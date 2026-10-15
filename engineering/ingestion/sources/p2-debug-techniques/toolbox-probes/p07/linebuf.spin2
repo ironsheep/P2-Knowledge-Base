@@ -1,0 +1,36 @@
+' probe p07 (PATTERN scoping, DT-055/058/061/348/349): build one line in a hub buffer and emit it with one zstr_()
+' labels live in DAT (not DEBUG data); the formatter never writes past maxLen.
+CON
+  _clkfreq = 200_000_000
+  LINE_MAX = 80
+
+DAT
+  line        byte    0[LINE_MAX + 1]
+  lblDepth    byte    "depth=", 0
+  lblGuard    byte    " guard=", 0
+
+PUB main() | n
+  n := 0
+  n := putStr(n, @lblDepth)
+  n := putDec(n, 1234)
+  n := putStr(n, @lblGuard)
+  n := putDec(n, 0)
+  debug(zstr_(@line))
+
+PRI putStr(n, pStr) : r | c
+  r := n
+  repeat while (c := byte[pStr++]) <> 0 and r < LINE_MAX
+    line[r++] := c
+  line[r] := 0
+
+PRI putDec(n, v) : r | digits[3], k, i
+  r := n
+  k := 0
+  repeat
+    byte[@digits][k++] := "0" + v // 10
+    v /= 10
+  while v <> 0 and k < 10
+  repeat i from k - 1 to 0
+    if r < LINE_MAX
+      line[r++] := byte[@digits][i]
+  line[r] := 0

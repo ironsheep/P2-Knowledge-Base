@@ -1,0 +1,11 @@
+' probe p04 top: prints the child's compiled-feature mask in the run header
+CON
+  _clkfreq = 200_000_000
+
+OBJ
+  d : "driver"
+
+PUB main()
+  debug("features ", uhex_long(d.COMPILED_FEATURES))
+  d.tick()
+  debug("hits ", udec(d.getHits()))
