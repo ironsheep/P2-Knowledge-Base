@@ -3,4 +3,3 @@
 *.md
 docker-compose*.yml
 devcontainer*.json
-devcontainer-lock.json

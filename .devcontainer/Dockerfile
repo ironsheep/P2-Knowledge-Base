@@ -6,8 +6,8 @@
 # steps that genuinely depend on runtime mounts (see devcontainer.json).
 #
 # Baked here: native PDF engines + full PDF->Markdown toolkit (docling, etc.),
-# Node.js LTS + @openai/codex, the pnut-ts P2 compiler, the Claude CLI, and PyYAML
-# for the repo's python validation scripts.
+# Node.js LTS + @openai/codex, the pnut-ts P2 compiler, and PyYAML + PyMuPDF for
+# the repo's python validation scripts.
 FROM mcr.microsoft.com/devcontainers/python:3.12
 
 # --- git: workspace trust + baked identity -----------------------------------
@@ -29,7 +29,7 @@ RUN git config --system --add safe.directory '/workspaces/*'
 # which produces a NEW inode, leaving the container's mount pointed at the old
 # unlinked one. The container then reads frozen content until it is recreated.
 # That is the "stale .gitconfig" failure; it stranded the fleet on 2026-08-28 and
-# cleared only on reboot. The other host mounts (.ssh, .claude, container-tools)
+# cleared only on reboot. The other host mounts (.ssh and the local override's)
 # are DIRECTORIES and are immune, because each lookup inside them resolves fresh.
 # .gitconfig was the fleet's only single-file mount. Retired 2026-09-10.
 #
@@ -194,7 +194,7 @@ RUN printf '%s\n' \
     'Venv: /opt/pdf-tools/venv   Models: /opt/pdf-tools/models (DOCLING_ARTIFACTS_PATH)' \
     > /opt/pdf-tools/README.md
 
-# --- per-user tooling baked into the image (Claude CLI + repo tooling deps) -----
+# --- per-user tooling baked into the image (repo tooling deps) -----------------
 # Installed as the runtime user so it lands in /home/vscode and is on PATH.
 # These are what engineering/tools/ runs under the SYSTEM python3. Note pymupdf is
 # also in /opt/pdf-tools/venv above, but that venv is isolated -- the validation
@@ -202,8 +202,7 @@ RUN printf '%s\n' \
 # ("PyMuPDF is required") mid-release. audit-pdf-margin-overflow.py hit exactly that
 # in a fresh container on 2026-08-21.
 USER vscode
-RUN curl -fsSL https://claude.ai/install.sh | bash \
-    && grep -q '\.local/bin' ~/.bashrc 2>/dev/null \
-       || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc \
-    && pip install --user --no-cache-dir PyYAML pymupdf
+RUN pip install --user --no-cache-dir PyYAML pymupdf \
+    && { grep -q '\.local/bin' ~/.bashrc 2>/dev/null \
+         || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc; }
 USER root

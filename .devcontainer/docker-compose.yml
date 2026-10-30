@@ -1,14 +1,12 @@
+# Pinned to the project name the Dev Containers extension already derived, so
+# existing named volumes keep their data.
+name: p2-knowledge-base_devcontainer
+
 services:
   dev:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    # Name the built image so Docker reuses cached layers across rebuilds.
+    # Built by devcontainer.json's initializeCommand, not by a `build:` section
+    # here (the reason is with that command).
     image: p2-knowledge-base-dev:local
     volumes:
       - ..:/workspaces/P2-Knowledge-Base:cached
-      - todo-mcp-data:/home/vscode/.local/share/todo-mcp
     command: sleep infinity
-
-volumes:
-  todo-mcp-data:

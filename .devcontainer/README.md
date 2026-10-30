@@ -1,167 +1,90 @@
 # P2 Knowledge Base Dev Container
 
-This directory contains the VSCode Dev Container configuration for the P2 Knowledge Base project.
+This directory contains the VS Code Dev Container configuration for the P2 Knowledge Base project.
 
 ## Quick Start
 
-1. **Install Prerequisites:**
+1. **Install prerequisites:**
    - [Docker Desktop](https://www.docker.com/products/docker-desktop)
-   - [VSCode](https://code.visualstudio.com/)
+   - [VS Code](https://code.visualstudio.com/)
    - [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 
-2. **PNut-TS Binary:**
-   The Linux ARM64 `pnut-ts` compiler ships as a checked-in zip in this
-   directory (`pnut-ts-linux-arm64-*.zip`) and is installed automatically
-   by `postCreateCommand`. No manual step required.
+2. **Add the pnut-ts compiler zip:**
+   The Dockerfile bakes the Linux ARM64 `pnut-ts` compiler from a
+   `pnut-ts-linux-arm64-*.zip` placed in this directory. When several are
+   present, the highest version is used.
 
-3. **Open in Container:**
-   - Open this repository in VSCode
+3. **Open in the container:**
+   - Open this repository in VS Code
    - Click "Reopen in Container" when prompted
-   - OR: Command Palette → "Dev Containers: Reopen in Container"
+   - Or: Command Palette → "Dev Containers: Reopen in Container"
 
-## What's Included
+## How the image is built
 
-### Base Image
-- **Image:** `mcr.microsoft.com/devcontainers/python:3.12`
-- **OS:** Debian-based (Ubuntu-like, uses `apt`)
-- **Size:** ~500MB
-- **User:** `vscode` (non-root with sudo access)
+Before every open and rebuild, `initializeCommand` in `devcontainer.json` runs
+`docker build` on the host and tags `p2-knowledge-base-dev:local`. The compose
+service names that image and has no `build:` section: for a compose `build:`,
+the Dev Containers extension builds from a generated Dockerfile in the host's
+temp folder, which buildx 0.37.2 and later refuse to read.
 
-### Languages & Tools
-- **Python 3.12** - Latest stable Python
-- **Node.js LTS** - For MCP server development, Claude Code, Todo-MCP
-- **npm** - Node package manager (included with Node.js)
-- **Git** - Version control
-- **Bash** - Default shell (configured in VSCode)
+Cached layers make the build about a second when nothing changed. *Rebuild
+Without Cache* does not force a fresh build; to do that, run the `docker build`
+line from `initializeCommand` with `--no-cache`, then Rebuild.
 
-### Python Packages
-- **PyYAML** - YAML processing (auto-installed)
+## What's included
 
-### P2 Tools
-- **PNut-TS** - P2 Spin2/PASM2 compiler
-  - Location: `/usr/local/bin/pnut-ts` (in PATH)
+All tooling is baked into the image by `Dockerfile`, so it survives rebuilds
+and works offline.
 
-### VSCode Extensions (Auto-installed)
-- Python (ms-python.python)
-- YAML (redhat.vscode-yaml)
-- Markdown All in One (yzhang.markdown-all-in-one)
-- GitLens (eamodio.gitlens)
+- **Base image:** `mcr.microsoft.com/devcontainers/python:3.12`, user `vscode`
+- **Python 3.12**, with PyYAML and PyMuPDF for the repo's validation scripts
+- **Node.js 22 (LTS)** from NodeSource, with `@openai/codex`
+- **pnut-ts**, the P2 Spin2/PASM2 compiler, at `/usr/local/bin/pnut-ts`
+- **PDF toolkit:** `pdf2md` (docling), `pdf-layout` (pdftotext), `camelot`,
+  `pdf-ocr` (ocrmypdf). Reference: `/opt/pdf-tools/README.md` in the container.
+- **Git**, with the workspace trusted and identity baked into `/etc/gitconfig`
 
-## Directory Structure
+VS Code extensions installed in the container are listed in `devcontainer.json`.
+
+## Directory structure
 
 ```
 .devcontainer/
-├── devcontainer.json              # Main configuration
-├── docker-compose.yml             # Base service (image + workspace mount)
-├── docker-compose.override.yml    # Local-only mounts (gitignored)
-├── pnut-ts-linux-arm64-*.zip      # Bundled P2 compiler (installed by postCreate)
-└── README.md                      # This file
+├── devcontainer.json                      # Main configuration; builds the image
+├── Dockerfile                             # Everything baked into the image
+├── docker-compose.yml                     # Service (image + workspace mount)
+├── docker-compose.override.yml.example    # Template for local-only mounts
+├── docker-compose.override.yml            # Local-only mounts (gitignored)
+├── pnut-ts-linux-arm64-*.zip              # P2 compiler, baked by the Dockerfile
+└── README.md                              # This file
 ```
 
-## PNut-TS Installation
+## Local customization
 
-During container creation, `postCreateCommand`:
-1. Unzips the bundled `pnut-ts-linux-arm64-*.zip`
-2. Copies the `pnut-ts` binary to `/usr/local/bin/pnut-ts`
-3. Makes it executable with `chmod +x`
-
-## Customization
-
-### Add More Python Packages
-Edit `postCreateCommand` in `devcontainer.json`:
-```json
-"postCreateCommand": "pip install --user PyYAML <package2> <package3> && ..."
-```
-
-### Add More VSCode Extensions
-Add to `extensions` array in `devcontainer.json`:
-```json
-"extensions": [
-  "ms-python.python",
-  "your.extension.id"
-]
-```
-
-### Install Additional Tools
-Add to `postCreateCommand`:
-```json
-"postCreateCommand": "pip install --user PyYAML && sudo apt-get update && sudo apt-get install -y <package> && ..."
-```
-
-## Installing Node.js Tools
-
-The container includes Node.js LTS and npm, ready for installing tools:
-
-### Claude Code (AI Coding Assistant)
-```bash
-npm install -g @anthropic-ai/claude-code
-```
-
-### Todo-MCP (Task Management)
-```bash
-npm install -g @your-org/todo-mcp  # Adjust package name as needed
-```
-
-### Project MCP Server
-```bash
-cd engineering/enhancements/mcp-server
-npm install
-npm start
-```
-
-### Verify Node.js Setup
-```bash
-node --version   # Should show v20.x or v22.x (LTS)
-npm --version    # Should show v10.x+
-which npm        # Should show /usr/local/bin/npm or similar
-```
+- **Mounts** (for example `~/.ssh` for git over SSH): copy
+  `docker-compose.override.yml.example` to `docker-compose.override.yml` and
+  edit it. If the override is missing, an empty one is created so the
+  container still starts.
+- **Extra image layers:** put Dockerfile lines in
+  `.devcontainer/Dockerfile.local-additions`. `initializeCommand` appends them
+  to `Dockerfile` as `Dockerfile.local` and builds from that. Both files are
+  gitignored.
+- **Project tooling:** add it to `Dockerfile` so it is baked into the image,
+  never to `postCreateCommand`.
 
 ## Troubleshooting
 
-### PNut-TS Not Found
 ```bash
-# Inside container, check:
-ls -la /usr/local/bin/pnut-ts
-which pnut-ts
+# Inside the container:
 pnut-ts --version
+node --version
+python3 -c "import yaml, fitz; print('ok')"
 ```
 
-### Python Package Issues
-```bash
-# Inside container:
-pip list | grep PyYAML
-pip install --user --force-reinstall PyYAML
-```
-
-### Rebuild Container
-If things get weird:
-- Command Palette → "Dev Containers: Rebuild Container"
-- This pulls fresh image and re-runs setup
-
-## Performance Notes
-
-**First Launch:**
-- Pulls ~500MB image (once)
-- Runs postCreateCommand (~30 seconds)
-- Total: ~1-2 minutes
-
-**Subsequent Launches:**
-- Image cached locally
-- Container starts in ~5 seconds
-
-**Updates:**
-- Rebuild container to get latest base image updates
-- Microsoft updates the Python image regularly
-
-## Security
-
-- Container runs as non-root user (`vscode`)
-- Sudo access available for installing packages
-- Repository mounted as volume (changes persist)
-- PNut-TS installed from a bundled zip during container creation
+If the image looks stale, run the `docker build` line from `initializeCommand`
+with `--no-cache` on the host, then "Dev Containers: Rebuild Container".
 
 ## Support
 
 - **Dev Containers:** https://code.visualstudio.com/docs/devcontainers/containers
-- **Base Image:** https://github.com/devcontainers/images/tree/main/src/python
-- **Features:** https://containers.dev/features
+- **Base image:** https://github.com/devcontainers/images/tree/main/src/python

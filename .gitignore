@@ -251,6 +251,8 @@ extracted_images_enhanced_test/
 .mcp.json
 # Devcontainer - local-only files (host-provided binaries and config)
 .devcontainer/docker-compose.override.yml
+.devcontainer/Dockerfile.local
+.devcontainer/Dockerfile.local-additions
 .devcontainer/.DS_Store
 engineering/document-production/WORKSPACE-REORGANIZATION-COMPLETE.md
 /engineering/document-production/outbound
