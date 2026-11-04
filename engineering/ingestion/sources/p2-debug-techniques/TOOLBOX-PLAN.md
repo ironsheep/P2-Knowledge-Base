@@ -253,7 +253,7 @@ Columns: id · kind · form · KB destination · facts → source · whole → p
 | DT-184 | tech | F=NAA | — | generic invariant checking | P=— | — |
 | DT-186 | fact | F=NAA | — | a soft interpreter timing figure (the KB states method-call clock count is not documented); XF ungraded | P=— | — |
 | DT-187 | tech | F=NAA | — | instrumentation policy | P=— | — |
-| DT-190 | trap | F=POU | `preprocessor-overview.yaml` traps | VAR is zeroed at run time (v55:265); an #ifdef-off writer is removed | P=NEWCP-07 + SRC (v55:265) | B5 |
+| DT-190 | trap | F=POU | `preprocessor-overview.yaml` `anti_patterns` | VAR is zeroed at run time (v55:265); an #ifdef-off writer is removed | P=NEWCP-07 + SRC (v55:265) | B5 |
 | DT-191 | tech | F=NAA | — | advice | P=— | — |
 | DT-192 | trap | F=NAA | — | generic | P=— | — |
 
@@ -302,7 +302,7 @@ Columns: id · kind · form · KB destination · facts → source · whole → p
 | DT-235 | fact | F=SHIP | `xinit.yaml`; `nco-timing.yaml` | v35 | P=SRC | — |
 | DT-236 | tech | F=SHIP +HUB(S-09) | streamer `overview.yaml` `debug_interaction` | EF-057 | P=EF-057 | B8a |
 | DT-237 | fact | F=NAA | — | generic; the specific traps are DT-238/240/242 | P=— | — |
-| DT-238 | trap | F=POU +HUB(S-20) | `preprocessor-overview.yaml` traps | #ifdef semantics | P=NEWCP-04 | B5 |
+| DT-238 | trap | F=POU +HUB(S-20) | `preprocessor-overview.yaml` `anti_patterns` | #ifdef semantics | P=NEWCP-04 | B5 |
 | DT-240 | fact | F=POU +HUB(S-20) | `preprocessor-overview.yaml` | — | P=NEWCP-04 | B5 |
 | DT-241 | tech | F=POU | `preprocessor-overview.yaml` (compare the two binaries before a run); "automate it" is NAA | — | P=NEWCP-04 | B5 |
 | DT-242 | trap | F=POU +HUB(S-21) | `preprocessor-overview.yaml`; `pragma-exportdef.yaml` | #define is file-local; `-D` is global (CP-013) | P=NEWCP-04 | B5 |
@@ -500,8 +500,8 @@ meaning (2); every other spelling is used in meaning (1) or mixed (1)+advice.
 **Two canonical pitfall keys, because the meanings differ:**
 
 ```yaml
-traps:                       # code or setup that does not do what it appears to
-  - trap: snake_case_id
+anti_patterns:               # code or setup that does not do what it appears to
+  - anti_pattern: snake_case_id
     when: "the code or setup"                 # required
     effect: "what actually happens"           # required; sourced or CP/EF-proven
     instead: "the sourced correct form"       # optional; sourced, never advice
@@ -515,24 +515,23 @@ limitations:                 # what the thing cannot do or is bounded by
     description: "..."
 ```
 
-**Recommended name `traps:`** (not `anti_patterns:`): it says the meaning; it separates the item
-from advice, which is what Phase S removes; and it is the doctrine's own word ("the trap in the
-entry the agent opens"). Renaming the 31 `anti_patterns` files is the same edit class as converging
-the other ~57 files. Alternative: keep `anti_patterns:` as the canonical trap key (31 files
-unchanged). This is a naming ruling — Stephen's (J-1).
+**The trap key is `anti_patterns:`** (Stephen's ruling J-1, 2026-11-04: "so yes, anti_patterns").
+It is the term our documents teach: the platform's `antipattern` presentation block and the planned
+*P2 Anti-Patterns* manual, whose subject is this same meaning. The key name removes no advice, so
+item-level classing still runs on the 31 files already using it; the other ~57 files converge to it.
 
 `debugging:` is kept as a **third, non-pitfall key** for a proven per-entry debugging technique
-(Standard A applies to every item); its trap items move to `traps:`, its bounds to `limitations:`,
+(Standard A applies to every item); its trap items move to `anti_patterns:`, its bounds to `limitations:`,
 and generic unsourced items go through Phase S (J-2).
 
-**Conversion rule per item:** trap → `traps:`; bound → `limitations:`; advice → Phase S (kept only
+**Conversion rule per item:** trap → `anti_patterns:`; bound → `limitations:`; advice → Phase S (kept only
 where a source states it, under the file's existing `best_practices:`; otherwise removed with a
 register entry); wrong claim → fixed in the same pass (KB carve-out). Item-level classing is the
 first step of each conversion batch; this map is at key level.
 
 ### 2.3 Per-file conversion map (key level)
 
-`→ T` = to `traps:`; `→ L` = to `limitations:`; `→ T/L` = split per item; `adv?` = holds advice items
+`→ T` = to `anti_patterns:`; `→ L` = to `limitations:`; `→ T/L` = split per item; `adv?` = holds advice items
 Phase S must class; `!` = holds a defect already named in A.6.
 
 | file (under `deliverables/ai/P2/`) | key now | → | note |
@@ -729,7 +728,7 @@ working" entry pointed at H-A S-05/H-D.
 ## 4. PATTERN ENTRIES
 
 Each lives under `language/spin2/patterns/implementation/` with `pattern_id`, `aliases:` (patterns
-today carry none; `pattern_id` is harvested), `when_use`, `implementation`, `traps`, `resources`,
+today carry none; `pattern_id` is harvested), `when_use`, `implementation`, `anti_patterns`, `resources`,
 `related`, and a compile-manifest entry under
 `engineering/tools/validation/kb-compile-manifest/language/spin2/patterns/implementation/`
 (legality only); it is listed in `pattern-index.yaml`. Every claim in the entry is sourced; the code
@@ -812,7 +811,7 @@ in the same pass; no release without Stephen.
 | batch | content | ledger rows | gate before it starts |
 |---|---|---|---|
 | B0 | Defects D-1 (SC DEBUG_DISABLE "Globally"), D-2 (streamer_smartpin_control TESTP / lock[15]), D-3 (cogspin "causes crashes"; the same class in `spin2_cog_management` `insufficient_stack`) | DT-143, DT-208 (homes) | none — served now |
-| B1a | Pitfall-key conversion: `language/spin2/methods`, `operators`, `constructs`, `keywords`, `special-symbols`, `system-variables` (§2.3) | — (files ≈ 30) | Stephen's ruling J-1 |
+| B1a | Pitfall-key conversion: `language/spin2/methods`, `operators`, `constructs`, `keywords`, `special-symbols`, `system-variables` (§2.3) | — (files ≈ 30) | J-1 (ruled 2026-11-04) |
 | B1b | Conversion: `language/spin2/concepts`, `preprocessor`, `patterns`, `debug-commands`, `conventions`, `language/fundamentals` | — (files ≈ 27) | J-1 |
 | B1c | Conversion: `language/pasm2`, `architecture`, `hardware` nested singletons, app notes (J-3), `debugging:` blocks | — (files ≈ 30) | J-1, J-2, J-3 |
 | B4 | Debug POU: DS, DM, SC, `clkset.yaml`, `method_definition.yaml`; NEWCP-01/02/03/05/06/08 | DT-012, 013, 042, 064, 068, 069, 086, 105, 111, 116 (10) | NEWCPs registered |
@@ -833,9 +832,9 @@ their blockers clear. New traps written in B4-B7 use the canonical key from the 
 
 | id | the call this plan makes | the alternative |
 |---|---|---|
-| J-1 | canonical trap key `traps:` (rename the 31 `anti_patterns` files too) | keep `anti_patterns:` as canonical; converge only the other ~57 files |
-| J-2 | three keys: `traps`, `limitations`, and `debugging` kept for proven per-entry techniques | two keys only; `debugging` items moved to `traps`/`limitations` or removed |
-| J-3 | app-note `gotchas {flag}`: pitfall → `traps`, hardware → `limitations` or `notes`, tip/verify/gap → `notes` | leave app-note YAMLs as document mirrors until each app note's next revision (a carve-out expiring then) |
+| J-1 | canonical trap key `anti_patterns:`; the other ~57 files converge to it | `traps:` (rejected: it would give one concept two names across the KB and the manuals) |
+| J-2 | three keys: `anti_patterns`, `limitations`, and `debugging` kept for proven per-entry techniques | two keys only; `debugging` items moved to `anti_patterns`/`limitations` or removed |
+| J-3 | app-note `gotchas {flag}`: pitfall → `anti_patterns`, hardware → `limitations` or `notes`, tip/verify/gap → `notes` | leave app-note YAMLs as document mirrors until each app note's next revision (a carve-out expiring then) |
 | J-4 | four domain hub files under `guides/`, quick-queries as their index | one hub file; or hubs under `language/spin2/debug-commands/` |
 | J-5 | alias ownership: single-cause symptom phrases live at the point-of-use entry, multi-cause at the hub | every symptom phrase at the hub (needs alias removal from DS and others to avoid arrays) |
 | J-6 | a ledger-drawn symptom may list KB-resident sourced causes the ledger never named (RCFAST clock under S-01) | ledger causes only |
@@ -868,7 +867,7 @@ RDPIN WC returns busy); XF-004 is CONFIRMED.
 
 | call | ruling | on what |
 |---|---|---|
-| J-1 | **Stephen's** — asked | naming a key across ~88 files |
+| J-1 | **Stephen ruled 2026-11-04: `anti_patterns:`** | the term the documents teach; naming a key across ~88 files |
 | J-2 | accepted | `debugging:` holds proven techniques under Standard A; a third meaning, not a third spelling |
 | J-3 | accepted | KB carve-out: a wrong-key item is fixed in the pass; the `flag` survives as the item's class |
 | J-4 | accepted | `p2kb_get` returns the whole file per hit; four domains keep a hit small |
