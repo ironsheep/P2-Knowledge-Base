@@ -7,7 +7,7 @@ to the fenced code block in the manual's `opus-master/*.md` that carries the
 matching `caption="<name>.spin2"`. This is the anti-drift gate for the shipped
 example ZIP: readers open the loose files in an external tool (Prop Tool IDE /
 PNut-Term-TS), so a loose file that has silently diverged from the manual's
-printed code block is a trust defect ([[feedback_example_file_matches_code_block_not_figure]]).
+printed code block is a trust defect.
 
 What it checks (all three must hold for GREEN):
   1. IDENTITY   — for every caption that has a library file, block bytes == file bytes.

@@ -32,7 +32,7 @@
 **Example**: Flash File System with clean API and error handling
 **Strength**: Practical, usable, well-documented interfaces
 **When to Use**: Library documentation, API guides
-**Failure mode**: Marketing-spin — over-claiming ("perfect", "complete", "seamless") and trading technical precision for approachability. Guard: no inflated artifact names or capability claims (see the no-inflated-names rule).
+**Failure mode**: Marketing-spin — over-claiming ("perfect", "complete", "seamless") and trading technical precision for approachability. Guard: name an artifact for what it does, and put no inflated adjective (Complete, Perfect, Professional, Production-ready, Ultimate, Comprehensive) on an example, a figure or a capability claim.
 
 ### 5. Claude Voice (AI-Pedagogical)
 **Characteristics**: Adaptive depth, data-driven clarity

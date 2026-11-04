@@ -314,7 +314,10 @@ just those makes the notation self-consistent (afterward `=` *always* means rece
 `==` *always* means compare), which is what stops an agent copying the wrong operator
 into generated code. The strict Spin2 rule (`:=` assign / `==` compare, no bare `=`)
 applies **only to actual Spin2 code examples** (fenced source); PASM2 CON-block `=` is
-legitimate assembler syntax and stays. (`feedback_behavior_notation_vs_code_operators`.)
+legitimate assembler syntax and stays. Judge each `=` per occurrence — "receives" (keep) or
+comparison (make `==`); never a blind replace, and never convert a "receives" `=` into `:=`
+(Stephen's correction, 2026-07-09: behaviors are shown in the trusted source's own notation, not
+forced into source-code operators).
 
 ---
 
@@ -435,7 +438,6 @@ A defect is an instance of a **class**. On finding one, identify the class and f
 **every occurrence in every document AND every YAML** — not just the reported spot.
 Reject "lightweight" / triage-only responses; they guarantee more defect reports, not
 fewer, and the exhaustive sweep is explicitly worth the time.
-(`feedback_classwide_sweep_on_every_finding`.)
 
 ### 9.2 Systemic ⇒ content bump; full audit gates re-release
 

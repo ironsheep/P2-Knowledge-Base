@@ -56,12 +56,11 @@ re-scan is not done until ALL of these are refreshed in the **same** effort:
 2. [ ] **`OBEX-INTEGRATION-COMPLETE.md`** — append the vN.N delta section (counts, new/changed IDs, validation).
 3. [ ] **Reset the delta baseline** to the new scrape date — in *both* this dashboard AND `whats-next` SKILL.md
    (the obex row in the head table + §"choose a target" obex line) so `whats-next` resumes from the right baseline.
-4. [ ] **Memory pointer** `project_release_and_obex_dashboard_panels` — update the baseline date.
-5. [ ] **Confirm the release** — index regenerated + `release-yamls` ran + the objects are in the tagged KB release + MCP re-served (content-probe a new ID).
-6. [ ] **One-liners** — every new object has its authored `description_short` (the release gate enforces it).
+4. [ ] **Confirm the release** — index regenerated + `release-yamls` ran + the objects are in the tagged KB release + MCP re-served (content-probe a new ID).
+5. [ ] **One-liners** — every new object has its authored `description_short` (the release gate enforces it).
 
 > **Why a checklist here and not a skill:** OBEX is the one multi-artifact head without a working skill
 > (ingestion has `ingest-source`, manual has `prepare-/release-manual`, yaml has
 > `yaml-knowledge-base-maintenance`). Until/unless an `obex-rescan` skill exists, this checklist is the
 > single home for the re-scan's definition-of-done. v2.2 (2026-06-29) did the data + release but left this
-> dashboard, the baseline, and the memory pointer stale for ~5 days — exactly the gap this list closes.
+> dashboard and the baseline stale for ~5 days — exactly the gap this list closes.

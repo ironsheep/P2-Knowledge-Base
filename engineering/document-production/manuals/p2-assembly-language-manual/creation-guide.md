@@ -732,7 +732,7 @@ not source — follow the trusted source's convention, consistently:
 The defect is the **mismatch**: a comparison written with a single `=` (write `== 0`,
 not `= 0`). A bare `=` inside a fenced **Spin2** code example is a real bug (use `:=`
 assign / `==` compare). PASM2 CON-block `=` is legitimate assembler syntax and stays.
-See methodology §6.4 + `feedback_behavior_notation_vs_code_operators`.
+See methodology §6.4.
 
 ---
 
