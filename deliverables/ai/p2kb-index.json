@@ -1,11 +1,11 @@
 {
   "system": {
     "version": "3.6.0",
-    "generated": "2026-10-12T23:22:29.812884",
-    "total_entries": 1137,
+    "generated": "2026-11-05T08:46:56.555208",
+    "total_entries": 1138,
     "total_categories": 60,
-    "total_aliases": 3598,
-    "multi_target_aliases": 221,
+    "total_aliases": 3714,
+    "multi_target_aliases": 223,
     "source": "deliverables/ai/P2/"
   },
   "delivery_filter": {
@@ -1577,6 +1577,9 @@
     "BOOLEAN XOR": [
       "p2kbSpin2OpOpXorxor"
     ],
+    "BOOL_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "BOOT ROM FORTH": [
       "p2kbArchTaqozForth"
     ],
@@ -1700,6 +1703,9 @@
       "p2kbHwAddonGoertzelTouchAddonGoertzelTouch"
     ],
     "CAPTURE A BUS PIN": [
+      "p2kbArchPinCapture"
+    ],
+    "CAPTURE A BUS PIN WITHOUT A MONITOR PIN": [
       "p2kbArchPinCapture"
     ],
     "CAPTURE MODES": [
@@ -1940,6 +1946,9 @@
     "CONSTANT ASSIGNMENT": [
       "p2kbSpin2OpOpEquate"
     ],
+    "CONTINUATION BIT ENCODING": [
+      "p2kbPasm2Rfvar"
+    ],
     "CONTINUE TASK": [
       "p2kbSpin2Taskcont"
     ],
@@ -1992,6 +2001,9 @@
     ],
     "COROUTINES": [
       "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
+    "COUNT EDGES ON A NEIGHBOURING PIN WITHOUT DRIVING IT": [
+      "p2kbArchSmartPin01110CountAEdgesOptionalBDec"
     ],
     "COUNT HIGHS OVER PERIODS WITHIN X CLOCKS": [
       "p2kbArchSmartPin10110CountHighsInXClocks"
@@ -2263,6 +2275,9 @@
     "DEBUG OUTPUT FORMAT": [
       "p2kbSpin2DbgDebugFormattersOverview"
     ],
+    "DEBUG OUTPUT GARBLED AFTER CHANGING THE CLOCK": [
+      "p2kbSpin2DbgDebugStrategyGuide"
+    ],
     "DEBUG OUTPUT LOOKS WEIRD": [
       "p2kbSpin2DbgDebugNewUserGuide"
     ],
@@ -2287,6 +2302,12 @@
     "DEBUG SPECTRO": [
       "p2kbSpin2Spectro"
     ],
+    "DEBUG STATEMENTS STILL COMPILE WITH DEBUG_MASK 0": [
+      "p2kbSpin2DbgDebugStrategyGuide"
+    ],
+    "DEBUG STOPS WORKING AFTER CLKSET": [
+      "p2kbSpin2DbgDebugStrategyGuide"
+    ],
     "DEBUG STRATEGY GUIDE: KEEPING A DEBUG BUILD WITHIN THE COMPILER'S LIMITS": [
       "p2kbSpin2DbgDebugStrategyGuide"
     ],
@@ -2304,6 +2325,9 @@
     ],
     "DEBUG new user guide": [
       "p2kbSpin2DbgDebugNewUserGuide"
+    ],
+    "DEBUG[3] WILL NOT COMPILE": [
+      "p2kbSpin2DebugMask"
     ],
     "DEBUG_BAUD": [
       "p2kbSpin2SpecialConfigurationSymbols"
@@ -2342,6 +2366,18 @@
       "p2kbSpin2SpecialConfigurationSymbols"
     ],
     "DEBUG_MASK": [
+      "p2kbSpin2DebugMask"
+    ],
+    "DEBUG_MASK NEEDS A VERSION DIRECTIVE": [
+      "p2kbSpin2DbgDebugStrategyGuide"
+    ],
+    "DEBUG_MASK SYMBOL MUST BE DEFINED FOR DEBUG[0..31] USAGE": [
+      "p2kbSpin2DebugMask"
+    ],
+    "DEBUG_MASK needs a version directive": [
+      "p2kbSpin2DbgDebugStrategyGuide"
+    ],
+    "DEBUG_MASK symbol must be defined for DEBUG[0..31] usage": [
       "p2kbSpin2DebugMask"
     ],
     "DEBUG_PIN": [
@@ -2621,6 +2657,9 @@
     "E7 erratum": [
       "p2kbPasm2Rdfast"
     ],
+    "EACH INSTANCE HAS ITS OWN COUNTER": [
+      "p2kbSpin2ObjectImageDedup"
+    ],
     "EDGE BOARD PINOUT": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
@@ -2841,7 +2880,13 @@
       "p2kbSpin2DbgDebugFormattersArrays",
       "p2kbSpin2DbgDebugFormattersComplete"
     ],
+    "FDEC_ARRAY_": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "FDEC_REG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "FDEC_REG_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "FFT": [
@@ -3067,6 +3112,27 @@
     ],
     "FTDI FT231X programmer": [
       "p2kbHwProgrammingPropPlugProgrammingPropPlug"
+    ],
+    "FVAR": [
+      "p2kbPasm2Fvar"
+    ],
+    "FVAR / FVARS": [
+      "p2kbPasm2Fvar"
+    ],
+    "FVAR DIRECTIVE": [
+      "p2kbPasm2Fvar"
+    ],
+    "FVAR directive": [
+      "p2kbPasm2Fvar"
+    ],
+    "FVARS": [
+      "p2kbPasm2Fvar"
+    ],
+    "FVARS DIRECTIVE": [
+      "p2kbPasm2Fvar"
+    ],
+    "FVARS directive": [
+      "p2kbPasm2Fvar"
     ],
     "Field Pointer Operator": [
       "p2kbSpin2SymCaretAt"
@@ -3894,6 +3960,9 @@
     "LSTRING": [
       "p2kbSpin2Lstring"
     ],
+    "LSTR_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "LUT": [
       "p2kbArchLookupRam"
     ],
@@ -4276,6 +4345,10 @@
     "OBJECT COMPOSITION PATTERNS": [
       "p2kbSpin2ObjectArchetypes"
     ],
+    "OBJECT HAS DEBUG_MASK = 0 BUT STILL PRINTS": [
+      "p2kbSpin2DebugMask",
+      "p2kbSpin2DbgDebugStrategyGuide"
+    ],
     "OBJECT IMAGE DEDUP": [
       "p2kbSpin2ObjectImageDedup"
     ],
@@ -4371,6 +4444,9 @@
     ],
     "OUTZ": [
       "p2kbPasm2Outz"
+    ],
+    "OVERRIDE DEBUG_MASK IN AN OBJECT": [
+      "p2kbSpin2DebugMask"
     ],
     "OVERRIDE FORWARDING": [
       "p2kbSpin2ObjectImageDedup"
@@ -5815,6 +5891,12 @@
     "READ ANALOG VOLTAGE NO EXTERNAL ADC": [
       "p2kbAppNoteP2an001SinglePinInstrumentationAdc"
     ],
+    "READ FVAR DATA": [
+      "p2kbPasm2Rfvar"
+    ],
+    "READ FVARS DATA": [
+      "p2kbPasm2Rfvars"
+    ],
     "READING BUTTON INPUT WITH INA REGISTER": [
       "p2kbExampleSmartPins002ButtonReading"
     ],
@@ -6114,24 +6196,45 @@
       "p2kbSpin2DbgDebugFormattersBinary",
       "p2kbSpin2DbgDebugFormattersComplete"
     ],
+    "SBIN_BYTE_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "SBIN_BYTE_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "SBIN_BYTE_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "SBIN_LONG": [
       "p2kbSpin2DbgDebugFormattersBinary",
       "p2kbSpin2DbgDebugFormattersComplete"
     ],
+    "SBIN_LONG_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "SBIN_LONG_ARRAY": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
+    "SBIN_LONG_ARRAY_": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "SBIN_REG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "SBIN_REG_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "SBIN_WORD": [
       "p2kbSpin2DbgDebugFormattersBinary",
       "p2kbSpin2DbgDebugFormattersComplete"
     ],
+    "SBIN_WORD_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "SBIN_WORD_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "SBIN_WORD_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "SCA": [
@@ -6179,24 +6282,45 @@
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersDecimal"
     ],
+    "SDEC_BYTE_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "SDEC_BYTE_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "SDEC_BYTE_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "SDEC_LONG": [
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersDecimal"
     ],
+    "SDEC_LONG_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "SDEC_LONG_ARRAY": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
+    "SDEC_LONG_ARRAY_": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "SDEC_REG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "SDEC_REG_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "SDEC_WORD": [
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersDecimal"
     ],
+    "SDEC_WORD_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "SDEC_WORD_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "SDEC_WORD_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "SD_CARD_BOOT": [
@@ -6243,6 +6367,9 @@
     ],
     "SERIAL_LOADER": [
       "p2kbArchSerialLoader"
+    ],
+    "SET A CHILD OBJECT'S DEBUG_MASK": [
+      "p2kbSpin2DebugMask"
     ],
     "SET BITS": [
       "p2kbSpin2OpOpBitor"
@@ -6397,24 +6524,45 @@
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersHexadecimal"
     ],
+    "SHEX_BYTE_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "SHEX_BYTE_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "SHEX_BYTE_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "SHEX_LONG": [
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersHexadecimal"
     ],
+    "SHEX_LONG_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "SHEX_LONG_ARRAY": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
+    "SHEX_LONG_ARRAY_": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "SHEX_REG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "SHEX_REG_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "SHEX_WORD": [
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersHexadecimal"
     ],
+    "SHEX_WORD_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "SHEX_WORD_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "SHEX_WORD_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "SHIFT LEFT": [
@@ -6467,6 +6615,12 @@
     ],
     "SIGNED SCALE": [
       "p2kbSpin2OpOpSCAS"
+    ],
+    "SIGNED VARIABLE-LENGTH INTEGER": [
+      "p2kbPasm2Rfvars"
+    ],
+    "SIGNED VARIABLE-LENGTH VALUE FROM FIFO": [
+      "p2kbPasm2Rfvars"
     ],
     "SIGNX": [
       "p2kbPasm2Signx",
@@ -6554,6 +6708,9 @@
     "SKIPF_BRANCHING": [
       "p2kbPasm2SkipfBranching"
     ],
+    "SMART PIN COUNTS EDGES OF THE PIN NEXT TO IT": [
+      "p2kbArchSmartPin01110CountAEdgesOptionalBDec"
+    ],
     "SMART PIN DAC AUDIO BOARD": [
       "p2kbHwAddonHdAudioAddonHdAudio"
     ],
@@ -6565,6 +6722,9 @@
     ],
     "SMART PIN INPUT SELECTOR": [
       "p2kbPasm2Wrpin"
+    ],
+    "SMART PIN NEIGHBOUR REACHES ONLY 3 PINS": [
+      "p2kbHwEdgeStandardModuleEdgeStandardModule"
     ],
     "SMART PIN POWER GROUPING": [
       "p2kbArchPinPowerDomains"
@@ -6625,6 +6785,12 @@
     ],
     "SPI Flash Programmer and Boot Loader \u2014 Annotated Reference Case Study": [
       "p2kbExampleFlashLoaderCaseStudy"
+    ],
+    "SPI WRITE CORRUPTS SECTORS SILENTLY AT SOME CLOCK RATES": [
+      "p2kbPasm2StreamerSmartpinControl"
+    ],
+    "SPI write corrupts sectors silently at some clock rates": [
+      "p2kbPasm2StreamerSmartpinControl"
     ],
     "SPIN2 BASIC I/O - DIGITAL PIN CONTROL": [
       "p2kbSpin2BasicIo"
@@ -6852,6 +7018,12 @@
     ],
     "STREAMER NEVER STOPS": [
       "p2kbArchOverview"
+    ],
+    "STREAMER OUTPUT NOT VISIBLE": [
+      "p2kbArchPinCapture"
+    ],
+    "STREAMER OUTPUT NOT VISIBLE ON THE PIN": [
+      "p2kbArchPinSelection"
     ],
     "STREAMER OVERVIEW": [
       "p2kbArchOverview"
@@ -7405,24 +7577,45 @@
       "p2kbSpin2DbgDebugFormattersBinary",
       "p2kbSpin2DbgDebugFormattersComplete"
     ],
+    "UBIN_BYTE_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "UBIN_BYTE_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "UBIN_BYTE_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "UBIN_LONG": [
       "p2kbSpin2DbgDebugFormattersBinary",
       "p2kbSpin2DbgDebugFormattersComplete"
     ],
+    "UBIN_LONG_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "UBIN_LONG_ARRAY": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
+    "UBIN_LONG_ARRAY_": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "UBIN_REG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "UBIN_REG_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "UBIN_WORD": [
       "p2kbSpin2DbgDebugFormattersBinary",
       "p2kbSpin2DbgDebugFormattersComplete"
     ],
+    "UBIN_WORD_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "UBIN_WORD_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "UBIN_WORD_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "UDEC": [
@@ -7441,24 +7634,45 @@
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersDecimal"
     ],
+    "UDEC_BYTE_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "UDEC_BYTE_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "UDEC_BYTE_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "UDEC_LONG": [
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersDecimal"
     ],
+    "UDEC_LONG_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "UDEC_LONG_ARRAY": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
+    "UDEC_LONG_ARRAY_": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "UDEC_REG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "UDEC_REG_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "UDEC_WORD": [
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersDecimal"
     ],
+    "UDEC_WORD_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "UDEC_WORD_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "UDEC_WORD_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "UHEX": [
@@ -7477,24 +7691,45 @@
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersHexadecimal"
     ],
+    "UHEX_BYTE_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "UHEX_BYTE_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "UHEX_BYTE_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "UHEX_LONG": [
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersHexadecimal"
     ],
+    "UHEX_LONG_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "UHEX_LONG_ARRAY": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
+    "UHEX_LONG_ARRAY_": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
     "UHEX_REG_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "UHEX_REG_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "UHEX_WORD": [
       "p2kbSpin2DbgDebugFormattersComplete",
       "p2kbSpin2DbgDebugFormattersHexadecimal"
     ],
+    "UHEX_WORD_": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
     "UHEX_WORD_ARRAY": [
+      "p2kbSpin2DbgDebugFormattersArrays"
+    ],
+    "UHEX_WORD_ARRAY_": [
       "p2kbSpin2DbgDebugFormattersArrays"
     ],
     "UNARY MINUS": [
@@ -7596,8 +7831,14 @@
     "VAR": [
       "p2kbSpin2KwVAR"
     ],
+    "VAR LEDGER SPLIT ACROSS INSTANCES": [
+      "p2kbSpin2ObjectImageDedup"
+    ],
     "VAR VARIABLES": [
       "p2kbSpin2KwVAR"
+    ],
+    "VAR ledger split across instances": [
+      "p2kbSpin2ObjectImageDedup"
     ],
     "VAR variables": [
       "p2kbSpin2KwVAR"
@@ -7613,6 +7854,18 @@
     ],
     "VARIABLE SCOPING AND BEST PRACTICES": [
       "p2kbLanguageVariableScopingBestPractices"
+    ],
+    "VARIABLE-LENGTH DATA": [
+      "p2kbPasm2Fvar"
+    ],
+    "VARIABLE-LENGTH INTEGER": [
+      "p2kbPasm2Rfvar"
+    ],
+    "VARIABLE-LENGTH INTEGER IN DAT": [
+      "p2kbPasm2Fvar"
+    ],
+    "VARIABLE-LENGTH VALUE FROM FIFO": [
+      "p2kbPasm2Rfvar"
     ],
     "VAR\\X": [
       "p2kbSpin2OpOpPostassign"
@@ -7758,6 +8011,12 @@
     "WHAT A DEBUG BUILD COSTS": [
       "p2kbSpin2DbgDebugStrategyGuide"
     ],
+    "WHAT CAN WRITE HUB RAM": [
+      "p2kbArchHub"
+    ],
+    "WHAT DOES THE ROM DO TO P59 P60 P61 AT RESET": [
+      "p2kbArchBootPatternSelection"
+    ],
     "WHICH BOARD": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
     ],
@@ -7769,6 +8028,9 @@
     ],
     "WHICH PINS": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
+    "WHICH PINS CAN OBSERVE P62 OR P63": [
+      "p2kbHwEdgeStandardModuleEdgeStandardModule"
     ],
     "WHILE": [
       "p2kbSpin2KwWHILE"
@@ -7962,8 +8224,14 @@
       "p2kbArchOverview",
       "p2kbPasm2Xinit"
     ],
+    "XINIT COUNT LARGER THAN 16 BITS": [
+      "p2kbPasm2Xinit"
+    ],
     "XINIT MODE": [
       "p2kbArchModesReference"
+    ],
+    "XINIT count larger than 16 bits": [
+      "p2kbPasm2Xinit"
     ],
     "XINIT mode": [
       "p2kbArchModesReference"
@@ -8249,6 +8517,9 @@
       "p2kbSpin2OpOpZEROX"
     ],
     "ZSTR": [
+      "p2kbSpin2DbgDebugFormattersComplete"
+    ],
+    "ZSTR_": [
       "p2kbSpin2DbgDebugFormattersComplete"
     ],
     "\\": [
@@ -8697,6 +8968,9 @@
     "capture a bus pin": [
       "p2kbArchPinCapture"
     ],
+    "capture a bus pin without a monitor pin": [
+      "p2kbArchPinCapture"
+    ],
     "capture modes": [
       "p2kbArchModesReference"
     ],
@@ -8834,6 +9108,9 @@
     "constant assignment": [
       "p2kbSpin2OpOpEquate"
     ],
+    "continuation bit encoding": [
+      "p2kbPasm2Rfvar"
+    ],
     "continue task": [
       "p2kbSpin2Taskcont"
     ],
@@ -8858,6 +9135,9 @@
     ],
     "coroutines": [
       "p2kbAppNoteP2an005CooperativeMultitaskingTasks"
+    ],
+    "count edges on a neighbouring pin without driving it": [
+      "p2kbArchSmartPin01110CountAEdgesOptionalBDec"
     ],
     "count ones": [
       "p2kbSpin2OpOpONES"
@@ -8934,11 +9214,23 @@
     "debug output format": [
       "p2kbSpin2DbgDebugFormattersOverview"
     ],
+    "debug output garbled after changing the clock": [
+      "p2kbSpin2DbgDebugStrategyGuide"
+    ],
     "debug output looks weird": [
       "p2kbSpin2DbgDebugNewUserGuide"
     ],
     "debug resource usage": [
       "p2kbSpin2DbgDebugStrategyGuide"
+    ],
+    "debug statements still compile with DEBUG_MASK 0": [
+      "p2kbSpin2DbgDebugStrategyGuide"
+    ],
+    "debug stops working after clkset": [
+      "p2kbSpin2DbgDebugStrategyGuide"
+    ],
+    "debug[3] will not compile": [
+      "p2kbSpin2DebugMask"
     ],
     "debug_enabled": [
       "p2kbSpin2DebugEnabled"
@@ -9080,6 +9372,9 @@
     ],
     "dual_communication": [
       "p2kbSpin2DualCommunication"
+    ],
+    "each instance has its own counter": [
+      "p2kbSpin2ObjectImageDedup"
     ],
     "edge board pinout": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
@@ -10083,6 +10378,10 @@
     "object composition patterns": [
       "p2kbSpin2ObjectArchetypes"
     ],
+    "object has DEBUG_MASK = 0 but still prints": [
+      "p2kbSpin2DebugMask",
+      "p2kbSpin2DbgDebugStrategyGuide"
+    ],
     "object image dedup": [
       "p2kbSpin2ObjectImageDedup"
     ],
@@ -10139,6 +10438,9 @@
     ],
     "outz": [
       "p2kbPasm2Outz"
+    ],
+    "override DEBUG_MASK in an object": [
+      "p2kbSpin2DebugMask"
     ],
     "override forwarding": [
       "p2kbSpin2ObjectImageDedup"
@@ -10558,6 +10860,12 @@
     "re-entrant driver state": [
       "p2kbSpin2OpTypedPointers"
     ],
+    "read FVAR data": [
+      "p2kbPasm2Rfvar"
+    ],
+    "read FVARS data": [
+      "p2kbPasm2Rfvars"
+    ],
     "read a pin that runs a smart pin": [
       "p2kbArchPinCapture"
     ],
@@ -10805,6 +11113,9 @@
     "serial terminal": [
       "p2kbSpin2Term"
     ],
+    "set a child object's DEBUG_MASK": [
+      "p2kbSpin2DebugMask"
+    ],
     "set bits": [
       "p2kbSpin2OpOpBitor"
     ],
@@ -10976,6 +11287,12 @@
     "signed scale": [
       "p2kbSpin2OpOpSCAS"
     ],
+    "signed variable-length integer": [
+      "p2kbPasm2Rfvars"
+    ],
+    "signed variable-length value from FIFO": [
+      "p2kbPasm2Rfvars"
+    ],
     "signx": [
       "p2kbPasm2Signx"
     ],
@@ -11039,11 +11356,17 @@
     "smart pin IN": [
       "p2kbArchSmartPins"
     ],
+    "smart pin counts edges of the pin next to it": [
+      "p2kbArchSmartPin01110CountAEdgesOptionalBDec"
+    ],
     "smart pin handshake": [
       "p2kbArchSmartPins"
     ],
     "smart pin input selector": [
       "p2kbPasm2Wrpin"
+    ],
+    "smart pin neighbour reaches only 3 pins": [
+      "p2kbHwEdgeStandardModuleEdgeStandardModule"
     ],
     "smart pin power grouping": [
       "p2kbArchPinPowerDomains"
@@ -11223,6 +11546,12 @@
     ],
     "streamer never stops": [
       "p2kbArchOverview"
+    ],
+    "streamer output not visible": [
+      "p2kbArchPinCapture"
+    ],
+    "streamer output not visible on the pin": [
+      "p2kbArchPinSelection"
     ],
     "streamer overview": [
       "p2kbArchOverview"
@@ -11540,6 +11869,18 @@
     "var\\x": [
       "p2kbSpin2OpOpPostassign"
     ],
+    "variable-length data": [
+      "p2kbPasm2Fvar"
+    ],
+    "variable-length integer": [
+      "p2kbPasm2Rfvar"
+    ],
+    "variable-length integer in DAT": [
+      "p2kbPasm2Fvar"
+    ],
+    "variable-length value from FIFO": [
+      "p2kbPasm2Rfvar"
+    ],
     "vector graphics": [
       "p2kbSpin2Plot"
     ],
@@ -11642,6 +11983,12 @@
     "what a debug build costs": [
       "p2kbSpin2DbgDebugStrategyGuide"
     ],
+    "what can write hub RAM": [
+      "p2kbArchHub"
+    ],
+    "what does the ROM do to P59 P60 P61 at reset": [
+      "p2kbArchBootPatternSelection"
+    ],
     "which P2 board": [
       "p2kbHwP2HardwareSelectionGuideP2HardwareSelectionGuide"
     ],
@@ -11653,6 +12000,9 @@
     ],
     "which pins": [
       "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix"
+    ],
+    "which pins can observe P62 or P63": [
+      "p2kbHwEdgeStandardModuleEdgeStandardModule"
     ],
     "wireless programming adapter": [
       "p2kbHwAddonWxAdapterAddonWxAdapter"
@@ -11793,8 +12143,8 @@
     },
     "p2kbAppNoteP2an004FrequencyRotationRcTimingMeasurement": {
       "path": "deliverables/ai/P2/application-notes/p2an004-frequency-rotation-rc-timing-measurement.yaml",
-      "mtime": 1791847327,
-      "sha256": "a11244592dd97963d5bb54d155264291ea08a2000343dfcdb2b43a88a2ae6b95"
+      "mtime": 1793856345,
+      "sha256": "4966c5d8fd3f76a191af3b65787afc2d6275ac060c15b36d70e70a1d3a2f7617"
     },
     "p2kbAppNoteP2an005CooperativeMultitaskingTasks": {
       "path": "deliverables/ai/P2/application-notes/p2an005-cooperative-multitasking-tasks.yaml",
@@ -11808,8 +12158,8 @@
     },
     "p2kbAppNoteP2an007DataStructuresNewFacilities": {
       "path": "deliverables/ai/P2/application-notes/p2an007-data-structures-new-facilities.yaml",
-      "mtime": 1791847327,
-      "sha256": "5e7f431626c26dfd43bee8f84ba1543a6dd03b96ade7d392de87ab83a6820420"
+      "mtime": 1791914114,
+      "sha256": "1d3466fbb7953abd791ef7b3aed0b791fcdfe387165616bc5b2300bede8fc3fe"
     },
     "p2kbArchIndex": {
       "path": "deliverables/ai/P2/architecture/boot-rom/_index.yaml",
@@ -11818,8 +12168,8 @@
     },
     "p2kbArchBootPatternSelection": {
       "path": "deliverables/ai/P2/architecture/boot-rom/boot-pattern-selection.yaml",
-      "mtime": 1791752670,
-      "sha256": "429fcd3df8aac8788491be02c65f0c580773ebdb9ba373ec3e71fe2f02621d38"
+      "mtime": 1793860136,
+      "sha256": "a604ede4f209c1599c26af9c6460accc0f7bde684ee9b7648e5a5eeaccb0baee"
     },
     "p2kbArchBootRomContents": {
       "path": "deliverables/ai/P2/architecture/boot-rom/boot-rom-contents.yaml",
@@ -11923,8 +12273,8 @@
     },
     "p2kbArchResourceOwnership": {
       "path": "deliverables/ai/P2/architecture/decomposition/resource-ownership.yaml",
-      "mtime": 1782849425,
-      "sha256": "77592ee844a01cd8832c553749590a7590f17c5fd6b83676032ed8ef6e7cef9b"
+      "mtime": 1791914114,
+      "sha256": "739cc19a9cbd5c6534c7a95bd661c021d96572af2bd4bdb9108eb8ecbe78bfbb"
     },
     "p2kbArchSharedBusBroker": {
       "path": "deliverables/ai/P2/architecture/decomposition/shared-bus-broker.yaml",
@@ -11958,13 +12308,13 @@
     },
     "p2kbArchFifo": {
       "path": "deliverables/ai/P2/architecture/fifo.yaml",
-      "mtime": 1791689246,
-      "sha256": "f0b587b8d658d0ff620e9e546f11cdd7ef493c74f839cd30072b8a41aa0e96d0"
+      "mtime": 1793854709,
+      "sha256": "122349b1f4f11d88af98bd503a20475127cffe905459f9dcb40e41cb7718284f"
     },
     "p2kbArchHub": {
       "path": "deliverables/ai/P2/architecture/hub.yaml",
-      "mtime": 1791689246,
-      "sha256": "616dce68544f1a529ed2dc21e8c600f67920af48eb48e4038c3e7990491b4f41"
+      "mtime": 1793855470,
+      "sha256": "a3d1eca9cd17e1bb3f7174c084865721bda6c7305f47efcf699bc3ff24356a37"
     },
     "p2kbArchInterrupts": {
       "path": "deliverables/ai/P2/architecture/interrupts.yaml",
@@ -11978,8 +12328,8 @@
     },
     "p2kbArchLocks": {
       "path": "deliverables/ai/P2/architecture/locks.yaml",
-      "mtime": 1791689246,
-      "sha256": "b5da98f05a1e04d736a4761ea22e9bcaada17d9f6a649c207d14772d7611d9cd"
+      "mtime": 1791914114,
+      "sha256": "311a65d1b74ffc6b42057bd7774cb98df7595f70754e4f451aaff9d3b1dc3be9"
     },
     "p2kbArchLookupRam": {
       "path": "deliverables/ai/P2/architecture/lookup_ram.yaml",
@@ -12038,7 +12388,7 @@
     },
     "p2kbArchPinDriveConfiguration": {
       "path": "deliverables/ai/P2/architecture/pin-drive-configuration.yaml",
-      "mtime": 1791752670,
+      "mtime": 1793859879,
       "sha256": "8b1e565c2d49db32d03288c208dd49fe403d9abd7426fd7a716d522a1d54fb67"
     },
     "p2kbArchPinPowerDomains": {
@@ -12128,8 +12478,8 @@
     },
     "p2kbArchSmartPin01110CountAEdgesOptionalBDec": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-01110-count-a-edges-optional-b-dec.yaml",
-      "mtime": 1791746602,
-      "sha256": "4ad6a3850325c89969f6335bf000e2f3ae934ffed149671a3edfc464e34b71bc"
+      "mtime": 1791914114,
+      "sha256": "10dd7355bdd8dd19c66570b5411f8a73c7b7d6e5810f58eb81b1512c9caaaf48"
     },
     "p2kbArchSmartPin01111CountHighsOptionalDec": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-01111-count-highs-optional-dec.yaml",
@@ -12203,8 +12553,8 @@
     },
     "p2kbArchSmartPin11101SyncSerialReceive": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11101-sync-serial-receive.yaml",
-      "mtime": 1791600381,
-      "sha256": "12179007bf93e152f4287f5f669b2a0810e937065efca40d94d74d49cb61db85"
+      "mtime": 1793855470,
+      "sha256": "d08fd09c8bcb5d81566c1211a3e8f33baa6f56e6797f90d7d8decbcdca03411c"
     },
     "p2kbArchSmartPin11110AsyncSerialTransmit": {
       "path": "deliverables/ai/P2/architecture/smart-pins/smart-pin-11110-async-serial-transmit.yaml",
@@ -12263,13 +12613,13 @@
     },
     "p2kbArchPinCapture": {
       "path": "deliverables/ai/P2/architecture/streamer/pin-capture.yaml",
-      "mtime": 1791752670,
-      "sha256": "151292eb84bfa151975825fa5b62d3453d55b1bdb79e4b735f09f3065d1b86b1"
+      "mtime": 1791914114,
+      "sha256": "74b9fa10ebd8f8b9c8faa9ea3062a02db09211241438195263a64c78823baf6b"
     },
     "p2kbArchPinSelection": {
       "path": "deliverables/ai/P2/architecture/streamer/pin-selection.yaml",
-      "mtime": 1791752670,
-      "sha256": "21fc893858f7e70980d89f0de94ca0c7a6377e65dce002ea67445238c01b97b7"
+      "mtime": 1793856345,
+      "sha256": "af76e4438819d4480e04c02412651fb9e53ce49674722746cc929b7a45c09c65"
     },
     "p2kbArchCompleteSystemRegistersIndex": {
       "path": "deliverables/ai/P2/architecture/system-registers/complete-system-registers-index.yaml",
@@ -13183,13 +13533,13 @@
     },
     "p2kbGuideQuickQueries": {
       "path": "deliverables/ai/P2/guides/quick-queries.yaml",
-      "mtime": 1791602515,
-      "sha256": "ae96704f6fc8547ce8f2df6505861f7c7237253e7e9b15a5f67c1329fdfe8f6f"
+      "mtime": 1792106194,
+      "sha256": "dd46b20df5825cfd95003ee441c905ccfaf26849e66694bcf9cda81d826f45b7"
     },
     "p2kbGuideSpin2GettingStarted": {
       "path": "deliverables/ai/P2/guides/spin2-getting-started.yaml",
-      "mtime": 1791755536,
-      "sha256": "6215e5111ba84581bbae9d6c1ebf526d0b4bace759bdb5c5a8ef959de04b09f4"
+      "mtime": 1793855470,
+      "sha256": "1680c7bb16e3b168188dcc77c5abc4b446312c455d91b038673e8cec8dc98b04"
     },
     "p2kbHwAddonAvBreakoutAddonAvBreakout": {
       "path": "deliverables/ai/P2/hardware/addon-av-breakout.yaml",
@@ -13293,8 +13643,8 @@
     },
     "p2kbHwEdgeStandardModuleEdgeStandardModule": {
       "path": "deliverables/ai/P2/hardware/edge-standard-module.yaml",
-      "mtime": 1791615115,
-      "sha256": "1f778e3045a360a0e917e3f90291d896cbbab78f33289412f2ee3f08b96f1b4c"
+      "mtime": 1793859879,
+      "sha256": "a84f311934591698aca761566a2122d3016b99d684ebcc865d0c879aaf36de9d"
     },
     "p2kbHwHardwareCompatibilityMatrixHardwareCompatibilityMatrix": {
       "path": "deliverables/ai/P2/hardware/hardware-compatibility-matrix.yaml",
@@ -13338,8 +13688,8 @@
     },
     "p2kbLanguageCaseSensitivity": {
       "path": "deliverables/ai/P2/language/fundamentals/case-sensitivity.yaml",
-      "mtime": 1791602515,
-      "sha256": "ec222024b3fbb2e98bd2c8df48016dfa03c74c81ace755aed3eb457559335c81"
+      "mtime": 1793855470,
+      "sha256": "b40ecb41d5f14fedfce0b69d7e2504cc1ec62cdeeb08dd9d90540b3e59db8c7a"
     },
     "p2kbLanguageIdentifierRules": {
       "path": "deliverables/ai/P2/language/fundamentals/identifier-rules.yaml",
@@ -13558,8 +13908,8 @@
     },
     "p2kbPasm2Byte": {
       "path": "deliverables/ai/P2/language/pasm2/byte.yaml",
-      "mtime": 1764449566,
-      "sha256": "5c1dcb1537929cac8332ff1c1ac282fbaa646b50041179876e5c1d53a29393c2"
+      "mtime": 1793854709,
+      "sha256": "7d884a1595444349daa6cdc66cd54e37efef4b62909ae4683ab68884a07c060f"
     },
     "p2kbPasm2Bytefit": {
       "path": "deliverables/ai/P2/language/pasm2/bytefit.yaml",
@@ -13693,8 +14043,8 @@
     },
     "p2kbPasm2EventInterruptConfig": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/event_interrupt_config.yaml",
-      "mtime": 1791752670,
-      "sha256": "97a7d3030d1a611911f6ec2552538b15b1c6e355630f51920c4b258b1570b371"
+      "mtime": 1792106194,
+      "sha256": "631c2aa4eccd8be21865c329a6a2d3614bb066dd8f6bfb0c7cd6731669b9a7cc"
     },
     "p2kbPasm2ExecutionModes": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/execution_modes.yaml",
@@ -13713,8 +14063,8 @@
     },
     "p2kbPasm2MultiCogSynchronization": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/multi_cog_synchronization.yaml",
-      "mtime": 1791752670,
-      "sha256": "403a4ed86d0caa3e19b98db41fb49c3459dbe4ae701a9ca4e8a9a84d8a12a924"
+      "mtime": 1793855470,
+      "sha256": "eddc919794e4052c011455a1dfd1c3c6d88db504398ef3c3aa273ef3124b4440"
     },
     "p2kbPasm2RegisterIndirection": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/register_indirection.yaml",
@@ -13723,8 +14073,8 @@
     },
     "p2kbPasm2RepInstruction": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/rep_instruction.yaml",
-      "mtime": 1791747713,
-      "sha256": "67fbe2d464bc3532a19743bd006ba4411387b773cc1bed5059be8f6215fd6ec1"
+      "mtime": 1791914114,
+      "sha256": "70b54325d2919c502702ed0ace5841104dc368830b2b2ab809e7d25f183c4cd5"
     },
     "p2kbPasm2SetqBlockOps": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/setq_block_ops.yaml",
@@ -13748,12 +14098,12 @@
     },
     "p2kbPasm2StreamerSmartpinControl": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/streamer_smartpin_control.yaml",
-      "mtime": 1791747713,
-      "sha256": "4329ece6310b84895477f571258dd517daf1bab93858571eb0d57fb111674b99"
+      "mtime": 1792106194,
+      "sha256": "c2eff369063b2d6d5c54fe9504d1e5d64102bbab16563b077f4cb7bd7fe6deb2"
     },
     "p2kbPasm2ConditionalDebug": {
       "path": "deliverables/ai/P2/language/pasm2/conditional-debug.yaml",
-      "mtime": 1791602515,
+      "mtime": 1793855836,
       "sha256": "7cf7157cd89ca26dab6cd86c749d458274f23e9d52ae116365fe9ebabbc95fa6"
     },
     "p2kbPasm2Crcbit": {
@@ -13971,6 +14321,11 @@
       "mtime": 1791615115,
       "sha256": "30acd3b1a2f7f5be12c4a5749acaa2c96fb9ae41c4973aeef870e813ae3f1b51"
     },
+    "p2kbPasm2Fvar": {
+      "path": "deliverables/ai/P2/language/pasm2/fvar.yaml",
+      "mtime": 1793855470,
+      "sha256": "3f5e69afaf0173730c479374385bb2e3f4c9494f5639b5c86f2a23765176e47c"
+    },
     "p2kbPasm2Getbrk": {
       "path": "deliverables/ai/P2/language/pasm2/getbrk.yaml",
       "mtime": 1791615115,
@@ -13993,8 +14348,8 @@
     },
     "p2kbPasm2Getptr": {
       "path": "deliverables/ai/P2/language/pasm2/getptr.yaml",
-      "mtime": 1791615115,
-      "sha256": "6eee7697156a7210584602260129315477b8de82d5a9b495a311ec494ce6493d"
+      "mtime": 1793854709,
+      "sha256": "603ebd90c21e46b41d5ce55d5ab5ea0e50c0145fec72ac39ae9e95c085a00e05"
     },
     "p2kbPasm2Getqx": {
       "path": "deliverables/ai/P2/language/pasm2/getqx.yaml",
@@ -14328,13 +14683,13 @@
     },
     "p2kbPasm2Locktry": {
       "path": "deliverables/ai/P2/language/pasm2/locktry.yaml",
-      "mtime": 1791615115,
-      "sha256": "de3ed2abd456b639f2c68016122e769e462228f5fab69580f3d17132b32a9b4c"
+      "mtime": 1792106194,
+      "sha256": "a276d76a82789e6c263e2076f86fcc844ec7999bf395b1870f9575611bd4b7fe"
     },
     "p2kbPasm2Long": {
       "path": "deliverables/ai/P2/language/pasm2/long.yaml",
-      "mtime": 1791689246,
-      "sha256": "e323f5f2782294cf118dd45142e5488981385a2bfed7c105938f6d50ebadc695"
+      "mtime": 1793854709,
+      "sha256": "4da6ba6baf7652166d25be6701d6d3dc0d5946fe50d75b2fdfd916b496e52f1b"
     },
     "p2kbPasm2Mergeb": {
       "path": "deliverables/ai/P2/language/pasm2/mergeb.yaml",
@@ -14738,33 +15093,33 @@
     },
     "p2kbPasm2Rdbyte": {
       "path": "deliverables/ai/P2/language/pasm2/rdbyte.yaml",
-      "mtime": 1791689246,
-      "sha256": "7110ddf52382502fbae3de7839f09e7862257004e732c9c8474529a96bc955a8"
+      "mtime": 1793855470,
+      "sha256": "2d38c1128d0934d635b7306d0efccea23c3f228e8be0b92018c99a9181281ddc"
     },
     "p2kbPasm2Rdfast": {
       "path": "deliverables/ai/P2/language/pasm2/rdfast.yaml",
-      "mtime": 1791689246,
-      "sha256": "8739c1582655ef3f172ad37bed10ed4a5a4c1e14ee8b7cc96156c206b677bc86"
+      "mtime": 1793854709,
+      "sha256": "0bda0de247388694f773cbf1a961f29d8506a3fa75cce880f7f6497004f04458"
     },
     "p2kbPasm2Rdlong": {
       "path": "deliverables/ai/P2/language/pasm2/rdlong.yaml",
-      "mtime": 1791689246,
-      "sha256": "9f163bc854b5fc8a04792cac9ba0da50b5d967167bd41516367b719a7029bd79"
+      "mtime": 1793855470,
+      "sha256": "a5199109fc7264478ce2360e84770a3cc33af8834d0f27cac68cf76f478a5531"
     },
     "p2kbPasm2Rdlut": {
       "path": "deliverables/ai/P2/language/pasm2/rdlut.yaml",
-      "mtime": 1791672000,
-      "sha256": "39af7709c351ade8d982173982d16402495d5c89136f49c631f277fa8c861a40"
+      "mtime": 1793855470,
+      "sha256": "537c18a0bbc172fcf224c5eb328579592034025801f1cd861c529af4a260e20b"
     },
     "p2kbPasm2Rdpin": {
       "path": "deliverables/ai/P2/language/pasm2/rdpin.yaml",
-      "mtime": 1791615115,
-      "sha256": "7cc0d5f51d7a7fdba51d3ac9b5006da38fa7ff840d37e3cf51072065b53600f1"
+      "mtime": 1793855470,
+      "sha256": "bd868b40df1f4e75d9ed51f6ac720439fa09ccaa72c069370f56fbb366794fc9"
     },
     "p2kbPasm2Rdword": {
       "path": "deliverables/ai/P2/language/pasm2/rdword.yaml",
-      "mtime": 1791689246,
-      "sha256": "2b3a9ee25fb05c2d4bce69d63e83e5a10d700d019cdc0374d3b38d4997981018"
+      "mtime": 1793855470,
+      "sha256": "32f5452d944a1ed9fda1cdbfc60dea05a17e94cf9b57d4d3e66a2a8540a9316e"
     },
     "p2kbPasm2PrRegisters": {
       "path": "deliverables/ai/P2/language/pasm2/registers/pr-registers.yaml",
@@ -14773,8 +15128,8 @@
     },
     "p2kbPasm2Rep": {
       "path": "deliverables/ai/P2/language/pasm2/rep.yaml",
-      "mtime": 1791615115,
-      "sha256": "5e83fbdec755b8ffa384e10d21e62043d31d61e9782979219eea1cd96eddcfd5"
+      "mtime": 1791914114,
+      "sha256": "a8108ec792031fabd327d7e6dd0784ff76982e6b1c0bcb2d9dc2bc5c081fb11c"
     },
     "p2kbPasm2Res": {
       "path": "deliverables/ai/P2/language/pasm2/res.yaml",
@@ -14808,13 +15163,13 @@
     },
     "p2kbPasm2Reta": {
       "path": "deliverables/ai/P2/language/pasm2/reta.yaml",
-      "mtime": 1791615115,
-      "sha256": "beb5fad6c528b45358e9f32b26341083bf940e9f1040c850b7074678fabcc732"
+      "mtime": 1793855470,
+      "sha256": "171b19d31d4120b280455ef1312490e8e4f9046493b7686adb7f0b0a7817092d"
     },
     "p2kbPasm2Retb": {
       "path": "deliverables/ai/P2/language/pasm2/retb.yaml",
-      "mtime": 1791615115,
-      "sha256": "fff1239b4e8babe3f432814da515751eb6a04e6516b551d5f176e39648670fe9"
+      "mtime": 1793855470,
+      "sha256": "051cbd9590d02a06798ff55318722db14b524196f150aa279c2f74b895b97811"
     },
     "p2kbPasm2Reti0": {
       "path": "deliverables/ai/P2/language/pasm2/reti0.yaml",
@@ -14843,28 +15198,28 @@
     },
     "p2kbPasm2Rfbyte": {
       "path": "deliverables/ai/P2/language/pasm2/rfbyte.yaml",
-      "mtime": 1791615115,
-      "sha256": "ad63bc93a497ebab7caca1b56e52e3b782ba4538cb11b730623c84ce5cd92477"
+      "mtime": 1793854709,
+      "sha256": "14fc62a7440e6408fd9696ceb7d29be682dfad4d2f311a185a567036fa1fc1f5"
     },
     "p2kbPasm2Rflong": {
       "path": "deliverables/ai/P2/language/pasm2/rflong.yaml",
-      "mtime": 1791615115,
-      "sha256": "e739a627f1f7c673998a2a7995f0be8af11d0feab20d28cbea91317a7e628f0d"
+      "mtime": 1793854709,
+      "sha256": "4fd16df1376cf0154de9cc8af06af5c7acab74d82a82c4ba59c7d04baf236f92"
     },
     "p2kbPasm2Rfvar": {
       "path": "deliverables/ai/P2/language/pasm2/rfvar.yaml",
-      "mtime": 1791615115,
-      "sha256": "10411763388c9fd6d62b56e7b3e21f06ac5181a5a758a5f6e8f0e291598f4a7a"
+      "mtime": 1793854709,
+      "sha256": "a69be241a5865901870d921dc9561345c283358073aaf41525894e19f50429b2"
     },
     "p2kbPasm2Rfvars": {
       "path": "deliverables/ai/P2/language/pasm2/rfvars.yaml",
-      "mtime": 1791615115,
-      "sha256": "62b76702f0d47572eb8eace20aa1428881791ddd1bca26945a3a9d60e2176766"
+      "mtime": 1793854709,
+      "sha256": "ce69da392a282d559ec3684e91403fc9b02d09e6f5ea4a2a8d53e5d6ef16d926"
     },
     "p2kbPasm2Rfword": {
       "path": "deliverables/ai/P2/language/pasm2/rfword.yaml",
-      "mtime": 1791615115,
-      "sha256": "0b1d8fcfe139ff2bf8260f54685d8713e8a41ae4bb6d792de9c65897607989c0"
+      "mtime": 1793854709,
+      "sha256": "1f4319d191b50692ad698ad26d8497c20fadff783bc1cf4d2dffc35e2fec1268"
     },
     "p2kbPasm2Rgbexp": {
       "path": "deliverables/ai/P2/language/pasm2/rgbexp.yaml",
@@ -15143,8 +15498,8 @@
     },
     "p2kbPasm2Sumc": {
       "path": "deliverables/ai/P2/language/pasm2/sumc.yaml",
-      "mtime": 1791615115,
-      "sha256": "1724b3b35d0da541fd5b353ff5530fb603d0d82d0bfa2f24c4c4d9b7bc23288a"
+      "mtime": 1793859879,
+      "sha256": "420286ef4e5e3e4aaef647d743d65c9255379cb0ddae490a26e36297643fdd9e"
     },
     "p2kbPasm2Sumnc": {
       "path": "deliverables/ai/P2/language/pasm2/sumnc.yaml",
@@ -15158,8 +15513,8 @@
     },
     "p2kbPasm2Sumz": {
       "path": "deliverables/ai/P2/language/pasm2/sumz.yaml",
-      "mtime": 1791615115,
-      "sha256": "f1ad8f344e40e52b0549b0aafafabc0b02e47e7d646f52544377737bec3551cf"
+      "mtime": 1793859879,
+      "sha256": "da47e19ff29736e1a7a345149ecd328a5984c70662d20ced9f297344d81ce3ae"
     },
     "p2kbPasm2Test": {
       "path": "deliverables/ai/P2/language/pasm2/test.yaml",
@@ -15168,8 +15523,8 @@
     },
     "p2kbPasm2Testb": {
       "path": "deliverables/ai/P2/language/pasm2/testb.yaml",
-      "mtime": 1791615115,
-      "sha256": "b52a7c28342963d545661f2fa4cf8dec93c4aff744584d1e975d15c9470259e8"
+      "mtime": 1793855836,
+      "sha256": "2048647d1087d2a583e5950b63f17f8843226eaf8ed78fb85330a19a2de55f84"
     },
     "p2kbPasm2Testbn": {
       "path": "deliverables/ai/P2/language/pasm2/testbn.yaml",
@@ -15183,13 +15538,13 @@
     },
     "p2kbPasm2Testp": {
       "path": "deliverables/ai/P2/language/pasm2/testp.yaml",
-      "mtime": 1791615115,
-      "sha256": "581bb947735cb36c0443e509ec58675d22a02ff13f53b3195e7098a427803ed0"
+      "mtime": 1791914114,
+      "sha256": "262af90c422ddbbe55cf3631ea1319d39e6a993848c2dc97a2132df049a0c097"
     },
     "p2kbPasm2Testpn": {
       "path": "deliverables/ai/P2/language/pasm2/testpn.yaml",
-      "mtime": 1791615115,
-      "sha256": "da43c702958626b99ed484148929100ff740ecc933f50da513556c76d180e645"
+      "mtime": 1791914114,
+      "sha256": "4ff34874aa6e70a7eba01f3714e03b1b5c731f426365d572ebc67d1084054190"
     },
     "p2kbPasm2Tjf": {
       "path": "deliverables/ai/P2/language/pasm2/tjf.yaml",
@@ -15328,18 +15683,18 @@
     },
     "p2kbPasm2Wfbyte": {
       "path": "deliverables/ai/P2/language/pasm2/wfbyte.yaml",
-      "mtime": 1791615115,
-      "sha256": "9d8b7824cdd52ccf9a2c5ddf8e3b97355d5ace0c0b2f71c81bb0d2ea5c75c1fe"
+      "mtime": 1793854709,
+      "sha256": "ce0dab85cccd3b04d70994918c8861547b7948c6b6fc2d0a74475b1bcc149004"
     },
     "p2kbPasm2Wflong": {
       "path": "deliverables/ai/P2/language/pasm2/wflong.yaml",
-      "mtime": 1791615115,
-      "sha256": "bff413769782e1f6c270954e16430f7a554178accaf80cc5e91f2c2c518d2e98"
+      "mtime": 1793854709,
+      "sha256": "696b319288d2e5a1c7fdb398e40ba309c61b1af9b90a215974d9654ee61c10f4"
     },
     "p2kbPasm2Wfword": {
       "path": "deliverables/ai/P2/language/pasm2/wfword.yaml",
-      "mtime": 1791615115,
-      "sha256": "1e1fe559d8c1b435eae64faed1bbfecbc2d83ec1751a02fef962516185b1921e"
+      "mtime": 1793854709,
+      "sha256": "c1256f06568f648bdb8bb22b6e02cd534f62240bf38a06861f26c9562feecf91"
     },
     "p2kbPasm2Wmlong": {
       "path": "deliverables/ai/P2/language/pasm2/wmlong.yaml",
@@ -15348,8 +15703,8 @@
     },
     "p2kbPasm2Word": {
       "path": "deliverables/ai/P2/language/pasm2/word.yaml",
-      "mtime": 1791689246,
-      "sha256": "9e77e45dbc20da38a16f383bdd8fe097d34bda62ffe1020907ece6ae54795468"
+      "mtime": 1793854709,
+      "sha256": "32f7e9b9c517c62dba550906567f09f9f43a91aab075d821496c6e32cd9c27cc"
     },
     "p2kbPasm2Wordfit": {
       "path": "deliverables/ai/P2/language/pasm2/wordfit.yaml",
@@ -15373,13 +15728,13 @@
     },
     "p2kbPasm2Wrlong": {
       "path": "deliverables/ai/P2/language/pasm2/wrlong.yaml",
-      "mtime": 1791689246,
-      "sha256": "fd6486197d63f5cf8ddcc06cebd53acd3b5c6ea7cd4580ca0f4af7de86b648b8"
+      "mtime": 1793855470,
+      "sha256": "0ddb212a285a24b3f936c8093853f1c1833e9916965ca40314e73822e7d5862e"
     },
     "p2kbPasm2Wrlut": {
       "path": "deliverables/ai/P2/language/pasm2/wrlut.yaml",
-      "mtime": 1791672000,
-      "sha256": "826c5cca4043da2a0bbcf788af9883da01ed42d5c3b397062426dd0baebbdbe6"
+      "mtime": 1793855470,
+      "sha256": "3ba29dd692be584a16b7e9c8bd7ab4ff52dd45bee1ba6c70354ebedf9a99f2d8"
     },
     "p2kbPasm2Wrnc": {
       "path": "deliverables/ai/P2/language/pasm2/wrnc.yaml",
@@ -15398,8 +15753,8 @@
     },
     "p2kbPasm2Wrword": {
       "path": "deliverables/ai/P2/language/pasm2/wrword.yaml",
-      "mtime": 1791689246,
-      "sha256": "299bd2f1e16fd666ce7dd81f1bcdeeac5a052b5cba57e91ba0aabad6453ee140"
+      "mtime": 1793855470,
+      "sha256": "2fd123d5115b3fe277cb0cc53ad3375f0ff9c1dfe71b04d5d304b155f9b6600a"
     },
     "p2kbPasm2Wrz": {
       "path": "deliverables/ai/P2/language/pasm2/wrz.yaml",
@@ -15423,8 +15778,8 @@
     },
     "p2kbPasm2Xinit": {
       "path": "deliverables/ai/P2/language/pasm2/xinit.yaml",
-      "mtime": 1791615115,
-      "sha256": "cc195d131055ec0c09e85b32d6227668e76632eb774ed1e578c4ff4edff3c8a1"
+      "mtime": 1793859879,
+      "sha256": "ff4493a4aea5dd6ae79dd2ca9e390d462902aed3c71d857f3761a10fbca1c39e"
     },
     "p2kbPasm2Xor": {
       "path": "deliverables/ai/P2/language/pasm2/xor.yaml",
@@ -15463,8 +15818,8 @@
     },
     "p2kbSpin2AsmByte": {
       "path": "deliverables/ai/P2/language/spin2/assembly-directives/byte.yaml",
-      "mtime": 1791615115,
-      "sha256": "4a7d819c30ac4c9d0f190ffd94d1f76bc5d01c3ec9e1b04fb0f05153cd5eb322"
+      "mtime": 1793854709,
+      "sha256": "a04a9df198d0387d8c15d4929016e025ac4c6643d98a2d4354142b9f883f2758"
     },
     "p2kbSpin2AsmDitto": {
       "path": "deliverables/ai/P2/language/spin2/assembly-directives/ditto.yaml",
@@ -15483,8 +15838,8 @@
     },
     "p2kbSpin2AsmLong": {
       "path": "deliverables/ai/P2/language/spin2/assembly-directives/long.yaml",
-      "mtime": 1791615115,
-      "sha256": "efa79a99edff599e5042bee34a23aa4a774ce4cb4a65f3e222745a35ec43e6fd"
+      "mtime": 1793854709,
+      "sha256": "613a8eb2be5fbfbe9043891a1b52e1e65d2bbab90ec7b22bf752f386365dc633"
     },
     "p2kbSpin2AsmOrg": {
       "path": "deliverables/ai/P2/language/spin2/assembly-directives/org.yaml",
@@ -15508,8 +15863,8 @@
     },
     "p2kbSpin2AsmWord": {
       "path": "deliverables/ai/P2/language/spin2/assembly-directives/word.yaml",
-      "mtime": 1791615115,
-      "sha256": "d9b204682585d197bc7c888d316e1d138d5302b67eed79e179e3cbc946c5da8d"
+      "mtime": 1793854709,
+      "sha256": "8bced321b27fd16368a766712bf0f10d20b08fc4c46c530d41d5e659eae7e356"
     },
     "p2kbSpin2Addressing": {
       "path": "deliverables/ai/P2/language/spin2/concepts/addressing.yaml",
@@ -15543,18 +15898,18 @@
     },
     "p2kbSpin2ObjectImageDedup": {
       "path": "deliverables/ai/P2/language/spin2/concepts/object-image-dedup.yaml",
-      "mtime": 1791746602,
-      "sha256": "e5a1eadc1bcfbec0b5b8447bc02f7b479cab4e95cadd50c2d5a416b70983b98a"
+      "mtime": 1793855470,
+      "sha256": "7d272cef3adffc287fe28425f8589c63f59f17e40164f6ae9f944f35014b8148"
     },
     "p2kbSpin2ObjectArchetypes": {
       "path": "deliverables/ai/P2/language/spin2/concepts/object_archetypes.yaml",
-      "mtime": 1791591175,
-      "sha256": "8ffa37e6ad4a6be4369c5c41bdb8eed00df6376b1762e7f85f8f79bcc81ddc20"
+      "mtime": 1791914114,
+      "sha256": "07f01b10b838c373e0d57f43cdc22289cece9cb8d1b1a2502a8e8f3edfccfb65"
     },
     "p2kbSpin2Operators": {
       "path": "deliverables/ai/P2/language/spin2/concepts/operators.yaml",
-      "mtime": 1791689246,
-      "sha256": "10a2ced134bf07636213a99082a3cea961c3693474143bd368ff18a6a7bff04e"
+      "mtime": 1791914114,
+      "sha256": "ce4de47b71eb7af970f64b1119845038b04dbb632aea37ee014c2a02401f249d"
     },
     "p2kbSpin2RandomGeneration": {
       "path": "deliverables/ai/P2/language/spin2/concepts/random_generation.yaml",
@@ -15568,7 +15923,7 @@
     },
     "p2kbSpin2StructBitfields": {
       "path": "deliverables/ai/P2/language/spin2/concepts/struct-bitfields.yaml",
-      "mtime": 1777749196,
+      "mtime": 1793855836,
       "sha256": "60d9b5c3b59408ad6f5103c1229687595a063bd52e51ab231e4c800212e5b17f"
     },
     "p2kbSpin2TableLookup": {
@@ -15593,8 +15948,8 @@
     },
     "p2kbSpin2DebugMask": {
       "path": "deliverables/ai/P2/language/spin2/constants/debug-mask.yaml",
-      "mtime": 1791602515,
-      "sha256": "5117922e029dd7cf67a67d20482175d8ac7da0b739ec96391d9aab089ad65195"
+      "mtime": 1793855470,
+      "sha256": "b61bdba00c44dbc31fef1cd211f00b6f6af14b02800ea1df76e664da288d2672"
     },
     "p2kbSpin2Newtask": {
       "path": "deliverables/ai/P2/language/spin2/constants/newtask.yaml",
@@ -15603,8 +15958,8 @@
     },
     "p2kbSpin2SpecialConfigurationSymbols": {
       "path": "deliverables/ai/P2/language/spin2/constants/special-configuration-symbols.yaml",
-      "mtime": 1791615115,
-      "sha256": "f56c0c7bc4e07d74fd9b123abf1e9ae55d637bcbc8db9322a96c788dfeec1a94"
+      "mtime": 1792106194,
+      "sha256": "0a761242c7f42d3bb0aba3e1ca27521371978d5688a6c8fae34aafcb046357f6"
     },
     "p2kbSpin2Thistask": {
       "path": "deliverables/ai/P2/language/spin2/constants/thistask.yaml",
@@ -15628,7 +15983,7 @@
     },
     "p2kbSpin2EscapeStrings": {
       "path": "deliverables/ai/P2/language/spin2/constructs/escape-strings.yaml",
-      "mtime": 1791603291,
+      "mtime": 1793855836,
       "sha256": "8203d0686de5d3a26848bbba532b0f2407beaa9e192d9339c00326fcc83445e2"
     },
     "p2kbSpin2IfElseifElse": {
@@ -15638,8 +15993,8 @@
     },
     "p2kbSpin2InlinePasm": {
       "path": "deliverables/ai/P2/language/spin2/constructs/inline_pasm.yaml",
-      "mtime": 1791752670,
-      "sha256": "6873125568e879ebfaf551fe9b595b3186ea1a412a86d10b33b1fdf08911b8c7"
+      "mtime": 1791914114,
+      "sha256": "fcd9afc72eebdb0d364553c9577462b33e27cec8d11eb9fae8222b9c4fa8657f"
     },
     "p2kbSpin2MethodDefinition": {
       "path": "deliverables/ai/P2/language/spin2/constructs/method_definition.yaml",
@@ -15658,7 +16013,7 @@
     },
     "p2kbSpin2RegisterConstants": {
       "path": "deliverables/ai/P2/language/spin2/constructs/register-constants.yaml",
-      "mtime": 1791602515,
+      "mtime": 1793855836,
       "sha256": "dc70d68b10828d71ce7020f02f5ada952ecb5608aa9b3a3ac09871ceb696e69b"
     },
     "p2kbSpin2Repeat": {
@@ -15703,8 +16058,8 @@
     },
     "p2kbSpin2DbgDebugFormattersArrays": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-arrays.yaml",
-      "mtime": 1791615115,
-      "sha256": "af654991f0cbd9c3527543ef1a1164b3e6ca497e70b6847b7a2ddaea2d2f5b34"
+      "mtime": 1791848830,
+      "sha256": "02b4810c5717871b73721d5f0bf40b5ce2f67b14efea94a71f810e5f27c6734b"
     },
     "p2kbSpin2DbgDebugFormattersBinary": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-binary.yaml",
@@ -15713,8 +16068,8 @@
     },
     "p2kbSpin2DbgDebugFormattersComplete": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-complete.yaml",
-      "mtime": 1791065413,
-      "sha256": "e57dfa98fd5ea9fb907a575ff8d3944ac6603429674102c2335c022047b15e00"
+      "mtime": 1791914114,
+      "sha256": "6527ac46d5c1c192f18bf23e6f435338f3c7e86e84f5dcfd6fe77fae242517b5"
     },
     "p2kbSpin2DbgDebugFormattersDecimal": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-formatters-decimal.yaml",
@@ -15738,8 +16093,8 @@
     },
     "p2kbSpin2DbgDebugStrategyGuide": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug-strategy-guide.yaml",
-      "mtime": 1791615115,
-      "sha256": "173224240454c50c89af8a7829d01134623f1904b59d30918954e351cbf9bc31"
+      "mtime": 1793859879,
+      "sha256": "ad75aa85fad9e7fa8306637cb35763a752729c04787f68857e4ed6048c1f9198"
     },
     "p2kbSpin2DbgDebug": {
       "path": "deliverables/ai/P2/language/spin2/debug-commands/debug.yaml",
@@ -15873,8 +16228,8 @@
     },
     "p2kbSpin2KwDAT": {
       "path": "deliverables/ai/P2/language/spin2/keywords/DAT.yaml",
-      "mtime": 1790448982,
-      "sha256": "0163b0ebaa2ad58e253de8c4cbbb2ef9100955f0d7d7506e870152b1f2398be6"
+      "mtime": 1793854709,
+      "sha256": "6850093d7dd719653abd33535708f7d9dc0599e903395c22bdc0d14bf58b9819"
     },
     "p2kbSpin2KwELSE": {
       "path": "deliverables/ai/P2/language/spin2/keywords/ELSE.yaml",
@@ -15988,7 +16343,7 @@
     },
     "p2kbSpin2KwSTRUCT": {
       "path": "deliverables/ai/P2/language/spin2/keywords/STRUCT.yaml",
-      "mtime": 1791591175,
+      "mtime": 1793855836,
       "sha256": "c101cb72ed5540565fc74826def4a2ce6fe15065f7a001a6c13633eb750a151f"
     },
     "p2kbSpin2KwTO": {
@@ -16068,8 +16423,8 @@
     },
     "p2kbSpin2Clkset": {
       "path": "deliverables/ai/P2/language/spin2/methods/clkset.yaml",
-      "mtime": 1791588042,
-      "sha256": "0f1ac62a95a0b01252229b9be42b7034829682b5078c0af25fd559191dafe886"
+      "mtime": 1791853338,
+      "sha256": "989240867fb26144d641e0f2d8f8605e3c52d73db226d3d1f9588ee227f3f253"
     },
     "p2kbSpin2Cogatn": {
       "path": "deliverables/ai/P2/language/spin2/methods/cogatn.yaml",
@@ -16093,13 +16448,13 @@
     },
     "p2kbSpin2Cogspin": {
       "path": "deliverables/ai/P2/language/spin2/methods/cogspin.yaml",
-      "mtime": 1791752670,
-      "sha256": "cb09e35998556c6109daf609f14803db8a7afb764f02840ed092ddac02938f87"
+      "mtime": 1793859879,
+      "sha256": "0c8a03a4485d3a0a1b796373b01e43fe6e2946e2ea04b400a8b4a7eae50dde5f"
     },
     "p2kbSpin2Cogstop": {
       "path": "deliverables/ai/P2/language/spin2/methods/cogstop.yaml",
-      "mtime": 1791752670,
-      "sha256": "b3842be34be2bf752889396d9ec7c3d21ab5862ce9c8c3cb34d24759c2c30fda"
+      "mtime": 1791914114,
+      "sha256": "0c1807d42a7a82b5f5efb809cfded23c75283f09b2021e6e9ce7b18cb26c186c"
     },
     "p2kbSpin2Endianl": {
       "path": "deliverables/ai/P2/language/spin2/methods/endianl.yaml",
@@ -16173,8 +16528,8 @@
     },
     "p2kbSpin2Locknew": {
       "path": "deliverables/ai/P2/language/spin2/methods/locknew.yaml",
-      "mtime": 1791615115,
-      "sha256": "39a606c35983bbcff12bfe20ad5ac7c775818f4b1a79bab45c7770e3b2376228"
+      "mtime": 1791914114,
+      "sha256": "e9c21d20fa02b480bbda416a0b385daf682babc92002fa71020493d7b980a97a"
     },
     "p2kbSpin2Lockrel": {
       "path": "deliverables/ai/P2/language/spin2/methods/lockrel.yaml",
@@ -16258,7 +16613,7 @@
     },
     "p2kbSpin2Movbyts": {
       "path": "deliverables/ai/P2/language/spin2/methods/movbyts.yaml",
-      "mtime": 1791752670,
+      "mtime": 1793855836,
       "sha256": "84eed4837507bb6e9f0c1442de633cc865f531d7e95bf60564c706f4c15161a9"
     },
     "p2kbSpin2Muldiv64": {
@@ -16293,13 +16648,13 @@
     },
     "p2kbSpin2Pinlow": {
       "path": "deliverables/ai/P2/language/spin2/methods/pinlow.yaml",
-      "mtime": 1791615115,
-      "sha256": "1e7e80344bc0b9491f803dac08bd28d1b30d4fe9b08e12d18f72bd073d782ddb"
+      "mtime": 1791914114,
+      "sha256": "9f851d47feeae33ca2d88acc44f88506458edb632d8fa6ff68c115e58cc93384"
     },
     "p2kbSpin2Pinread": {
       "path": "deliverables/ai/P2/language/spin2/methods/pinread.yaml",
-      "mtime": 1791615115,
-      "sha256": "91ee94ba167e6e528dd293ed357beb9e2724fcb04fd24be2c2d5e779d0c439a3"
+      "mtime": 1791914114,
+      "sha256": "7d2ddefde6cdb22a91ed0dbd94e9c2f3ec2fb485b5c9c5cb704cc5d21d630433"
     },
     "p2kbSpin2Pinstart": {
       "path": "deliverables/ai/P2/language/spin2/methods/pinstart.yaml",
@@ -16473,18 +16828,18 @@
     },
     "p2kbSpin2Waitct": {
       "path": "deliverables/ai/P2/language/spin2/methods/waitct.yaml",
-      "mtime": 1791752670,
-      "sha256": "004375cd84ca944719d7ea25bc879998d5ebaa4def031606d891b38fd5b3af5f"
+      "mtime": 1793854709,
+      "sha256": "c850d881cff8bff5a415d035b6e18aa11c1fba71fb91c672922c71b29207751f"
     },
     "p2kbSpin2Waitms": {
       "path": "deliverables/ai/P2/language/spin2/methods/waitms.yaml",
-      "mtime": 1791615115,
-      "sha256": "93aa180ab6b395aa24ab6ee61a8355dad6f977983c1a0de637818aade001a46d"
+      "mtime": 1793854709,
+      "sha256": "1a8d9060a24ae90b7edcf87b8e19eab455703cb502b8080c61df39e990f33efe"
     },
     "p2kbSpin2Waitus": {
       "path": "deliverables/ai/P2/language/spin2/methods/waitus.yaml",
-      "mtime": 1791615115,
-      "sha256": "0db3c212aedb2834aca61ca5efa2c8fb958eeccf9401d4aa1e4b5e9a23f25350"
+      "mtime": 1793854709,
+      "sha256": "8e5701d65153586faa4225c56ded47f0ba3f2a11dc7d7ef3330094f111728bab"
     },
     "p2kbSpin2Word": {
       "path": "deliverables/ai/P2/language/spin2/methods/word.yaml",
@@ -16938,8 +17293,8 @@
     },
     "p2kbSpin2OpPrecedence": {
       "path": "deliverables/ai/P2/language/spin2/operators/precedence.yaml",
-      "mtime": 1791752670,
-      "sha256": "66c3b0f9ed74e97bc8e473f161a7f2d14689f096169f58fffd70d95cf5aa289e"
+      "mtime": 1791914114,
+      "sha256": "84fc615d8e40e2eb2217fc1113d1b8e90591c80594f4986bec21e49b5dbe92fc"
     },
     "p2kbSpin2OpTypedPointers": {
       "path": "deliverables/ai/P2/language/spin2/operators/typed-pointers.yaml",
@@ -17068,8 +17423,8 @@
     },
     "p2kbSpin2Spin2CogManagement": {
       "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_cog_management.yaml",
-      "mtime": 1791746602,
-      "sha256": "ac08379c97cb16d00d3512a2353784782f6d325be4d79c4d2f7337ea5be9fc72"
+      "mtime": 1792106194,
+      "sha256": "648a0cae53ab15f086690ef402fa3e1d5c9ea38d8371b0d2667586624e10e5de"
     },
     "p2kbSpin2Spin2CooperativeTasking": {
       "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_cooperative_tasking.yaml",
@@ -17138,8 +17493,8 @@
     },
     "p2kbSpin2Spin2SharedMemory": {
       "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_shared_memory.yaml",
-      "mtime": 1783379620,
-      "sha256": "ce287f773c6848121eca7eb46653006c8e02d7a908c1cb5e84ea626965a86214"
+      "mtime": 1791914114,
+      "sha256": "a04765a57030effcce2d85110a8ab25d24a8901109c535790c85c41332303921"
     },
     "p2kbSpin2Spin2SlewEasingEngine": {
       "path": "deliverables/ai/P2/language/spin2/patterns/implementation/spin2_slew_easing_engine.yaml",
@@ -17193,27 +17548,27 @@
     },
     "p2kbSpin2Define": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/define.yaml",
-      "mtime": 1791603291,
+      "mtime": 1793855836,
       "sha256": "6de44b209328584ac0a89d2454721cc88a7c0357be686c656fc69649d994793b"
     },
     "p2kbSpin2Else": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/else.yaml",
-      "mtime": 1791602515,
+      "mtime": 1793855836,
       "sha256": "895a0a18754fd18924acf59233cd60f6d8d85e2d85dd9edaa4a0414e6adffe55"
     },
     "p2kbSpin2Elseifdef": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/elseifdef.yaml",
-      "mtime": 1791602515,
+      "mtime": 1793855836,
       "sha256": "bce0e1cd6a492d67bdbe0381260732ee5fb5e03bf5dc40fb5e408bcf9c055bef"
     },
     "p2kbSpin2Elseifndef": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/elseifndef.yaml",
-      "mtime": 1791602515,
+      "mtime": 1793855836,
       "sha256": "8b9ad83589a63d6a19416a4311b548fd841a5898e376874dd8e476d176548373"
     },
     "p2kbSpin2Endif": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/endif.yaml",
-      "mtime": 1791602515,
+      "mtime": 1793855836,
       "sha256": "efbc13929705887f029705953af8a0961a031ff73713802d5603d65dff42fa74"
     },
     "p2kbSpin2Error": {
@@ -17223,17 +17578,17 @@
     },
     "p2kbSpin2ExternalSymbols": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/external-symbols.yaml",
-      "mtime": 1791603291,
-      "sha256": "c23a7d4e91f2e194d2d79468e393d453d54ebfb626c8de0f2b61037919f9c52e"
+      "mtime": 1793856345,
+      "sha256": "22f9c5836b84a0f07b2eef9229f87a31c454ccd35b9b44766c386cb033be6c70"
     },
     "p2kbSpin2Ifdef": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/ifdef.yaml",
-      "mtime": 1791602515,
+      "mtime": 1793855836,
       "sha256": "35b352ff888444c3952f754df34160e2bc55d0f65a79d44adbba57cc77499b80"
     },
     "p2kbSpin2Ifndef": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/ifndef.yaml",
-      "mtime": 1791602515,
+      "mtime": 1793855836,
       "sha256": "7baebcc4cac807ad844879017d70be8cee188550edea14211e06bdbcdb7eda1b"
     },
     "p2kbSpin2Include": {
@@ -17243,17 +17598,17 @@
     },
     "p2kbSpin2PragmaExportdef": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/pragma-exportdef.yaml",
-      "mtime": 1791595249,
-      "sha256": "e3189f0540efc0e98b3e7c02ab64f800080cb82d38769aae145633ee966b1aa7"
+      "mtime": 1791914114,
+      "sha256": "5d7177720fbedb0f62c87c2604069c04e960609f90a994e0d8fcef68b0051893"
     },
     "p2kbSpin2PreprocessorOverview": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/preprocessor-overview.yaml",
-      "mtime": 1791602515,
+      "mtime": 1793855836,
       "sha256": "8ea9bd50b20375ee2f3cdc771356816745dc7585644bff1a95fb8fc046afaabe"
     },
     "p2kbSpin2Undef": {
       "path": "deliverables/ai/P2/language/spin2/preprocessor/undef.yaml",
-      "mtime": 1791602515,
+      "mtime": 1793855836,
       "sha256": "a351e4471b4b9d215d6ab7ea9524774fbc575086175dc62f0823d68803821f65"
     },
     "p2kbSpin2Warn": {
@@ -17393,7 +17748,7 @@
     },
     "p2kbSpin2SymHash": {
       "path": "deliverables/ai/P2/language/spin2/special-symbols/hash.yaml",
-      "mtime": 1791615115,
+      "mtime": 1793855836,
       "sha256": "d9b30bef4fd0ca632395002ce00485f299caf916ab983362e1400cf7198ae022"
     },
     "p2kbSpin2SymPercent": {
@@ -17418,8 +17773,8 @@
     },
     "p2kbSpin2Spin2LanguageCompleteMap": {
       "path": "deliverables/ai/P2/language/spin2/spin2-language-complete-map.yaml",
-      "mtime": 1791615115,
-      "sha256": "13bc93e788d4d2cbb8e2325e0a7bfb2638f78adab213d4cc35cb9874d2c56480"
+      "mtime": 1793854709,
+      "sha256": "fed6a100dbff201f01ad94af1bc16d8afb3255593d70f04b1711e53128ad095c"
     },
     "p2kbSpin2Spin2LanguageSchema": {
       "path": "deliverables/ai/P2/language/spin2/spin2-language-schema.yaml",
@@ -17428,8 +17783,8 @@
     },
     "p2kbSpin2Debug": {
       "path": "deliverables/ai/P2/language/spin2/statements/debug.yaml",
-      "mtime": 1791752670,
-      "sha256": "7cb1fb08bd43d44315374dbc6d9ad07d6c3a71870fa5622eb09e6dd4d717830b"
+      "mtime": 1793855836,
+      "sha256": "1dcf752d8deb4d19171aea72d743aac1fb220025a4f1683343911d5ce00fbca5"
     },
     "p2kbSpin2Spin2BuiltinSymbolsComplete": {
       "path": "deliverables/ai/P2/language/spin2/symbols/spin2-builtin-symbols-complete.yaml",

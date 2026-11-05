@@ -1,7 +1,7 @@
 {
   "meta": {
-    "release_date": "2026-10-12",
-    "last_updated": "2026-10-12T23:22:29.884438",
+    "release_date": "2026-11-05",
+    "last_updated": "2026-11-05T08:46:56.614222",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-10-12T23:22:29.884438",
+    "extraction_date": "2026-11-05T08:46:56.614222",
     "categories": {
       "Math and Logic": {
         "count": 109,
@@ -257,7 +257,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "{WC/WZ/WCZ}   Sum +/-S into D by Z. If Z = 1 then D = D - S, else D = D + S. C = true sign of (D +/- S). *",
+            "description": "Sum +/-S into D by Z. If Z = 1 then D = D - S, else D = D + S. C = true sign of (D +/- S).",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -646,7 +646,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "{WC/WZ/WCZ}   Sum +/-S into D by C. If C = 1 then D = D - S, else D = D + S. C = true sign of (D +/- S). *",
+            "description": "Sum +/-S into D by C. If C = 1 then D = D - S, else D = D + S. C = true sign of (D +/- S).",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -3637,7 +3637,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "WC/WZ   Test bit S[4:0] of D, write to C/Z. C/Z = D[S[4:0]].",
+            "description": "Test bit S[4:0] of D, write to C/Z. C/Z = D[S[4:0]].",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -10521,7 +10521,7 @@
                 "valueType": 31
               }
             },
-            "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TESTP / TESTPN, p.136",
+            "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TESTP / TESTPN, p.136; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (in smart pin modes the IN bit serves as a flag)",
             "documentation_level": "comprehensive"
           },
           "DIRZ": {
@@ -11944,7 +11944,7 @@
                 "valueType": 31
               }
             },
-            "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TESTP / TESTPN, p.136; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), I/O PIN TIMING (TESTP/TESTPN read the state of the pin registered two clocks before the start of the instruction)",
+            "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TESTP / TESTPN, p.136; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), I/O PIN TIMING (TESTP/TESTPN read the state of the pin registered two clocks before the start of the instruction); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (in smart pin modes the IN bit serves as a flag)",
             "documentation_level": "comprehensive"
           }
         }
@@ -13948,7 +13948,7 @@
                 "clocks": "11...18 *"
               }
             ],
-            "description": "Return by reading hub long (L) at --PTRB. C = L[31], Z = L[30], PC = L[19:0].                                             11...18 1 / 20...40",
+            "description": "Return by reading hub long (L) at --PTRB. C = L[31], Z = L[30], PC = L[19:0].",
             "result": "",
             "timing": {
               "cycles": "11...18 (cog) / 20...40 (hub-exec)",
@@ -14144,7 +14144,7 @@
                 "clocks": "11...18 *"
               }
             ],
-            "description": "Return by reading hub long (L) at --PTRA. C = L[31], Z = L[30], PC = L[19:0].                                             11...18 1 / 20...40",
+            "description": "Return by reading hub long (L) at --PTRA. C = L[31], Z = L[30], PC = L[19:0].",
             "result": "",
             "timing": {
               "cycles": "11...18 (cog) / 20...40 (hub-exec)",
@@ -14997,7 +14997,7 @@
                 "clocks": "9...16"
               }
             ],
-            "description": "{WC/WZ/WCZ}     Read zero-extended byte from hub address {#}S/PTRx into D. C = MSB of byte. *",
+            "description": "Read zero-extended byte from hub address {#}S/PTRx into D. C = MSB of byte.",
             "result": "",
             "timing": {
               "cycles": 9,
@@ -15049,7 +15049,7 @@
                 "clocks": "9...16 *"
               }
             ],
-            "description": "{WC/WZ/WCZ}     Read zero-extended word from hub address {#}S/PTRx into D. C = MSB of word. *                                          9...16 1 / 9...26",
+            "description": "Read zero-extended word from hub address {#}S/PTRx into D. C = MSB of word.",
             "result": "",
             "timing": {
               "cycles": "9...16 (cog) / 9...26 (hub-exec)",
@@ -15153,7 +15153,7 @@
                 "clocks": "9...16 *"
               }
             ],
-            "description": "{WC/WZ/WCZ}                                                                                                                            9...16 1 / 9...26",
+            "description": "Read long from hub address {#}S/PTRx into D. C = MSB of long. Prior SETQ/SETQ2 invokes cog/LUT block transfer.",
             "result": "",
             "timing": {
               "cycles": "9...16 (cog) / 9...26 (hub-exec)",
@@ -15234,7 +15234,7 @@
                 "clocks": "3...10*"
               }
             ],
-            "description": "Write long in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.              3...10 1 / 3...20",
+            "description": "Write long in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.",
             "result": "",
             "timing": {
               "cycles": "3...10 (cog) / 3...20 (hub-exec)",
@@ -15294,7 +15294,7 @@
                 "clocks": "3...10*"
               }
             ],
-            "description": "Write word in D[15:0] to hub address {#}S/PTRx.                                                               3...10 1 / 3...20",
+            "description": "Write word in D[15:0] to hub address {#}S/PTRx.",
             "result": "",
             "timing": {
               "cycles": "3...10 (cog) / 3...20 (hub-exec)",
@@ -15831,7 +15831,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "{WC/WZ/WCZ}   Used after RDFAST. Read zero-extended 1..4-byte value from FIFO into D. C = 0. *                                       2 / FIFO IN USE",
+            "description": "Used after RDFAST. Read one variable-length unsigned value (1 to 4 bytes, up to 29 bits) from the FIFO into D, zero-extended. The FIFO pointer advances by the bytes the value occupied, so mixed-length values read back-to-back with no length bookkeeping. FVAR emits this format in DAT data.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -15845,7 +15845,14 @@
             "syntax_variants": [
               "RFVAR D"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/rfvars.yaml",
+              "language/pasm2/fvar.yaml",
+              "language/pasm2/rdfast.yaml",
+              "language/pasm2/getptr.yaml",
+              "language/pasm2/rfbyte.yaml",
+              "architecture/fifo.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -15892,6 +15899,8 @@
             "related": [
               "language/pasm2/wrfast.yaml",
               "language/pasm2/getptr.yaml",
+              "language/pasm2/rfvar.yaml",
+              "language/pasm2/rfvars.yaml",
               "language/pasm2/xinit.yaml",
               "language/pasm2/concepts/streamer_smartpin_control.yaml",
               "architecture/streamer/_index.yaml",
@@ -15931,21 +15940,27 @@
                 "clocks": "2"
               }
             ],
-            "description": "{WC/WZ/WCZ}   Used after RDFAST. Read sign-extended 1..4-byte value from FIFO into D. C = MSB of value. *                            2 / FIFO IN USE",
+            "description": "Used after RDFAST. Read one variable-length signed value (1 to 4 bytes) from the FIFO into D, sign-extended. The bytes are laid out exactly as for RFVAR; only the extension differs. FVARS emits this format in DAT data.",
             "result": "",
             "timing": {
               "cycles": 2,
               "type": "mode_dependent"
             },
             "flags_affected": {
-              "C": "Set to MSB of value",
+              "C": "Set to MSB of value, so C = 1 if the value is negative",
               "Z": "Set if result equals zero"
             },
             "parameters": [],
             "syntax_variants": [
               "RFVARS D"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/rfvar.yaml",
+              "language/pasm2/fvar.yaml",
+              "language/pasm2/rdfast.yaml",
+              "language/pasm2/getptr.yaml",
+              "architecture/fifo.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -15991,7 +16006,12 @@
             "syntax_variants": [
               "WFBYTE {#}D"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/wrfast.yaml",
+              "language/pasm2/wfword.yaml",
+              "language/pasm2/wflong.yaml",
+              "language/pasm2/getptr.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -16089,7 +16109,12 @@
             "syntax_variants": [
               "WFWORD {#}D"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/wrfast.yaml",
+              "language/pasm2/wfbyte.yaml",
+              "language/pasm2/wflong.yaml",
+              "language/pasm2/getptr.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -16135,7 +16160,12 @@
             "syntax_variants": [
               "WFLONG {#}D"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/wrfast.yaml",
+              "language/pasm2/wfbyte.yaml",
+              "language/pasm2/wfword.yaml",
+              "language/pasm2/getptr.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -16184,6 +16214,8 @@
             "related": [
               "language/pasm2/rdfast.yaml",
               "language/pasm2/wrfast.yaml",
+              "language/pasm2/rfvar.yaml",
+              "language/pasm2/rfvars.yaml",
               "code-examples/flash-loader-case-study.yaml"
             ],
             "compiler_info": {
@@ -16217,7 +16249,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "{WC/WZ/WCZ}   Used after RDFAST. Read zero-extended word from FIFO into D. C = MSB of word. *                                        2 / FIFO IN USE",
+            "description": "Used after RDFAST. Read zero-extended word from FIFO into D. C = MSB of word. Not usable in hub execution, where the FIFO is in use.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -16231,7 +16263,13 @@
             "syntax_variants": [
               "RFWORD D"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/rdfast.yaml",
+              "language/pasm2/rfbyte.yaml",
+              "language/pasm2/rflong.yaml",
+              "language/pasm2/rfvar.yaml",
+              "language/pasm2/getptr.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -16263,7 +16301,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "{WC/WZ/WCZ}   Used after RDFAST. Read long from FIFO into D. C = MSB of long. *                                                      2 / FIFO IN USE",
+            "description": "Used after RDFAST. Read long from FIFO into D. C = MSB of long. Not usable in hub execution, where the FIFO is in use.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -16277,7 +16315,13 @@
             "syntax_variants": [
               "RFLONG D"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/rdfast.yaml",
+              "language/pasm2/rfbyte.yaml",
+              "language/pasm2/rfword.yaml",
+              "language/pasm2/rfvar.yaml",
+              "language/pasm2/getptr.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -16309,7 +16353,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "{WC/WZ/WCZ}   Used after RDFAST. Read zero-extended byte from FIFO into D. C = MSB of byte. *                                        2 / FIFO IN USE",
+            "description": "Used after RDFAST. Read zero-extended byte from FIFO into D. C = MSB of byte. Not usable in hub execution, where the FIFO is in use.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -16323,7 +16367,13 @@
             "syntax_variants": [
               "RFBYTE D"
             ],
-            "related": [],
+            "related": [
+              "language/pasm2/rdfast.yaml",
+              "language/pasm2/rfword.yaml",
+              "language/pasm2/rflong.yaml",
+              "language/pasm2/rfvar.yaml",
+              "language/pasm2/getptr.yaml"
+            ],
             "compiler_info": {
               "syntax": "",
               "encoding": {
@@ -17136,7 +17186,7 @@
                 "clocks": "2"
               }
             ],
-            "description": "{WC}   Read smart pin S[5:0] result \"Z\" into D, acknowledge smart pin. C = modal result.",
+            "description": "Read smart pin S[5:0] result \"Z\" into D, acknowledge smart pin. C = modal result.",
             "result": "",
             "timing": {
               "cycles": 2,
@@ -17567,7 +17617,7 @@
                 "clocks": "3"
               }
             ],
-            "description": "{WC/WZ/WCZ}      Read data from LUT address {#}S/PTRx into D. C = MSB of data. *",
+            "description": "Read data from LUT address {#}S/PTRx into D. C = MSB of data.",
             "result": "",
             "timing": {
               "cycles": 3,
@@ -18487,7 +18537,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-10-12T23:22:29.884438",
+    "extraction_date": "2026-11-05T08:46:56.614222",
     "categories": {
       "keywords": {
         "count": 37,
@@ -19253,6 +19303,7 @@
               "Line base type persists across comma-separated values",
               "Inline type overrides apply to single value only \u2014 line base type reasserts after",
               "Supports BYTEFIT/WORDFIT for range-checked declarations",
+              "FVAR/FVARS after BYTE, WORD or LONG emit one value in the 1 to 4 byte form RFVAR/RFVARS read",
               "Can contain inline PASM2 assembly after ORG/ORGH directives",
               "DAT is class state (shared by instances of one image); VAR is instance state \u2014 see instance_model"
             ],
@@ -19266,6 +19317,7 @@
               "language/spin2/keywords/LONG.yaml",
               "language/spin2/keywords/BYTEFIT.yaml",
               "language/spin2/keywords/WORDFIT.yaml",
+              "language/pasm2/fvar.yaml",
               "language/spin2/assembly-directives/org.yaml",
               "language/spin2/assembly-directives/orgh.yaml",
               "language/spin2/concepts/type-propagation.yaml"
@@ -22714,8 +22766,8 @@
                 "name": "CogNum",
                 "type": "long",
                 "description": "Cog number to start:\n- 0-7: Start specific cog (will stop if running)\n- NEWCOG (%01_0000): Start any available cog -- the ONLY symbol the\n  COGSPIN table defines\n\nDO NOT pass -1. It is not a synonym for NEWCOG -- see not_an_input below.\n",
-                "source": "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbol for COGSPIN() Usage (NEWCOG = %01_0000 is the ONLY symbol listed; -1 is NEWTASK, TASKSPIN's symbol); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS (COGINIT D operand)",
-                "not_an_input": "-1 does NOT mean \"any available cog\". The interpreter's cogspin_ ORs in hubexec (#%10_0000) and passes the operand to COGINIT without masking, so -1 arrives as $FFFF_FFFF and the silicon decodes D[5:0] = %111111: D[4]=1 selects the free-cog search and D[0]=1 selects the PAIR form. cogspin(-1, worker(), @stk) therefore starts TWO cogs running worker(), both handed the SAME @stk -- two interpreters pushing call frames into one buffer with no arbitration -- and returns the even/lower cog's ID, so a later cogstop(id) stops only one of them. Confirmed with pnut-ts v1.55.4 (2026-08-30): the -1 form emits $A0 (bc_con_n1_14), the NEWCOG form emits $42 $10 (push byte 16) -- different constants, different binaries. -1 IS the failure RETURN value; see returns."
+                "source": "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbol for COGSPIN() Usage (NEWCOG = %01_0000 is the ONLY symbol listed; -1 is NEWTASK, TASKSPIN's symbol); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS (COGINIT D operand); the emitted bytes: Parallax Spin2 Interpreter v55 (2026.05.07), bc_con_n1_14 and bc_con_rfbyte",
+                "not_an_input": "-1 does NOT mean \"any available cog\". The interpreter's cogspin_ ORs in hubexec (#%10_0000) and passes the operand to COGINIT without masking, so -1 arrives as $FFFF_FFFF and the silicon decodes D[5:0] = %111111: D[4]=1 selects the free-cog search and D[0]=1 selects the PAIR form. cogspin(-1, worker(), @stk) therefore starts TWO cogs running worker(), both handed the SAME @stk -- two interpreters pushing call frames into one buffer with no arbitration -- and returns the even/lower cog's ID, so a later cogstop(id) stops only one of them. The -1 form emits $A0 (bc_con_n1_14), the NEWCOG form emits $42 $10 (push byte 16) -- different constants, different binaries. -1 IS the failure RETURN value; see returns."
               },
               {
                 "name": "Method({Parameters})",
@@ -22820,8 +22872,7 @@
               "source": "OBEX 4261 (P2 FLASH Filesystem), object description. A community object, not a Parallax publication."
             },
             "notes": [
-              "Method runs until it returns or cog is stopped",
-              "Stack overflow causes undefined behavior",
+              "Method runs until it returns or cog is stopped. When the top-level method returns, the effect is TASKSTOP(-1): the task ends, and with no other task remaining the cog is stopped and freed.",
               "Each cog has independent method call stack",
               "Parameters are passed by value",
               "Cannot share local variables between cogs"
@@ -22837,7 +22888,6 @@
             ],
             "warnings": [
               "Stack overflow is not detected",
-              "Insufficient stack causes crashes",
               "VAR variables need synchronization",
               "No automatic resource cleanup"
             ],
@@ -22899,6 +22949,10 @@
               "Maximum frequency depends on chip specs",
               "The compiler defines clkmode_ and clkfreq_ from the CON clock symbols; there are no other predefined clkmode_ constants"
             ],
+            "in_a_debug_build": {
+              "note": "CLKSET also keeps the debugger's stored clock frequency (P63, held in long-repository mode) current, so DEBUG output stays at the right baud rate after the change. DEBUG needs a clock of at least 10 MHz derived from a crystal or an external input, so the RCFAST and RCSLOW examples here cannot be used in a DEBUG build",
+              "source": "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (to use the debugger, at least a 10 MHz clock derived from a crystal or external input; DEBUG dynamic clock frequency adaptation) and version history v36 (CLKSET supports the P63 clock-frequency repository)"
+            },
             "timing": {
               "description": "Clock stabilization delay",
               "cycles": "~10 ms (20_000_000/100 clocks at RCFAST), only when the new clkmode selects the crystal or PLL (bit 1 of the mode set); otherwise no wait",
@@ -23140,6 +23194,7 @@
           },
           "COGSTOP": {
             "method": "COGSTOP",
+            "documentation_source": "Parallax Propeller 2 Spin2 Language Documentation v55, REPEAT ('if you don't want the cog to stop and cease driving its I/O's'); DEBUG (LOCK[15] is allocated by the debugger)",
             "category": "cog_management",
             "type": "method",
             "description": "Stop a specified cog immediately.\nThe cog stops executing and becomes available for reuse.\nNo effect if the cog is already stopped.\n",
@@ -23179,12 +23234,13 @@
                 "Cog becomes available for COGINIT (it returns to the pool of free cogs)"
               ],
               "pin_state_after_stop": [
-                "What a stopped cog leaves on the pins and in smart pin modes it configured: not documented; do not rely on it"
+                "A stopped cog stops driving its I/O pins",
+                "What a smart pin the cog configured does afterwards is not documented; do not rely on it"
               ],
               "resources": [
                 "A lock the cog HELD goes free. Ownership stops holding the moment the cog becomes inactive - for any cause, not only COGSTOP - so nothing has to release it",
                 "The lock's ALLOCATION does not go free. The number stays issued and LOCKNEW will not hand it out again. Only LOCKRET returns a lock number to the pool",
-                "So stopping a cog that holds locks LEAKS lock numbers: sixteen leaks and LOCKNEW returns nothing, ever, and the failure surfaces at some later LOCKNEW in unrelated code",
+                "So stopping a cog that holds locks LEAKS lock numbers: sixteen leaks (one fewer in a -d build, where the debugger allocates lock 15) and LOCKNEW returns nothing, ever, and the failure surfaces at some later LOCKNEW in unrelated code",
                 "Hub RAM is NOT affected",
                 "Other cogs continue running"
               ]
@@ -23360,7 +23416,7 @@
               }
             ],
             "underlying_implementation": {
-              "description": "NOT a WAITX. The interpreter reads the system counter, computes\n(CLKFREQ/1000) * milliseconds, ADDS the current counter to make an ABSOLUTE\nTARGET, and then waits the way WAITCT does - looping while the MSB of\n(CT - target) is set.\nThat distinction is the whole reason the $8000_0000-clock bound exists, and\nit is what the method does when you exceed it: see limitations.past_the_bound.\nAutomatically adjusts for system clock frequency.\n",
+              "description": "NOT a WAITX. The interpreter reads the system counter, computes\n(CLKFREQ/1000) * milliseconds, ADDS the current counter to make an ABSOLUTE\nTARGET, and then waits the way WAITCT does - looping while the MSB of\n(CT - target) is set.\nThe $8000_0000-clock bound: see limitations.past_the_bound.\nAutomatically adjusts for system clock frequency.\n",
               "related_pasm": "language/pasm2/waitx.yaml"
             },
             "common_uses": [
@@ -23388,11 +23444,10 @@
               "blocking": "The cog is stopped in the wait for its duration."
             },
             "limitations": {
-              "source": "Parallax Spin2 Documentation v55, Timing Methods (the WAITMS row)",
+              "source": "Parallax Spin2 Language Documentation v55, Timing Methods; Parallax Spin2 interpreter v55 (WAITMS/WAITUS compute an absolute target and wait in the WAITCT loop)",
               "hard_bound": "duration must not exceed $8000_0000 clocks",
               "ceiling_formula": "max Milliseconds = $8000_0000 / (CLKFREQ / 1000)",
-              "past_the_bound": "Exceeding the bound does NOT clamp, and does not wait a partial time - the call\nRETURNS IMMEDIATELY, with no error and nothing in the build to say so. Code that\nasks for 10 s at 350 MHz gets no wait at all and looks exactly like code that works.\nWHY, and it follows from the implementation above: the wait is against an absolute\nCOUNTER TARGET tested by the MSB rule, so a target more than 2^31 clocks ahead reads\nas ALREADY PASSED on the first comparison.\n",
-              "long_waits": "For a wait longer than the bound, loop on GETMS()/GETCT() against a deadline in\nslices of at most a second, rather than asking for the whole span at once.\n",
+              "past_the_bound": "The bound is $8000_0000 clocks. The call computes an absolute counter target from\nthe duration and waits for it as WAITCT does; what a call past the bound does is\nnot documented. Keep every call within the bound.\n",
               "resolution": "1 ms -- the argument's unit"
             },
             "anti_patterns": [
@@ -24635,7 +24690,7 @@
               }
             ],
             "underlying_implementation": {
-              "description": "NOT a WAITX. The interpreter reads the system counter, computes\n(CLKFREQ/1_000_000) * microseconds, ADDS the current counter to make an ABSOLUTE\nTARGET, and then waits the way WAITCT does - looping while the MSB of\n(CT - target) is set.\nThat distinction is the whole reason the $8000_0000-clock bound exists, and\nit is what the method does when you exceed it: see limitations.past_the_bound.\nAutomatically adjusts for system clock frequency.\nAt lower frequencies, resolution degrades.\n",
+              "description": "NOT a WAITX. The interpreter reads the system counter, computes\n(CLKFREQ/1_000_000) * microseconds, ADDS the current counter to make an ABSOLUTE\nTARGET, and then waits the way WAITCT does - looping while the MSB of\n(CT - target) is set.\nThe $8000_0000-clock bound: see limitations.past_the_bound.\nAutomatically adjusts for system clock frequency.\nAt lower frequencies, resolution degrades.\n",
               "related_pasm": "language/pasm2/waitx.yaml"
             },
             "common_uses": [
@@ -24663,11 +24718,10 @@
               "blocking": "The cog is stopped in the wait for its duration."
             },
             "limitations": {
-              "source": "Parallax Spin2 Documentation v55, Timing Methods (the WAITUS row)",
+              "source": "Parallax Spin2 Language Documentation v55, Timing Methods; Parallax Spin2 interpreter v55 (WAITMS/WAITUS compute an absolute target and wait in the WAITCT loop)",
               "hard_bound": "duration must not exceed $8000_0000 clocks",
               "ceiling_formula": "max Microseconds = $8000_0000 / (CLKFREQ / 1_000_000)",
-              "past_the_bound": "Exceeding the bound does NOT clamp, and does not wait a partial time - the call\nRETURNS IMMEDIATELY, with no error and nothing in the build to say so. Code that\nasks for 10 s at 350 MHz gets no wait at all and looks exactly like code that works.\nWHY, and it follows from the implementation above: the wait is against an absolute\nCOUNTER TARGET tested by the MSB rule, so a target more than 2^31 clocks ahead reads\nas ALREADY PASSED on the first comparison.\n",
-              "long_waits": "For a wait longer than the bound, loop on GETMS()/GETCT() against a deadline in\nslices of at most a second, rather than asking for the whole span at once.\n",
+              "past_the_bound": "The bound is $8000_0000 clocks. The call computes an absolute counter target from\nthe duration and waits for it as WAITCT does; what a call past the bound does is\nnot documented. Keep every call within the bound.\n",
               "resolution": "1 \u00b5s -- the argument's unit"
             },
             "clock_frequency_impact": {
@@ -26569,6 +26623,7 @@
             "method": "WAITCT",
             "type": "method",
             "description": "Wait until the System Counter has passed the specified tick value. The wait ends\nonce the MSB of (CT - Tick) is 0, not only on the single cycle where CT equals\nTick, so the comparison stays correct across counter wraparound. A target already\nin the recent past therefore returns AT ONCE, and a target more than 2^31 clocks\nahead reads as already passed and also returns at once.\n",
+            "source": "Parallax Propeller 2 Spin2 Language Documentation v55, Timing Methods (WAITCT: wait for the system counter to get past Tick); Parallax Spin2 Interpreter v55 (2026.05.07), WAITCT (loops while CMPM of CT against Tick sets C, the MSB of CT - Tick)",
             "category": "Timing Operations",
             "syntax": "WAITCT(Tick)",
             "parameters": [
@@ -26733,6 +26788,7 @@
           },
           "PINREAD": {
             "method": "PINREAD",
+            "documentation_source": "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (in smart pin modes the IN bit serves as a flag)",
             "aliases": [
               "PINR"
             ],
@@ -26802,7 +26858,7 @@
               "Works regardless of pin direction (input or output)",
               "When reading output pins, returns the driven state",
               "Does not affect pin configuration",
-              "Can read pins configured as smart pins",
+              "Can read pins configured as smart pins. In a smart-pin mode the IN bit serves as a flag. See architecture/smart_pins.yaml",
               "Atomic read - all pins sampled simultaneously",
               "No debouncing - returns instantaneous state"
             ],
@@ -28881,7 +28937,8 @@
             "see_also": [
               "language/pasm2/drvl.yaml",
               "language/spin2/methods/pinhigh.yaml",
-              "language/spin2/methods/pintoggle.yaml"
+              "language/spin2/methods/pintoggle.yaml",
+              "language/spin2/operators/op_ADDPINS.yaml"
             ]
           },
           "MULDIV64": {
@@ -29078,8 +29135,9 @@
             "parameters": [],
             "returns": {
               "type": "integer",
-              "description": "Lock ID (0..15) if successful, -1 if no locks available"
+              "description": "Lock ID (0..15) if successful; a negative value (< 0) if no lock is available"
             },
+            "source": "Spin2 v55 documentation (LOCKNEW: < 0 if no LOCK available; LOCK[15] is allocated by the debugger); Parallax Spin2 interpreter v55 (LOCKNEW)",
             "examples": [
               {
                 "description": "Allocate lock with error checking",
@@ -29087,7 +29145,7 @@
               },
               {
                 "description": "Complete lock lifecycle",
-                "code": "CON\n  NO_LOCK = -1\n\nVAR\n  long counter_lock\n  long shared_counter\n\nPUB init()\n  counter_lock := LOCKNEW()\n  shared_counter := 0\n\nPUB cleanup()\n  if counter_lock <> NO_LOCK\n    LOCKRET(counter_lock)\n    counter_lock := NO_LOCK\n"
+                "code": "CON\n  NO_LOCK = -1\n\nVAR\n  long counter_lock\n  long shared_counter\n\nPUB init()\n  counter_lock := LOCKNEW()\n  shared_counter := 0\n\nPUB cleanup()\n  if counter_lock >= 0\n    LOCKRET(counter_lock)\n    counter_lock := NO_LOCK\n"
               },
               {
                 "description": "Multiple locks for different resources",
@@ -29106,12 +29164,12 @@
                 "anti_pattern": "unchecked_allocation",
                 "severity": "runtime_error",
                 "description": "Not checking if lock allocation succeeded",
-                "wrong": "lock := LOCKNEW()\n' Assume lock is valid - may be -1!\nREPEAT UNTIL LOCKTRY(lock)  ' Undefined behavior with lock=-1\n",
+                "wrong": "lock := LOCKNEW()\n' Assume lock is valid - may be negative!\nREPEAT UNTIL LOCKTRY(lock)  ' Undefined behavior with a negative lock\n",
                 "correct": "lock := LOCKNEW()\nif lock < 0\n  ABORT  ' Or handle error appropriately\n"
               }
             ],
             "best_practices": [
-              "Always check return value for -1 (no locks available)",
+              "Check the return value with < 0 (a negative value means no lock is available)",
               "Store lock ID in VAR or DAT for later LOCKRET",
               "Return locks in cleanup/stop methods",
               "Document which lock protects which resource",
@@ -29120,7 +29178,8 @@
             "notes": [
               "P2 has 16 hardware locks (0-15)",
               "Returns next available lock ID",
-              "Returns -1 if all 16 locks in use",
+              "Returns a negative value (< 0) if no lock is available",
+              "A -d build allocates lock 15 for the debugger before the program runs, so LOCKNEW has one fewer lock available there",
               "Lock is allocated but NOT captured (call LOCKTRY to acquire)",
               "Must call LOCKRET when done to free lock for reuse",
               "Locks are shared across all 8 COGs",
@@ -29861,7 +29920,8 @@
               "WORD",
               "LONG",
               "ALIGNL",
-              "ALIGNW"
+              "ALIGNW",
+              "language/pasm2/fvar.yaml"
             ],
             "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Categorical Listing Of Propeller 2 Assembly Language (Directives), p.15; Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (DAT Symbols and Data)",
             "created_date": "2025-09-19",
@@ -29885,7 +29945,8 @@
               "BYTE",
               "LONG",
               "ALIGNW",
-              "ALIGNL"
+              "ALIGNL",
+              "language/pasm2/fvar.yaml"
             ],
             "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Categorical Listing Of Propeller 2 Assembly Language (Directives), p.15; Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (DAT Symbols and Data)",
             "created_date": "2025-09-19",
@@ -29921,7 +29982,8 @@
               "BYTE",
               "WORD",
               "ALIGNL",
-              "RES"
+              "RES",
+              "language/pasm2/fvar.yaml"
             ],
             "documentation_source": "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Categorical Listing Of Propeller 2 Assembly Language (Directives), p.15; Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (DAT Symbols and Data)",
             "created_date": "2025-09-19",
