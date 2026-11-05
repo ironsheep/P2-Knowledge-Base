@@ -110,7 +110,7 @@ predefined_symbols:
   - symbol: "__VERSION__"
     kind: "substituting"
     description: >-
-      The PNut-TS version, bare with no v prefix (e.g. 1.55.3), matching the version the
+      The PNut-TS version as dotted numbers, bare with no v prefix, matching the version the
       CLI banner reports. The substituted text is a bare dotted string and is NOT a legal
       Spin2 expression -- CON V = __VERSION__ fails at the use site. Use it inside a quoted
       string, or test it with #IFDEF.

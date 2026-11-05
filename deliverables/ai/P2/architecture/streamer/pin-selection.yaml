@@ -235,7 +235,7 @@ pin_base_encoding:
       vanishes and the transfer runs at P16..P23."
     neither_errors: "Both forms compile clean. No compiler can separate them, and no
       runtime check exists. Alignment is the reader's obligation."
-    source: "Command words above assembled with pnut-ts v1.55.3 from the exact
+    source: "Command words above assembled with pnut-ts from the exact
       expressions shown. The mechanism is hardware-verified in a different mode family
       by EF-065 (X_IMM_4X8_1DAC8 + 20<<17 drove P24..P31 against an aligned control
       that drove P16..P23) and, in a third, by EF-059 (adc_pin<<17 in
