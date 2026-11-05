@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-630`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-632`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -65,7 +65,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ---
 
-## Found by the RFVAR/RFVARS change «#440» (2026-11-05) — F-625 … F-629
+## Found by the RFVAR/RFVARS change «#440» (2026-11-05) — F-625 … F-631
 
 Source for all five: the PNut-TS project's `external-inputs/pnut_ts_facts/RFVAR-RFVARS-reference.md`, `XF-019`, `CP-027`. The manual findings are fixed after the KB release, by Stephen's order of 2026-11-05.
 
@@ -80,6 +80,12 @@ Line 272's table row gives "28-bit value" in both columns. The 4th byte carries 
 
 ### F-628 — XBYTE Guide §15.4 says "the assembler emits" a two-byte offset without saying how — `CONFIRMED` (found 2026-11-05, «#440»)
 `xbyte-body.md:1514`: the -64..+63 range is right; the sentence omits that `FVARS` is what makes the assembler size the value. Fix: name `FVARS`.
+
+### F-630 — P2AN007 says `LOCKNEW` returns `-1`; Spin2 v55 says "< 0" — `CONFIRMED` (found 2026-11-05, «#440», v1.25.0 impact survey)
+`P2AN007.md:277` ("returning `-1` if none are free") and `:424` ("returns `-1` when they're exhausted"). Spin2 v55 documents `LOCKNEW` as `< 0` if no lock is available (F-592); the YAML companion already says a negative value, so the note and its companion disagree. Fix: both sentences state a negative value and the `< 0` check, and any example code tests the same way.
+
+### F-631 — Assembly Reference Appendix E calls `DEBUG_DISABLE` global and states no runtime overhead — `CONFIRMED` (found 2026-11-05, «#440», v1.25.0 impact survey)
+`appendix-e-constants.md:474` ("skips all DEBUG statements entirely—no code is generated, no runtime overhead exists", "zero debug footprint") and `:557` ("Global debug disable"). Spin2 v55: a non-0 value "will disable all DEBUG statements in the file/object"; CP-026 proves the statements are not compiled. Fix: state the file/object scope and "not compiled", as `special-configuration-symbols.yaml` does.
 
 ### F-629 — the KB never described the `RFVAR`/`RFVARS` byte format and had no `FVAR`/`FVARS` entry — `PENDING-VALIDATION` (found 2026-11-05, «#440», from the PNut-TS project's request)
 > **Applied 2026-11-05:** `rfvar.yaml` and `rfvars.yaml` gained the format, ranges, preconditions, interpreter use, examples and `related:`; new `language/pasm2/fvar.yaml`; links added from `rdfast`, `getptr`, `fifo`, `DAT` and the `byte`/`word`/`long` directive pages. Same pass: table residue (`* 2 / FIFO IN USE`) removed from the five `RF*` descriptions, with the hub-exec fact restated on `rfbyte`/`rfword`/`rflong`; `related:` added to `rfbyte`, `rfword`, `rflong`, `wfbyte`, `wfword`, `wflong`. `waitct.yaml` gained the citation for its 2^31 statement (Spin2 Interpreter v55, WAITCT loop). The `long_waits` advice came out of `waitms.yaml` and `waitus.yaml`: no golden source states it, and its "at most a second" figure had no origin. Closes when the release serves it.
@@ -693,6 +699,29 @@ list, so the drift cannot recur.
 > — F-569. **Needs Stephen on Windows:** `fetch-kb-file.ps1` changed, so *PowerShell Filter Verified*
 > stays red until `verify-ps1-filter.ps1` is re-run and `PS1-VERIFIED.md` updated. *Fetch Script Parity*
 > reads the published index rule and turns green when the index is regenerated after the commit.
+
+## Impact survey — v1.25.0 (`release-yamls` §8, run 2026-11-05)
+
+The v1.25.0 delta (80 YAMLs) was intersected against every live document's declared sources, then each
+intersecting master was grepped for the statements the delta contradicts. Each row is a
+**re-audit-against-HEAD** signal for that document's next pass.
+
+| Document | What changed in the KB | Located in the manual |
+|---|---|---|
+| Assembly Reference | RFVAR/RFVARS format, FVAR/FVARS; DEBUG_DISABLE scope; REP and interrupts; TESTP in a smart-pin mode | F-625, F-626, **F-631** |
+| Interpreters & Emulators (XBYTE) | RFVAR/RFVARS format, FVAR/FVARS | F-627, F-628 |
+| P2AN007 | LOCKNEW's failure value is negative, not `-1` | `P2AN007.md:277`, `:424` — **F-630**; its companion already says it |
+| DeSilva Tutorial | PASM2 descriptions, REP and interrupts, TESTP | no contradicted statement found by the grep; to the audit |
+| I/O & Smart Pins | `%11101` IN and clocking, `%01110` as observer, smart-pin IN as a flag, Edge neighbour reach | no contradicted statement found by the grep; to the audit |
+| Streamer Guide | capture with the smart pin off; XINIT count not range-checked | no contradicted statement found by the grep; to the audit |
+| Getting Started | `hub`, boot pins, `spin2-getting-started` | no contradicted statement found by the grep; to the audit |
+| Architect's Guide | `resource-ownership`, `locks`, `hub` | no contradicted statement found by the grep; to the audit |
+| P2 Errata | `language/pasm2` is an authoring aid there | no contradicted statement found by the grep |
+| P2AN006 | `cogspin` stack wording | no contradicted statement found by the grep; to the audit |
+
+No declared source of the DEBUG Window Manual, Single-Step Debugger, PNut-Term-TS guide or P2AN001-P2AN005
+reaches a changed fact (the P2AN004 companion's change is a `source:` field; P2AN001's `rdpin` change is a
+description's table residue).
 
 ## Impact survey — v1.24.6 (`release-yamls` §8, run 2026-10-12)
 
