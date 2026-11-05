@@ -10,7 +10,7 @@
 > resumes your thread, and routes you into the right head. This README is what you
 > read to see the *whole board* and decide where to push next.
 >
-> _Last refreshed: 2026-10-12_
+> _Last refreshed: 2026-11-05_
 
 ## The heads — status & next action
 
@@ -18,8 +18,8 @@ Glance only — one line per head; each head's own dashboard (Dashboard column) 
 
 | Head | Dashboard | Status at a glance | Next actionable |
 |------|-----------|--------------------|-----------------|
-| **Ingestion** | [`ingestion/README.md`](ingestion/README.md) | **37 logical sources** (🏆 26) · gap ledger 6 OPEN + 4 PARTIAL · expert queue 6 open | **p2-debug-techniques** (registered 2026-10-12): claim ledger done (411 claims); next the XF grading «#429» and YAML batches «#430» |
-| **YAML (P2KB)** | [dashboard](operations/YAML-HEAD-DASHBOARD.md) · [register](operations/P2KB-CORRECTION-FINDINGS.md) | **v1.24.7** 2026-10-12 — app-note companions name the published ZIP; P2AN006 companion follows its v1.0.2 (F-575) | p2kb-mcp 1.5.1 OBEX summary (F-571: change request ready); F-569 compile records |
+| **Ingestion** | [`ingestion/README.md`](ingestion/README.md) | **37 logical sources** (🏆 26) · gap ledger 6 OPEN + 4 PARTIAL · expert queue 6 open | **p2-debug-techniques** (registered 2026-10-12): claim ledger done (411 claims), XF graded, YAML batches shipped in KB v1.25.0; next the debug toolbox «#435»..«#438» |
+| **YAML (P2KB)** | [dashboard](operations/YAML-HEAD-DASHBOARD.md) · [register](operations/P2KB-CORRECTION-FINDINGS.md) | **v1.25.0** 2026-11-05 — RFVAR/RFVARS format and a new FVAR/FVARS entry; debug-techniques batches and toolbox B0 | Manual fixes F-625..F-628; debug toolbox «#435»..«#438»; p2kb-mcp 1.5.1 OBEX summary (F-571: change request ready); F-569 compile records |
 | **Manual** | [`document-production/README.md`](document-production/README.md) · [roster](document-production/PUBLICATION-ROSTER.md) | **18 published** · 9 manuals · 7 app-notes · 1 guide · 1 tool-guide — latest **P2AN006 v1.0.2** (2026-10-12); **Assembly v3.1.11**, **deSilva v3.0.9**, **I/O & Smart Pins v1.0.11**, **XBYTE v1.1.1** (10-05) | «#378» manual updates all released (10-05); P2 Errata's design-reason paragraphs parked on its punch list until the amended P2 Documentation publishes; Parallax review |
 | **OBEX** | [`obex-integration/README.md`](obex-integration/README.md) | ✅ **130 P2 objects**, a pure catalog mirror (KB v1.24.4) · one-liners · MCP-served · listing re-scanned 2026-10-12, 0 new | p2kb-mcp 1.5.1 (F-571); next re-scan vs the **2026-10-12** baseline |
 | **Operations** | [`operations/README.md`](operations/README.md) | Cross-cutting process · owns register + lessons-learned | (infrastructure — supports the content heads) |

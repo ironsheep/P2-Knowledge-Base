@@ -20,6 +20,45 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.25.0] - 2026-11-05
+
+**The `RFVAR`/`RFVARS` byte format and a new `FVAR`/`FVARS` entry, with fuller DEBUG, lock, pin and boot pages.**
+
+### Added
+
+- **FVAR / FVARS**: new entry with valid ranges, per-item rules, worked bytes, Spin2 decoders and common traps
+- **RFVAR / RFVARS**: byte layout, signed and unsigned ranges, preconditions, what the Spin2 interpreter reads with them, and examples
+- **FIFO links**: `RDFAST`, `GETPTR`, `fifo`, `DAT`, `BYTE`, `WORD` and `LONG` link to these entries; the `RF*` and `WF*` instructions link their families
+- **Boot pins**: what a device wired to P58-P61 sees from the boot ROM at reset, by pin and by path
+- **Hub RAM**: `hub` lists what can write hub RAM, including streamer capture and the protected last 16KB
+- **Neighbour pins**: an edge counter as a passive observer of a nearby pin; `edge-standard-module` states the three-pin reach around P62 and P63
+- **Streamer capture**: capture a pin directly with its smart pin off, with no monitor pin
+- **XINIT**: the count is not range-checked; bits above 15 land in D[31:16], with no error or warning
+- **DEBUG output commands**: every underscore form is reachable by name, and `ZSTR_` and `LSTR_` are documented
+- **DEBUG output and lock 15**: when another cog can take over the serial pin, including `DLY` as the release point
+- **DEBUG clock rules**: `CLKSET` keeps the debugger's frequency current; `RCFAST` and `RCSLOW` cannot be used in a `-d` build
+- **Inline PASM**: the error for a variable past the first 16 longs, and the line that reports it
+- **Object instances**: `object-image-dedup` explains why an image count cannot show a split VAR ledger, and where to read it
+- **Name collisions**: `case-sensitivity` gives the compile errors for a parameter or local named like a cog register
+- **Comparison operators**: `precedence` states that `>=` and `<=` are the operators; `=>` and `=<` do not compile
+
+### Changed
+
+- **LOCKNEW**: allocates a lock number without taking the lock, and returns a negative value when none is available; check with `< 0`
+- **Lock 15**: the debugger allocates it in a `-d` build, leaving one fewer lock for `LOCKNEW`
+- **DEBUG_MASK and `debug[N]()`**: need no version directive; a parent can set a child's mask in `OBJ`; plain `debug()` compiles under any mask
+- **`{Spin2_v46}`**: `spin2-getting-started` lists `DEBUG(C_Z)` as its feature
+- **BOOL / BOOL_**: need `{Spin2_v45}` or later
+- **DEBUG_DISABLE**: a non-0 value disables the DEBUG statements in that file or object
+- **DEBUG_COGS**: enables the debug interrupt per cog, and is compiled into the program image
+- **Debug serial pins**: the debug pages follow `DEBUG_PIN_TX` and `DEBUG_PIN_RX`, with P62 and P63 as their defaults
+- **COGSTOP / COGSPIN**: a stopped cog stops driving its pins; a top-level return ends the task, and the last task's end frees the cog
+- **REP**: interrupts, including the debug interrupt, are ignored during looping; S = 0 repeats the block indefinitely
+- **WAITMS / WAITUS**: keep every call within the `$8000_0000`-clock bound; behaviour past it is not documented
+- **`#PRAGMA EXPORTDEF`**: defines the symbol in child objects and their descendants, not in the file holding the pragma
+- **Smart pin IN**: `TESTP`, `TESTPN` and `PINREAD` return a flag in a smart-pin mode; `%11101` states when IN rises
+- **Instruction descriptions**: `RDLONG`, `RF*`, `RET*`, `SUM*` and their neighbours open with what the instruction does, with timing kept under `timing:`
+
 ## [1.24.7] - 2026-10-12
 
 **Every application note's digest names the example archive that is actually published.**
