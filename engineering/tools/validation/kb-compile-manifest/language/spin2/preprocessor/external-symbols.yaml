@@ -11,7 +11,7 @@ blocks:
     compile: fragment
     wrap: spin2-method
   - at: predefined_symbols[8].example
-    fp: "75539b26da43cd7c"
+    fp: "a437a62874515abc"
     compile: program
   - at: examples[0].code
     fp: "fd59c1cf614ff13a"
