@@ -1035,7 +1035,7 @@ DEBUG data:              3 of 15872 bytes (0.0%)
 ```
 *Coalescing and IF (2026-11-05, `pnut-ts` v1.55.10, `-d -l`):* `proofs/cp-022-coalesce-two.spin2` 1 record, 4 bytes; `proofs/cp-022-coalesce-one.spin2` 1 record, 3 bytes; `proofs/cp-022-if-absent.spin2` 1 record, 5 bytes; `proofs/cp-022-if-present.spin2` 1 record, 6 bytes.
 **Grounds:** none beyond the compile; the DEBUG budget is the compiler's. *Limits:* one message of
-about 200 characters; one small case each for coalescing and IF. *→ EF:* none.
+about 200 characters on v1.55.8; one small case each for coalescing and IF on v1.55.10. *→ EF:* none.
 
 ### CP-023 · A streamer count above $FFFF is accepted silently: `XINIT`'s count spills into the command field, and a count of 131,072 assembles to the word for the next pin with count 0 — `LAYOUT`
 *KB:* `language/pasm2/xinit.yaml` (notes)
