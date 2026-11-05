@@ -1195,8 +1195,18 @@ This is the behaviour Spin2 v55's version history v44 describes. It is not speci
 followed by `nop` under `org` fills the same way; outside `org`, `byte FVAR 300` followed by `nop` emits
 `AC 02 00 00 00 00` with no fill.
 **Grounds:** Spin2 v55 states only that these overrides exist and can be read by `RFVAR`/`RFVARS`
-(DAT Symbols and Data). *Limits:* `proofs/cp-027-fvars-nonnegative.spin2` is rejected by v1.55.8 with
-`FVAR/FVARS data is too big (m350)`, a defect the PNut-TS project has fixed; non-negative `FVARS`
-bytes rest on `XF-019` until this file is re-run on the released compiler and its bytes are added
-here.
+(DAT Symbols and Data).
+*Non-negative `FVARS` (2026-11-05):* `pnut-ts` v1.55.10, `pnut-ts -l .../proofs/cp-027-fvars-nonnegative.spin2`, exit status 0:
+```text
+FVARS 0          00
+FVARS 63         3F
+FVARS 64         C0 00
+FVARS 100        E4 00
+FVARS 1000       E8 07
+FVARS $0FFF_FFFF FF FF FF 7F
+```
+v1.55.8 rejected this file with `FVAR/FVARS data is too big (m350)`; v1.55.10 carries the PNut-TS
+project's fix. `cp-027-accepted` and `cp-027-org-padding` give the same bytes under both, and the
+six rejections print the same errors under both.
+*Limits:* two compiler versions.
 *→ EF:* none — layout and legality stay CP.
