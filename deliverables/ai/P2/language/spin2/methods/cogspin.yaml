@@ -24,7 +24,7 @@ parameters:
         COGSPIN table defines
 
       DO NOT pass -1. It is not a synonym for NEWCOG -- see not_an_input below.
-    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbol for COGSPIN() Usage (NEWCOG = %01_0000 is the ONLY symbol listed; -1 is NEWTASK, TASKSPIN's symbol); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS (COGINIT D operand)"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbol for COGSPIN() Usage (NEWCOG = %01_0000 is the ONLY symbol listed; -1 is NEWTASK, TASKSPIN's symbol); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS (COGINIT D operand); the emitted bytes: Parallax Spin2 Interpreter v55 (2026.05.07), bc_con_n1_14 and bc_con_rfbyte"
     not_an_input: >-
       -1 does NOT mean "any available cog". The interpreter's cogspin_ ORs in
       hubexec (#%10_0000) and passes the operand to COGINIT without masking, so

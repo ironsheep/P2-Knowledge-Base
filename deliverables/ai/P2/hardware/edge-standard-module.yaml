@@ -165,9 +165,9 @@ pin_mapping:
   neighbour_pin_reach: >-
     A smart-pin observer reaches only the pins within three of its own: the WRPIN
     A and B input selectors name this pin or the pin 1, 2 or 3 above or below it.
-    For a signal on P62 or P63 the candidate observer pins below them, P59-P61, are the
-    boot-flash and microSD lines on this module (P59 MOSI / CMD, P60 flash CLK /
-    microSD CS, P61 flash CS / microSD CLK).
+    A signal on P62 can be observed from P59-P61 or P63, and one on P63 from P60-P62.
+    P59-P61 are the boot-flash and microSD lines on this module (P59 MOSI / CMD, P60
+    flash CLK / microSD CS, P61 flash CS / microSD CLK).
   microsd_socket:
     added_in: "Rev C"
     power: "supplied by the VIO5663 LDO regulator"

@@ -1,0 +1,6 @@
+' CP-022: the same text coalesced into one zstr_ command.
+PUB go()
+  debug(zstr_(@a))
+
+DAT
+a       byte    "aabb", 0

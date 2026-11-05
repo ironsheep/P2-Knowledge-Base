@@ -1,0 +1,7 @@
+' CP-022: two adjacent zstr_ commands in one statement.
+PUB go()
+  debug(zstr_(@a), zstr_(@b))
+
+DAT
+a       byte    "aa", 0
+b       byte    "bb", 0

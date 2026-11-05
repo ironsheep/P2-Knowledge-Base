@@ -70,7 +70,7 @@ reducing_bytes_and_records:
     one and not the other; a few help both. Applying one that does not help your
     case changes nothing while looking like work.
   over_on_bytes:
-    fix: "Move prose into DAT and emit it with zstr_() -- the text leaves DEBUG data entirely."
+    fix: "Move prose into DAT and emit it with zstr_() -- the text leaves DEBUG data; the command's few bytes stay."
     also_helps: "Coalescing adjacent strings so one zstr_() replaces several saves the per-command bytes; it does not change the record count."
     does_not_help: "DEBUG_COGS and debug(IF(...)) -- both are runtime; IF adds bytes."
   over_on_records:

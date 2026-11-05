@@ -9,7 +9,7 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: Sum +/-S into D by Z. If Z = 1 then D = D - S, else D = D + S. C = correct
+description: Sum +/-S into D by Z. If Z = 1 then D = D - S, else D = D + S. C = true
   sign of (D +/- S).
 flags_affected:
   C: Set to true sign of result (D +/- S)
