@@ -11,6 +11,7 @@ description: |
   - -D: Define a symbol (as if #DEFINE appeared at file start). Both compilers.
   - -U: Block a #PRAGMA EXPORTDEF of that symbol. PNut-TS only.
   - -I: Add directories to the #INCLUDE search path. PNut-TS only.
+  Available in PNut/pnut-ts v48 and later compilers.
 
   A command-line symbol is DEFINED ONLY -- it carries no value. There is no
   -D symbol=value form in either compiler: the symbol is presence-only, testable
@@ -123,11 +124,6 @@ predefined_symbols:
 # read back from the -i intermediate file for substitution. The presence-only
 # symbols were confirmed NOT to substitute -- byte "__P2__" stays literal.
 # All predefined __*__ symbols are protected from #UNDEF (see undef.yaml).
-#
-# History: v1.55.2 and earlier defined __VERSION__ too late for the preprocessor
-# to see it, so any use failed; it was omitted from this file until v1.55.3 made
-# it real. The v1.55.2 Preprocessor.md also spelled the compiler marker
-# __PNUTTS__, a documentation typo -- the symbol has always been __PNUT_TS__.
 
 examples:
   - code: |

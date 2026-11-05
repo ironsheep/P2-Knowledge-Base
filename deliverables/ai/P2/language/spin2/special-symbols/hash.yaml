@@ -27,7 +27,7 @@ syntax:
 predefined_registers:
   description: |
     The # operator can be used with predefined register names to get their addresses.
-    #register returns the register's address in Spin2 expressions.
+    Added in PNut v47: #register now returns the register's address in Spin2 expressions.
     
   examples:
     - "#PR0 resolves to $1D8"
@@ -116,6 +116,7 @@ memory_spaces:
 notes:
   - "# in Spin2 expressions returns register address"
   - "# in PASM instructions means immediate value (different meaning!)"
+  - "Added in PNut v47 - earlier versions don't support #register in Spin2"
   - "Use @ for hub addresses, # for cog/LUT register addresses"
   - "Register symbols must be defined in ORG sections or be predefined"
   - "PR0-PR7 at $1D8-$1DF are available to both PASM and Spin2"

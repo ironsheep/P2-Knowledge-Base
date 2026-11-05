@@ -8,7 +8,7 @@ description: |
   The Spin2 preprocessor provides conditional compilation and symbol definition 
   capabilities. Preprocessor directives begin with # and are processed before 
   compilation, allowing code to be included or excluded based on defined symbols.
-  No version directive required.
+  Available in PNut/pnut-ts v48 and later compilers. No version directive required.
 
 directives:
   symbol_definition:

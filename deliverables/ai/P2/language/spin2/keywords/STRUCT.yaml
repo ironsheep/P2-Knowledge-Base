@@ -209,7 +209,7 @@ pointer_syntax:
 
 v54_enhancements:
   summary: "Named bitfields on BYTE/WORD/LONG struct members, plus nameless single-member struct form"
-  enforcement: "Not enforced by the compiler. {Spin2_v54} is recommended as declaration of intent."
+  enforcement: "Not enforced by PNut v54 — no level54_symbols table. {Spin2_v54} is recommended as declaration of intent."
   minimum_compiler: "v54"
 
   named_bitfields_on_members:

@@ -24,7 +24,7 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: 'WC/WZ   Test bit S[4:0] of D, write to C/Z. C/Z = D[S[4:0]].'
+description: 'Test bit S[4:0] of D, write to C/Z. C/Z = D[S[4:0]].'
 flags_affected:
   C: Set to D[S[4:0]] (tested bit value), or AND/OR/XOR with C
   Z: Set to D[S[4:0]] (tested bit value), or AND/OR/XOR with Z
