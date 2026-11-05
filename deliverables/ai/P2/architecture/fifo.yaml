@@ -232,7 +232,7 @@ notes:
   - "WRFAST must complete before starting new FIFO operation"
   - "Block size of 0 means maximum (16384 blocks = 1MB)"
   - "FIFO is also used internally by hub execution mode"
-  - "Variable-length reads (RFVAR/RFVARS) use continuation bit encoding"
+  - "Variable-length reads (RFVAR/RFVARS) use continuation bit encoding: see language/pasm2/rfvar.yaml for the byte layout and language/pasm2/fvar.yaml for the DAT directives that emit it"
 
 limitations:
   - "Cannot read and write simultaneously (streamer/software role)"
@@ -248,6 +248,9 @@ related:
 cross_references:
   - rdfast_instruction: "language/pasm2/rdfast"
   - wrfast_instruction: "language/pasm2/wrfast"
+  - rfvar_instruction: "language/pasm2/rfvar"
+  - rfvars_instruction: "language/pasm2/rfvars"
+  - fvar_directive: "language/pasm2/fvar"
   - streamer_system: "architecture/streamer"
 
 documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB EXECUTION and FAST SEQUENTIAL FIFO INTERFACE"

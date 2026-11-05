@@ -21,8 +21,10 @@ notes:
 - Each value occupies exactly 1 byte
 - Strings are stored as individual bytes
 - No automatic alignment
+- FVAR or FVARS on a BYTE line emits that one value in variable length (1 to 4 bytes)
 related:
 - WORD
 - LONG
 - RES
+- language/pasm2/fvar.yaml
 oneliner: Declare byte data in memory

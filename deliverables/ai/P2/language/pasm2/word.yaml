@@ -19,9 +19,11 @@ notes:
 - Each value occupies 2 bytes
 - DAT data is packed in the order declared, so a WORD that follows BYTE data is not word-aligned unless ALIGNW precedes it
 - 'Range: 0 to 65535 (unsigned)'
+- FVAR or FVARS on a WORD line emits that one value in variable length (1 to 4 bytes)
 related:
 - BYTE
 - LONG
 - ALIGNW
+- language/pasm2/fvar.yaml
 oneliner: Declare word data in memory
 source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (data is packed in memory in the order declared; ALIGNW word-aligns to hub memory by emitting a zero byte, if necessary)"

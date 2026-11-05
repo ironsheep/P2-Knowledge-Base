@@ -1,0 +1,8 @@
+' CP-027: FVAR and negative FVARS items the compiler accepts, and the bytes it emits.
+DAT
+unsigned        byte    FVAR 127, FVAR 128, FVAR 300, FVAR 70_000, FVAR $1FFF_FFFF
+signed          byte    FVARS -1, FVARS -300, FVARS -$1000_0000
+one_item        byte    FVAR 300, 400
+in_long         long    FVAR 300, 1
+in_word         word    1, FVAR 300, 2
+mixed           byte    1, FVAR 300, 2, FVARS -300, 3

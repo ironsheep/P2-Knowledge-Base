@@ -109,9 +109,6 @@ limitations:
     The bound is $8000_0000 clocks. The call computes an absolute counter target from
     the duration and waits for it as WAITCT does; what a call past the bound does is
     not documented. Keep every call within the bound.
-  long_waits: |
-    For a wait longer than the bound, loop on GETMS()/GETCT() against a deadline in
-    slices of at most a second, rather than asking for the whole span at once.
   resolution: "1 µs -- the argument's unit"
 
 clock_frequency_impact:

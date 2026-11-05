@@ -18,7 +18,7 @@ assembled word; stays CP) · `BEHAVIOUR` (what
 compiled code does; the compile does not prove it) · `BEHAVIOUR → EF-NNN` (a P2 run has since
 proved it; the KB cites the EF).
 
-**Next record ID: `CP-027`** — take the number from this line and advance it in the same edit
+**Next record ID: `CP-028`** — take the number from this line and advance it in the same edit
 that files the record.
 
 **Commands** are run from the repository root with the repository-relative path, so each output
@@ -1153,3 +1153,39 @@ engineering/ingestion/external-sources/compiler-verification/proofs/cp-026-disab
 disable all DEBUG statements in the file/object", `spin2-v55-text.txt:1028`); the record supplies the
 0 case. *Limits:* one statement per file; one compiler version.
 *→ EF:* none — layout stays CP.
+
+### CP-027 · `FVAR` and `FVARS` are per-item overrides that follow `BYTE`/`WORD`/`LONG`, emit 1 to 4 bytes whatever the line's size, pad nothing, take no `[count]` and reject values outside their ranges (`FVAR/FVARS data is too big`) — `LAYOUT` + `LEGALITY`
+*KB:* `language/pasm2/fvar.yaml`
+*Class:* layout (the image bytes) and legality (the rejections).
+*Source:* `proofs/cp-027-accepted.spin2`, and one file for each rejection:
+`proofs/cp-027-fvar-too-big.spin2`, `cp-027-fvar-negative.spin2`, `cp-027-fvar-float.spin2`,
+`cp-027-fvars-too-big.spin2`, `cp-027-fvar-repeat.spin2`, `cp-027-fvar-no-size.spin2`.
+*Compiler:* `pnut-ts` v1.55.8, build date 9/19/2026, with `-l`.
+
+*Command (2026-11-05):* `pnut-ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-027-accepted.spin2`, exit status 0. The 41 image bytes, by labelled line:
+```text
+unsigned   7F | 80 01 | AC 02 | F0 A2 04 | FF FF FF FF
+signed     7F | D4 7D | 80 80 80 80
+one_item   AC 02 | 90
+in_long    AC 02 | 01 00 00 00
+in_word    01 00 | AC 02 | 02 00
+mixed      01 | AC 02 | 02 | D4 7D | 03
+```
+The listing types the labels `DAT_BYTE`, `DAT_LONG` and `DAT_WORD` after the line's declared size,
+and places `in_long` at a non-long offset.
+
+*Rejections (2026-11-05):* `pnut-ts -l <the file>`, exit status 1 each:
+```text
+cp-027-fvar-too-big.spin2:3:error:FVAR/FVARS data is too big (m351)
+cp-027-fvar-negative.spin2:3:error:FVAR/FVARS data is too big (m351)
+cp-027-fvar-float.spin2:3:error:FVAR/FVARS data is too big (m351)
+cp-027-fvars-too-big.spin2:3:error:FVAR/FVARS data is too big (m350)
+cp-027-fvar-repeat.spin2:3:error:Expected "," or end of line
+cp-027-fvar-no-size.spin2:3:error:Expected a unique name, BYTE, WORD, LONG, or assembly instruction
+```
+**Grounds:** Spin2 v55 states only that these overrides exist and can be read by `RFVAR`/`RFVARS`
+(DAT Symbols and Data). *Limits:* `proofs/cp-027-fvars-nonnegative.spin2` is rejected by v1.55.8 with
+`FVAR/FVARS data is too big (m350)`, a defect the PNut-TS project has fixed; non-negative `FVARS`
+bytes rest on `XF-019` until this file is re-run on the released compiler and its bytes are added
+here.
+*→ EF:* none — layout and legality stay CP.

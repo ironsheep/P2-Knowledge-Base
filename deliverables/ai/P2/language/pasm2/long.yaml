@@ -21,9 +21,11 @@ notes:
 - Each value occupies 4 bytes
 - DAT data is packed in the order declared, so a LONG that follows BYTE or WORD data is not long-aligned unless ALIGNL precedes it
 - Full 32-bit range
+- FVAR or FVARS on a LONG line emits that one value in variable length (1 to 4 bytes)
 related:
 - BYTE
 - WORD
 - ALIGNL
+- language/pasm2/fvar.yaml
 oneliner: Declare long data in memory
 source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (data is packed in memory in the order declared; ALIGNL long-aligns to hub memory by emitting 1 to 3 zero bytes, if necessary)"

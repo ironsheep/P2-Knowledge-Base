@@ -47,6 +47,8 @@ related_instructions:
 - RFBYTE: Read byte via FIFO
 - RFWORD: Read word via FIFO
 - RFLONG: Read long via FIFO
+- RFVAR: Read unsigned 1 to 4 byte variable-length value via FIFO
+- RFVARS: Read signed 1 to 4 byte variable-length value via FIFO
 - WRFAST: Begin fast hub write via FIFO
 - FBLOCK: Set the next start address and 64-byte block count, taken when the current blocks are fully read (2 clocks, never waits)
 notes:
@@ -106,6 +108,8 @@ aliases:
 related:
   - language/pasm2/wrfast.yaml
   - language/pasm2/getptr.yaml
+  - language/pasm2/rfvar.yaml
+  - language/pasm2/rfvars.yaml
   - language/pasm2/xinit.yaml
   - language/pasm2/concepts/streamer_smartpin_control.yaml
   - architecture/streamer/_index.yaml

@@ -23,6 +23,7 @@ see_also:
 - LONG
 - ALIGNL
 - ALIGNW
+- language/pasm2/fvar.yaml
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Categorical Listing Of Propeller 2 Assembly Language (Directives), p.15; Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (DAT Symbols and Data)"
 created_date: '2025-09-19'
 group: Data Declaration

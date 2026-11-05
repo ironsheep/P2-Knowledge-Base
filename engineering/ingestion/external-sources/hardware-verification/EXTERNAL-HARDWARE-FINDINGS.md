@@ -231,6 +231,28 @@ as the control.
 A byte-identical binary passed 25 of 25 as the first program after a power cycle and was silent as
 the fifth. *Gap:* rules 1, 2, 4 — the cause (card or peripheral state) is not isolated.
 
+## PNut-TS project
+
+### XF-019 · `RFVAR` and `RFVARS` read the `FVAR`/`FVARS` format as documented, at every length boundary — `CONFIRMED`
+*KB:* `language/pasm2/rfvar.yaml`; `language/pasm2/rfvars.yaml`; `language/pasm2/fvar.yaml`
+
+Reported 2026-11-04 by the PNut-TS project in
+[`RFVAR-RFVARS-reference.md`](../../external-inputs/pnut_ts_facts/RFVAR-RFVARS-reference.md), which
+carries its full statement. The program `rfvar_hw_check.spin2`, held by that project, was built by
+PNut-TS and run from RAM on a P2.
+
+*Measured:* 105 checks, each printed on its own line, all passing.
+
+*Control:* 9 negative controls, each a plausible wrong answer, each disproved by the hardware.
+
+*Scope, in their words:* "RFVAR's and RFVARS's values and their C and Z flags at every length
+boundary; the GETPTR advance; RFVARS sign-extending and RFVAR not sign-extending; the 4th byte
+carrying 8 bits; the §8.1 and §8.2 examples, and the §8.3 decoders."
+
+*Rig:* the report does not name the board or the clock. These are cog instructions reading hub
+memory, attached to no pin. Accepted on Stephen's ruling of 2026-11-05 that this project's checked
+work is settled.
+
 ---
 
 ## Lifecycle

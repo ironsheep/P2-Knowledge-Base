@@ -63,6 +63,7 @@ notes:
   - "Line base type persists across comma-separated values"
   - "Inline type overrides apply to single value only — line base type reasserts after"
   - "Supports BYTEFIT/WORDFIT for range-checked declarations"
+  - "FVAR/FVARS after BYTE, WORD or LONG emit one value in the 1 to 4 byte form RFVAR/RFVARS read"
   - "Can contain inline PASM2 assembly after ORG/ORGH directives"
   - "DAT is class state (shared by instances of one image); VAR is instance state — see instance_model"
 
@@ -76,6 +77,7 @@ related:
   - language/spin2/keywords/LONG.yaml
   - language/spin2/keywords/BYTEFIT.yaml
   - language/spin2/keywords/WORDFIT.yaml
+  - language/pasm2/fvar.yaml
   - language/spin2/assembly-directives/org.yaml
   - language/spin2/assembly-directives/orgh.yaml
   - language/spin2/concepts/type-propagation.yaml

@@ -9,8 +9,8 @@ encoding:
 timing:
   cycles: 2
   type: mode_dependent
-description: '{WC/WZ/WCZ}   Used after RDFAST. Read long from FIFO into D. C = MSB
-  of long. *                                                      2 / FIFO IN USE'
+description: Used after RDFAST. Read long from FIFO into D. C = MSB of long. Not usable
+  in hub execution, where the FIFO is in use.
 flags_affected:
   C: Set to MSB of long
   Z: Set if result equals zero
@@ -28,3 +28,9 @@ syntax_variants:
 last_updated: '2025-09-19T16:04:17.296102'
 category: Hub FIFO
 oneliner: Read long from FIFO
+related:
+- language/pasm2/rdfast.yaml
+- language/pasm2/rfbyte.yaml
+- language/pasm2/rfword.yaml
+- language/pasm2/rfvar.yaml
+- language/pasm2/getptr.yaml

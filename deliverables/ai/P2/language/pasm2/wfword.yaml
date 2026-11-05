@@ -27,3 +27,8 @@ syntax_variants:
 last_updated: '2025-09-19T16:04:17.182612'
 category: Hub FIFO
 oneliner: Write word to FIFO
+related:
+- language/pasm2/wrfast.yaml
+- language/pasm2/wfbyte.yaml
+- language/pasm2/wflong.yaml
+- language/pasm2/getptr.yaml

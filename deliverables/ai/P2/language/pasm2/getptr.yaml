@@ -48,4 +48,6 @@ oneliner: Get current FIFO hub pointer into D
 related:
   - language/pasm2/rdfast.yaml
   - language/pasm2/wrfast.yaml
+  - language/pasm2/rfvar.yaml
+  - language/pasm2/rfvars.yaml
   - code-examples/flash-loader-case-study.yaml

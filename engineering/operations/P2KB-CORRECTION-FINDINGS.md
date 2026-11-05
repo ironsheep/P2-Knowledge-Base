@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-625`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-630`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -62,6 +62,27 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 > file. The previous sweep was deferred on 2026-06-20 pending G-004 and G-005; G-005 closed
 > 2026-07-04, and G-004's remainder was found to be out of KB scope entirely (see its entry), so the
 > deferral's condition is discharged.
+
+---
+
+## Found by the RFVAR/RFVARS change «#440» (2026-11-05) — F-625 … F-629
+
+Source for all five: the PNut-TS project's `external-inputs/pnut_ts_facts/RFVAR-RFVARS-reference.md`, `XF-019`, `CP-027`. The manual findings are fixed after the KB release, by Stephen's order of 2026-11-05.
+
+### F-625 — Assembly Language Reference `chapter-04-timing.md` says a 4-byte `RFVAR`/`RFVARS` value is 28 bits; it is 29 — `CONFIRMED` (found 2026-11-05, «#440»)
+Line 272's table row gives "28-bit value" in both columns. The 4th byte carries all 8 bits, so a 4-byte value holds 29 bits (`XF-019`). Line 265 also says the MSB of "each byte" signals more bytes; the 4th byte has no continuation flag. Published in the current PDF. Fix: correct the row and the sentence.
+
+### F-626 — Assembly Language Reference has no `FVAR`/`FVARS` directive section — `CONFIRMED` (found 2026-11-05, «#440»)
+`part-ii/directives.md` documents `BYTEFIT` and `WORDFIT`, while `FVAR`/`FVARS` appear only in the Appendix H reserved-word lists. Fix: add a section from `language/pasm2/fvar.yaml`, and link it from the `RFVAR`/`RFVARS` entries in `part-ii/instructions-r.md`.
+
+### F-627 — XBYTE Guide §5.3 never gives the variable-length byte format or names `FVAR`/`FVARS` — `CONFIRMED` (found 2026-11-05, «#440»)
+`xbyte-body.md:410` introduces the instructions by extension only, and neither the guide nor its examples library mentions the directives that emit the format. Fix: add the layout and the directives to §5.3.
+
+### F-628 — XBYTE Guide §15.4 says "the assembler emits" a two-byte offset without saying how — `CONFIRMED` (found 2026-11-05, «#440»)
+`xbyte-body.md:1514`: the -64..+63 range is right; the sentence omits that `FVARS` is what makes the assembler size the value. Fix: name `FVARS`.
+
+### F-629 — the KB never described the `RFVAR`/`RFVARS` byte format and had no `FVAR`/`FVARS` entry — `PENDING-VALIDATION` (found 2026-11-05, «#440», from the PNut-TS project's request)
+> **Applied 2026-11-05:** `rfvar.yaml` and `rfvars.yaml` gained the format, ranges, preconditions, interpreter use, examples and `related:`; new `language/pasm2/fvar.yaml`; links added from `rdfast`, `getptr`, `fifo`, `DAT` and the `byte`/`word`/`long` directive pages. Same pass: table residue (`* 2 / FIFO IN USE`) removed from the five `RF*` descriptions, with the hub-exec fact restated on `rfbyte`/`rfword`/`rflong`; `related:` added to `rfbyte`, `rfword`, `rflong`, `wfbyte`, `wfword`, `wflong`. `waitct.yaml` gained the citation for its 2^31 statement (Spin2 Interpreter v55, WAITCT loop). The `long_waits` advice came out of `waitms.yaml` and `waitus.yaml`: no golden source states it, and its "at most a second" figure had no origin. Closes when the release serves it.
 
 ---
 

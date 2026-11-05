@@ -15,7 +15,7 @@ spin2_language_complete_map:
       covers:
         - "Block Structure (CON, DAT, OBJ, PUB, PRI, VAR)"
         - "Control Flow (IF, ELSE, CASE, REPEAT, etc.)"
-        - "Data Types (BYTE, WORD, LONG, BYTEFIT, WORDFIT)"
+        - "Data Types (BYTE, WORD, LONG, BYTEFIT, WORDFIT, FVAR, FVARS)"
         - "Built-in Functions (LOOKDOWN, LOOKUP variants)"
         - "Special (FILE, ORG, FIT)"
 

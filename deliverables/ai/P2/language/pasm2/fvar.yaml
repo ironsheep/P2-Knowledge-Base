@@ -1,0 +1,84 @@
+directive: FVAR
+name: FVAR / FVARS
+description: |
+  Per-item size overrides for DAT data. FVAR emits the next value in the unsigned
+  variable-length form RFVAR reads; FVARS emits it in the signed form RFVARS reads.
+  Small values take one byte and larger ones take up to four, which suits a table of
+  mostly small integers read in order by cog code.
+category: Data Declaration Directives
+documentation_level: complete
+aliases:
+- FVARS
+- FVAR directive
+- FVARS directive
+- variable-length data
+- variable-length integer in DAT
+syntax: "BYTE|WORD|LONG {value,} FVAR value {, FVARS value, ...}"
+valid_range:
+  FVAR: "0 .. $1FFF_FFFF (bits 31..29 must be 0)"
+  FVARS: "-$1000_0000 .. $0FFF_FFFF (bits 31..28 must all be equal)"
+  error_message: "FVAR/FVARS data is too big"
+rules:
+- They follow a BYTE, WORD or LONG and apply only to the one value after them. The next comma-separated item reverts to the line's declared size.
+- The emitted length is 1 to 4 bytes whatever the line's size. Nothing is padded or aligned. A label on the line takes the line's declared type.
+- The value is a single integer expression. There is no [count] repeat, and floats are rejected.
+- The shortest encoding that holds the value is emitted, and signed values are sized by their signed range, so FVARS 100 takes 2 bytes.
+worked_bytes:
+- "FVAR 127: 7F"
+- "FVAR 128: 80 01"
+- "FVAR 300: AC 02"
+- "FVAR 70_000: F0 A2 04"
+- "FVAR $1FFF_FFFF: FF FF FF FF"
+- "FVARS -1: 7F"
+- "FVARS 64: C0 00"
+- "FVARS 100: E4 00"
+- "FVARS -300: D4 7D"
+- "FVARS -$1000_0000: 80 80 80 80"
+format: "Byte layout: see rfvar value_format. Signed ranges and sign extension: see rfvars value_format."
+examples:
+- code: |
+    DAT
+    table   byte    FVAR 300, FVAR 70_000          ' AC 02  F0 A2 04
+    deltas  byte    FVARS 1000, FVARS -3, FVARS 0  ' E8 07  7D  00
+    mixed   byte    1, FVAR 300, 2, FVARS -300, 3  ' 01  AC 02  02  D4 7D  03
+  description: "Every variable-length item needs its own FVAR or FVARS"
+- code: |
+    PUB decode_fvar(p_bytes) : value | b, shift
+    '' Decode one FVAR (RFVAR-form) value from hub bytes at p_bytes
+      repeat 3
+        b := byte[p_bytes++]
+        value |= (b & $7F) << shift
+        if b & $80 == 0
+          return
+        shift += 7
+      value |= byte[p_bytes] << 21                  ' 4th byte: all 8 bits
+
+    PUB decode_fvars(p_bytes) : value | b, shift
+    '' Decode one FVARS (RFVARS-form) value: same bytes, then sign-extend
+      repeat 3
+        b := byte[p_bytes++]
+        value |= (b & $7F) << shift
+        shift += 7
+        if b & $80 == 0
+          return value signx (shift - 1)            ' sign bit is bit 6, 13 or 20
+      value |= byte[p_bytes] << 21
+      return value signx 28                         ' sign bit is bit 28
+  description: "Decoding the same bytes in Spin2, without the FIFO"
+anti_patterns:
+- anti_pattern: "override_assumed_to_persist"
+  description: "The second value is a plain byte: 400 is emitted as $90, truncated"
+  wrong: "byte FVAR 300, 400"
+  correct: "byte FVAR 300, FVAR 400"
+- anti_pattern: "signedness_mismatch"
+  description: "Nothing marks the stream signed or unsigned; a value whose top value bit is 1 decodes wrongly with no error. Pair FVAR with RFVAR and FVARS with RFVARS."
+- anti_pattern: "alignment_assumed"
+  description: "An FVAR item in a LONG line still emits 1 to 4 bytes, and the longs after it are not realigned."
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (DAT Symbols and Data: FVAR/FVARS overrides allowed, can be read via RFVAR/RFVARS); CP-027; XF-019"
+related:
+- language/pasm2/rfvar.yaml
+- language/pasm2/rfvars.yaml
+- language/pasm2/rdfast.yaml
+- language/pasm2/byte.yaml
+- language/pasm2/bytefit.yaml
+- language/spin2/keywords/DAT.yaml
+oneliner: "DAT per-item overrides that emit a 1 to 4 byte variable-length value for RFVAR / RFVARS"
