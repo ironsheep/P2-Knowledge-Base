@@ -9,7 +9,7 @@ description: |
   Rearranges the bytes of a 32-bit value according to a quaternary pattern. Each 
   digit in the pattern (0-3) specifies which source byte maps to that destination 
   position. This is the Spin2 function version of the PASM2 MOVBYTS instruction.
-  Available in PNut/pnut-ts v52 and later compilers. No version directive required.
+  No version directive required.
 
 syntax: "result := MOVBYTS(value, order)"
 

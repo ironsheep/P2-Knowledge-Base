@@ -19,7 +19,7 @@ hardware_primitives:
     numbers: "0-15"
     atomic_operations: "Test-and-set via LOCKTRY"
     traditional_usage:
-      lock_15: "Held by a DEBUG build"
+      lock_15: "Allocated by the debugger in a DEBUG build"
     
     lock_operations:
       LOCKTRY:

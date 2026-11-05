@@ -1,0 +1,7 @@
+' CP-027: in an ORG section an instruction after FVAR data starts on the next long.
+DAT
+                org
+a               byte    FVAR 300, FVARS -1
+b               nop
+c               byte    FVAR 300
+                long    1

@@ -20,7 +20,7 @@ valid_range:
   error_message: "FVAR/FVARS data is too big"
 rules:
 - They follow a BYTE, WORD or LONG and apply only to the one value after them. The next comma-separated item reverts to the line's declared size.
-- The emitted length is 1 to 4 bytes whatever the line's size. Nothing is padded or aligned. A label on the line takes the line's declared type.
+- The emitted length is 1 to 4 bytes whatever the line's size, with no padding between data items. In an ORG section an instruction after them starts on the next long, with zero bytes filling the gap, as after any data. A label on the line takes the line's declared type.
 - The value is a single integer expression. There is no [count] repeat, and floats are rejected.
 - The shortest encoding that holds the value is emitted, and signed values are sized by their signed range, so FVARS 100 takes 2 bytes.
 worked_bytes:
@@ -72,8 +72,8 @@ anti_patterns:
 - anti_pattern: "signedness_mismatch"
   description: "Nothing marks the stream signed or unsigned; a value whose top value bit is 1 decodes wrongly with no error. Pair FVAR with RFVAR and FVARS with RFVARS."
 - anti_pattern: "alignment_assumed"
-  description: "An FVAR item in a LONG line still emits 1 to 4 bytes, and the longs after it are not realigned."
-source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (DAT Symbols and Data: FVAR/FVARS overrides allowed, can be read via RFVAR/RFVARS); CP-027; XF-019"
+  description: "An FVAR item in a LONG line still emits 1 to 4 bytes, and the long data after it is not realigned."
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (DAT Symbols and Data: FVAR/FVARS overrides allowed, can be read via RFVAR/RFVARS), version history v44 (ORG sections pad zeroes to the next long after FVAR/FVARS); CP-027; XF-019"
 related:
 - language/pasm2/rfvar.yaml
 - language/pasm2/rfvars.yaml

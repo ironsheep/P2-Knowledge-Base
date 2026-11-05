@@ -18,8 +18,8 @@ timing:
   type: variable
   source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (clocks column), p.154"
   notes: "Hub-window dependent (egg-beater); minimum 9 clocks when window is hit. +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
-description: '{WC/WZ/WCZ}                                                                                                                            9...16
-  1 / 9...26'
+description: Read long from hub address {#}S/PTRx into D. C = MSB of long. Prior SETQ/SETQ2
+  invokes cog/LUT block transfer.
 compiler_category: Memory and I/O
 flags_affected:
   C: Set to MSB of long

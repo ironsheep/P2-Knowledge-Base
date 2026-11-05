@@ -138,7 +138,7 @@ common_pitfalls:
     correct: |
       PRI m(pinA)
         ' a name that is not a register name
-    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Spin2 Overview ('Source code is case-insensitive'); CP-016"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Spin2 Overview ('Source code is case-insensitive'); the rejection of register names as parameter and variable names: CP-016"
 
   - pitfall: "import_confusion"
     description: "Expecting case-sensitive behavior from other language experience"

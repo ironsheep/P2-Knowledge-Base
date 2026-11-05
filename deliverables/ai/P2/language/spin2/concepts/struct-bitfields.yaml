@@ -162,7 +162,7 @@ interpreter_implementation:
     - description: "Multi-bit bitfield: handled by the same setup path used for plain `var.[upper..lower]` bitfield access"
 
 version_directive_guidance:
-  enforcement: "Not enforced by PNut v54"
+  enforcement: "Not enforced by the compiler"
   rationale: |
     spin2_version is 54, so {Spin2_v54} is a legal directive, but no
     level54_symbols table was added — the new STRUCT syntax parses

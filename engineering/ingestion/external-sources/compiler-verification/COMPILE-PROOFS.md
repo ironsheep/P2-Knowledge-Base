@@ -1183,6 +1183,17 @@ cp-027-fvars-too-big.spin2:3:error:FVAR/FVARS data is too big (m350)
 cp-027-fvar-repeat.spin2:3:error:Expected "," or end of line
 cp-027-fvar-no-size.spin2:3:error:Expected a unique name, BYTE, WORD, LONG, or assembly instruction
 ```
+*ORG section (2026-11-05):* `pnut-ts -l .../proofs/cp-027-org-padding.spin2`, exit status 0. An
+instruction after the data starts on the next long; long data does not:
+```text
+a          AC 02 | 7F | 00        (one zero byte, then b on the next long)
+b          00 00 00 00
+c          AC 02
+(long 1)   01 00 00 00            (no fill before it)
+```
+This is the behaviour Spin2 v55's version history v44 describes. It is not specific to `FVAR`: `byte 1`
+followed by `nop` under `org` fills the same way; outside `org`, `byte FVAR 300` followed by `nop` emits
+`AC 02 00 00 00 00` with no fill.
 **Grounds:** Spin2 v55 states only that these overrides exist and can be read by `RFVAR`/`RFVARS`
 (DAT Symbols and Data). *Limits:* `proofs/cp-027-fvars-nonnegative.spin2` is rejected by v1.55.8 with
 `FVAR/FVARS data is too big (m350)`, a defect the PNut-TS project has fixed; non-negative `FVARS`

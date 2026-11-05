@@ -11,8 +11,7 @@ timing:
   type: variable
   source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (clocks column), p.154"
   notes: "Hub-window dependent; minimum 9 clocks when window is hit. +1 clock if the word crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
-description: '{WC/WZ/WCZ}     Read zero-extended word from hub address {#}S/PTRx into
-  D. C = MSB of word. *                                          9...16 1 / 9...26'
+description: Read zero-extended word from hub address {#}S/PTRx into D. C = MSB of word.
 flags_affected:
   C: Set to MSB of word
   Z: Set if result equals zero

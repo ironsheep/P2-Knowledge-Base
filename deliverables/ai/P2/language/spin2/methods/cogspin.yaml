@@ -33,9 +33,9 @@ parameters:
       worker(), @stk) therefore starts TWO cogs running worker(), both handed
       the SAME @stk -- two interpreters pushing call frames into one buffer with
       no arbitration -- and returns the even/lower cog's ID, so a later
-      cogstop(id) stops only one of them. Confirmed with pnut-ts v1.55.4
-      (2026-08-30): the -1 form emits $A0 (bc_con_n1_14), the NEWCOG form emits
-      $42 $10 (push byte 16) -- different constants, different binaries.
+      cogstop(id) stops only one of them. The -1 form emits $A0 (bc_con_n1_14),
+      the NEWCOG form emits $42 $10 (push byte 16) -- different constants,
+      different binaries.
       -1 IS the failure RETURN value; see returns.
 
 

@@ -49,7 +49,7 @@ z_register: |
   - 16-bit: Z[31:16]=data, use SHR #16  
   - 32-bit: Z[31:0]=data, no shift needed
 
-in_flag: "Raised when a full word (X[4:0]+1 bits) has been shifted in. Shifting is clocked by the positive edges of the B input; the A input is only sampled at those edges."
+in_flag: "Raised when a full word (X[4:0]+1 bits) has been shifted in. The A input is sampled around each positive edge of the B input, with X[5] choosing the sample position; setting B[3] in WRPIN's D inverts B for negative-edge clocking."
 
 # Pin Usage
 pins:

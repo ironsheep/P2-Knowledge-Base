@@ -121,7 +121,7 @@ usage_patterns:
     description: "Change DEBUG_MASK based on build type (debug vs release)"
 
 compilation_behavior:
-  - "DEBUG[n] with bit n NOT set: Entire statement omitted (no code generated)"
+  - "DEBUG[n] with bit n NOT set: The statement is not compiled"
   - "DEBUG[n] with bit n SET: Statement compiled normally"
   - "Without DEBUG_MASK defined: DEBUG[n] syntax is an error"
   - "Plain DEBUG() (no channel): Always compiled, ignores DEBUG_MASK; it is compiled even with DEBUG_MASK = 0"
@@ -131,7 +131,7 @@ notes:
   - "DEBUG_MASK must be defined for DEBUG[n] syntax to work"
   - "Channel numbers must be 0-31"
   - "DEBUG_MASK belongs to the file that defines it. A parent can set a child object's mask where it declares the object, like any other overridable constant: OBJ drv : \"driver\" | DEBUG_MASK = %1"
-  - "Unset channels generate NO code (complete elimination)"
+  - "A statement on an unset channel is not compiled"
   - "Use constants to name channels for readability"
   - "Plain DEBUG() without channel index ignores the mask"
   - "Useful for reducing code size in release builds"
@@ -144,8 +144,8 @@ debug_cogs_interaction:
   levels:
     DEBUG_MASK:
       level: "Compile-time"
-      controls: "Whether debug[N]() generates any code at all"
-      effect: "If bit N is NOT set, no code is generated - zero runtime overhead"
+      controls: "Whether debug[N]() is compiled at all"
+      effect: "If bit N is NOT set, the statement is not compiled"
     DEBUG_COGS:
       level: "Runtime"
       controls: "The per-cog debug INTERRUPT enable. An enabled cog takes a debug interrupt at every COGINIT whether or not it ever prints, so this is not merely an output filter — see language/spin2/constants/special-configuration-symbols.yaml"

@@ -19,7 +19,7 @@ timing:
   source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (clocks column), p.155"
   notes: "Hub-window dependent; minimum 3 clocks when window is hit. +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
 description: Write long in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2 invokes
-  cog/LUT block transfer.              3...10 1 / 3...20
+  cog/LUT block transfer.
 flags_affected:
   C: No effect
   Z: No effect

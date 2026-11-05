@@ -172,7 +172,7 @@ mechanisms_overview:
       level: compile-time
       reduces_record_count: "Yes (all or nothing)"
       reduces_debug_bytes: "Yes (all or nothing)"
-      granularity: "Global (per source file)"
+      granularity: "Per file/object"
       eliminates_code: true
       requires_code_changes: "CON constant"
       version_requirement: Base
@@ -338,9 +338,8 @@ decision_guide:
         DEBUG statements in that file/object).
     - condition: "Writing a reusable object/library"
       recommendation: |
-        Use DEBUG_DISABLE in the object so its debug statements don't count
-        against the parent project's records. Or use debug[N]() with documented
-        channel assignments.
+        Use DEBUG_DISABLE in the object so its debug statements are not compiled.
+        Or use debug[N]() with documented channel assignments.
     - condition: "Multi-cog project with too much debug output at runtime"
       recommendation: |
         Use debug(IF(...), ...) / IFNOT for conditional runtime filtering. (These don't

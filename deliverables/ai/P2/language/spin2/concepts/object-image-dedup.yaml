@@ -144,7 +144,7 @@ verification:
       - a tier forwarding one of the object's TWO DAT-sizing CONs -> two driver images;
         adding the missing forwarding constant collapses them to one
   map_caveat: |
-    The .map format changed at pnut-ts 1.55.8: there is no `Objects:` line. Read the image
+    The .map has no `Objects:` line. Read the image
     count from the SUMMARY sentence instead.
     Its labels are reliable. Every instance appears, named by access path (A, A.LEAF, D[1],
     A.D[1].LEAF) with its source object and its own VAR base; each element of an OBJ array

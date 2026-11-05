@@ -18,8 +18,8 @@ timing:
       NOP                   ' 2 clocks: covers the IN-flag reset delay
       TESTP   #pin WC       ' NOW safe to poll IN flag
     Note: RQPIN (read quiet) does NOT reset the IN flag.
-description: '{WC}   Read smart pin S[5:0] result "Z" into D, acknowledge smart pin.
-  C = modal result.'
+description: 'Read smart pin S[5:0] result "Z" into D, acknowledge smart pin. C = modal
+  result.'
 flags_affected:
   C: Set to modal result
   Z: No effect

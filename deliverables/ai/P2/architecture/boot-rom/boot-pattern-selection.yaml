@@ -68,7 +68,7 @@ what_an_attached_device_sees:
   every_reset: "At every reset the ROM drives P59 low for more than 1 us, then floats it, waits more than 5 us and samples it."
   without_a_p59_pullup: "The ROM does the same to P61, and if that finds no pull-up, to P60. A pull-up found on P61 starts the flash probe, which drives P61, P60, P59 and P58 and sends fixed ROM commands (exit-quad, exit-dual, reset-enable, reset, write-disable, read-status) to whatever is attached. A pull-up found on P60 starts the microSD card boot."
   with_a_p59_pullup: "With a pull-up on P59 the ROM goes to serial boot."
-  consequence: "A device wired to P58-P61 (flash, microSD card, or any other device on those pins) sees these pulses and, without a P59 pull-up, the probe commands at every reset, before the application runs."
+  consequence: "A device wired to P58-P61 (flash, microSD card, or any other device on those pins) sees these pulses at every reset, and the probe commands when the ROM finds a pull-up on P61, before the application runs."
 
 # Boot-time clock state — applies to ALL ROM boot paths
 boot_time_clock_state:

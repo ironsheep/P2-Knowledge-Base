@@ -55,7 +55,7 @@ memory_organization:
 write_paths:
   source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), THE COG-to-HUB RAM INTERFACE; FAST SEQUENTIAL FIFO INTERFACE; DEBUG INTERRUPT (the protected last 16KB)"
   paths: |
-    A cog's write instructions (WRBYTE, WRWORD, WRLONG, and their block forms).
+    A cog's write instructions (WRBYTE, WRWORD, WRLONG, WMLONG, and their block forms).
     A cog's FIFO writes (WFBYTE, WFWORD, WFLONG after WRFAST).
     The streamer's capture modes, which write through the FIFO.
     The protected last 16KB, once write-protected, is writable only from within debug ISRs.
@@ -179,7 +179,7 @@ hub_operations:
     sharing: "CORDIC results through hub interface"
     
   smart_pin_data:
-    repository_modes: "Smart pins can access hub data"
+    repository_modes: "A smart pin in a long repository mode holds a long that a cog writes with WXPIN and reads with RDPIN or RQPIN"
 
 performance:
   bandwidth:
