@@ -1,7 +1,7 @@
 {
   "meta": {
     "release_date": "2026-11-06",
-    "last_updated": "2026-11-06T20:21:12.915606",
+    "last_updated": "2026-11-06T21:40:54.953325",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-11-06T20:21:12.915606",
+    "extraction_date": "2026-11-06T21:40:54.953325",
     "categories": {
       "Math and Logic": {
         "count": 109,
@@ -12091,7 +12091,8 @@
               "language/pasm2/rdlut.yaml",
               "language/pasm2/wrlut.yaml",
               "language/pasm2/concepts/setq_block_ops.yaml",
-              "architecture/xbyte_engine.yaml"
+              "architecture/xbyte_engine.yaml",
+              "language/spin2/integration/spin2-pasm2-integration.yaml"
             ],
             "compiler_info": {
               "syntax": "",
@@ -18537,7 +18538,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-11-06T20:21:12.915606",
+    "extraction_date": "2026-11-06T21:40:54.953325",
     "categories": {
       "keywords": {
         "count": 37,
@@ -23194,7 +23195,7 @@
           },
           "COGSTOP": {
             "method": "COGSTOP",
-            "documentation_source": "Parallax Propeller 2 Spin2 Language Documentation v55, REPEAT ('if you don't want the cog to stop and cease driving its I/O's'); DEBUG (LOCK[15] is allocated by the debugger)",
+            "documentation_source": "Parallax Propeller 2 Spin2 Language Documentation v55, REPEAT ('if you don't want the cog to stop and cease driving its I/O's'); DEBUG (LOCK[15] is allocated by the debugger); EF-105 (pin and smart-pin state after a stop)",
             "category": "cog_management",
             "type": "method",
             "description": "Stop a specified cog immediately.\nThe cog stops executing and becomes available for reuse.\nNo effect if the cog is already stopped.\n",
@@ -23235,7 +23236,7 @@
               ],
               "pin_state_after_stop": [
                 "A stopped cog stops driving its I/O pins",
-                "What a smart pin the cog configured does afterwards is not documented; do not rely on it"
+                "A smart pin the cog configured (measured on NCO frequency with P_OE; other modes untested) keeps its mode, X and Y. With no other cog holding the pin's DIR high its output stops toggling; raising DIR from another cog makes it toggle again with no WRPIN, WXPIN or WYPIN, and while another cog holds DIR high it keeps toggling through the stop"
               ],
               "resources": [
                 "A lock the cog HELD goes free. Ownership stops holding the moment the cog becomes inactive - for any cause, not only COGSTOP - so nothing has to release it",
@@ -29973,7 +29974,7 @@
               "LONG  $12345678        ' Single long value",
               "LONG  -1, 0, 1         ' Multiple long values",
               "LONG  value[4]          ' Duplicate value 4 times",
-              "LONG  @label            ' Address of label",
+              "LONG  @label            ' Address of label, an object offset in a Spin2 object",
               "LONG  %%3210            ' Quaternary literal"
             ],
             "usage": "LONG is used in DAT sections to define long-sized (32-bit) data values. Data\nis placed at the current assembly origin \u2014 in COG RAM, LUT RAM, or Hub RAM\ndepending on the active ORG/ORGH mode. Multiple values can be specified separated\nby commas. This is the native data size for P2 operations. Longs are stored\nin little-endian format.\n",
@@ -30648,7 +30649,7 @@
               "Symbol without @ returns the DATA at that address, not the address itself",
               "@method creates a 32-bit method pointer with index and VAR base encoded",
               "First long of object's VAR space stores object base for method pointers",
-              "The PASM-side counterpart: inside a Spin2 object, `##hubsymbol` in a DAT block does NOT give the symbol's runtime hub address (it resolves against $400) - pass the address in from Spin2 with @, or use PTRA. See language/spin2/integration/spin2-pasm2-integration.yaml (integration_rules.hub_address_resolution)."
+              "The PASM-side counterpart: inside a Spin2 object, neither `##hubsymbol` ($400 plus an offset) nor `##@hubsymbol` (the object offset) in a DAT block gives the symbol's runtime hub address - pass the address in from Spin2 with @, through PTRA. See language/spin2/integration/spin2-pasm2-integration.yaml (integration_rules.hub_address_resolution)."
             ],
             "related": [
               "language/spin2/special-symbols/double_at.yaml",
