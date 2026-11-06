@@ -4,7 +4,7 @@
 ''   Purpose....  A time-domain buffer shown as frequency, with a log
 ''                scale so small peaks survive
 ''   Manual.....  P2 Debug Window Manual
-''   Version....  v1.1.4 (2026-10-04)
+''   Version....  v1.1.5 (2026-11-05)
 ''   Appears in.  Chapter 9: The FFT Window - Frequency Spectrum -- A
 ''                complete example: a multi-tone spectrum, no hardware
 ''   Authors....  Iron Sheep Productions, LLC

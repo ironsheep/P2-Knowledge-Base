@@ -4,7 +4,7 @@
 ''   Purpose....  Packed 8-bit samples into a SCOPE window, config and
 ''                data sent separately
 ''   Manual.....  P2 Debug Window Manual
-''   Version....  v1.1.4 (2026-10-04)
+''   Version....  v1.1.5 (2026-11-05)
 ''   Appears in.  Chapter 13: Packed Data - Compact High-Rate Transfers --
 ''                How to send packed data
 ''   Authors....  Iron Sheep Productions, LLC

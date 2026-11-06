@@ -4,7 +4,7 @@
 ''   Purpose....  A debug window fed from an inline-PASM org/end block
 ''                inside a Spin2 method
 ''   Manual.....  P2 Debug Window Manual
-''   Version....  v1.1.4 (2026-10-04)
+''   Version....  v1.1.5 (2026-11-05)
 ''   Appears in.  Chapter 14: Multiple Windows and PASM Debugging --
 ''                Debugging from PASM
 ''   Authors....  Iron Sheep Productions, LLC

@@ -4,7 +4,7 @@
 ''   Purpose....  A trigger holding the trace still, instead of chasing a
 ''                free-running signal
 ''   Manual.....  P2 Debug Window Manual
-''   Version....  v1.1.4 (2026-10-04)
+''   Version....  v1.1.5 (2026-11-05)
 ''   Appears in.  Chapter 7: The SCOPE Window - Time-Domain Oscilloscope
 ''                -- Acquisition: catching a fast event over a slow link
 ''   Authors....  Iron Sheep Productions, LLC

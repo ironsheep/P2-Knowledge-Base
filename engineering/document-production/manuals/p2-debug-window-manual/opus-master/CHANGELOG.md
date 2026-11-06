@@ -1,5 +1,13 @@
 # P2 Debug Window Manual: Change Log
 
+## v1.1.5 (2026-11-05)
+
+**Names in capitals stay whole at a line end.**
+
+### Fixed
+
+- **`SPECTRO` and other all-caps names** keep to one piece at a line end, so a name never reads as if it had a hyphen
+
 ## v1.1.4 (2026-10-04)
 
 **How a frozen BITMAP comes back, how PLOT text aligns, and when a DEBUG timestamp runs early.**
