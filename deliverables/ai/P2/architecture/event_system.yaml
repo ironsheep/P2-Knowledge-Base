@@ -454,7 +454,7 @@ performance_characteristics:
   
   response_latency:
     polling: "POLLxxx: 2 clocks (per per-instruction YAMLs)"
-    waiting: "WAITxxx releases on the same clock the event flag becomes set"
+    waiting: "WAITxxx releases when the event occurs; no clock count is documented"
     interrupt: "4 clocks cog / 13-20 clocks hub for the dispatched CALLD (per language/pasm2/calld.yaml)"
   
   simultaneous_events: "All 4 SE events tracked independently"

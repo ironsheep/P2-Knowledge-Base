@@ -95,7 +95,7 @@ prerequisites:
 
 gotchas:
   - flag: pitfall
-    text: "Configure the smart pin while DIR is low: write the mode (WRPIN/WXPIN) BEFORE raising DIR. In the DAC modes a WYPIN during reset is captured, so the first value may be written before or after DIR rises."
+    text: "Configure the smart pin while DIR is low: write the mode (WRPIN/WXPIN) BEFORE raising DIR. In the two 16-bit dither DAC modes, Y is captured during reset (DIR=0)."
   - flag: pitfall
     text: "PWM dither (P_DAC_DITHER_PWM) requires its X period to be a multiple of 256 clocks (256 minimum). If you need a different period, use PRNG dither instead."
   - flag: pitfall

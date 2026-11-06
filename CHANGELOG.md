@@ -20,6 +20,21 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.25.2] - 2026-11-06
+
+**Interrupt pages in the Silicon Doc's words, and the size limit on bare struct pointers.**
+
+### Fixed
+
+- **STALLI and ALLOWI**: stall and allow INT1, INT2 and INT3 interrupt branches; debug interrupts are non-stallable, and a REP block shields against them
+- **NIXINT and TRGINT**: NIXINT cancels a triggered interrupt that is waiting to branch; a TRGINT branch waits for the branch conditions
+- **Interrupt timing**: interrupt entry, context switching and WAITxxx release carry no documented clock count, and the pages say so
+- **Interrupt protection**: the Spin2 interpreter accommodates interrupts and only stalls them briefly; a branch such as `_ret_` cancels REP; locks are semaphore bits with atomic read-modify-write operations
+- **Struct pointers**: `p := method()` compiles only for a structure of 4 bytes or fewer; `[p] := method()` is the form for a pointer receiver, in a child object or the same object
+- **Structure limits**: copy and swap work at any size; passing by value and multi-long assignment stop at 15 longs
+- **Clock setup**: the page separates the documented combinations from what a compile shows; `_xtlfreq` with `_xinfreq` is rejected
+- **DAC smart pins**: configure with WRPIN and WXPIN while DIR is low; in the two 16-bit dither modes Y is captured during reset
+
 ## [1.25.1] - 2026-11-06
 
 **`REP` and interrupts in the Silicon Doc's words, and the values `FVAR` and `FVARS` can size.**

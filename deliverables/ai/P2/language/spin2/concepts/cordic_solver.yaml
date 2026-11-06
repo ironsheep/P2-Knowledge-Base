@@ -123,7 +123,7 @@ comparison_with_pasm2:
   spin2_advantages:
     - Simpler syntax - just call the method
     - Automatic timing management
-    - No interrupt handling needed in the Spin2 code that calls it
+    - Spin2 accommodates interrupts and only stalls them briefly
     - Results returned directly
 
   pasm2_advantages:
