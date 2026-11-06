@@ -4,7 +4,7 @@
 ''   Purpose....  Feed one queue from several cogs, with a P2 hardware
 ''                lock making each enqueue exclusive
 ''   Manual.....  Data Structures with the New Language Facilities
-''   Version....  v1.0.3 (2026-11-05)
+''   Version....  v1.0.4 (2026-11-06)
 ''   Appears in.  Recipe R4 - Locked Multi-Writer Queue
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz

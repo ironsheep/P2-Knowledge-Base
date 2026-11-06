@@ -4,7 +4,7 @@
 ''   Purpose....  Stream records from exactly one producer cog to one
 ''                consumer cog through a ring buffer, with no lock
 ''   Manual.....  Data Structures with the New Language Facilities
-''   Version....  v1.0.3 (2026-11-05)
+''   Version....  v1.0.4 (2026-11-06)
 ''   Appears in.  Recipe R2 - Lock-Free Ring Buffer (One Producer, One
 ''                Consumer)
 ''   Authors....  Iron Sheep Productions, LLC

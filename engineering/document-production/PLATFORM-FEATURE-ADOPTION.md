@@ -678,7 +678,7 @@ cell from — to ⏳**, and the owed work is the tag in the source plus `p2kb-pl
 adoption only where the document carries three or more notes.
 
 ²⁷ **P2AN007 — all four proven on the released v1.0.2 PDF, 2026-10-04** (18:32 build, 16pp = prior), and
-held on v1.0.3 (cover "November 2026", "Version 1.0.3"; metadata gate and example corpus green).
+held on v1.0.3 and v1.0.4 (cover "November 2026", "Version 1.0.4"; metadata gate and example corpus green).
 **Metadata single-source + rights:** the cover reads `\DocDate` / `\DocVersion` (page 1: "October 2026",
 "Version 1.0.2"); `audit-pdf-metadata.py --require-rights --request` verified all seven declared fields —
 Title, Subject, Author, Keywords (copyright + licence), page-1 date and version — CLEAN; v1.0.1 carried

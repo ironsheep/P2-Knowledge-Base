@@ -47,6 +47,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 - closed 2026-10-12 at the v1.24.3 release «#425» (1 finding: F-573) → `correction-sweeps/2026-10-12-v1.24.3-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-10-12 at the v1.24.5 release (1 finding: F-574) → `correction-sweeps/2026-10-12-v1.24.5-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-11-05 at the v1.25.0 release (49 findings: F-576 … F-615, F-617 … F-624, F-629; F-588 and F-589 withdrawn) → `correction-sweeps/2026-11-05-v1.25.0-P2KB-CORRECTION-FINDINGS-archive.md`
+- closed 2026-11-06 at the P2AN007 v1.0.4 release (F-565) → `correction-sweeps/2026-11-06-p2an007-v1.0.4-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-11-06 at the P2AN004 v1.0.4 release (F-638) → `correction-sweeps/2026-11-06-p2an004-v1.0.4-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-11-06 at the P2AN007 v1.0.3 release (F-630) → `correction-sweeps/2026-11-06-p2an007-v1.0.3-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-11-06 at the v1.25.1 release (F-632, F-633) → `correction-sweeps/2026-11-06-v1.25.1-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -306,28 +307,6 @@ beside `parallax.com/`; a non-Parallax host is still refused. **Owed:** other `w
 hardware pages that are not Quick Bytes articles (`/usbdrivers`, `/product/p2-to-mikrobus-click-adapter`, the
 bare home page) were not probed under the request to keep traffic to Parallax light; and the download links
 themselves were read from the pages, not fetched, so `auth_gated: false` rests on the page showing no gate.
-
-### F-565 — `keywords/STRUCT.yaml` `gotchas.struct_pointer_obj_returns` said `pCfg := sensor.getConfig()` is a COMPILE ERROR for structures over 15 longs; no ingested source and no compile-proof record states it — `PARTIAL` (the KB is applied; `P2AN007.md:57` and `:422` are owed at the app note's next release)
-> **KB decision:** not KB: released in v1.25.2; P2AN007.md is owed
-> **Answered 2026-11-06, CP-028:** the compile probe needed no bench. The bare form is rejected at 5 bytes or more, in a child object and in the same object, with `Expected ","` up to 15 longs and `Expected a variable (m251)` from 16; 4 bytes or fewer compiles; the bracket form always compiles. So the removed claim was wrong in scope, and the replacement "writes through the pointer" was wrong from 5 bytes. `STRUCT.yaml`, `typed-pointers.yaml` and the P2AN007 companion now say this. "Larger uses BYTEMOVE" goes from `STRUCT.yaml` and the companion: Spin2 v55 states copy and swap at any size and no BYTEMOVE.
-Found 2026-10-09 by «#415» fixing `language/spin2/keywords/STRUCT.yaml`. The page carried a
-`wrong:`/`correct:` pair (`pCfg := sensor.getConfig()  ' COMPILE ERROR for large structs` against
-`[pCfg] := sensor.getConfig()`), the explanation that "the compiler may interpret the return as the full
-structure", and the scope "only across OBJ boundaries". Both pair strings were manifest class `not-code`
-(a one-line string cannot declare the `sensor` OBJ), so the gate never compiled them. The only origin is
-the upstream lead `external-inputs/pnut_ts_facts/Pointer-Usage-Guide.md` (not an authority); Spin2 v55's
-VAR Blocks section states only that a pointer variable named alone is the pointed-to variable and
-`[ptrvar]` is the pointer itself (`spin2-v55-text.txt:249-261`); the interpreter has no typed-pointer
-bytecode; no EF or CP record covers the call. **Applied now:** the pair, the compile-error claim and the
-scope sentence are removed; the page states the v55 pointer semantics (a bare `pCfg :=` writes through
-the pointer, `[pCfg] :=` stores the pointer) and keeps the compiled bracket-form example. **Question
-(compile probe, no hardware):** with a child object returning a `^StructName` of 16 or more longs,
-does `pCfg := child.getConfig()` fail to compile, and with what message? **Fix when answered:** record a
-CP-NNN in `COMPILE-PROOFS.md`; if it fails, restore the "wrong" form as a `never` block citing it. The
-same pair sat in `operators/typed-pointers.yaml` (`gotchas.struct_pointer_obj_returns`); **«#416»
-applied the same treatment there on 2026-10-10** (the pair, the compile-error claim and the scope sentence
-removed, the v55 pointer semantics stated, the bracket-form example kept). The CP-NNN question above
-now covers both pages.
 
 ### F-564 — what a stopped cog leaves on the pins and in smart-pin modes is stated nowhere in the ingested sources; `cogstop.yaml` shipped three claims about it — `NEEDS-VERIFICATION` (bench question)
 > **KB decision:** in batch v1.25.5

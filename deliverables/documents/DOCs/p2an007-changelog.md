@@ -1,5 +1,14 @@
 # P2AN007 Changelog: Data Structures with the New Language Facilities
 
+## v1.0.4 (2026-11-06)
+
+**A record pointer from a method takes brackets, in a child object or the same object.**
+
+### Fixed
+
+- **Record pointers from methods** (Pitfalls): `[pRec] := child.method()` receives the pointer; without the brackets, a record of 5 bytes or more fails to compile
+- **Copy and swap** work at any record size
+
 ## v1.0.3 (2026-11-05)
 
 **`LOCKNEW`'s failure value is stated as the Spin2 documentation states it.**
