@@ -237,6 +237,10 @@ def scan(path):
         if depth > 0:
             continue
 
+        # A comment line never prints, so nothing on it can leak to the page.
+        if ln.lstrip().startswith("%"):
+            continue
+
         # INLINE CODE is verbatim too. pandoc emits a code span as
         # \passthrough{\lstinline!code!}, and its content is literal, so every
         # signature below is legitimate inside it. Blank the spans (length-preserving)

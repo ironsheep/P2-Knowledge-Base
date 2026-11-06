@@ -98,12 +98,18 @@ def main():
         if not args.quiet:
             print(f'GREEN: no examples-library/ under {slug} — no ZIP to check.')
         return 0
+    expected = shippable(corpus)
     if not os.path.isfile(zippath):
+        if not expected:
+            # A folder holding only .gitkeep has nothing to publish.
+            if not args.quiet:
+                print(f'GREEN: examples-library/ under {slug} has no shippable '
+                      f'files — no ZIP to check.')
+            return 0
         print(f'RED: {slug} has an examples-library/ but no published ZIP at '
               f'{zippath}', file=sys.stderr)
         return 1
 
-    expected = shippable(corpus)
     with tempfile.TemporaryDirectory() as tmp:
         with zipfile.ZipFile(zippath) as zf:
             zf.extractall(tmp)

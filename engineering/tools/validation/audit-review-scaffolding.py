@@ -18,8 +18,9 @@ product, in front of the public.
 
 WHAT IT LOOKS FOR
 -----------------
-  markdown  ::: {.tool-review ...}   the authored fence
-  latex     \\begin{ToolReviewBlock}  the rendered box (also catches boxes
+  markdown  ::: {.tool-review ...}   the authored fence, which opens its line
+                                     (prose that names the fence is not a box)
+  latex    \\begin{ToolReviewBlock}  the rendered box (also catches boxes
                                      hand-written in raw-LaTeX front matter)
 
 Run it over the opus-master sources AND the generated .tex, because either one
@@ -57,7 +58,9 @@ def scan(path: Path):
         return
     for lineno, line in enumerate(text.splitlines(), 1):
         for label, needle, also in MARKERS:
-            if needle in line and (also is None or also in line):
+            found = (needle in line if also is None
+                     else line.lstrip(" \t>").startswith(needle) and also in line)
+            if found:
                 yield path, lineno, label, line.strip()
                 break
 
