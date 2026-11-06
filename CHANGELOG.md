@@ -20,6 +20,16 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.25.1] - 2026-11-06
+
+**`REP` and interrupts in the Silicon Doc's words, and the values `FVAR` and `FVARS` can size.**
+
+### Fixed
+
+- **REP and interrupts**: a REP block is shielded from interrupts, debug included; a pending interrupt branches once REP is no longer active and the other branch conditions are met
+- **SETQ block moves**: SETQ/SETQ2 shields the next instruction from interruption
+- **FVAR / FVARS**: a label defined later in the file stops the build with "Undefined symbol"; a constant, wherever it is defined, is accepted
+
 ## [1.25.0] - 2026-11-05
 
 **The `RFVAR`/`RFVARS` byte format and a new `FVAR`/`FVARS` entry, with fuller DEBUG, lock, pin and boot pages.**
