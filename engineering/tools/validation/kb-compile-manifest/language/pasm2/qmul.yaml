@@ -23,6 +23,6 @@ blocks:
     wrap: pasm2-dat
     assumes: [a1, b1, a2, b2, result1_low, result1_high, result2_low, result2_high]
   - at: interrupt_protection
-    fp: "46e080a1f7a0b52a"
+    fp: "1f595a64153631eb"
     compile: not-code
     reason: "YAML prose (\"For timing-critical PASM2 code ... use REP with a single iteration ...\") with an indented REP/QMUL/GETQX/GETQY excerpt embedded after an English lead-in; the excerpt itself compiles as a fragment (scratch check) but the string as a whole is a sentence"

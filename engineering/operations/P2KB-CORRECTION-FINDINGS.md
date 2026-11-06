@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-637`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-638`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -83,6 +83,11 @@ Line 272's table row gives "28-bit value" in both columns. The 4th byte carries 
 
 ### F-628 — XBYTE Guide §15.4 says "the assembler emits" a two-byte offset without saying how — `CONFIRMED` (found 2026-11-05, «#440»)
 `xbyte-body.md:1514`: the -64..+63 range is right; the sentence omits that `FVARS` is what makes the assembler size the value. Fix: name `FVARS`.
+
+### F-637 — `qmul.yaml` says Spin2 operators are already protected by the interpreter — `PENDING-VALIDATION` (found 2026-11-06, the document pass's class search)
+> **KB decision:** in batch v1.25.4
+`language/pasm2/qmul.yaml:142`, the last of the wording `cordic_solver.yaml` dropped in v1.25.2. Spin2 v55 says the interpreter "accommodates interrupts and only stalls them briefly" and does not speak of the CORDIC window.
+> **Applied 2026-11-06, widened by the v1.25.4 audit:** v55's sentence sits in the list of what in-line and CALLed PASM may do, and says nothing of CORDIC or operators. Beside a CORDIC window it still read as "Spin2 CORDIC is safe", so it moves to its own home, `spin2/constructs/inline_pasm.yaml` `interrupts`, and goes from `qmul.yaml` and both `cordic_solver.yaml` pages; "Spin2 code" comes off `when_unnecessary`. `spin2/concepts/cordic_solver.yaml` drops the same claim in other words ("handle all timing and synchronization automatically", "No timing concerns", "interpreter handles everything", "Automatic timing management", "handled efficiently", the key `automatic_management`, now `calling_the_methods`), "All operations use dedicated CORDIC hardware", the two unsourced speed comparisons and "Full 32-bit precision", which becomes the Silicon Doc's "32-bit, pipelined CORDIC solver with scale-factor correction". Documents follow: Assembly §5.1.8, `REP`, `instructions-q.md`, `instruction-categories.md`, and P2AN002 `:326`, each stating the pattern for PASM2 with interrupts enabled.
 
 ### F-636 — two leftovers of F-632's class, seen reading the pages live on v1.25.1 — `PENDING-VALIDATION` (found 2026-11-06, «#440», v1.25.1 content probe)
 > **KB decision:** not KB: released in v1.25.2 and read live, only the register closure is owed

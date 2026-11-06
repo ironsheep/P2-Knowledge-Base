@@ -20,6 +20,19 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.25.4] - 2026-11-06
+
+**The CORDIC pages keep to what the sources state.**
+
+### Fixed
+
+- **CORDIC and interrupts**: the REP protection pattern is stated for PASM2 code with interrupts enabled, on the `QMUL` page and both CORDIC concept pages
+- **Spin2 CORDIC page**: a method returns its results directly; the hardware is a 32-bit, pipelined CORDIC solver with scale-factor correction
+
+### Added
+
+- **In-line PASM**: in-line code may enable an interrupt that executes code in cog registers $000..$11F, and Spin2 accommodates interrupts and only stalls them briefly
+
 ## [1.25.3] - 2026-11-06
 
 **The event and interrupt pages name each event source in the Silicon Doc's words.**
