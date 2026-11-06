@@ -47,6 +47,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 - closed 2026-10-12 at the v1.24.3 release «#425» (1 finding: F-573) → `correction-sweeps/2026-10-12-v1.24.3-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-10-12 at the v1.24.5 release (1 finding: F-574) → `correction-sweeps/2026-10-12-v1.24.5-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-11-05 at the v1.25.0 release (49 findings: F-576 … F-615, F-617 … F-624, F-629; F-588 and F-589 withdrawn) → `correction-sweeps/2026-11-05-v1.25.0-P2KB-CORRECTION-FINDINGS-archive.md`
+- closed 2026-11-06 at the P2AN003 v1.0.3 release (F-561) → `correction-sweeps/2026-11-06-p2an003-v1.0.3-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-11-06 at the P2AN007 v1.0.4 release (F-565) → `correction-sweeps/2026-11-06-p2an007-v1.0.4-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-11-06 at the P2AN004 v1.0.4 release (F-638) → `correction-sweeps/2026-11-06-p2an004-v1.0.4-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-11-06 at the P2AN007 v1.0.3 release (F-630) → `correction-sweeps/2026-11-06-p2an007-v1.0.3-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -343,25 +344,6 @@ gives "ISP Hub75 Matrix Driver" and `.../isp-hub75-matrix-driver/`. Which is cur
 > which already agreed with each other; the old name was the GitHub repository's. **Not verifiable
 > here:** whether the live OBEX listing still carries that title and path (no network). Stephen:
 > open `https://obex.parallax.com/obex/isp-hub75-matrix-driver/` and say if it resolves.
-
-### F-561 — P2AN003 (app note + YAML companion) says reversing the DAC init order "leaves the first output cycle undefined"; the P2 Documentation says Y is captured in reset — `PARTIAL` (companion half applied 2026-10-10, «#420», and `PENDING-VALIDATION`; the app-note prose and the "undefined" clause change together at the app-note release)
-> **KB decision:** not KB: released in v1.25.2; P2AN003.md is owed
-> **Applied 2026-11-06:** the "undefined" sentence is out of the companion now, because it should not stay in service waiting for the app note. `P2AN003.md:541` is still owed at the app note's next release.
-Found 2026-10-07 by the independent check of F-554. `app-notes/P2AN003/opus-master/P2AN003.md:541`
-and its companion `application-notes/p2an003-dac-analog-signal-generation.yaml:98` ("the universal
-smart-pin init order. Reversing it leaves the first output cycle undefined"). For the DAC modes
-the P2 Documentation says "During reset (DIR=0), IN is low and Y.[15..0] is captured"
-(`silicon-doc-text.txt:3946`, `:3963`) — a WYPIN before DIR is raised is captured, not lost; no
-source states the "undefined" outcome, and "universal" overclaims (EF-090 exception). **Fix:** the
-app note and its companion together (the agreement gate), as an app-note correction release —
-state the order as the general one and drop the unsourced consequence, or source it.
-
-> **Half applied 2026-10-10 («#420»), by the agreement gate's own rule.** The companion
-> `p2an003-dac-analog-signal-generation.yaml` `gotchas[0]` no longer says "the universal smart-pin init
-> order" (the app note never said it). The clause "Reversing it leaves the first output cycle
-> undefined" is **kept in both** — the published app-note text (`P2AN003.md:541`) states the same, so
-> changing the companion alone would put them in disagreement. It changes in the app-note release
-> together with the prose.
 
 ## Full impact audit: every fact KB v1.23.0 and v1.23.1 changed, against every live document (2026-10-04, «#378») — F-526 … F-541, plus F-542 … F-545 (seen verifying v1.23.1 and writing the MCP filter handoff)
 

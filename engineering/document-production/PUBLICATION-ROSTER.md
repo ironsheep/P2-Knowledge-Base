@@ -52,7 +52,7 @@ The released set. The technical manuals here (all on the shared `p2kb-platform` 
 | Interpreters & Emulators (XBYTE) | manual | 1.1.1 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | P2AN001 — ADC Instrumentation | app-note | 1.0.6 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | P2AN002 — CORDIC for Real Work | app-note | 1.0.5 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
-| P2AN003 — DAC & Signal Generation | app-note | 1.0.2 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
+| P2AN003 — DAC & Signal Generation | app-note | 1.0.3 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | P2AN004 — Freq / Rotation / RC-Timing | app-note | 1.0.4 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | P2AN005 — Cooperative Multitasking / TASK (C1) | app-note | 1.0.2 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
 | P2AN006 — Sizing Cog & Task Stacks (C3) | app-note | 1.0.2 | ✅ | ✅ | ✅ | — | ✅ | ✅ |
@@ -185,7 +185,9 @@ Prior **v1.0.4 released 2026-09-11** (15pp) — each timing and precision figure
 Prior **v1.0.0 (2026-07-03, 14pp)** — lead of the Math family (B1); techniques-catalog (6 recipes + FOC/Park ceiling, OBEX #2811).
 
 **P2AN003 — DAC & Analog Signal Generation** · `P2AN003` · app-note
-**v1.0.1 released 2026-07-12** (19pp) — DAC precision refinement: the PWM-dither spectral component sits at a fixed sysclock/256, independent of the sample period.
+**v1.0.3 released 2026-11-06** (20pp) — the output-stage pitfall states what the P2 documentation says: configure with WRPIN and WXPIN while DIR is low, and in the two 16-bit dither modes Y is captured during reset (F-561). Adopts all four platform features: metadata single-source, rights, cross-ref filter, and generated example headers with five printed captions. ZIP repacked with the v1.0.3 headers.
+Prior **v1.0.2 released 2026-08-08** (19pp) — licensing patch, CC BY-SA 4.0 restored; no technical content changed.
+Prior **v1.0.1 released 2026-07-12** (19pp) — DAC precision refinement: the PWM-dither spectral component sits at a fixed sysclock/256, independent of the sample period.
 Prior **v1.0.0 (2026-07-03, 19pp)** — Family A1 (output sibling to ADC); shared dithered-DAC output stage + 5 recipes (sample playback, waveform synthesis, dithering, ADC→DAC passthrough, mixing & panning) + reSound 32-stream ceiling (OBEX #2861). Deep audit (4-agent fan-out + hand-verify) caught + fixed a HIGH Recipe-4 scaling bug pre-release. Cites IOSP Ch.10/§18.3.
 
 **P2AN004 — Frequency / Rotation / RC-Timing Measurement** · `P2AN004` · app-note
@@ -348,6 +350,7 @@ that PDF was generated. This ledger is the detector.
 ```
 2026-11-06 21:56  PUBLISH   P2AN004                          (v1.0.4, 16pp, prior 15, +1 from the Revision History row spilling to a 68-word last page; F-638: `P_LOW_150K` absent, the Verify line read on p8; no all-caps breaks; 16pp log, 0 serious signatures, max overfull 10.31pt; release gates green; cover November 2026 / Version 1.0.4; ZIP repacked 4/4; examples compile.)
 2026-11-06 21:53  PUBLISH   P2AN002                          (v1.0.5, 16pp, prior 15, +1 from the Revision History row spilling to a 74-word last page; F-637: the interrupt pitfall stated for PASM2, text-present p11 and read; no all-caps breaks; 16pp log, 0 serious signatures, max overfull 1.66pt; release gates green; cover November 2026 / Version 1.0.5; ZIP repacked 7/7.)
+2026-11-06 22:02  PUBLISH   P2AN003                          (v1.0.3, 20pp, prior 19, +1 from five captions and the new Revision History row, 101-word last page; F-561: the pitfall read on p17, "undefined" absent; all four platform features proven; no all-caps breaks; 20pp log, 0 serious signatures, max overfull 2.50pt; release gates green; cover November 2026 / Version 1.0.3; ZIP repacked 6/6.)
 2026-11-06 22:01  PUBLISH   P2AN001                          (v1.0.6, 20pp = prior; F-634: no all-caps breaks; 20pp log, 0 serious signatures, max overfull 1.65pt; release gates green; cover November 2026 / Version 1.0.6; ZIP repacked 4/4.)
 2026-11-06 21:57  PUBLISH   P2AN007                          (v1.0.4, 16pp = prior; F-565: the pointer pitfall read on p14, `BYTEMOVE` absent; no all-caps breaks; 16pp log, 0 serious signatures, max overfull 7.80pt; release gates green; cover November 2026 / Version 1.0.4; ZIP repacked 7/7.)
 2026-11-05 23:00  PLATFORM  filters/p2kb-platform-mnemonic-bold.lua   (F-634: all-caps words in a document are hyphenation exceptions, listed by the filter from the document's own text; a list of all-caps names may break after its slash. Hyphen breaks in names read as names with hyphens: 29 all-caps breaks in 6 released PDFs, Assembly 22. `\uchyph=0` was tried first and rejected: it stopped ordinary capitalised words too, and pushed text up to 74.5pt past the margin. Line breaks move, and page counts can. P2AN007 has absorbed it; Assembly, XBYTE, P2AN001, Single-Step, PNut-Term-TS, Debug Window and I/O & Smart Pins are prepared to; every other consumer of the filter at its next render)
@@ -452,7 +455,8 @@ lives in the Live-section detail above — not repeated here.)
 | `P2AN001` | 1.0.6 | ✅ current | rebuilt 11-06 22:01 (20pp) — above every platform line |
 | `P2AN007` | 1.0.4 | ✅ current | rebuilt 11-06 21:57 (16pp) — above every platform line |
 | `P2AN006` | 1.0.2 | ✅ current | rebuilt 10-12 23:09 (14pp) — above every platform line |
-| `P2AN003` · `P2AN005` | see roster | ⏳ behind 09-10 | last rebuilt 08-08 (licensing wave); behind `foundation.sty` 09-10 23:09 onward |
+| `P2AN003` | 1.0.3 | ✅ current | rebuilt 11-06 22:02 (20pp) — above every platform line |
+| `P2AN005` | see roster | ⏳ behind 09-10 | last rebuilt 08-08 (licensing wave); behind `foundation.sty` 09-10 23:09 onward |
 | `pnut-term-ts-user-guide` | 1.0.0 | ⏳ behind 09-10 | INITIAL release published 09-10 04:18 (47pp); behind `foundation.sty` 09-10 23:09 onward |
 | `p2-layout-torture-test` | — | ✅ served its purpose 09-11 | behind several platform files + `diagrams.sty`. **Was the F-319 negative control, and it earned its keep on 2026-09-11**: rendered unadopted against the 09-10 fix and came back with `"; licensed under "` anyway, which is what exposed the real cause (`@` at catcode 12, so `\@empty` was never the kernel's empty macro). Completed fix then proven on it in all four branches |
 

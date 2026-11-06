@@ -57,7 +57,8 @@ each feature's *mechanism* stays in its own document, linked below.
 | **P2AN004** | app-note | **✅** ²⁰ | **✅** ²⁰ | **✅** ²⁰ | **✅** ²⁰ | — |
 | **P2AN007** | app-note | **✅** ²⁷ | **✅** ²⁷ | **✅** ²⁷ | **✅** ²⁷ | — |
 | **P2AN006** | app-note | **✅** ²⁹ | **✅** ²⁹ | **✅** ²⁹ | **✅** ²⁹ | — |
-| P2AN003 · P2AN005 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ | — |
+| **P2AN003** | app-note | **✅** ³⁵ | **✅** ³⁵ | **✅** ³⁵ | **✅** ³⁵ | — |
+| P2AN005 | app-note | ⏳ ⁴ | ⏳ | ⏳ | ⏳ ⁵ | — |
 | Layout Torture Test | instrument | — | — | — | — | — |
 | AI Privacy Guide | guide | — | ⏳ | — | — | — |
 
@@ -613,6 +614,8 @@ section — page N", with 44 link annotations on the page. `audit-pdf-silicon-no
 page carries its chip and section, 22 entries = 22 notes in the source. That gate was built at this release
 after the 05:19 build sent the WMLONG entry a page early (fixed in `content.sty`, 19:43 line).
 `p2kb-platform-silicon-notes` sits before tables in `request.json`.
+
+³⁵ **P2AN003 — all four proven on the released v1.0.3 PDF, 2026-11-06** (22:02 build, 20pp, prior 19). **Metadata single-source + rights:** `audit-pdf-metadata.py --require-rights` CLEAN; Title, Subject, Author and Keywords read from the artifact; cover "November 2026", "Version 1.0.3". **Cross-ref filter:** wired, and correctly silent: the note holds no self-reference to link (0 hyperlinks in the `.tex`), as for P2AN001/002/004. **Captions + generated headers:** all five captions read on pp6, 8, 10, 11 and 14, with p6 rendered and inspected; corpus identity GREEN and ZIP currency 6/6.
 
 ³³ **I/O & Smart Pins — silicon notes proven on the released v1.0.11 PDF, 2026-10-05** (03:03 build, 397pp
 = prior). Two chips (DAC-mode ADC feedback: OUT runs the ADC only with TT bit 0 set) render inline on p161

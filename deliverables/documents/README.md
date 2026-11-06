@@ -123,11 +123,11 @@ Put the Propeller 2's shared hardware CORDIC solver to real work, the engine tha
 *November 2026 - Community Review Edition* | [Changelog](DOCs/p2an002-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN002-src.zip)
 
 #### [Generate Analog Waveforms and Audio on a P2 Pin](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN003.pdf)
-**Application Note P2AN003 · DAC & Analog Signal Generation** · *Version 1.0.2*
+**Application Note P2AN003 · DAC & Analog Signal Generation** · *Version 1.0.3*
 
 Turn a single P2 pin into a 16-bit audio-quality analog output using only the built-in smart-pin DAC, no external converter. It dithers the pin's 8-bit DAC to an effective 16 bits and paces it from the smart pin's own sample clock, so a continuous signal is just the right sequence of numbers delivered on time. One shared output stage comes first, then five recipes to choose among: sample playback and waveform synthesis from a DDS phase accumulator, deliberate dither-mode and RC-filter choice for effective resolution, a real-time ADC-to-DAC passthrough, and multi-voice mixing with stereo panning, plus a 32-stream reference ceiling. Every worked program compiles clean and runs on a bare P2 board, with a one-jumper known-answer check that proves the whole signal path with no bench gear.
 
-*August 2026 - Community Review Edition* | [Changelog](DOCs/p2an003-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN003-src.zip)
+*November 2026 - Community Review Edition* | [Changelog](DOCs/p2an003-changelog.md) | [Example Library (ZIP)](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN003-src.zip)
 
 #### [Read Real-World Sensors by Frequency, Rotation, and RC Timing on a P2 Pin](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/P2AN004.pdf)
 **Application Note P2AN004 · Frequency / Rotation / RC-Timing Measurement** · *Version 1.0.4*

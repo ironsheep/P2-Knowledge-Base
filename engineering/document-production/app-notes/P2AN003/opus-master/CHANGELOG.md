@@ -1,5 +1,18 @@
 # P2AN003 Changelog: DAC & Analog Signal Generation
 
+## v1.0.3 (2026-11-06)
+
+**The output-stage order is stated with what the P2 documentation says about Y.**
+
+### Fixed
+
+- **DAC pin setup** (Pitfalls): configure with WRPIN and WXPIN while DIR is low; in the two 16-bit dither modes, Y is captured during reset (DIR=0)
+
+### Added
+
+- **Example library**: each example file opens with a header naming its purpose and this note's version
+- **Cover and PDF properties** carry the version, date and license
+
 ## v1.0.2 (2026-08-08)
 
 A licensing change. No technical content changed.
