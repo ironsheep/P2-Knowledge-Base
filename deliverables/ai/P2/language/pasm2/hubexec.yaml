@@ -34,6 +34,7 @@ notes:
 - Must specify target cog ID (0-7)
 - Use HUBEXEC_NEW to auto-select available cog
 - See also HUBEXEC_NEW and HUBEXEC_NEW_PAIR variants
+hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 related:
 - COGEXEC
 - ORGH
@@ -42,5 +43,6 @@ related:
 - language/pasm2/concepts/cog_hub_execution.yaml
 - language/pasm2/concepts/execution_modes.yaml
 - architecture/fifo.yaml
+- language/spin2/integration/spin2-pasm2-integration.yaml
 oneliner: Predefined constant for COGINIT instruction
 source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION (13-clock minimum branch, forbidden-instruction list); THE COG -to- HUB RAM INTERFACE ((cogs+11) FIFO stages); INSTRUCTION REPEATING (REP hidden jump in hub memory)"

@@ -68,8 +68,10 @@ code_examples:
         wypin(tx_pin, value)
       
       DAT
-      ' PASM2 example - high-speed serial output
+      ' PASM2 example - high-speed serial output, started by
+      ' COGINIT(COGEXEC_NEW, @entry, @message), which puts @message in PTRA
         org
+      entry
         mov     bit_clks, ##(_clkfreq / baud) << 16
         or      bit_clks, #7                     ' 8 data bits (X[4:0] = N-1)
 
@@ -79,7 +81,6 @@ code_examples:
         dirh    #tx_pin                          ' Enable smart pin
 
         ' Send message
-        mov     ptra, ##@message                 ' hub address of the message
       .loop
         rdbyte  data, ptra++                     ' Get next character
         cmp     data, #0 wz                      ' Check for null
@@ -87,8 +88,8 @@ code_examples:
         call    #transmit
         jmp     #.loop
       .done
-        ret
-      
+        jmp     #.done                           ' Message sent: nothing to return to
+
       transmit
         testp   #tx_pin wc                       ' Wait for ready
         if_nc   jmp #transmit

@@ -406,3 +406,5 @@ sources:
   - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG ATTENTION"
   - "Parallax Spin2/PASM Debugger v51, debug entry and debug_exit (LOCKTRY #15 / LOCKREL #15 give one cog at a time ownership of the save buffer and tx/rx pins)"
   - "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts)"
+
+hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."

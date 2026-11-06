@@ -318,3 +318,5 @@ see_also:
   - architecture/streamer/modes-reference.yaml
   - architecture/streamer/nco-timing.yaml
   - language/pasm2/getxacc.yaml
+
+hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."

@@ -190,9 +190,11 @@ events:
   EVENT_XRL: "Read LUT address $1FF (event 13)"
 
 # See also
+hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 related:
   - architecture/streamer/pin-capture.yaml
   - architecture/smart_pins.yaml
+  - language/spin2/integration/spin2-pasm2-integration.yaml
 
 see_also:
   - architecture/streamer/modes-reference.yaml

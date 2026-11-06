@@ -451,15 +451,14 @@ integration_rules:
     hub_call: "Runs in hub execution mode, slower but more flexible"
     
   hub_address_resolution:
-    rule: |
-      INSIDE A SPIN2 OBJECT, `##hubsymbol` IN A DAT BLOCK DOES NOT RESOLVE TO THE
-      SYMBOL'S RUNTIME HUB ADDRESS. It resolves against $400 rather than the object's
-      load address, so the PASM reads interpreter memory and returns garbage.
-    correct_in: "A STANDALONE PASM file, where the load-address precondition holds and `##hubsym` is correct."
+    rule: "INSIDE A SPIN2 OBJECT, HUB ADDRESSES IN A DAT BLOCK ARE RELATIVE TO THE OBJECT, AND NO IMMEDIATE FORM GIVES A HUB SYMBOL'S RUNTIME HUB ADDRESS. `##hubsymbol` assembles to $400 plus an offset, the same value whichever object it is in, so the PASM reads other memory and returns garbage. `#hubsymbol` and `#\\hubsymbol` from cog code assemble to that value too. `##@hubsymbol` and `LONG @hubsymbol` assemble to the offset from the start of the object."
+    cog_symbols: "A symbol defined under ORG and used as a cog address is unaffected: `#cogsym` and `##cogsym` assemble to its cog address."
+    correct_in: "A PASM-only file, where hub addresses are absolute: `##hubsym` and `##@hubsym` are both correct."
+    at_at: "`@@x` is the hub address of this object + x, for a stored offset read in a Spin2 method. The compiler rejects it in a DAT block, as `##@@sym` and as `LONG @@sym`."
     why_it_bites: "A PASM fragment copied out of a guide or reference into a Spin2 object — which is how most P2 code is written — carries this defect invisibly. It assembles, it runs, and it reads the wrong memory."
-    workaround: "Pass hub addresses in from Spin2 with `@` (e.g. `@buffer` into a DAT long or a PTRx), or address through PTRA/PTRB."
+    workaround: "Pass hub addresses in from Spin2 with `@`: COGINIT(COGEXEC_NEW, @entry, @buffer) puts @buffer in the new cog's PTRA. In a Spin2 method, `@@table[i]` converts a stored offset first."
     behaviour: "`@disp` reports $1AF9 from Spin2 while `##disp` gives $0651 from PASM in the same object — 5,288 bytes apart."
-    source: "EF-060 (real P2 silicon)"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (hub addresses in Spin2+PASM and in PASM-only programs), Operators (@@); EF-060 (real P2 silicon); CP-030"
 
   memory_safety:
     cog_limits: "$000-$11F safe for user code, $120+ reserved"

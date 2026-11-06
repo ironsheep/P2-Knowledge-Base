@@ -13,7 +13,7 @@ examples:
 
     table   long  $1234_5678         '' Hex value
 
-    ptrs    long  @start, @fin       '' Address pointers
+    ptrs    long  @start, @fin       '' Addresses: object offsets in a Spin2 object
 
     '
   description: Long data declarations

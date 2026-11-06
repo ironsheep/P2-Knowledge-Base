@@ -240,6 +240,7 @@ limitations:
   - "Hub-execute mode dedicates the FIFO to instruction prefetch"
   - "In hubexec, these FIFO/streamer instructions are FORBIDDEN: RDFAST, WRFAST, FBLOCK, RFBYTE, RFWORD, RFLONG, RFVAR, RFVARS, WFBYTE, WFWORD, WFLONG, XINIT, XZERO, XCONT (when streamer engages FIFO)"
 
+hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 related:
   - streamer: "Streamer also uses hub data transfers"
   - hub_memory: "FIFO operates on hub RAM"

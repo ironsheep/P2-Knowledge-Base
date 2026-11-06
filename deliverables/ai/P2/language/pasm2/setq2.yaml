@@ -61,6 +61,7 @@ last_updated: '2025-09-19T16:04:16.983812'
 category: Miscellaneous
 oneliner: Set Q to D
 
+hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 related:
   - language/pasm2/setq.yaml
   - language/pasm2/rdlong.yaml
@@ -69,3 +70,4 @@ related:
   - language/pasm2/wrlut.yaml
   - language/pasm2/concepts/setq_block_ops.yaml
   - architecture/xbyte_engine.yaml
+  - language/spin2/integration/spin2-pasm2-integration.yaml

@@ -63,8 +63,10 @@ code_examples:
         value := rdpin(rx_pin) >> 24
       
       DAT
-      ' PASM2 example - buffered serial receive
+      ' PASM2 example - buffered serial receive, started by
+      ' COGINIT(COGEXEC_NEW, @entry, @buffer), which puts @buffer in PTRA
         org
+      entry
         mov     bit_clks, ##(_clkfreq / baud) << 16
         or      bit_clks, #7                     ' 8 data bits (X[4:0] = N-1)
 
@@ -74,7 +76,6 @@ code_examples:
         dirh    #rx_pin                          ' Enable smart pin
 
         ' Receive loop with buffering
-        mov     ptra, ##@buffer                  ' hub address of the buffer
         mov     count, #0
       .loop
         testp   #rx_pin wc                       ' Check for data
@@ -87,8 +88,8 @@ code_examples:
         if_nz   jmp #.loop                       ' Continue if buffer not full
         
         ' Process buffer...
-        ret
-      
+        jmp     #$                               ' Buffer full: nothing to return to
+
       rx_mode
         long    P_ASYNC_RX
       buffer  byte    0[256]                     ' 256-byte buffer

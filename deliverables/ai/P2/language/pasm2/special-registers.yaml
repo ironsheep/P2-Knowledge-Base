@@ -330,6 +330,7 @@ common_patterns:
     setq    #count-1
     rdlong  buffer, ptra++
 
+hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 related:
 - DIRC/DIRH/DIRL - Pin direction instructions
 - OUTC/OUTH/OUTL - Pin output instructions

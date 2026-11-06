@@ -473,6 +473,7 @@ why_this_matters:
     in limited COG RAM, supporting complex debugging operations
     without consuming precious COG space permanently.
 
+hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 related:
   - language/pasm2/jmp.yaml
   - language/pasm2/call.yaml
@@ -490,6 +491,7 @@ related:
   - language/pasm2/cogexec.yaml
   - architecture/fifo.yaml
   - language/spin2/constructs/inline_pasm.yaml
+  - language/spin2/integration/spin2-pasm2-integration.yaml
 
 sources:
   - propeller_2_documentation_v35: "HUB EXECUTION section. Branching to a hub address takes a minimum of 13 clock cycles. If the instruction being branched to is not long-aligned, one additional clock cycle is required. FIFO depth (THE COG -to- HUB RAM INTERFACE section): (cogs+11) stages. REP hidden jump (INSTRUCTION REPEATING section): REP works in hub memory, but executes a hidden jump to get back to the top of the repeated instructions. Forbidden list (HUB EXECUTION section): while in hub execution mode, the FIFO cannot be used for anything else, so during hub execution these instructions cannot be used: RDFAST / WRFAST / FBLOCK / RFBYTE / RFWORD / RFLONG / RFVAR / RFVARS / WFBYTE / WFWORD / WFLONG / XINIT / XZERO / XCONT - when the streamer mode engages the FIFO."

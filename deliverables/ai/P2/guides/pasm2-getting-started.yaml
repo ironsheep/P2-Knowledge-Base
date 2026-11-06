@@ -480,7 +480,7 @@ labels_and_symbols:
   reference_operators:
     "#label": "Immediate branch target (for jumps/calls); relative by default, and #\\label forces absolute"
     "#.local": "Immediate reference to local label"
-    "@label": "Hub address of label"
+    "@label": "Hub address of label (in a PASM-only file; in a Spin2 object, DAT hub addresses are relative to the object)"
     "$": "Current origin: the cog register address in ORG code (steps by 1 per instruction), the hub address in ORGH code (steps by 4)"
 
   detailed_reference: "language/pasm2/concepts/labels.yaml"
@@ -526,7 +526,7 @@ string_handling:
           newline_msg BYTE  "Line 1", 13, 10, "Line 2", 0    ' CR LF between lines
 
   accessing_strings:
-    description: "Use hub address operator @ to get string pointer"
+    description: "Use hub address operator @ to get string pointer (in a PASM-only file; in a Spin2 object, DAT hub addresses are relative to the object)"
     pattern: |
       DAT
               ORG
@@ -630,6 +630,7 @@ next_steps:
     - "architecture/streamer/overview.yaml - Streamer, high-speed pin sequencing"
     - "language/pasm2/concepts/multi_cog_synchronization.yaml - Multi-COG programming, parallel processing"
 
+hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 related:
   - language/pasm2/special-registers.yaml
   - language/pasm2/call.yaml
@@ -644,6 +645,7 @@ related:
   - language/pasm2/wrlong.yaml
   - language/pasm2/waitx.yaml
   - language/pasm2/getct.yaml
+  - language/spin2/integration/spin2-pasm2-integration.yaml
 
 see_also:
   - language/pasm2/special-registers.yaml

@@ -63,6 +63,7 @@ notes:
 sources:
   - "notes (waits for the prior command's last clock cycle): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER"
 
+hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 related_instructions:
 - XINIT: Start immediately with zero phase
 - XZERO: Buffer command with phase zero

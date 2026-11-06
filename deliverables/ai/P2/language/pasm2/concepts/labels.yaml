@@ -104,8 +104,8 @@ reference_operators:
 
     hub_address:
       syntax: "@label"
-      meaning: "Hub address of label"
-      context: "Spin2 or PASM - getting hub memory address"
+      meaning: "Hub address of label in a Spin2 method and in a PASM-only file; in a Spin2 object's DAT block, the offset from the start of the object"
+      context: "Spin2 methods, and PASM-only files. In a Spin2 object, take @label in Spin2 and pass it in PTRA (language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution)"
       example: "MOV ptr, ##@hub_data"
 
     object_relative:

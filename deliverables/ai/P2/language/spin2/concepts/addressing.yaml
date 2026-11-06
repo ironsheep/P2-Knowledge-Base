@@ -226,7 +226,7 @@ org_vs_orgh_addressing:
     context: "HUB execution mode"
     addresses: "$400 and above (hub byte addresses)"
     behavior: "Code runs directly from hub RAM"
-    example: "RDLONG val, ##@data uses hub addressing"
+    example: "RDLONG val, ##@data uses hub addressing in a PASM-only file"
   example: |
     DAT
             ORG     0                       ' COG mode
@@ -302,6 +302,7 @@ notes:
   - "# is for cog/LUT addresses, @ is for hub addresses"
   - "PASM-only programs have simpler addressing (all absolute)"
 
+hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 related:
   - language/spin2/special-symbols/at.yaml
   - language/spin2/special-symbols/double_at.yaml
@@ -323,6 +324,7 @@ related:
   - language/spin2/assembly-directives/orgh.yaml
   - architecture/hub.yaml
   - architecture/cog.yaml
+  - language/spin2/integration/spin2-pasm2-integration.yaml
 
 source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks and Operators (Address Operators table)"
 

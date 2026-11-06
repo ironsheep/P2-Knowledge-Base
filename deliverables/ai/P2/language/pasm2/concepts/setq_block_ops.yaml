@@ -304,6 +304,7 @@ sources:
   - "Parallax SPI Flash Programmer and Boot Loader v51, Loader (SETQ moves code from cog to hub) and Move application down to $00000+ (SETQ2 block copy)"
   - "Parallax Spin2/PASM Debugger v51, debug entry and debug_exit (SETQ saves and restores registers $010..$1F7 to the save buffer)"
 
+hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 related:
   - language/pasm2/setq.yaml
   - language/pasm2/setq2.yaml
@@ -312,4 +313,5 @@ related:
   - language/pasm2/idioms/hub-memory.yaml
   - code-examples/flash-loader-case-study.yaml
   - architecture/boot-rom/spi-flash-boot.yaml
+  - language/spin2/integration/spin2-pasm2-integration.yaml
   - architecture/silicon_errata.yaml

@@ -7,7 +7,7 @@ examples:
 - LONG  $12345678        ' Single long value
 - LONG  -1, 0, 1         ' Multiple long values
 - LONG  value[4]          ' Duplicate value 4 times
-- LONG  @label            ' Address of label
+- LONG  @label            ' Address of label, an object offset in a Spin2 object
 - LONG  %%3210            ' Quaternary literal
 usage: 'LONG is used in DAT sections to define long-sized (32-bit) data values. Data
 

@@ -298,14 +298,15 @@ cog_loading:
       param     LONG  0
       result    LONG  0
       
-      ' COG code
+      ' COG code. Started by COGINIT(COGEXEC_NEW, @cog_loop, @command),
+      ' which puts @command in PTRA
       ORG   0
     cog_loop
-      RDLONG temp, ##@command WZ
+      RDLONG temp, PTRA WZ
       IF_Z  JMP #cog_loop        ' Wait for command
-      
+
       ' Process command
-      WRLONG #0, ##@command      ' Clear command
+      WRLONG #0, PTRA            ' Clear command
       JMP    #cog_loop
 
 debugging_considerations:

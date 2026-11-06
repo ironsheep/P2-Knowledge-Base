@@ -11,7 +11,7 @@ syntax: '[label] WORD value[, value...]'
 examples:
 - code: 'counts  word  1000, 2000, 3000  '' Decimal values
 
-    addr    word  @buffer            '' Address reference
+    addr    word  @buffer            '' Address: an object offset in a Spin2 object
 
     '
   description: Word data declarations

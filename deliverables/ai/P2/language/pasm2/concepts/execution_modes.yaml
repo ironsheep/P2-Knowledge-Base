@@ -96,7 +96,7 @@ mode_transitions:
     example: |
       ' In cog execution
       JMP #\$1000       ' Jump to hub execution
-      CALL #@hub_func   ' Call hub function
+      CALL #hub_func    ' Call hub function
     return: "RET with hub return address"
 
   hub_to_cog:
@@ -104,7 +104,7 @@ mode_transitions:
     example: |
       ' In hub execution
       JMP #\$100        ' Jump to cog execution
-      CALL #@cog_func   ' Call cog function
+      CALL #cog_func    ' Call cog function
     return: "RET with cog return address"
 
   lut_transitions:
@@ -175,7 +175,7 @@ code_organization:
       main_loop
         CALL #\critical_driver  ' Call cog routine
         ' Non-critical processing
-        JMP #@main_loop
+        JMP #main_loop
       
       ' Cog execution for timing-critical
       ORG 0
@@ -221,4 +221,6 @@ debugging:
     - "Cog/LUT timing is predictable"
     - "Hub timing varies with access patterns"
     - "Use CT registers for measurements"
+
+hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 

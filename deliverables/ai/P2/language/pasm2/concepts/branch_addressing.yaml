@@ -29,7 +29,7 @@ addressing_modes:
       - "JMP #\\hub_routine      ' Jump to absolute hub address"
       - "CALL #\\$10000          ' Call absolute address"
       - "JMP #cog_routine       ' Jump within cog (relative)"
-    notes: "\\ forces absolute addressing. Crossing between cog and hub is always absolute and is forced by the assembler, so # alone is enough there; @label is the hub address of a label defined under ORG"
+    notes: "\\ forces absolute addressing. Crossing between cog and hub is always absolute and is forced by the assembler, so # alone is enough there; @label is the hub address of a label defined under ORG. In a Spin2 object it is the object offset."
 
   register_indirect:
     syntax: "register"

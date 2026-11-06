@@ -26,6 +26,7 @@ notes:
 - Begins execution at cog register address $000
 - Must specify target cog ID (0-7)
 - Use COGEXEC_NEW to auto-select available cog
+hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 related:
 - COGINIT
 - COGEXEC_NEW
