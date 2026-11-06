@@ -1,5 +1,13 @@
 # P2AN007 Changelog: Data Structures with the New Language Facilities
 
+## v1.0.3 (2026-11-05)
+
+**`LOCKNEW`'s failure value is stated as the Spin2 documentation states it.**
+
+### Fixed
+
+- **`LOCKNEW`** (R4 and the Hardware note): returns a negative value when no lock is free; check it with `< 0`
+
 ## v1.0.2 (2026-10-03)
 
 **The latest-wins mailbox states its hand-back rule and its one safe non-blocking form.**

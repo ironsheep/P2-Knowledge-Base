@@ -5,7 +5,7 @@
 ''                OFFSETOF supplies each member offset instead of
 ''                hand-counted numbers
 ''   Manual.....  Data Structures with the New Language Facilities
-''   Version....  v1.0.2 (2026-10-03)
+''   Version....  v1.0.3 (2026-11-05)
 ''   Appears in.  Recipe R6 - Safe Raw Addressing with OFFSETOF
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz

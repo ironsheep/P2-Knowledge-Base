@@ -5,7 +5,7 @@
 ''                timestamp, value and status into one named STRUCT record
 ''                in an array, instead of three parallel arrays
 ''   Manual.....  Data Structures with the New Language Facilities
-''   Version....  v1.0.2 (2026-10-03)
+''   Version....  v1.0.3 (2026-11-05)
 ''   Appears in.  Recipe R1 - In-Cog Record + Array
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz

@@ -4,7 +4,7 @@
 ''   Purpose....  Pack a whole record into one long with member bitfields
 ''                so it publishes in a single atomic store
 ''   Manual.....  Data Structures with the New Language Facilities
-''   Version....  v1.0.2 (2026-10-03)
+''   Version....  v1.0.3 (2026-11-05)
 ''   Appears in.  Recipe R5 - A Whole Record in One Long
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz

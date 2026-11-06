@@ -3,7 +3,7 @@ manual_slug: P2AN007
 doc_class: reference                              # app note — YAML/KB-backed; verifies claims against KB YAML + pnut-ts
 element_type: application-note                    # ships doc + first-party YAML companion (four-artifact model)
 code_line_budget_K: 76                            # inherits platform K (creation-guide §6.3); Dimension #3b
-last_published_tag: p2an007-v1.0.2   # baseline for Dimension #15 (released 2026-10-04, 16pp)
+last_published_tag: p2an007-v1.0.3   # baseline for Dimension #15 (released 2026-11-05, 16pp)
 guide_paths:
   creation_guide: ../APP-NOTE-CREATION-GUIDE.md
   voice_guide: ../APP-NOTE-VOICE-GUIDE.md
@@ -13,7 +13,7 @@ authoritative_sources: see ../APP-NOTE-CREATION-GUIDE.md §5.1 # Spin2 Language 
 high_risk_quant:
   - "STRUCT requires {Spin2_v45}; members default LONG, packed (no padding); reading_t(LONG,LONG,BYTE)=9 bytes; SIZEOF returns byte size"
   - "Pass-by-value <=15 longs; larger use BYTEMOVE internally. Receiving ^structName from a CHILD object needs bracket notation `[pRec] := child.method()` or >15-long structs throw a compile error"
-  - "P2 has 16 hardware locks. LOCKNEW returns 0..15 or -1 (check it); LOCKTRY(id) nonzero if captured; LOCKREL(id); LOCKRET(id) frees. REPEAT UNTIL LOCKTRY = spin-acquire"
+  - "P2 has 16 hardware locks. LOCKNEW returns 0..15 or a negative value (check it with < 0); LOCKTRY(id) nonzero if captured; LOCKREL(id); LOCKRET(id) frees. REPEAT UNTIL LOCKTRY = spin-acquire"
   - "Atomicity model: a single hub LONG is read/written atomically; a multi-field record is NOT. Publish = write fields FIRST, flip one long (index/seq) LAST"
   - "Single writer of an index/seq long -> no lock (R2 ring, R3 mailbox). Several writers -> one lock (R4 queue)"
 fragile_areas:

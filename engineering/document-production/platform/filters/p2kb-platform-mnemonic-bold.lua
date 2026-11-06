@@ -778,9 +778,108 @@ function Plain(plain)
   return plain
 end
 
+-- Allow a line break after the slash in a list of all-caps names ("RDLONG/WRLONG").
+-- These names never hyphenate (see Pandoc below), so without this a long list has
+-- no break point and runs past the margin. Prose with a slash ("and/or") is untouched.
+-- The leading \kern0pt keeps the list's first name whole: TeX considers only the first
+-- word after a space for hyphenation, an explicit kern ends that search, and an
+-- exception does not reach a word with a slash directly after it.
+local function break_after_slash(str)
+  local text = str.text
+  local inlines = {}
+  local start = 1
+  for pos in text:gmatch("()/") do
+    local before = text:sub(1, pos - 1)
+    if before:match("%u%u[%w_]*$") and text:sub(pos + 1):match("^%u%u") then
+      if start == 1 then
+        table.insert(inlines, pandoc.RawInline("latex", "\\kern0pt{}"))
+      end
+      table.insert(inlines, pandoc.Str(text:sub(start, pos)))
+      table.insert(inlines, pandoc.RawInline("latex", "\\allowbreak{}"))
+      start = pos + 1
+    end
+  end
+  if start == 1 then
+    return nil
+  end
+  if start <= #text then
+    table.insert(inlines, pandoc.Str(text:sub(start)))
+  end
+  return inlines
+end
+
+-- The passes above leave a mnemonic and its suffix as two adjacent Strs ("RDLONG",
+-- "/WRLONG"), so adjacent Strs are joined before a list is looked for.
+local function breaks_in_inlines(inlines)
+  local joined = {}
+  for _, inline in ipairs(inlines) do
+    local last = joined[#joined]
+    if inline.t == "Str" and last and last.t == "Str" then
+      last.text = last.text .. inline.text
+    else
+      table.insert(joined, inline)
+    end
+  end
+  local result = {}
+  for _, inline in ipairs(joined) do
+    local split = inline.t == "Str" and break_after_slash(inline) or nil
+    if split then
+      for _, part in ipairs(split) do
+        table.insert(result, part)
+      end
+    else
+      table.insert(result, inline)
+    end
+  end
+  return result
+end
+
+local function breaks_in_block(block)
+  return pandoc.walk_block(block, { Inlines = breaks_in_inlines })
+end
+
+-- Exempt the document's all-caps names from hyphenation. A name broken at a line end
+-- ("RF-VARS") reads as a name with a hyphen in it. TeX matches an exception in either
+-- case, so an all-caps word that also appears as an ordinary word ("STANDARD" beside
+-- "standard") is left out, or the ordinary word could no longer break and its line
+-- would run past the margin. A mnemonic is always exempt. The five-letter floor is
+-- TeX's own: with its default minimums a shorter word cannot hyphenate.
+function Pandoc(doc)
+  local caps = {}
+  local ordinary = {}
+  pandoc.walk_block(pandoc.Div(doc.blocks), {
+    Str = function(str)
+      for word in str.text:gmatch("%a+") do
+        if word:match("^%u+$") then
+          if #word >= 5 then
+            caps[word] = true
+          end
+        elseif word:match("^%u?%l+$") then
+          ordinary[word:lower()] = true
+        end
+      end
+    end
+  })
+  local words = {}
+  for word in pairs(caps) do
+    local lower = word:lower()
+    if is_mnemonic(lower) or not ordinary[lower] then
+      table.insert(words, word)
+    end
+  end
+  if #words > 0 then
+    table.sort(words)
+    table.insert(doc.blocks, 1, pandoc.RawBlock("latex",
+      "\\hyphenation{" .. table.concat(words, " ") .. "}"))
+  end
+  return doc
+end
+
 return {
   { CodeBlock = CodeBlock },
   { Code = Code },
   { Para = Para },
-  { Plain = Plain }
+  { Plain = Plain },
+  { Para = breaks_in_block, Plain = breaks_in_block },
+  { Pandoc = Pandoc }
 }

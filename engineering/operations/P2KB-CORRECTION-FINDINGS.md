@@ -82,9 +82,6 @@ Line 272's table row gives "28-bit value" in both columns. The 4th byte carries 
 ### F-628 — XBYTE Guide §15.4 says "the assembler emits" a two-byte offset without saying how — `CONFIRMED` (found 2026-11-05, «#440»)
 `xbyte-body.md:1514`: the -64..+63 range is right; the sentence omits that `FVARS` is what makes the assembler size the value. Fix: name `FVARS`.
 
-### F-630 — P2AN007 says `LOCKNEW` returns `-1`; Spin2 v55 says "< 0" — `CONFIRMED` (found 2026-11-05, «#440», v1.25.0 impact survey)
-`P2AN007.md:277` ("returning `-1` if none are free") and `:424` ("returns `-1` when they're exhausted"). Spin2 v55 documents `LOCKNEW` as `< 0` if no lock is available (F-592); the YAML companion already says a negative value, so the note and its companion disagree. Fix: both sentences state a negative value and the `< 0` check, and any example code tests the same way.
-
 ### F-631 — Assembly Reference Appendix E calls `DEBUG_DISABLE` global and states no runtime overhead — `CONFIRMED` (found 2026-11-05, «#440», v1.25.0 impact survey)
 `appendix-e-constants.md:474` ("skips all DEBUG statements entirely—no code is generated, no runtime overhead exists", "zero debug footprint") and `:557` ("Global debug disable"). Spin2 v55: a non-0 value "will disable all DEBUG statements in the file/object"; CP-026 proves the statements are not compiled. Fix: state the file/object scope and "not compiled", as `special-configuration-symbols.yaml` does.
 
