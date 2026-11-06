@@ -46,7 +46,7 @@ architecture:
       - {event: 14, name: "attention requested by another cog or cogs", poll: "POLLATN"}
       - {event: 15, name: "GETQX/GETQY executed with no CORDIC result available", poll: "POLLQMT"}
     note: >-
-      Every event but 15 also has a matching WAITxxx and a Jxxx/JNxxx branch. There is no
+      Every event but 15 has a matching WAITxxx, and every event has a Jxxx/JNxxx branch. There is no
       WAITQMT, because that event cannot occur while waiting. Events 0-3 and 8-15 are fixed sensors; only events 4-7
       are programmable, via SETSE1..4.
   
@@ -257,7 +257,7 @@ event_configurations:
       ' Setup 1ms timer event
       GETCT   timeout
       ADDCT1  timeout, ##160_000  ' 1ms at 160MHz
-      WAITCT1                     ' Wait for CT >= CT1 (dedicated instruction)
+      WAITCT1                     ' Wait for CT to pass CT1 (dedicated instruction)
 
 programming_patterns:
   - pattern: "multi_event_monitor"
@@ -395,7 +395,7 @@ common_applications:
     complexity: "beginner"
     implementation: |
       ' Wait for button press with debounce
-      SETSE1  #%01_000000 | BUTTON_PIN  ' Positive edge
+      SETSE1  #%001_000000 | BUTTON_PIN ' INA/INB bit of pin rises
       WAITSE1                            ' Wait for press
       WAITX   ##1_600_000               ' 10ms debounce
       TESTP   #BUTTON_PIN WC            ' C = pin is still high (pressed)
@@ -405,10 +405,10 @@ common_applications:
     complexity: "intermediate"
     implementation: |
       ' Measure positive pulse width
-      SETSE1  #%01_000000 | PULSE_PIN   ' Positive edge
+      SETSE1  #%001_000000 | PULSE_PIN  ' INA/INB bit of pin rises
       WAITSE1
       GETCT   start_time
-      SETSE1  #%10_000000 | PULSE_PIN   ' Negative edge
+      SETSE1  #%010_000000 | PULSE_PIN  ' INA/INB bit of pin falls
       WAITSE1
       GETCT   end_time
       SUB     end_time, start_time      ' Pulse width
@@ -513,7 +513,7 @@ related_topics:
     relationship: "Events can trigger interrupts"
   
   - topic: "smart_pins"
-    relationship: "Smart pin IN rises are common event sources"
+    relationship: "A pin's INA/INB bit can be selected with SETSEn as an event source"
   
   - topic: "timers"
     relationship: "CT comparisons are event sources"

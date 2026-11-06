@@ -85,7 +85,7 @@ Line 272's table row gives "28-bit value" in both columns. The 4th byte carries 
 `xbyte-body.md:1514`: the -64..+63 range is right; the sentence omits that `FVARS` is what makes the assembler size the value. Fix: name `FVARS`.
 
 ### F-636 — two leftovers of F-632's class, seen reading the pages live on v1.25.1 — `PENDING-VALIDATION` (found 2026-11-06, «#440», v1.25.1 content probe)
-> **KB decision:** in batch v1.25.2
+> **KB decision:** not KB: released in v1.25.2 and read live, only the register closure is owed
 `cordic_solver.yaml` `extended_protection.description` said "until ret", where `rep_instruction.yaml` now says "a branch, such as _ret_". `setq_block_ops.yaml` `best_practices` said "Consider interrupt latency impact", the same unsourced advice as the removed "Keep transfers small".
 > **Applied 2026-11-06, uncommitted:** both changed in the tree. They ship with the next KB release. The Assembly Reference's "first `ret`, `_ret_`, or branch" stands: it names a branch generally, and `ret.yaml` is category Branch.
 
@@ -158,7 +158,7 @@ object as the OBEX spec says, which ends field-name coupling for good). Re-probe
 that carries each.
 
 ### F-569 — the new provenance-key gate's census: three provenance keys still reach agents, and the OBEX tooling it touched has two defects — `NEEDS-VERIFICATION` (found 2026-10-10, «#422»)
-> **KB decision:** in batch v1.25.2
+> **KB decision:** not KB: released in v1.25.2, only the register closure is owed
 > **Applied 2026-11-06:** the last served key is gone: CP-029 records the clock-setup forms, `clock_setup.source` cites it, `combinations_are_compiler_verified` and the gate's `open` line are deleted.
 Found building F-545's gate (`audit-yaml-provenance-key-names.py`, kind `open`). Each is understood but
 needs a call or a record that is not in hand:
@@ -297,7 +297,7 @@ bare home page) were not probed under the request to keep traffic to Parallax li
 themselves were read from the pages, not fetched, so `auth_gated: false` rests on the page showing no gate.
 
 ### F-565 — `keywords/STRUCT.yaml` `gotchas.struct_pointer_obj_returns` said `pCfg := sensor.getConfig()` is a COMPILE ERROR for structures over 15 longs; no ingested source and no compile-proof record states it — `PARTIAL` (the KB is applied; `P2AN007.md:57` and `:422` are owed at the app note's next release)
-> **KB decision:** in batch v1.25.2
+> **KB decision:** not KB: released in v1.25.2; P2AN007.md is owed
 > **Answered 2026-11-06, CP-028:** the compile probe needed no bench. The bare form is rejected at 5 bytes or more, in a child object and in the same object, with `Expected ","` up to 15 longs and `Expected a variable (m251)` from 16; 4 bytes or fewer compiles; the bracket form always compiles. So the removed claim was wrong in scope, and the replacement "writes through the pointer" was wrong from 5 bytes. `STRUCT.yaml`, `typed-pointers.yaml` and the P2AN007 companion now say this. "Larger uses BYTEMOVE" goes from `STRUCT.yaml` and the companion: Spin2 v55 states copy and swap at any size and no BYTEMOVE.
 Found 2026-10-09 by «#415» fixing `language/spin2/keywords/STRUCT.yaml`. The page carried a
 `wrong:`/`correct:` pair (`pCfg := sensor.getConfig()  ' COMPILE ERROR for large structs` against
@@ -354,7 +354,7 @@ gives "ISP Hub75 Matrix Driver" and `.../isp-hub75-matrix-driver/`. Which is cur
 > open `https://obex.parallax.com/obex/isp-hub75-matrix-driver/` and say if it resolves.
 
 ### F-561 — P2AN003 (app note + YAML companion) says reversing the DAC init order "leaves the first output cycle undefined"; the P2 Documentation says Y is captured in reset — `PARTIAL` (companion half applied 2026-10-10, «#420», and `PENDING-VALIDATION`; the app-note prose and the "undefined" clause change together at the app-note release)
-> **KB decision:** in batch v1.25.2
+> **KB decision:** not KB: released in v1.25.2; P2AN003.md is owed
 > **Applied 2026-11-06:** the "undefined" sentence is out of the companion now, because it should not stay in service waiting for the app note. `P2AN003.md:541` is still owed at the app note's next release.
 Found 2026-10-07 by the independent check of F-554. `app-notes/P2AN003/opus-master/P2AN003.md:541`
 and its companion `application-notes/p2an003-dac-analog-signal-generation.yaml:98` ("the universal
@@ -403,7 +403,7 @@ audit, see their notes).
 F-526 (sync TX primes in reset, EF-090) and F-540 (`##` takes a skip-pattern bit, EF-091) are DONE and archived — `correction-sweeps/2026-10-04-P2KB-CORRECTION-FINDINGS-archive.md`.
 
 ### F-545 — provenance ships under keys the delivery filter does not list (`last_verified`, `extraction_status`, `authority_tier`, `grounding`, …) — `PARTIAL` (census, folds, the `scrape_tracking` filter key and the new-key gate applied 2026-10-10, «#420»/«#422», `PENDING-VALIDATION`; three served provenance keys remain, F-569)
-> **KB decision:** in batch v1.25.2
+> **KB decision:** not KB: released in v1.25.2, only the register closure is owed
 Measured 2026-10-04 on the shipped payload (keys surviving the filter): `extraction_status` 131 files,
 `last_verified` 131, `last_author_extraction` 113, `last_complete_extraction` 73,
 `last_author_re_extraction` 29, `authority_tier` 92 lines / 15 files, `grounding` 28 / 10,

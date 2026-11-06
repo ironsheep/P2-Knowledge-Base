@@ -20,6 +20,16 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.25.3] - 2026-11-06
+
+**The event and interrupt pages name each event source in the Silicon Doc's words.**
+
+### Fixed
+
+- **Interrupt event sources**: 5, 6 and 7 are the SE2, SE3 and SE4 selectable events; 1, 2 and 3 are CT passing CT1, CT2 and CT3; 9 is the Hub RAM FIFO interface wrapping and reloading
+- **Selectable events**: SETSEn selects LUT read/write, hub lock and INA/INB pin-bit events, with `%001_PPPPPP` for a rising pin bit and `%010_PPPPPP` for a falling one; a pin-bit event involves no smart pin acknowledge
+- **Event branches**: every event has a Jxxx/JNxxx branch, and every event but 15 has a WAITxxx
+
 ## [1.25.2] - 2026-11-06
 
 **Interrupt pages in the Silicon Doc's words, and the size limit on bare struct pointers.**

@@ -35,12 +35,12 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: interrupt_sources_detail[1].setup
-    fp: "09792467bba06df4"
+    fp: "9065d7477ac41ae7"
     compile: fragment
     wrap: pasm2-dat
     assumes: [timeout]
   - at: programming_patterns[0].code
-    fp: "2867ad67d4fd8eda"
+    fp: "6bae18ff08b3cce8"
     compile: fragment
     wrap: pasm2-dat
     assumes: [timeout]

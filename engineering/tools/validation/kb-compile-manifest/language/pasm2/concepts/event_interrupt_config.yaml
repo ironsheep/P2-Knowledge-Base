@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: overview
-    fp: "4a2233fd7e9b58ca"
+    fp: "c180024b80870f40"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: interrupt_system.interrupt_operations.SETINT1.example
@@ -20,12 +20,12 @@ blocks:
     wrap: pasm2-dat
     assumes: [work_reg]
   - at: common_patterns.timer_interrupt.code
-    fp: "2b8d7a7218622b17"
+    fp: "11f29c2ef82dc8a4"
     compile: fragment
     wrap: pasm2-dat
     assumes: [base_time, period=con]
   - at: common_patterns.pin_event.code
-    fp: "f7b6726d652ac02c"
+    fp: "34f61cb65962fa20"
     compile: fragment
     wrap: pasm2-dat
     assumes: [pin]

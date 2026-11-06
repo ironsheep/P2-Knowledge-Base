@@ -46,7 +46,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [mask, pattern]
   - at: event_configurations.timer_events.setup_example
-    fp: "e84e71b7fe26e1c7"
+    fp: "0d7c207b9221bf21"
     compile: fragment
     wrap: pasm2-dat
     assumes: [timeout]
@@ -92,12 +92,12 @@ blocks:
     compile: not-code
     reason: "a bare binary value (`%0100`) giving the SETINTx event selector for the row it sits in; a literal with no statement"
   - at: common_applications[0].implementation
-    fp: "cf56fa9eb90ce32e"
+    fp: "dc962a34d626f494"
     compile: fragment
     wrap: pasm2-dat
     assumes: [BUTTON_PIN=con, state]
   - at: common_applications[1].implementation
-    fp: "ad739bce6595a718"
+    fp: "1dbffeea823ed7d3"
     compile: fragment
     wrap: pasm2-dat
     assumes: [PULSE_PIN=con, start_time, end_time]

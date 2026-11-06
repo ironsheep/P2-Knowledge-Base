@@ -6,7 +6,7 @@ documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon),
 documentation_level: comprehensive
 
 overview: |
-  P2 provides sophisticated event and interrupt handling with 16 selectable event sources per cog,
+  P2 provides sophisticated event and interrupt handling with 16 event sources per cog (four of them selectable, SE1..SE4),
   three program-visible interrupts with dedicated vectors, and both polling and interrupt-driven
   responses. A fourth, hidden debug interrupt sits above all three and is inaccessible to normal
   cog programs.
@@ -38,7 +38,7 @@ interrupt_system:
       priority: "Middle - can interrupt INT3"
       vector: "IJMP2"
       return: "RETI2 or RESI2"
-      typical_use: "Pin events, Smart Pin ready"
+      typical_use: "Pin events (SE1..SE4)"
 
     INT3:
       priority: "Lowest - can interrupt only non-interrupt code"
@@ -87,11 +87,11 @@ interrupt_system:
       use: "Co-routine style interrupt service routines that keep their place between interrupts"
 
 event_sources:
-  selectable_events:
+  interrupt_sources:
     0: "Never (disabled)"
-    1: "CT-passed-CT1 (CT >= CT1)"
-    2: "CT-passed-CT2 (CT >= CT2)"
-    3: "CT-passed-CT3 (CT >= CT3)"
+    1: "CT-passed-CT1"
+    2: "CT-passed-CT2"
+    3: "CT-passed-CT3"
     4: "SE1 event occurred"
     5: "SE2 event occurred"
     6: "SE3 event occurred"
@@ -109,7 +109,7 @@ event_sources:
     SETSE1:
       syntax: "SETSE1 #mode"
       operation: "Configure selectable event 1"
-      modes: "Pin edge, state, Smart Pin ready, etc."
+      modes: "LUT read/write, hub lock rise/fall/change, INA/INB bit of a pin rises/falls/changes/is low/is high"
       
     SETSE2:
       syntax: "SETSE2 #mode"
@@ -142,7 +142,7 @@ event_operations:
       
     POLLCT1_3:
       syntax: "POLLCTx {WC}"
-      operation: "Poll for CT >= CTx"
+      operation: "Poll for CT passing CTx"
       
     POLLPAT:
       syntax: "POLLPAT {WC}"
@@ -159,15 +159,15 @@ event_operations:
       
     WAITCT1:
       syntax: "WAITCT1"
-      operation: "Wait for CT >= CT1"
+      operation: "Wait for CT to pass CT1"
       
     WAITCT2:
       syntax: "WAITCT2"
-      operation: "Wait for CT >= CT2"
+      operation: "Wait for CT to pass CT2"
       
     WAITCT3:
       syntax: "WAITCT3"
-      operation: "Wait for CT >= CT3"
+      operation: "Wait for CT to pass CT3"
       
     WAITPAT:
       syntax: "WAITPAT"
@@ -209,7 +209,7 @@ common_patterns:
       GETCT base_time
       ADDCT1 base_time, ##period
       MOV IJMP1, ##timer_isr
-      SETINT1 #1       ' CT >= CT1
+      SETINT1 #1       ' CT passed CT1
       
       timer_isr
         ' Handle timer
@@ -221,15 +221,14 @@ common_patterns:
   pin_event:
     code: |
       ' Setup pin edge detection
-      SETSE1 #%01_000000 | pin  ' Rising edge on pin
+      SETSE1 #%001_000000 | pin  ' INA/INB bit of pin rises
       MOV IJMP2, ##pin_handler
       SETINT2 #4       ' SE1 event
-      
+
       pin_handler
         ' Handle pin event
-        AKPIN pin        ' Acknowledge Smart Pin
         RETI2
-    description: "Pin change interrupt"
+    description: "Pin rising-edge interrupt"
 
   attention_handler:
     code: |

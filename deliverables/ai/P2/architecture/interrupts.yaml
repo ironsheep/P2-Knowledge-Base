@@ -258,18 +258,18 @@ interrupt_sources_detail:
   
   - source_id: "%0001"
     name: "CT-passed-CT1"
-    description: "System counter >= CT1 register"
+    description: "CT passed CT1, established by ADDCT1"
     setup: |
       ADDCT1  timeout, #0     ' Set CT1 to timeout value
-      SETINT1 #%0001          ' Enable INT1 on CT >= CT1
+      SETINT1 #%0001          ' INT1 on CT passing CT1
   
   - source_id: "%0010"
     name: "CT-passed-CT2"
-    description: "System counter >= CT2 register"
+    description: "CT passed CT2, established by ADDCT2"
   
   - source_id: "%0011"
     name: "CT-passed-CT3"
-    description: "System counter >= CT3 register"
+    description: "CT passed CT3, established by ADDCT3"
   
   - source_id: "%0100"
     name: "SE1-event"
@@ -279,15 +279,15 @@ interrupt_sources_detail:
   
   - source_id: "%0101"
     name: "SE2-event"
-    description: "Smart pin event 2"
+    description: "SE2 event occurred, established by SETSE2"
   
   - source_id: "%0110"
     name: "SE3-event"
-    description: "Smart pin event 3"
+    description: "SE3 event occurred, established by SETSE3"
   
   - source_id: "%0111"
     name: "SE4-event"
-    description: "Smart pin event 4"
+    description: "SE4 event occurred, established by SETSE4"
   
   - source_id: "%1000"
     name: "PAT-event"
@@ -295,7 +295,7 @@ interrupt_sources_detail:
 
   - source_id: "%1001"
     name: "FIFO-event"
-    description: "Hub FIFO interface event"
+    description: "Hub RAM FIFO interface wrapped and reloaded, established by RDFAST/WRFAST/FBLOCK"
 
   - source_id: "%1010"
     name: "XMT-streamer-ready"
@@ -331,7 +331,7 @@ programming_patterns:
               MOV     IJMP1, #timer_isr    ' Set ISR address
               GETCT   timeout
               ADDCT1  timeout, ##160_000   ' 1ms at 160MHz
-              SETINT1 #%0001               ' CT >= CT1
+              SETINT1 #%0001               ' CT passed CT1
               
       timer_isr
               ' Interrupt code here
@@ -474,7 +474,7 @@ related_topics:
     relationship: "Events can trigger interrupts"
   
   - topic: "smart_pins"
-    relationship: "Smart pin IN rising can trigger interrupts"
+    relationship: "A pin's INA/INB bit, selected with SETSEn, can trigger an interrupt"
   
   - topic: "timers"
     relationship: "CT timers primary interrupt source"
