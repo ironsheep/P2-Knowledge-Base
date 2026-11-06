@@ -1,0 +1,9 @@
+{Spin2_v55}
+CON
+  STRUCT s(BYTE a[4])
+VAR
+  s rec
+PUB main() | ^s p
+  p := m()
+PRI m() : ^s r
+  [r] := @rec

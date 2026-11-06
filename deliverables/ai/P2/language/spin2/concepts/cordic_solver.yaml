@@ -18,7 +18,7 @@ key_features:
   automatic_management:
     - No pipeline management required
     - No timing concerns for the programmer
-    - Interrupt-safe (interpreter handles protection)
+    - The interpreter accommodates interrupts and only stalls them briefly
     - Results returned directly to variables
 
   angle_format:
@@ -123,7 +123,7 @@ comparison_with_pasm2:
   spin2_advantages:
     - Simpler syntax - just call the method
     - Automatic timing management
-    - Interrupt-safe without extra code
+    - No interrupt handling needed in the Spin2 code that calls it
     - Results returned directly
 
   pasm2_advantages:

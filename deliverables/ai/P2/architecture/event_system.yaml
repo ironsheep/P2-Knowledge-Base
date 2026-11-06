@@ -60,7 +60,7 @@ architecture:
     
     - destination: "wait_release"
       description: "Events can release WAIT instructions"
-      latency: "0 additional clocks beyond the WAITx instruction's normal completion"
+      latency: "Not documented as a clock count"
     
     - destination: "polling"
       description: "Events can be polled via POLL instructions"

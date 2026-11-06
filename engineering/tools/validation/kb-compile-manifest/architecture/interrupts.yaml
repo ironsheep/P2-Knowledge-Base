@@ -7,7 +7,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: instructions[1].usage_example
-    fp: "5f1defd0adeec0c9"
+    fp: "068b7de1c2268d5f"
     compile: fragment
     wrap: pasm2-dat
   - at: instructions[2].usage_example

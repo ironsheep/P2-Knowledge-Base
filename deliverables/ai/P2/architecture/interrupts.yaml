@@ -44,7 +44,7 @@ architecture:
       - "C and Z flags -- into IRETx (the CALLD carries WCZ)"
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS.
-    context_switch_time: "0 clocks -- IJMPx/IRETx are dedicated registers; nothing is swapped"
+    context_switch_time: "Not documented as a clock count. IJMPx/IRETx are dedicated registers."
   
   interrupt_sources:
     total_sources: 16
@@ -155,7 +155,7 @@ instructions:
       Release the STALLI hold. Any interrupt already pending may then branch,
       with priority given to INT1, then INT2, then INT3.
     usage_example: |
-      ALLOWI                   ' Enable interrupts
+      ALLOWI                   ' Allow interrupt branches
   
   - instruction: "SETINT1"
     encoding: "EEEE 1101011 00L DDDDDDDDD 000100101"
@@ -185,7 +185,7 @@ instructions:
   - instruction: "TRGINT1"
     encoding: "EEEE 1101011 000 000100010 000100100"
     description: "Trigger interrupt 1 by software"
-    operation: "Force interrupt 1 to trigger immediately"
+    operation: "Trigger INT1 in software; the branch still waits for the branch conditions"
     usage_example: |
       TRGINT1                 ' Software trigger INT1
   
@@ -389,11 +389,10 @@ programming_patterns:
 best_practices:
   - practice: "keep_isr_short"
     description: "Minimize code in interrupt service routines"
-    rationale: "INT1 can interrupt INT2 and INT3, INT2 can interrupt INT3, and INT3 can only interrupt non-interrupt code, so a running handler holds off the interrupts it cannot be interrupted by"
+    rationale: "INT1 can interrupt INT2 and INT3, INT2 can interrupt INT3, and INT3 can only interrupt non-interrupt code"
   
   - practice: "acknowledge_sources"
     description: "Clear interrupt sources within ISR"
-    rationale: "Prevents immediate re-triggering"
   
   - practice: "save_registers"
     description: >-
@@ -405,7 +404,7 @@ best_practices:
   
   - practice: "avoid_hub_ops"
     description: "Minimize hub operations in ISRs"
-    rationale: "Hub access is slower and blocks other COGs"
+    rationale: "A hub operation waits for the cog's hub slot"
 
 performance_characteristics:
   source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INTERRUPTS"
@@ -418,7 +417,7 @@ performance_characteristics:
   entry_overhead:
     cogexec: "4 clocks for the dispatched CALLD (per language/pasm2/calld.yaml encoding 4 / 13-20)"
     hubexec: "13-20 clocks for the dispatched CALLD (FIFO refill on the branch)"
-    note: "Minimum overhead assuming none of the deferral conditions apply. Time spent waiting for those conditions to clear is additional."
+    note: "These are CALLD's own timings; the source states the CALLD insertion, not a clock count for interrupt entry. They assume none of the deferral conditions apply. Time spent waiting for those conditions to clear is additional."
   
   exit_overhead:
     description: "RETIx / RESIx are themselves CALLD instructions and follow the same timing"
@@ -438,7 +437,7 @@ performance_characteristics:
       - "STALLI..ALLOWI window"
       - "WAITx stall"
   
-  context_switch_overhead: "0 clocks for register state — IJMPx/IRETx are dedicated registers; the dispatched CALLD captures C/Z and PC into IRETx automatically"
+  context_switch_overhead: "Not documented as a clock count. IJMPx/IRETx are dedicated registers; the dispatched CALLD captures C/Z and PC into IRETx automatically"
   
   interrupt_rate:
     note: |

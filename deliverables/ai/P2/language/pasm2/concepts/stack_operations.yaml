@@ -237,7 +237,7 @@ interrupt_considerations:
     - "Consider stack depth limits"
     
   atomic_operations:
-    - "PUSHA/POPA are atomic"
+    - "PUSHA/POPA are single instructions (WRLONG/RDLONG with PTRA)"
     - "Manual sequences may be interrupted"
     - "Use STALLI/ALLOWI for critical sections"
 

@@ -34,7 +34,9 @@ MODES
 
 LIMIT
     This reads what the register and git record. It does not know about a defect
-    nobody wrote down, and it does not judge whether a stated blocker is true.
+    nobody wrote down, and it does not judge whether a stated blocker is true. An
+    open entry counts as KB only if it names a KB path or a .yaml, so one that names a
+    page only in prose is not asked for a decision.
 """
 
 import argparse

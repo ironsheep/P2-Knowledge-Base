@@ -1,9 +1,9 @@
 instruction: ALLOWI
 syntax: ALLOWI
-brief_description: Allow interrupts
+brief_description: Allow interrupt branches
 category: Interrupt
-description: ALLOWI re-enables interrupt branching; the default on cog start. ALLOWI is the complement of the STALLI instruction-- both are used to protect short, vital sections of main code from timing jitter or state loss caused by asynchronous interrupt handling.
-result: Any stalled and future interrupts are allowed.
+description: ALLOWI allows any stalled and future interrupt branches to occur; this is the default mode on cog start. ALLOWI is the complement of the STALLI instruction; critical blocks of code can be protected from interruption by beginning with STALLI and ending with ALLOWI.
+result: Any stalled and future interrupt branches are allowed.
 flags_affected:
   C: No effect
   Z: No effect

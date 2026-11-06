@@ -71,8 +71,7 @@ interrupt_system:
     
     NIXINT1_3:
       syntax: "NIXINT1/2/3"
-      operation: "Cancel pending interrupt"
-      debug_use: "Clear pending debug interrupts"
+      operation: "Cancel a triggered interrupt that is waiting to branch"
 
   return_instructions:
     RETI0_3:
@@ -187,7 +186,6 @@ interrupt_context:
     - "PC (program counter)"
     - "C flag"
     - "Z flag"
-    - "Execution mode (cog/LUT/hub)"
     
   not_saved:
     - "General registers"

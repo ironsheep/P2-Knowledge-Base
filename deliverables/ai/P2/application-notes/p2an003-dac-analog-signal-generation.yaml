@@ -95,9 +95,9 @@ prerequisites:
 
 gotchas:
   - flag: pitfall
-    text: "Write the mode (WRPIN/WXPIN) BEFORE raising DIR, and the first value (WYPIN) AFTER."
+    text: "Configure the smart pin while DIR is low: write the mode (WRPIN/WXPIN) BEFORE raising DIR. In the DAC modes a WYPIN during reset is captured, so the first value may be written before or after DIR rises."
   - flag: pitfall
-    text: "PWM dither (P_DAC_DITHER_PWM) requires its X period to be a multiple of 256 clocks (256 minimum). A non-multiple produces incorrect dithering; if you need a different period, use PRNG dither instead."
+    text: "PWM dither (P_DAC_DITHER_PWM) requires its X period to be a multiple of 256 clocks (256 minimum). If you need a different period, use PRNG dither instead."
   - flag: pitfall
     text: "FGES/FLES are INTEGER signed-limit instructions (Force >=/<= Signed), NOT floating-point — the R5 mix clamp to +/-$7FFF is correct integer saturation. Do not 're-fix' it into a bug."
   - flag: pitfall

@@ -1213,16 +1213,18 @@ six rejections print the same errors under both.
 *Limits:* two compiler versions.
 *→ EF:* none — layout and legality stay CP.
 
-### CP-028 · Assigning a method's `^StructName` result to a bare pointer variable is rejected for a structure of two or more longs, in a child object and in the same object; the bracket form is accepted at every size — `LEGALITY`
+### CP-028 · Assigning a method's `^StructName` result to a bare pointer variable is rejected for a structure of 5 bytes or more, in a child object and in the same object; the bracket form is accepted at every size — `LEGALITY`
 *KB:* `language/spin2/keywords/STRUCT.yaml`, `language/spin2/operators/typed-pointers.yaml`, `application-notes/p2an007-data-structures-new-facilities.yaml`
 *Class:* legality.
-*Source:* `proofs/cp-028-child-{1,8,16}.spin2` (the called objects), `proofs/cp-028-bare-child-{1,8,16}.spin2`, `proofs/cp-028-bare-same-{1,8,16}.spin2`, `proofs/cp-028-bracket-child-{1,8,16}.spin2`. The number is the structure's size in longs.
+*Source:* `proofs/cp-028-child-{1,8,16}.spin2` (the called objects), `proofs/cp-028-bare-child-{1,8,16}.spin2`, `proofs/cp-028-bare-same-{1,8,16}.spin2`, `proofs/cp-028-bracket-child-{1,8,16}.spin2`, where the number is the structure's size in longs; `proofs/cp-028-bare-same-4bytes.spin2`, `cp-028-bare-same-5bytes.spin2`.
 *Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
 
 *Command (2026-11-06):* `pnut-ts <the file>`, from `proofs/`:
 ```text
 cp-028-bare-child-1      exit 0
 cp-028-bare-same-1       exit 0
+cp-028-bare-same-4bytes  exit 0
+cp-028-bare-same-5bytes  exit 1  :7:error:Expected ","
 cp-028-bare-child-8      exit 1  :5:error:Expected ","
 cp-028-bare-same-8       exit 1  :7:error:Expected ","
 cp-028-bare-child-16     exit 1  :5:error:Expected a variable (m251)
@@ -1231,7 +1233,7 @@ cp-028-bracket-child-1   exit 0
 cp-028-bracket-child-8   exit 0
 cp-028-bracket-child-16  exit 0
 ```
-The same run also tried 2, 3, 4, 15 and 20 longs as child or same-object cases, with the same results by size range. Spin2 v55 gives the reading: a bare pointer variable is the pointed-to variable, a structure up to 1 long passes as a single long, and one up to 15 longs takes multi-long assignment.
+The first version of this record named the boundary as two longs, and an audit's compiles of 5, 6 and 7 bytes showed it is in bytes. The same runs tried 2, 3, 4, 15 and 20 longs, byte and word structures, and pointers held in a VAR, a local and a parameter, with the same results by size. The failure belongs to the multi-long target: a plain-long method result fails the same way, and two results assigned to an 8-byte target compile. Spin2 v55 gives the reading: a bare pointer variable is the pointed-to variable, a structure up to 1 long passes as a single long, and one up to 15 longs takes multi-long assignment.
 *Limits:* legality only; nothing was run. One compiler version.
 *→ EF:* none — legality stays CP.
 

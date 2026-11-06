@@ -44,7 +44,7 @@ condition_behavior: "Regardless of its execution condition, BRK triggers the deb
 related_instructions:
 - GETBRK: Get breakpoint status/code
 - COGBRK: Trigger breakpoint in another COG
-- NIXINT1/2/3: Disable interrupt sources
+- NIXINT1/2/3: Cancel a triggered interrupt that is waiting to branch
 notes:
 - Requires debug interrupts enabled to function
 - Breakpoint code passed to debug ISR

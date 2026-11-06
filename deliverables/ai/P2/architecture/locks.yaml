@@ -363,7 +363,7 @@ related_topics:
     relationship: "Can combine locks with events for complex synchronization"
   
   - topic: "interrupts"
-    relationship: "Lock operations are atomic even with interrupts enabled"
+    relationship: "Locks are semaphore bits with atomic read-modify-write operations"
 
 sources:
     - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOCKS (Allocating Locks and Using Locks)"

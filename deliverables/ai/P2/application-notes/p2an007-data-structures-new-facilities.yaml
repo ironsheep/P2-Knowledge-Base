@@ -131,13 +131,13 @@ gotchas:
   - flag: pitfall
     text: "Member bitfields may OVERLAP silently. The compiler rejects a bit range that overruns its member type, but performs NO disjointness check — two fields sharing bits compile clean and corrupt each other. Add the bit budget up by hand, once."
   - flag: pitfall
-    text: "Brackets write the POINTER, the bare name writes the RECORD: `[ph] := @packet` aims a ^struct pointer; plain `ph := ...` means the record it points at and will not compile as an address assignment."
+    text: "Brackets write the POINTER, the bare name writes the RECORD: `[ph] := @packet` aims a ^struct pointer; plain `ph := ...` means the record it points at. For a record of 5 bytes or more an address assignment fails to compile; for 4 bytes or fewer it compiles and writes the record, not the pointer."
   - flag: pitfall
     text: "Use the REAL P2 locks LOCKNEW/LOCKTRY/LOCKREL. The P1 methods lockset()/lockclr() do NOT exist on P2 and will not compile."
   - flag: pitfall
     text: "Release the lock on EVERY exit path from a critical section — an early RETURN/ABORT inside a locked section must LOCKREL first, or the lock leaks and other cogs hang. Free the lock with LOCKRET when done."
   - flag: pitfall
-    text: "Receiving a struct POINTER from a method needs bracket notation: `[pRec] := child.method()`. Without it the assignment targets the pointed-to record, and a record of two or more longs fails to compile, whether the method is in a child object or the same object."
+    text: "Receiving a struct POINTER from a method needs bracket notation: `[pRec] := child.method()`. Without it the assignment targets the pointed-to record, and a record of 5 bytes or more fails to compile, whether the method is in a child object or the same object."
   - flag: hardware
     text: "The P2 has 16 hardware locks; LOCKNEW returns a negative value when they're exhausted — always check (< 0). Keep the locked section tiny (never hold a lock across debug()/waitms)."
   - flag: tip
@@ -158,7 +158,7 @@ hardware_status: |
   the P2 Architect's Guide.
 
 sources:
-  - "Parallax Propeller 2 Spin2 Language Documentation v55, DATA STRUCTURES (the STRUCT facility: declaration, typed members, arrays, nesting, SIZEOF, pointers, v49 cross-object export/import, the >15-long struct-pointer bracket rule) and Built-In Methods (the hardware lock methods LOCKNEW/LOCKTRY/LOCKREL/LOCKRET)"
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, DATA STRUCTURES (the STRUCT facility: declaration, typed members, arrays, nesting, SIZEOF, pointers, v49 cross-object export/import, the struct-pointer bracket rule) and Built-In Methods (the hardware lock methods LOCKNEW/LOCKTRY/LOCKREL/LOCKRET)"
   - "hardware_status (cross-cog measurements on real P2 silicon): EF-036 (publish-index-last ring), EF-037 (one-store packed-record publish), EF-038 (seq/ack handshake), EF-039 (lock-serialized enqueue), EF-040 (STRUCT layout OFFSETOF/SIZEOF)"
 
 language_facts:
