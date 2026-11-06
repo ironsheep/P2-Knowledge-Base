@@ -47,6 +47,8 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 - closed 2026-10-12 at the v1.24.3 release «#425» (1 finding: F-573) → `correction-sweeps/2026-10-12-v1.24.3-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-10-12 at the v1.24.5 release (1 finding: F-574) → `correction-sweeps/2026-10-12-v1.24.5-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-11-05 at the v1.25.0 release (49 findings: F-576 … F-615, F-617 … F-624, F-629; F-588 and F-589 withdrawn) → `correction-sweeps/2026-11-05-v1.25.0-P2KB-CORRECTION-FINDINGS-archive.md`
+- closed 2026-11-06 at the P2AN007 v1.0.3 release (F-630) → `correction-sweeps/2026-11-06-p2an007-v1.0.3-P2KB-CORRECTION-FINDINGS-archive.md`
+- closed 2026-11-06 at the v1.25.1 release (F-632, F-633) → `correction-sweeps/2026-11-06-v1.25.1-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-10-15 by «#434» (1 ID never used: F-616, `RESOLVED-INVALID`) → `correction-sweeps/2026-10-15-unused-id-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-10-12 at the P2AN006 v1.0.2 / v1.24.6 release (1 finding: F-575) → `correction-sweeps/2026-10-12-p2an006-v1.0.2-P2KB-CORRECTION-FINDINGS-archive.md`
 
