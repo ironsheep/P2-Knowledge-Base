@@ -1,5 +1,13 @@
 # P2AN001 Changelog: Single-Pin Instrumentation ADC
 
+## v1.0.6 (2026-11-05)
+
+**Names in capitals stay whole at a line end.**
+
+### Fixed
+
+- **`DEBUG` and other all-caps names** keep to one piece at a line end, so a name never reads as if it had a hyphen
+
 ## v1.0.5 (2026-09-10)
 
 **Every figure the note quotes now names the source that states it.** No recipes added.

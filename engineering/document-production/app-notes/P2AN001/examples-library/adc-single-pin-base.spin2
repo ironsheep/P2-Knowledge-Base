@@ -5,7 +5,7 @@
 ''                rotating the ADC across GIO, VIO and the pin, and taking
 ''                the ratio
 ''   Manual.....  Single-Pin Instrumentation ADC
-''   Version....  v1.0.5 (2026-09-10)
+''   Version....  v1.0.6 (2026-11-05)
 ''   Appears in.  The Base Build - Single-Pin Instrumentation ADC
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz

@@ -4,7 +4,7 @@
 ''   Purpose....  Three pins tied to one node, sampled together for lower
 ''                noise in the same time at constant source impedance
 ''   Manual.....  Single-Pin Instrumentation ADC
-''   Version....  v1.0.5 (2026-09-10)
+''   Version....  v1.0.6 (2026-11-05)
 ''   Appears in.  Recipe 2 - Three Pins for 3x the Data
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz

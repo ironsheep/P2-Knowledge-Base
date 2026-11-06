@@ -20,8 +20,8 @@
         "title": "Measure an Absolute Voltage in Microvolts on a P2 Pin",
         "subtitle": "Application Note P2AN001 \u2014 No External ADC",
         "author": "Iron Sheep Productions, LLC",
-        "version": "1.0.5",
-        "date": "September 2026",
+        "version": "1.0.6",
+        "date": "November 2026",
         "copyright": "Copyright 2026 Iron Sheep Productions, LLC and Parallax Inc.",
         "license": "CC BY-SA 4.0"
       }
