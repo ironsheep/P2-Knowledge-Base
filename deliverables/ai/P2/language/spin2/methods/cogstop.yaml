@@ -3,7 +3,7 @@
 # Purpose: Stop a running cog
 
 method: "COGSTOP"
-documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, REPEAT ('if you don't want the cog to stop and cease driving its I/O's'); DEBUG (LOCK[15] is allocated by the debugger)"
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, REPEAT ('if you don't want the cog to stop and cease driving its I/O's'); DEBUG (LOCK[15] is allocated by the debugger); EF-105 (pin and smart-pin state after a stop)"
 category: "cog_management"
 type: "method"
 description: |
@@ -68,7 +68,7 @@ effects:
 
   pin_state_after_stop:
     - "A stopped cog stops driving its I/O pins"
-    - "What a smart pin the cog configured does afterwards is not documented; do not rely on it"
+    - "A smart pin the cog configured (measured on NCO frequency with P_OE; other modes untested) keeps its mode, X and Y. With no other cog holding the pin's DIR high its output stops toggling; raising DIR from another cog makes it toggle again with no WRPIN, WXPIN or WYPIN, and while another cog holds DIR high it keeps toggling through the stop"
 
   resources:
     - "A lock the cog HELD goes free. Ownership stops holding the moment the cog becomes inactive - for any cause, not only COGSTOP - so nothing has to release it"

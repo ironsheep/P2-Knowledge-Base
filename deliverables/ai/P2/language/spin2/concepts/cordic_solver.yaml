@@ -120,11 +120,6 @@ comparison_with_pasm2:
   pasm2_advantages:
     - Pipeline control for maximum throughput
     - Can overlap CORDIC with other operations
-    - Lower overhead for bulk operations
-
-  recommendation: |
-    Use Spin2 methods for most applications. Switch to inline PASM2 only when
-    processing large datasets where pipeline optimization provides significant benefit.
 
 sources:
   - "performance_notes (result available 55 clocks after the CORDIC instruction issues): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES, CORDIC Solver"
