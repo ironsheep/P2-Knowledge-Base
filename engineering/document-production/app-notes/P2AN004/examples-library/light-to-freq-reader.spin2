@@ -5,7 +5,7 @@
 ''                counter, accurate at low frequencies because the window
 ''                ends on a whole period
 ''   Manual.....  Frequency / Rotation / RC-Timing Measurement
-''   Version....  v1.0.3 (2026-09-10)
+''   Version....  v1.0.4 (2026-11-06)
 ''   Appears in.  Recipe R2 - Light-to-Frequency Reader
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz
@@ -31,8 +31,7 @@ CON
   '               A/B routed back one pin (P_MINUS1_A|P_MINUS1_B) so it
   '               watches the SAME signal physically present on SIG_PIN.
   '   freq = MULDIV64(periods, clkfreq, ticks)
-  ' P_LOW_150K adds a soft pull that rejects noise on an open input.
-  TIK_MODE = P_COUNTER_TICKS   | P_LOW_150K
+  TIK_MODE = P_COUNTER_TICKS
   PER_MODE = P_COUNTER_PERIODS | P_MINUS1_A | P_MINUS1_B
 
   ' TSL235R datasheet typical: fO = 250 kHz at Ee = 430 uW/cm^2

@@ -4,7 +4,7 @@
 ''   Purpose....  Read any resistive or capacitive sensor by timing an RC
 ''                decay in hardware with P_HIGH_TICKS
 ''   Manual.....  Frequency / Rotation / RC-Timing Measurement
-''   Version....  v1.0.3 (2026-09-10)
+''   Version....  v1.0.4 (2026-11-06)
 ''   Appears in.  Recipe R1 - RC-Decay Reader
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz

@@ -429,7 +429,8 @@ right-aligned monospace inside its Spin2Block. `verify-example-corpus-identity.p
 same box on both xelatex passes rather than two distinct ones.
 
 ²⁰ **P2AN004 — all four PROVEN on the returned v1.0.3 PDF, 2026-09-11 02:45**, completing the
-app-note trio in the v1.18.0 wave. P2AN003/005/006/007 stay ⏳ ⁵ until their own updates.
+app-note trio in the v1.18.0 wave. P2AN003/005/006/007 stay ⏳ ⁵ until their own updates. Held on
+v1.0.4 (cover "November 2026", "Version 1.0.4"; metadata gate, rights and example corpus green).
 
 **Metadata single-source + rights.** `audit-pdf-metadata.py` CLEAN, all seven declared fields
 round-tripped: cover `September 2026` / `Version 1.0.3`, Title, Subject, Author and Keywords

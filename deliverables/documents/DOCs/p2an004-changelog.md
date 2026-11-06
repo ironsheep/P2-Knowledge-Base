@@ -1,5 +1,14 @@
 # P2AN004 Changelog: Frequency / Rotation / RC-Timing Measurement
 
+## v1.0.4 (2026-11-06)
+
+**The light-to-frequency reader sets only what the counter needs.** No instruments added.
+
+### Fixed
+
+- **Recipe R2**: the ticks pin is plain `P_COUNTER_TICKS`, with its output disabled as a smart pin's is by default
+- **Erratic readings** (Verify): check the wiring and the supply capacitor; an external pull-down gives a line that can be left disconnected a defined level
+
 ## v1.0.3 (2026-09-10)
 
 **Each half of the RC-timing pin configuration names the job it does.** No instruments added.
