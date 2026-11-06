@@ -4,7 +4,7 @@
 ''   Purpose....  The engine driving a graphics display list - the same
 ''                dispatch with no interpreter in sight
 ''   Manual.....  P2 Interpreters & Emulators Guide
-''   Version....  v1.1.1 (2026-10-04)
+''   Version....  v1.1.2 (2026-11-05)
 ''   Appears in.  Chapter 19: XBYTE Beyond Interpreters -- 19.5 A display
 ''                list - the stream as a movable cursor
 ''   Authors....  Iron Sheep Productions, LLC

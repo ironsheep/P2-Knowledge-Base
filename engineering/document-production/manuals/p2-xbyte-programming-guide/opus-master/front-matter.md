@@ -189,7 +189,7 @@ The rest of this guide takes its time. This page does not — it is the whole me
 
 The cycle costs **8 clocks, 6 of them overhead** (Chapter 9), against 9 for the tightest equivalent written by hand. That margin — 6 versus 9 — is the whole economic argument for the engine, and Chapter 7 is where you decide whether it applies to you.
 
-Arming takes four steps, and the shape rarely varies:
+Arming takes four steps, and the shape rarely varies (written for a PASM-only file; §5.1 gives the rule for a Spin2 object):
 
 ```pasm2
                 setq2   #256-1              ' load the dispatch table

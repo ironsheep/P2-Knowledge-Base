@@ -189,7 +189,7 @@ The rest of this guide takes its time. This page does not — it is the whole me
 
 The cycle costs **8 clocks, 6 of them overhead** (Chapter 9), against 9 for the tightest equivalent written by hand. That margin — 6 versus 9 — is the whole economic argument for the engine, and Chapter 7 is where you decide whether it applies to you.
 
-Arming takes four steps, and the shape rarely varies:
+Arming takes four steps, and the shape rarely varies (written for a PASM-only file; §5.1 gives the rule for a Spin2 object):
 
 ```pasm2
                 setq2   #256-1              ' load the dispatch table
@@ -663,6 +663,8 @@ Before any bytecode can be fetched, the cog's FIFO must be pointed at the byteco
                                             ' from 'program' onward
 ```
 
+> **`##program` is correct in a PASM-only file,** where hub addresses are absolute. In a Spin2 object's DAT block, hub addresses are relative to the object: `##hubsymbol` assembles to $400 plus an offset, and `##@hubsymbol` to the offset from the start of the object, so the FIFO would read other memory. In a Spin2 object, pass the address in from Spin2 with `@`, through PTRA. The hub-symbol fragments in this guide are written for a PASM-only file.
+
 - **S** holds the hub start address (S[19:0]).
 - **D** holds the block size in 64-byte units (D[13:0]); **0 means "no limit"** — the FIFO streams continuously, which is what an interpreter usually wants. D[31] is a no-wait flag. [Rev C]{.silicon-note topic="No-wait RDFAST and the next hub instruction"} After a no-wait `RDFAST`, start no hub instruction for 16 clocks (a `WAITX #12` straight after it does it), or use the waiting form; a hub instruction started sooner can complete before its own hub access.
 
@@ -688,6 +690,25 @@ Many bytecode formats follow an operation with an operand whose size varies — 
 
 - **RFVAR** reads a **zero-extended** 1-to-4-byte variable-length value into D (C is cleared).
 - **RFVARS** reads a **sign-extended** 1-to-4-byte variable-length value into D (C = the value's MSB).
+
+The bytes say how long the value is. In each of the first three bytes, bit 7 set means another byte follows and bit 7 clear ends the value, while bits 6..0 carry the value, least-significant group first. A fourth byte is always the last and carries all 8 of its bits:
+
+| Bytes | Layout | RFVAR range | RFVARS range |
+|:-----:|:------:|:-----------:|:------------:|
+| 1 | `0vvvvvvv` | 0 to 127 | -64 to 63 |
+| 2 | `1vvvvvvv 0vvvvvvv` | 0 to 16,383 | -8,192 to 8,191 |
+| 3 | `1vvvvvvv 1vvvvvvv 0vvvvvvv` | 0 to 2,097,151 | -1,048,576 to 1,048,575 |
+| 4 | `1vvvvvvv 1vvvvvvv 1vvvvvvv vvvvvvvv` | 0 to $1FFF_FFFF | -$1000_0000 to $0FFF_FFFF |
+
+In `DAT` data, the **FVAR** and **FVARS** overrides emit this format, in the shortest form that holds the value. Each follows a `BYTE`, `WORD` or `LONG` and applies only to the one value after it:
+
+```pasm2
+' Inline operands in a bytecode program.
+program         byte    $00, FVAR 300       ' opcode, operand 300: 00 AC 02
+                byte    $00, FVAR 7         ' opcode, operand 7:   00 07
+```
+
+Nothing in the stream marks a value as signed or unsigned, so **FVAR** pairs with **RFVAR** and **FVARS** with **RFVARS**. A mismatch gives no error: `$40` reads as 64 through **RFVAR** and -64 through **RFVARS**.
 
 ```pasm2
 ' Inside a "push constant" handler: the constant follows the
@@ -1786,7 +1807,7 @@ The first line is the one to look at. **The operand is read on both paths, taken
 ::: caution
 **A one-byte signed offset reaches -64 to +63, not -128 to +127.**
 
-`RFVARS` reads a variable-length value whose first byte is `%0SAAAAAA`: bit 7 says whether another byte follows, bit 6 is the sign, and only the low six bits are magnitude. So a single byte spans -64..+63, and a loop whose body exceeds 64 bytes needs a two-byte offset — the assembler emits one, but only if you let it compute the value rather than hand-writing a byte.
+`RFVARS` reads a variable-length value whose first byte is `%0SAAAAAA`: bit 7 says whether another byte follows, bit 6 is the sign, and only the low six bits are magnitude. So a single byte spans -64..+63, and a loop whose body exceeds 64 bytes needs a two-byte offset. **FVARS** emits one from a value the assembler already knows: `FVARS -200` assembles to `$B8 $7E`. It cannot use a label defined later in the file (the build stops with `Undefined symbol`), so an offset measured from the label after its own operand, as `(p1_loop-p1_b)` is in the program below, cannot be written with **FVARS**.
 
 The program below stays inside one byte: its backward branch is -20, assembled as `$6C`, which sign-extends to -20 exactly because bit 6 is set.
 :::

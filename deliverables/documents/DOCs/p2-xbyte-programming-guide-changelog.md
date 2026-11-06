@@ -1,5 +1,19 @@
 # P2 Interpreters & Emulators Guide - Changelog
 
+## v1.1.2 (2026-11-05)
+
+**The variable-length operand format, and the directives that emit it.**
+
+### Added
+
+- **Variable-length operands** (§5.3): the byte layout and ranges of `RFVAR` and `RFVARS`, and the `FVAR` and `FVARS` overrides that emit them
+
+### Fixed
+
+- **Two-byte branch offsets** (§15.4): `FVARS` emits them from a value the assembler already knows, and takes no label defined later in the file
+- **Hub addresses** (§5.1): `##hubsymbol` and `##@hubsymbol` are for a PASM-only file; in a Spin2 object, pass the address in with `@`, through PTRA
+- **Instruction names** stay whole at a line end, so a name never reads as if it had a hyphen
+
 ## v1.1.1 (2026-10-04)
 
 **Absolute calls in shared bodies, what a skip costs, and a Rev C note on RDFAST.**
