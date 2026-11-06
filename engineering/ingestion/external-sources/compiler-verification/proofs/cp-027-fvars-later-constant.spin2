@@ -1,0 +1,6 @@
+' CP-027: an FVARS value from a constant defined later in the file is accepted.
+DAT
+op              byte    $08, FVARS VAL
+
+CON
+  VAL = 100

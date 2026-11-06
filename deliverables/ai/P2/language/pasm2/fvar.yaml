@@ -21,7 +21,7 @@ valid_range:
 rules:
 - They follow a BYTE, WORD or LONG and apply only to the one value after them. The next comma-separated item reverts to the line's declared size.
 - The emitted length is 1 to 4 bytes whatever the line's size, with no padding between data items. In an ORG section an instruction after them starts on the next long, with zero bytes filling the gap, as after any data. A label on the line takes the line's declared type.
-- The value is a single integer expression. There is no [count] repeat, and floats are rejected. A symbol defined later in the file stops the build with "Undefined symbol"; a constant or an earlier label is accepted.
+- The value is a single integer expression. There is no [count] repeat, and floats are rejected. A label defined later in the file stops the build with "Undefined symbol"; a constant, wherever it is defined, or an earlier label is accepted.
 - The shortest encoding that holds the value is emitted, and signed values are sized by their signed range, so FVARS 100 takes 2 bytes.
 worked_bytes:
 - "FVAR 127: 7F"
