@@ -1908,6 +1908,16 @@ needs the nearest integer must round itself. *Limits:* one board; 21,003 inputs 
 16,383 and the top 512, a stride across the rest, eleven 64-bit N), not every input. *Source:*
 `campaigns/2026-10-p2kb-close-out/tests/test-vo-j-036-qsqrt-rounding.spin2`.
 
+### EF-105 · A 2-pin or 4-pin streamer capture reads from the pin its base names; a stopped cog's OUT and DIR no longer reach a pin; an NCO smart pin it configured keeps its mode, X and Y, and stops toggling only when no cog holds its DIR high — `CONFIRMED`
+*KB:* `architecture/streamer/pin-selection.yaml`; `language/spin2/methods/cogstop.yaml`
+*How proven:* `test-f361-f564-subpin-cogstop` (F-361, F-564, VO-J-005 arm B), bare board, P0–P2 and P32–P47. Capture: static levels at 1:16, each lane group carrying a value that names it, at every 4-pin base (32, 36, 40, 44) and every 2-pin base (32..46). Plain pin: cog 0 holds P0 with a 15 kΩ low, a worker drives it high. Smart pin: P1 runs NCO with `P_OE`, one transition per 100 µs, watched by P2 with A from relative −1, changes counted over 20 ms.
+*Result (log `debug_261106-142849`, 2026-11-06; `.bin` 13,235 bytes = the build):* no gate failed.
+- **Capture:** all-low and all-high read `$00` and `$FF` at every base. 4-pin bases read groups 0, 1, 2, 3 under the pattern and its complement; 2-pin bases read pairs 0..7. With the first two groups' levels swapped on purpose, base 36 read `$11` and base 34 read pair 0: the decoder reports a wrong base when there is one.
+- **Plain pin:** no worker 0; worker alive 1, then 1 after 20 ms; worker stopped 0. Cog 0's own DIR stays high throughout, so this arm shows the worker's OUT gone.
+- **Smart pin (changes in 20 ms):** nothing running 0; worker alive 200, 200; **worker stopped 0**, which shows the worker's DIR gone; cog 0 raises DIR by `DRVL`, with no WRPIN, WXPIN or WYPIN, **200**; the same after `WRPIN 0`, 0; cog 0 holding DIR 200, **worker stopped 200**; cog 0 drops DIR 0.
+
+**Grounds:** F-361 holds. F-564 is answered. In the arm that holds DIR, COGSTOP leaves the smart pin running: what stops it is its DIR bit. *Limits:* one board. NCO only, with `P_OE`. Output toggling is what was observed, not the smart pin's internal state. Bases in P32..P47 only; other groups and the 1-pin and 8-pin families are EF-064 and EF-065. *Source:* `campaigns/2026-11-kb-findings/tests/test-f361-f564-subpin-cogstop.spin2`.
+
 ## Open / pending empirical questions
 
 - **SINC2 XZS-S2 start-up sample moved with the restyled cog-0 code (2026-09-26).** In

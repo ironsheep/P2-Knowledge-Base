@@ -7,12 +7,12 @@ blocks:
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: mode_transitions.cog_to_hub.example
-    fp: "2b71f8279e60a2d1"
+    fp: "00b6c8ae2a3e07ef"
     compile: fragment
     wrap: pasm2-dat
     assumes: [hub_func]
   - at: mode_transitions.hub_to_cog.example
-    fp: "1a6120b88bd77346"
+    fp: "e3c0058979def757"
     compile: fragment
     wrap: pasm2-dat
     assumes: [cog_func]
@@ -21,7 +21,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: code_organization.mixed_mode.example
-    fp: "ab5e279bacbdca15"
+    fp: "21ecb99e7db9a7eb"
     compile: fragment
     wrap: pasm2-dat
   - at: code_organization.loading_code.to_cog

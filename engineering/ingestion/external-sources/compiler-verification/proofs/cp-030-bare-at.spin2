@@ -1,0 +1,4 @@
+DAT
+        org
+        coginit #COGEXEC+5, @code
+code    jmp     #code

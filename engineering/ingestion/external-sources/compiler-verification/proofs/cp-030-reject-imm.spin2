@@ -1,0 +1,8 @@
+PUB main()
+  repeat
+DAT
+        org
+e       mov     pa, ##@@tbl
+        jmp     #e
+        orgh
+tbl     long    $D2D2D2D2

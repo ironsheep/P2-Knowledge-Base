@@ -18,7 +18,7 @@ assembled word; stays CP) · `BEHAVIOUR` (what
 compiled code does; the compile does not prove it) · `BEHAVIOUR → EF-NNN` (a P2 run has since
 proved it; the KB cites the EF).
 
-**Next record ID: `CP-028`** — take the number from this line and advance it in the same edit
+**Next record ID: `CP-031`** — take the number from this line and advance it in the same edit
 that files the record.
 
 **Commands** are run from the repository root with the repository-relative path, so each output
@@ -1249,3 +1249,28 @@ cp-029-both.spin2:7:error:Conflicting or deficient _CLKFREQ/_XTLFREQ/_XINFREQ/_R
 ```
 *Limits:* legality only. It says nothing about the effect and `%CC_SS` columns, which are the Spin2 documentation's statements. One compiler version.
 *→ EF:* none — legality stays CP.
+
+### CP-030 · In a Spin2 object, `##hubsym` assembles to $400 plus an offset and `##@hubsym` and `LONG @hubsym` to the object offset, neither the symbol's place in the image; in a PASM-only file each assembles to the true address; `@@` is accepted in PUB code and rejected in DAT — `LAYOUT`
+*KB:* `language/spin2/integration/spin2-pasm2-integration.yaml`, `language/spin2/constructs/inline_pasm.yaml`, `language/pasm2/concepts/labels.yaml`
+*Class:* layout, with the three rejections as legality.
+*Source:* `proofs/cp-030-top.spin2` (with its child `proofs/cp-030-child.spin2`), `proofs/cp-030-pasm-only.spin2`, `proofs/cp-030-dblat-pub.spin2`, `proofs/cp-030-reject-imm.spin2`, `proofs/cp-030-reject-long.spin2`, `proofs/cp-030-reject-pasm-only.spin2`.
+*Compiler:* `pnut-ts` v1.55.10.
+
+*Command (2026-11-06):* `pnut-ts <the file>`, from `proofs/`. The values are decoded from each `.bin`: the AUGS and MOV words before the marker long give the 32-bit immediate.
+```text
+cp-030-top               exit 0
+cp-030-pasm-only         exit 0
+cp-030-dblat-pub         exit 0
+cp-030-reject-imm        exit 1  :5:error:Expected a constant, unary operator, or "("
+cp-030-reject-long       exit 1  :4:error:Expected a constant, unary operator, or "("
+cp-030-reject-pasm-only  exit 1  :3:error:Expected a constant, unary operator, or "("
+
+top        cog sym at $18BC, hub sym at $18C0; ##cog=$9 ##@cog=$34 ##hub=$428 ##@hub=$38; long @hub=$38
+child      cog sym at $18F8, hub sym at $18FC; ##cog=$9 ##@cog=$2C ##hub=$428 ##@hub=$30; long @hub=$30
+pasm-only  cog sym at $0024, hub sym at $0400; ##cog=$9 ##@cog=$24 ##hub=$400 ##@hub=$400; long @hub=$400
+```
+`proofs/cp-030-branch.spin2` (Spin2 object) and `proofs/cp-030-branch-pasm-only.spin2`: from cog code, `loc ptra, #\hs`, `loc ptrb, #hs` and `call #hs` each assemble with R = 0 and the address `$418` in the object and `$400` in the PASM-only file. `proofs/cp-030-bare-at.spin2`: `coginit #COGEXEC+5, @code`, with no `#`, is accepted, and `@code` there is a register operand.
+
+`##hubsym` is the same `$428` in two objects whose symbols are at different places. The PASM-only file is the control. Spin2 v55 states the rule: "In Spin2+PASM programs, hub addresses are relative to the start of the object"; "In PASM-only programs, hub addresses are absolute." EF-060 shows the `##hubsym` read failing on silicon.
+*Limits:* what is assembled, not what runs. The `.bin` offsets are image offsets, not measured runtime addresses. One compiler version.
+*→ EF:* EF-060 for `##hubsym`; none for `##@hubsym`.

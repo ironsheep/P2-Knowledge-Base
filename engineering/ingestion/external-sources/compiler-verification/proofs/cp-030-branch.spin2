@@ -1,0 +1,12 @@
+PUB main()
+  repeat
+DAT
+        org
+e       loc     ptra, #\hs
+        loc     ptrb, #hs
+        call    #@hs
+        call    #hs
+        jmp     #e
+        long    $E1E1E1E1
+        orgh
+hs      long    $E2E2E2E2

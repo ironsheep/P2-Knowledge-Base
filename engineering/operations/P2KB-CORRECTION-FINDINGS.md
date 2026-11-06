@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-638`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-640`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -85,9 +85,14 @@ Line 272's table row gives "28-bit value" in both columns. The 4th byte carries 
 `xbyte-body.md:1514`: the -64..+63 range is right; the sentence omits that `FVARS` is what makes the assembler size the value. Fix: name `FVARS`.
 
 ### F-637 — `qmul.yaml` says Spin2 operators are already protected by the interpreter — `PENDING-VALIDATION` (found 2026-11-06, the document pass's class search)
-> **KB decision:** in batch v1.25.4
+> **KB decision:** not KB: released in v1.25.4 and read live, only the register closure is owed
 `language/pasm2/qmul.yaml:142`, the last of the wording `cordic_solver.yaml` dropped in v1.25.2. Spin2 v55 says the interpreter "accommodates interrupts and only stalls them briefly" and does not speak of the CORDIC window.
 > **Applied 2026-11-06, widened by the v1.25.4 audit:** v55's sentence sits in the list of what in-line and CALLed PASM may do, and says nothing of CORDIC or operators. Beside a CORDIC window it still read as "Spin2 CORDIC is safe", so it moves to its own home, `spin2/constructs/inline_pasm.yaml` `interrupts`, and goes from `qmul.yaml` and both `cordic_solver.yaml` pages; "Spin2 code" comes off `when_unnecessary`. `spin2/concepts/cordic_solver.yaml` drops the same claim in other words ("handle all timing and synchronization automatically", "No timing concerns", "interpreter handles everything", "Automatic timing management", "handled efficiently", the key `automatic_management`, now `calling_the_methods`), "All operations use dedicated CORDIC hardware", the two unsourced speed comparisons and "Full 32-bit precision", which becomes the Silicon Doc's "32-bit, pipelined CORDIC solver with scale-factor correction". Documents follow: Assembly §5.1.8, `REP`, `instructions-q.md`, `instruction-categories.md`, and P2AN002 `:326`, each stating the pattern for PASM2 with interrupts enabled.
+
+### F-639 — `##@hubsymbol` in a Spin2 object encodes the object-relative offset, not the runtime hub address — `CONFIRMED` (found 2026-11-06, the v1.25.4 live read)
+> **KB decision:** in batch v1.25.5
+Seen as `RDLONG temp, ##@command` in `inline_pasm.yaml` `with_communication`, a Spin2 object. Spin2 v55: "In Spin2+PASM programs, hub addresses are relative to the start of the object"; "In PASM-only programs, hub addresses are absolute." Compile matrix, `pnut-ts`, decoded from the binaries, not yet a CP record: for a hub symbol, `##sym` encodes `$428` in the top object and in the child alike ($400 plus its offset, EF-060's result), and `##@sym` encodes `$38` and `$30`, each object's own offset; the symbols sit at `$244D` and `$2495`. A standalone PASM control encodes the true address in both forms (`$400` at `$400`). For a cog symbol `##sym` is the cog address, as intended. No bench is owed: the source and the encoding settle it, and EF-060 has the class on silicon. `@@` does not change this: v55 gives "Hub address of this object + x", and `pnut-ts` accepts it in PUB code and rejects `##@@sym` and `long @@sym` with `Expected a constant, unary operator, or "("`. Also wrong: Assembly `chapter-02-instruction-format.md:808-809` (`@@label` "Object-relative address", "Spin2 or PASM"; `@label` "Hub address of label" in PASM) and `pasm2/concepts/labels.yaml` `hub_address` (`MOV ptr, ##@hub_data`). Reach: about 20 `##@` lines in 13 KB files, each to be classed as standalone PASM or Spin2 object; deSilva's 22 and Assembly's 4 UNSURE sites from the F-268 sweep. Same batch: `spin2/concepts/cordic_solver.yaml` `recommendation` and "Lower overhead for bulk operations", which no source states.
+> **Applied 2026-11-06, committed for v1.25.5:** `CP-030` filed. `hub_address_resolution` states the whole rule; `inline_pasm.yaml` and the two async-serial smart-pin pages pass the address through `PTRA`; 20 pages of bare fragments carry `hub_symbols`, a one-line pointer to the rule. Documents: Assembly, deSilva, XBYTE and Streamer notes state both forms, Assembly's `@@` row and two bare `@code` operands are corrected, deSilva Chapter 3 no longer teaches `##@` as the Spin2 form, and I/O & Smart Pins Chapter 11's `##message` on a cog symbol becomes `##@message`. Closes on the released PDFs.
 
 ### F-636 — two leftovers of F-632's class, seen reading the pages live on v1.25.1 — `PENDING-VALIDATION` (found 2026-11-06, «#440», v1.25.1 content probe)
 > **KB decision:** not KB: released in v1.25.2 and read live, only the register closure is owed
@@ -324,7 +329,8 @@ removed, the v55 pointer semantics stated, the bracket-form example kept). The C
 now covers both pages.
 
 ### F-564 — what a stopped cog leaves on the pins and in smart-pin modes is stated nowhere in the ingested sources; `cogstop.yaml` shipped three claims about it — `NEEDS-VERIFICATION` (bench question)
-> **KB decision:** held (bench): what P0 DIR/OUT/IN and a P1 smart-pin mode are after COGSTOP; `cogstop.yaml` says not documented meanwhile
+> **KB decision:** in batch v1.25.5
+> **Answered 2026-11-06, EF-105:** a stopped cog no longer drives a pin. A smart pin it configured keeps its configuration, and goes quiet only when no cog holds its DIR high. `cogstop.yaml` says so.
 Found 2026-10-09 by «#414» fixing `language/spin2/methods/cogstop.yaml`. The page shipped "All pins
 controlled by the cog are released to float state", `pin_control: All DIR bits cleared (pins become
 inputs) / Smart pin modes disabled / Pin states float`, "Cog RAM contents preserved but inaccessible",
@@ -1017,7 +1023,7 @@ document staged*. It has one. That plan line is wrong and is corrected in «#318
   `pin_base_encoding` example that is the EF-065 misalignment trap written out for a reader to
   copy.** — `PENDING-VALIDATION` (both fixed 2026-08-26; a direct bench check of the sub-pin
   weights is arm B of VO-J-005 and has not been run)
-> **KB decision:** not KB: YAML correct and served; the later bench check is arm B of VO-J-005
+> **KB decision:** not KB: YAML correct and served, EF-105 confirms it; only the register closure is owed
 
   **Defect 1 — the sub-pin table.** The block stated `field: "D[19:17] within mode config"` and then
   gave a **dense slot** mapping: for 2-pin modes `%001 = Pins 3..2`, `%010 = Pins 5..4` … `%111 =

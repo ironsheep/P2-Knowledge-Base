@@ -1,0 +1,5 @@
+PUB main()
+  repeat
+DAT
+ptr     long    @@tbl
+tbl     long    $D3D3D3D3

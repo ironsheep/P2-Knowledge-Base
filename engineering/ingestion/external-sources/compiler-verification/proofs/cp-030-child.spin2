@@ -1,0 +1,14 @@
+PUB where() : a
+  a := @kid_h
+
+DAT
+        org
+kid_e   mov     pa, ##kid_c
+        mov     pa, ##@kid_c
+        mov     pa, ##kid_h
+        mov     pa, ##@kid_h
+        jmp     #kid_e
+kid_c   long    $C1C1C1C1
+        orgh
+kid_h   long    $C2C2C2C2
+kid_p   long    @kid_h

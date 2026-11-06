@@ -1,0 +1,11 @@
+DAT
+        org
+alo_e   mov     pa, ##alo_c
+        mov     pa, ##@alo_c
+        mov     pa, ##alo_h
+        mov     pa, ##@alo_h
+        jmp     #alo_e
+alo_c   long    $B1B1B1B1
+        orgh    $400
+alo_h   long    $B2B2B2B2
+alo_p   long    @alo_h

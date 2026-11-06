@@ -16,7 +16,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [value=con]
   - at: examples[3]
-    fp: "26f4c3ca5af1d1b6"
+    fp: "57226b5726f912fa"
     compile: fragment
     wrap: pasm2-dat
     assumes: [label]

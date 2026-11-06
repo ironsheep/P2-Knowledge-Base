@@ -1,0 +1,478 @@
+'' ===========================================================================
+''
+''   File.......  test-f361-f564-subpin-cogstop.spin2
+''   Purpose....  Two wiring-free questions, each with arms that must come out
+''                both ways: (1) which pins a 2-pin and a 4-pin streamer capture
+''                read at each base; (2) what COGSTOP leaves on a plain pin and
+''                on a smart pin the stopped cog configured
+''   Manual.....  P2 Knowledge Base
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Nov 2026
+''   Updated....  Nov 2026
+''
+'' ===========================================================================
+
+{ RIG
+  Bare P2 board, 200 MHz, NOTHING attached.  Pins touched: P0..P2, P32..P47.
+  Build pnut-ts -d.  Cog 0 prints; no other cog has the debugger.
+
+QUESTION 1  (F-361, VO-J-005 arm B)
+  pin-selection.yaml says pin_base << 17 resolves the base within the group.
+  EF-095 proved only the group's first base.  Static levels on P32..P47 are
+  captured at every 4-pin base (32, 36, 40, 44) and every 2-pin base (32..46).
+  Each lane group carries a value that names it, so a capture reports WHICH
+  pins it read.
+    Both rails   all low and all high read $00 and $FF at every base.
+    Tail A       the patterns as designed: the rule predicts base B reads B.
+    Tail B       the same capture with the first two groups' levels swapped:
+                 base 36 (4-pin) and base 34 (2-pin) must now DECODE as the
+                 lower group.  This is the reversing outcome, made on purpose.
+  If Tail B does not decode as the lower group, the decoder cannot report a
+  wrong base and the verdict is INCONCLUSIVE, whatever Tail A read.
+
+QUESTION 2  (F-564)
+  Plain pin P0.  Cog 0 holds P0 with a 15 kOhm low; the worker drives it high
+  hard, and the pin's DIR and OUT are OR'd across cogs.
+    P0   no worker        must read 0: the low tail
+    P1   worker alive     must read 1, and still 1 after 20 ms: the high tail
+    P2   worker stopped   the reading: 0 RELEASED, 1 RETAINED
+  Smart pin P1 runs NCO with P_OE, one transition per 100 us.  P2 watches it
+  with its A input routed from relative -1, and cog 0 counts changes in 20 ms.
+    S0   nothing running          must be quiet: the stopped tail
+    S1   worker alive, twice      must run, both times: the running tail
+    S2   worker stopped           the reading: quiet or running
+    S3   then cog 0 raises DIR    does the pin run on what it kept?
+    S4   same, after WRPIN 0      must be quiet: the control for S3
+    S5   cog 0 holds DIR too, then the worker stops: the reading, without the
+         worker's DIR being the only one
+    S6   then cog 0 drops DIR     does the pin stop?
+  Any control that misses its tail makes that verdict INCONCLUSIVE.
+
+NOT MEASURED
+  Other groups' bases, 1-pin and 8-pin (EF-064, EF-065).  One part, N = 1.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq        = 200_000_000
+  DEBUG_COGS      = %0000_0001
+
+  PIN_D           = 0                   ' plain pin, question 2
+  PIN_S           = 1                   ' smart pin, question 2
+  PIN_M           = 2                   ' monitor of PIN_S: A from relative -1
+  GUARD_LO        = 32                  ' question 1 uses P32..P47
+  GUARD_N         = 16
+
+  SAMPLES         = 32                  ' NCO rollovers per capture
+  BYTES_4P        = SAMPLES / 2
+  BYTES_2P        = SAMPLES / 4
+  BUF_BYTES       = 64
+  SENTINEL        = $A5                 ' no static pattern here produces it
+  XFRQ_1_16       = $1000_0000          ' one sample per 16 clocks
+  CAP_BUDGET      = 2_000_000           ' 10 ms
+
+  N4              = 4                   ' 4-pin bases
+  N2              = 8                   ' 2-pin bases
+  NP4             = 5                   ' rail 0, rail 1, S1, S2, swapped
+  NP2             = 7                   ' rail 0, rail 1, A, B, ~A, ~B, swapped
+
+  PAT4_S1         = $8421               ' groups read 1, 2, 4, 8 from P32 up
+  PAT4_S2         = $7BDE               ' its complement
+  PAT4_SWAP       = $8412               ' groups 0 and 1 exchanged
+  PAT2_A          = $E4E4               ' pair k reads k & 3
+  PAT2_B          = $5500               ' pair k reads k >> 2
+  PAT2_SWAP       = $E4E1               ' pairs 0 and 1 exchanged in PAT2_A
+
+  CFG_S           = P_NCO_FREQ | P_OE
+  S_X             = 20_000              ' base period: 100 us at 200 MHz
+  S_Y             = $8000_0000          ' Z[31] toggles every base period
+  WINDOW_MS       = 20
+  RUN_MIN         = 100                 ' about 200 changes expected when running
+  QUIET_MAX       = 4
+
+  WORKER_STACK    = 128
+  DONE_V          = $0D0E_0D0E
+  NO_BYTE         = -1                  ' bytes in the buffer were not uniform
+  LATE_BYTE       = -2                  ' the streamer never signalled XFI
+
+VAR ' ---- Rig State ----
+  long  wStack[WORKER_STACK]
+  long  wReady
+  long  wDone
+  long  busyHi
+  long  rec4[N4 * NP4]
+  long  rec2[N2 * NP2]
+  byte  bufl[BUF_BYTES]
+  long  bufPad[4]
+  long  padHits
+
+PUB main()
+'' Run both questions and print the readings.
+''
+
+  debug("=== test-f361-f564 ===")
+  debug("Q1 prediction: every base B reads pins from B. Reversing outcome: another base.")
+  debug("Q2 no prediction: Spin2 v55 says a stopped cog ceases driving; the smart pin is undocumented.")
+  question_1()
+  question_2()
+  debug("=== END ===")
+  debug("DEBUG_END_SESSION")
+  repeat
+
+PRI question_1() | cog, t0
+' Start the measuring cog, wait for it and print the verdicts.
+'
+
+  wDone := 0
+  padHits := 0
+  cog := cogspin(NEWCOG, q1_worker(), @wStack)
+  if cog < 0
+    debug("RIG FAIL: no free cog for question 1")
+    return
+  t0 := getct()
+  repeat until wDone == DONE_V
+    if getct() - t0 > clkfreq * 10
+      cogstop(cog)
+      pinclear(GUARD_LO addpins GUARD_N - 1)
+      debug("RIG FAIL: question 1 stalled")
+      return
+  waitms(1)                             ' the worker returns and frees its stack
+  if busyHi
+    debug("RIG FAIL: something attached to P32..P47, mask ", uhex_long_(busyHi))
+    return
+  if padHits
+    debug("RIG FAIL: a capture over-ran the buffer, count ", udec_(padHits))
+    return
+  verdict_4p()
+  verdict_2p()
+
+PRI q1_worker() | i, base
+' Capture every base under every pattern.  No debug() runs in this cog.
+'
+
+  pinclear(GUARD_LO addpins GUARD_N - 1)
+  wrpin(GUARD_LO addpins GUARD_N - 1, P_LOW_15K)
+  pinlow(GUARD_LO addpins GUARD_N - 1)
+  waitms(1)
+  busyHi := pinread(GUARD_LO addpins GUARD_N - 1)
+  pinclear(GUARD_LO addpins GUARD_N - 1)
+  if busyHi == 0
+    repeat i from 0 to N4 - 1
+      base := GUARD_LO + i * 4
+      rec4[i * NP4 + 0] := capture_at(X_4P_4DAC1_WFBYTE, base, $0000, BYTES_4P)
+      rec4[i * NP4 + 1] := capture_at(X_4P_4DAC1_WFBYTE, base, $FFFF, BYTES_4P)
+      rec4[i * NP4 + 2] := capture_at(X_4P_4DAC1_WFBYTE, base, PAT4_S1, BYTES_4P)
+      rec4[i * NP4 + 3] := capture_at(X_4P_4DAC1_WFBYTE, base, PAT4_S2, BYTES_4P)
+      rec4[i * NP4 + 4] := capture_at(X_4P_4DAC1_WFBYTE, base, PAT4_SWAP, BYTES_4P)
+    repeat i from 0 to N2 - 1
+      base := GUARD_LO + i * 2
+      rec2[i * NP2 + 0] := capture_at(X_2P_2DAC1_WFBYTE, base, $0000, BYTES_2P)
+      rec2[i * NP2 + 1] := capture_at(X_2P_2DAC1_WFBYTE, base, $FFFF, BYTES_2P)
+      rec2[i * NP2 + 2] := capture_at(X_2P_2DAC1_WFBYTE, base, PAT2_A, BYTES_2P)
+      rec2[i * NP2 + 3] := capture_at(X_2P_2DAC1_WFBYTE, base, PAT2_B, BYTES_2P)
+      rec2[i * NP2 + 4] := capture_at(X_2P_2DAC1_WFBYTE, base, PAT2_A ^ $FFFF, BYTES_2P)
+      rec2[i * NP2 + 5] := capture_at(X_2P_2DAC1_WFBYTE, base, PAT2_B ^ $FFFF, BYTES_2P)
+      rec2[i * NP2 + 6] := capture_at(X_2P_2DAC1_WFBYTE, base, PAT2_SWAP, BYTES_2P)
+  pinclear(GUARD_LO addpins GUARD_N - 1)
+  wDone := DONE_V
+
+PRI capture_at(mode, base, pattern, nBytes) : value | cmd, xfrq, addr, budget, t0, t1, late, i
+' Drive the pattern on P32..P47, capture at the base and return the byte every
+' sample produced.  The buffer is filled with the sentinel first, and every byte
+' past nBytes must still hold it.
+'
+' @param mode - the streamer mode symbol
+' @param base - the pin base under test
+' @param pattern - levels for P32..P47, bit 0 = P32
+' @param nBytes - bytes this capture must write
+' @returns value - the uniform byte, NO_BYTE or LATE_BYTE
+
+' Local Variables:
+' @local cmd - the streamer command word
+' @local xfrq - SETXFRQ value
+' @local addr - hub address of the buffer
+' @local budget - clocks allowed for the streamer to finish
+' @local t0 - CT at XINIT
+' @local t1 - CT in the wait loop
+' @local late - 1 when XFI did not come in the budget
+' @local i - byte index
+
+  late := 0
+  pinwrite(GUARD_LO addpins GUARD_N - 1, pattern)
+  waitms(1)
+  bytefill(@bufl, SENTINEL, BUF_BYTES)
+  longfill(@bufPad, $A5A5_A5A5, 4)
+  cmd := mode | X_WRITE_ON | (base << 17) | SAMPLES
+  xfrq := XFRQ_1_16
+  addr := @bufl
+  budget := CAP_BUDGET
+  org
+    setxfrq xfrq
+    wrfast  #0, addr
+    getct   t0
+    xinit   cmd, #0
+.wait
+    getct   t1
+    sub     t1, t0
+    cmp     t1, budget      wc
+    if_nc   mov     late, #1
+    if_nc   jmp     #.done
+    pollxfi                 wc
+    if_nc   jmp     #.wait
+.done
+    waitx   ##10_000
+    xstop
+  end
+  if long[@bufPad][0] <> $A5A5_A5A5
+    padHits++
+  if late
+    return LATE_BYTE
+  value := bufl[0]
+  repeat i from 0 to nBytes - 1
+    if bufl[i] <> value
+      return NO_BYTE
+  repeat i from nBytes to BUF_BYTES - 1
+    if bufl[i] <> SENTINEL
+      return NO_BYTE
+
+PRI group_4p(b, inverted) : k
+' Which 4-pin group a captured byte names.
+'
+' @param b - the captured byte
+' @param inverted - TRUE when the complement pattern was driven
+' @returns k - group 0..3, or -1 when the byte names none
+
+  k := -1
+  if inverted
+    b ^= $FF
+  case b
+    $11: k := 0
+    $22: k := 1
+    $44: k := 2
+    $88: k := 3
+
+PRI pair_val(b) : v
+' The 2-bit value a captured byte repeats, or -1.
+'
+' @param b - the captured byte
+' @returns v - 0..3, or -1 when the byte is not one value repeated
+
+  v := b & 3
+  if b <> v * $55
+    v := -1
+
+PRI verdict_4p() | i, s1, s2, sw, rails, match, bReversing
+' Print each 4-pin base and judge it.
+'
+
+  rails := TRUE
+  match := TRUE
+  repeat i from 0 to N4 - 1
+    s1 := group_4p(rec4[i * NP4 + 2], FALSE)
+    s2 := group_4p(rec4[i * NP4 + 3], TRUE)
+    debug("4P base ", udec_(GUARD_LO + i * 4), " rail0 ", sdec_(rec4[i * NP4]), " rail1 ", sdec_(rec4[i * NP4 + 1]), " S1 ", uhex_byte_(rec4[i * NP4 + 2]), " S2 ", uhex_byte_(rec4[i * NP4 + 3]), " swap ", uhex_byte_(rec4[i * NP4 + 4]), " reads group ", sdec_(s1), " and ", sdec_(s2))
+    if rec4[i * NP4] <> $00 or rec4[i * NP4 + 1] <> $FF
+      rails := FALSE
+    if s1 <> i or s2 <> i
+      match := FALSE
+  sw := group_4p(rec4[NP4 + 4], FALSE)
+  bReversing := sw == 0
+  debug("4P tail B: base 36 under swapped levels decodes as group ", sdec_(sw), ", must be 0")
+  if not rails
+    debug("VERDICT 4P: INCONCLUSIVE, a rail did not read $00 and $FF")
+  elseif not bReversing
+    debug("VERDICT 4P: INCONCLUSIVE, the decoder cannot report a wrong base")
+  elseif match
+    debug("VERDICT 4P: RULE HOLDS, every base B reads from pin B, and the reversing tail was seen")
+  else
+    debug("VERDICT 4P: RULE FAILS, F-361 reverses; see the groups above")
+
+PRI verdict_2p() | i, a, b, na, nb, j, rails, match, consistent, swv, bReversing
+' Print each 2-pin base and judge it.
+'
+
+  rails := TRUE
+  match := TRUE
+  consistent := TRUE
+  repeat i from 0 to N2 - 1
+    a := pair_val(rec2[i * NP2 + 2])
+    b := pair_val(rec2[i * NP2 + 3])
+    na := pair_val(rec2[i * NP2 + 4])
+    nb := pair_val(rec2[i * NP2 + 5])
+    j := (a < 0 or b < 0) ? -1 : a | (b << 2)
+    debug("2P base ", udec_(GUARD_LO + i * 2), " rail0 ", sdec_(rec2[i * NP2]), " rail1 ", sdec_(rec2[i * NP2 + 1]), " A ", uhex_byte_(rec2[i * NP2 + 2]), " B ", uhex_byte_(rec2[i * NP2 + 3]), " reads pair ", sdec_(j))
+    if rec2[i * NP2] <> $00 or rec2[i * NP2 + 1] <> $FF
+      rails := FALSE
+    if j <> i
+      match := FALSE
+    if a < 0 or b < 0 or na <> (a ^ 3) or nb <> (b ^ 3)
+      consistent := FALSE
+  swv := pair_val(rec2[NP2 + 6])
+  bReversing := swv == 0
+  debug("2P tail B: base 34 under swapped levels decodes as pair ", sdec_(swv), ", must be 0")
+  if not rails
+    debug("VERDICT 2P: INCONCLUSIVE, a rail did not read $00 and $FF")
+  elseif not bReversing
+    debug("VERDICT 2P: INCONCLUSIVE, the decoder cannot report a wrong base")
+  elseif not consistent
+    debug("VERDICT 2P: INCONCLUSIVE, a complement capture disagreed")
+  elseif match
+    debug("VERDICT 2P: RULE HOLDS, every base B reads from pin B, and the reversing tail was seen")
+  else
+    debug("VERDICT 2P: RULE FAILS, F-361 reverses; see the pairs above")
+
+PRI question_2()
+' Run the plain-pin and smart-pin arms.
+'
+
+  pinclear(PIN_D addpins 2)
+  plain_pin_arms()
+  pinclear(PIN_D addpins 2)
+  smart_pin_arms()
+  pinclear(PIN_D addpins 2)
+
+PRI w_drive()
+' Worker: drive PIN_D high and stay alive.
+'
+
+  pinhigh(PIN_D)
+  wReady := 1
+  repeat
+
+PRI w_smart()
+' Worker: start the smart pin and stay alive.
+'
+
+  pinstart(PIN_S, CFG_S, S_X, S_Y)
+  wReady := 1
+  repeat
+
+PRI start_worker(which) : cog | t0
+' Start a worker and wait until it reports ready.
+'
+' @param which - 0 for w_drive, 1 for w_smart
+' @returns cog - the worker's cog, or -1
+
+  wReady := 0
+  if which == 0
+    cog := cogspin(NEWCOG, w_drive(), @wStack)
+  else
+    cog := cogspin(NEWCOG, w_smart(), @wStack)
+  if cog < 0
+    return
+  t0 := getct()
+  repeat until wReady
+    if getct() - t0 > clkfreq
+      cogstop(cog)
+      return -1
+  waitms(1)
+
+PRI plain_pin_arms() | cog, p0, p1a, p1b, p2
+' Question 2, plain pin.
+'
+
+  wrpin(PIN_D, P_LOW_15K)
+  pinlow(PIN_D)
+  waitms(1)
+  p0 := pinread(PIN_D)
+  cog := start_worker(0)
+  if cog < 0
+    debug("RIG FAIL: no worker for the plain-pin arms")
+    return
+  p1a := pinread(PIN_D)
+  waitms(WINDOW_MS)
+  p1b := pinread(PIN_D)
+  cogstop(cog)
+  waitms(1)
+  p2 := pinread(PIN_D)
+  debug("P0 no worker ", udec_(p0), ", P1 alive ", udec_(p1a), " then ", udec_(p1b), ", P2 stopped ", udec_(p2))
+  if p0 <> 0 or p1a <> 1 or p1b <> 1
+    debug("VERDICT PLAIN: INCONCLUSIVE, a control missed its tail")
+  elseif p2 == 0
+    debug("VERDICT PLAIN: RELEASED, the stopped cog no longer drives the pin")
+  else
+    debug("VERDICT PLAIN: RETAINED, the stopped cog still drives the pin")
+
+PRI changes() : n | t0, last, now
+' Count changes of the monitor pin over the window.
+'
+' @returns n - level changes seen
+
+  t0 := getct()
+  last := pinread(PIN_M)
+  repeat until getct() - t0 > clkfreq / 1000 * WINDOW_MS
+    now := pinread(PIN_M)
+    if now <> last
+      n++
+      last := now
+
+PRI smart_pin_arms() | cog, s0, s1a, s1b, s2, s3, s4, s5a, s5b, s6
+' Question 2, smart pin.  Each arm that needs a fresh pin starts from pinclear.
+'
+
+  wrpin(PIN_M, P_MINUS1_A)
+  waitms(1)
+  s0 := changes()
+
+  cog := start_worker(1)
+  if cog < 0
+    debug("RIG FAIL: no worker for the smart-pin arms")
+    return
+  s1a := changes()
+  s1b := changes()
+  cogstop(cog)
+  waitms(1)
+  s2 := changes()
+  pinlow(PIN_S)                         ' cog 0's DIR high, nothing else written
+  waitms(1)
+  s3 := changes()
+  pinclear(PIN_S)
+
+  cog := start_worker(1)
+  cogstop(cog)
+  waitms(1)
+  wrpin(PIN_S, 0)
+  pinlow(PIN_S)
+  waitms(1)
+  s4 := changes()
+  pinclear(PIN_S)
+
+  cog := start_worker(1)
+  pinlow(PIN_S)                         ' cog 0 holds DIR high as well
+  waitms(1)
+  s5a := changes()
+  cogstop(cog)
+  waitms(1)
+  s5b := changes()
+  pinfloat(PIN_S)                       ' cog 0 drops its DIR
+  waitms(1)
+  s6 := changes()
+  pinclear(PIN_S)
+
+  debug("S0 quiet ", udec_(s0), ", S1 alive ", udec_(s1a), " then ", udec_(s1b), ", S2 stopped ", udec_(s2), ", S3 DIR back ", udec_(s3), ", S4 after WRPIN 0 ", udec_(s4), ", S5 held ", udec_(s5a), " then stopped ", udec_(s5b), ", S6 DIR dropped ", udec_(s6))
+  if s0 > QUIET_MAX or s1a < RUN_MIN or s1b < RUN_MIN
+    debug("VERDICT SMART: INCONCLUSIVE, the detector did not show both tails")
+    return
+  say_arm(string("S2 worker's DIR gone"), s2)
+  if s4 > QUIET_MAX
+    debug("VERDICT S3: INCONCLUSIVE, the WRPIN 0 control still ran")
+  else
+    say_arm(string("S3 DIR back with nothing rewritten"), s3)
+  if s5a < RUN_MIN
+    debug("VERDICT S5: INCONCLUSIVE, the pin did not run with cog 0 holding DIR")
+  else
+    say_arm(string("S5 stopped with cog 0 holding DIR"), s5b)
+    say_arm(string("S6 cog 0 dropped DIR"), s6)
+
+PRI say_arm(pText, n)
+' Print one arm's reading from its change count.
+'
+' @param pText - the arm's name
+' @param n - changes counted
+
+  if n >= RUN_MIN
+    debug("VERDICT ", zstr_(pText), ": RUNNING, ", udec_(n), " changes")
+  elseif n <= QUIET_MAX
+    debug("VERDICT ", zstr_(pText), ": QUIET, ", udec_(n), " changes")
+  else
+    debug("VERDICT ", zstr_(pText), ": BETWEEN THE LIMITS, ", udec_(n), " changes, no reading")

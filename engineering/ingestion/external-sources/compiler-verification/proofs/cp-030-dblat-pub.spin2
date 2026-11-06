@@ -1,0 +1,9 @@
+PUB main() | a, b, c
+  a := @tbl
+  b := @@ptr
+  c := @@0
+  debug(uhex_long(a, b, c))
+  repeat
+DAT
+ptr long @tbl
+tbl long $D5D5D5D5

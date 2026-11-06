@@ -20,6 +20,18 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.25.5] - 2026-11-06
+
+**Hub addresses are stated for a Spin2 object and for a PASM-only file.**
+
+### Fixed
+
+- **Hub symbols in a Spin2 object**: DAT hub addresses are relative to the object; `##hubsymbol` assembles to $400 plus an offset and `##@hubsymbol` to the object offset, and the address goes in through PTRA
+- **In-line PASM and async serial examples**: each cog receives its hub address from COGINIT in PTRA
+- **Fragments with hub symbols**: pages using them point to the rule; `@label`, `LONG @label` and `WORD @label` each state their meaning in a Spin2 object
+- **COGSTOP**: a stopped cog no longer drives a pin; an NCO smart pin it configured keeps its mode, X and Y, and its output stops toggling when no cog holds its DIR high
+- **Spin2 CORDIC page**: states what each form provides
+
 ## [1.25.4] - 2026-11-06
 
 **The CORDIC pages keep to what the sources state.**

@@ -1,0 +1,17 @@
+OBJ
+  k : "cp-030-child"
+PUB main()
+  debug(uhex_long(@top_h, k.where()))
+  repeat
+
+DAT
+        org
+top_e   mov     pa, ##top_c
+        mov     pa, ##@top_c
+        mov     pa, ##top_h
+        mov     pa, ##@top_h
+        jmp     #top_e
+top_c   long    $A1A1A1A1
+        orgh
+top_h   long    $A2A2A2A2
+top_p   long    @top_h

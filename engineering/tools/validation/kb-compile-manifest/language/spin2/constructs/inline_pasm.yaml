@@ -54,7 +54,7 @@ blocks:
     wrap: spin2-top
     assumes: [parameters]
   - at: cog_loading.with_communication
-    fp: "df45c68d992048ae"
+    fp: "ad4092024bc875d0"
     compile: fragment
     wrap: spin2-top
     assumes: [temp]

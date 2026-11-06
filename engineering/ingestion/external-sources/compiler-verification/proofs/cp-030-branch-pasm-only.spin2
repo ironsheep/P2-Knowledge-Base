@@ -1,0 +1,10 @@
+DAT
+        org
+e       loc     ptra, #\hs
+        loc     ptrb, #hs
+        call    #@hs
+        call    #hs
+        jmp     #e
+        long    $E3E3E3E3
+        orgh    $400
+hs      long    $E4E4E4E4

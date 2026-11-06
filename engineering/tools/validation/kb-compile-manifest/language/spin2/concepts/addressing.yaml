@@ -68,7 +68,7 @@ blocks:
     compile: not-code
     reason: "English sentence with an inline instruction ('JMP #label uses cog-relative address'), not code"
   - at: org_vs_orgh_addressing.ORGH.example
-    fp: "695de0e8128db0fe"
+    fp: "08d5e0003e341061"
     compile: not-code
     reason: "English sentence with an inline instruction ('JMP #label uses cog-relative address'), not code"
   - at: org_vs_orgh_addressing.example

@@ -1,0 +1,7 @@
+DAT
+        org
+e       mov     pa, ##@@tbl
+        jmp     #e
+ptr     long    @@tbl
+        orgh    $400
+tbl     long    $D4D4D4D4
