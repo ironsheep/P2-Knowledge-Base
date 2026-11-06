@@ -338,10 +338,11 @@ gotchas:
       pointer itself. A method in a child object that returns a struct pointer
       (^structName) returns one LONG pointer value, so store it in the receiving
       pointer variable through its bracket form, [pCfg] := sensor.getConfig().
-      The unbracketed pCfg := ... writes through the pointer into the pointed-to
-      structure instead.
-    rule: "When receiving ^structName from an object method, use bracket notation on the receiver"
-    source: "Parallax Propeller 2 Spin2 Language Documentation v55, VAR Blocks (pointer variables)"
+      The unbracketed pCfg := ... assigns to the pointed-to structure instead. It
+      compiles only for a one-long structure; with two or more longs the build stops,
+      whether the method is in a child object or the same object.
+    rule: "When receiving ^structName from a method, use bracket notation on the receiver"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, VAR Blocks (pointer variables); CP-028"
     example: |
       OBJ
           sensor : "sensor_driver"
@@ -358,7 +359,7 @@ notes:
   - "Use SIZEOF() to get structure size in bytes"
   - "Structure pointers (^structName) also require {Spin2_v45}"
   - "Pass large structures by pointer for efficiency"
-  - "Structures larger than 15 LONGs use BYTEMOVE internally for assignment"
+  - "Copy (a := b) and swap (a :=: b) work on structures of any size; passing by value and multi-long assignment stop at 15 longs"
   - "V49+: Structures defined in CON blocks are automatically exported to parent objects"
   - "V49+: Use object.struct_t syntax to reference structures from child objects"
   - "V49+: Imported structures can be used in VAR blocks, local variables, and method parameters"

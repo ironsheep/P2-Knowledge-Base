@@ -1,0 +1,6 @@
+CON
+  _clkfreq = 250_000_000, _errfreq = 0
+DAT
+  org
+loop
+  jmp #loop

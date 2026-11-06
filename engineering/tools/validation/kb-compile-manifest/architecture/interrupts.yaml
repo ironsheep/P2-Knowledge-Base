@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: instructions[0].usage_example
-    fp: "9b17f155ca840335"
+    fp: "4daa097aa759cafc"
     compile: fragment
     wrap: pasm2-dat
   - at: instructions[1].usage_example
@@ -54,7 +54,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: programming_patterns[3].code
-    fp: "369685afd6b9bab7"
+    fp: "1726c54cc63a0987"
     compile: fragment
     wrap: pasm2-dat
   - at: debugging_considerations[0].code

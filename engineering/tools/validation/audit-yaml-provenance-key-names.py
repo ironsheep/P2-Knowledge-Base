@@ -100,8 +100,6 @@ ALLOW = {
     "what_the_source_says":   ("content", "pitfall: what a source says, set against the verified behaviour"),
     "consequence_source":     ("content", "smart_pins: the statement the consequence rests on (declared-conflict note)"),
     "verification_status":    ("content", "streamer/pin-capture.yaml: what was measured on silicon (the facts themselves), each sub-block with its own EF source: line"),
-    # ---- provenance that reaches consumers today (kind 'open') --------------------------
-    "combinations_are_compiler_verified": ("open", "pasm2-getting-started: a compile-verification claim under an unlisted key; the CP register is the home for it"),
 }
 
 STEMS = ("extract", "scrape", "verif", "authorit", "provenance", "tracking")

@@ -132,7 +132,7 @@ interrupt_protection:
       .protect
 
   extended_protection:
-    description: Protect longer sequences until ret
+    description: Protect longer sequences until a branch, such as _ret_, cancels REP
     code: |
       REP     #99, #1               ' Large block, 1 iteration
       QSQRT   value, #0

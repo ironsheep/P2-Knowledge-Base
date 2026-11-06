@@ -1,0 +1,9 @@
+{Spin2_v55}
+CON
+  STRUCT big(LONG v[8])
+VAR
+  big rec
+PUB main() | ^big p
+  p := m()
+PRI m() : ^big pr
+  [pr] := @rec

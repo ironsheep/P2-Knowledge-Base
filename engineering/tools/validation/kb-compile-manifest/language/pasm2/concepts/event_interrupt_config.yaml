@@ -34,6 +34,6 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: common_patterns.critical_section.code
-    fp: "6a9cf077544fce20"
+    fp: "15c6e0d04ef29734"
     compile: fragment
     wrap: pasm2-dat

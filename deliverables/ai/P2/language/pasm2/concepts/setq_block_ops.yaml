@@ -295,7 +295,6 @@ best_practices:
   - "Always use count-1 in SETQ/SETQ2"
   - "Align transfers to long boundaries"
   - "Use for initialization and bulk copies"
-  - "Consider interrupt latency impact"
   - "Document transfer sizes clearly"
   - "Test boundary conditions"
   - "Use LUT for frequently accessed tables"

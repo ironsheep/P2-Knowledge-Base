@@ -1562,6 +1562,31 @@ def validate_claim_sourcing(verbose: bool = False) -> ValidationResult:
     return result
 
 
+def validate_kb_pending(verbose: bool = False) -> ValidationResult:
+    """BLOCKING. Has every open KB repair been decided for the release being cut?
+
+    The version is the top semver entry of CHANGELOG.md, which release-yamls §4
+    writes before this runs. With --post-commit the tree under the KB must also
+    be clean: nothing seen is left behind uncommitted.
+    """
+    result = ValidationResult("KB Pending (open repairs decided)")
+    script = Path("engineering/tools/validation/audit-kb-pending.py")
+    changelog = Path("CHANGELOG.md")
+    match = re.search(r"^## \[(\d+\.\d+\.\d+)\]", changelog.read_text(encoding="utf-8"), re.M) \
+        if changelog.exists() else None
+    if not match:
+        result.fail("no semver entry in CHANGELOG.md — nothing audited, not a pass")
+        return result
+    args = ['--release', match.group(1)]
+    if '--post-commit' in sys.argv:
+        args.append('--final')
+    _run_gate(result, script, ['--negative-control'], "negative control", verbose)
+    _run_gate(result, script, args, "audit", verbose)
+    result.info("Scope: what the register and git record, not whether a stated "
+                "blocker is true.")
+    return result
+
+
 def validate_kb_code_compiles(verbose: bool = False) -> ValidationResult:
     """BLOCKING (ENH-03). Does every code block in the shipped KB compile in its
     declared context?
@@ -2010,6 +2035,7 @@ def run_all_validations(verbose: bool = False, incremental: bool = False) -> boo
         validate_served_value_citations,
         validate_obex_one_liners,
         validate_ledger_kb_home,
+        validate_kb_pending,
         validate_cross_references,
         validate_constant_fidelity,
         validate_claim_sourcing,

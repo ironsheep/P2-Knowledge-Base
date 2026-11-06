@@ -1,0 +1,6 @@
+CON
+  _xinfreq = 100_000_000
+DAT
+  org
+loop
+  jmp #loop

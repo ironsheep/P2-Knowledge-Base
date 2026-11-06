@@ -106,7 +106,7 @@ key_parameters:
   packed_long_atomicity: "CRITICAL and counter-intuitive: packing a record into ONE long does NOT make it atomic. Each bitfield write is a read-modify-write of the backing long, so writing the SHARED record field-by-field is several separate stores and a reader CAN observe an intermediate state. Atomicity requires staging the record in a PRIVATE local, publishing with ONE whole-struct store (shared := staged), and snapshotting with ONE whole-struct load (snap := shared) before reading any field"
   offsetof: "{Spin2_v53}. OFFSETOF(struct.member) -> byte offset of the member within the record (records pack with NO padding). Nests and indexes: OFFSETOF(s.sub.member), OFFSETOF(s.arr[2].member). Restricted to DAT/VAR/PUB/PRI blocks — using it in CON or OBJ is a compile error (same restriction as SIZEOF). Use it wherever raw addressing is unavoidable so a widened/inserted member cannot silently invalidate a hand-counted offset"
   struct_decl: "STRUCT name(members) in a CON block; members default LONG, or typed BYTE/WORD/LONG; arrays and nesting allowed; packed (no padding). reading_t(LONG,LONG,BYTE) = 9 bytes"
-  struct_ops: "member access var.member; whole-struct copy a := b; SIZEOF(name) -> byte size; pass-by-value <=15 longs (larger uses BYTEMOVE)"
+  struct_ops: "member access var.member; whole-struct copy a := b; SIZEOF(name) -> byte size; pass-by-value <=15 longs; copy and swap work at any size"
   atomicity_model: "a single hub LONG is read/written atomically; a multi-field record is NOT. Publish a record: write its fields FIRST, then flip ONE long (an index or a sequence counter) LAST"
   lock_rule: "single writer of the publish long -> NO lock (R2 ring: producer owns head, consumer owns tail; R3 mailbox: one writer bumps seq). Several writers of the same index -> ONE hardware lock (R4)"
   locks: "P2 has 16 hardware locks. LOCKNEW() -> 0..15 or a negative value (check it with < 0); REPEAT UNTIL LOCKTRY(id) spin-acquires; LOCKREL(id) releases; LOCKRET(id) frees. Release on EVERY exit path; two locks -> acquire in the SAME (ascending) order"
@@ -137,7 +137,7 @@ gotchas:
   - flag: pitfall
     text: "Release the lock on EVERY exit path from a critical section — an early RETURN/ABORT inside a locked section must LOCKREL first, or the lock leaks and other cogs hang. Free the lock with LOCKRET when done."
   - flag: pitfall
-    text: "Receiving a struct POINTER from a CHILD object needs bracket notation: `[pRec] := child.method()`. Without it a record larger than 15 longs is treated as a full-struct return and fails to compile. (Only across OBJ boundaries.)"
+    text: "Receiving a struct POINTER from a method needs bracket notation: `[pRec] := child.method()`. Without it the assignment targets the pointed-to record, and a record of two or more longs fails to compile, whether the method is in a child object or the same object."
   - flag: hardware
     text: "The P2 has 16 hardware locks; LOCKNEW returns a negative value when they're exhausted — always check (< 0). Keep the locked section tiny (never hold a lock across debug()/waitms)."
   - flag: tip

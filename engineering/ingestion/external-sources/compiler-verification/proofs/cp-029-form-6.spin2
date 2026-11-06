@@ -1,0 +1,6 @@
+CON
+  _rcslow
+DAT
+  org
+loop
+  jmp #loop

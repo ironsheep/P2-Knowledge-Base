@@ -95,7 +95,7 @@ prerequisites:
 
 gotchas:
   - flag: pitfall
-    text: "Write the mode (WRPIN/WXPIN) BEFORE raising DIR, and the first value (WYPIN) AFTER. Reversing it leaves the first output cycle undefined."
+    text: "Write the mode (WRPIN/WXPIN) BEFORE raising DIR, and the first value (WYPIN) AFTER."
   - flag: pitfall
     text: "PWM dither (P_DAC_DITHER_PWM) requires its X period to be a multiple of 256 clocks (256 minimum). A non-multiple produces incorrect dithering; if you need a different period, use PRNG dither instead."
   - flag: pitfall

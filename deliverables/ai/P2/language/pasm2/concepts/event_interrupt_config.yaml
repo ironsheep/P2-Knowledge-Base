@@ -61,12 +61,12 @@ interrupt_system:
 
     STALLI:
       syntax: "STALLI"
-      operation: "Stall interrupts (disable)"
+      operation: "Stall interrupt branches indefinitely until ALLOWI executes"
       use: "Critical sections"
       
     ALLOWI:
       syntax: "ALLOWI"
-      operation: "Allow interrupts (enable)"
+      operation: "Allow any stalled and future interrupt branches to occur"
       use: "Exit critical section"
     
     NIXINT1_3:
@@ -248,11 +248,11 @@ common_patterns:
 
   critical_section:
     code: |
-      STALLI           ' Disable interrupts
-      ' Critical code that must not be interrupted
+      STALLI           ' Stall interrupt branches
+      ' Code protected from INT1, INT2 and INT3 branches
       ' Access shared resources
-      ALLOWI           ' Re-enable interrupts
-    description: "Interrupt-safe code section"
+      ALLOWI           ' Allow interrupt branches
+    description: "Section protected from INT1, INT2 and INT3 branches; debug interrupts are non-stallable"
 
 priority_and_nesting:
   priority_rules:

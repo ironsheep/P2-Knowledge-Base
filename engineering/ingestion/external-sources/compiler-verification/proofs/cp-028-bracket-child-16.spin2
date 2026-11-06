@@ -1,0 +1,5 @@
+{Spin2_v55}
+OBJ
+  c : "cp-028-child-16"
+PUB main() | ^c.big p
+  [p] := c.m()

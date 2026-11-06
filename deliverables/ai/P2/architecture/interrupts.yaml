@@ -141,9 +141,9 @@ instructions:
       the branch. STALLI being active is itself one of the conditions that defers
       an interrupt branch.
     usage_example: |
-      STALLI                   ' Stop new interrupts
+      STALLI                   ' Stall interrupt branches
       ' ... critical section ...
-      ALLOWI                   ' Re-enable interrupts
+      ALLOWI                   ' Allow interrupt branches
   
   - instruction: "ALLOWI"
     encoding: "EEEE 1101011 000 000100000 000100100"
@@ -377,19 +377,19 @@ programming_patterns:
               RETI3
 
   - pattern: "critical_section"
-    description: "Atomic operations without interruption"
+    description: "Stall INT1, INT2 and INT3 branches around a sequence; debug interrupts are non-stallable, and a REP block shields against them too"
     code: |
       ' Critical section protection
-              STALLI                      ' Disable interrupts
-              ' ... atomic operations ...
+              STALLI                      ' Stall interrupt branches
+              ' ... protected sequence ...
               ' Modify shared data structures
               ' Access hardware resources
-              ALLOWI                      ' Re-enable interrupts
+              ALLOWI                      ' Allow interrupt branches
 
 best_practices:
   - practice: "keep_isr_short"
     description: "Minimize code in interrupt service routines"
-    rationale: "Reduces interrupt latency for other interrupts"
+    rationale: "INT1 can interrupt INT2 and INT3, INT2 can interrupt INT3, and INT3 can only interrupt non-interrupt code, so a running handler holds off the interrupts it cannot be interrupted by"
   
   - practice: "acknowledge_sources"
     description: "Clear interrupt sources within ISR"
