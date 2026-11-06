@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.6.0",
-    "generated": "2026-11-06T10:27:21.634798",
+    "generated": "2026-11-06T20:21:12.857783",
     "total_entries": 1138,
     "total_categories": 60,
     "total_aliases": 3714,
@@ -14038,8 +14038,8 @@
     },
     "p2kbPasm2CordicSolver": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/cordic_solver.yaml",
-      "mtime": 1793959509,
-      "sha256": "e0dd7cd5a375dc9fd490c4edf79b778a4124d6c3efcaade22c1f30c8c26e5eb9"
+      "mtime": 1793996245,
+      "sha256": "6fceb92fb0672ca1bcaf0f032a41cbbbe2188523c51cddbb038a2c5f97d430ce"
     },
     "p2kbPasm2EventInterruptConfig": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/event_interrupt_config.yaml",
@@ -15053,8 +15053,8 @@
     },
     "p2kbPasm2Qmul": {
       "path": "deliverables/ai/P2/language/pasm2/qmul.yaml",
-      "mtime": 1793950874,
-      "sha256": "4a91800362cd251ad1e71b41319ff755db7b9eb9080962b42891a0ee4fa867d7"
+      "mtime": 1793996245,
+      "sha256": "2872036659f4a08094d58e116f7ee56f2b753e46751c362a72cbf78c581bc1d7"
     },
     "p2kbPasm2Qrotate": {
       "path": "deliverables/ai/P2/language/pasm2/qrotate.yaml",
@@ -15878,8 +15878,8 @@
     },
     "p2kbSpin2CordicSolver": {
       "path": "deliverables/ai/P2/language/spin2/concepts/cordic_solver.yaml",
-      "mtime": 1793959924,
-      "sha256": "b44b85dc9e9d61b2b35416121b2dc839cd42e1e22338bce1f18c2f0fb23559e1"
+      "mtime": 1793996245,
+      "sha256": "557218a53f4196edb9f4188f11f7d66ab2ec26c9ce855e279d17a3b7ddf4dba2"
     },
     "p2kbSpin2FloatingPoint": {
       "path": "deliverables/ai/P2/language/spin2/concepts/floating_point.yaml",
@@ -15993,8 +15993,8 @@
     },
     "p2kbSpin2InlinePasm": {
       "path": "deliverables/ai/P2/language/spin2/constructs/inline_pasm.yaml",
-      "mtime": 1791914114,
-      "sha256": "fcd9afc72eebdb0d364553c9577462b33e27cec8d11eb9fae8222b9c4fa8657f"
+      "mtime": 1793996245,
+      "sha256": "4d01ca41c341f5dbc4aaa56782fe5e535b88e501aaa8a386e0d1a78d4d72a1dc"
     },
     "p2kbSpin2MethodDefinition": {
       "path": "deliverables/ai/P2/language/spin2/constructs/method_definition.yaml",
