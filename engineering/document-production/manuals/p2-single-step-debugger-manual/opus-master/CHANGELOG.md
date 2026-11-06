@@ -1,5 +1,13 @@
 # P2 Single-Step Debugger Manual Changelog
 
+## v1.0.2 (2026-11-05)
+
+**Names in capitals stay whole at a line end.**
+
+### Fixed
+
+- **`DEBUG` and other all-caps names** keep to one piece at a line end, so a name never reads as if it had a hyphen
+
 ## v1.0.1 (2026-09-22)
 
 **The cog register map names the instructions that write PA and PB.**

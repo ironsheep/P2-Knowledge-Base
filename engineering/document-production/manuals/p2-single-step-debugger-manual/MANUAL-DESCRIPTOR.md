@@ -2,7 +2,7 @@
 manual_slug: p2-single-step-debugger-manual
 doc_class: behavior                               # documents the on-chip debugger's behavior — grounds against the debugger implementation + hardware, NOT language YAML
 code_line_budget_K: 76                            # platform-inherited reference K (creation-guide.md §5b); this manual consumes the platform code boxes unchanged
-last_published_tag: p2-single-step-debugger-manual-v1.0.1   # released 2026-09-22
+last_published_tag: p2-single-step-debugger-manual-v1.0.2   # baseline for Dimension #15 (released 2026-11-06, 47pp)
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md
@@ -65,8 +65,8 @@ same filename (region-oriented, mechanism-accurate; the root copy is
 feature-oriented). Neither supersedes the other cleanly and neither is the master —
 the Opus Master is the blend. Keep both; cite neither.
 
-**Baseline note:** `last_published_tag` = `p2-single-step-debugger-manual-v1.0.1`, set at the
-2026-09-22 release. The 2026-09-10 **initial** release had no prior baseline — no tag, no
+**Baseline note:** `last_published_tag` = `p2-single-step-debugger-manual-v1.0.2`, set at the
+2026-11-06 release. The 2026-09-10 **initial** release had no prior baseline — no tag, no
 README entry — so its audit ran under the initial-release form (a description of the
 document, not a delta) and the changeset-integrity gate did not apply. **From v1.0.1 onward
 both apply**, diffing against this tag.
