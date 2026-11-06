@@ -1,5 +1,13 @@
 # P2AN002 Changelog: CORDIC for Real Work
 
+## v1.0.5 (2026-11-06)
+
+**The interrupt pitfall is stated for the code it applies to.**
+
+### Fixed
+
+- **Interrupts and pipelined sequences** (Pitfalls): the `REP` pattern is stated for PASM2 code with interrupts enabled
+
 ## v1.0.4 (2026-09-10)
 
 **Each timing and precision figure is stated to the scope its source supports.** No recipes added.

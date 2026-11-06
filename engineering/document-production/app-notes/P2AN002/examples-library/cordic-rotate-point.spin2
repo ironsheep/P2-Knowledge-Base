@@ -4,7 +4,7 @@
 ''   Purpose....  Rotate a point about the origin with ROTXY, using the
 ''                P2's full-circle 32-bit binary angle
 ''   Manual.....  CORDIC for Real Work
-''   Version....  v1.0.4 (2026-09-10)
+''   Version....  v1.0.5 (2026-11-06)
 ''   Appears in.  Recipe 2 - Rotate a Point
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz

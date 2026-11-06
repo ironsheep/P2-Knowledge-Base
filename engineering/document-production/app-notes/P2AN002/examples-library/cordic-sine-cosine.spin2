@@ -4,7 +4,7 @@
 ''   Purpose....  Generate a sine or cosine wave with QSIN and QCOS,
 ''                scaled by an amplitude you choose
 ''   Manual.....  CORDIC for Real Work
-''   Version....  v1.0.4 (2026-09-10)
+''   Version....  v1.0.5 (2026-11-06)
 ''   Appears in.  Recipe 4 - Sine & Cosine
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz

@@ -404,7 +404,8 @@ captioning them now would put their opus-master ahead of their published PDFs. T
 their own next update, exactly as footnote 5 directs.
 
 ¹⁹ **P2AN002 — all four PROVEN on the returned v1.0.4 PDF, 2026-09-11 00:01**, and split out for the
-same reason P2AN001 was: the row's documents diverged. P2AN004 is staged and unrendered.
+same reason P2AN001 was: the row's documents diverged. P2AN004 is staged and unrendered. Held on
+v1.0.5 (cover "November 2026", "Version 1.0.5"; metadata gate, rights and example corpus green).
 
 Unlike P2AN001, this note needed only ONE render. It carried the fixed app-note template, the
 corrected `foundation.sty` and the fence captions in a single bundle, because P2AN001 paid for all

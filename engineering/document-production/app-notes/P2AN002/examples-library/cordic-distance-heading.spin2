@@ -4,7 +4,7 @@
 ''   Purpose....  Distance and bearing between two points from one XYPOL,
 ''                the cartesian-to-polar navigation primitive
 ''   Manual.....  CORDIC for Real Work
-''   Version....  v1.0.4 (2026-09-10)
+''   Version....  v1.0.5 (2026-11-06)
 ''   Appears in.  Recipe 1 - Distance & Heading
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz

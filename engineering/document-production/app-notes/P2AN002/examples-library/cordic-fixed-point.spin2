@@ -4,7 +4,7 @@
 ''   Purpose....  64-bit-safe scaling, magnitude, and log/exp without
 ''                overflow, via MULDIV64 and the solver
 ''   Manual.....  CORDIC for Real Work
-''   Version....  v1.0.4 (2026-09-10)
+''   Version....  v1.0.5 (2026-11-06)
 ''   Appears in.  Recipe 5 - Fixed-Point Scale & Magnitude
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz

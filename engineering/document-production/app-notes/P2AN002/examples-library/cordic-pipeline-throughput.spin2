@@ -4,7 +4,7 @@
 ''   Purpose....  Keep the 54-stage pipeline full so a finished result
 ''                arrives every eight clocks instead of every 55
 ''   Manual.....  CORDIC for Real Work
-''   Version....  v1.0.4 (2026-09-10)
+''   Version....  v1.0.5 (2026-11-06)
 ''   Appears in.  Recipe 6 - Pipelining for Throughput
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz

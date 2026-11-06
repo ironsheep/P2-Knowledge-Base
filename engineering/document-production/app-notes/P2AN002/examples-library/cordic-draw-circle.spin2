@@ -4,7 +4,7 @@
 ''   Purpose....  Place points around a circle or arc with POLXY, polar to
 ''                cartesian one point at a time
 ''   Manual.....  CORDIC for Real Work
-''   Version....  v1.0.4 (2026-09-10)
+''   Version....  v1.0.5 (2026-11-06)
 ''   Appears in.  Recipe 3 - Draw a Circle
 ''   Authors....  Iron Sheep Productions, LLC
 ''   E-mail.....  stephen@ironsheep.biz
