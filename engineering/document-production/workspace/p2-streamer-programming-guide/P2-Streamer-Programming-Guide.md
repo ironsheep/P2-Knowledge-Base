@@ -660,6 +660,10 @@ Hub data serves as LUT index values. As in Chapter 5, the DAC side of these mode
 
 **%a bit:** bit order *within each byte* — 0 = bottom-first, 1 = top-first. It reorders bits inside a sub-byte group, so it acts only on the 1-, 2- and 4-bit rows above; the 4×8 row has no `%a` bit and nothing for it to reorder.
 
+::: caution
+**Hub symbols in a Spin2 object.** The hub-symbol patterns in this guide are written for a PASM-only file, where hub addresses are absolute. In a Spin2 object's DAT block, hub addresses are relative to the object: `##hubsymbol` assembles to $400 plus an offset, and `##@hubsymbol` to the offset from the start of the object, so the streamer would read other memory. In a Spin2 object, pass hub addresses in from Spin2 with `@`, through PTRA.
+:::
+
 **Example.** **Pattern** — supply `bitmap_addr`, `base` — a multiple of 8 (§12.0) — and the LUT palette.
 
 ```pasm2

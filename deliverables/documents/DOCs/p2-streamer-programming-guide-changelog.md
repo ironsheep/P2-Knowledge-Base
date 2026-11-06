@@ -1,5 +1,13 @@
 # P2 Streamer Programming Guide - Changelog
 
+## v1.1.4 (2026-11-06)
+
+**The hub-symbol patterns say where they apply.**
+
+### Fixed
+
+- **Hub addresses** (§6.1): `##hubsymbol` and `##@hubsymbol` are for a PASM-only file; in a Spin2 object, pass the address in with `@`, through PTRA
+
 ## v1.1.3 (2026-10-04)
 
 **How Goertzel results read on Rev C silicon, SINC2 measured, and where SPI data meets its clock.**
