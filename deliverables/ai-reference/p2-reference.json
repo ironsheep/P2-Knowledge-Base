@@ -1,7 +1,7 @@
 {
   "meta": {
     "release_date": "2026-11-06",
-    "last_updated": "2026-11-06T07:55:52.047350",
+    "last_updated": "2026-11-06T10:12:24.910464",
     "completeness": 0.95,
     "sources": {
       "pasm2": "deliverables/ai/P2/language/pasm2/",
@@ -11,7 +11,7 @@
   "instructions": {
     "total_count": 359,
     "source": "deliverables/ai/P2/language/pasm2/",
-    "extraction_date": "2026-11-06T07:55:52.047350",
+    "extraction_date": "2026-11-06T10:12:24.910464",
     "categories": {
       "Math and Logic": {
         "count": 109,
@@ -12544,8 +12544,8 @@
           "STALLI": {
             "mnemonic": "STALLI",
             "syntax": "STALLI",
-            "brief_description": "Disallow future interrupts",
-            "oneliner": "Prevent further interrupts",
+            "brief_description": "Stall interrupt branches",
+            "oneliner": "Stall interrupt branches",
             "encoding": [
               {
                 "bits": "EEEE 1101011 000 000100001 000100100",
@@ -12555,8 +12555,8 @@
                 "clocks": "2"
               }
             ],
-            "description": "STALLI disables interrupt branching. STALLI is the complement of the ALLOWI instruction; both are used to protect short, vital sections of main code from timing jitter or state loss caused by asynchronous interrupt handling.",
-            "result": "All future interrupts are disallowed.",
+            "description": "STALLI stalls INT1, INT2 and INT3 interrupt branches indefinitely until ALLOWI executes. STALLI is the complement of the ALLOWI instruction; critical blocks of code can be protected from interruption by beginning with STALLI and ending with ALLOWI.",
+            "result": "Interrupt branches are stalled until ALLOWI executes.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
@@ -12823,8 +12823,8 @@
           "ALLOWI": {
             "mnemonic": "ALLOWI",
             "syntax": "ALLOWI",
-            "brief_description": "Allow interrupts",
-            "oneliner": "Allow interrupts",
+            "brief_description": "Allow interrupt branches",
+            "oneliner": "Allow interrupt branches",
             "encoding": [
               {
                 "bits": "EEEE 1101011 000 000100000 000100100",
@@ -12834,8 +12834,8 @@
                 "clocks": "2"
               }
             ],
-            "description": "ALLOWI re-enables interrupt branching; the default on cog start. ALLOWI is the complement of the STALLI instruction-- both are used to protect short, vital sections of main code from timing jitter or state loss caused by asynchronous interrupt handling.",
-            "result": "Any stalled and future interrupts are allowed.",
+            "description": "ALLOWI allows any stalled and future interrupt branches to occur; this is the default mode on cog start. ALLOWI is the complement of the STALLI instruction; critical blocks of code can be protected from interruption by beginning with STALLI and ending with ALLOWI.",
+            "result": "Any stalled and future interrupt branches are allowed.",
             "timing": {
               "cycles": 2,
               "type": "fixed"
@@ -18537,7 +18537,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "deliverables/ai/P2/language/spin2/",
-    "extraction_date": "2026-11-06T07:55:52.047350",
+    "extraction_date": "2026-11-06T10:12:24.910464",
     "categories": {
       "keywords": {
         "count": 37,
@@ -18862,9 +18862,9 @@
             },
             "gotchas": {
               "struct_pointer_obj_returns": {
-                "description": "A pointer variable named alone is the variable it points to; [pCfg] is the\npointer itself. A method in a child object that returns a struct pointer\n(^structName) returns one LONG pointer value, so store it in the receiving\npointer variable through its bracket form, [pCfg] := sensor.getConfig().\nThe unbracketed pCfg := ... writes through the pointer into the pointed-to\nstructure instead.\n",
-                "rule": "When receiving ^structName from an object method, use bracket notation on the receiver",
-                "source": "Parallax Propeller 2 Spin2 Language Documentation v55, VAR Blocks (pointer variables)",
+                "description": "A pointer variable named alone is the variable it points to; [pCfg] is the\npointer itself. A method in a child object that returns a struct pointer\n(^structName) returns one LONG pointer value, so store it in the receiving\npointer variable through its bracket form, [pCfg] := sensor.getConfig().\nThe unbracketed pCfg := ... assigns to the pointed-to structure instead. It\ncompiles only for a structure of 4 bytes or fewer; at 5 bytes or more the build\nstops, whether the method is in a child object or the same object.\n",
+                "rule": "When receiving ^structName from a method, use bracket notation on the receiver",
+                "source": "Parallax Propeller 2 Spin2 Language Documentation v55, VAR Blocks (pointer variables); CP-028",
                 "example": "OBJ\n    sensor : \"sensor_driver\"\nCON\n    STRUCT sensorConfig(rate, gain, offset, calibration, filterTaps[16])\nPUB example() | ^sensorConfig pCfg\n    [pCfg] := sensor.getConfig()        ' Bracket notation required\n    debug(\"rate = \", sdec_(pCfg.rate))   ' Then access members normally\n"
               }
             },
@@ -18875,12 +18875,12 @@
               "Use SIZEOF() to get structure size in bytes",
               "Structure pointers (^structName) also require {Spin2_v45}",
               "Pass large structures by pointer for efficiency",
-              "Structures larger than 15 LONGs use BYTEMOVE internally for assignment",
+              "Copy (a := b) and swap (a :=: b) work on structures of any size; passing by value and multi-long assignment stop at 15 longs",
               "V49+: Structures defined in CON blocks are automatically exported to parent objects",
               "V49+: Use object.struct_t syntax to reference structures from child objects",
               "V49+: Imported structures can be used in VAR blocks, local variables, and method parameters",
               "V49+: Structure layout (size, alignment) is preserved exactly when imported",
-              "Use [pVar] := obj.method() bracket notation when receiving struct pointers across OBJ boundaries",
+              "Use [pVar] := obj.method() bracket notation when receiving a struct pointer from a method, in any object",
               "V54+: Named bitfields on BYTE/WORD/LONG members \u2014 see v54_enhancements section and language/spin2/concepts/struct-bitfields.yaml",
               "V54+: Nameless single BYTE/WORD/LONG member form \u2014 struct_var.bitfield without intermediate member name",
               "V54+: Bitfield syntax is NOT enforced by a version directive; {Spin2_v54} is recommended as declaration of intent",
