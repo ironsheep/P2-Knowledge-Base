@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-640`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-641`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -71,29 +71,38 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ---
 
-## Found by the RFVAR/RFVARS change «#440» (2026-11-05) — F-625 … F-628, F-631 … F-633 (F-629 archived at v1.25.0)
+## Found by the RFVAR/RFVARS change «#440» (2026-11-05) — F-625 … F-628, F-631, F-634 … F-637, F-639, F-640 (F-629, F-630, F-632, F-633, F-638 archived)
 
 Source for all five: the PNut-TS project's `external-inputs/pnut_ts_facts/RFVAR-RFVARS-reference.md`, `XF-019`, `CP-027`. The manual findings are fixed after the KB release, by Stephen's order of 2026-11-05.
 
-### F-625 — Assembly Language Reference `chapter-04-timing.md` says a 4-byte `RFVAR`/`RFVARS` value is 28 bits; it is 29 — `CONFIRMED` (found 2026-11-05, «#440»)
+### F-625 — Assembly Language Reference `chapter-04-timing.md` says a 4-byte `RFVAR`/`RFVARS` value is 28 bits; it is 29 — `PENDING-VALIDATION` (found 2026-11-05, «#440»)
 Line 272's table row gives "28-bit value" in both columns. The 4th byte carries all 8 bits, so a 4-byte value holds 29 bits (`XF-019`). Line 265 also says the MSB of "each byte" signals more bytes; the 4th byte has no continuation flag. Published in the current PDF. Fix: correct the row and the sentence.
+> **Applied 2026-11-05, Assembly v3.1.12 prepared:** row and sentence corrected; a pointer to `FVAR`/`FVARS` added. Closes on the released PDF.
 
-### F-626 — Assembly Language Reference has no `FVAR`/`FVARS` directive section — `CONFIRMED` (found 2026-11-05, «#440»)
+### F-626 — Assembly Language Reference has no `FVAR`/`FVARS` directive section — `PENDING-VALIDATION` (found 2026-11-05, «#440»)
+> **KB decision:** not KB: Assembly master, closes with its PDF
 `part-ii/directives.md` documents `BYTEFIT` and `WORDFIT`, while `FVAR`/`FVARS` appear only in the Appendix H reserved-word lists. Fix: add a section from `language/pasm2/fvar.yaml`, and link it from the `RFVAR`/`RFVARS` entries in `part-ii/instructions-r.md`.
+> **Applied 2026-11-05, Assembly v3.1.12 prepared:** new `Variable-Length Data Directives` section, linked from both instructions; directive counts 15 to 17, categories seven to eight. Same pass: Appendix H's directive list points at the section (it counts both under Lookup and Miscellaneous, so its totals stand), and its `BYTEFIT`/`WORDFIT` lines ("Verify code fits in specified byte count") now say what `part-ii/directives.md` says. Closes on the released PDF.
 
-### F-627 — XBYTE Guide §5.3 never gives the variable-length byte format or names `FVAR`/`FVARS` — `CONFIRMED` (found 2026-11-05, «#440»)
+### F-627 — XBYTE Guide §5.3 never gives the variable-length byte format or names `FVAR`/`FVARS` — `PENDING-VALIDATION` (found 2026-11-05, «#440»)
 `xbyte-body.md:410` introduces the instructions by extension only, and neither the guide nor its examples library mentions the directives that emit the format. Fix: add the layout and the directives to §5.3.
+> **Applied 2026-11-05, XBYTE v1.1.2 prepared:** §5.3 carries the layout table, the two overrides, a compiled example and the signed/unsigned pairing. Closes on the released PDF.
 
-### F-628 — XBYTE Guide §15.4 says "the assembler emits" a two-byte offset without saying how — `CONFIRMED` (found 2026-11-05, «#440»)
+### F-628 — XBYTE Guide §15.4 says "the assembler emits" a two-byte offset without saying how — `PENDING-VALIDATION` (found 2026-11-05, «#440»)
 `xbyte-body.md:1514`: the -64..+63 range is right; the sentence omits that `FVARS` is what makes the assembler size the value. Fix: name `FVARS`.
+> **Applied 2026-11-05, XBYTE v1.1.2 prepared:** widened on a compile. "Let it compute the value" was itself wrong for this program: `FVARS` takes no label defined later in the file (CP-027), and the guide's offsets are measured from a label after the operand. §15.4 now names `FVARS`, gives `FVARS -200` as `$B8 $7E`, and states that limit. Closes on the released PDF.
 
 ### F-637 — `qmul.yaml` says Spin2 operators are already protected by the interpreter — `PENDING-VALIDATION` (found 2026-11-06, the document pass's class search)
 > **KB decision:** not KB: released in v1.25.4 and read live, only the register closure is owed
 `language/pasm2/qmul.yaml:142`, the last of the wording `cordic_solver.yaml` dropped in v1.25.2. Spin2 v55 says the interpreter "accommodates interrupts and only stalls them briefly" and does not speak of the CORDIC window.
 > **Applied 2026-11-06, widened by the v1.25.4 audit:** v55's sentence sits in the list of what in-line and CALLed PASM may do, and says nothing of CORDIC or operators. Beside a CORDIC window it still read as "Spin2 CORDIC is safe", so it moves to its own home, `spin2/constructs/inline_pasm.yaml` `interrupts`, and goes from `qmul.yaml` and both `cordic_solver.yaml` pages; "Spin2 code" comes off `when_unnecessary`. `spin2/concepts/cordic_solver.yaml` drops the same claim in other words ("handle all timing and synchronization automatically", "No timing concerns", "interpreter handles everything", "Automatic timing management", "handled efficiently", the key `automatic_management`, now `calling_the_methods`), "All operations use dedicated CORDIC hardware", the two unsourced speed comparisons and "Full 32-bit precision", which becomes the Silicon Doc's "32-bit, pipelined CORDIC solver with scale-factor correction". Documents follow: Assembly §5.1.8, `REP`, `instructions-q.md`, `instruction-categories.md`, and P2AN002 `:326`, each stating the pattern for PASM2 with interrupts enabled.
 
+### F-640 — `spin2-pasm2-integration.yaml` `mixed_execution_modes` jumps with `#\@sym` in a Spin2 object — `CONFIRMED` (found 2026-11-06, the v1.25.5 live read)
+> **KB decision:** held (Stephen): documents first, 2026-11-06; with it, the pre-tag whole-page record as a gate and the sweep by operand
+Lines 359, 362, 363, with `PUB start()` in the same block. A `pnut-ts` probe encodes `jmp #\@hs` as absolute with the object offset (`$10`, the symbol at `$1898` in the image). F-639's sweep searched `##@`, `#@` and `@@` and missed this form. A search of the KB and every document master finds it nowhere else. No document is affected.
+
 ### F-639 — `##@hubsymbol` in a Spin2 object encodes the object-relative offset, not the runtime hub address — `CONFIRMED` (found 2026-11-06, the v1.25.4 live read)
-> **KB decision:** in batch v1.25.5
+> **KB decision:** not KB: released in v1.25.5 and read live; the document half closes on the released PDFs
 Seen as `RDLONG temp, ##@command` in `inline_pasm.yaml` `with_communication`, a Spin2 object. Spin2 v55: "In Spin2+PASM programs, hub addresses are relative to the start of the object"; "In PASM-only programs, hub addresses are absolute." Compile matrix, `pnut-ts`, decoded from the binaries, not yet a CP record: for a hub symbol, `##sym` encodes `$428` in the top object and in the child alike ($400 plus its offset, EF-060's result), and `##@sym` encodes `$38` and `$30`, each object's own offset; the symbols sit at `$244D` and `$2495`. A standalone PASM control encodes the true address in both forms (`$400` at `$400`). For a cog symbol `##sym` is the cog address, as intended. No bench is owed: the source and the encoding settle it, and EF-060 has the class on silicon. `@@` does not change this: v55 gives "Hub address of this object + x", and `pnut-ts` accepts it in PUB code and rejects `##@@sym` and `long @@sym` with `Expected a constant, unary operator, or "("`. Also wrong: Assembly `chapter-02-instruction-format.md:808-809` (`@@label` "Object-relative address", "Spin2 or PASM"; `@label` "Hub address of label" in PASM) and `pasm2/concepts/labels.yaml` `hub_address` (`MOV ptr, ##@hub_data`). Reach: about 20 `##@` lines in 13 KB files, each to be classed as standalone PASM or Spin2 object; deSilva's 22 and Assembly's 4 UNSURE sites from the F-268 sweep. Same batch: `spin2/concepts/cordic_solver.yaml` `recommendation` and "Lower overhead for bulk operations", which no source states.
 > **Applied 2026-11-06, committed for v1.25.5:** `CP-030` filed. `hub_address_resolution` states the whole rule; `inline_pasm.yaml` and the two async-serial smart-pin pages pass the address through `PTRA`; 20 pages of bare fragments carry `hub_symbols`, a one-line pointer to the rule. Documents: Assembly, deSilva, XBYTE and Streamer notes state both forms, Assembly's `@@` row and two bare `@code` operands are corrected, deSilva Chapter 3 no longer teaches `##@` as the Spin2 form, and I/O & Smart Pins Chapter 11's `##message` on a cog symbol becomes `##@message`. Closes on the released PDFs.
 
@@ -102,8 +111,23 @@ Seen as `RDLONG temp, ##@command` in `inline_pasm.yaml` `with_communication`, a 
 `cordic_solver.yaml` `extended_protection.description` said "until ret", where `rep_instruction.yaml` now says "a branch, such as _ret_". `setq_block_ops.yaml` `best_practices` said "Consider interrupt latency impact", the same unsourced advice as the removed "Keep transfers small".
 > **Applied 2026-11-06, uncommitted:** both changed in the tree. They ship with the next KB release. The Assembly Reference's "first `ret`, `_ret_`, or branch" stands: it names a branch generally, and `ret.yaml` is category Branch.
 
-### F-631 — Assembly Reference Appendix E calls `DEBUG_DISABLE` global and states no runtime overhead — `CONFIRMED` (found 2026-11-05, «#440», v1.25.0 impact survey)
+### F-635 — the Assembly Reference says REP stalls interrupts — `PENDING-VALIDATION` (found 2026-11-06, F-632's class search over the manuals)
+`chapter-05-hardware.md` §5.1.8 and `instructions-r.md`'s REP entry say REP "stalls interrupt handling", call the block atomic, and name it an interrupt stall. Silicon Doc wording per F-632.
+> **Widened 2026-11-06, the v1.25.2 and v1.25.3 impact survey, not yet fixed:** the same class is in `instructions-s.md:1132,1149,1152,1154` and `instructions-a.md:314,331` (STALLI "disables", ALLOWI "re-enables"), `chapter-05-hardware.md:406` ("Stall (disable)") and `:176` ("already protected by the Spin2 interpreter"), and `front-matter.md:172` ("smart pin event system"). The Assembly v3.1.12 bundle in outbound does not carry these.
+> **Applied 2026-11-06, Assembly v3.1.12 prepared:** both passages use "shielded" and the pending branch, the `.stall` label becomes `.protect`, the heading becomes Extended Interrupt Protection. Searched `manuals/*/opus-master` and `app-notes/*/opus-master` for the same wording: `P2AN002.md:363` ("never let an interrupt stall a pipelined sequence") has a different meaning; `instructions-w.md:37` describes WAITx and stands. Left as agreeing in meaning, for Stephen to see: `instructions-r.md:455` ("Interrupts are blocked during REP execution") and `chapter-01-execution-model.md:170` ("interrupt-atomic: REP shields its repeated instructions"). Closes on the released PDF.
+> **Applied 2026-11-06, Assembly v3.1.12 re-staged:** the widening above is fixed, and the two lines left for Stephen now use the Silicon Doc's words (`instructions-r.md`, `chapter-01-execution-model.md`). Same class, fixed in the pass: Chapter 5's event table and its SETSE sentence ("counter comparisons" is not a selectable event), every event has a Jxxx branch, "interpreter already protects" in `instructions-q.md`, `instructions-r.md`, `instruction-categories.md` and `P2AN002.md:326` (P2AN002 v1.0.5). Closes on the released PDFs.
+> **Impact survey, v1.25.1:** no `MANUAL-DESCRIPTOR` names a page in the delta. By direct search the release reaches the Assembly Reference only, and this finding carries it.
+
+### F-631 — Assembly Reference Appendix E calls `DEBUG_DISABLE` global and states no runtime overhead — `PENDING-VALIDATION` (found 2026-11-05, «#440», v1.25.0 impact survey)
+> **KB decision:** not KB: Assembly master, closes with its PDF
 `appendix-e-constants.md:474` ("skips all DEBUG statements entirely—no code is generated, no runtime overhead exists", "zero debug footprint") and `:557` ("Global debug disable"). Spin2 v55: a non-0 value "will disable all DEBUG statements in the file/object"; CP-026 proves the statements are not compiled. Fix: state the file/object scope and "not compiled", as `special-configuration-symbols.yaml` does.
+> **Applied 2026-11-05, Assembly v3.1.12 prepared:** header, description, table, usage comment, notes and the related-constants line. "Works identically in Spin2 PUB/PRI blocks and PASM2 DAT blocks" and "zero bytes" came out: no source states them (F-617, F-624). The float rejection (CP-026) went in. The section intro at `:454` said the same "no code ... zero runtime overhead"; reading the daemon render showed it, and it now says "not compiled". Closes on the released PDF.
+
+### F-634 — instruction names and constants hyphenate at line ends ("RF-VARS", "DE-BUG") — `PENDING-VALIDATION` (found 2026-11-05, reading the XBYTE v1.1.2 daemon render, p. 32)
+A name broken at a line end reads as a name with a hyphen in it. Counted by text extraction on the released PDFs, each hit checked against its source: 29 all-caps breaks in 6 of 17 (Assembly 22, I/O & Smart Pins 3, Debug Window, Single-Step Debugger, P2AN001 and PNut-Term-TS 1 each); XBYTE had 0 until the v1.1.2 draft's `RF-VARS`. The search also returned four hits on Streamer p. 68 that are not breaks: adjacent table cells giving signal polarity (`RED-` beside `CLK+`). Regular-weight text and bold are both affected, so the cause is not the mnemonic filter: TeX hyphenates capitalised words by default.
+> **Applied 2026-11-05, this wave:** `p2kb-platform-mnemonic-bold.lua` makes every all-caps word in the document a hyphenation exception and allows a break after the slash in a list of all-caps names. `\uchyph=0` was tried first and rejected: it stopped ordinary capitalised words too, and the margin gate failed on all three manuals (up to 74.5pt). Stephen, 2026-11-05: "yes now, we can't allow those." The filter stages once, with P2AN007. Every other consumer absorbs it at its next render (Platform Freshness Ledger). Closes when no released PDF carries a false break.
+> **Reach of the filter:** it reads pandoc text only, so raw LaTeX in a source is outside it. Single-Step p. 15 (`BREAK/INIT/DE-BUG/MAIN`, a hand-written table row) kept its break and now carries `\allowbreak{}` in the source. Other raw-LaTeX all-caps slash lists are in Assembly chapters 2, 3, 6 and Single-Step `:383`; none breaks in the 2026-11-05 renders. Each returned PDF is checked for all-caps breaks at its release.
+> **Unexplained, for the Assembly release to settle:** in a part-by-part daemon render, `instructions-q.md`'s "The angle result uses..." paragraph is 25.47pt overfull (+23.4pt at the margin gate) with the old filter and the new one alike. The pre-fix full-book run has no overfull on that paragraph, and the released PDF sets it clean. No `\sloppy`, `\tolerance` or `\emergencystretch` setting in the source or templates accounts for the difference. The margin gate on the full returned PDF decides whether it is only an effect of rendering in parts.
 
 ---
 
@@ -310,7 +334,7 @@ bare home page) were not probed under the request to keep traffic to Parallax li
 themselves were read from the pages, not fetched, so `auth_gated: false` rests on the page showing no gate.
 
 ### F-564 — what a stopped cog leaves on the pins and in smart-pin modes is stated nowhere in the ingested sources; `cogstop.yaml` shipped three claims about it — `NEEDS-VERIFICATION` (bench question)
-> **KB decision:** in batch v1.25.5
+> **KB decision:** not KB: released in v1.25.5 and read live, only the register closure is owed
 > **Answered 2026-11-06, EF-105:** a stopped cog no longer drives a pin. A smart pin it configured keeps its configuration, and goes quiet only when no cog holds its DIR high. `cogstop.yaml` says so.
 Found 2026-10-09 by «#414» fixing `language/spin2/methods/cogstop.yaml`. The page shipped "All pins
 controlled by the cog are released to float state", `pin_control: All DIR bits cleared (pins become
@@ -1234,6 +1258,7 @@ document staged*. It has one. That plan line is wrong and is corrected in «#318
 
 ### F-356 — the drive-strength mislabel is alive in the IOSP master at 23 sites, including the one composition this sprint forbids by name — `PARTIAL`
 > **KB decision:** not KB: the I/O & Smart Pins master
+> **Applied 2026-11-06, I/O & Smart Pins v1.0.12 re-staged:** the four `P_HIGH_15K | P_LOW_FLOAT` sites and the two table rows use the documented driven form (F-336's ruling; `pin-drive-configuration.yaml` weak_high, EF-063). "Resistor" comes off the rungs in Chapters 2 and 12, and "internal" off the pull-ups in Chapters 2 and 6. "Pull-up" stays: under §1.24 it is accepted vocabulary, so an agent's proposal to relabel about 40 sites was rejected. Closes on the released PDF.
 
 **How this surfaced.** «#301» was told, as a *measured result and not an assumption*, that a
 class-wide sweep on 2026-08-24 found the manual and app-note masters **clean** of this sprint's
@@ -2040,6 +2065,7 @@ decision.
 
 ### F-268 — inside a Spin2 object, `##hubsymbol` in a `DAT` block resolves against `$400`, not the object's load address. `PARTIAL — KB DONE 2026-08-16; guide-side sweep owed`
 > **KB decision:** not KB: the manual sweep
+> **Swept 2026-11-06:** 135 hub-symbol operand lines across the masters and example libraries, none in a listing with a PUB, so none misbehaves as printed; no manual stated the rule. One note added where each first presents the fragment form: Assembly §2.7.1 (v3.1.12), XBYTE §5.1 (v1.1.2), Streamer §6.1 (v1.1.4), deSilva Chapter 2 (v3.0.10). `##@label` was not measured by EF-060, so the notes do not speak of it. Closes on the released PDFs.
 
 **Origin:** EF-060, which had no F-number and no KB entry. Surfaced while getting the F-256/EF-058
 rig working, so it is a by-product rather than a target — and it is the broadest-reach item the
@@ -2506,6 +2532,7 @@ drift.
 
 ### F-202 — IOSP §16.2 ADC input-mode table (and 5 propagated sites) frame the gain ranges as ground-referenced `0V–ceiling` — `PARTIAL — the KB and the IOSP ch16/appendix-c windows ship as measured; two stale phrases still say the windows are "being characterized on hardware" (IOSP ch16 :532, appendix-d :192) (re-verified 2026-10-05 «#386»)`
 > **KB decision:** not KB: two phrases in the I/O & Smart Pins master
+> **Applied 2026-11-06, I/O & Smart Pins v1.0.12 re-staged:** both phrases point to the windows measured in §16.2. Closes on the released PDF.
 > **Source of report:** community reviewer (2026-07-07, relayed by Stephen): *"the ranges are totally
 > wrong… they are centred around 1.65V."* Community-tier input (Titus-tier): challenges our work, is not
 > itself a citable source.
