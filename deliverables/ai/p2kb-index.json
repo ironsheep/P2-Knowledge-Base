@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "3.6.0",
-    "generated": "2026-11-06T10:12:24.853009",
+    "generated": "2026-11-06T10:27:21.634798",
     "total_entries": 1138,
     "total_categories": 60,
     "total_aliases": 3714,
@@ -12303,8 +12303,8 @@
     },
     "p2kbArchEventSystem": {
       "path": "deliverables/ai/P2/architecture/event_system.yaml",
-      "mtime": 1793959924,
-      "sha256": "d3b7edf85b53659f832e850164dba99862a95515321ff19bbaba53a53e333359"
+      "mtime": 1793960823,
+      "sha256": "5a7d4f1b2d27e10c358a8b9840bff92c06d8f0ee472f66e260f7db9b656bd00e"
     },
     "p2kbArchFifo": {
       "path": "deliverables/ai/P2/architecture/fifo.yaml",
@@ -12318,8 +12318,8 @@
     },
     "p2kbArchInterrupts": {
       "path": "deliverables/ai/P2/architecture/interrupts.yaml",
-      "mtime": 1793959509,
-      "sha256": "8868763461e4cb38ca0ee94a87d98d8830b0a17232306449ba651d6addabe392"
+      "mtime": 1793960823,
+      "sha256": "9232eefa2192b0e872f1293cc558ef2f2113fa4abcf9564b6b0570cb5ceb0a2e"
     },
     "p2kbArchIoPinTiming": {
       "path": "deliverables/ai/P2/architecture/io_pin_timing.yaml",
@@ -14043,8 +14043,8 @@
     },
     "p2kbPasm2EventInterruptConfig": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/event_interrupt_config.yaml",
-      "mtime": 1793959509,
-      "sha256": "6ef382e495979b6b577f1a3e55cea69dc2f00be89c54becaff465cf5a715c1b4"
+      "mtime": 1793960823,
+      "sha256": "d75457deca8d4f09eb309a113dad46e3786f3c626728b94255eb42a119569350"
     },
     "p2kbPasm2ExecutionModes": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/execution_modes.yaml",
