@@ -379,6 +379,11 @@ def build_gates(slug: str, phase: str, pdfs: list[str] | None):
                   ["--kb-content"], True,
                   "a push sends every commit; KB content must be released (indexed) first"))
 
+        # BLOCKING: a mixed commit under this release ties its push to another silo's
+        # readiness, which is what held P2AN007 up on 2026-11-05.
+        G.append(("commit-silos", f"{V}/audit-commit-silos.py", [], True,
+                  "each commit ahead of upstream holds one silo"))
+
         # BLOCKING: the descriptor must name the tag THIS release creates. F-282 fixed
         # the baseline fleet-wide once (2026-08-25) and left the per-release step as
         # overlay prose; by 2026-10-05 twelve of seventeen were stale again, four of

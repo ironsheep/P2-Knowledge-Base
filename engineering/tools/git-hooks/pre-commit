@@ -1,0 +1,3 @@
+#!/bin/sh
+# Refuses a commit that mixes silos or holds YAML outside a KB release.
+exec python3 engineering/tools/validation/audit-commit-silos.py --staged

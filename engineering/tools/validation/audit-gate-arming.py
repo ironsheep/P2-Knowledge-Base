@@ -93,7 +93,7 @@ HEADS = {
         "audit-descriptor-baseline.py", "audit-license-block.py",
         "audit-review-scaffolding.py", "verify-published-zip-currency.py",
         "verify-example-corpus-identity.py", "sync-manual-examples.py",
-        "audit-gate-arming.py",
+        "audit-gate-arming.py", "audit-commit-silos.py",
     },
     "yaml": {
         "audit-constant-fidelity.py", "audit-yaml-claim-sourcing.py",
