@@ -204,7 +204,7 @@ performance:
     - "Maximum 512 longs per operation"
     - "Must be contiguous memory"
     - "Cannot cross cog/LUT boundary"
-    - "Interrupts delayed during transfer"
+    - "SETQ/SETQ2 shields the next instruction from interruption"
     - "LUT addressing starts at 0, not $200 for SETQ2"
 
 common_patterns:
@@ -275,8 +275,7 @@ advanced_usage:
 
   interrupt_blocking:
     description: "SETQ/SETQ2 shields the next instruction from interruption"
-    behavior: "SETQ/SETQ2 must not be executing before an interrupt branch can happen, so the block transfer it starts completes first"
-    consideration: "Keep transfers small for responsiveness"
+    behavior: "SETQ/SETQ2 must not be executing before an interrupt branch can happen"
 
 debugging:
   verification:

@@ -158,7 +158,7 @@ common_patterns:
         QEXP x
         ...
       _ret_ MOV result, x  ' REP exits at _ret_
-    description: Shielded from interrupts until a branch, such as ret or _ret_, cancels REP
+    description: Shielded from interrupts until a branch, such as _ret_, cancels REP
 
   i2c_bitbang:
     code: |
