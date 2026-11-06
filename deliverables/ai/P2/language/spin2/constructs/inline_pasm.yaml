@@ -66,7 +66,11 @@ execution_model:
     description: "PASM code is copied separately into cog registers starting at the ORG address (default $000), so code length is NOT constrained by the 16-long variable limit."
     code_size_limit: "Inline code area is $000..$11F (288 longs) when no multitasking is in use, plus LUT $000..$00F (16 longs). When the cog uses multitasking, $100..$11F is the multitasking taskptr table (building DOWNWARD from $11F), reducing the available inline code area; programs using fewer than 32 software tasks leave the LOWER portion of $100..$11F free for user code as well. Avoid writing to $120..$1D7 (Spin2 interpreter) and LUT $010..$1FF (interpreter)."
     source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE (free cog registers $000..$11F; avoid writing $120..$1D7); Document Status (v47: task pointers build downward in the last 32 free cog registers, from $11F..$100)"
-  
+
+  interrupts:
+    description: "In-line PASM code may enable an interrupt which executes code residing somewhere in cog registers $000..$11F. Spin2 accommodates interrupts and only stalls them briefly."
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE"
+
   multitasking_taskptr_table:
     location: "$100..$11F (cog registers)"
     fill_direction: "Downward from $11F (taskptr for task 31 occupies $11F, task 30 at $11E, etc.)"

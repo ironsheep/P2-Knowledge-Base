@@ -139,7 +139,6 @@ interrupt_protection: |
     GETQX result_lo
     GETQY result_hi
     .protect
-  Note: Spin2 accommodates interrupts and only stalls them briefly.
   See language/pasm2/concepts/cordic_solver.yaml for detailed patterns.
 documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.20, and CORDIC Solver Instructions, p.44; P2 Instructions v35 - Rev B/C Silicon, Sheet1"
 documentation_level: comprehensive

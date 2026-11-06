@@ -113,8 +113,7 @@ usage_patterns:
 
 interrupt_protection:
   applicability: |
-    This section applies to PASM2 code with interrupts enabled. Spin2 accommodates interrupts
-    and only stalls them briefly.
+    This section applies to PASM2 code with interrupts enabled.
   description: |
     The 55-clock delay between queuing and retrieval creates a timing window vulnerable to
     interrupts. For timing-critical PASM2 applications with interrupts enabled, place the

@@ -11,12 +11,10 @@ overview: |
 
 key_features:
   hardware_accelerated:
-    - All operations use dedicated CORDIC hardware
     - A 32-bit, pipelined CORDIC solver with scale-factor correction
 
-  automatic_management:
-    - No pipeline management required
-    - The interpreter accommodates interrupts and only stalls them briefly
+  calling_the_methods:
+    - No pipeline management in the calling code
     - Results returned directly to variables
 
   angle_format:
@@ -117,7 +115,6 @@ performance_notes:
 comparison_with_pasm2:
   spin2_advantages:
     - Simpler syntax - just call the method
-    - Spin2 accommodates interrupts and only stalls them briefly
     - Results returned directly
 
   pasm2_advantages:
