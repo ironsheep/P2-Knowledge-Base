@@ -311,8 +311,8 @@ limitations:
   - "16 event sources per cog"
   - "No interrupt priority modification"
   - "Cannot interrupt AUGS/AUGD pairs"
-  - "REP blocks delay interrupts"
-  - "SETQ blocks are atomic"
+  - "REP must not be executing or active before an interrupt branch can happen"
+  - "SETQ/SETQ2 shields the next instruction from interruption"
   - "Debug ISR size limited by COG RAM"
 
 sources:

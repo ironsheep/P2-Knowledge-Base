@@ -1,0 +1,8 @@
+' CP-027: an FVARS value from a constant or from earlier labels is sized normally.
+CON
+  OFFSET = -200
+
+DAT
+first           byte    0, 0, 0
+second          byte    0
+op              byte    $08, FVARS OFFSET, FVARS (first - second), FVARS (first - second - 200)

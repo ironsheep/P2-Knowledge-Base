@@ -15,11 +15,13 @@ constraints:
   - "Instruction count is D[8:0] only (maximum 511 instructions, whether D is #immediate or a register); it does not extend beyond 9 bits"
   - "Maximum 511 iterations with #immediate; use ## or register for S up to 2^32-1"
   - REP cannot be nested (single hardware counter)
-  - Interrupts are ignored during REP looping, the debug interrupt included
+  - Interrupts are ignored during REP looping. A REP block is automatically shielded from interrupts, including non-stallable debug interrupts
+  - When an interrupt event occurs, REP must not be executing or active before the interrupt branch can happen. Once this and the other branch conditions are met, any pending interrupt is allowed to branch
   - Cannot use WC, WZ, or WCZ effects
   - Branches within block cancel REP immediately
 sources:
   - "constraints (instruction count is D[8:0] only): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION REPEATING"
+  - "constraints (interrupts): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION REPEATING, SETQ CONSIDERATIONS and INTERRUPTS"
 extended_counts:
   - "##reps (the S operand) emits an AUGS prefix for a 32-bit iteration count; S[31:0] may also come from a register"
   - "The D instruction count stays 9 bits (D[8:0]); only the S repeat count extends to 32 bits"

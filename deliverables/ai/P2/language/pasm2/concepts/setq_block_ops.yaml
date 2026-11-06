@@ -274,10 +274,9 @@ advanced_usage:
         DJNZ count, #.loop
 
   interrupt_blocking:
-    description: "Block transfers are atomic"
-    behavior: "Interrupts delayed until complete"
+    description: "SETQ/SETQ2 shields the next instruction from interruption"
+    behavior: "SETQ/SETQ2 must not be executing before an interrupt branch can happen, so the block transfer it starts completes first"
     consideration: "Keep transfers small for responsiveness"
-    debug_impact: "Debug ISR must wait for completion"
 
 debugging:
   verification:

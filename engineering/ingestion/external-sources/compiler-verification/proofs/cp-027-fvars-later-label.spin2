@@ -1,0 +1,4 @@
+' CP-027: an FVARS value cannot use a label defined later in the file.
+DAT
+op              byte    $08, FVARS (after - op)
+after           byte    0

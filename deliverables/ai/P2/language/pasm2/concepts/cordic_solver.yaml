@@ -117,13 +117,15 @@ interrupt_protection:
     CORDIC (such as *, /, SQRT, QSIN, QCOS, etc.) are already protected by the Spin2 interpreter.
   description: |
     The 55-clock delay between queuing and retrieval creates a timing window vulnerable to
-    interrupts. For timing-critical PASM2 applications with interrupts enabled, use REP to
-    stall interrupts during the sequence.
+    interrupts. For timing-critical PASM2 applications with interrupts enabled, place the
+    sequence within a REP block, which is automatically shielded from interrupts, including
+    non-stallable debug interrupts. A pending interrupt is allowed to branch once REP is no
+    longer active and the other branch conditions are met.
 
   basic_protection:
     description: Protect a single CORDIC operation
     code: |
-      REP     @.protect, #1         ' Execute block atomically
+      REP     @.protect, #1         ' Block is shielded from interrupts
       QMUL    multiplicand, multiplier
       GETQX   result_lo
       GETQY   result_hi

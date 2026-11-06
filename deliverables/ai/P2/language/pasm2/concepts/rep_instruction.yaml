@@ -60,14 +60,15 @@ key_features:
     - Dedicated loop counter (hidden)
     - Automatic PC control
     - No register usage for counting
-    - Cannot be interrupted mid-block
+    - Automatically shielded from interrupts
 
   constraints:
     - Maximum 511 instructions per block (9-bit D field)
     - 'Maximum 511 iterations with a # immediate; up to 2^32-1 with ## or a register; a count of 0 repeats forever'
     - No branches within REP block (branches cancel REP)
     - No REP nesting allowed (single hardware counter)
-    - Interrupts are ignored during REP looping, the debug interrupt included
+    - Interrupts are ignored during REP looping. A REP block is automatically shielded from interrupts, including non-stallable debug interrupts
+    - When an interrupt event occurs, REP must not be executing or active before the interrupt branch can happen. Once this and the other branch conditions are met, any pending interrupt is allowed to branch
     - Cannot use WC, WZ, or WCZ effects
 
 operational_details:
@@ -100,7 +101,7 @@ restrictions:
     - DJNZ in REP block: Works but exits REP early
     - Interrupts: Ignored during REP looping
     - S = 0 repeats the block indefinitely
-    - A REP block is shielded from interrupts, including the debug interrupt
+    - A REP block is automatically shielded from interrupts, including non-stallable debug interrupts
     - Debug: Cannot single-step through REP
     - Hub execution: REP works in hubexec mode
 
@@ -142,14 +143,14 @@ common_patterns:
 
   interrupt_protection:
     code: |
-      REP @.stall, #1
+      REP @.protect, #1
         QMUL y, x          ' CORDIC multiply
         GETQX x            ' Get result
         GETQY y            ' Get overflow
-      .stall
-    description: Stall interrupts during critical CORDIC sequence
+      .protect
+    description: A REP block is automatically shielded from interrupts, so this critical CORDIC sequence is protected
 
-  extended_interrupt_stall:
+  extended_interrupt_protection:
     code: |
       REP #99, #1          ' Large block count, 1 iteration
         QSQRT x, #0
@@ -157,7 +158,7 @@ common_patterns:
         QEXP x
         ...
       _ret_ MOV result, x  ' REP exits at _ret_
-    description: Interrupt-free zone until ret/_ret_ or branch
+    description: Shielded from interrupts until a branch, such as ret or _ret_, cancels REP
 
   i2c_bitbang:
     code: |
@@ -239,7 +240,7 @@ comparison:
     - Unrolled: Larger code, fully flexible
 
 sources:
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION REPEATING"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION REPEATING, SETQ CONSIDERATIONS and INTERRUPTS"
 
 related:
   - language/pasm2/concepts/labels.yaml

@@ -50,11 +50,11 @@ blocks:
     wrap: pasm2-dat
     assumes: [multiplicand, coefficient, accumulator]
   - at: common_patterns.interrupt_protection.code
-    fp: "fac060dd9f05c87f"
+    fp: "fbe649e54a38bdbb"
     compile: fragment
     wrap: pasm2-dat
     assumes: [y, x]
-  - at: common_patterns.extended_interrupt_stall.code
+  - at: common_patterns.extended_interrupt_protection.code
     fp: "564a3777dd702811"
     compile: fragment
     wrap: pasm2-dat

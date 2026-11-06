@@ -130,8 +130,10 @@ timing_notes: Result available 55 clocks after instruction issue. Each cog can i
 applications: DSP multiply-accumulate, fixed-point arithmetic, large integer calculations,
   cryptographic operations, precise mathematical computations.
 interrupt_protection: |
-  For timing-critical PASM2 code with interrupts enabled, use REP with a single
-  iteration to stall interrupts during the 55-clock CORDIC window:
+  For timing-critical PASM2 code with interrupts enabled, place the 55-clock CORDIC
+  window within a single-iteration REP block, which is automatically shielded from
+  interrupts. A pending interrupt is allowed to branch once REP is no longer active
+  and the other branch conditions are met:
     REP @.protect, #1
     QMUL multiplicand, multiplier
     GETQX result_lo

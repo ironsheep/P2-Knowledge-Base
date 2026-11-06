@@ -1197,6 +1197,7 @@ followed by `nop` under `org` fills the same way; outside `org`, `byte FVAR 300`
 `AC 02 00 00 00 00` with no fill.
 **Grounds:** Spin2 v55 states only that these overrides exist and can be read by `RFVAR`/`RFVARS`
 (DAT Symbols and Data).
+*Values the compiler can size (2026-11-05):* `pnut-ts` v1.55.10. `pnut-ts -l .../proofs/cp-027-fvars-later-label.spin2`, exit status 1: `cp-027-fvars-later-label.spin2:3:error:Undefined symbol`, for a label on the next line. `pnut-ts -l .../proofs/cp-027-fvars-known-value.spin2`, exit status 0, with a CON constant of -200 and two earlier labels 3 bytes apart: `08 | B8 7E | 7D | B5 7E`.
 *Non-negative `FVARS` (2026-11-05):* `pnut-ts` v1.55.10, `pnut-ts -l .../proofs/cp-027-fvars-nonnegative.spin2`, exit status 0:
 ```text
 FVARS 0          00

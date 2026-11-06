@@ -18,7 +18,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [a, b, result_lo, result_hi]
   - at: interrupt_protection.basic_protection.code
-    fp: "2674ecb4ed1ae61c"
+    fp: "2b18cd62d194501d"
     compile: fragment
     wrap: pasm2-dat
     assumes: [multiplicand, multiplier, result_lo, result_hi]
