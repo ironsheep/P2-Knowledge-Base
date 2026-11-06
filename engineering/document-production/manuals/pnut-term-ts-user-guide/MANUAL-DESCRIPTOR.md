@@ -2,7 +2,7 @@
 manual_slug: pnut-term-ts-user-guide
 doc_class: behavior                               # software-tool user guide — grounds against source-extraction (repo feeds), NOT language YAML
 code_line_budget_K: 76                            # platform-inherited default (LM-Mono reference K); revisit if this guide adopts a different template
-last_published_tag: pnut-term-ts-user-guide-v1.0.0   # released 2026-09-10
+last_published_tag: pnut-term-ts-user-guide-v1.0.1   # baseline for Dimension #15 (released 2026-11-06, 47pp)
 guide_paths:
   creation_guide: ./creation-guide.md
   voice_guide: ./voice-guide.md
@@ -57,4 +57,4 @@ features adopted (metadata single-source, rights, cross-ref, generated headers n
 
 *Draft-and-hold, DISCHARGED.* The instruction here was to draft against the v0.10.3 feeds and then re-pull the feeds and re-verify at release. Both halves happened: the feeds were re-snapshotted 2026-09-09 at tool **v1.0.7** and the whole surface was re-checked against them before the release, not after.
 
-**Baseline note:** `last_published_tag` = `pnut-term-ts-user-guide-v1.0.0` (2026-09-10).
+**Baseline note:** `last_published_tag` = `pnut-term-ts-user-guide-v1.0.1` (2026-11-06).

@@ -180,7 +180,7 @@ It ships here because it is a P2 document — the tool exists to download to a P
 one run — and that is the shelf a P2 developer looks on.
 
 ### [PNut-Term-TS User Guide](https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/deliverables/documents/DOCs/PNut-Term-TS-User-Guide.pdf)
-**The Cross-Platform Downloader, Terminal, and Debug Display for the Propeller 2** · *Version 1.0.0*
+**The Cross-Platform Downloader, Terminal, and Debug Display for the Propeller 2** · *Version 1.0.1*
 
 The operating guide for PNut-Term-TS — the downloader, serial terminal, and `debug()` display
 in one program that runs the same way on Windows, macOS, and Linux. It replaces Parallax Serial
@@ -194,7 +194,7 @@ each one costs real time when guessed at: the exit codes as a contract a script 
 the Debug Logger as a window onto the log rather than the log itself, and the naming rule that
 decides whether a display window ever appears.
 
-*September 2026* · Tracks **PNut-Term-TS v1.0.7** | [Changelog](DOCs/pnut-term-ts-user-guide-changelog.md) | [Report a tool or guide issue](https://github.com/ironsheep/PNut-Term-TS/issues)
+*November 2026* · Tracks **PNut-Term-TS v1.0.7** | [Changelog](DOCs/pnut-term-ts-user-guide-changelog.md) | [Report a tool or guide issue](https://github.com/ironsheep/PNut-Term-TS/issues)
 
 
 ## The Full Documentation Set
