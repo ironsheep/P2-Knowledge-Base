@@ -452,7 +452,7 @@ REP creates a hardware-implemented loop that executes the next Dest[8:0] instruc
 
 The REP instruction itself takes 2 cycles, and the repeated instructions execute with zero overhead—no jump penalty, no counter decrement. This makes REP ideal for time-critical inner loops.
 
-REP blocks cannot be nested. The P2 hardware uses a single internal counter for REP execution; starting a new REP while one is active overwrites the existing repeat state. For nested iteration, use REP for the inner loop and branch instructions (DJNZ) for outer loops. Interrupts are blocked during REP execution—including debug interrupts that ordinary masking cannot hold off—to maintain timing precision and keep the repeated block atomic. A REP block of RDLONG/WRLONG transfers is therefore an interrupt-atomic, cog-driven block move (the blocking counterpart to the streamer's autonomous transfer; see Chapter 1). REP adds no per-iteration overhead, so it suits tight timing-critical loops.
+REP blocks cannot be nested. The P2 hardware uses a single internal counter for REP execution; starting a new REP while one is active overwrites the existing repeat state. For nested iteration, use REP for the inner loop and branch instructions (DJNZ) for outer loops. Interrupts are ignored during REP looping, and a REP block is automatically shielded from interrupts, including non-stallable debug interrupts. A REP block of RDLONG/WRLONG transfers is therefore an uninterrupted, cog-driven block move (the blocking counterpart to the streamer's autonomous transfer; see Chapter 1). REP adds no per-iteration overhead, so it suits tight timing-critical loops.
 
 **Critical Restrictions:**
 
@@ -528,25 +528,25 @@ REP blocks can span from cog RAM into LUT RAM when executing in combined cog+LUT
 
 **Interrupt Protection Pattern:**
 
-A common PASM2 idiom uses REP with repetition count = 1 to stall interrupts during critical operations. (Note: This pattern is only needed in PASM2 code with interrupts enabled; Spin2 operators are already protected by the interpreter.)
+A common PASM2 idiom uses REP with repetition count = 1 to shield critical operations from interrupts. (Note: This pattern applies to PASM2 code with interrupts enabled.)
 
 ```pasm2
 ' Protect CORDIC operation from interrupts
-                rep     @.stall, #1           ' Run block once, atomically
+                rep     @.protect, #1         ' Run block once, shielded
                 qmul    y, x                  ' CORDIC multiply
                 getqx   x                     ' Get result
                 getqy   y                     ' Get overflow
-.stall
+.protect
 ```
 
-This works because REP stalls interrupt handling until all repeated instructions complete, even with just one iteration.
+This works because a REP block is automatically shielded from interrupts, including non-stallable debug interrupts, even with just one iteration. A pending interrupt is allowed to branch once REP is no longer active and the other branch conditions are met.
 
-**Extended Interrupt Stall:**
+**Extended Interrupt Protection:**
 
 For longer critical sequences, use a large instruction count with repetition = 1:
 
 ```pasm2
-' Stall interrupts until ret/_ret_ is encountered
+' Shield from interrupts until ret/_ret_ is encountered
 op_quna         rep     #99, #1               ' Large count, exits on ret
                 qsqrt   x, #0                 ' CORDIC operations...
                 qlog    x
@@ -555,7 +555,7 @@ op_quna         rep     #99, #1               ' Large count, exits on ret
         _ret_   mov     result, x             ' REP ends at _ret_
 ```
 
-The large instruction count (99) with repetition count of 1 creates an interrupt-free zone that terminates at the first `ret`, `_ret_`, or branch instruction.
+The large instruction count (99) with repetition count of 1 creates a shielded block that terminates at the first `ret`, `_ret_`, or branch instruction.
 
 **Conditional REP:**
 
@@ -935,7 +935,7 @@ Read Variable Via FIFO
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010011 | 0 | result == 0 | D | 2 |
 
 
-**Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFVARS](#rfvars)
+**Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFVARS](#rfvars), [FVAR](#fvar)
 
 **Explanation:**
 
@@ -945,7 +945,7 @@ If the WC or WCZ effect is specified, C is always cleared to 0.
 
 If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
-The length of each value is encoded in the data itself, not by any streamer configuration: bit 7 of each of the first three bytes is a continuation flag. A byte with bit 7 clear ends the value, and a fourth byte is always the last, so a value is 1 to 4 bytes long.
+The length of each value is encoded in the data itself, not by any streamer configuration: bit 7 of each of the first three bytes is a continuation flag. A byte with bit 7 clear ends the value, and a fourth byte is always the last, so a value is 1 to 4 bytes long. The [FVAR](#fvar) directive emits this format in DAT data.
 
 
 
@@ -971,7 +971,7 @@ Read Signed Variable Via FIFO
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010100 | MSB of value | result == 0 | D | 2 |
 
 
-**Related:** [RDFAST](#rdfast), [RFVAR](#rfvar), [RFBYTE](#rfbyte)
+**Related:** [RDFAST](#rdfast), [RFVAR](#rfvar), [RFBYTE](#rfbyte), [FVARS](#fvar)
 
 **Explanation:**
 
@@ -981,7 +981,7 @@ If the WC or WCZ effect is specified, C is set to the MSB of the value.
 
 If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
-The length of each value is encoded in the data itself, not by any streamer configuration: bit 7 of each of the first three bytes is a continuation flag. A byte with bit 7 clear ends the value, and a fourth byte is always the last, so a value is 1 to 4 bytes long.
+The length of each value is encoded in the data itself, not by any streamer configuration: bit 7 of each of the first three bytes is a continuation flag. A byte with bit 7 clear ends the value, and a fourth byte is always the last, so a value is 1 to 4 bytes long. The [FVARS](#fvar) directive emits this format in DAT data.
 
 
 

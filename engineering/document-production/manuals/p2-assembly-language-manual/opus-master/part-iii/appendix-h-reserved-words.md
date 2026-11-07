@@ -378,7 +378,7 @@ These keywords define the major sections of a Spin2/PASM2 source file:
 - **ALIGNL** - Align to next long boundary (4-byte alignment)
 - **ALIGNW** - Align to next word boundary (2-byte alignment)
 - **BYTE** - Reserve/initialize byte-sized data
-- **BYTEFIT** - Verify code fits in specified byte count
+- **BYTEFIT** - Declare byte data with compile-time range validation
 - **DEBUG** - Insert debug statements (Spin2 feature)
 - **DITTO** - Repeat the lines up to `DITTO END` a given number of times; `$$` is the iteration index (Spin2 v50+)
 - **FIT** - Verify code fits in cog memory
@@ -388,7 +388,9 @@ These keywords define the major sections of a Spin2/PASM2 source file:
 - **ORGH** - Set assembly origin (hub address)
 - **RES** - Reserve uninitialized registers/memory
 - **WORD** - Reserve/initialize word-sized data (16 bits)
-- **WORDFIT** - Verify code fits in specified word count
+- **WORDFIT** - Declare word data with compile-time range validation
+
+[FVAR and FVARS](#fvar) are counted under Lookup and Miscellaneous.
 
 
 

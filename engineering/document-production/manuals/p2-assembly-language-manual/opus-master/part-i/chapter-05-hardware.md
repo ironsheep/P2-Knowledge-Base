@@ -173,15 +173,15 @@ Full instruction details, including operand formats and result interpretations, 
 
 ### 5.1.8 Protecting Critical CORDIC Sequences
 
-**Note:** This section applies only to PASM2 code with interrupts enabled. Spin2 operators that use CORDIC (such as `*`, `/`, `SQRT`, `QSIN`, `QCOS`, etc.) are already protected by the Spin2 interpreter—no additional protection is needed when using Spin2.
+**Note:** This section applies to PASM2 code with interrupts enabled.
 
-The 55-clock delay between queuing a CORDIC operation and retrieving its result creates a timing window. In PASM2 applications using interrupts, an interrupt that fires during this window could delay result retrieval or queue additional operations that interfere with the expected sequence. For timing-critical applications, this can cause incorrect results or undefined behavior.
+The 55-clock delay between queuing a CORDIC operation and retrieving its result creates a timing window. In PASM2 applications using interrupts, an interrupt that fires during this window could delay result retrieval or queue additional operations that interfere with the expected sequence.
 
 The P2 provides a simple protection mechanism using REP with a single iteration:
 
 ```pasm2
 ' Protect CORDIC operation from interrupts
-        rep     @.protect, #1         ' Execute block atomically
+        rep     @.protect, #1         ' Block is shielded from interrupts
         qmul    multiplicand, multiplier
         ' ... other CORDIC work (up to 55 clocks) ...
         getqx   result_lo
@@ -189,7 +189,7 @@ The P2 provides a simple protection mechanism using REP with a single iteration:
 .protect
 ```
 
-This idiom works because REP stalls interrupt handling until all repeated instructions complete—even with just one iteration. The entire sequence from QMUL through GETQY executes without interruption.
+This idiom works because a REP block is automatically shielded from interrupts, including non-stallable debug interrupts—even with just one iteration. The entire sequence from QMUL through GETQY executes without interruption. A pending interrupt is allowed to branch once REP is no longer active and the other branch conditions are met.
 
 **When to use interrupt protection:**
 
@@ -199,7 +199,6 @@ This idiom works because REP stalls interrupt handling until all repeated instru
 
 **When protection is unnecessary:**
 
-- **Spin2 code:** The Spin2 interpreter already protects CORDIC operations internally
 - **PASM2 without interrupts:** When no interrupts are enabled (SETINT not used)
 - **Background calculations:** Where the 55-clock window has explicit NOP padding or other work
 - **Pipelined processing:** Where the fill-steady-drain pattern naturally handles timing
@@ -369,8 +368,8 @@ A cog monitors sixteen background events, numbered 0 through 15. The numbers mat
 | Event | Source | Typical Use |
 |-------|--------|-------------|
 | 0 — INT | An interrupt occurred (any of the three levels INT1/INT2/INT3) | Interrupt handling; each level's source is selected via SETINTx |
-| 1-3 — CT1, CT2, CT3 | Counter events | Periodic timing, scheduled events |
-| 4-7 — SE1, SE2, SE3, SE4 | Selectable events | Pin edges, lock status, configurable conditions |
+| 1-3 — CT1, CT2, CT3 | CT passed CT1, CT2 or CT3 | Periodic timing, scheduled events |
+| 4-7 — SE1, SE2, SE3, SE4 | Selectable events | INA/INB pin bits, hub locks, LUT reads and writes |
 | 8 — PAT | Pattern match on pins | Multi-pin state detection, port monitoring |
 | 9 — FBW | FIFO block wrap | Set up next FIFO block at circular-buffer boundary (via FBLOCK) |
 | 10 — XMT | Streamer ready for new command | Command-buffer-empty (streamer-empty) notification |
@@ -384,7 +383,7 @@ Only events 4-7 are programmable—those are the selectable events, configured b
 
 **Pitfall:** Event 0 and interrupt-source code 0 are not the same thing. As an *event*, 0 means "an interrupt occurred" and is pollable with POLLINT. As a *SETINTx source code*, 0 means `<off>`—the default on cog start for all three levels. Codes 1-15 map to events 1-15 exactly; only code 0 diverges.
 
-Each event source sets a corresponding flag when its condition occurs. Code responds to events through wait instructions (blocking until event occurs), poll instructions (testing event flag without blocking), or interrupt configuration (automatic handler invocation). Every event except 15 has a matching WAITxxx and a Jxxx/JNxxx branch; there is no WAITQMT, because that event cannot occur while waiting.
+Each event source sets a corresponding flag when its condition occurs. Code responds to events through wait instructions (blocking until event occurs), poll instructions (testing event flag without blocking), or interrupt configuration (automatic handler invocation). Every event has a Jxxx/JNxxx branch, and every event except 15 has a matching WAITxxx; there is no WAITQMT, because that event cannot occur while waiting.
 
 ### 5.4.2 Event Configuration
 
@@ -396,15 +395,15 @@ The four selectable events (SE1-SE4) can monitor various conditions:
 
 - **SETSE1, SETSE2, SETSE3, SETSE4** - Configure selectable event sources
 
-Each SETSE instruction selects one condition from dozens of options: pin edges (rising/falling on any pin), lock states (locked/unlocked), counter comparisons, or other hardware events. This flexibility allows tailoring event detection to application requirements.
+Each SETSE instruction selects one condition: a LUT read or write, a hub lock rising, falling or changing, or the INA/INB bit of a pin rising, falling, changing, low or high.
 
 **Interrupt Configuration:**
 
-Interrupt setup involves two steps: configuring the interrupt source and enabling interrupt processing:
+Interrupt setup selects the event source and sets the handler address. Interrupt branches are allowed by default; STALLI and ALLOWI stall and allow them:
 
 - **SETINT1, SETINT2, SETINT3** - Select the interrupt event source (4-bit code in Dest[3:0]). Codes 1-15 are the event numbers from the table in §5.4.1—`SETINT1 #4` makes SE1 trigger INT1, and `SETINT2 #14` makes an attention request from another cog trigger INT2. Code 0 means `<off>`, which is the default on cog start, so `SETINT1 #0` turns INT1 off again. The handler address is set separately by writing the IJMP1/2/3 registers ($1F4/$1F2/$1F0).
-- **STALLI** - Stall (disable) interrupt processing
-- **ALLOWI** - Allow (enable) interrupt processing (default on cog start)
+- **STALLI** - Stall interrupt branches indefinitely until ALLOWI executes
+- **ALLOWI** - Allow any stalled and future interrupt branches to occur (default on cog start)
 
 Each interrupt level (1, 2, 3) has independent configuration. Level 1 (INT1) has the highest priority and can interrupt levels 2 and 3; level 2 can interrupt level 3; level 3 (INT3), the lowest priority, can only interrupt normal (non-interrupt) execution. This provides priority-based interrupt handling when multiple urgent events require service.
 

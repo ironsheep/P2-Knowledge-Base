@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-642`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-643`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -47,6 +47,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 - closed 2026-10-12 at the v1.24.3 release «#425» (1 finding: F-573) → `correction-sweeps/2026-10-12-v1.24.3-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-10-12 at the v1.24.5 release (1 finding: F-574) → `correction-sweeps/2026-10-12-v1.24.5-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-11-05 at the v1.25.0 release (49 findings: F-576 … F-615, F-617 … F-624, F-629; F-588 and F-589 withdrawn) → `correction-sweeps/2026-11-05-v1.25.0-P2KB-CORRECTION-FINDINGS-archive.md`
+- closed 2026-11-07 at the Assembly Reference v3.1.12 release (F-625, F-626, F-631, F-634, F-635, F-639, F-268) → `correction-sweeps/2026-11-07-assembly-v3.1.12-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-11-07 at the I/O & Smart Pins v1.0.12 release (F-356, F-202) → `correction-sweeps/2026-11-07-iosp-v1.0.12-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-11-06 at the XBYTE Guide v1.1.2 release (F-627, F-628) → `correction-sweeps/2026-11-06-xbyte-v1.1.2-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-11-06 at the P2AN003 v1.0.3 release (F-561) → `correction-sweeps/2026-11-06-p2an003-v1.0.3-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -73,22 +74,15 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ---
 
-## Found by the RFVAR/RFVARS change «#440» (2026-11-05) — F-625, F-626, F-631, F-634 … F-637, F-639 … F-641 (F-627 … F-630, F-632, F-633, F-638 archived)
+## Found by the RFVAR/RFVARS change «#440» (2026-11-05) — F-636, F-637, F-640 … F-642 (F-625 … F-635, F-638, F-639 archived)
+
+### F-642 — Assembly Chapter 5 keeps "interrupt-free zone" where the REP entry says "shielded block" — `CONFIRMED` (found 2026-11-07, the Assembly v3.1.12 verification)
+> **KB decision:** not KB: Assembly master, fixed at its next release
+Accurate, and it fails no gate; the two passages only differ in wording. `chapter-05-hardware.md:209` and `:219` (p101) say "interrupt-free zone", and F-635's pass changed the same sentence in `instructions-r.md` to "shielded block" (p296). Fix: use the Silicon Doc's "shielded" at both.
 
 ### F-641 — two layout blemishes seen reading released pages — `CONFIRMED` (found 2026-11-06, the Debug Window and deSilva verification)
 > **KB decision:** not KB: document masters, fixed at each document's next release
 Neither misstates anything, and neither fails a gate. Debug Window v1.1.5 p109: the first line of the note at `ch10-spectro.md:222` ends 19.3pt past the right margin at `RGB8/16/24,` (45.29pt overfull in the log), inside the margin gate's 20pt tolerance and the same line as in v1.1.4. Fix: reword so the list breaks earlier. deSilva v3.0.10 p43: the code span `long @` splits across a line, printing `LONG` at the end of one line and an indented ` @` at the start of the next. Fix: reword so the span does not fall at a line end, or write it as `long @label`.
-
-Source for all five: the PNut-TS project's `external-inputs/pnut_ts_facts/RFVAR-RFVARS-reference.md`, `XF-019`, `CP-027`. The manual findings are fixed after the KB release, by Stephen's order of 2026-11-05.
-
-### F-625 — Assembly Language Reference `chapter-04-timing.md` says a 4-byte `RFVAR`/`RFVARS` value is 28 bits; it is 29 — `PENDING-VALIDATION` (found 2026-11-05, «#440»)
-Line 272's table row gives "28-bit value" in both columns. The 4th byte carries all 8 bits, so a 4-byte value holds 29 bits (`XF-019`). Line 265 also says the MSB of "each byte" signals more bytes; the 4th byte has no continuation flag. Published in the current PDF. Fix: correct the row and the sentence.
-> **Applied 2026-11-05, Assembly v3.1.12 prepared:** row and sentence corrected; a pointer to `FVAR`/`FVARS` added. Closes on the released PDF.
-
-### F-626 — Assembly Language Reference has no `FVAR`/`FVARS` directive section — `PENDING-VALIDATION` (found 2026-11-05, «#440»)
-> **KB decision:** not KB: Assembly master, closes with its PDF
-`part-ii/directives.md` documents `BYTEFIT` and `WORDFIT`, while `FVAR`/`FVARS` appear only in the Appendix H reserved-word lists. Fix: add a section from `language/pasm2/fvar.yaml`, and link it from the `RFVAR`/`RFVARS` entries in `part-ii/instructions-r.md`.
-> **Applied 2026-11-05, Assembly v3.1.12 prepared:** new `Variable-Length Data Directives` section, linked from both instructions; directive counts 15 to 17, categories seven to eight. Same pass: Appendix H's directive list points at the section (it counts both under Lookup and Miscellaneous, so its totals stand), and its `BYTEFIT`/`WORDFIT` lines ("Verify code fits in specified byte count") now say what `part-ii/directives.md` says. Closes on the released PDF.
 
 ### F-637 — `qmul.yaml` says Spin2 operators are already protected by the interpreter — `PENDING-VALIDATION` (found 2026-11-06, the document pass's class search)
 > **KB decision:** not KB: released in v1.25.4 and read live, only the register closure is owed
@@ -99,34 +93,10 @@ Line 272's table row gives "28-bit value" in both columns. The 4th byte carries 
 > **KB decision:** held (Stephen): documents first, 2026-11-06; with it, the pre-tag whole-page record as a gate and the sweep by operand
 Lines 359, 362, 363, with `PUB start()` in the same block. A `pnut-ts` probe encodes `jmp #\@hs` as absolute with the object offset (`$10`, the symbol at `$1898` in the image). F-639's sweep searched `##@`, `#@` and `@@` and missed this form. A search of the KB and every document master finds it nowhere else. No document is affected.
 
-### F-639 — `##@hubsymbol` in a Spin2 object encodes the object-relative offset, not the runtime hub address — `CONFIRMED` (found 2026-11-06, the v1.25.4 live read)
-> **KB decision:** not KB: released in v1.25.5 and read live; the document half closes on the released PDFs
-Seen as `RDLONG temp, ##@command` in `inline_pasm.yaml` `with_communication`, a Spin2 object. Spin2 v55: "In Spin2+PASM programs, hub addresses are relative to the start of the object"; "In PASM-only programs, hub addresses are absolute." Compile matrix, `pnut-ts`, decoded from the binaries, not yet a CP record: for a hub symbol, `##sym` encodes `$428` in the top object and in the child alike ($400 plus its offset, EF-060's result), and `##@sym` encodes `$38` and `$30`, each object's own offset; the symbols sit at `$244D` and `$2495`. A standalone PASM control encodes the true address in both forms (`$400` at `$400`). For a cog symbol `##sym` is the cog address, as intended. No bench is owed: the source and the encoding settle it, and EF-060 has the class on silicon. `@@` does not change this: v55 gives "Hub address of this object + x", and `pnut-ts` accepts it in PUB code and rejects `##@@sym` and `long @@sym` with `Expected a constant, unary operator, or "("`. Also wrong: Assembly `chapter-02-instruction-format.md:808-809` (`@@label` "Object-relative address", "Spin2 or PASM"; `@label` "Hub address of label" in PASM) and `pasm2/concepts/labels.yaml` `hub_address` (`MOV ptr, ##@hub_data`). Reach: about 20 `##@` lines in 13 KB files, each to be classed as standalone PASM or Spin2 object; deSilva's 22 and Assembly's 4 UNSURE sites from the F-268 sweep. Same batch: `spin2/concepts/cordic_solver.yaml` `recommendation` and "Lower overhead for bulk operations", which no source states.
-> **Applied 2026-11-06, committed for v1.25.5:** `CP-030` filed. `hub_address_resolution` states the whole rule; `inline_pasm.yaml` and the two async-serial smart-pin pages pass the address through `PTRA`; 20 pages of bare fragments carry `hub_symbols`, a one-line pointer to the rule. Documents: Assembly, deSilva, XBYTE and Streamer notes state both forms, Assembly's `@@` row and two bare `@code` operands are corrected, deSilva Chapter 3 no longer teaches `##@` as the Spin2 form, and I/O & Smart Pins Chapter 11's `##message` on a cog symbol becomes `##@message`. Closes on the released PDFs: Streamer v1.1.4 released 2026-11-06, note read on p30; XBYTE v1.1.2 released 2026-11-06, note read on p31; deSilva v3.0.10 released 2026-11-06, sidetrack read on p29, Chapter 3 read on pp43-44; I/O & Smart Pins v1.0.12 released 2026-11-07, `##@message` and the rule beside it read on pp179-180, the block compiles; Assembly to come.
-
 ### F-636 — two leftovers of F-632's class, seen reading the pages live on v1.25.1 — `PENDING-VALIDATION` (found 2026-11-06, «#440», v1.25.1 content probe)
 > **KB decision:** not KB: released in v1.25.2 and read live, only the register closure is owed
 `cordic_solver.yaml` `extended_protection.description` said "until ret", where `rep_instruction.yaml` now says "a branch, such as _ret_". `setq_block_ops.yaml` `best_practices` said "Consider interrupt latency impact", the same unsourced advice as the removed "Keep transfers small".
 > **Applied 2026-11-06, uncommitted:** both changed in the tree. They ship with the next KB release. The Assembly Reference's "first `ret`, `_ret_`, or branch" stands: it names a branch generally, and `ret.yaml` is category Branch.
-
-### F-635 — the Assembly Reference says REP stalls interrupts — `PENDING-VALIDATION` (found 2026-11-06, F-632's class search over the manuals)
-`chapter-05-hardware.md` §5.1.8 and `instructions-r.md`'s REP entry say REP "stalls interrupt handling", call the block atomic, and name it an interrupt stall. Silicon Doc wording per F-632.
-> **Widened 2026-11-06, the v1.25.2 and v1.25.3 impact survey, not yet fixed:** the same class is in `instructions-s.md:1132,1149,1152,1154` and `instructions-a.md:314,331` (STALLI "disables", ALLOWI "re-enables"), `chapter-05-hardware.md:406` ("Stall (disable)") and `:176` ("already protected by the Spin2 interpreter"), and `front-matter.md:172` ("smart pin event system"). The Assembly v3.1.12 bundle in outbound does not carry these.
-> **Applied 2026-11-06, Assembly v3.1.12 prepared:** both passages use "shielded" and the pending branch, the `.stall` label becomes `.protect`, the heading becomes Extended Interrupt Protection. Searched `manuals/*/opus-master` and `app-notes/*/opus-master` for the same wording: `P2AN002.md:363` ("never let an interrupt stall a pipelined sequence") has a different meaning; `instructions-w.md:37` describes WAITx and stands. Left as agreeing in meaning, for Stephen to see: `instructions-r.md:455` ("Interrupts are blocked during REP execution") and `chapter-01-execution-model.md:170` ("interrupt-atomic: REP shields its repeated instructions"). Closes on the released PDF.
-> **Applied 2026-11-06, Assembly v3.1.12 re-staged:** the widening above is fixed, and the two lines left for Stephen now use the Silicon Doc's words (`instructions-r.md`, `chapter-01-execution-model.md`). Same class, fixed in the pass: Chapter 5's event table and its SETSE sentence ("counter comparisons" is not a selectable event), every event has a Jxxx branch, "interpreter already protects" in `instructions-q.md`, `instructions-r.md`, `instruction-categories.md` and `P2AN002.md:326` (P2AN002 v1.0.5). Closes on the released PDFs.
-> **Impact survey, v1.25.1:** no `MANUAL-DESCRIPTOR` names a page in the delta. By direct search the release reaches the Assembly Reference only, and this finding carries it.
-
-### F-631 — Assembly Reference Appendix E calls `DEBUG_DISABLE` global and states no runtime overhead — `PENDING-VALIDATION` (found 2026-11-05, «#440», v1.25.0 impact survey)
-> **KB decision:** not KB: Assembly master, closes with its PDF
-`appendix-e-constants.md:474` ("skips all DEBUG statements entirely—no code is generated, no runtime overhead exists", "zero debug footprint") and `:557` ("Global debug disable"). Spin2 v55: a non-0 value "will disable all DEBUG statements in the file/object"; CP-026 proves the statements are not compiled. Fix: state the file/object scope and "not compiled", as `special-configuration-symbols.yaml` does.
-> **Applied 2026-11-05, Assembly v3.1.12 prepared:** header, description, table, usage comment, notes and the related-constants line. "Works identically in Spin2 PUB/PRI blocks and PASM2 DAT blocks" and "zero bytes" came out: no source states them (F-617, F-624). The float rejection (CP-026) went in. The section intro at `:454` said the same "no code ... zero runtime overhead"; reading the daemon render showed it, and it now says "not compiled". Closes on the released PDF.
-
-### F-634 — instruction names and constants hyphenate at line ends ("RF-VARS", "DE-BUG") — `PENDING-VALIDATION` (found 2026-11-05, reading the XBYTE v1.1.2 daemon render, p. 32)
-A name broken at a line end reads as a name with a hyphen in it. Counted by text extraction on the released PDFs, each hit checked against its source: 29 all-caps breaks in 6 of 17 (Assembly 22, I/O & Smart Pins 3, Debug Window, Single-Step Debugger, P2AN001 and PNut-Term-TS 1 each); XBYTE had 0 until the v1.1.2 draft's `RF-VARS`. The search also returned four hits on Streamer p. 68 that are not breaks: adjacent table cells giving signal polarity (`RED-` beside `CLK+`). Regular-weight text and bold are both affected, so the cause is not the mnemonic filter: TeX hyphenates capitalised words by default.
-> **Applied 2026-11-05, this wave:** `p2kb-platform-mnemonic-bold.lua` makes every all-caps word in the document a hyphenation exception and allows a break after the slash in a list of all-caps names. `\uchyph=0` was tried first and rejected: it stopped ordinary capitalised words too, and the margin gate failed on all three manuals (up to 74.5pt). Stephen, 2026-11-05: "yes now, we can't allow those." The filter stages once, with P2AN007. Every other consumer absorbs it at its next render (Platform Freshness Ledger). Closes when no released PDF carries a false break.
-> **Reach of the filter:** it reads pandoc text only, so raw LaTeX in a source is outside it. Single-Step p. 15 (`BREAK/INIT/DE-BUG/MAIN`, a hand-written table row) kept its break and now carries `\allowbreak{}` in the source. Other raw-LaTeX all-caps slash lists are in Assembly chapters 2, 3, 6 and Single-Step `:383`; none breaks in the 2026-11-05 renders. Each returned PDF is checked for all-caps breaks at its release.
-> **Released without a false break, 2026-11-06:** P2AN001, P2AN002, P2AN003, P2AN004, P2AN007, Single-Step v1.0.2 (the `DE-BUG` row read on p15), PNut-Term-TS v1.0.1, Streamer v1.1.4 (its p68 `RED-` cells stand, as above), XBYTE v1.1.2, Debug Window v1.1.5 (`SPEC-TRO` gone), deSilva v3.0.10; I/O & Smart Pins v1.0.12, 2026-11-07. Still carrying breaks until its release: Assembly.
-> **Unexplained, for the Assembly release to settle:** in a part-by-part daemon render, `instructions-q.md`'s "The angle result uses..." paragraph is 25.47pt overfull (+23.4pt at the margin gate) with the old filter and the new one alike. The pre-fix full-book run has no overfull on that paragraph, and the released PDF sets it clean. No `\sloppy`, `\tolerance` or `\emergencystretch` setting in the source or templates accounts for the difference. The margin gate on the full returned PDF decides whether it is only an effect of rendering in parts.
 
 ---
 
@@ -1958,58 +1928,6 @@ is raised for them; the ones that are **not** covered are flagged below.
 These flags are the drift signal `document-audit` drains on each element's next pass. They are
 **not** Sprint 2 scope and must not be pulled into it silently — surface them to Stephen as a scope
 decision.
-
----
-
-## Spin2/PASM2 boundary defect promoted from the empirical ledger (2026-08-16) — F-268
-
-### F-268 — inside a Spin2 object, `##hubsymbol` in a `DAT` block resolves against `$400`, not the object's load address. `PARTIAL — KB DONE 2026-08-16; guide-side sweep owed`
-> **KB decision:** not KB: the manual sweep
-> **Swept 2026-11-06:** 135 hub-symbol operand lines across the masters and example libraries, none in a listing with a PUB, so none misbehaves as printed; no manual stated the rule. One note added where each first presents the fragment form: Assembly §2.7.1 (v3.1.12), XBYTE §5.1 (v1.1.2), Streamer §6.1 (v1.1.4), deSilva Chapter 2 (v3.0.10). `##@label` was not measured by EF-060; CP-030 then settled it (F-639), and the notes state both forms. Closes on the released PDFs: Streamer v1.1.4 released 2026-11-06, note read on p30; XBYTE v1.1.2 released 2026-11-06, note read on p31; deSilva v3.0.10 released 2026-11-06, sidetrack read on p29; Assembly to come.
-
-**Origin:** EF-060, which had no F-number and no KB entry. Surfaced while getting the F-256/EF-058
-rig working, so it is a by-product rather than a target — and it is the broadest-reach item the
-2026-08 campaign produced.
-
-**The fact.** A PASM fragment that is correct in a **standalone** PASM file reads **interpreter
-memory** when pasted into a Spin2 object's `DAT` block: `##hubsym` resolves against `$400` rather
-than the object's load address. Measured on real P2 silicon: `@disp` = `$1AF9` from Spin2 versus
-`##disp` = `$0651` from PASM in the same object — **5,288 bytes apart**, and the `##` form returned
-garbage.
-
-**Why it matters more than its size suggests.** It bites anyone who copies a PASM fragment out of a
-guide or reference into a Spin2 object — which is how most P2 code is written. It assembles, it
-runs, and it reads the wrong memory. **Workaround:** pass hub addresses in from Spin2 with `@`, or
-address through PTRA/PTRB.
-
-> **KB APPLIED 2026-08-16 («#218»).**
-> `language/spin2/integration/spin2-pasm2-integration.yaml` →
-> `integration_rules.hub_address_resolution`: the rule, where it is instead correct (standalone
-> PASM), why it bites, the workaround, and the measurement. Findability: a matching one-line pointer
-> added to `language/spin2/special-symbols/at.yaml` `notes:`, since `@`'s
-> object-relative-vs-absolute entry is exactly where a reader chasing this lands — that file already
-> documented the Spin2 side of the same boundary and had no route to the PASM side.
-> Source trace: EF-060.
-
-**Still owed (manual head, NOT tasked in Sprint 2):** our guides present standalone-PASM fragments
-without saying so. A class-wide sweep of `##hubsym`-style fragments across the live manual set is
-the durable fix; scope it as its own item rather than folding it into a correction task.
-
-> **KB + KB-GUIDE HALVES RE-VERIFIED ON DISK 2026-08-25 («#300») — both clean; only the MANUAL sweep remains.**
->
-> - **KB half — DONE, confirmed at the file.**
->   `deliverables/ai/P2/language/spin2/integration/spin2-pasm2-integration.yaml:427-436` carries
->   `integration_rules.hub_address_resolution` complete: the rule, `correct_in` (standalone PASM),
->   `why_it_bites`, the `workaround` (pass `@` in from Spin2, or address through PTRA/PTRB), the
->   `measured` figures (`@disp` `$1AF9` vs `##disp` `$0651`, 5,288 bytes apart) and
->   `source: … P2-EMPIRICAL-FINDINGS.md EF-060 (2026-08-14)`. The findability pointer is live at
->   `language/spin2/special-symbols/at.yaml:219`.
-> - **KB-guide half — NOTHING OWED, and this was measured rather than assumed.** Swept
->   `deliverables/ai/P2/guides/` for `##`-prefixed hub-symbol fragments: **zero hits**. The KB's guide layer
->   does not present any standalone-PASM fragment that would carry this defect, so there is no guide-side
->   sweep to run.
-> - **What is left is the MANUAL set only** — the class-wide sweep named above, which is «#301»'s scope,
->   not a KB item. Status stays `PARTIAL` for that reason alone.
 
 ---
 

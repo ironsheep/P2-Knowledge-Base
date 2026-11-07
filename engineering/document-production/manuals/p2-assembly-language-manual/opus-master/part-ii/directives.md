@@ -2,7 +2,7 @@
 
 Assembler directives control the assembly process itself. Unlike instructions that generate executable code, directives guide the assembler in organizing memory, reserving space, and verifying code constraints. Directives execute at assembly time, not runtime.
 
-The P2 assembler provides 15 directives organized into seven functional categories: origin control, memory definition, size verification, alignment, code replication, space management, and inline assembly control.
+The P2 assembler provides 17 directives organized into eight functional categories: origin control, memory definition, size verification, variable-length data, alignment, code replication, space management, and inline assembly control.
 
 
 
@@ -211,7 +211,7 @@ Set the assembly origin to a hub RAM address. All subsequent code and data assem
 #### Behavior by Context
 
 1. **Without parameters** (`ORGH`):
-   - In Spin2 objects: Sets hub address to $400 (after interpreter)
+   - In Spin2 objects: Sets hub address to $400 (after interpreter); §2.7.1 gives what this means for `##hubsymbol`
    - In PASM-only objects: Sets hub address to current object position
    - Sets limit to $100000 (1MB)
 
@@ -295,7 +295,7 @@ hub_data
 - After ORGH, use ORG to switch to cog RAM addresses
 - DAT blocks start in hub mode by default
 
-**Tip:** Use `@label` to get the hub address of any label, regardless of whether that label is in cog or hub mode.
+**Tip:** In a Spin2 method and in a PASM-only file, `@label` gives the hub address of any label, regardless of whether that label is in cog or hub mode. In a Spin2 object's DAT block it gives the offset from the start of the object (§2.7.1).
 
 #### Related Directives
 - [ORG](#org) — Set cog RAM origin
@@ -730,6 +730,102 @@ WORDFIT values must range from -$8000 to $FFFF
 #### Related Directives
 - [BYTEFIT](#bytefit) — Declare byte data with range validation
 - [WORD](#word) — Declare word data (no range checking)
+
+
+
+## Variable-Length Data Directives
+
+Variable-length data directives emit values in the 1-to-4-byte format read by RFVAR and RFVARS. They suit a table of mostly small integers read in order by cog code.
+
+::: dirheader
+### FVAR and FVARS {#fvar}
+Declare Variable-Length Data Values
+
+Emits the next value in the 1-to-4-byte form read by RFVAR or RFVARS.
+:::
+
+Per-item size overrides for DAT data. FVAR emits the next value in the unsigned form read by [RFVAR](#rfvar); FVARS emits it in the signed form read by [RFVARS](#rfvars). Each follows a BYTE, WORD, or LONG and applies only to the one value after it.
+
+#### Syntax
+```pasm2
+[label] size  [value,] FVAR value [, FVARS value...]
+```
+
+#### Parameters
+| Parameter | Description |
+|-----------|-------------|
+| size | BYTE, WORD, or LONG; the size of the line's other values |
+| value | A single integer expression whose value is known where it is written |
+
+#### Valid Range
+
+| Override | Minimum | Maximum | Rule |
+|----------|---------|---------|------|
+| FVAR | 0 | $1FFF_FFFF | Bits 31..29 must be 0 |
+| FVARS | -$1000_0000 | $0FFF_FFFF | Bits 31..28 must all be equal |
+
+#### Encoding
+
+The shortest encoding that holds the value is emitted, least-significant group first. In bytes 1 to 3, bit 7 set means another byte follows and bit 7 clear ends the value; bits 6..0 carry value bits. A fourth byte is always the last and carries all 8 of its bits.
+
+| Bytes | Value Bits | FVAR Range | FVARS Range |
+|:-----:|:----------:|:----------:|:-----------:|
+| 1 | 7 | 0 to 127 | -64 to 63 |
+| 2 | 14 | 128 to 16,383 | -8,192 to 8,191 |
+| 3 | 21 | 16,384 to 2,097,151 | -1,048,576 to 1,048,575 |
+| 4 | 29 | 2,097,152 to $1FFF_FFFF | -268,435,456 to 268,435,455 |
+
+| Declaration | Bytes Emitted |
+|-------------|---------------|
+| FVAR 127 | $7F |
+| FVAR 128 | $80 $01 |
+| FVAR 300 | $AC $02 |
+| FVAR 70_000 | $F0 $A2 $04 |
+| FVAR $1FFF_FFFF | $FF $FF $FF $FF |
+| FVARS -1 | $7F |
+| FVARS 64 | $C0 $00 |
+| FVARS -300 | $D4 $7D |
+| FVARS -$1000_0000 | $80 $80 $80 $80 |
+
+#### Example
+```pasm2
+DAT
+' Every variable-length item needs its own FVAR or FVARS
+table   byte    FVAR 300, FVAR 70_000          ' AC 02  F0 A2 04
+deltas  byte    FVARS 1000, FVARS -3, FVARS 0  ' E8 07  7D  00
+mixed   byte    1, FVAR 300, 2, FVARS -300, 3  ' 01  AC 02  02  D4 7D  03
+```
+
+#### Error Messages
+A value outside its range produces:
+```
+FVAR/FVARS data is too big
+```
+
+A label defined later in the file produces:
+```
+Undefined symbol
+```
+
+#### Notes
+- The emitted length is 1 to 4 bytes whatever the line's size, with no padding between data items
+- In an ORG section, an instruction after the data starts on the next long, with zero bytes filling the gap
+- A label on the line takes the line's declared type
+- There is no [count] repeat, and floats are rejected
+- Signed values are sized by their signed range, so FVARS 100 takes 2 bytes
+- An FVAR item in a LONG line still emits 1 to 4 bytes, and long data after it is not realigned
+
+**Pitfall:** The override does not persist. In `byte FVAR 300, 400`, the second value is a plain byte, and 400 is emitted as $90, truncated. Write `byte FVAR 300, FVAR 400`.
+
+**Pitfall:** Nothing marks a stream as signed or unsigned. A value whose top value bit is 1 reads differently under RFVAR and RFVARS, with no error: $40 is 64 to RFVAR and -64 to RFVARS. FVAR pairs with RFVAR, and FVARS pairs with RFVARS.
+
+#### Related Directives
+- [BYTE](#byte) — Declare byte data
+- [BYTEFIT](#bytefit) — Declare byte data with range validation
+
+#### Related Instructions
+- [RFVAR](#rfvar) — Read unsigned variable-length value from FIFO
+- [RFVARS](#rfvars) — Read signed variable-length value from FIFO
 
 
 
@@ -1387,11 +1483,12 @@ Programs using fewer than 32 software tasks leave the *lower* portion of `$100..
 
 ## Summary
 
-The P2 assembler's 15 directives provide complete control over memory layout and assembly constraints:
+The P2 assembler's 17 directives provide complete control over memory layout and assembly constraints:
 
 **Origin Control**: ORG, ORGH, ORGF set assembly addresses
 **Memory Definition**: BYTE, WORD, LONG allocate and initialize data; FILE includes binary files
 **Size Verification**: BYTEFIT, WORDFIT declare data with compile-time range validation
+**Variable-Length Data**: FVAR, FVARS emit values in the form RFVAR and RFVARS read
 **Alignment**: ALIGNL, ALIGNW optimize memory access
 **Code Replication**: DITTO generates multiple copies of instruction/data blocks at compile time
 **Space Management**: RES, FIT control allocation and verify constraints

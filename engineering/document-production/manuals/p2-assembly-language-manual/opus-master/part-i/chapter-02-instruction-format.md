@@ -423,6 +423,8 @@ The `##` prefix indicates a full 32-bit immediate value:
         mov     ptr, ##hub_data         ' Load 20-bit Hub address
 ```
 
+**Note:** `##hub_data` is correct in a PASM-only file, where hub addresses are absolute. In a Spin2 object's DAT block, hub addresses are relative to the object: `##hubsymbol` assembles to $400 plus an offset, and `##@hubsymbol` and `long @hubsymbol` assemble to the offset from the start of the object, so none of them is the runtime hub address. A cog symbol used as a cog address is unaffected. In a Spin2 object, pass hub addresses in from Spin2 with `@`, through PTRA. The hub-symbol fragments in this manual are written for a PASM-only file.
+
 ### 2.7.2 AUGS and AUGD Instructions
 
 The assembler implements 32-bit immediates by inserting AUG instructions:
@@ -803,8 +805,8 @@ PASM2 provides several operators for referencing labels in different contexts:
 | `#label` | Immediate value (Cog address) | PASM instructions |
 | `#.local` | Immediate reference to local label | PASM instructions |
 | `#\label` | Absolute address (non-PC-relative) | Forces the branch's 20-bit address field to be absolute rather than PC-relative |
-| `@label` | Hub address of label | Spin2 or PASM |
-| `@@label` | Object-relative address | Spin2 or PASM |
+| `@label` | Hub address of label; in a Spin2 object's DAT block, the offset from the start of the object (§2.7.1) | Spin2 methods, PASM |
+| `@@x` | Hub address of this object + x, where x is a stored object offset | Spin2 methods only |
 | `$` | Current assembly address | PASM (ORG → Cog address, ORGH → Hub address) |
 
 **Example:**
@@ -823,7 +825,7 @@ routine         jmp     #.skip                  ' Jump to local label
 ' In ORGH (Hub) mode:
                 orgh
 hub_data        byte    "Hello", 0
-hub_routine     long    @routine                ' Hub address of cog routine
+hub_routine     long    @routine                ' PASM-only: hub address
 ```
 
 ### 2.10.4 Scope Boundary Rules

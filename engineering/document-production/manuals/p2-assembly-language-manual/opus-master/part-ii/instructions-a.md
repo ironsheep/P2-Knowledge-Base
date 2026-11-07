@@ -311,7 +311,7 @@ After AKPIN executes, the smart pin takes two clocks to lower its IN signal, so 
 ## ALLOWI {#allowi}
 Allow Interrupts
 
-[Interrupts](#interrupts) - Re-enables interrupt handling after STALLI.
+[Interrupts](#interrupts) - Allows any stalled and future interrupt branches to occur.
 :::
 
 **ALLOWI**
@@ -328,9 +328,9 @@ Allow Interrupts
 
 **Explanation:**
 
-ALLOWI re-enables interrupt branching; the default on cog start. ALLOWI is the complement of the STALLI instruction. Both are used to protect short, vital sections of main code from timing jitter or state loss caused by asynchronous interrupt handling.
+ALLOWI allows any stalled and future interrupt branches to occur; this is the default mode on cog start. ALLOWI is the complement of the STALLI instruction; a critical block of code is protected from interruption by beginning with STALLI and ending with ALLOWI.
 
-When ALLOWI is executed, any interrupts that were stalled by a previous STALLI instruction are allowed to proceed, and future interrupts are also enabled. This allows the cog to respond to interrupt events normally.
+A branch held off by a previous STALLI still waits for the other interrupt branch conditions to be met.
 
 
 

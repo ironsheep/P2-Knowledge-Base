@@ -169,7 +169,7 @@ The P2 adds capabilities the P1 lacked: **Smart Pins** (64 autonomous I/O pins w
 
 **Changed from P1**
 
-- **Counters**: CTRA/CTRB replaced by smart pin event system
+- **Counters**: CTRA/CTRB replaced by smart pin modes
 - **Video**: VCFG/VSCL/WAITVID replaced by streamer and DAC capabilities
 - **ROM Tables**: Sine/log/antilog tables replaced by CORDIC operations
 - **Boot Pins**: P28-P31 changed to P58-P63
@@ -495,7 +495,7 @@ The CORDIC coprocessor also interacts with hub memory. CORDIC operations can rea
 
 ### 1.4.4 Moving Hub Data: the Cog and the Streamer
 
-The hub instructions above are *cog-driven*: the cog issues each RDLONG or WRLONG and waits for its hub window, so the transfer occupies—blocks—the cog while it runs. A SETQ burst (§1.4.3) is the fast cog-driven path, moving one long per clock after the initial window. Wrapping a transfer loop in a `REP` block (Chapter 4) makes it interrupt-atomic: REP shields its repeated instructions from interrupts—including debug interrupts that ordinary masking cannot hold off—so the whole block runs uninterrupted, at the cost of added interrupt latency for its duration.
+The hub instructions above are *cog-driven*: the cog issues each RDLONG or WRLONG and waits for its hub window, so the transfer occupies—blocks—the cog while it runs. A SETQ burst (§1.4.3) is the fast cog-driven path, moving one long per clock after the initial window. Wrapping a transfer loop in a `REP` block (Chapter 4) shields it from interrupts: a REP block is automatically shielded from interrupts, including non-stallable debug interrupts, so the whole block runs uninterrupted, at the cost of added interrupt latency for its duration.
 
 Alongside this cog-driven path, each cog has its own **streamer**: a small engine that moves data between hub memory and the pins, DACs, or ADC inputs on its own, at a rate the program sets, without the cog's further involvement. The streamer is a close cousin of a DMA channel, with the additions that it paces transfers to an exact rate and can reshape data as it moves. The streamer shares the cog's FIFO with hub execution and the RDFAST/WRFAST instructions, so only one of those uses is active at a time. The streamer is covered in Chapter 4 and, in depth, in the *P2 Streamer Programming Guide*.
 
@@ -993,6 +993,8 @@ The `##` prefix indicates a full 32-bit immediate value:
         mov     ptr, ##hub_data         ' Load 20-bit Hub address
 ```
 
+**Note:** `##hub_data` is correct in a PASM-only file, where hub addresses are absolute. In a Spin2 object's DAT block, hub addresses are relative to the object: `##hubsymbol` assembles to $400 plus an offset, and `##@hubsymbol` and `long @hubsymbol` assemble to the offset from the start of the object, so none of them is the runtime hub address. A cog symbol used as a cog address is unaffected. In a Spin2 object, pass hub addresses in from Spin2 with `@`, through PTRA. The hub-symbol fragments in this manual are written for a PASM-only file.
+
 ### 2.7.2 AUGS and AUGD Instructions
 
 The assembler implements 32-bit immediates by inserting AUG instructions:
@@ -1373,8 +1375,8 @@ PASM2 provides several operators for referencing labels in different contexts:
 | `#label` | Immediate value (Cog address) | PASM instructions |
 | `#.local` | Immediate reference to local label | PASM instructions |
 | `#\label` | Absolute address (non-PC-relative) | Forces the branch's 20-bit address field to be absolute rather than PC-relative |
-| `@label` | Hub address of label | Spin2 or PASM |
-| `@@label` | Object-relative address | Spin2 or PASM |
+| `@label` | Hub address of label; in a Spin2 object's DAT block, the offset from the start of the object (§2.7.1) | Spin2 methods, PASM |
+| `@@x` | Hub address of this object + x, where x is a stored object offset | Spin2 methods only |
 | `$` | Current assembly address | PASM (ORG → Cog address, ORGH → Hub address) |
 
 **Example:**
@@ -1393,7 +1395,7 @@ routine         jmp     #.skip                  ' Jump to local label
 ' In ORGH (Hub) mode:
                 orgh
 hub_data        byte    "Hello", 0
-hub_routine     long    @routine                ' Hub address of cog routine
+hub_routine     long    @routine                ' PASM-only: hub address
 ```
 
 ### 2.10.4 Scope Boundary Rules
@@ -2443,16 +2445,16 @@ FBLOCK can be executed after RDFAST, WRFAST, or a FIFO block wrap event. Coordin
 
 **Variable-Length Data: RFVAR and RFVARS:**
 
-For bytecode interpreters and compact data formats, RFVAR and RFVARS read 1-4 bytes of variable-length encoded data from the FIFO. The encoding uses the MSB of each byte to indicate whether more bytes follow:
+For bytecode interpreters and compact data formats, RFVAR and RFVARS read 1-4 bytes of variable-length encoded data from the FIFO. Bit 7 of each of the first three bytes indicates whether another byte follows, and bits 6..0 carry the value, least-significant group first. A fourth byte is always the last and carries all 8 of its bits:
 
 | First Byte | Additional Bytes | RFVAR Returns | RFVARS Returns |
 |------------|------------------|---------------|----------------|
 | %0xxxxxxx | none | 7-bit value, zero-extended | 7-bit value, sign-extended |
 | %1xxxxxxx | 1 more (%0xxxxxxx) | 14-bit value, zero-extended | 14-bit value, sign-extended |
 | %1xxxxxxx | 2 more | 21-bit value, zero-extended | 21-bit value, sign-extended |
-| %1xxxxxxx | 3 more | 28-bit value, zero-extended | 28-bit value, sign-extended |
+| %1xxxxxxx | 3 more | 29-bit value, zero-extended | 29-bit value, sign-extended |
 
-This encoding provides memory-efficient storage for bytecode constants and offset addresses—small values use 1 byte, larger values expand as needed. RFVAR returns unsigned (zero-extended) values; RFVARS returns signed (sign-extended) values.
+This encoding provides memory-efficient storage for bytecode constants and offset addresses—small values use 1 byte, larger values expand as needed. RFVAR returns unsigned (zero-extended) values; RFVARS returns signed (sign-extended) values. The [FVAR and FVARS](#fvar) directives emit this format in DAT data.
 
 **FIFO Events:**
 
@@ -3023,15 +3025,15 @@ Full instruction details, including operand formats and result interpretations, 
 
 ### 5.1.8 Protecting Critical CORDIC Sequences
 
-**Note:** This section applies only to PASM2 code with interrupts enabled. Spin2 operators that use CORDIC (such as `*`, `/`, `SQRT`, `QSIN`, `QCOS`, etc.) are already protected by the Spin2 interpreter—no additional protection is needed when using Spin2.
+**Note:** This section applies to PASM2 code with interrupts enabled.
 
-The 55-clock delay between queuing a CORDIC operation and retrieving its result creates a timing window. In PASM2 applications using interrupts, an interrupt that fires during this window could delay result retrieval or queue additional operations that interfere with the expected sequence. For timing-critical applications, this can cause incorrect results or undefined behavior.
+The 55-clock delay between queuing a CORDIC operation and retrieving its result creates a timing window. In PASM2 applications using interrupts, an interrupt that fires during this window could delay result retrieval or queue additional operations that interfere with the expected sequence.
 
 The P2 provides a simple protection mechanism using REP with a single iteration:
 
 ```pasm2
 ' Protect CORDIC operation from interrupts
-        rep     @.protect, #1         ' Execute block atomically
+        rep     @.protect, #1         ' Block is shielded from interrupts
         qmul    multiplicand, multiplier
         ' ... other CORDIC work (up to 55 clocks) ...
         getqx   result_lo
@@ -3039,7 +3041,7 @@ The P2 provides a simple protection mechanism using REP with a single iteration:
 .protect
 ```
 
-This idiom works because REP stalls interrupt handling until all repeated instructions complete—even with just one iteration. The entire sequence from QMUL through GETQY executes without interruption.
+This idiom works because a REP block is automatically shielded from interrupts, including non-stallable debug interrupts—even with just one iteration. The entire sequence from QMUL through GETQY executes without interruption. A pending interrupt is allowed to branch once REP is no longer active and the other branch conditions are met.
 
 **When to use interrupt protection:**
 
@@ -3049,7 +3051,6 @@ This idiom works because REP stalls interrupt handling until all repeated instru
 
 **When protection is unnecessary:**
 
-- **Spin2 code:** The Spin2 interpreter already protects CORDIC operations internally
 - **PASM2 without interrupts:** When no interrupts are enabled (SETINT not used)
 - **Background calculations:** Where the 55-clock window has explicit NOP padding or other work
 - **Pipelined processing:** Where the fill-steady-drain pattern naturally handles timing
@@ -3219,8 +3220,8 @@ A cog monitors sixteen background events, numbered 0 through 15. The numbers mat
 | Event | Source | Typical Use |
 |-------|--------|-------------|
 | 0 — INT | An interrupt occurred (any of the three levels INT1/INT2/INT3) | Interrupt handling; each level's source is selected via SETINTx |
-| 1-3 — CT1, CT2, CT3 | Counter events | Periodic timing, scheduled events |
-| 4-7 — SE1, SE2, SE3, SE4 | Selectable events | Pin edges, lock status, configurable conditions |
+| 1-3 — CT1, CT2, CT3 | CT passed CT1, CT2 or CT3 | Periodic timing, scheduled events |
+| 4-7 — SE1, SE2, SE3, SE4 | Selectable events | INA/INB pin bits, hub locks, LUT reads and writes |
 | 8 — PAT | Pattern match on pins | Multi-pin state detection, port monitoring |
 | 9 — FBW | FIFO block wrap | Set up next FIFO block at circular-buffer boundary (via FBLOCK) |
 | 10 — XMT | Streamer ready for new command | Command-buffer-empty (streamer-empty) notification |
@@ -3234,7 +3235,7 @@ Only events 4-7 are programmable—those are the selectable events, configured b
 
 **Pitfall:** Event 0 and interrupt-source code 0 are not the same thing. As an *event*, 0 means "an interrupt occurred" and is pollable with POLLINT. As a *SETINTx source code*, 0 means `<off>`—the default on cog start for all three levels. Codes 1-15 map to events 1-15 exactly; only code 0 diverges.
 
-Each event source sets a corresponding flag when its condition occurs. Code responds to events through wait instructions (blocking until event occurs), poll instructions (testing event flag without blocking), or interrupt configuration (automatic handler invocation). Every event except 15 has a matching WAITxxx and a Jxxx/JNxxx branch; there is no WAITQMT, because that event cannot occur while waiting.
+Each event source sets a corresponding flag when its condition occurs. Code responds to events through wait instructions (blocking until event occurs), poll instructions (testing event flag without blocking), or interrupt configuration (automatic handler invocation). Every event has a Jxxx/JNxxx branch, and every event except 15 has a matching WAITxxx; there is no WAITQMT, because that event cannot occur while waiting.
 
 ### 5.4.2 Event Configuration
 
@@ -3246,15 +3247,15 @@ The four selectable events (SE1-SE4) can monitor various conditions:
 
 - **SETSE1, SETSE2, SETSE3, SETSE4** - Configure selectable event sources
 
-Each SETSE instruction selects one condition from dozens of options: pin edges (rising/falling on any pin), lock states (locked/unlocked), counter comparisons, or other hardware events. This flexibility allows tailoring event detection to application requirements.
+Each SETSE instruction selects one condition: a LUT read or write, a hub lock rising, falling or changing, or the INA/INB bit of a pin rising, falling, changing, low or high.
 
 **Interrupt Configuration:**
 
-Interrupt setup involves two steps: configuring the interrupt source and enabling interrupt processing:
+Interrupt setup selects the event source and sets the handler address. Interrupt branches are allowed by default; STALLI and ALLOWI stall and allow them:
 
 - **SETINT1, SETINT2, SETINT3** - Select the interrupt event source (4-bit code in Dest[3:0]). Codes 1-15 are the event numbers from the table in §5.4.1—`SETINT1 #4` makes SE1 trigger INT1, and `SETINT2 #14` makes an attention request from another cog trigger INT2. Code 0 means `<off>`, which is the default on cog start, so `SETINT1 #0` turns INT1 off again. The handler address is set separately by writing the IJMP1/2/3 registers ($1F4/$1F2/$1F0).
-- **STALLI** - Stall (disable) interrupt processing
-- **ALLOWI** - Allow (enable) interrupt processing (default on cog start)
+- **STALLI** - Stall interrupt branches indefinitely until ALLOWI executes
+- **ALLOWI** - Allow any stalled and future interrupt branches to occur (default on cog start)
 
 Each interrupt level (1, 2, 3) has independent configuration. Level 1 (INT1) has the highest priority and can interrupt levels 2 and 3; level 2 can interrupt level 3; level 3 (INT3), the lowest priority, can only interrupt normal (non-interrupt) execution. This provides priority-based interrupt handling when multiple urgent events require service.
 
@@ -4467,7 +4468,7 @@ Cog control instructions manage cog operations including starting and stopping c
 
 CORDIC (Coordinate Rotation Digital Computer) instructions provide hardware-accelerated mathematical operations. The dedicated coprocessor performs multiplication, division, square root, trigonometric functions, logarithms, and coordinate transformations with high precision.
 
-These instructions come in pairs: one queues an operation, and GETQX/GETQY collects its result 55 clocks later. **The two must not be split by an interrupt.** In PASM2 with interrupts enabled, fence the sequence with a REP block, which blocks interrupts for its duration — see [REP](#rep). Spin2 needs no such fence; the interpreter already protects its own CORDIC use.
+These instructions come in pairs: one queues an operation, and GETQX/GETQY collects its result 55 clocks later. **The two must not be split by an interrupt.** In PASM2 with interrupts enabled, fence the sequence with a REP block, which is automatically shielded from interrupts — see [REP](#rep).
 
 [GETQX](#getqx), [GETQY](#getqy), [QDIV](#qdiv), [QEXP](#qexp), [QFRAC](#qfrac), [QLOG](#qlog), [QMUL](#qmul), [QROTATE](#qrotate), [QSQRT](#qsqrt), [QVECTOR](#qvector)
 
@@ -4817,7 +4818,7 @@ After AKPIN executes, the smart pin takes two clocks to lower its IN signal, so 
 ## ALLOWI {#allowi}
 Allow Interrupts
 
-[Interrupts](#interrupts) - Re-enables interrupt handling after STALLI.
+[Interrupts](#interrupts) - Allows any stalled and future interrupt branches to occur.
 :::
 
 **ALLOWI**
@@ -4834,9 +4835,9 @@ Allow Interrupts
 
 **Explanation:**
 
-ALLOWI re-enables interrupt branching; the default on cog start. ALLOWI is the complement of the STALLI instruction. Both are used to protect short, vital sections of main code from timing jitter or state loss caused by asynchronous interrupt handling.
+ALLOWI allows any stalled and future interrupt branches to occur; this is the default mode on cog start. ALLOWI is the complement of the STALLI instruction; a critical block of code is protected from interruption by beginning with STALLI and ending with ALLOWI.
 
-When ALLOWI is executed, any interrupts that were stalled by a previous STALLI instruction are allowed to proceed, and future interrupts are also enabled. This allows the cog to respond to interrupt events normally.
+A branch held off by a previous STALLI still waits for the other interrupt branch conditions to be met.
 
 
 
@@ -11307,7 +11308,7 @@ Having two independent hub stack pointers (PTRA and PTRB) allows a cog to manage
 
 This section contains all PASM2 instructions beginning with the letter Q. The Q instructions are part of the CORDIC coprocessor family.
 
-**A CORDIC command and the GETQX/GETQY that collects its result must not be split by an interrupt.** Every instruction on this page queues an operation whose result arrives 55 clocks later, so the issue and the collection are separate instructions with a gap between them. In PASM2 with interrupts enabled, fence that gap with a REP block, which blocks interrupts for its duration — including debug interrupts that ordinary masking cannot hold off. See [REP](#rep) for the pattern. Spin2 needs no such fence; the interpreter already protects its own CORDIC use.
+**A CORDIC command and the GETQX/GETQY that collects its result must not be split by an interrupt.** Every instruction on this page queues an operation whose result arrives 55 clocks later, so the issue and the collection are separate instructions with a gap between them. In PASM2 with interrupts enabled, fence that gap with a REP block, which is automatically shielded from interrupts, including non-stallable debug interrupts. See [REP](#rep) for the pattern.
 
 
 
@@ -12095,7 +12096,7 @@ REP creates a hardware-implemented loop that executes the next Dest[8:0] instruc
 
 The REP instruction itself takes 2 cycles, and the repeated instructions execute with zero overhead—no jump penalty, no counter decrement. This makes REP ideal for time-critical inner loops.
 
-REP blocks cannot be nested. The P2 hardware uses a single internal counter for REP execution; starting a new REP while one is active overwrites the existing repeat state. For nested iteration, use REP for the inner loop and branch instructions (DJNZ) for outer loops. Interrupts are blocked during REP execution—including debug interrupts that ordinary masking cannot hold off—to maintain timing precision and keep the repeated block atomic. A REP block of RDLONG/WRLONG transfers is therefore an interrupt-atomic, cog-driven block move (the blocking counterpart to the streamer's autonomous transfer; see Chapter 1). REP adds no per-iteration overhead, so it suits tight timing-critical loops.
+REP blocks cannot be nested. The P2 hardware uses a single internal counter for REP execution; starting a new REP while one is active overwrites the existing repeat state. For nested iteration, use REP for the inner loop and branch instructions (DJNZ) for outer loops. Interrupts are ignored during REP looping, and a REP block is automatically shielded from interrupts, including non-stallable debug interrupts. A REP block of RDLONG/WRLONG transfers is therefore an uninterrupted, cog-driven block move (the blocking counterpart to the streamer's autonomous transfer; see Chapter 1). REP adds no per-iteration overhead, so it suits tight timing-critical loops.
 
 **Critical Restrictions:**
 
@@ -12171,25 +12172,25 @@ REP blocks can span from cog RAM into LUT RAM when executing in combined cog+LUT
 
 **Interrupt Protection Pattern:**
 
-A common PASM2 idiom uses REP with repetition count = 1 to stall interrupts during critical operations. (Note: This pattern is only needed in PASM2 code with interrupts enabled; Spin2 operators are already protected by the interpreter.)
+A common PASM2 idiom uses REP with repetition count = 1 to shield critical operations from interrupts. (Note: This pattern applies to PASM2 code with interrupts enabled.)
 
 ```pasm2
 ' Protect CORDIC operation from interrupts
-                rep     @.stall, #1           ' Run block once, atomically
+                rep     @.protect, #1         ' Run block once, shielded
                 qmul    y, x                  ' CORDIC multiply
                 getqx   x                     ' Get result
                 getqy   y                     ' Get overflow
-.stall
+.protect
 ```
 
-This works because REP stalls interrupt handling until all repeated instructions complete, even with just one iteration.
+This works because a REP block is automatically shielded from interrupts, including non-stallable debug interrupts, even with just one iteration. A pending interrupt is allowed to branch once REP is no longer active and the other branch conditions are met.
 
-**Extended Interrupt Stall:**
+**Extended Interrupt Protection:**
 
 For longer critical sequences, use a large instruction count with repetition = 1:
 
 ```pasm2
-' Stall interrupts until ret/_ret_ is encountered
+' Shield from interrupts until ret/_ret_ is encountered
 op_quna         rep     #99, #1               ' Large count, exits on ret
                 qsqrt   x, #0                 ' CORDIC operations...
                 qlog    x
@@ -12198,7 +12199,7 @@ op_quna         rep     #99, #1               ' Large count, exits on ret
         _ret_   mov     result, x             ' REP ends at _ret_
 ```
 
-The large instruction count (99) with repetition count of 1 creates an interrupt-free zone that terminates at the first `ret`, `_ret_`, or branch instruction.
+The large instruction count (99) with repetition count of 1 creates a shielded block that terminates at the first `ret`, `_ret_`, or branch instruction.
 
 **Conditional REP:**
 
@@ -12578,7 +12579,7 @@ Read Variable Via FIFO
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010011 | 0 | result == 0 | D | 2 |
 
 
-**Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFVARS](#rfvars)
+**Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFVARS](#rfvars), [FVAR](#fvar)
 
 **Explanation:**
 
@@ -12588,7 +12589,7 @@ If the WC or WCZ effect is specified, C is always cleared to 0.
 
 If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
-The length of each value is encoded in the data itself, not by any streamer configuration: bit 7 of each of the first three bytes is a continuation flag. A byte with bit 7 clear ends the value, and a fourth byte is always the last, so a value is 1 to 4 bytes long.
+The length of each value is encoded in the data itself, not by any streamer configuration: bit 7 of each of the first three bytes is a continuation flag. A byte with bit 7 clear ends the value, and a fourth byte is always the last, so a value is 1 to 4 bytes long. The [FVAR](#fvar) directive emits this format in DAT data.
 
 
 
@@ -12614,7 +12615,7 @@ Read Signed Variable Via FIFO
 | EEEE | 1101011 | CZ0 | DDDDDDDDD | 000010100 | MSB of value | result == 0 | D | 2 |
 
 
-**Related:** [RDFAST](#rdfast), [RFVAR](#rfvar), [RFBYTE](#rfbyte)
+**Related:** [RDFAST](#rdfast), [RFVAR](#rfvar), [RFBYTE](#rfbyte), [FVARS](#fvar)
 
 **Explanation:**
 
@@ -12624,7 +12625,7 @@ If the WC or WCZ effect is specified, C is set to the MSB of the value.
 
 If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
-The length of each value is encoded in the data itself, not by any streamer configuration: bit 7 of each of the first three bytes is a continuation flag. A byte with bit 7 clear ends the value, and a fourth byte is always the last, so a value is 1 to 4 bytes long.
+The length of each value is encoded in the data itself, not by any streamer configuration: bit 7 of each of the first three bytes is a continuation flag. A byte with bit 7 clear ends the value, and a fourth byte is always the last, so a value is 1 to 4 bytes long. The [FVARS](#fvar) directive emits this format in DAT data.
 
 
 
@@ -14071,14 +14072,14 @@ Splits odd and even bits of Dest into separate words. The even bits (0, 2, 4, ..
 
 ::: instrheader
 ## STALLI {#stalli}
-Disallow Interrupts
+Stall Interrupts
 
-[Interrupts](#interrupts) - Disables interrupt branching to protect critical code sections.
+[Interrupts](#interrupts) - Stalls INT1, INT2 and INT3 interrupt branches to protect critical code sections.
 :::
 
 **STALLI**
 
-**Result:** All future interrupts are disallowed.
+**Result:** Interrupt branches are stalled until ALLOWI executes.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -14090,12 +14091,12 @@ Disallow Interrupts
 
 **Explanation:**
 
-STALLI disables interrupt branching. STALLI is the complement of the ALLOWI instruction; both are used to protect short, vital sections of main code from timing jitter or state loss caused by asynchronous interrupt handling.
+STALLI holds off INT1, INT2 and INT3 interrupt branches indefinitely, until ALLOWI executes. STALLI is the complement of the ALLOWI instruction; a critical block of code is protected from interruption by beginning with STALLI and ending with ALLOWI. Debug interrupts are non-stallable.
 
 ```pasm2
-        STALLI                 ' Disable interrupts
+        STALLI                 ' Stall interrupt branches
         ' Critical section...
-        ALLOWI                 ' Re-enable interrupts
+        ALLOWI                 ' Allow interrupt branches
 ```
 
 
@@ -15972,7 +15973,7 @@ ZEROX is the complement to SIGNX. While ZEROX fills upper bits with zeros (for u
 
 Assembler directives control the assembly process itself. Unlike instructions that generate executable code, directives guide the assembler in organizing memory, reserving space, and verifying code constraints. Directives execute at assembly time, not runtime.
 
-The P2 assembler provides 15 directives organized into seven functional categories: origin control, memory definition, size verification, alignment, code replication, space management, and inline assembly control.
+The P2 assembler provides 17 directives organized into eight functional categories: origin control, memory definition, size verification, variable-length data, alignment, code replication, space management, and inline assembly control.
 
 
 
@@ -16181,7 +16182,7 @@ Set the assembly origin to a hub RAM address. All subsequent code and data assem
 #### Behavior by Context
 
 1. **Without parameters** (`ORGH`):
-   - In Spin2 objects: Sets hub address to $400 (after interpreter)
+   - In Spin2 objects: Sets hub address to $400 (after interpreter); §2.7.1 gives what this means for `##hubsymbol`
    - In PASM-only objects: Sets hub address to current object position
    - Sets limit to $100000 (1MB)
 
@@ -16265,7 +16266,7 @@ hub_data
 - After ORGH, use ORG to switch to cog RAM addresses
 - DAT blocks start in hub mode by default
 
-**Tip:** Use `@label` to get the hub address of any label, regardless of whether that label is in cog or hub mode.
+**Tip:** In a Spin2 method and in a PASM-only file, `@label` gives the hub address of any label, regardless of whether that label is in cog or hub mode. In a Spin2 object's DAT block it gives the offset from the start of the object (§2.7.1).
 
 #### Related Directives
 - [ORG](#org) — Set cog RAM origin
@@ -16700,6 +16701,102 @@ WORDFIT values must range from -$8000 to $FFFF
 #### Related Directives
 - [BYTEFIT](#bytefit) — Declare byte data with range validation
 - [WORD](#word) — Declare word data (no range checking)
+
+
+
+## Variable-Length Data Directives
+
+Variable-length data directives emit values in the 1-to-4-byte format read by RFVAR and RFVARS. They suit a table of mostly small integers read in order by cog code.
+
+::: dirheader
+### FVAR and FVARS {#fvar}
+Declare Variable-Length Data Values
+
+Emits the next value in the 1-to-4-byte form read by RFVAR or RFVARS.
+:::
+
+Per-item size overrides for DAT data. FVAR emits the next value in the unsigned form read by [RFVAR](#rfvar); FVARS emits it in the signed form read by [RFVARS](#rfvars). Each follows a BYTE, WORD, or LONG and applies only to the one value after it.
+
+#### Syntax
+```pasm2
+[label] size  [value,] FVAR value [, FVARS value...]
+```
+
+#### Parameters
+| Parameter | Description |
+|-----------|-------------|
+| size | BYTE, WORD, or LONG; the size of the line's other values |
+| value | A single integer expression whose value is known where it is written |
+
+#### Valid Range
+
+| Override | Minimum | Maximum | Rule |
+|----------|---------|---------|------|
+| FVAR | 0 | $1FFF_FFFF | Bits 31..29 must be 0 |
+| FVARS | -$1000_0000 | $0FFF_FFFF | Bits 31..28 must all be equal |
+
+#### Encoding
+
+The shortest encoding that holds the value is emitted, least-significant group first. In bytes 1 to 3, bit 7 set means another byte follows and bit 7 clear ends the value; bits 6..0 carry value bits. A fourth byte is always the last and carries all 8 of its bits.
+
+| Bytes | Value Bits | FVAR Range | FVARS Range |
+|:-----:|:----------:|:----------:|:-----------:|
+| 1 | 7 | 0 to 127 | -64 to 63 |
+| 2 | 14 | 128 to 16,383 | -8,192 to 8,191 |
+| 3 | 21 | 16,384 to 2,097,151 | -1,048,576 to 1,048,575 |
+| 4 | 29 | 2,097,152 to $1FFF_FFFF | -268,435,456 to 268,435,455 |
+
+| Declaration | Bytes Emitted |
+|-------------|---------------|
+| FVAR 127 | $7F |
+| FVAR 128 | $80 $01 |
+| FVAR 300 | $AC $02 |
+| FVAR 70_000 | $F0 $A2 $04 |
+| FVAR $1FFF_FFFF | $FF $FF $FF $FF |
+| FVARS -1 | $7F |
+| FVARS 64 | $C0 $00 |
+| FVARS -300 | $D4 $7D |
+| FVARS -$1000_0000 | $80 $80 $80 $80 |
+
+#### Example
+```pasm2
+DAT
+' Every variable-length item needs its own FVAR or FVARS
+table   byte    FVAR 300, FVAR 70_000          ' AC 02  F0 A2 04
+deltas  byte    FVARS 1000, FVARS -3, FVARS 0  ' E8 07  7D  00
+mixed   byte    1, FVAR 300, 2, FVARS -300, 3  ' 01  AC 02  02  D4 7D  03
+```
+
+#### Error Messages
+A value outside its range produces:
+```
+FVAR/FVARS data is too big
+```
+
+A label defined later in the file produces:
+```
+Undefined symbol
+```
+
+#### Notes
+- The emitted length is 1 to 4 bytes whatever the line's size, with no padding between data items
+- In an ORG section, an instruction after the data starts on the next long, with zero bytes filling the gap
+- A label on the line takes the line's declared type
+- There is no [count] repeat, and floats are rejected
+- Signed values are sized by their signed range, so FVARS 100 takes 2 bytes
+- An FVAR item in a LONG line still emits 1 to 4 bytes, and long data after it is not realigned
+
+**Pitfall:** The override does not persist. In `byte FVAR 300, 400`, the second value is a plain byte, and 400 is emitted as $90, truncated. Write `byte FVAR 300, FVAR 400`.
+
+**Pitfall:** Nothing marks a stream as signed or unsigned. A value whose top value bit is 1 reads differently under RFVAR and RFVARS, with no error: $40 is 64 to RFVAR and -64 to RFVARS. FVAR pairs with RFVAR, and FVARS pairs with RFVARS.
+
+#### Related Directives
+- [BYTE](#byte) — Declare byte data
+- [BYTEFIT](#bytefit) — Declare byte data with range validation
+
+#### Related Instructions
+- [RFVAR](#rfvar) — Read unsigned variable-length value from FIFO
+- [RFVARS](#rfvars) — Read signed variable-length value from FIFO
 
 
 
@@ -17357,11 +17454,12 @@ Programs using fewer than 32 software tasks leave the *lower* portion of `$100..
 
 ## Summary
 
-The P2 assembler's 15 directives provide complete control over memory layout and assembly constraints:
+The P2 assembler's 17 directives provide complete control over memory layout and assembly constraints:
 
 **Origin Control**: ORG, ORGH, ORGF set assembly addresses
 **Memory Definition**: BYTE, WORD, LONG allocate and initialize data; FILE includes binary files
 **Size Verification**: BYTEFIT, WORDFIT declare data with compile-time range validation
+**Variable-Length Data**: FVAR, FVARS emit values in the form RFVAR and RFVARS read
 **Alignment**: ALIGNL, ALIGNW optimize memory access
 **Code Replication**: DITTO generates multiple copies of instruction/data blocks at compile time
 **Space Management**: RES, FIT control allocation and verify constraints
@@ -19618,7 +19716,7 @@ COGEXEC specifies cog execution mode for the COGINIT instruction. When used, COG
         COGINIT #COGEXEC+1, #$100   ' Load and start cog 1 from hub RAM $100
 
 ' Start cog 5 with code at label
-        COGINIT #COGEXEC+5, @code   ' Load and start cog 5 from @code
+        COGINIT #COGEXEC+5, ##@code ' Load and start cog 5 from @code
 ```
 
 #### Syntax
@@ -19665,7 +19763,7 @@ HUBEXEC specifies hub execution mode for the COGINIT instruction. When used, COG
         COGINIT #HUBEXEC+1, ##$400   ' Cog 1 from hub RAM $400
 
 ' Start cog 5 with hub execution at label
-        COGINIT #HUBEXEC+5, @code   ' Cog 5 from @code in hub
+        COGINIT #HUBEXEC+5, ##@code ' Cog 5 from @code in hub
 ```
 
 #### Syntax
@@ -19834,27 +19932,27 @@ The P2's debug system operates at three distinct levels, each controlled by CON 
 
 ### Code Instrumentation Constants
 
-These constants control compile-time behavior. When debug statements are disabled, the assembler generates no code for them—zero runtime overhead.
+These constants control compile-time behavior: a DEBUG statement they disable is not compiled.
 
 ::: constheader
 ### DEBUG_DISABLE {#debug-disable}
 Disable All Debug Statements
 
-Prevents all DEBUG statements from compiling (0 = enabled, non-zero = disabled).
+Prevents the DEBUG statements in a file or object from compiling (0 = enabled, non-zero = disabled).
 :::
 
-Compile-time constant that globally disables all DEBUG statements.
+Compile-time constant that disables all DEBUG statements in the file or object that defines it.
 
 #### Value
 
 | Value | Effect |
 |-------|--------|
 | 0 or undefined | DEBUG statements compile normally |
-| Non-zero | All DEBUG statements are omitted from compilation |
+| Non-zero | All DEBUG statements in the file or object are omitted from compilation |
 
 #### Description
 
-DEBUG_DISABLE provides a master switch for debug output. When defined as any non-zero value, the assembler skips all DEBUG statements entirely—no code is generated, no runtime overhead exists. This enables maintaining debug instrumentation in source code while producing release binaries with zero debug footprint.
+DEBUG_DISABLE is a switch for the debug output of one file or object. When defined as any non-zero value, the DEBUG statements in that file or object are not compiled. This keeps debug instrumentation in source code while the build omits it.
 
 #### Usage
 
@@ -19864,16 +19962,15 @@ CON
 
 DAT
         org
-entry   debug("This generates no code when DEBUG_DISABLE = 1")
+entry   debug("Not compiled when DEBUG_DISABLE = 1")
         ' ... program code ...
 ```
 
 #### Notes
 
-- Must be defined as an integer constant in a CON block
+- Must be defined as an integer constant in a CON block; a float value is rejected
 - Affects both standard `debug()` and selective `debug[N]()` statements
-- The check occurs at compile time; disabled statements produce zero bytes
-- Works identically in Spin2 PUB/PRI blocks and PASM2 DAT blocks
+- The check occurs at compile time
 
 #### Related Constants
 
@@ -19937,7 +20034,7 @@ entry   debug[DBG_INIT]("Starting")     ' COMPILED - bit 0 set
 
 #### Related Constants
 
-- [DEBUG_DISABLE](#debug-disable) — Global debug disable
+- [DEBUG_DISABLE](#debug-disable) — Disable debug statements in a file or object
 - [DEBUG_COGS](#debug-cogs) — Runtime cog filtering
 
 
@@ -21480,7 +21577,7 @@ These keywords define the major sections of a Spin2/PASM2 source file:
 - **ALIGNL** - Align to next long boundary (4-byte alignment)
 - **ALIGNW** - Align to next word boundary (2-byte alignment)
 - **BYTE** - Reserve/initialize byte-sized data
-- **BYTEFIT** - Verify code fits in specified byte count
+- **BYTEFIT** - Declare byte data with compile-time range validation
 - **DEBUG** - Insert debug statements (Spin2 feature)
 - **DITTO** - Repeat the lines up to `DITTO END` a given number of times; `$$` is the iteration index (Spin2 v50+)
 - **FIT** - Verify code fits in cog memory
@@ -21490,7 +21587,9 @@ These keywords define the major sections of a Spin2/PASM2 source file:
 - **ORGH** - Set assembly origin (hub address)
 - **RES** - Reserve uninitialized registers/memory
 - **WORD** - Reserve/initialize word-sized data (16 bits)
-- **WORDFIT** - Verify code fits in specified word count
+- **WORDFIT** - Declare word data with compile-time range validation
+
+[FVAR and FVARS](#fvar) are counted under Lookup and Miscellaneous.
 
 
 

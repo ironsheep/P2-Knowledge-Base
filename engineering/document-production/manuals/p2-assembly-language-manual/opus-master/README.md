@@ -26,7 +26,7 @@ opus-master/
 │   ├── instructions-b.md               # Instructions starting with B
 │   ├── ... (alphabetical files)        # Continue through alphabet
 │   ├── instructions-z.md               # Instructions starting with Z
-│   ├── directives.md                   # Assembly directives (15 entries)
+│   ├── directives.md                   # Assembly directives (17 entries)
 │   ├── instruction-categories.md       # Instruction category overview
 │   └── special-registers.md            # Special registers
 └── part-iii/                           # Appendices (10 appendices)

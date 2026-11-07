@@ -169,7 +169,7 @@ The P2 adds capabilities the P1 lacked: **Smart Pins** (64 autonomous I/O pins w
 
 **Changed from P1**
 
-- **Counters**: CTRA/CTRB replaced by smart pin event system
+- **Counters**: CTRA/CTRB replaced by smart pin modes
 - **Video**: VCFG/VSCL/WAITVID replaced by streamer and DAC capabilities
 - **ROM Tables**: Sine/log/antilog tables replaced by CORDIC operations
 - **Boot Pins**: P28-P31 changed to P58-P63

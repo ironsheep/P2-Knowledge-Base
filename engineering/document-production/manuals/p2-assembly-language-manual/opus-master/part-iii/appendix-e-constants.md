@@ -235,7 +235,7 @@ COGEXEC specifies cog execution mode for the COGINIT instruction. When used, COG
         COGINIT #COGEXEC+1, #$100   ' Load and start cog 1 from hub RAM $100
 
 ' Start cog 5 with code at label
-        COGINIT #COGEXEC+5, @code   ' Load and start cog 5 from @code
+        COGINIT #COGEXEC+5, ##@code ' Load and start cog 5 from @code
 ```
 
 #### Syntax
@@ -282,7 +282,7 @@ HUBEXEC specifies hub execution mode for the COGINIT instruction. When used, COG
         COGINIT #HUBEXEC+1, ##$400   ' Cog 1 from hub RAM $400
 
 ' Start cog 5 with hub execution at label
-        COGINIT #HUBEXEC+5, @code   ' Cog 5 from @code in hub
+        COGINIT #HUBEXEC+5, ##@code ' Cog 5 from @code in hub
 ```
 
 #### Syntax
@@ -451,27 +451,27 @@ The P2's debug system operates at three distinct levels, each controlled by CON 
 
 ### Code Instrumentation Constants
 
-These constants control compile-time behavior. When debug statements are disabled, the assembler generates no code for them—zero runtime overhead.
+These constants control compile-time behavior: a DEBUG statement they disable is not compiled.
 
 ::: constheader
 ### DEBUG_DISABLE {#debug-disable}
 Disable All Debug Statements
 
-Prevents all DEBUG statements from compiling (0 = enabled, non-zero = disabled).
+Prevents the DEBUG statements in a file or object from compiling (0 = enabled, non-zero = disabled).
 :::
 
-Compile-time constant that globally disables all DEBUG statements.
+Compile-time constant that disables all DEBUG statements in the file or object that defines it.
 
 #### Value
 
 | Value | Effect |
 |-------|--------|
 | 0 or undefined | DEBUG statements compile normally |
-| Non-zero | All DEBUG statements are omitted from compilation |
+| Non-zero | All DEBUG statements in the file or object are omitted from compilation |
 
 #### Description
 
-DEBUG_DISABLE provides a master switch for debug output. When defined as any non-zero value, the assembler skips all DEBUG statements entirely—no code is generated, no runtime overhead exists. This enables maintaining debug instrumentation in source code while producing release binaries with zero debug footprint.
+DEBUG_DISABLE is a switch for the debug output of one file or object. When defined as any non-zero value, the DEBUG statements in that file or object are not compiled. This keeps debug instrumentation in source code while the build omits it.
 
 #### Usage
 
@@ -481,16 +481,15 @@ CON
 
 DAT
         org
-entry   debug("This generates no code when DEBUG_DISABLE = 1")
+entry   debug("Not compiled when DEBUG_DISABLE = 1")
         ' ... program code ...
 ```
 
 #### Notes
 
-- Must be defined as an integer constant in a CON block
+- Must be defined as an integer constant in a CON block; a float value is rejected
 - Affects both standard `debug()` and selective `debug[N]()` statements
-- The check occurs at compile time; disabled statements produce zero bytes
-- Works identically in Spin2 PUB/PRI blocks and PASM2 DAT blocks
+- The check occurs at compile time
 
 #### Related Constants
 
@@ -554,7 +553,7 @@ entry   debug[DBG_INIT]("Starting")     ' COMPILED - bit 0 set
 
 #### Related Constants
 
-- [DEBUG_DISABLE](#debug-disable) — Global debug disable
+- [DEBUG_DISABLE](#debug-disable) — Disable debug statements in a file or object
 - [DEBUG_COGS](#debug-cogs) — Runtime cog filtering
 
 

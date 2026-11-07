@@ -1127,14 +1127,14 @@ Splits odd and even bits of Dest into separate words. The even bits (0, 2, 4, ..
 
 ::: instrheader
 ## STALLI {#stalli}
-Disallow Interrupts
+Stall Interrupts
 
-[Interrupts](#interrupts) - Disables interrupt branching to protect critical code sections.
+[Interrupts](#interrupts) - Stalls INT1, INT2 and INT3 interrupt branches to protect critical code sections.
 :::
 
 **STALLI**
 
-**Result:** All future interrupts are disallowed.
+**Result:** Interrupt branches are stalled until ALLOWI executes.
 
 
 | EEEE | Opcode | CZI | Dest | Src | C | Z | Result | Clks |
@@ -1146,12 +1146,12 @@ Disallow Interrupts
 
 **Explanation:**
 
-STALLI disables interrupt branching. STALLI is the complement of the ALLOWI instruction; both are used to protect short, vital sections of main code from timing jitter or state loss caused by asynchronous interrupt handling.
+STALLI holds off INT1, INT2 and INT3 interrupt branches indefinitely, until ALLOWI executes. STALLI is the complement of the ALLOWI instruction; a critical block of code is protected from interruption by beginning with STALLI and ending with ALLOWI. Debug interrupts are non-stallable.
 
 ```pasm2
-        STALLI                 ' Disable interrupts
+        STALLI                 ' Stall interrupt branches
         ' Critical section...
-        ALLOWI                 ' Re-enable interrupts
+        ALLOWI                 ' Allow interrupt branches
 ```
 
 

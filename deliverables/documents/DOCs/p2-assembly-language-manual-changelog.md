@@ -1,5 +1,26 @@
 # P2 Assembly Language Reference Manual - Changelog
 
+## v3.1.12 (2026-11-05)
+
+**`FVAR` and `FVARS` are documented, with the full byte format of `RFVAR` and `RFVARS`.**
+
+### Added
+
+- **`FVAR` and `FVARS`**: a new directive section with valid ranges, the byte layout, worked bytes and pitfalls; `RFVAR` and `RFVARS` link to it
+
+### Fixed
+
+- **Variable-length values** (Chapter 4): a 4-byte value holds 29 bits, because the fourth byte carries all 8 of its bits
+- **`DEBUG_DISABLE`** (Appendix E): disables the DEBUG statements in the file or object that defines it
+- **`BYTEFIT` and `WORDFIT`** (Appendix H): declare data with compile-time range validation
+- **`REP` and interrupts** (Chapters 1 and 5, `REP`): a `REP` block is shielded from interrupts, including non-stallable debug interrupts, and a pending interrupt branches once `REP` is no longer active and the other branch conditions are met
+- **Hub addresses** (§2.7.1, §2.10, directives, Appendix E): `##hubsymbol` and `##@hubsymbol` are for a PASM-only file; in a Spin2 object, pass the address in with `@`, through PTRA; `@@x` is a Spin2-method operator
+- **`STALLI` and `ALLOWI`** (Chapter 5, both entries): stall and allow INT1, INT2 and INT3 interrupt branches; interrupt branches are allowed by default
+- **Selectable events** (Chapter 5): `SETSEn` selects a LUT read or write, a hub lock change or an INA/INB pin bit
+- **Event branches** (Chapter 5): every event has a Jxxx/JNxxx branch, and every event except 15 has a WAITxxx
+- **Protecting a CORDIC sequence** (Chapter 5, `REP`, the CORDIC pages): the `REP` pattern is stated for PASM2 code with interrupts enabled
+- **Instruction names** stay whole at a line end, so a name never reads as if it had a hyphen
+
 ## v3.1.11 (2026-10-05)
 
 **Every explanation, register, directive and appendix is checked against Parallax's documentation, and Rev C silicon notes mark each silicon trap where you meet it.**

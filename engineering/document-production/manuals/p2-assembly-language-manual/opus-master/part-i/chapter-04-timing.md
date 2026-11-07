@@ -262,16 +262,16 @@ FBLOCK can be executed after RDFAST, WRFAST, or a FIFO block wrap event. Coordin
 
 **Variable-Length Data: RFVAR and RFVARS:**
 
-For bytecode interpreters and compact data formats, RFVAR and RFVARS read 1-4 bytes of variable-length encoded data from the FIFO. The encoding uses the MSB of each byte to indicate whether more bytes follow:
+For bytecode interpreters and compact data formats, RFVAR and RFVARS read 1-4 bytes of variable-length encoded data from the FIFO. Bit 7 of each of the first three bytes indicates whether another byte follows, and bits 6..0 carry the value, least-significant group first. A fourth byte is always the last and carries all 8 of its bits:
 
 | First Byte | Additional Bytes | RFVAR Returns | RFVARS Returns |
 |------------|------------------|---------------|----------------|
 | %0xxxxxxx | none | 7-bit value, zero-extended | 7-bit value, sign-extended |
 | %1xxxxxxx | 1 more (%0xxxxxxx) | 14-bit value, zero-extended | 14-bit value, sign-extended |
 | %1xxxxxxx | 2 more | 21-bit value, zero-extended | 21-bit value, sign-extended |
-| %1xxxxxxx | 3 more | 28-bit value, zero-extended | 28-bit value, sign-extended |
+| %1xxxxxxx | 3 more | 29-bit value, zero-extended | 29-bit value, sign-extended |
 
-This encoding provides memory-efficient storage for bytecode constants and offset addresses—small values use 1 byte, larger values expand as needed. RFVAR returns unsigned (zero-extended) values; RFVARS returns signed (sign-extended) values.
+This encoding provides memory-efficient storage for bytecode constants and offset addresses—small values use 1 byte, larger values expand as needed. RFVAR returns unsigned (zero-extended) values; RFVARS returns signed (sign-extended) values. The [FVAR and FVARS](#fvar) directives emit this format in DAT data.
 
 **FIFO Events:**
 
