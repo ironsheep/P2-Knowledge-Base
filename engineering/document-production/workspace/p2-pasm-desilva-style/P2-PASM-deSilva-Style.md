@@ -686,6 +686,12 @@ When multiple cogs might write to the same location, we need locks:
 lock_id long    0              ' Lock 0-15 (claim it with LOCKNEW first)
 ```
 
+::: sidetrack
+### Hub Symbols Inside a Spin2 Object
+
+Fragments like `##shared_addr` and `##@hello` are written for a PASM-only file, where hub addresses are absolute, and there they are right. Paste one into the DAT block of a Spin2 object and it assembles, it runs, and it reads the wrong memory: inside an object, hub addresses are relative to the object. `##hubsymbol` assembles to $400 plus an offset, and `##@hubsymbol` and `long @hubsymbol` to the offset from the start of the object. A cog symbol used as a cog address is fine. In a Spin2 object, pass the hub address in from Spin2 with `@`, through PTRA. Every hub-symbol fragment in this book is the PASM-only kind unless its listing shows a PUB.
+:::
+
 ### Method 3: Mailboxes (Elegant)
 
 A mailbox is just a hub location where cogs leave messages:
@@ -1244,11 +1250,11 @@ When you reference a label, you need to tell the assembler what you want:
         call    #.helper        ' # works for local labels too
         mov     x, #data_table  ' Get cog address of data
 
-' For hub addresses (used with Spin2):
+' For hub addresses, in a PASM-only file:
         mov     ptr, ##@hub_data ' ##@ = full hub address of label
 ```
 
-The `#` means "immediate value" - use this for jumps and calls within cog code. The `@` means "hub address" - use this when passing addresses to Spin2 or for hub memory operations.
+The `#` means "immediate value" - use this for jumps and calls within cog code. The `@` means "hub address" in a Spin2 method and in a PASM-only file. In a Spin2 object's DAT block, `##@` and `long @` give the offset from the start of the object, so take the address with `@` in Spin2 and pass it in through PTRA.
 
 ### Scope Boundaries: When Local Labels Reset
 
@@ -1274,7 +1280,7 @@ This is wonderfully useful - your utility routines can all use `.loop` and `.don
 | Global label | `name` | `my_routine` |
 | Local label | `.name` or `:name` | `.loop`, `:done` |
 | Jump to label | `#label` | `jmp #.loop` |
-| Hub address | `##@label` | `mov ptr, ##@data` |
+| Hub address (PASM-only file) | `##@label` | `mov ptr, ##@data` |
 
 ### Common Gotchas
 
@@ -1493,7 +1499,7 @@ Beyond manually typing values, you have some helpers for creating data:
 
 **String Addresses in PASM**
 
-Need a string's address? In PASM you point at a DAT label with `##@`:
+Need a string's address? In a PASM-only file you point at a DAT label with `##@`:
 
 ```pasm2
         mov     ptra, ##@hello      ' ptra points to "Hello!" in hub
@@ -1508,7 +1514,7 @@ hello   byte    "Hello!", 0
 err_msg byte    "Error: ", 0
 ```
 
-The string lives in your DAT block, and `@label` gives its hub address. Spin2 has an even shorter shortcut - `@"Hello!"` composes the string and hands back its address with no separate label - but that one is Spin2-only, not PASM.
+The string lives in your DAT block, and in a PASM-only file `##@label` gives its hub address; in a Spin2 object, take `@label` in Spin2 and pass it in. Spin2 has an even shorter shortcut - `@"Hello!"` composes the string and hands back its address with no separate label - but that one is Spin2-only, not PASM.
 
 **STRING("text") and LSTRING("text")**
 
@@ -1540,7 +1546,7 @@ These are primarily Spin2 features, but they generate hub data that your PASM co
 | Method | Result | Use Case |
 |--------|--------|----------|
 | `file "name"` | Raw binary data | Images, audio, lookup tables |
-| `##@label` | String address | Inline strings in PASM (DAT label) |
+| `##@label` | String address | Inline strings in a PASM-only file (DAT label) |
 | `@"text"` | String address | Quick inline strings (Spin2 shortcut) |
 | `STRING("text")` | Zero-terminated string address | Spin2 string constants |
 | `LSTRING("text")` | Length-prefixed string | Spin2, needs `{Spin2_v43}` |

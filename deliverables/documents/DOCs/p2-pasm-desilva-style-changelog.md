@@ -1,5 +1,13 @@
 # DeSilva PASM2 Tutorial Manual - Changelog
 
+## v3.0.10 (2026-11-06)
+
+**Hub-symbol fragments say where they apply.**
+
+### Fixed
+
+- **Hub addresses** (Chapters 2 and 3): `##hubsymbol` and `##@hubsymbol` are for a PASM-only file; in a Spin2 object, pass the address in with `@`, through PTRA
+
 ## v3.0.9 (2026-10-05)
 
 **Every example does what its comments say, and every number matches the 200 MHz clock the book assumes.**
