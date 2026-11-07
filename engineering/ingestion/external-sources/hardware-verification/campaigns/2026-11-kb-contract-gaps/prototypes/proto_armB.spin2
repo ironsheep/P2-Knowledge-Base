@@ -1,0 +1,39 @@
+' Construction prototype for bench arm B: a backward DJNZ with a ## (augmented) target,
+' in cog execution and in hub execution, beside a forward ## branch and a near 9-bit branch.
+CON
+  _clkfreq = 200_000_000
+
+PUB go() | c
+  c := coginit(COGEXEC_NEW, @cogcode, @mailbox)
+  waitms(100)
+  if long[@mailbox] == 0
+    cogstop(c)
+  debug(uhex_long(long[@mailbox]))
+
+DAT
+mailbox         long    0
+
+                org     0
+cogcode         mov     x, #2
+cogtop          add     hits, #1
+                long    0[300]                  ' distance beyond the 9-bit reach
+                djnz    x, ##cogtop             ' backward, augmented
+                djnz    y, ##cogfwd             ' forward, augmented (control)
+                nop
+cogfwd          djnz    z, #cogfwd              ' near 9-bit (control)
+                wrlong  hits, ptra
+                jmp     #\hubentry - $400 + $400
+
+x               long    0
+y               long    1
+z               long    1
+hits            long    0
+
+                orgh
+hubentry        mov     x, #2
+hubtop          add     hits, #1
+                long    0[300]
+                djnz    x, ##hubtop             ' backward, augmented, in hub
+                wrlong  hits, ptra
+                cogid   x
+                cogstop x

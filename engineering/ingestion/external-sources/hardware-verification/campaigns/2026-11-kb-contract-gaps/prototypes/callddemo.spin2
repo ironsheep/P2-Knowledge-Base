@@ -1,0 +1,20 @@
+' prototype: does a far CALLD PA from hub execution land where the encoding says?
+' side 1: compiler-encoded calld; side 2: the same CALLD encoded by hand with a byte offset; control: jmp
+CON _clkfreq = 20_000_000
+PUB main() | r
+  debug(`zstr_(@hello))
+  coginit(16, @entry, 0)
+  waitms(100)
+  debug(uhex_long(long[$7000], long[$7004], long[$7008]))
+DAT
+hello   byte "start",0
+        org  0
+entry   jmp  #\hubcode
+        orgh $800
+landing wrlong #1,##$7000
+        jmp  pa
+        long 0[1000]
+hubcode wrlong #0,##$7000
+        calld pa,#landing
+back    cogid pb
+        cogstop pb

@@ -1,0 +1,94 @@
+' Construction prototype for bench arms B-O: every critical sequence must assemble
+' to the intended words. This is not the run sheet.
+CON
+  _clkfreq = 200_000_000
+
+VAR
+  long stack[32]
+
+PUB go() | c
+  c := coginit(COGEXEC_NEW, @worker, @mailbox)   ' supervisor launches each arm in a worker
+  waitms(100)
+  if long[@mailbox] == 0
+    cogstop(c)                                   ' runaway arm: supervisor timeout
+  debug(uhex_long(long[@mailbox]))
+
+DAT
+mailbox         long    0
+hubdata         long    1,2,3,4,5
+
+                org     0
+worker
+' C: SETQ across a cancelled instruction, then RDLONG
+                modc    _clr wc
+                setq    #3
+        if_c    mov     x, #1
+                rdlong  r0, ##@hubdata
+' C': SETQ across a SKIP-skipped instruction
+                skip    #%10
+                setq    #3
+                mov     x, #2
+                rdlong  r0, ##@hubdata
+' D: AUGS across a cancelled instruction, then an immediate
+                augs    #$12345
+        if_c    mov     x, #3
+                mov     y, #$1FF
+' E: CALLA under SKIP (skip pattern suspended or not)
+                skip    #%0100
+                calla   #\hubsub
+                add     x, #1
+                add     x, #2
+' F: ALTD past a skipped instruction
+                skip    #%10
+                altd    idx, #base
+                nop
+                mov     0-0, #7
+' G: _RET_ SETQ2 (assembles; the XBYTE harness supplies the next routine)
+                call    #gsub
+' H: TRGINT1 under STALLI
+                stalli
+                trgint1
+                allowi
+' I: COGINIT of itself (cog id from COGID)
+                cogid   x
+                setq    ptra
+                coginit x, ##@relaunch
+' J: own DIR gating OUT
+                drvl    #0
+                dirl    #1
+                outh    #1
+                testp   #1 wc
+' K: CORDIC retire by which read
+                qmul    k, ##$FFFFFFFF
+                getqy   y
+                getqx   x
+' L: QDIV overflow
+                setq    ##$1_0000
+                qdiv    ##$0000_0000, #1
+                getqx   x
+                getqy   y
+' M: GETQX with nothing pending
+                getqx   x wc
+' N: RDLUT/WRLUT with PTRx updates
+                wrlut   x, ptra++
+                rdlut   y, ptra[2]
+' O: CRCNIB against CRCBIT
+                setq    x
+                crcnib  y, #$8C
+                crcbit  y, #$8C
+                wrlong  x, ptra
+                cogid   x
+                cogstop x
+
+gsub    _ret_   setq2   #5
+
+x               long    0
+y               long    0
+k               long    3
+r0              res     4
+idx             long    0
+base            res     4
+
+                orgh
+hubsub          ret
+relaunch        jmp     #relaunch
