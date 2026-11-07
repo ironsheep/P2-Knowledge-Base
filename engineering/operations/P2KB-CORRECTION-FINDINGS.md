@@ -47,6 +47,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 - closed 2026-10-12 at the v1.24.3 release «#425» (1 finding: F-573) → `correction-sweeps/2026-10-12-v1.24.3-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-10-12 at the v1.24.5 release (1 finding: F-574) → `correction-sweeps/2026-10-12-v1.24.5-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-11-05 at the v1.25.0 release (49 findings: F-576 … F-615, F-617 … F-624, F-629; F-588 and F-589 withdrawn) → `correction-sweeps/2026-11-05-v1.25.0-P2KB-CORRECTION-FINDINGS-archive.md`
+- closed 2026-11-07 at the I/O & Smart Pins v1.0.12 release (F-356, F-202) → `correction-sweeps/2026-11-07-iosp-v1.0.12-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-11-06 at the XBYTE Guide v1.1.2 release (F-627, F-628) → `correction-sweeps/2026-11-06-xbyte-v1.1.2-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-11-06 at the P2AN003 v1.0.3 release (F-561) → `correction-sweeps/2026-11-06-p2an003-v1.0.3-P2KB-CORRECTION-FINDINGS-archive.md`
 - closed 2026-11-06 at the P2AN007 v1.0.4 release (F-565) → `correction-sweeps/2026-11-06-p2an007-v1.0.4-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -101,7 +102,7 @@ Lines 359, 362, 363, with `PUB start()` in the same block. A `pnut-ts` probe enc
 ### F-639 — `##@hubsymbol` in a Spin2 object encodes the object-relative offset, not the runtime hub address — `CONFIRMED` (found 2026-11-06, the v1.25.4 live read)
 > **KB decision:** not KB: released in v1.25.5 and read live; the document half closes on the released PDFs
 Seen as `RDLONG temp, ##@command` in `inline_pasm.yaml` `with_communication`, a Spin2 object. Spin2 v55: "In Spin2+PASM programs, hub addresses are relative to the start of the object"; "In PASM-only programs, hub addresses are absolute." Compile matrix, `pnut-ts`, decoded from the binaries, not yet a CP record: for a hub symbol, `##sym` encodes `$428` in the top object and in the child alike ($400 plus its offset, EF-060's result), and `##@sym` encodes `$38` and `$30`, each object's own offset; the symbols sit at `$244D` and `$2495`. A standalone PASM control encodes the true address in both forms (`$400` at `$400`). For a cog symbol `##sym` is the cog address, as intended. No bench is owed: the source and the encoding settle it, and EF-060 has the class on silicon. `@@` does not change this: v55 gives "Hub address of this object + x", and `pnut-ts` accepts it in PUB code and rejects `##@@sym` and `long @@sym` with `Expected a constant, unary operator, or "("`. Also wrong: Assembly `chapter-02-instruction-format.md:808-809` (`@@label` "Object-relative address", "Spin2 or PASM"; `@label` "Hub address of label" in PASM) and `pasm2/concepts/labels.yaml` `hub_address` (`MOV ptr, ##@hub_data`). Reach: about 20 `##@` lines in 13 KB files, each to be classed as standalone PASM or Spin2 object; deSilva's 22 and Assembly's 4 UNSURE sites from the F-268 sweep. Same batch: `spin2/concepts/cordic_solver.yaml` `recommendation` and "Lower overhead for bulk operations", which no source states.
-> **Applied 2026-11-06, committed for v1.25.5:** `CP-030` filed. `hub_address_resolution` states the whole rule; `inline_pasm.yaml` and the two async-serial smart-pin pages pass the address through `PTRA`; 20 pages of bare fragments carry `hub_symbols`, a one-line pointer to the rule. Documents: Assembly, deSilva, XBYTE and Streamer notes state both forms, Assembly's `@@` row and two bare `@code` operands are corrected, deSilva Chapter 3 no longer teaches `##@` as the Spin2 form, and I/O & Smart Pins Chapter 11's `##message` on a cog symbol becomes `##@message`. Closes on the released PDFs: Streamer v1.1.4 released 2026-11-06, note read on p30; XBYTE v1.1.2 released 2026-11-06, note read on p31; deSilva v3.0.10 released 2026-11-06, sidetrack read on p29, Chapter 3 read on pp43-44; Assembly and I/O & Smart Pins to come.
+> **Applied 2026-11-06, committed for v1.25.5:** `CP-030` filed. `hub_address_resolution` states the whole rule; `inline_pasm.yaml` and the two async-serial smart-pin pages pass the address through `PTRA`; 20 pages of bare fragments carry `hub_symbols`, a one-line pointer to the rule. Documents: Assembly, deSilva, XBYTE and Streamer notes state both forms, Assembly's `@@` row and two bare `@code` operands are corrected, deSilva Chapter 3 no longer teaches `##@` as the Spin2 form, and I/O & Smart Pins Chapter 11's `##message` on a cog symbol becomes `##@message`. Closes on the released PDFs: Streamer v1.1.4 released 2026-11-06, note read on p30; XBYTE v1.1.2 released 2026-11-06, note read on p31; deSilva v3.0.10 released 2026-11-06, sidetrack read on p29, Chapter 3 read on pp43-44; I/O & Smart Pins v1.0.12 released 2026-11-07, `##@message` and the rule beside it read on pp179-180, the block compiles; Assembly to come.
 
 ### F-636 — two leftovers of F-632's class, seen reading the pages live on v1.25.1 — `PENDING-VALIDATION` (found 2026-11-06, «#440», v1.25.1 content probe)
 > **KB decision:** not KB: released in v1.25.2 and read live, only the register closure is owed
@@ -124,7 +125,7 @@ Seen as `RDLONG temp, ##@command` in `inline_pasm.yaml` `with_communication`, a 
 A name broken at a line end reads as a name with a hyphen in it. Counted by text extraction on the released PDFs, each hit checked against its source: 29 all-caps breaks in 6 of 17 (Assembly 22, I/O & Smart Pins 3, Debug Window, Single-Step Debugger, P2AN001 and PNut-Term-TS 1 each); XBYTE had 0 until the v1.1.2 draft's `RF-VARS`. The search also returned four hits on Streamer p. 68 that are not breaks: adjacent table cells giving signal polarity (`RED-` beside `CLK+`). Regular-weight text and bold are both affected, so the cause is not the mnemonic filter: TeX hyphenates capitalised words by default.
 > **Applied 2026-11-05, this wave:** `p2kb-platform-mnemonic-bold.lua` makes every all-caps word in the document a hyphenation exception and allows a break after the slash in a list of all-caps names. `\uchyph=0` was tried first and rejected: it stopped ordinary capitalised words too, and the margin gate failed on all three manuals (up to 74.5pt). Stephen, 2026-11-05: "yes now, we can't allow those." The filter stages once, with P2AN007. Every other consumer absorbs it at its next render (Platform Freshness Ledger). Closes when no released PDF carries a false break.
 > **Reach of the filter:** it reads pandoc text only, so raw LaTeX in a source is outside it. Single-Step p. 15 (`BREAK/INIT/DE-BUG/MAIN`, a hand-written table row) kept its break and now carries `\allowbreak{}` in the source. Other raw-LaTeX all-caps slash lists are in Assembly chapters 2, 3, 6 and Single-Step `:383`; none breaks in the 2026-11-05 renders. Each returned PDF is checked for all-caps breaks at its release.
-> **Released without a false break, 2026-11-06:** P2AN001, P2AN002, P2AN003, P2AN004, P2AN007, Single-Step v1.0.2 (the `DE-BUG` row read on p15), PNut-Term-TS v1.0.1, Streamer v1.1.4 (its p68 `RED-` cells stand, as above), XBYTE v1.1.2, Debug Window v1.1.5 (`SPEC-TRO` gone), deSilva v3.0.10. Still carrying breaks until their releases: Assembly, I/O & Smart Pins.
+> **Released without a false break, 2026-11-06:** P2AN001, P2AN002, P2AN003, P2AN004, P2AN007, Single-Step v1.0.2 (the `DE-BUG` row read on p15), PNut-Term-TS v1.0.1, Streamer v1.1.4 (its p68 `RED-` cells stand, as above), XBYTE v1.1.2, Debug Window v1.1.5 (`SPEC-TRO` gone), deSilva v3.0.10; I/O & Smart Pins v1.0.12, 2026-11-07. Still carrying breaks until its release: Assembly.
 > **Unexplained, for the Assembly release to settle:** in a part-by-part daemon render, `instructions-q.md`'s "The angle result uses..." paragraph is 25.47pt overfull (+23.4pt at the margin gate) with the old filter and the new one alike. The pre-fix full-book run has no overfull on that paragraph, and the released PDF sets it clean. No `\sloppy`, `\tolerance` or `\emergencystretch` setting in the source or templates accounts for the difference. The margin gate on the full returned PDF decides whether it is only an effect of rendering in parts.
 
 ---
@@ -1252,176 +1253,6 @@ document staged*. It has one. That plan line is wrong and is corrected in «#318
 
 ---
 
-## The "masters are clean of the drive-strength mislabel" measurement is wrong (2026-08-25, «#301») — F-356
-
-### F-356 — the drive-strength mislabel is alive in the IOSP master at 23 sites, including the one composition this sprint forbids by name — `PARTIAL`
-> **KB decision:** not KB: the I/O & Smart Pins master
-> **Applied 2026-11-06, I/O & Smart Pins v1.0.12 re-staged:** the four `P_HIGH_15K | P_LOW_FLOAT` sites and the two table rows use the documented driven form (F-336's ruling; `pin-drive-configuration.yaml` weak_high, EF-063). "Resistor" comes off the rungs in Chapters 2 and 12, and "internal" off the pull-ups in Chapters 2 and 6. "Pull-up" stays: under §1.24 it is accepted vocabulary, so an agent's proposal to relabel about 40 sites was rejected. Closes on the released PDF.
-
-**How this surfaced.** «#301» was told, as a *measured result and not an assumption*, that a
-class-wide sweep on 2026-08-24 found the manual and app-note masters **clean** of this sprint's
-defect class (the drive-strength mislabel, the fabricated ladder, pin slew-rate claims) — which is
-why Plan §3 excludes manual prose from that class. Working F-251 required reading the deSilva Ch.1
-LED aside, whose closing sentence turned out to state the mislabel outright. One site is an
-anomaly; the sweep it implied is what produced this finding.
-
-**What was measured.** A sweep of every `opus-master/` body and CHANGELOG across all manuals and all
-seven app notes (excluding `archived-2025/` scaffolding and the non-P2 `Donna-Manuscript`) for
-pull-up / pull-down language, then each hit graded by hand as *external component* (correct) or
-*`P_HIGH_*`/`P_LOW_*` glossed as a bias resistor* (wrong):
-
-| Site class | Count | Where |
-|---|---|---|
-| A `P_HIGH_*`/`P_LOW_*` constant glossed as a **pull-up/pull-down resistor** | **23 lines** | IOSP `appendix-b-p-constants.md` ×7 · `chapter-12-digital-input.md` ×5 · `chapter-02-enhanced-direct-io.md` ×7 · `chapter-06-digital-output.md` ×2 · `appendix-a-intent-index.md:56` · `part-5-appendices/index.md:221` |
-| **"internal pull-up/pull-down"** asserted as a P2 feature | **5 lines** | `chapter-06-digital-output.md:137`, `:144`, `:441` · `chapter-02-enhanced-direct-io.md:431`, `:479` |
-| The composition this sprint says to **never** write | **4 sites** | `chapter-02-enhanced-direct-io.md:94`, `:399`, `:439`, `:480` — `P_HIGH_15K \| P_LOW_FLOAT` |
-
-**Why each class is wrong.** A pull-up is active whenever the pin is *not* driven; a drive-strength
-selector applies **only while the pin drives that direction** — DIR high, per the Pin Mode Legend
-(`deliverables/ai/P2/architecture/pin-drive-configuration.yaml:41-43`, `:166-171`; P2 Datasheet
-2022/11/01 p.24). This is F-321's reasoning exactly, and F-321 was applied to
-`deliverables/ai/P2/` and **only** there. `chapter-02-enhanced-direct-io.md:53` is the cleanest
-example: it prints `| P_HIGH_15K | %010 | Resistive | ~200µA / 15kΩ | **Pull-up resistor** |` — a
-component the chip does not have, in a table of things it does. `:441`'s
-*"Open-drain + internal pull-up"* is the F-322 inversion in a summary row. And
-`P_HIGH_15K | P_LOW_FLOAT` is the composition whose "high side weak, low side floated" variant
-`pin-drive-configuration.yaml:250-252` records as having **no Parallax documentary statement and no
-empirical record** — the manual teaches it four times, once as a recipe headed **"Pull-Up
-Resistor:"**.
-
-**Scope note — this is filed, NOT fixed, and the distinction is deliberate.** Plan §3 puts this
-defect class out of scope for manual prose in this sprint, and «#301» was told scope is Stephen's.
-So the correct act is to **falsify the measurement the exclusion rests on** and hand it over, not to
-widen a roster. The two sites «#301» *did* fix are the ones inside its own roster's findings:
-deSilva `COMPLETE-OPUS-MASTER.md:294` (inside F-251's aside), and `:2881` was checked and left
-because it is already **correct** (*"No pullup/pulldown by default — Use external resistors or
-configure smart pin modes"*).
-
-**PARTIAL 2026-09-10 — the MECHANISM half is applied across IOSP and deSilva; the SOURCING half is
-not: no source or bench result exists for `P_HIGH_15K | P_LOW_FLOAT` (F-336, closed 2026-10-10 by
-Stephen's ruling that the composition is dropped, not benched).** Worked as part of the v1.18.0 sweep, under §1.24's reframing.
-
-⚠️ **§1.24 changed what the repair is, and this entry's own site counts must be read through it.**
-Calling `P_HIGH_15K` a "15 kΩ pull-up" is now *acceptable vocabulary* — the Silicon Doc uses it for
-these same rungs, and the KB deliberately carries `pull-up`/`pull-down` **aliases** so a coder
-asking the real question lands on the real answer. So the "23 mislabel sites" are no longer 23
-defects. **What was owed, and is now delivered, is the DIR caveat and the mechanism at every place
-the constants are presented:**
-- `chapter-02` — a passage before the drive tables stating the P2 has no separate pull resistors,
-  that these are drive strengths, and that every rung needs `DIR = 1`; a second note governing the
-  *Common Drive Configurations* block (those lines are mode words only); and `PINHIGH` added to the
-  two bare-`WRPIN` pull-up recipes at `:94` and `:399`.
-- `chapter-06` — `:144` now says this is an open-drain *substitute* whose high side drives rather
-  than floats, and sends a genuine multi-master bus to `P_HIGH_FLOAT` + an external pull-up; `:441`'s
-  summary row is retitled *"Weak-high / strong-low (open-drain substitute)"* (that row is **F-417(b)**).
-- `appendix-b` — the *Drive Strength - High* table now opens with the DIR/OUT rule, and the button
-  recipe carries its `PINHIGH` step.
-- `deSilva :2881` — **re-adjudicated and rewritten.** This entry records it as "already correct",
-  and against the framing of 2026-08-25 it was; under §1.24 *"no pullup/pulldown **by default**"*
-  implies a non-default internal pull, and it sent the reader to smart-pin modes when the mechanism
-  is drive strength. It now gives the answer first.
-- `part-5-appendices/index.md:221` — the index sent a reader looking up "Pull-up" to Ch. 6, when the
-  mechanism and the constant tables are in Ch. 2. Now "Ch. 2, 6", and it names them as drive-strength
-  rungs. `appendix-a-intent-index.md:56` was read and **left**: an intent-index row using the
-  vocabulary a reader actually types is the findability behaviour the KB's own aliases exist for.
-
-**STILL OPEN — the sourcing half.** `P_HIGH_15K | P_LOW_FLOAT` still has no Parallax documentary
-statement and no bench result; the manual now explains the mechanism correctly but cannot *cite* the
-composition. **F-336 closed 2026-10-10 without content** (Stephen's Q6, study decisions: the line
-exists only in our own catalog extract, no Parallax document states it, no bench run is owed, the KB
-dropped it). So the manual cannot cite the composition either: its four `P_HIGH_15K | P_LOW_FLOAT`
-sites must come out or be re-expressed with a documented form. That, with the rest of the chapter-scale
-pass below, is what keeps this entry `PARTIAL`.
-
-**What would settle it.** Nothing further to establish — the mechanism is closed (F-321 applied, the
-Pin Mode Legend cited, the idioms hardware-verified in
-`pin-drive-configuration.yaml:203-239`). What is needed is a decision on **when** the IOSP master
-takes the correction, because it is not a token substitution: two constant tables, a chapter section
-heading (*"### Button Input with Internal Pull-Up"*), four worked recipes and an intent-index row all
-have to be restated in drive-strength terms, and the four `P_LOW_FLOAT` recipes need a form that has
-a source behind it. That is a chapter-scale pass on Chapters 2, 6 and 12 plus two appendices, not a
-sweep.
-
-**Related:** F-321 (same mislabel, KB side, applied) · F-322 (the disable-the-drive inversion) ·
-F-325 (the ladder absent from the shipped KB) · F-336 (closed: `P_HIGH_15K | P_LOW_FLOAT` has neither a
-Parallax statement nor a bench result, and the KB no longer carries it) · F-341 (the same mislabel in our own derived analysis docs) ·
-`SOURCE-ERRATA.md` E-004 and **E-010** (Parallax's own guides state it).
-
-> 🔴 **F-341 IS SHARPER THAN "LATENT" — THOSE FILES INVENT PARALLAX PART NUMBERS. Confirmed by
-> Stephen 2026-08-26.**
->
-> Asked whether our board coverage was complete, the inventory turned up three part numbers with
-> **zero occurrences in any ingested source directory** — i.e. in any actual captured Parallax
-> document. They exist only in the loose analysis files at `engineering/ingestion/sources/`:
->
-> | Invented | Where it appears | What it actually is |
-> |---|---|---|
-> | **#64025 "LED Board"** | `p2-hardware-validation-checklist.md:102`, `p2-board-power-analysis-matrix.md` | **does not exist** — the real board is **#64006C LED Matrix** |
-> | **#64026 "7-Segment Display"** | `p2-hardware-validation-checklist.md:150` | **does not exist** |
-> | **#64027 "Switches Board"** | `p2-hardware-validation-checklist.md:191` | **does not exist** — switches are on the **#64006A Control** add-on |
->
-> **Stephen, asked directly: "LED board, no. 7-segment, no. Switches, no."**
->
-> **Why this is worse than a wrong name.** The inventions are *plausible* — they describe real
-> capabilities (LEDs, a display, switches) that map onto real boards, at part numbers adjacent to
-> the real #64019/#64020/#64029 range. And `#64027`'s validation section is headed **"Test 1:
-> Pull-up Test"**, so the fabricated board carries the fabricated mechanism. A reader has nothing to
-> catch it with.
->
-> **None of the four files names a Parallax document anywhere.** Their headers are
-> *"Comprehensive testing procedures…"*, *"Complete power budget calculations…"*, *"Complete
-> cross-reference for automatic code generation"* — authored analysis, with no provenance, sitting
-> in the directory reserved for captured sources. **Location is doing the work of attribution.**
->
-> 🟢 **CONTAINMENT VERIFIED: zero leakage.** `grep -rl` for all three across `deliverables/ai/P2/`
-> returns **0 files**. The shipped KB never carried them, and «#305» had already excluded loose
-> root files from the fidelity tool's truth side. The damage is confined to the ingestion tree.
->
-> **Still open, and it is a scope call:** the four files remain where sources live, they still assert
-> the pull-up mislabel, and the compatibility/power matrices cross-reference boards that do not
-> exist — so anything derived from them is derived from fiction. Options: correct them in place and
-> relabel as analysis, relocate them out of `sources/`, or retire them. **Not actioned pending
-> Stephen's decision.**
->
-> 🟢 **THE INVENTED-PART-NUMBER HALF IS CLOSED 2026-08-26 («#323»).** Stephen's standing rule —
-> *"no fabricated names in the KB tree, delete invalid names outright"* — settled the disposition
-> without needing a further decision, so it was executed. **Every `#64025` / `#64026` / `#64027`
-> site in the repository was worked**, which was more than the three the finding names:
->
-> | File | What was there | What was done |
-> |---|---|---|
-> | `sources/p2-hardware-validation-checklist.md` | three validation sections (`:102`, `:150`, `:191`), incl. the `#64027` "Pull-up Test" that carries the F-321 mislabel | sections deleted, dated removal note left in place |
-> | `sources/p2-board-power-analysis-matrix.md` | three power-analysis sections, two `case` arms in worked code, five Quick-Reference rows | all deleted, removal note left |
-> | `sources/p2-complete-signal-flow-matrix.md` | three signal-path sections, a VIO-load `case`, three `ADDON_*` constants, an impedance-detect routine returning two of the invented boards | all deleted, removal note left |
-> | `sources/p2-board-addon-compatibility-matrix.md` | three grid rows, five detailed configurations across two boards, three power rows, three `case` arms | all deleted, removal notes left |
-> | `plans/quick-bytes-ingestion-plan.md` | `parallax_id: "64025"` against **"P2 RTC Add-on Board"** | **corrected to `64013`** — the real part number, from `sources/edge-breakout-board/edge-breakout-board-narrative.txt:137` |
-> | `knowledge-base/P2-support/extractors/hardware-specs-extractor.py` | a YAML **generator** with all three baked in, emitting them under `source: P2 Documentation Collection` | the three entries deleted, note left |
->
-> **Deleted rather than relabelled, deliberately.** The nearest real boards are the **#64006C LED
-> Matrix** (an 8×7 Charlieplexed grid driven on 8 pins) and the **#64006A Control** add-on (four
-> buttons and four LEDs); there is no 7-segment board in the #64006 series at all. The removed pin
-> maps, currents and test procedures described none of those, so relabelling would have attached
-> fabricated numbers to real boards — a worse defect than the one being fixed.
->
-> After: `grep -rn '64025\|64026\|64027'` across the repository returns **no hit that presents a
-> board**. Every surviving occurrence is one of four kinds: a dated removal note at the site the
-> content was cut from, the `#64013` correction comment, the sprint plan's task row, or this
-> register's own documentation above. Deliberately stated as classes rather than a count — the
-> count changes every time this register is edited, and a self-referential tally is stale the
-> moment it is written. (Arbiter check, «#323»: the figure first written here was 11; the live
-> number was already 15, because writing the table above added hits to the thing being counted.)
->
-> **Two halves remain open**, both unchanged by this pass: the four files still sit at
-> `sources/` top level asserting the pull-up mislabel (the relocate-or-repair-or-retire call), and
-> the *same class* of unverified part numbers survives in them — `#64028` "Buttons Board",
-> `#64029` relabelled "Switches and LEDs Combo", `#40003` "Protoboard", `#40007` "Digital I/O
-> Board". Those four were left strictly alone because Stephen confirmed three numbers, not seven,
-> and «#323» would have been widening its own scope to act on them.
-
-Status: `PARTIAL` — the mechanism/DIR-caveat half is applied across IOSP and deSilva (2026-09-10, in the v1.18.0 sweep, shipping in IOSP v1.0.10); the `P_HIGH_15K | P_LOW_FLOAT` composition has no source and no bench result (F-336, closed 2026-10-10: dropped from the KB), so the four manual sites that teach it are still owed.
-
----
-
 ## Five defects surfaced while ending the drive-strength mislabel class (2026-08-25, «#296» §5) — F-342…F-346
 
 > **Origin.** All five were found while correcting F-321…F-324 — three of them only because
@@ -1802,6 +1633,77 @@ mechanism, so Table 25 is unlikely to be the only other instance.
 > sources; that is the route, not picking the majority.
 
 ### F-341 — six of our own derived analysis documents sit at the root of `engineering/ingestion/sources/`, repeat the pull-up mislabel F-321 exists to kill, and are inside the fidelity gate's declared *Parallax documentary* truth root — `PARTIAL`
+
+> 🔴 **F-341 IS SHARPER THAN "LATENT" — THOSE FILES INVENT PARALLAX PART NUMBERS. Confirmed by
+> Stephen 2026-08-26.**
+>
+> Asked whether our board coverage was complete, the inventory turned up three part numbers with
+> **zero occurrences in any ingested source directory** — i.e. in any actual captured Parallax
+> document. They exist only in the loose analysis files at `engineering/ingestion/sources/`:
+>
+> | Invented | Where it appears | What it actually is |
+> |---|---|---|
+> | **#64025 "LED Board"** | `p2-hardware-validation-checklist.md:102`, `p2-board-power-analysis-matrix.md` | **does not exist** — the real board is **#64006C LED Matrix** |
+> | **#64026 "7-Segment Display"** | `p2-hardware-validation-checklist.md:150` | **does not exist** |
+> | **#64027 "Switches Board"** | `p2-hardware-validation-checklist.md:191` | **does not exist** — switches are on the **#64006A Control** add-on |
+>
+> **Stephen, asked directly: "LED board, no. 7-segment, no. Switches, no."**
+>
+> **Why this is worse than a wrong name.** The inventions are *plausible* — they describe real
+> capabilities (LEDs, a display, switches) that map onto real boards, at part numbers adjacent to
+> the real #64019/#64020/#64029 range. And `#64027`'s validation section is headed **"Test 1:
+> Pull-up Test"**, so the fabricated board carries the fabricated mechanism. A reader has nothing to
+> catch it with.
+>
+> **None of the four files names a Parallax document anywhere.** Their headers are
+> *"Comprehensive testing procedures…"*, *"Complete power budget calculations…"*, *"Complete
+> cross-reference for automatic code generation"* — authored analysis, with no provenance, sitting
+> in the directory reserved for captured sources. **Location is doing the work of attribution.**
+>
+> 🟢 **CONTAINMENT VERIFIED: zero leakage.** `grep -rl` for all three across `deliverables/ai/P2/`
+> returns **0 files**. The shipped KB never carried them, and «#305» had already excluded loose
+> root files from the fidelity tool's truth side. The damage is confined to the ingestion tree.
+>
+> **Still open, and it is a scope call:** the four files remain where sources live, they still assert
+> the pull-up mislabel, and the compatibility/power matrices cross-reference boards that do not
+> exist — so anything derived from them is derived from fiction. Options: correct them in place and
+> relabel as analysis, relocate them out of `sources/`, or retire them. **Not actioned pending
+> Stephen's decision.**
+>
+> 🟢 **THE INVENTED-PART-NUMBER HALF IS CLOSED 2026-08-26 («#323»).** Stephen's standing rule —
+> *"no fabricated names in the KB tree, delete invalid names outright"* — settled the disposition
+> without needing a further decision, so it was executed. **Every `#64025` / `#64026` / `#64027`
+> site in the repository was worked**, which was more than the three the finding names:
+>
+> | File | What was there | What was done |
+> |---|---|---|
+> | `sources/p2-hardware-validation-checklist.md` | three validation sections (`:102`, `:150`, `:191`), incl. the `#64027` "Pull-up Test" that carries the F-321 mislabel | sections deleted, dated removal note left in place |
+> | `sources/p2-board-power-analysis-matrix.md` | three power-analysis sections, two `case` arms in worked code, five Quick-Reference rows | all deleted, removal note left |
+> | `sources/p2-complete-signal-flow-matrix.md` | three signal-path sections, a VIO-load `case`, three `ADDON_*` constants, an impedance-detect routine returning two of the invented boards | all deleted, removal note left |
+> | `sources/p2-board-addon-compatibility-matrix.md` | three grid rows, five detailed configurations across two boards, three power rows, three `case` arms | all deleted, removal notes left |
+> | `plans/quick-bytes-ingestion-plan.md` | `parallax_id: "64025"` against **"P2 RTC Add-on Board"** | **corrected to `64013`** — the real part number, from `sources/edge-breakout-board/edge-breakout-board-narrative.txt:137` |
+> | `knowledge-base/P2-support/extractors/hardware-specs-extractor.py` | a YAML **generator** with all three baked in, emitting them under `source: P2 Documentation Collection` | the three entries deleted, note left |
+>
+> **Deleted rather than relabelled, deliberately.** The nearest real boards are the **#64006C LED
+> Matrix** (an 8×7 Charlieplexed grid driven on 8 pins) and the **#64006A Control** add-on (four
+> buttons and four LEDs); there is no 7-segment board in the #64006 series at all. The removed pin
+> maps, currents and test procedures described none of those, so relabelling would have attached
+> fabricated numbers to real boards — a worse defect than the one being fixed.
+>
+> After: `grep -rn '64025\|64026\|64027'` across the repository returns **no hit that presents a
+> board**. Every surviving occurrence is one of four kinds: a dated removal note at the site the
+> content was cut from, the `#64013` correction comment, the sprint plan's task row, or this
+> register's own documentation above. Deliberately stated as classes rather than a count — the
+> count changes every time this register is edited, and a self-referential tally is stale the
+> moment it is written. (Arbiter check, «#323»: the figure first written here was 11; the live
+> number was already 15, because writing the table above added hits to the thing being counted.)
+>
+> **Two halves remain open**, both unchanged by this pass: the four files still sit at
+> `sources/` top level asserting the pull-up mislabel (the relocate-or-repair-or-retire call), and
+> the *same class* of unverified part numbers survives in them — `#64028` "Buttons Board",
+> `#64029` relabelled "Switches and LEDs Combo", `#40003` "Protoboard", `#40007` "Digital I/O
+> Board". Those four were left strictly alone because Stephen confirmed three numbers, not seven,
+> and «#323» would have been widening its own scope to act on them.
 
 > 🔴 **THE LATENT DISARM WENT ACTIVE, EXACTLY AS THIS FINDING PREDICTED — and is now closed
 > at the instrument (2026-08-25, «#305»).** This entry says the disarm is "a shape away, not a
@@ -2523,111 +2425,6 @@ drift.
   > version v141, different build target. Mine THAT one; the FPGA listing carries FPGA clock
   > constants, a different SD call structure, and a reserved long that silicon uses for MBR
   > validation. Keep `ROM_Booter.lst` only as the labelled FPGA comparison point.
-
----
-
-## ADC gain-mode input ranges framed ground-referenced, not centered on VIO/2 (2026-07-07) — F-202
-
-### F-202 — IOSP §16.2 ADC input-mode table (and 5 propagated sites) frame the gain ranges as ground-referenced `0V–ceiling` — `PARTIAL — the KB and the IOSP ch16/appendix-c windows ship as measured; two stale phrases still say the windows are "being characterized on hardware" (IOSP ch16 :532, appendix-d :192) (re-verified 2026-10-05 «#386»)`
-> **KB decision:** not KB: two phrases in the I/O & Smart Pins master
-> **Applied 2026-11-06, I/O & Smart Pins v1.0.12 re-staged:** both phrases point to the windows measured in §16.2. Closes on the released PDF.
-> **Source of report:** community reviewer (2026-07-07, relayed by Stephen): *"the ranges are totally
-> wrong… they are centred around 1.65V."* Community-tier input (Titus-tier): challenges our work, is not
-> itself a citable source.
-> **TRUST-CHAIN DISCIPLINE (Stephen, 2026-07-07):** the **P2AN\*** app notes are derived from the SAME
-> ingested sources as the manuals — a **peer derivation, NOT an authority**. Do not justify manual content
-> against P2AN001/§16.3; ground only against trusted **ingested** sources (Silicon Doc) or **empirical**
-> hardware (EF ledger). This finding was re-grounded on that basis.
-> **What the Silicon Doc (trusted ingested) DOES ground:**
-> - **GIO/VIO are calibration sources, not input-range modes** — *"Delta-sigma ADC with 5 ranges, 2
->   **sources**, and **VIO/GIO calibration**."* The §16.2 table mislabels them as ranges (`GIO = 0V–3.3V`,
->   `VIO = VIO-relative`). WRONG per a trusted source.
-> - **The ADC has a ~mid-supply bias point** — Rev C note: FLOAT mode "useful for determining the
->   **floating bias point of the ADC**." So the gain window sits around mid-supply, **not up from 0 V** —
->   the table's ground-referenced framing is wrong.
-> - Tell-tale of how it happened: the table's ceilings (`1.04V / 330mV / 104mV / 33mV`) equal `3.3V ÷ gain`
->   — correct range **widths** placed at `[0, width]` (generic unipolar-PGA assumption) instead of around
->   the mid-supply bias. (§16.7 L469 and §16.3 already describe the bias/references correctly — but those
->   are peer manual sections, cited here only as internal-inconsistency evidence, not as authority.)
-> **RESOLUTION — nominal transfer characteristic (releasable-correct without hardware):**
-> The exact endpoints are a **nominal / definitional** quantity, not a measured one: the mid-supply
-> reference is grounded (Silicon Doc float-bias-point) and the gain factors are grounded (Silicon Doc
-> "5 ranges" + image catalog), so the window `= 1.65 V ± (1.65 V / gain)` about mid-supply is **DERIVED**
-> (like the Ohm's-law drive currents and `clkfreq/2³²` NCO resolution we already print), NOT AT_RISK —
-> **provided it is labelled *nominal* and carries the calibration caveat** (exact endpoints vary with device
-> tolerance + VIO; for absolute work calibrate against GIO/VIO, §16.3). This mirrors the manual's already-correct
-> nominal-vs-measured handling of resolution ([[F-201]]). This is the distinction I initially over-collapsed:
-> a *measured precision spec* needs silicon; the *nominal transfer characteristic* does not. So §16.2 prints the
-> nominal windows (labelled) — correct, complete, hardware-independent.
-> **Verification split (per VERIFICATION-OPPORTUNITIES.md):**
-> - **VO-J-001 (jumper-only — we do it):** on-chip DAC → jumper → ADC pin sweep confirms the centering + √10
->   window scaling on silicon (upgrades nominal → silicon-confirmed). Task #172. NOT a release blocker.
-> - **VO-X-001 (external-hardware — cataloged, not committed):** calibrated external reference + precision meter
->   for tolerance-bounded absolute endpoints. Benefit: nominal → datasheet-grade. Deferred.
-> **Propagated sites (all same root), IOSP opus-master `part-3-input-modes/chapter-16-adc.md` unless noted:**
-> §16.2 table (L39–46) · §16.2 prose (L50–60) · §16.2 example "0-100mV sensor → 30x" (L64–66) ·
-> §16.7 Example 4 thermocouple "0-50mV → 100x" (L505–517) · §16.7 quick-ref table (L636–640) ·
-> `part-5-appendices/appendix-d-mode-comparison-charts.md` (L195–198). The **examples are the worst**:
-> they feed a ground-referenced small-signal sensor (0-100 mV, 0-50 mV thermocouple, mic, strain gauge)
-> into a 1.65 V-centered gain mode with **no mid-rail bias network** — they would not work as written.
-> **NOT affected (checked, don't over-correct):** §16.3 ratiometric (correct) · §16.7 float note L469
-> (correct) · **DAC ranges ch10** `0–3.3V`/`0–2.0V` (correct — DAC is genuinely unipolar 0-to-Vfs,
-> matches Silicon Doc drive-level table). Defect is **specific to ADC gain modes**.
-> **Secondary check:** `architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml` L144–145 calls
-> GIO/VIO "Ground-referenced input / VIO-referenced input" — loose (they're calibration references);
-> tighten wording, and confirm no range claim depends on the ground-referenced framing.
-> **SILICON-CONFIRMED 2026-07-07 (EF-024) — supersedes the nominal formula.** VO-J-001 ran on real P2:
-> gain modes ARE centered on mid-supply (~1.64 V measured) [structural, definitive], but the **derived
-> `1.65 ± 1.65/gain` (3.3 V/gain width) was WRONG** — measured widths are ~1.4× wider (≈4.55 V/gain), √10-laddered.
-> Measured representative windows (N=1): 3.16× 0.93–2.36 V · 10× 1.41–1.87 V · 31.6× 1.57–1.71 V · 100× 1.61–1.66 V.
-> **Fold into IOSP v1.0.4** (staged): (a) GIO/VIO reclassified [APPLIED]; (b) mid-supply framing + examples
-> fixed [APPLIED]; (c) **print the MEASURED windows** (table above) across §16.2 + Appendix B + Appendix C,
-> labelled *measured on real P2 silicon, representative single-sample* (per the citation convention), NOT the
-> derived formula; rebuild the two examples on the measured centering [PENDING apply]. With (c), F-202 is
-> **CLOSED for release** and now hardware-grounded (not merely derived). VO-X-001 (absolute tolerance across
-> parts) remains the optional datasheet-grade upgrade.
-
-> ### KB-SIDE SECONDARY CHECK DISCHARGED 2026-08-25 («#300») — and this entry's HEADLINE is stale
->
-> 🔴 **Read the headline against this block.** The heading still says *"exact centered endpoints UNVERIFIED
-> (no trusted numeric source) → **hardware campaign required**"*. **That campaign already ran.** The
-> `SILICON-CONFIRMED 2026-07-07 (EF-024)` note immediately above is the result, and
-> `VERIFICATION-OPPORTUNITIES.md:38` records **VO-J-001 → DONE → EF-024**. A top-down reader stops at the
-> heading and concludes this is blocked on silicon we cannot reach; it is not. **This is exactly the failure
-> mode REGISTER-CONSULTATION §1 exists for** — the status sits at the end, and here the end supersedes the
-> front. The heading is left in place rather than rewritten because the entry is mid-flight on the manual
-> side, but nothing downstream should quote it.
->
-> **KB FIX APPLIED — the "Secondary check" line above, now discharged.**
-> `deliverables/ai/P2/architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml`:
-> - `:143-151` — `adc_input_modes` no longer calls GIO/VIO input ranges. `P_ADC_GIO` / `P_ADC_VIO` now read
->   *"…calibration reference to the ADC (a calibration **SOURCE**, not an input range)"*, and `P_ADC_FLOAT`
->   states its actual purpose. Grounded in-file on **Silicon Doc `p2-documentation.txt:452`** — *"Delta-sigma
->   ADC with 5 ranges, 2 **sources**, and **VIO/GIO calibration**"* — with the mode-name glosses cited to
->   **`spin2-v55-text.txt:1466-1473`** (*"ADC GIO → IN"* / *"ADC VIO → IN"* / *"ADC FLOAT → IN"*), and
->   `P_ADC_FLOAT`'s bias-point role to **`p2-documentation.txt:188-190`** (Rev C: *"…but floats the ADC input.
->   This mode is now useful for determining the floating bias point of the ADC."*).
-> - `:168-169` — **the range claim that depended on the ground-referenced framing is gone.** The old note
->   *"ADC input modes (GIO/VIO/gain) affect voltage range and sensitivity"* lumped the calibration sources in
->   with the gain ladder as if all of them set a range. It now separates them, and a second note carries the
->   structural EF-024 result: *"The gain-mode window is **CENTERED ON MID-SUPPLY (~VIO/2)**, not referenced up
->   from 0V … centered at ~1.64V for every gain (EF-024). A ground-referenced small-signal source needs a
->   mid-rail bias network before it can be read through a gain mode"* — which is the trap that made this
->   finding's worked examples unrunnable.
-> - **Only the structural half of EF-024 was carried into the KB, deliberately.** EF-024 grades the centering
->   as *[structural, definitive]* but its window endpoints as a **representative single sample (N=1)**. The
->   centering is stated; **the N=1 endpoint numbers are NOT printed in the KB**, because a bare table there
->   would read as a specification. Printing them, labelled, is step (c) above — **manual-side, «#301»**.
-> - Verified after the edit: `validate-crossref-keys.py` 3161 refs / 0 unresolved ·
->   `audit-yaml-claim-sourcing.py` 0 Tier-1, Tier-2 unchanged at 78 · `verify-yaml-format.py` clean.
->
-> **THE GAP THAT ACTUALLY REMAINS — and it is NOT the centering.** It is **VO-X-001**, cataloged at
-> `VERIFICATION-OPPORTUNITIES.md:51`: *tolerance-bounded **absolute** endpoints across parts and
-> temperatures.* **What would settle it:** a calibrated, traceable external voltage reference plus a
-> precision meter, exercised across several parts — **external hardware, which this container cannot reach**
-> and which is `CATALOGED`, not committed. Its own entry says it is *"not needed for correctness."*
-> **No endpoint number was supplied here, and none should be** — the measured N=1 windows in EF-024 are the
-> only figures with evidence behind them, and they are labelled as such at their source.
 
 ---
 

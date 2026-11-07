@@ -189,7 +189,7 @@ This appendix provides comparison matrices to help select the appropriate smart 
 
 ### Gain Selection Guide
 
-Gain modes increase ADC sensitivity *around the mid-supply bias point (~VIO/2)*, not up from ground — so they suit small signals already centered near mid-supply (an AC signal coupled in via `P_ADC_FLOAT`, or a signal biased there). A ground-referenced small signal (a thermocouple or strain gauge sitting near 0 V) must be level-shifted to mid-supply first, or measured with the ratiometric reference method (Chapter 16, §16.3). Higher gain narrows the measurable window about mid-supply; the exact per-gain input window is being characterized on hardware (see Chapter 16, §16.2). For a full-rail signal (a pot or a sensor that swings across the supply), use `P_ADC_1X`.
+Gain modes increase ADC sensitivity *around the mid-supply bias point (~VIO/2)*, not up from ground — so they suit small signals already centered near mid-supply (an AC signal coupled in via `P_ADC_FLOAT`, or a signal biased there). A ground-referenced small signal (a thermocouple or strain gauge sitting near 0 V) must be level-shifted to mid-supply first, or measured with the ratiometric reference method (Chapter 16, §16.3). Higher gain narrows the measurable window about mid-supply; the per-gain input windows measured on P2 hardware are in Chapter 16, §16.2. For a full-rail signal (a pot or a sensor that swings across the supply), use `P_ADC_1X`.
 
 ## DAC Mode Comparison
 

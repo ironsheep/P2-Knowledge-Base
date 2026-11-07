@@ -52,7 +52,7 @@ Select one drive-high constant. These control the high-side output driver.
 |----------|-------------|-------|-------------------|----------|
 | `P_HIGH_FAST` (default) | %000 | Fast CMOS | ~30mA / ~17Ω | Standard digital, LEDs |
 | `P_HIGH_1K5` | %001 | Resistive | ~2mA / 1.5kΩ | Current limiting, protection |
-| `P_HIGH_15K` | %010 | Resistive | ~200µA / 15kΩ | Pull-up resistor |
+| `P_HIGH_15K` | %010 | Resistive | ~200µA / 15kΩ | Pull-up (driven high) |
 | `P_HIGH_150K` | %011 | Resistive | ~20µA / 150kΩ | Weak pull-up |
 | `P_HIGH_1MA` | %100 | Current source | 1mA | Constant current |
 | `P_HIGH_100UA` | %101 | Current source | 100µA | Low-power pull-up |
@@ -67,7 +67,7 @@ Select one drive-low constant. These control the low-side output driver.
 |----------|-------------|-------|-------------------|----------|
 | `P_LOW_FAST` (default) | %000 | Fast CMOS | ~30mA / ~17Ω | Standard digital, LEDs |
 | `P_LOW_1K5` | %001 | Resistive | ~2mA / 1.5kΩ | Current limiting |
-| `P_LOW_15K` | %010 | Resistive | ~200µA / 15kΩ | Pull-down resistor |
+| `P_LOW_15K` | %010 | Resistive | ~200µA / 15kΩ | Pull-down (driven low) |
 | `P_LOW_150K` | %011 | Resistive | ~20µA / 150kΩ | Weak pull-down |
 | `P_LOW_1MA` | %100 | Current sink | 1mA | Constant current |
 | `P_LOW_100UA` | %101 | Current sink | 100µA | Low-power pull-down |
@@ -93,9 +93,9 @@ WRPIN(pin, P_HIGH_FLOAT | P_LOW_FAST)  ' OUT=1 floats, OUT=0 drives low
 WRPIN(pin, P_HIGH_FAST | P_LOW_FLOAT)  ' OUT=1 drives high, OUT=0 floats
 ```
 
-**Pull-Up Resistor:**
+**15kΩ Pull-Up:**
 ```spin2
-WRPIN(pin, P_HIGH_15K | P_LOW_FLOAT)     ' 15kΩ pull-up, no low drive
+WRPIN(pin, P_HIGH_15K)                   ' 15kΩ pull-up
 PINHIGH(pin)                             ' DIR=1, OUT=1: pull now live
 ```
 
@@ -401,7 +401,7 @@ WRPIN(pin, P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
 
 **Weak pull-up with inverted input:**
 ```spin2
-WRPIN(pin, P_HIGH_15K | P_LOW_FLOAT | P_INVERT_IN)
+WRPIN(pin, P_HIGH_15K | P_INVERT_IN)
 PINHIGH(pin)                             ' DIR=1, OUT=1: pull now live
 ```
 
@@ -434,15 +434,15 @@ PUB setup_i2c()
   PINHIGH(SCL_PIN)                        ' Float (open-drain high)
 ```
 
-### Button Input with Internal Pull-Up
+### Button Input with a 15kΩ Pull-Up
 
 ```spin2
 CON
   BUTTON_PIN = 10
 
 PUB setup_button()
-  ' Internal 15kΩ pull-up, Schmitt trigger for noise immunity
-  WRPIN(BUTTON_PIN, P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A)
+  ' 15kΩ pull-up, Schmitt trigger for noise immunity
+  WRPIN(BUTTON_PIN, P_HIGH_15K | P_SCHMITT_A)
   PINHIGH(BUTTON_PIN)                     ' DIR=1, OUT=1: pull now live
   
   ' Now PINREAD returns 1 when released, 0 when pressed
@@ -482,8 +482,8 @@ PUB set_voltage(level) | config
               wrpin ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A), sda_pin
               drvh      sda_pin              ' Release line (floats high)
 
-' Internal pull-up button
-              wrpin ##(P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A), btn_pin
+' 15kΩ pull-up button
+              wrpin ##(P_HIGH_15K | P_SCHMITT_A), btn_pin
               drvh      btn_pin                ' DIR=1, OUT=1: pull live
 
 ' Current-source LED
@@ -508,8 +508,8 @@ PUB set_voltage(level) | config
 | Fast | Fast | Default digital (30mA) |
 | Float | Fast | Open-drain |
 | Fast | Float | Open-source |
-| 15K | Float | Pull-up only |
-| Float | 15K | Pull-down only |
+| 15K | Fast | 15kΩ pull-up (DIR=1, OUT=1) |
+| Fast | 15K | 15kΩ pull-down (DIR=1, OUT=0) |
 | 1K5 | 1K5 | Current-limited |
 | 1MA | Fast | LED current source |
 

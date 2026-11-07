@@ -237,7 +237,7 @@ a drive-low constant to set both directions.
 |----------|-------|-------|----------|
 | P_HIGH_FAST | %...000... | 30mA | High-speed digital signals |
 | P_HIGH_1K5 | %...001... | 1.5kΩ | Moderate current limiting |
-| P_HIGH_15K | %...010... | 15kΩ | Pull-up resistor |
+| P_HIGH_15K | %...010... | 15kΩ | Pull-up (driven high) |
 | P_HIGH_150K | %...011... | 150kΩ | Weak pull-up |
 | P_HIGH_1MA | %...100... | 1mA | Current source |
 | P_HIGH_100UA | %...101... | 100μA | Low-power pull-up |
@@ -245,7 +245,7 @@ a drive-low constant to set both directions.
 | P_HIGH_FLOAT | %...111... | Float | Open-drain output |
 
 **Combining constants:**
-  mode := P_HIGH_15K | P_LOW_FLOAT  ' Open-drain with pull-up
+  mode := P_HIGH_15K | P_LOW_FAST  ' 15kΩ pull-up when high, fast drive low
 ```
 
 ### 4.3 Smart Pin Mode Entries

@@ -1637,7 +1637,7 @@ Select one drive-high constant. These control the high-side output driver.
 |----------|-------------|-------|-------------------|----------|
 | `P_HIGH_FAST` (default) | %000 | Fast CMOS | ~30mA / ~17Ω | Standard digital, LEDs |
 | `P_HIGH_1K5` | %001 | Resistive | ~2mA / 1.5kΩ | Current limiting, protection |
-| `P_HIGH_15K` | %010 | Resistive | ~200µA / 15kΩ | Pull-up resistor |
+| `P_HIGH_15K` | %010 | Resistive | ~200µA / 15kΩ | Pull-up (driven high) |
 | `P_HIGH_150K` | %011 | Resistive | ~20µA / 150kΩ | Weak pull-up |
 | `P_HIGH_1MA` | %100 | Current source | 1mA | Constant current |
 | `P_HIGH_100UA` | %101 | Current source | 100µA | Low-power pull-up |
@@ -1652,7 +1652,7 @@ Select one drive-low constant. These control the low-side output driver.
 |----------|-------------|-------|-------------------|----------|
 | `P_LOW_FAST` (default) | %000 | Fast CMOS | ~30mA / ~17Ω | Standard digital, LEDs |
 | `P_LOW_1K5` | %001 | Resistive | ~2mA / 1.5kΩ | Current limiting |
-| `P_LOW_15K` | %010 | Resistive | ~200µA / 15kΩ | Pull-down resistor |
+| `P_LOW_15K` | %010 | Resistive | ~200µA / 15kΩ | Pull-down (driven low) |
 | `P_LOW_150K` | %011 | Resistive | ~20µA / 150kΩ | Weak pull-down |
 | `P_LOW_1MA` | %100 | Current sink | 1mA | Constant current |
 | `P_LOW_100UA` | %101 | Current sink | 100µA | Low-power pull-down |
@@ -1678,9 +1678,9 @@ WRPIN(pin, P_HIGH_FLOAT | P_LOW_FAST)  ' OUT=1 floats, OUT=0 drives low
 WRPIN(pin, P_HIGH_FAST | P_LOW_FLOAT)  ' OUT=1 drives high, OUT=0 floats
 ```
 
-**Pull-Up Resistor:**
+**15kΩ Pull-Up:**
 ```spin2
-WRPIN(pin, P_HIGH_15K | P_LOW_FLOAT)     ' 15kΩ pull-up, no low drive
+WRPIN(pin, P_HIGH_15K)                   ' 15kΩ pull-up
 PINHIGH(pin)                             ' DIR=1, OUT=1: pull now live
 ```
 
@@ -1986,7 +1986,7 @@ WRPIN(pin, P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A)
 
 **Weak pull-up with inverted input:**
 ```spin2
-WRPIN(pin, P_HIGH_15K | P_LOW_FLOAT | P_INVERT_IN)
+WRPIN(pin, P_HIGH_15K | P_INVERT_IN)
 PINHIGH(pin)                             ' DIR=1, OUT=1: pull now live
 ```
 
@@ -2019,15 +2019,15 @@ PUB setup_i2c()
   PINHIGH(SCL_PIN)                        ' Float (open-drain high)
 ```
 
-### Button Input with Internal Pull-Up
+### Button Input with a 15kΩ Pull-Up
 
 ```spin2
 CON
   BUTTON_PIN = 10
 
 PUB setup_button()
-  ' Internal 15kΩ pull-up, Schmitt trigger for noise immunity
-  WRPIN(BUTTON_PIN, P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A)
+  ' 15kΩ pull-up, Schmitt trigger for noise immunity
+  WRPIN(BUTTON_PIN, P_HIGH_15K | P_SCHMITT_A)
   PINHIGH(BUTTON_PIN)                     ' DIR=1, OUT=1: pull now live
   
   ' Now PINREAD returns 1 when released, 0 when pressed
@@ -2067,8 +2067,8 @@ PUB set_voltage(level) | config
               wrpin ##(P_HIGH_FLOAT | P_LOW_FAST | P_SCHMITT_A), sda_pin
               drvh      sda_pin              ' Release line (floats high)
 
-' Internal pull-up button
-              wrpin ##(P_HIGH_15K | P_LOW_FLOAT | P_SCHMITT_A), btn_pin
+' 15kΩ pull-up button
+              wrpin ##(P_HIGH_15K | P_SCHMITT_A), btn_pin
               drvh      btn_pin                ' DIR=1, OUT=1: pull live
 
 ' Current-source LED
@@ -2093,8 +2093,8 @@ PUB set_voltage(level) | config
 | Fast | Fast | Default digital (30mA) |
 | Float | Fast | Open-drain |
 | Fast | Float | Open-source |
-| 15K | Float | Pull-up only |
-| Float | 15K | Pull-down only |
+| 15K | Fast | 15kΩ pull-up (DIR=1, OUT=1) |
+| Fast | 15K | 15kΩ pull-down (DIR=1, OUT=0) |
 | 1K5 | 1K5 | Current-limited |
 | 1MA | Fast | LED current source |
 
@@ -3807,9 +3807,9 @@ PUB sda_read() : state
 
 `TESTP` is used for the read-back (rather than reading the INA register) deliberately: it sees the pin two clocks old versus three for INA — one clock fresher, which matters on a fast bus where a line is driven and immediately sampled (see §1.2).
 
-**With Internal Pull-Up:**
+**With a 15kΩ Pull-Up:**
 
-If external pull-up isn't available, use internal resistive drive:
+If external pull-up isn't available, use the pin's resistive drive:
 ```spin2
 WRPIN(pin, P_HIGH_15K | P_LOW_FAST)       ' 15kΩ pull-up when high
 ```
@@ -6752,6 +6752,8 @@ PUB tx_buffer(ptr, count) | i
 
 ### Example 4: PASM2 High-Speed Serial
 
+This is a PASM-only file, where `##@message` is the hub address of the string. In a Spin2 object, hub addresses in a DAT block are relative to the object: take `@message` in Spin2 and pass it in through PTRA.
+
 ```pasm2
 CON
   _clkfreq = 200_000_000
@@ -6769,7 +6771,7 @@ DAT           org
               dirh      #TX_PIN
 
 ' Transmit message
-              mov       ptra, ##message
+              mov       ptra, ##@message
 tx_loop
               rdbyte    data, ptra++
               cmp       data, #0 wz
@@ -6868,7 +6870,7 @@ X = ((sysclk * 65536 / baud) & $FFFFFC00) | data_bits
 
 # Chapter 12: Digital Input {#ch12}
 
-This chapter covers reading digital signals, from basic direct I/O through enhanced input conditioning. Topics include INA/INB registers, TESTP instruction, Schmitt trigger inputs, level comparison, and pull-up/pull-down resistors.
+This chapter covers reading digital signals, from basic direct I/O through enhanced input conditioning. Topics include INA/INB registers, TESTP instruction, Schmitt trigger inputs, level comparison, and pull-ups and pull-downs.
 
 
 ## 12.1 Input Architecture
@@ -7047,9 +7049,9 @@ The voltages below assume the nominal `Vxxyy` of 3.3 V. On a board running the I
 - Analog signal digitization
 
 
-## 12.4 Pull-Up and Pull-Down Resistors
+## 12.4 Pull-Ups and Pull-Downs
 
-Pull resistors and when to use them are covered in Ch2 §2.2; this section gives the smart-pin constants and how to apply them to inputs.
+Pull-ups and pull-downs and when to use them are covered in Ch2 §2.2; this section gives the smart-pin constants and how to apply them to inputs.
 
 ### Available Options
 
@@ -7107,7 +7109,7 @@ PINHIGH(pin)                               ' DIR=1, OUT=1 → 15kΩ drive high
 
 ### Why Inputs Float
 
-When an input pin has no connection and no pull resistor:
+When an input pin has no connection and nothing pulling it:
 
 - Input buffer amplifies internal noise
 - State oscillates unpredictably
@@ -7459,7 +7461,7 @@ Theoretical maximum depends on sampling method:
 | P_SCHMITT_A | Schmitt trigger (adds input hysteresis) |
 | P_LEVEL_A | Programmable level comparator (use level=108 for ~1.4V TTL threshold) |
 
-### Pull Resistors
+### Pull-Ups and Pull-Downs
 
 | Constant | Value | Use |
 |----------|-------|-----|
@@ -9916,7 +9918,7 @@ of millivolts referenced to ground) needs a bias network to lift it to mid-suppl
 or the ratiometric reference method (§16.3); it cannot be read directly by a gain
 mode. This example configures a gain mode for a signal already biased to mid-supply
 and reads the filtered result. Converting that reading to volts needs the per-gain
-input window, which is being characterized on hardware (see §16.2).
+input window, measured on P2 hardware in §16.2.
 
 ```spin2
 CON
@@ -12933,7 +12935,7 @@ This appendix provides comparison matrices to help select the appropriate smart 
 
 ### Gain Selection Guide
 
-Gain modes increase ADC sensitivity *around the mid-supply bias point (~VIO/2)*, not up from ground — so they suit small signals already centered near mid-supply (an AC signal coupled in via `P_ADC_FLOAT`, or a signal biased there). A ground-referenced small signal (a thermocouple or strain gauge sitting near 0 V) must be level-shifted to mid-supply first, or measured with the ratiometric reference method (Chapter 16, §16.3). Higher gain narrows the measurable window about mid-supply; the exact per-gain input window is being characterized on hardware (see Chapter 16, §16.2). For a full-rail signal (a pot or a sensor that swings across the supply), use `P_ADC_1X`.
+Gain modes increase ADC sensitivity *around the mid-supply bias point (~VIO/2)*, not up from ground — so they suit small signals already centered near mid-supply (an AC signal coupled in via `P_ADC_FLOAT`, or a signal biased there). A ground-referenced small signal (a thermocouple or strain gauge sitting near 0 V) must be level-shifted to mid-supply first, or measured with the ratiometric reference method (Chapter 16, §16.3). Higher gain narrows the measurable window about mid-supply; the per-gain input windows measured on P2 hardware are in Chapter 16, §16.2. For a full-rail signal (a pot or a sensor that swings across the supply), use `P_ADC_1X`.
 
 ## DAC Mode Comparison
 

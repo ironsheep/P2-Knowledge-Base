@@ -1,5 +1,16 @@
 # P2 I/O & Smart Pins User Guide: Change Log
 
+## v1.0.12 (2026-11-05)
+
+**The 15 kΩ pull-up uses its documented form, and the ADC windows point to their measurements.**
+
+### Fixed
+
+- **15 kΩ pull-ups and pull-downs** (Chapter 2): each recipe uses `P_HIGH_15K` or `P_LOW_15K` with the pin driven; a pull is a driven pin, named that way in Chapters 2, 6 and 12
+- **PASM2 high-speed serial** (Chapter 11): the message is read from its hub address, `##@message`, in a PASM-only file
+- **ADC gain windows** (Chapter 16, Appendix D): converting a gain-mode reading uses the per-gain windows measured in §16.2
+- **`WXPIN`, `PINHIGH` and other all-caps names** keep to one piece at a line end, so a name never reads as if it had a hyphen
+
 ## v1.0.11 (2026-10-05)
 
 **Trigger modes take Y after the enable, and a Rev C note on DAC-mode ADC feedback.**

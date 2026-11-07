@@ -1,6 +1,6 @@
 # Chapter 12: Digital Input {#ch12}
 
-This chapter covers reading digital signals, from basic direct I/O through enhanced input conditioning. Topics include INA/INB registers, TESTP instruction, Schmitt trigger inputs, level comparison, and pull-up/pull-down resistors.
+This chapter covers reading digital signals, from basic direct I/O through enhanced input conditioning. Topics include INA/INB registers, TESTP instruction, Schmitt trigger inputs, level comparison, and pull-ups and pull-downs.
 
 
 ## 12.1 Input Architecture
@@ -179,9 +179,9 @@ The voltages below assume the nominal `Vxxyy` of 3.3 V. On a board running the I
 - Analog signal digitization
 
 
-## 12.4 Pull-Up and Pull-Down Resistors
+## 12.4 Pull-Ups and Pull-Downs
 
-Pull resistors and when to use them are covered in Ch2 §2.2; this section gives the smart-pin constants and how to apply them to inputs.
+Pull-ups and pull-downs and when to use them are covered in Ch2 §2.2; this section gives the smart-pin constants and how to apply them to inputs.
 
 ### Available Options
 
@@ -239,7 +239,7 @@ PINHIGH(pin)                               ' DIR=1, OUT=1 → 15kΩ drive high
 
 ### Why Inputs Float
 
-When an input pin has no connection and no pull resistor:
+When an input pin has no connection and nothing pulling it:
 
 - Input buffer amplifies internal noise
 - State oscillates unpredictably
@@ -591,7 +591,7 @@ Theoretical maximum depends on sampling method:
 | P_SCHMITT_A | Schmitt trigger (adds input hysteresis) |
 | P_LEVEL_A | Programmable level comparator (use level=108 for ~1.4V TTL threshold) |
 
-### Pull Resistors
+### Pull-Ups and Pull-Downs
 
 | Constant | Value | Use |
 |----------|-------|-----|

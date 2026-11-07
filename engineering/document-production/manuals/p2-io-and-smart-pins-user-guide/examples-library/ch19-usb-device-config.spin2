@@ -4,7 +4,7 @@
 ''   Purpose....  The pin pair and clock a USB device configuration
 ''                requires before any transfer happens
 ''   Manual.....  P2 I/O & Smart Pins User Guide
-''   Version....  v1.0.11 (2026-10-05)
+''   Version....  v1.0.12 (2026-11-05)
 ''   Appears in.  Chapter 19: USB Host/Device -- 19.7 Basic USB
 ''                Configuration Example
 ''   Authors....  Iron Sheep Productions, LLC

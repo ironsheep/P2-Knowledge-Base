@@ -529,7 +529,7 @@ of millivolts referenced to ground) needs a bias network to lift it to mid-suppl
 or the ratiometric reference method (§16.3); it cannot be read directly by a gain
 mode. This example configures a gain mode for a signal already biased to mid-supply
 and reads the filtered result. Converting that reading to volts needs the per-gain
-input window, which is being characterized on hardware (see §16.2).
+input window, measured on P2 hardware in §16.2.
 
 ```spin2
 CON

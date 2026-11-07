@@ -472,6 +472,8 @@ PUB tx_buffer(ptr, count) | i
 
 ### Example 4: PASM2 High-Speed Serial
 
+This is a PASM-only file, where `##@message` is the hub address of the string. In a Spin2 object, hub addresses in a DAT block are relative to the object: take `@message` in Spin2 and pass it in through PTRA.
+
 ```pasm2
 CON
   _clkfreq = 200_000_000
@@ -489,7 +491,7 @@ DAT           org
               dirh      #TX_PIN
 
 ' Transmit message
-              mov       ptra, ##message
+              mov       ptra, ##@message
 tx_loop
               rdbyte    data, ptra++
               cmp       data, #0 wz

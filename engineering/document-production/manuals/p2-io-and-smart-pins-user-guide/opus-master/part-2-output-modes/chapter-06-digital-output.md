@@ -134,9 +134,9 @@ PUB sda_read() : state
 
 `TESTP` is used for the read-back (rather than reading the INA register) deliberately: it sees the pin two clocks old versus three for INA — one clock fresher, which matters on a fast bus where a line is driven and immediately sampled (see §1.2).
 
-**With Internal Pull-Up:**
+**With a 15kΩ Pull-Up:**
 
-If external pull-up isn't available, use internal resistive drive:
+If external pull-up isn't available, use the pin's resistive drive:
 ```spin2
 WRPIN(pin, P_HIGH_15K | P_LOW_FAST)       ' 15kΩ pull-up when high
 ```
