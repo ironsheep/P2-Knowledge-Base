@@ -18,7 +18,7 @@ assembled word; stays CP) · `BEHAVIOUR` (what
 compiled code does; the compile does not prove it) · `BEHAVIOUR → EF-NNN` (a P2 run has since
 proved it; the KB cites the EF).
 
-**Next record ID: `CP-036`** — take the number from this line and advance it in the same edit
+**Next record ID: `CP-037`** — take the number from this line and advance it in the same edit
 that files the record.
 
 **Commands** are run from the repository root with the repository-relative path, so each output
@@ -1542,3 +1542,50 @@ pnut-ts: Done
 **Grounds:** Spin2 v55 documentation, operator table, which lists the operator only in the form `??var`; this record shows the compiler refuses the form with no variable.
 *Limits:* one refused form (`??` with nothing after it, in an assignment) and one accepted form; other placements are not compiled here. One compiler version.
 *→ EF:* none — legality stays CP.
+
+### CP-036 · Instruction-word fields as assembled: R (bit 20) is 1 for a relative and 0 for an absolute (`#\`) branch; WW (bits 22:21) selects PA, PB, PTRA, PTRB; the augment field is the low 23 bits; cccc/zzzz, NNN, the C/Z/I bits and the condition field sit where the encoding tables place them — `LAYOUT`
+*KB:* `language/pasm2/concepts/instruction_encoding_key.yaml`
+*Class:* layout (the assembled words), read from the decoded `.lst`.
+*Source:* `proofs/cp-036-encoding-key-fields.spin2`.
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-08):* `pnut-ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-036-encoding-key-fields.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-036-encoding-key-fields.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-036-encoding-key-fields.lst
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-036-encoding-key-fields.bin (6400 bytes)
+pnut-ts: Done
+```
+**Decoding.** The `.lst` prints image bytes little-endian (`58 00 B0 FD` is the word `FDB00058`); the cog block starts at image offset `$008` (`.lst` lines 20-26). `sub1` is cog address `$017`.
+```text
+image  word       source                          field read
+$008   FDB00058   call    #sub1                   bit 20 = 1 (R, relative)
+$00C   FDA00017   call    #\sub1                  bit 20 = 0 (R, absolute); A = $017
+$010   FDF00050   callb   #sub1                   bit 20 = 1 (R)
+$014   FE000017   calld   pa, #\sub1              bits 22:21 = 00 (WW = PA); R = 0
+$018   FE200017   calld   pb, #\sub1              WW = 01 (PB)
+$01C   FE400017   calld   ptra, #\sub1            WW = 10 (PTRA)
+$020   FE600017   calld   ptrb, #\sub1            WW = 11 (PTRB)
+$024   FE90000F   loc     pa, #sub1               WW = 00; R = 1
+$028   FEB0000E   loc     pb, #sub1               WW = 01; R = 1
+$02C   FED0000D   loc     ptra, #sub1             WW = 10; R = 1
+$030   FEF0000C   loc     ptrb, #sub1             WW = 11; R = 1
+$034   FE800017   loc     pa, #\sub1              WW = 00; R = 0
+$038   FF091A2B   augs    #$12345600              low 23 bits = $091A2B ($12345600 >> 9)
+$03C   FF891A2B   augd    #$12345600              low 23 bits = $091A2B
+$040   FD7DE06F   modcz   _set, _clr wcz          C = 1, Z = 1; cccc (16:13) = 1111, zzzz (12:9) = 0000
+$044   F8683019   getnib  x, y, #5                NNN (bits 21:19) = 101
+$050   F1103019   add     x, y wc                 bit 20 (C) = 1
+$054   F1083019   add     x, y wz                 bit 19 (Z) = 1
+$058   F1183019   add     x, y wcz                bits 20, 19 = 1
+$05C   F1043005   add     x, #5                   bit 18 (I) = 1
+$060   51003019   if_nz add x, y                  bits 31:28 (EEEE) = 0101
+```
+`calld pa,#sub1` without `\` assembles to the CALLD D,S form, not the WW form; the record therefore uses `#\` for the WW rows.
+
+**Grounds:** the instruction CSV's encoding rows (R: "if R=1 PC += A else PC = A"; the W field; `n` for AUGS/AUGD) and the PASM2 manual's encoding key, which these words agree with; and the Silicon Doc's encoding table, whose R row states the opposite (0 = relative) and which these words contradict.
+*Limits:* what is assembled, never what silicon does with it. One compiler version; the `L` bit and the N/NN index forms are not compiled here.
+*→ EF:* none — layout stays CP.

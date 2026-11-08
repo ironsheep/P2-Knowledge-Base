@@ -1,0 +1,35 @@
+' Encoding fields of the instruction word: R, WW, the augment field, cccc/zzzz,
+' the NNN index, the C/Z/I flag bits and the condition field, read from the listing.
+CON
+  _clkfreq = 20_000_000
+
+PUB main()
+  coginit(0, @entry, 0)
+
+DAT
+        org     0
+entry   call    #sub1
+        call    #\sub1
+        callb   #sub1
+        calld   pa, #\sub1
+        calld   pb, #\sub1
+        calld   ptra, #\sub1
+        calld   ptrb, #\sub1
+        loc     pa, #sub1
+        loc     pb, #sub1
+        loc     ptra, #sub1
+        loc     ptrb, #sub1
+        loc     pa, #\sub1
+        augs    #$12345600
+        augd    #$12345600
+        modcz   _set, _clr wcz
+        getnib  x, y, #5
+        mov     x, ##$12345678
+        add     x, y wc
+        add     x, y wz
+        add     x, y wcz
+        add     x, #5
+        if_nz add x, y
+sub1    ret
+x       long    0
+y       long    0
