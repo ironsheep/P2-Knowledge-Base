@@ -47,10 +47,10 @@ Each is posed to Stephen one at a time, with its reasoning in full. The recommen
    chip, we resolve things ourselves"*. §10 now states those items ourselves.
 2. ~~What the bench carries~~ **Resolved 2026-11-07: all 15 arms as planned** (Stephen: *"all 15 as
    planned"*). §9 stands; the left-out list stays out.
-3. ~~The cog-state page~~ **Not a question: where approved content lives is ours to decide** (Stephen,
-   2026-11-07). §11's page is decided: one canonical home for cog state.
+3. ~~The cog-state YAML file~~ **Not a question: where approved content lives is ours to decide** (Stephen,
+   2026-11-07). §11's YAML file is decided: one canonical home for cog state.
 4. ~~The v1.25.6 held work~~ **Not a question: already decided.** Stephen held F-640 "documents first"
-   on 2026-11-06, with the whole-page record as a gate and the sweep by operand to come with it. The
+   on 2026-11-06, with the whole-file record as a gate and the sweep by operand to come with it. The
    documents shipped on 2026-11-07, so all three join this release (§12, §16).
 5. ~~Manual masters~~ **Resolved 2026-11-07: YAML first, manuals after.** Stephen: *"complete the YAML
    edits for all of what we're trying to do, then, in a focused effort, apply the YAML changes to all
@@ -84,26 +84,26 @@ Each is posed to Stephen one at a time, with its reasoning in full. The recommen
 | `engineering/tools/validation/audit-yaml-certification-record.py` (new), wired into `validate-dod-release.py` | §12's pre-tag gate: a release-diff YAML file with no certification row fails | 12 |
 | `pasm2/alignl.yaml`, `language/spin2/methods/coginit.yaml` | Alignment siblings | 1 |
 | `language/spin2/methods/getrnd.yaml` | "True random" and cryptographic claims | 1 |
-| `pasm2/concepts/branch_addressing.yaml`, `pasm2/loc.yaml`, 43 S-branch pages | Units table and one line each | 3 |
+| `pasm2/concepts/branch_addressing.yaml`, `pasm2/loc.yaml`, 43 S-branch YAML files | Units table and one line each | 3 |
 | `pasm2/concepts/addressing_modes.yaml`, `setq_block_ops.yaml` | PTR expressions, block update | 3 |
-| `pasm2/concepts/special_registers.yaml`, `alti.yaml`, `testb.yaml`, 8 `bit*` pages | Q life, ALTI codes, shared opcode | 4 |
+| `pasm2/concepts/special_registers.yaml`, `alti.yaml`, `testb.yaml`, 8 `bit*` YAML files | Q life, ALTI codes, shared opcode | 4 |
 | `pasm2/hubset.yaml`, `getbrk.yaml`, `architecture/event_system.yaml` | Mode table, PRNG, GETBRK, clearing | 6 |
-| `architecture/smart_pins.yaml`, 11 `dir*`/`out*` pages | Reset states, wrap sentence | 7 |
-| `pasm2/concepts/pixel_mixer.yaml` (new), six pixel pages | Formula and table | 7 |
+| `architecture/smart_pins.yaml`, 11 `dir*`/`out*` YAML files | Reset states, wrap sentence | 7 |
+| `pasm2/concepts/pixel_mixer.yaml` (new), six pixel YAML files | Formula and table | 7 |
 | `pasm2/rgbsqz.yaml`, `rgbexp.yaml`, `crcbit.yaml`, `crcnib.yaml`, `rdlut.yaml`, `wrlut.yaml`, `architecture/lookup_ram.yaml` | Bit rules, PTRx scale | 7, 9 |
-| `architecture/interrupts.yaml`, `architecture/io_pin_timing.yaml`, 62 instruction pages | Aliases, links | 8 |
+| `architecture/interrupts.yaml`, `architecture/io_pin_timing.yaml`, 62 instruction YAML files | Aliases, links | 8 |
 | `architecture/cog_state.yaml` (new, decided) | What a cog holds | 11 |
 | `external-sources/compiler-verification/COMPILE-PROOFS.md` | CP-031 to CP-033 | 2 |
 | `external-sources/hardware-verification/` | New campaign, EF entries | 9 |
 | `engineering/ingestion/sources/silicon-doc/SILICON-DOC-CARRIAGE-LEDGER.md`, `carriage-walk-2026-11-07/` | Walk ledger and range files (written 2026-11-07) | 15, 17 |
 | `engineering/operations/YAML-CERTIFICATION-RECORD.md` (new) | One row per certified file | 16 |
-| `engineering/ingestion/SOURCE-ERRATA.md` | Four new source errata | 17.9 |
+| `engineering/ingestion/SOURCE-ERRATA.md` | Five new source errata (§17.9), plus the PASM2 Manual QMT slip (§6) | 6, 17.9 |
 | The files in §17's packages | Walk findings | 17 |
 
 ## Design decisions to flag
 
-- **New pages:** `pixel_mixer.yaml`, because six instructions share one table and none owns it. The
-  alternative is to put it in `mixpix.yaml` with five pages pointing there. Decided by the rule that a
+- **New YAML files:** `pixel_mixer.yaml`, because six instructions share one table and none owns it. The
+  alternative is to put it in `mixpix.yaml` with five YAML files pointing there. Decided by the rule that a
   fact has one canonical home. `architecture/cog_state.yaml` is decided the same way (§11). The
   colorspace converter and DVI output (§17.3) get their home by the same rule during the work.
 - **`CALLD` in the units table:** the cell stays "not yet proven" until the bench answers, and
@@ -130,7 +130,7 @@ goes to the register.
 | Egg-beater order | `hub.yaml:70-71`: "COG 0→1→2…" | Each cog reaches the next slice every clock (SD:2999,:3001) | None found |
 | BRK order | `pasm2/brk.yaml:12`: `…_BCDEFGHIJKLM` | `%aaaaaaaaaaaaaaaaeeee_LKJIHGFEDCBA` (SD:2498-2512) | Assembly `instructions-b.md:311` (§13) |
 | RD/WR timing | `cog_hub_execution.yaml:83,182,225,227,231,233,349`: 9-24, 3-12 | 9..16 and 3..10 in cog, 9..26 and 3..20 in hub (DS:1827-1841; CSV line 178) | None found |
-| RCR shift 0 | `pasm2/rcr.yaml:28`: `D[31]` | `D[0]` (CSV:30; the page's own `:18,:32`) | Seven sibling pages are right |
+| RCR shift 0 | `pasm2/rcr.yaml:28`: `D[31]` | `D[0]` (CSV:30; the file's own `:18,:32`) | Seven sibling YAML files are right |
 | XBYTE flags | `xbyte_engine.yaml:42`: "from bytecode" | Bits 1,0 of the table index (SD:946; `:194`) | XBYTE guide `xbyte-body.md:822,1113` (§13) |
 | XBYTE trigger | `xbyte_engine.yaml:248`: "RET to `$1F8..$1FF`" | `$1FF` (SD:897,:965) | None found |
 | REP wording | `rep_instruction.yaml:68,97`: "No branches" | A taken branch cancels REP (SD:775; `:95`) | None found |
@@ -174,13 +174,13 @@ the addressing work behind v1.25.3 to v1.25.5.
   (longs in cog, bytes in hub), 9-bit S (instructions, times four in hub; SD:690,:5566), `##` S
   (SD:5571-5575), `CALLD` (bench arm A). A footer states the Spin2 object-offset rule and links
   `hub_address_resolution`.
-- **43 S-branch pages** gain one line in `tjs.yaml:14-16`'s wording and a link. The set is 47: the `djz`
+- **43 S-branch YAML files** gain one line in `tjs.yaml:14-16`'s wording and a link. The set is 47: the `djz`
   to `tjv` family with `callpa` and `callpb` (15) and the event jumps (32). `tjs`, `tjnf`, `tjns` and `tjv`
   already carry the line (the set is defined in Planning Gate 4, with its command). `tjs`, `tjnf` and
-  `tjns` say "20-bit signed", which is reconciled with arm B. Until arm B answers, the 43 pages say only
+  `tjns` say "20-bit signed", which is reconciled with arm B. Until arm B answers, the 43 YAML files say only
   what CP-031 proves (9-bit S in instructions, times four in hub) and say nothing about `##` S-branches.
   If arm B shows the 18-bit field lands correctly, the `##` line is added; if it shows it does not, the
-  pages carry the trap and how to write around it.
+  YAML files carry the trap and how to write around it.
 - **`loc.yaml:13`** gets its unit.
 - **`addressing_modes.yaml`, new `ptr_expression_encoding`:** layout `%1SUPNNNNN`, index widths, `00000` =
   16, the forms table, and the augmented form (SD:3164-3205, :3245-3252).
@@ -205,7 +205,7 @@ and control fields but not the codes. `testb.yaml` (50 lines) never names the sh
   (SD:1196), and the span uses (SD:60-62). Linked from `setq`, `setq2`, `rdlut`, `getxacc`, `xoro32`,
   `crcnib`, `qdiv`, `qfrac`, `qrotate`, `coginit`, `muxq`.
 - **ALTI, `alti.yaml`:** new `src_operand` with the mask sizes (SD:618-626) and control codes (SD:628-650).
-- **TESTB and BITx, `testb.yaml`** with links from the eight `bit*` pages: CP-033.
+- **TESTB and BITx, `testb.yaml`** with links from the eight `bit*` YAML files: CP-033.
 - **Skip and JMP:** a plain JMP shifts the pattern like any instruction (SD:789), and SKIPF runs through
   relative branches (SD:891). Stated in `instruction_skipping.yaml`; no bench.
 
@@ -234,11 +234,11 @@ the XBYTE guide agrees, or §13 lists the difference.
 - **`event_system.yaml`, new `event_clearing`:** one table from the PASM2 Manual's event text
   (`pasm2-manual-text.txt:3288-3450`). Its QMT sentence at `:3367` names the wrong event, so that row
   comes from `SD:2209` and the manual slip is recorded in `SOURCE-ERRATA`. Links go from the 63 event
-  instruction pages: the 16 `poll*` pages, the 15 `wait*` event pages (all except `waitx`) and the 32
+  instruction YAML files: the 16 `poll*` YAML files, the 15 `wait*` event YAML files (all except `waitx`) and the 32
   event jumps. None links `architecture/event_system.yaml` today
   (run from `deliverables/ai/P2/language/pasm2`: `(ls poll*.yaml wait*.yaml; <the event-jump ls of
   Planning Gate 4>) | grep -vx waitx.yaml` gives 63, and piping that to `xargs grep -l
-  architecture/event_system.yaml | wc -l` gives 0). This replaces the earlier "21 pages holding the sentence",
+  architecture/event_system.yaml | wc -l` gives 0). This replaces the earlier "21 YAML files holding the sentence",
   which had no command behind it.
 - **`getbrk.yaml`:** state codes and the 16 event-trap bits (SD:2527-2593). `P2D:6018` has a typo, so
   `SD:2591` is the citation.
@@ -251,12 +251,12 @@ cell says more than its source about which events cog start clears (only ATN, IN
 - **`smart_pins.yaml`, `z_register.reset_preload`:** a table of "During reset (DIR=0)" values (SD:3918,
   :3929 to :4254). ADC, USB, sync RX and async RX are stated as not documented; no bench.
 - **Async TX `buffering`:** one-word buffer ahead of the shifter (SD:4696-4705).
-- **Wrap sentence on 11 pages:** `dirh`, `dirl`, `dirc`, and the eight `out*` pages, from
+- **Wrap sentence on 11 YAML files:** `dirh`, `dirl`, `dirc`, and the eight `out*` YAML files, from
   `pasm2/concepts/basic-io.yaml:165-170`.
 - **Reading a driven pin:** IN returns the pin's read state, three clocks old (SD:3706; DS:1032,:1067,
   :1076). Goes to `io_pin_timing.yaml`.
 - **CORDIC overwrite rule, `cordic.yaml`:** DS:924-926, SD:3413, EF-053.
-- **Pixel mixer, new page:** formula and Table 13 (SD:1214-1255), seven clocks (SD:1200).
+- **Pixel mixer, new YAML file:** formula and Table 13 (SD:1214-1255), seven clocks (SD:1200).
 - **`rgbsqz`, `rgbexp`, `crcbit`, `crcnib`:** bit rules (CSV:155-156,:411-412). CRCNIB's bit order waits
   for arm O.
 
@@ -265,20 +265,20 @@ D[31:16] = 0 only after checking it. Error: nothing in the reset table goes beyo
 
 ## 8. Findability
 
-**Why.** Chip listed as guesses things the KB states. **Measured:** 0 of 22 interrupt-control pages link
-`architecture/interrupts.yaml`, 0 of 40 pin pages link `architecture/io_pin_timing.yaml`, neither page
+**Why.** Chip listed as guesses things the KB states. **Measured:** 0 of 22 interrupt-control YAML files link
+`architecture/interrupts.yaml`, 0 of 40 pin YAML files link `architecture/io_pin_timing.yaml`, neither YAML file
 has an `aliases:` block, and `p2kb_find latency` returns 0. Aliases are harvested, plural `keywords:` is
 not (`generate-p2kb-index.py:130-242`).
 
-**Target.** Aliases on both pages (`latency`, `pin timing`, `OUT to pin`, `interrupt priority`, and so
-on), `related:` links from the 62 pages (BRK, COGBRK, GETBRK to `debug_interrupt.yaml`), and the same
-treatment for pages this sprint adds. The 62 are named in Planning Gate 4 with the command that counts
+**Target.** Aliases on both YAML files (`latency`, `pin timing`, `OUT to pin`, `interrupt priority`, and so
+on), `related:` links from the 62 YAML files (BRK, COGBRK, GETBRK to `debug_interrupt.yaml`), and the same
+treatment for YAML files this sprint adds. The 62 are named in Planning Gate 4 with the command that counts
 them. Starting point: `interrupts.yaml` and `io_pin_timing.yaml` have no `aliases:` key
 (`grep -c '^aliases:'` gives 0 for each). `wrpin.yaml:122-138` is the pattern for the `aliases:` block,
 and `:139-144` for the `related:` block.
 
 **Verify.** Normal: after a local index regeneration, each alias resolves. Edge: the natural question
-"how long from OUT to the pin changing" ranks the timing page first, or its gap is recorded for the
+"how long from OUT to the pin changing" ranks the timing YAML file first, or its gap is recorded for the
 `p2kb-mcp` ranking, which is outside this tree. Error: `validate-crossref-keys.py` reads 100%. Re-run the
 live `p2kb_find` after publishing, since the server reads the published index.
 
@@ -313,7 +313,7 @@ a supervisor timeout, so one bad landing cannot lose the others. Results print b
 | Arm | Question | Readings | Control | Closes |
 |---|---|---|---|---|
 | I | What survives `COGINIT` of a running cog, of a stopped cog, and of itself? DIR, OUT, C, Z, stack, PA, PB, Q, LUT, CT target, skip, REP | Each state against a never-used cog's baseline and against the dirty image | The reader sees the dirty state on a plain jump, proving it can read each class | §1 COGINIT row; §11 |
-| J | Is a cog's OUT gated by its own DIR? | Cog 0 DIR=1, OUT=0; worker DIR=0, OUT=1: reads 1 independent, 0 gated. Swapped | Worker drives; no worker (`test-f361-f564-subpin-cogstop.spin2`'s arms) | §7 pin page |
+| J | Is a cog's OUT gated by its own DIR? | Cog 0 DIR=1, OUT=0; worker DIR=0, OUT=1: reads 1 independent, 0 gated. Swapped | Worker drives; no worker (`test-f361-f564-subpin-cogstop.spin2`'s arms) | §7 pin YAML file |
 | K | Which read retires a CORDIC result? | Y-only, X then Y, and X twice, identified by `QMUL k,#$FFFFFFFF` | EF-053's X-only stream; Y-then-X from `cordic_interleave.spin2` | §7 cordic |
 | L | What does QDIV return when the quotient exceeds 32 bits? | `$8000_0000` wrap, saturate, or other, and the remainder | In-range quotient; EF-089 divide by zero | §7 cordic |
 | M | What does GETQX return with nothing pending? | Value, and the 2-clock time (SD:3413) | A pending read beforehand | §7 cordic |
@@ -378,7 +378,7 @@ campaign folder.
 **Why.** Where no source speaks, saying nothing hides the gap: an agent cannot tell "not covered" from
 "nothing to say". Stephen, 2026-11-07: *"no questions to chip, we resolve things ourselves"*. Starting
 point: none of the files below says "not documented" for these items today. Each item is closed by a
-source, a compile proof, a bench arm, or a plain "not documented" on the page an agent would read:
+source, a compile proof, a bench arm, or a plain "not documented" on the YAML file an agent would read:
 
 | Item | Closed by |
 |---|---|
@@ -388,10 +388,10 @@ source, a compile proof, a bench arm, or a plain "not documented" on the page an
 | Two AUGS in a row, ALTI's I bit in other modes | "Not documented" in `augs.yaml` and `alti.yaml` |
 | XORO32 algorithm, SEUSS permutations, egg-beater phase, COGINIT start time, SETQ start-up formula | "Not documented" on `xoro32.yaml`, `seussf.yaml`, `seussr.yaml`, `hub.yaml`, `coginit.yaml`, `setq_block_ops.yaml`, only where a programmer would ask |
 
-**Verify.** Normal: each "not documented" sits on the page an agent reads for that question. Edge: none
+**Verify.** Normal: each "not documented" sits on the YAML file an agent reads for that question. Edge: none
 contradicts a source found later in the sprint. Error: no item is closed by inference.
 
-## 11. The cog-state page
+## 11. The cog-state YAML file
 
 **Why.** The state a cog carries between instructions decides whether code works, and these facts have
 no single home: the walk found COGINIT described wrongly at `spin2/methods/coginit.yaml:134-135`, and
@@ -414,8 +414,8 @@ cell infers from a neighbouring state.
 - **F-640:** `spin2-pasm2-integration.yaml:359,362,363` jump with `#\@sym` in a Spin2 object. The fix
   follows the object-offset rule in §3.
 - **The sweep by operand:** search by operand form (`#\@`, `#@`, `##@`, `@@` and the rest) across the KB
-  and every document master, rather than by spelling. It runs over §3's pages and every file in §17.
-- **The whole-page record as a gate:** the pre-tag gate reads §16's certification record and fails
+  and every document master, rather than by spelling. It runs over §3's YAML files and every file in §17.
+- **The whole-file record as a gate:** the pre-tag gate reads §16's certification record and fails
   when a file in the release diff has no row. It needs a negative control: a release diff with one
   uncertified file must fail.
 
@@ -452,7 +452,7 @@ over `engineering/document-production/manuals/` shows no change in this sprint's
 ## 14. Release
 
 `release-yamls` end to end: `audit-kb-pending.py --session`, content commit as one change set with
-`P2KB_KB_RELEASE`, §1.5 change-set audit with every changed page read whole, Stephen's review, version, then
+`P2KB_KB_RELEASE`, §1.5 change-set audit with every changed YAML file read whole, Stephen's review, version, then
 the published `p2kb_find` and `p2kb_get` probes. The bump is proposed then (additive, so likely minor); it
 is his.
 
@@ -531,13 +531,30 @@ file, and every PARTIAL row on a file it touches, under §16:
 |---|---|---|
 | 17.1 Cog start, registers, hub exec, MODCZ | 1 | `spin2/methods/coginit.yaml`, `special_registers.yaml`, `hub.yaml`, `modc`/`modz`/`modcz` |
 | 17.2 Q, EXECF, REP in hub, XBYTE details | 2 | `special_registers.yaml`, `branch_addressing.yaml`, `rep_instruction.yaml`, `xbyte_engine.yaml` |
-| 17.3 Streamer, colorspace converter, DVI | 3 | `streamer_smartpin_control.yaml`, `nco-timing.yaml`, `setxfrq.yaml`, `architecture/streamer.yaml`; colorspace and DVI are new blocks or a new page, decided by where an agent looks |
-| 17.4 RETI/RESI flags, clock switching, interrupt rules, event flag clearing on 25 Jxxx pages | 4 | `reti*`, `resi*`, `clock_system.yaml`, `hubset.yaml`, `interrupts.yaml`, the J pages |
+| 17.3 Streamer, colorspace converter, DVI | 3 | `streamer_smartpin_control.yaml`, `nco-timing.yaml`, `setxfrq.yaml`, `architecture/streamer.yaml`; colorspace and DVI are new blocks or a new YAML file, decided by where an agent looks |
+| 17.4 RETI/RESI flags, clock switching, interrupt rules, event flag clearing on 25 Jxxx YAML files | 4 | `reti*`, `resi*`, `clock_system.yaml`, `hubset.yaml`, `interrupts.yaml`, the J YAML files |
 | 17.5 LOCKTRY, FIFO wrap and sizes, FIFO sharing | 5 | `locks.yaml`, `hub.yaml`, `fifo.yaml` |
-| 17.6 Smart pin repository, RDPIN rules, mode examples | 6 | `smart-pin-00001-…`, `wypin.yaml`, `rdpin.yaml`, `rqpin.yaml`, the `10101` and `01111` pages |
-| 17.7 ADC, USB, async examples | 7 | `smart-pin-11000-…`, USB pages, async TX/RX pages |
+| 17.6 Smart pin repository, RDPIN rules, mode examples | 6 | `smart-pin-00001-…`, `wypin.yaml`, `rdpin.yaml`, `rqpin.yaml`, the `10101` and `01111` YAML files |
+| 17.7 ADC, USB, async examples | 7 | `smart-pin-11000-…`, USB YAML files, async TX/RX YAML files |
 | 17.8 Serial loader, opcode sharing, MODCZ symbols, BYTE/WORD/LONG `[count]` | 8 | `serial_loader.yaml`, `testp*`, `dir*`, `getbrk`/`cogbrk`, `testb.yaml` |
 | 17.9 Source errata | 1, 7, 8 | `engineering/ingestion/SOURCE-ERRATA.md`: SD R-bit legend, LOCKREL typo, ORG limit, booter prose's P60 fast-boot pull-up against SD Table 36 and the Hardware Manual (SD:4805, range 7); Hardware Manual loader inversion |
+
+**17.10 The encoding key and its dangling pointer** *(revision 2026-11-07, cause 4: a known item left
+undispositioned. range-1.md row 92 and finding 8 recorded it, and no package took it. Found while the
+sprint was being tasked)*. 140 PASM2 instruction YAML files carry `# [bits|write|c|z|clocks] See
+encoding-table-reference.yaml` on their `encoding:` and `compiler_encoding:` keys. The comment is served
+verbatim (`p2kb_get` for POLLXRO, 2026-11-07), and no such file exists. No YAML file explains the
+`bits:` key letters (C/Z write flags, I = `#S` literal, L = `#D` literal; SD:296-311). Only WW
+(`calld.yaml:73`), R (`call.yaml:63`) and n (`augs.yaml:11`) are explained, each in one place. The fix
+gives the key one canonical home, sourced from SD:296-311 with the other letters from their sources,
+and repoints all 140 comments to it. 95 of the 140 files are not on the certification list. They are
+added to it, and all 140 are certified under §16 by the task that edits them, by the KB carve-out
+(the whole class is fixed in this pass). Certifying all 140 there keeps the pre-tag gate green at
+that task's boundary. A later task that edits one of them again re-reads it whole. **Verify.** Normal: `grep -rl
+encoding-table-reference` over the KB gives 0, and every letter in the key carries a source line.
+Edge: a letter that no source explains is stated as not documented. Error: `validate-crossref-keys.py`
+resolves the new home, and a sample of the 140 files is diffed so that each diff is the comment line
+only.
 
 **Rule for each row.** Re-find it by content: the agents' YAML line numbers can be wrong. Confirm it at
 the SD line and the YAML line. Then fix it, or state it as not documented. A row that does not hold is
@@ -579,9 +596,9 @@ PASS  guide layer conformant across 49 file(s)
 
 | Behaviour | Artifacts that describe it |
 |---|---|
-| Every fact in §1 to §11 | The YAML pages above, and `CHANGELOG.md` in the KB voice |
+| Every fact in §1 to §11 | The YAML files above, and `CHANGELOG.md` in the KB voice |
 | Release state | `README.md` badge, `YAML-HEAD-DASHBOARD.md`, `engineering/README.md` YAML row |
-| Counts | `yaml-knowledge-base-maintenance` §2.6 and §2.7 tree totals move with new pages and blocks: refresh or leave as dated readings |
+| Counts | `yaml-knowledge-base-maintenance` §2.6 and §2.7 tree totals move with new YAML files and blocks: refresh or leave as dated readings |
 | Compile and bench records | `COMPILE-PROOFS.md`, `P2-EMPIRICAL-FINDINGS.md`, `VERIFICATION-OPPORTUNITIES.md` |
 | Compiler behaviour | `DRAFTS/PNUT-TS-PUNCH-LIST.md` items 14, 15: closed or sent on, per arms A, B |
 | Manuals | Not changed in this sprint; reach recorded in `P2KB-CONTRACT-GAPS-MANUAL-REACH.md` for the manual effort that follows (§13) |
@@ -632,17 +649,17 @@ this section.
      tjns tjv callpa callpb`) gives 15. `ls $P/j*.yaml | grep -E '/j(n)?(int|ct[123]|se[1234]|pat|fbw|xmt|xfi|xro|xrl|atn|qmt)\.yaml$'`
      gives 32. Over those 47, `grep -lE 'whole instructions|-256'` gives 4: `tjs`, `tjnf`, `tjns`,
      `tjv`. (`calld.yaml` also matches, but it is outside the set.) So 43 change.
-   - **Findability, 62:** the 22 interrupt pages are `setint1-3 trgint1-3 nixint1-3 allowi stalli reti0-3
-     resi0-3 brk cogbrk getbrk`, and 0 contain `architecture/interrupts.yaml` (grep). The 40 pin pages
-     are the 32 `dir/out/flt/drv × l h c nc z nz rnd not` pages plus `testp testpn wrpin wxpin wypin rdpin
+   - **Findability, 62:** the 22 interrupt YAML files are `setint1-3 trgint1-3 nixint1-3 allowi stalli reti0-3
+     resi0-3 brk cogbrk getbrk`, and 0 contain `architecture/interrupts.yaml` (grep). The 40 pin YAML files
+     are the 32 `dir/out/flt/drv × l h c nc z nz rnd not` YAML files plus `testp testpn wrpin wxpin wypin rdpin
      rqpin akpin`, and 0 contain `architecture/io_pin_timing.yaml`. `grep -c '^aliases:'` gives 0 on both
-     architecture pages.
+     architecture YAML files.
    - **`bits` fields:** `grep -h '^- bits: ' $P/*.yaml` gives 407, and the same lines stripped of spaces
      give 0 that are not 32 characters.
    - **Certification size:** the files are listed in `engineering/planning/P2KB-CONTRACT-GAPS-CERTIFY-LIST.txt`,
      one path per line, relative to `deliverables/ai/P2/`. The list is the union of the file table, the
-     47 S-branch pages, the 62 findability pages, the 32 `dir/out/flt/drv` pages, the `bit*` and pixel
-     pages and §4's link pages, filtered to files that exist. `wc -l` gives 175. Founding count, run from
+     47 S-branch YAML files, the 62 findability YAML files, the 32 `dir/out/flt/drv` YAML files, the `bit*` and pixel
+     YAML files and §4's link YAML files, filtered to files that exist. `wc -l` gives 175. Founding count, run from
      `deliverables/ai/P2/`: `while read f; do t=$(wc -l < "$f"); o=$(git blame --date=short "$f" | grep -c
      ' 2025-0[89]-'); [ $((o*2)) -gt $t ] && echo "$f"; done < <list> | wc -l` gives 91. A file counts as
      founding when more than half its lines carry an August or September 2025 blame date. §17's packages
@@ -674,7 +691,7 @@ this section.
 6. **Named unknowns.** Bench outcomes: each arm says what changes either way. A silicon
    result proving the compiler wrong for CALLD or `##`: the KB states the silicon behaviour and how to write
    around it, and punch list items 14 and 15 go to the compiler. The natural-question ranking: if a fix needs
-   the server, it goes to the `p2kb-mcp` agent. Arm B: §3's S-branch pages carry only what CP-031 proves
+   the server, it goes to the `p2kb-mcp` agent. Arm B: §3's S-branch YAML files carry only what CP-031 proves
    until it answers, then gain the `##` line or the trap. Async TX initial IN: stated as not documented,
    with examples that do not depend on it (§17). Walk rows that do not hold on confirmation are recorded
    as refuted in their range file, and the package continues.
@@ -696,8 +713,8 @@ and found none wrong. Each finding was hand-checked, then resolved:
 6. §17: the range files are made part of the plan, with counts re-measured. The "blank" spots were
    checked and are not blank. The schematics carry no contract row.
 7. Completeness: why, starting points and edge and error cases were added to §2, §4, §5, §10, §11, §12,
-   §13 and §14. §8 now refers to aspect 4's page sets.
-8. Consistency: the TRGINT file-table row was split, and §3 states what the pages carry before arm B
+   §13 and §14. §8 now refers to aspect 4's YAML file sets.
+8. Consistency: the TRGINT file-table row was split, and §3 states what the YAML files carry before arm B
    answers.
 9. Size: §16 states 175 files and 91 founding, with certification and the change-set audit split by
    package.
@@ -714,7 +731,7 @@ quoted. Findings:
 1. BLOCKS, arm B not prototyped though claimed. Resolved: `proto_armB.spin2` was compiled with a backward
    `##` branch in cog and in hub plus controls, and its words are in §9. The identical fields in both
    spaces were added to punch list item 15 as unexplained.
-2. "21 pages" had no command. Resolved: §6 now names 63 event pages with the command, 0 linking today.
+2. "21 YAML files" had no command. Resolved: §6 now names 63 event YAML files with the command, 0 linking today.
 3. The 175 and 91 counts were prose. Resolved: the list file `P2KB-CONTRACT-GAPS-CERTIFY-LIST.txt` and the
    founding command are in aspect 4, and both re-ran to 175 and 91.
 4. §2's edge named the wrong `00000` encoding. Resolved: `ptra++[16]` (`160`).
@@ -730,7 +747,7 @@ The auditor re-ran the commands: arm B's words at two sites in the `.bin`, 175 a
 lines.
 1. SHOULD-FIX, §6's command counted 59: `grep -v waitx` also dropped the four `waitx*` event waits.
    Resolved: the command now uses `grep -vx waitx.yaml`. The arbiter re-ran it from `language/pasm2` and
-   got 63 pages, with 0 linking `event_system.yaml`. The conclusion was unchanged by the slip.
+   got 63 YAML files, with 0 linking `event_system.yaml`. The conclusion was unchanged by the slip.
 2. MINOR, the certification list is an artifact, not a command. Resolved: it is stated as a recorded
    artifact committed with the plan.
 
@@ -742,3 +759,134 @@ these line-level corrections.
 two line-level findings were fixed and re-measured.
 
 No questions remain: **true**, on both sides.
+
+---
+
+## Sprint start (2026-11-07)
+
+Started on Stephen's word after the clear: *"Let's continue"*, given at a resume point whose next step
+was this skill pair.
+
+- **Build number:** KB **v1.26.0**, a minor bump, since the sprint adds YAML files and blocks. Agreed by
+  Stephen on 2026-11-07 (*"q1 agreed"*). §14 still holds: the number is confirmed at release from the
+  diff.
+- **Working tree:** `git status --short` was empty, so the tree was clean. `main` is 4 commits ahead
+  of `origin/main` (3ad7a463, cc201f79, 1f02ba4c, 2ab699e2), all records. Pushing is Stephen's.
+- **Tracking readiness:** snapshot `tasks/backups/project_dump_20261107_232039.json`. 8 completed
+  tasks were archived (`tasks/archives/archive_20261107_232043.md`). 9 superseded resume and session
+  keys were deleted, taking context from 95 keys to 86; the remaining old parked pointers are a backlog
+  observation. `MEMORY.md` is 93 lines. Leftover live tasks: «#435»-«#437» run after this sprint's KB
+  release (aspect 5); «#441», «#438», «#431» and «#432» stay outside the sprint. «#430» was paused, but
+  its four commits (2f0bd4c4, 89d7d53f, 23201de0, 4228736f) all shipped in v1.25.0, so it was closed
+  with a `CLOSED:` line citing them. Verdict: **ready**.
+- **Entry baseline (yaml head, 2026-11-07):** `verify-yaml-format.py` parsed every file;
+  `validate-crossref-keys.py` resolved 4326 references; `validate-dod-release.py` passed every check;
+  `audit-constant-fidelity.py` found 0 Tier 1 and 0 Tier 2 across 120 constants;
+  `audit-yaml-claim-sourcing.py` found 0 Tier 1 and 0 Tier 2 across 1007 files;
+  `audit-kb-code-compiles.py` passed 3175 blocks (497 program, 2005 fragment);
+  `audit-yaml-duplicate-keys.py` was clean over 1137 files; `audit-yaml-plain-scalar-comment.py`
+  passed (0 flagged); `audit-adc-encoding.py`, `audit-hardware-revision-scope.py`,
+  `audit-index-findability.py` and `audit-index-integrity.py` passed; `audit-register-hygiene.py` on
+  the register was clean (20 entries); `audit-kb-pending.py --session` gave 8 entries, all
+  dispositioned in aspect 3; `audit-gate-arming.py --head yaml` was clean. The baseline is clean, so
+  no warnings task is created.
+- **Doc audit re-run:** `audit-guide-conformance.py --inventory` passed over 49 files, matching the
+  Blast Radius run.
+- **Register (this head's punch list):** every open entry is dispositioned in aspect 3, so there is
+  nothing new to present.
+
+---
+
+## Tasks (2026-11-07)
+
+Sprint tag `contract-gaps`. All tasks are medium priority, with no dependencies, and are ordered by
+`seq`. The column below gives each task's order in the set; the stored `seq` is that order plus one
+(2 to 27). «#435», «#436», «#437» and «#441» were moved behind «#467» (seq 28 to 31), so `todo_next`
+reaches the debug toolbox only after this sprint's release, as aspect 5 settled.
+
+| Plan § | Deliverable | Task | Order |
+|---|---|---|---|
+| §12, §16 | Certification record and pre-tag gate | «#442» | 1 |
+| §9 | Bench programs and run sheet, handed to Stephen | «#443» | 2 |
+| §2 | CP-031 to CP-033 | «#444» | 3 |
+| §1 | Served defects (not XBYTE, HUBSET, TRGINT, COGINIT resets) | «#445» | 4 |
+| §17.1 | Range 1 package | «#446» | 5 |
+| §17.10 | Encoding key and the 140 pointers | «#447» | 6 |
+| §3 | Addressing | «#448» | 7 |
+| §4 | Registers and prefixes | «#449» | 8 |
+| §5, §1 | XBYTE, with §1's two XBYTE rows | «#450» | 9 |
+| §17.2 | Range 2 package | «#451» | 10 |
+| §6, §1 | HUBSET (with §1's framing row), PRNG, events, GETBRK | «#452» | 11 |
+| §17.4 | Range 4 package | «#453» | 12 |
+| §7 | Smart pins, CORDIC, bit rules, pixel mixer | «#454» | 13 |
+| §17.3 | Range 3 package | «#455» | 14 |
+| §17.5 | Range 5 package | «#456» | 15 |
+| §17.6 | Range 6 package | «#457» | 16 |
+| §17.7 | Range 7 package | «#458» | 17 |
+| §17.8 | Range 8 package | «#459» | 18 |
+| §17.9 | Source errata E-025 to E-029 | «#460» | 19 |
+| §10 | Not-documented statements | «#461» | 20 |
+| §11 | `cog_state.yaml` | «#462» | 21 |
+| §8 | Findability | «#463» | 22 |
+| §12 | F-640 and the sweep by operand | «#464» | 23 |
+| §9 | Bench results applied (needs Stephen's logs) | «#465» | 24 |
+| Blast Radius, §13 | Documentation task and the reach check | «#466» | 25 |
+| §14 | Release | «#467» | 26 |
+
+§15 has no task: the walk ran before the gate, and its output is §17.
+
+**Ordering.** The record and gate come first because every YAML task writes rows into the record
+(foundation before building). The bench build comes second, so Stephen's run fills the window that
+tasks «#444» to «#464» work through (§3a-ii). «#465» needs his logs and waits for them. The CPs come
+before the addressing and prefix YAML files that cite them (discovery before utilization). Each §17
+package sits beside the section task that shares its YAML files, so a file is re-read by a neighbour
+rather than by a task far down the list. §10, §11 and §8 run late because they read or link YAML files
+the earlier tasks change. The F-640 sweep runs after the YAML files it sweeps. The documentation task
+and the release run last. No pair is left red: «#442»'s gate, once wired, fails only on a changed YAML
+file with no row, and every YAML task writes its rows before it closes.
+
+**Rework check.** A YAML file edited by two tasks is re-read whole by the second, which updates its
+row. Adjacency keeps this to neighbours (`hub.yaml`: «#445», «#446», «#456»; `special_registers.yaml`:
+«#446», «#449», «#451»; `xbyte_engine.yaml`: «#450», «#451»). No task edits a generated artifact: the
+index is regenerated locally only in «#463» and published in «#467».
+
+**Dispatch shape.** `arbiter-serial`, this head's default (`skill-conventions.md`), so the resume key
+carries no override. «#442» is **two-phase**: the record's columns and the gate's reading of the diff
+are a shape every later task writes against. Its first dispatch returns the design with one row
+applied, and the arbiter reviews both before the rest is built. The drafting of these task bodies was
+fanned out to three read-only agents writing to separate scratch files, with no shared writes. That
+fan-out was planning work, not sprint execution.
+
+**Set audit (`plan-to-tasks` §8, fresh `task-survey` agents, 2026-11-08).**
+
+*Round 1.* The verdict was SET NOT READY: 13 findings, plus 2 stale anchors. Checks 1, 2, 3 and 7
+passed. The findings:
+- «#467» carried no standing-sweep values.
+- «#447» left 45 changed files uncertified, which would leave the gate red. It now certifies all 140,
+  and §17.10 says so.
+- «#446»'s verify contradicted its hand-offs.
+- The MODCZ table and the hub bandwidth figures each had two owners. They now have one each:
+  «#446» → «#456» for bandwidth, and first-to-run with close-against for MODCZ.
+- «#465» credited «#450» with a statement it does not write.
+- «#466» used commit rows for YAML that only the release commits. Those rows are now "Owned by
+  «#467»".
+- §9's `DOWNLOAD TO RAM` check, §17's MATCH-row sample and §16's 175/91 were carried by no task.
+- One addition in «#446» had no recorded source.
+- The file table's errata count was wrong.
+
+Condensing ten bodies to fit todo-mcp's 10,000-character limit was checked with a token-preservation
+script, plus check 8 of this audit against the range files. No walk row was dropped.
+
+*Round 2.* 12 of the 13 were RESOLVED. The two line citations were still off by one after plan edits,
+so they now cite section names instead of line numbers. The round also raised four new minor findings,
+all line-level:
+- «#467» now re-measures counts on code-block changes too.
+- «#466»'s row forms are made one list.
+- «#467» expects 32 checks.
+- «#456» closes against «#446» and «#445» for the hub facts.
+
+All of these were fixed. Because they are one-clause corrections, no third round is run, by the same
+rule as the Planning Gate audit.
+
+N5 is kept as a note: «#447» certifies 140 YAML files in one task, which is the heaviest single
+certification load in the set.
