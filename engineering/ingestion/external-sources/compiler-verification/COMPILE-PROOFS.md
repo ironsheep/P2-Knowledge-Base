@@ -18,7 +18,7 @@ assembled word; stays CP) · `BEHAVIOUR` (what
 compiled code does; the compile does not prove it) · `BEHAVIOUR → EF-NNN` (a P2 run has since
 proved it; the KB cites the EF).
 
-**Next record ID: `CP-034`** — take the number from this line and advance it in the same edit
+**Next record ID: `CP-036`** — take the number from this line and advance it in the same edit
 that files the record.
 
 **Commands** are run from the repository root with the repository-relative path, so each output
@@ -1482,4 +1482,63 @@ Within each group of four the opcode field is the same: `bitl` and `testb` `0100
 
 **Grounds:** the opcode patterns `0100000` to `0100111` that `testb.yaml` and the eight `bit*` YAML files give in their `bits:` lines, here confirmed as compiled words (the YAML lines are the claims under test, not a source); and the split, that the compiler enforces which effects each name takes.
 *Limits:* what is assembled and refused, never what the instructions do at run time. The refusals are shown for an immediate S and one effect each; `bitl x,#1 wz`, `bitl` with a register S and the other `bitx` names with a single `wc` or `wz` are not compiled here, nor is `testbn` with `wcz`. One compiler version.
+*→ EF:* none — legality stays CP.
+
+### CP-034 · A VAR type specifier applies to the later names on its own line only; names on a line with no specifier are LONG; VAR variables are packed with no alignment — `LAYOUT`
+*KB:* `language/spin2/keywords/VAR.yaml`
+*Class:* layout (the types and hub offsets the compiler assigns), read from the `.lst` symbol table.
+*Source:* `proofs/cp-034-var-type-per-line.spin2`.
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-08):* `pnut-ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-034-var-type-per-line.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-034-var-type-per-line.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-034-var-type-per-line.lst
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-034-var-type-per-line.bin (6320 bytes)
+pnut-ts: Done
+```
+**Decoding.** The `.lst` symbol table, lines 3-9 (VALUE is the variable's offset in the object's VAR space):
+```text
+TYPE: VAR_BYTE          VALUE: 00000004          NAME: A
+TYPE: VAR_BYTE          VALUE: 00000005          NAME: B
+TYPE: VAR_BYTE          VALUE: 00000006          NAME: C
+TYPE: VAR_WORD          VALUE: 00000007          NAME: X
+TYPE: VAR_WORD          VALUE: 00000009          NAME: Y
+TYPE: VAR_LONG          VALUE: 0000000B          NAME: D
+TYPE: VAR_LONG          VALUE: 0000000F          NAME: E
+```
+The source declares `BYTE a, b, c`, then `WORD x, y`, then `d, e` on a line of its own. `b` and `c` take BYTE and `y` takes WORD from the specifier earlier on their line; `d` and `e`, on a line with no specifier, are LONG, not WORD. The offsets run 4, 5, 6, 7, 9, $B, $F: each variable starts where the previous one ends, so the WORD `x` sits at an odd offset and the LONG `d` at $B.
+
+**Grounds:** Spin2 v55 documentation, VAR section ("packed in memory in the order they are declared, beginning at a long-aligned address"; `BYTE a,b,c[1000],d` and the LONG default), which states the same-line case and the packing; this record adds the next-line case the documentation does not state in words.
+*Limits:* what the compiler assigns, never what a running program observes. One object, one compiler version; arrays and the `[count]` form are not compiled here.
+*→ EF:* none — layout stays CP.
+
+### CP-035 · The Spin2 `??` operator needs a variable operand: `value := ??` is refused, `value := ??seed` is accepted — `LEGALITY`
+*KB:* `language/spin2/operators/op_rand.yaml`
+*Class:* legality (the compiler's answer).
+*Source:* `proofs/cp-035-reject-rand-no-operand.spin2` (refused), `proofs/cp-035-rand-with-operand.spin2` (accepted).
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-08):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-035-reject-rand-no-operand.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-035-reject-rand-no-operand.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-035-reject-rand-no-operand.spin2:3:error:Expected a variable (m251)
+```
+*Command (2026-11-08):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-035-rand-with-operand.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-035-rand-with-operand.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-035-rand-with-operand.bin (6296 bytes)
+pnut-ts: Done
+```
+**Grounds:** Spin2 v55 documentation, operator table, which lists the operator only in the form `??var`; this record shows the compiler refuses the form with no variable.
+*Limits:* one refused form (`??` with nothing after it, in an assignment) and one accepted form; other placements are not compiled here. One compiler version.
 *→ EF:* none — legality stays CP.

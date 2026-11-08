@@ -1,0 +1,3 @@
+' The ?? operator with no variable operand is refused.
+PUB main() | value
+  value := ??

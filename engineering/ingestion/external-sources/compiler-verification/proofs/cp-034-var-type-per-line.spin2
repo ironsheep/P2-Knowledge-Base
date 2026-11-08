@@ -1,0 +1,11 @@
+' A VAR type specifier carries to the later names on its own line only;
+' names on a line with no type specifier are LONG.
+VAR
+  BYTE a, b, c
+  WORD x, y
+  d, e
+
+PUB main()
+  a := @b - @a
+  x := @y - @x
+  d := @e - @d

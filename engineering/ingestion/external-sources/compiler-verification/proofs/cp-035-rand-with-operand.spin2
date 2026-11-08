@@ -1,0 +1,3 @@
+' The ?? operator with a variable operand is accepted.
+PUB main() | value, seed
+  value := ??seed
