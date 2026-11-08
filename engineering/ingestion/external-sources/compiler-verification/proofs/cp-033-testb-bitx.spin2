@@ -1,0 +1,39 @@
+' Assembles each BITx instruction beside the TESTB or TESTBN form whose opcode field it is
+' paired with in the instruction YAML, with the flag spellings each one accepts.
+' Command: pnut-ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-033-testb-bitx.spin2
+' Expected: exit 0; the words are read from the .lst.
+DAT
+        org
+        bitl    x,#5
+        bitl    x,#5    wcz
+        testb   x,#5    wc
+        testb   x,#5    wz
+        bitc    x,#5
+        bitc    x,#5    wcz
+        testb   x,#5    andc
+        testb   x,#5    andz
+        bitz    x,#5
+        bitz    x,#5    wcz
+        testb   x,#5    orc
+        testb   x,#5    orz
+        bitrnd  x,#5
+        bitrnd  x,#5    wcz
+        testb   x,#5    xorc
+        testb   x,#5    xorz
+        bith    x,#5
+        bith    x,#5    wcz
+        testbn  x,#5    wc
+        testbn  x,#5    wz
+        bitnc   x,#5
+        bitnc   x,#5    wcz
+        testbn  x,#5    andc
+        testbn  x,#5    andz
+        bitnz   x,#5
+        bitnz   x,#5    wcz
+        testbn  x,#5    orc
+        testbn  x,#5    orz
+        bitnot  x,#5
+        bitnot  x,#5    wcz
+        testbn  x,#5    xorc
+        testbn  x,#5    xorz
+x       long    0

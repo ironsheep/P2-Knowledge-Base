@@ -1,0 +1,27 @@
+' Assembles each PTRA/PTRB expression form as the source operand of RDLONG: the nine-bit
+' S field is the low nine bits of each word; the augmented index forms assemble an AUGS
+' word followed by the RDLONG.
+' Command: pnut-ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-032-ptr-expressions.spin2
+' Expected: exit 0; the words are read from the .lst.
+DAT
+        org
+        rdlong  x,ptra++
+        rdlong  x,++ptra
+        rdlong  x,ptra--
+        rdlong  x,--ptra
+        rdlong  x,ptra[3]
+        rdlong  x,ptra[-20]
+        rdlong  x,ptrb[31]
+        rdlong  x,ptra++[16]
+        rdlong  x,ptra--[16]
+        rdlong  x,ptra[##1000]
+        rdlong  x,ptra++[##1000]
+        rdlong  x,ptra
+        rdlong  x,ptrb
+        rdlong  x,ptra++[15]
+        rdlong  x,++ptrb[10]
+        rdlong  x,ptrb++[16]
+        rdlong  x,++ptra[16]
+        rdlong  x,--ptra[16]
+        rdlong  x,ptrb[-32]
+x       long    0

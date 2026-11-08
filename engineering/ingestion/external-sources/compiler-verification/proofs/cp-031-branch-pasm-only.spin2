@@ -1,0 +1,59 @@
+' Assembles each branch form to a backward and a forward target, in cog and in hub
+' (PASM-only file: hub symbols are true addresses). The far cases put the target more
+' than 256 instructions away, so the augmented field carries more than nine bits.
+' Command: pnut-ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-031-branch-pasm-only.spin2
+' Expected: exit 0; the words are read from the .lst.
+DAT
+        org
+cb      nop
+        jmp     #cb
+        call    #cb
+        calla   #cb
+        callb   #cb
+        djnz    pa,#cb
+        tjz     pa,#cb
+        loc     pb,#cb
+        djnz    pa,##cb
+        jmp     #cf
+        call    #cf
+        calla   #cf
+        callb   #cf
+        djnz    pa,#cf
+        tjz     pa,#cf
+        loc     pb,#cf
+        djnz    pa,##cf
+        nop
+cf      nop
+        djnz    pa,##cz
+        tjz     pa,##cz
+        long    0[300]
+cz      nop
+        djnz    pa,##cb
+        tjz     pa,##cb
+
+        orgh    $800
+hb      nop
+        jmp     #hb
+        call    #hb
+        calla   #hb
+        callb   #hb
+        djnz    pa,#hb
+        tjz     pa,#hb
+        loc     pb,#hb
+        djnz    pa,##hb
+        jmp     #hf
+        call    #hf
+        calla   #hf
+        callb   #hf
+        djnz    pa,#hf
+        tjz     pa,#hf
+        loc     pb,#hf
+        djnz    pa,##hf
+        nop
+hf      nop
+        djnz    pa,##hz
+        tjz     pa,##hz
+        long    0[3000]
+hz      nop
+        djnz    pa,##hb
+        tjz     pa,##hb

@@ -18,7 +18,7 @@ assembled word; stays CP) · `BEHAVIOUR` (what
 compiled code does; the compile does not prove it) · `BEHAVIOUR → EF-NNN` (a P2 run has since
 proved it; the KB cites the EF).
 
-**Next record ID: `CP-031`** — take the number from this line and advance it in the same edit
+**Next record ID: `CP-034`** — take the number from this line and advance it in the same edit
 that files the record.
 
 **Commands** are run from the repository root with the repository-relative path, so each output
@@ -1274,3 +1274,212 @@ pasm-only  cog sym at $0024, hub sym at $0400; ##cog=$9 ##@cog=$24 ##hub=$400 ##
 `##hubsym` is the same `$428` in two objects whose symbols are at different places. The PASM-only file is the control. Spin2 v55 states the rule: "In Spin2+PASM programs, hub addresses are relative to the start of the object"; "In PASM-only programs, hub addresses are absolute." EF-060 shows the `##hubsym` read failing on silicon.
 *Limits:* what is assembled, not what runs. The `.bin` offsets are image offsets, not measured runtime addresses. One compiler version.
 *→ EF:* EF-060 for `##hubsym`; none for `##@hubsym`.
+
+### CP-031 · Branch units: the 20-bit JMP, CALL, CALLA and CALLB fields are byte offsets; the 9-bit S field of DJNZ and TJZ is in instructions in cog and times four in hub; a relative LOC field is longs in cog and bytes in hub; the augmented `##` S-branch carries an 18-bit field in cog and in hub — `LAYOUT`
+*KB:* `language/pasm2/concepts/branch_addressing.yaml`, `language/pasm2/loc.yaml`, the S-branch YAML files (`language/pasm2/djnz.yaml` and its family)
+*Class:* layout (what is assembled), read from the decoded `.lst` words. It does not show what silicon does with the 18-bit field.
+*Source:* `proofs/cp-031-branch-pasm-only.spin2` (PASM-only: hub symbols are true addresses), and the control `proofs/cp-031-branch-object.spin2` (the same DAT in a Spin2 object).
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-08):* `pnut-ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-031-branch-pasm-only.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-031-branch-pasm-only.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-031-branch-pasm-only.lst
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-031-branch-pasm-only.bin (14168 bytes)
+pnut-ts: Done
+```
+*Command (2026-11-08):* `pnut-ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-031-branch-object.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-031-branch-object.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-031-branch-object.lst
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-031-branch-object.bin (19732 bytes)
+pnut-ts: Done
+```
+**Decoding.** A `.lst` prints image bytes little-endian, so the bytes `F8 FF 9F FD` are the word `FD9FFFF8`. A branch's target is the next instruction's address plus the decoded offset. The cog address of an instruction is its image offset divided by four (cog addresses count longs); the hub address is the image offset itself, the file being PASM-only. The labels are `cb` (cog backward target, long 0), `cf` (cog forward target, long 20, image `$50`), `cz` (cog far target, long 325, image `$514`), `hb` (`$800`), `hf` (`$850`), `hz` (`$3744`), from the `.lst` symbol lines (`CF` = `01400050`, `CZ` = `14500514`, `HB` = `FFF00800`, `HF` = `FFF00850`, `HZ` = `FFF03744`). `Line` is the `.lst` line the word was read from (`.lst` of `cp-031-branch-pasm-only`).
+```text
+COG, backward (target cb = long 0)
+form              at long  word(s)              field            offset     next + offset      line
+jmp   #cb            1     FD9FFFF8             FFFF8  (20-bit)  -8 bytes   long 2 - 2 longs = 0   19
+call  #cb            2     FDBFFFF4             FFFF4  (20-bit)  -12 bytes  long 3 - 3 longs = 0   19
+calla #cb            3     FDDFFFF0             FFFF0  (20-bit)  -16 bytes  long 4 - 4 longs = 0   19
+callb #cb            4     FDFFFFEC             FFFEC  (20-bit)  -20 bytes  long 5 - 5 longs = 0   20
+djnz  pa,#cb         5     FB6FEDFA             1FA    (9-bit)   -6         long 6 - 6 = 0         20
+tjz   pa,#cb         6     FB97EDF9             1F9    (9-bit)   -7         long 7 - 7 = 0         20
+loc   pb,#cb         7     FEBFFFF8             FFFF8  (20-bit)  -8         long 8 - 8 = 0         20
+djnz  pa,##cb        9     FF0001FF + FB6FEDF6  3FFF6  (18-bit)  -10        long 10 - 10 = 0       21
+
+COG, forward (target cf = long 20)
+jmp   #cf           10     FD900024             00024            +36 bytes  long 11 + 9 longs = 20   21
+call  #cf           11     FDB00020             00020            +32 bytes  long 12 + 8 longs = 20   21
+calla #cf           12     FDD0001C             0001C            +28 bytes  long 13 + 7 longs = 20   22
+callb #cf           13     FDF00018             00018            +24 bytes  long 14 + 6 longs = 20   22
+djnz  pa,#cf        14     FB6FEC05             005              +5         long 15 + 5 = 20         22
+tjz   pa,#cf        15     FB97EC04             004              +4         long 16 + 4 = 20         22
+loc   pb,#cf        16     FEB00003             00003            +3         long 17 + 3 = 20         23
+djnz  pa,##cf       18     FF000000 + FB6FEC01  00001  (18-bit)  +1         long 19 + 1 = 20         23
+
+COG, far (the offset is larger than the nine-bit S field)
+djnz  pa,##cz       22     FF000000 + FB6FED2E  0012E  (18-bit)  +302       long 23 + 302 = 325      24
+tjz   pa,##cz       24     FF000000 + FB97ED2C  0012C  (18-bit)  +300       long 25 + 300 = 325      24-25
+djnz  pa,##cb      327     FF0001FF + FB6FECB8  3FEB8  (18-bit)  -328       long 328 - 328 = 0       100
+tjz   pa,##cb      329     FF0001FF + FB97ECB6  3FEB6  (18-bit)  -330       long 330 - 330 = 0       101
+
+HUB, backward (target hb = $800)
+form              at       word(s)              field            offset     next + offset            line
+jmp   #hb          $804    FD9FFFF8             FFFF8  (20-bit)  -8 bytes   $808 - 8 = $800          147
+call  #hb          $808    FDBFFFF4             FFFF4  (20-bit)  -12 bytes  $80C - 12 = $800         147
+calla #hb          $80C    FDDFFFF0             FFFF0  (20-bit)  -16 bytes  $810 - 16 = $800         147
+callb #hb          $810    FDFFFFEC             FFFEC  (20-bit)  -20 bytes  $814 - 20 = $800         148
+djnz  pa,#hb       $814    FB6FEDFA             1FA    (9-bit)   -6 = -24 bytes  $818 - 24 = $800    148
+tjz   pa,#hb       $818    FB97EDF9             1F9    (9-bit)   -7 = -28 bytes  $81C - 28 = $800    148
+loc   pb,#hb       $81C    FEBFFFE0             FFFE0  (20-bit)  -32 bytes  $820 - 32 = $800         148
+djnz  pa,##hb      $824    FF0001FF + FB6FEDF6  3FFF6  (18-bit)  -10 = -40 bytes  $828 - 40 = $800   149
+
+HUB, forward (target hf = $850)
+jmp   #hf          $828    FD900024             00024            +36 bytes  $82C + 36 = $850         149
+call  #hf          $82C    FDB00020             00020            +32 bytes  $830 + 32 = $850         149
+calla #hf          $830    FDD0001C             0001C            +28 bytes  $834 + 28 = $850         150
+callb #hf          $834    FDF00018             00018            +24 bytes  $838 + 24 = $850         150
+djnz  pa,#hf       $838    FB6FEC05             005              +5 = +20 bytes  $83C + 20 = $850   150
+tjz   pa,#hf       $83C    FB97EC04             004              +4 = +16 bytes  $840 + 16 = $850   150
+loc   pb,#hf       $840    FEB0000C             0000C            +12 bytes  $844 + 12 = $850        151
+djnz  pa,##hf      $848    FF000000 + FB6FEC01  00001  (18-bit)  +1 = +4 bytes   $84C + 4 = $850    151
+
+HUB, far (target hz = $3744)
+djnz  pa,##hz      $858    FF000005 + FB6FEDBA  00BBA  (18-bit)  +3002 = +12008 bytes  $85C + $2EE8 = $3744   152
+tjz   pa,##hz      $860    FF000005 + FB97EDB8  00BB8  (18-bit)  +3000 = +12000 bytes  $864 + $2EE0 = $3744   152-153
+djnz  pa,##hb      $374C   FF0001FA + FB6FEC2C  3F42C  (18-bit)  -3028 = -12112 bytes  $3750 - $2F50 = $800   903
+tjz   pa,##hb      $3754   FF0001FA + FB97EC2A  3F42A  (18-bit)  -3030 = -12120 bytes  $3758 - $2F58 = $800   904
+```
+Read off the table: the 20-bit fields of JMP, CALL, CALLA and CALLB hold the same number in cog and in hub, and it is the distance in bytes (`-8` for two longs in cog, `-8` for eight bytes in hub). The DJNZ and TJZ 9-bit S holds `-6` in both spaces, which is six instructions in cog (`long 6 - 6 = 0`) and 24 bytes in hub (`$818 - 24 = $800`), so the field is instructions in cog and times four in hub. LOC `#cb` backward assembles `FFFF8` in cog (eight longs) and `FFFE0` in hub (32 bytes). In the `##` form the AUGS word carries only bits 9 to 17 of the offset (`FF0001FF` for the small negative offsets, `FF0001FA` for the far ones, never the sign bits of a 32-bit value), so the field is 18 bits; in hub it is again times four (`-3028` is `-12112` bytes). The far cog and hub forward cases need more than nine bits (`$12E` = 302, `$BBA` = 3002).
+
+*Control (Spin2 object).* `proofs/cp-031-branch-object.spin2` holds the same DAT after a `PUB main()`. Its hub symbols sit elsewhere (`HB` = `FFF00530`, `HF` = `FFF00580`, `HZ` = `FFF03474`; the cog block starts at image `$8`), and every word in its listing is the word in the table above: cog small and forward-far blocks `.lst` lines 21-27, cog far backward 103, hub backward and forward blocks 104-108, hub far forward 109-110, hub far backward 860-861 (`.lst` of `cp-031-branch-object`, read with the same decoding). The hub symbols differ from the PASM-only file (CP-030 shows a Spin2 object shifts them); the branch words do not, since the fields are relative.
+
+**Grounds:** the units the YAML needs to state, which no source states in words: JMP, CALL, CALLA and CALLB immediate fields are bytes; the S field of DJNZ, TJZ and the family is instructions in cog and times four in hub; LOC's relative field is longs in cog and bytes in hub; the `##` S-branch field is 18 bits in cog and in hub.
+*Limits:* what is assembled, never what silicon does with it; whether the 18-bit field lands correctly on silicon is the bench's to settle (arm B). The CALLD unit is not stated here, and `jmp #\label`, `call #\label` and the other absolute forms are not covered. LOC is recorded as the relative `loc pb,#label` field only. One compiler version.
+*→ EF:* none — layout stays CP until a P2 run proves the behaviour.
+
+### CP-032 · PTR expressions: the S field of the post- and pre-increment and -decrement and the indexed forms assembles to the SD table's values, and the augmented index forms to the 20-bit index words `$8003E8` and `$B003E8` — `LAYOUT`
+*KB:* `language/pasm2/concepts/addressing_modes.yaml`
+*Class:* layout (what is assembled), read from the decoded `.lst` words.
+*Source:* `proofs/cp-032-ptr-expressions.spin2`.
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-08):* `pnut-ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-032-ptr-expressions.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-032-ptr-expressions.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-032-ptr-expressions.lst
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-032-ptr-expressions.bin (88 bytes)
+pnut-ts: Done
+```
+**Decoding.** Each form is the source operand of `rdlong x,<form>`. The `.lst` prints little-endian, so `61 2B 04 FB` is the word `FB042B61`; its S field is the low nine bits, `161`. The `.lst` lines are 14 (image `$00`-`$0F`), 15 (`$10`), 16 (`$20`), 17 (`$30`), 18 (`$40`), 19 (`$50`).
+```text
+form                  image   word                  S field (9 bits)   line   SD:3164-3205 row
+ptra++                $00     FB042B61              161                14     101100001
+++ptra                $04     FB042B41              141                14     101000001
+ptra--                $08     FB042B7F              17F                14     101111111
+--ptra                $0C     FB042B5F              15F                14     101011111
+ptra[3]               $10     FB042B03              103                15     100IIIIII (000011)
+ptra[-20]             $14     FB042B2C              12C                15     100IIIIII (101100)
+ptrb[31]              $18     FB042B9F              19F                15     110IIIIII (011111)
+ptra++[16]            $1C     FB042B60              160                15     1011NNNNN (00000 = 16)
+ptra--[16]            $20     FB042B70              170                16     1011nnnnn (10000 = -16)
+ptra[##1000]          $24     FF004001 + FB042BE8   AUGS 4001, S 1E8   16     (4001 << 9) + 1E8 = $8003E8
+ptra++[##1000]        $2C     FF005801 + FB042BE8   AUGS 5801, S 1E8   16-17  (5801 << 9) + 1E8 = $B003E8
+ptra                  $34     FB042B00              100                17     100000000
+ptrb                  $38     FB042B80              180                17     110000000
+ptra++[15]            $3C     FB042B6F              16F                17     1011NNNNN (01111 = 15)
+++ptrb[10]            $40     FB042BCA              1CA                18     1110NNNNN (01010 = 10)
+ptrb++[16]            $44     FB042BE0              1E0                18     1111NNNNN (00000 = 16)
+++ptra[16]            $48     FB042B40              140                18     1010NNNNN (00000 = 16)
+--ptra[16]            $4C     FB042B50              150                18     1010nnnnn (10000 = -16)
+ptrb[-32]             $50     FB042BA0              1A0                19     110IIIIII (100000)
+```
+The nine required values read: `ptra++` `161`, `++ptra` `141`, `ptra--` `17F`, `--ptra` `15F`, `ptra[3]` `103`, `ptra[-20]` `12C`, `ptrb[31]` `19F`, `ptra++[16]` `160`, `ptra--[16]` `170`. The edge `ptra++[16]` is `160`, whose index field `00000` stands for 16. The two augmented forms give the 20-bit index words `$8003E8` and `$B003E8`.
+
+**Grounds:** Silicon Doc SD:3164-3205 (the `1SUPNNNNN` table) and SD:3245-3252 (`##` before the index inserts an AUGS), which show the S field as bits and which the compiler's words agree with row by row for the forms above; the extra rows (`ptra`, `ptrb`, `ptra++[15]`, `++ptrb[10]`, `ptrb++[16]`, `++ptra[16]`, `--ptra[16]`, `ptrb[-32]`) are the table's other bit patterns, also matching. The hex values are the encoding the YAML can state.
+*Limits:* what is assembled for `rdlong`, never what a P2 does with the pointer. The scaling by operand size and the update of PTRA/PTRB are behaviour, not shown. Other instructions that take a PTR expression are not compiled here. The `00000` = 16 reading of the index field comes from SD:3179 and the word `160`; the compiler does not say it. One compiler version.
+*→ EF:* none — layout stays CP until a P2 run proves the behaviour.
+
+### CP-033 · TESTB and BITx share an opcode field: `bitl`, `bitc`, `bitz`, `bitrnd` pair with `testb` and its C/Z-combining forms, `bith`, `bitnc`, `bitnz`, `bitnot` with `testbn`; the assembler refuses `bitl x,#1 wc` and `testb x,#1 wcz` — `LEGALITY` + `LAYOUT`
+*KB:* `language/pasm2/testb.yaml`, `language/pasm2/bitl.yaml`, `language/pasm2/bith.yaml`, `language/pasm2/bitc.yaml`, `language/pasm2/bitnc.yaml`, `language/pasm2/bitz.yaml`, `language/pasm2/bitnz.yaml`, `language/pasm2/bitrnd.yaml`, `language/pasm2/bitnot.yaml`
+*Class:* layout for the shared opcode (the assembled words), legality for the two refusals (the compiler's answer).
+*Source:* `proofs/cp-033-testb-bitx.spin2` (accepted), `proofs/cp-033-reject-bitl-wc.spin2` and `proofs/cp-033-reject-testb-wcz.spin2` (each refused, one file each).
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-08):* `pnut-ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-033-testb-bitx.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-033-testb-bitx.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-033-testb-bitx.lst
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-033-testb-bitx.bin (132 bytes)
+pnut-ts: Done
+```
+*Command (2026-11-08):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-033-reject-bitl-wc.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-033-reject-bitl-wc.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-033-reject-bitl-wc.spin2:6:error:This effect is not allowed for this instruction
+```
+*Command (2026-11-08):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-033-reject-testb-wcz.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-033-reject-testb-wcz.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-033-reject-testb-wcz.spin2:6:error:Expected WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, or XORZ
+```
+**Decoding.** The S field of every word is `005` (`#5`) and D is `020` (the register `x`, from the `.lst` symbol line `X` = `02000080`); the `.lst` prints little-endian (`05 40 04 F4` is the word `F4044005`). Each word is `EEEE oooooooCZI DDDDDDDDD SSSSSSSSS`: `ooooooo` is bits 27:21, `C` bit 20, `Z` bit 19, `I` bit 18. All 32 instructions have `EEEE` = `F` and `I` = 1. The `.lst` (`cp-033-testb-bitx`) line holds four instructions: line 14 image `$00`-`$0F`, 15 `$10`, 16 `$20`, 17 `$30`, 18 `$40`, 19 `$50`, 20 `$60`, 21 `$70`.
+```text
+source                  word       opcode(27:21)  C Z    line
+bitl    x,#5            F4044005   0100000        0 0    14
+bitl    x,#5   wcz      F41C4005   0100000        1 1    14
+testb   x,#5   wc       F4144005   0100000        1 0    14
+testb   x,#5   wz       F40C4005   0100000        0 1    14
+bitc    x,#5            F4444005   0100010        0 0    15
+bitc    x,#5   wcz      F45C4005   0100010        1 1    15
+testb   x,#5   andc     F4544005   0100010        1 0    15
+testb   x,#5   andz     F44C4005   0100010        0 1    15
+bitz    x,#5            F4844005   0100100        0 0    16
+bitz    x,#5   wcz      F49C4005   0100100        1 1    16
+testb   x,#5   orc      F4944005   0100100        1 0    16
+testb   x,#5   orz      F48C4005   0100100        0 1    16
+bitrnd  x,#5            F4C44005   0100110        0 0    17
+bitrnd  x,#5   wcz      F4DC4005   0100110        1 1    17
+testb   x,#5   xorc     F4D44005   0100110        1 0    17
+testb   x,#5   xorz     F4CC4005   0100110        0 1    17
+bith    x,#5            F4244005   0100001        0 0    18
+bith    x,#5   wcz      F43C4005   0100001        1 1    18
+testbn  x,#5   wc       F4344005   0100001        1 0    18
+testbn  x,#5   wz       F42C4005   0100001        0 1    18
+bitnc   x,#5            F4644005   0100011        0 0    19
+bitnc   x,#5   wcz      F47C4005   0100011        1 1    19
+testbn  x,#5   andc     F4744005   0100011        1 0    19
+testbn  x,#5   andz     F46C4005   0100011        0 1    19
+bitnz   x,#5            F4A44005   0100101        0 0    20
+bitnz   x,#5   wcz      F4BC4005   0100101        1 1    20
+testbn  x,#5   orc      F4B44005   0100101        1 0    20
+testbn  x,#5   orz      F4AC4005   0100101        0 1    20
+bitnot  x,#5            F4E44005   0100111        0 0    21
+bitnot  x,#5   wcz      F4FC4005   0100111        1 1    21
+testbn  x,#5   xorc     F4F44005   0100111        1 0    21
+testbn  x,#5   xorz     F4EC4005   0100111        0 1    21
+```
+Within each group of four the opcode field is the same: `bitl` and `testb` `0100000`, `bitc` and `testb andc/andz` `0100010`, `bitz` and `testb orc/orz` `0100100`, `bitrnd` and `testb xorc/xorz` `0100110`; `bith` and `testbn wc/wz` `0100001`, `bitnc` and `testbn andc/andz` `0100011`, `bitnz` and `testbn orc/orz` `0100101`, `bitnot` and `testbn xorc/xorz` `0100111`. The words differ only in the C and Z bits (`bitx` no effect `00`, `wcz` `11`; the `testb` forms `10` for the C spelling and `01` for the Z spelling). The assembler accepts `bitx` with no effect and with `wcz`, and `testb` and `testbn` with `wc`, `wz`, `andc`, `andz`, `orc`, `orz`, `xorc` and `xorz`; it refuses `bitl x,#1 wc` and, the error text itself listing the eight spellings, `testb x,#1 wcz`.
+
+**Grounds:** the opcode patterns `0100000` to `0100111` that `testb.yaml` and the eight `bit*` YAML files give in their `bits:` lines, here confirmed as compiled words (the YAML lines are the claims under test, not a source); and the split, that the compiler enforces which effects each name takes.
+*Limits:* what is assembled and refused, never what the instructions do at run time. The refusals are shown for an immediate S and one effect each; `bitl x,#1 wz`, `bitl` with a register S and the other `bitx` names with a single `wc` or `wz` are not compiled here, nor is `testbn` with `wcz`. One compiler version.
+*→ EF:* none — legality stays CP.

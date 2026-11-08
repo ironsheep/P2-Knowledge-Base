@@ -1,0 +1,7 @@
+' TESTB with an immediate S and the WCZ effect.
+' Command: pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-033-reject-testb-wcz.spin2
+' Expected: exit 1, with a compiler error on line 6.
+DAT
+        org
+        testb   x,#1    wcz
+x       long    0

@@ -1,0 +1,60 @@
+' Control for cp-031-branch-pasm-only.spin2: the same branch forms in a Spin2 object,
+' where the hub code follows a PUB method and the object's hub symbols sit elsewhere.
+' Command: pnut-ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-031-branch-object.spin2
+' Expected: exit 0; the words are read from the .lst.
+PUB main()
+
+DAT
+        org
+cb      nop
+        jmp     #cb
+        call    #cb
+        calla   #cb
+        callb   #cb
+        djnz    pa,#cb
+        tjz     pa,#cb
+        loc     pb,#cb
+        djnz    pa,##cb
+        jmp     #cf
+        call    #cf
+        calla   #cf
+        callb   #cf
+        djnz    pa,#cf
+        tjz     pa,#cf
+        loc     pb,#cf
+        djnz    pa,##cf
+        nop
+cf      nop
+        djnz    pa,##cz
+        tjz     pa,##cz
+        long    0[300]
+cz      nop
+        djnz    pa,##cb
+        tjz     pa,##cb
+
+        orgh
+hb      nop
+        jmp     #hb
+        call    #hb
+        calla   #hb
+        callb   #hb
+        djnz    pa,#hb
+        tjz     pa,#hb
+        loc     pb,#hb
+        djnz    pa,##hb
+        jmp     #hf
+        call    #hf
+        calla   #hf
+        callb   #hf
+        djnz    pa,#hf
+        tjz     pa,#hf
+        loc     pb,#hf
+        djnz    pa,##hf
+        nop
+hf      nop
+        djnz    pa,##hz
+        tjz     pa,##hz
+        long    0[3000]
+hz      nop
+        djnz    pa,##hb
+        tjz     pa,##hb

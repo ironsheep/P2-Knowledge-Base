@@ -1,0 +1,7 @@
+' BITL with an immediate S and the WC effect.
+' Command: pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-033-reject-bitl-wc.spin2
+' Expected: exit 1, with a compiler error on line 6.
+DAT
+        org
+        bitl    x,#1    wc
+x       long    0
