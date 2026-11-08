@@ -1,0 +1,6 @@
+' RDLUT with a plain immediate address of 255, and with an augmented ##256, are accepted.
+DAT
+        org
+        rdlut   x, #255
+        rdlut   x, ##256
+x       long    0

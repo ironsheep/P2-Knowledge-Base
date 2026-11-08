@@ -1,0 +1,5 @@
+' RDLUT with a plain immediate address of 256 is refused.
+DAT
+        org
+        rdlut   x, #256
+x       long    0

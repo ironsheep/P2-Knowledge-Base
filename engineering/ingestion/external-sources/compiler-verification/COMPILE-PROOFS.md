@@ -18,7 +18,7 @@ assembled word; stays CP) · `BEHAVIOUR` (what
 compiled code does; the compile does not prove it) · `BEHAVIOUR → EF-NNN` (a P2 run has since
 proved it; the KB cites the EF).
 
-**Next record ID: `CP-037`** — take the number from this line and advance it in the same edit
+**Next record ID: `CP-038`** — take the number from this line and advance it in the same edit
 that files the record.
 
 **Commands** are run from the repository root with the repository-relative path, so each output
@@ -1589,3 +1589,38 @@ $060   51003019   if_nz add x, y                  bits 31:28 (EEEE) = 0101
 **Grounds:** the instruction CSV's encoding rows (R: "if R=1 PC += A else PC = A"; the W field; `n` for AUGS/AUGD) and the PASM2 manual's encoding key, which these words agree with; and the Silicon Doc's encoding table, whose R row states the opposite (0 = relative) and which these words contradict.
 *Limits:* what is assembled, never what silicon does with it. One compiler version; the `L` bit and the N/NN index forms are not compiled here.
 *→ EF:* none — layout stays CP.
+
+### CP-037 · RDLUT's plain immediate address is limited to `#0`-`#255`: `rdlut x,#256` and `rdlut x,#511` are refused with "Constant must be from 0 to 255"; `#255` and the augmented `##256` are accepted — `LEGALITY`
+*KB:* `language/pasm2/rdlut.yaml`
+*Class:* legality (the compiler's answer).
+*Source:* `proofs/cp-037-reject-rdlut-imm-256.spin2` and `proofs/cp-037-reject-rdlut-imm-511.spin2` (refused), `proofs/cp-037-rdlut-imm-255-and-aug-256.spin2` (accepted).
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-08):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-037-reject-rdlut-imm-256.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-037-reject-rdlut-imm-256.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-037-reject-rdlut-imm-256.spin2:4:error:Constant must be from 0 to 255
+```
+*Command (2026-11-08):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-037-reject-rdlut-imm-511.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-037-reject-rdlut-imm-511.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-037-reject-rdlut-imm-511.spin2:4:error:Constant must be from 0 to 255
+```
+*Command (2026-11-08):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-037-rdlut-imm-255-and-aug-256.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-037-rdlut-imm-255-and-aug-256.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-037-rdlut-imm-255-and-aug-256.bin (16 bytes)
+pnut-ts: Done
+```
+**Grounds:** the Silicon Doc's instruction list gives `RDLUT D,S/#/PTRx`, and its hub random-access operand form (documented for the hub read/write instructions) has an immediate S of `#%0AAAAAAAA` as an 8-bit address and `#%1SUPNNNNN` as a PTR expression; this record shows the assembler refuses a plain RDLUT immediate above 255 rather than encoding it.
+*Limits:* RDLUT only, at the two ends of the refused range; WRLUT and the hub read/write instructions are not compiled here. What RDLUT does at run time with an augmented `##` S value is not shown. One compiler version.
+*→ EF:* none — legality stays CP.
