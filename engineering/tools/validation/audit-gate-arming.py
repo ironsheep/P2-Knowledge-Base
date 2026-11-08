@@ -102,7 +102,7 @@ HEADS = {
         "audit-adc-encoding.py", "audit-register-hygiene.py",
         "audit-yaml-plain-scalar-comment.py", "audit-index-integrity.py",
         "audit-hardware-revision-scope.py", "audit-index-findability.py",
-        "audit-kb-pending.py",
+        "audit-kb-pending.py", "audit-yaml-certification-record.py",
     },
     "ingestion": {
         "audit-extraction-digit-density.py",

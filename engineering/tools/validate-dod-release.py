@@ -1726,6 +1726,21 @@ def validate_plain_scalar_comment(verbose: bool = False) -> ValidationResult:
         "whitespace before it are outside the rule.", verbose)
 
 
+def validate_yaml_certification_record(verbose: bool = False) -> ValidationResult:
+    """BLOCKING. Does every YAML file that differs from the latest KB tag have a record row?
+
+    The base is the highest vN.N.N tag, compared with the working tree, so committed,
+    staged, unstaged and untracked new YAML files under deliverables/ai/P2/ all count.
+    A deleted file needs no row; a renamed file needs a row at its new path. Rows are
+    read from engineering/operations/YAML-CERTIFICATION-RECORD.md.
+    """
+    return _two_phase_gate(
+        "YAML Certification Record", "audit-yaml-certification-record.py",
+        "Scope: one valid row per changed YAML file. A valid row for an unchanged "
+        "file is harmless; a malformed row or a second row for one path fails "
+        "wherever it sits. The row's content is not judged here.", verbose)
+
+
 def validate_index_integrity(verbose: bool = False) -> ValidationResult:
     """BLOCKING. Does the index agree with what is committed (F-441 / F-405)?
 
@@ -2036,6 +2051,7 @@ def run_all_validations(verbose: bool = False, incremental: bool = False) -> boo
         validate_obex_one_liners,
         validate_ledger_kb_home,
         validate_kb_pending,
+        validate_yaml_certification_record,
         validate_cross_references,
         validate_constant_fidelity,
         validate_claim_sourcing,
