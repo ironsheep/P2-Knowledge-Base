@@ -1,0 +1,13 @@
+' REP @label over a body whose ALTS has a ## operand: the assembler counts the AUGS word.
+' Body: AUGS (from ##$200) + ALTS, MOV, ADD = 4 instruction words.
+DAT
+        org
+        rep     @.e, #10
+        alts    index, ##$200
+        mov     x, 0-0
+        add     sum, x
+.e
+        nop
+index   long 0
+x       long 0
+sum     long 0

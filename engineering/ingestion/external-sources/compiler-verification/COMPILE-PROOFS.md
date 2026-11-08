@@ -18,7 +18,7 @@ assembled word; stays CP) · `BEHAVIOUR` (what
 compiled code does; the compile does not prove it) · `BEHAVIOUR → EF-NNN` (a P2 run has since
 proved it; the KB cites the EF).
 
-**Next record ID: `CP-038`** — take the number from this line and advance it in the same edit
+**Next record ID: `CP-039`** — take the number from this line and advance it in the same edit
 that files the record.
 
 **Commands** are run from the repository root with the repository-relative path, so each output
@@ -1624,3 +1624,25 @@ pnut-ts: Done
 **Grounds:** the Silicon Doc's instruction list gives `RDLUT D,S/#/PTRx`, and its hub random-access operand form (documented for the hub read/write instructions) has an immediate S of `#%0AAAAAAAA` as an 8-bit address and `#%1SUPNNNNN` as a PTR expression; this record shows the assembler refuses a plain RDLUT immediate above 255 rather than encoding it.
 *Limits:* RDLUT only, at the two ends of the refused range; WRLUT and the hub read/write instructions are not compiled here. What RDLUT does at run time with an augmented `##` S value is not shown. One compiler version.
 *→ EF:* none — legality stays CP.
+
+### CP-038 · `REP @label` counts an AUGS word: a body of `ALTS index,##$200` (AUGS + ALTS), `MOV`, `ADD` assembles as `REP #4` — `LAYOUT`
+*KB:* `language/pasm2/concepts/register_indirection.yaml`, `language/pasm2/concepts/rep_instruction.yaml`
+*Class:* layout (what is assembled).
+*Source:* `proofs/cp-038-rep-label-counts-augs.spin2`.
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-08):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-038-rep-label-counts-augs.spin2`, then `od -An -tx1 -N20` on the `.bin`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-038-rep-label-counts-augs.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-038-rep-label-counts-augs.bin (36 bytes)
+pnut-ts: Done
+ 0a 08 dc fc 01 00 00 ff 00 0c 94 f9 00 0e 00 f6
+ 07 10 00 f1
+```
+The first long, `$FCDC080A`, is REP (`EEEE 1100110 1LI DDDDDDDDD SSSSSSSSS`) with D = 4 and S = 10. The next four longs are the body: `$FF000001` (AUGS), `$F9940C00` (ALTS), `$F6000E00` (MOV), `$F1001007` (ADD).
+**Grounds:** the Silicon Doc's REP entry ("repeat the next D[8:0] instructions"); the assembler, given the block end as a label, counts the AUGS that a `##` operand inserts as one of those instructions.
+*Limits:* what is assembled — the assembler's count of the block. Whether the hardware counts the AUGS word the same way at run time is not shown here. One compiler version.
+*→ EF:* none — layout stays CP.
