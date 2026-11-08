@@ -89,7 +89,6 @@ ALLOW = {
     "verification":           ("content", "how a reader checks something: SETQ count checklist, compile-with--m method"),
     "frequency_verification": ("content", "clkfreq: example code that checks the clock is in range"),
     "pin_verification":       ("content", "click-module page: example debug code that prints the pin assignments"),
-    "read_back_verification": ("content", "DIRA/DIRB debugging tip: read the register back"),
     # ---- self-declared source conflicts, read by audit-yaml-source-lock (kind 'content') --
     "conflicting_sources":    ("content", "declared conflict between sources (source-lock Class B marker)"),
     "cross_source_conflict":  ("content", "declared conflict between sources (source-lock Class B marker)"),
