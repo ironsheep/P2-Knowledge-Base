@@ -556,6 +556,37 @@ Edge: a letter that no source explains is stated as not documented. Error: `vali
 resolves the new home, and a sample of the 140 files is diffed so that each diff is the comment line
 only.
 
+**17.11 The pnut-ts table blocks are removed** *(revision 2026-11-08, cause 2: a premise planning
+did not check. Certification left these blocks out as unsourced, and they turned out to contradict the
+certified fields)*. 358 PASM2 instruction YAML files carry `compiler_operand_format` and
+`compiler_encoding`, and 10 also carry `compiler_syntax`, `compiler_category` and `compiler_effects`.
+All five were copied from the pnut-ts compiler's operand tables. No Parallax document backs them, and they
+are served. Some contradict their own file. `dirh.yaml` gives `D/#0..511 {WC/WZ}` where its syntax is
+`{#}D {WCZ}`, and pnut-ts refuses `dirh #5 wc` ("This effect is not allowed for this instruction"). 17 pin
+files share that pattern. 19 event files say "moves S to D", which is compiler-internal and reads as chip
+behaviour. **Stephen's ruling (2026-11-08):** *"C sound right"* and *"At the very least, we cannot
+serve conflicts."* The blocks are deleted, not filtered at delivery. **Work:**
+- Delete those five keys from every PASM2 instruction YAML file. Keep the `compiler_*` keys that are
+  prose about the compiler (`compiler_note`, `compiler_portability`, `compiler_behavior` and the nested
+  ones in `pasm-labels.yaml`, `preprocessor-overview.yaml`, `asm_integration_analysis.yaml`). Those are
+  read and certified like any other claim when their file is touched.
+- The cut is done by one script. An audit then proves each file lost exactly those keys' lines and
+  nothing else.
+- 176 of the 358 files are already certified. They are re-checked by that diff audit. The other 182 are
+  certified whole under §16 and added to the certify list. The class defects found in them are fixed in
+  the same pass: pair text in single-instruction files ("or input" in `dirh.yaml`'s oneliner), and the
+  dispatch-lessons list.
+- `gen-pasm2-encoding-reference.py` takes its operand column from `syntax:` and drops its
+  `compiler_category` fallback.
+- `update-p2-reference-complete.py`'s `operand_format` copy is removed.
+- The p2kb-mcp cert-bundle fixtures follow the served content.
+
+**Verify.** Normal: `grep -rlE '^compiler_(operand_format|encoding|syntax|category|effects):'` over
+`deliverables/ai/P2/` gives 0, and the certification gate passes over the larger change set. Edge: the
+diff audit shows no file losing any line outside those keys. The prose `compiler_*` keys are unchanged.
+Error: the generator runs clean and its operand column matches `syntax:`, and `validate-dod-release.py`
+fails only on the expected orphan until «#467».
+
 **Rule for each row.** Re-find it by content: the agents' YAML line numbers can be wrong. Confirm it at
 the SD line and the YAML line. Then fix it, or state it as not documented. A row that does not hold is
 recorded in the range file as refuted, with the reason.
