@@ -1,0 +1,1326 @@
+'' ===========================================================================
+''
+''   File.......  test-contract-gaps-p1-instruction-flow.spin2
+''   Purpose....  Eight instruction-flow questions, arms A to H, each with
+''                controls that must come out both ways.  No pins are used.
+''   Manual.....  P2 Knowledge Base
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Nov 2026
+''   Updated....  Nov 2026
+''
+'' ===========================================================================
+
+{ RIG
+  Bare P2 board, 200 MHz, NOTHING attached.  No pins are touched.
+  Build pnut-ts -d.  Cog 0 supervises and prints; no other cog has the
+  debugger.  Every step runs in a fresh worker cog that writes its record to
+  hub and DONE last; the supervisor stops a worker that has not finished in
+  STEP_MS and reports that step as hung.  Results print before verdicts, and
+  every reading not named below is printed raw as OTHER or NO READING.
+
+ARM A  Does a far CALLD PA,#label in hub land on its label?
+  The compiler encodes this word with the distance in instructions (-1006).
+  A byte reading of that field lands 1006 bytes back, inside a sled whose
+  every long, and every 2-byte offset of it, is CALL #\HANDLER; the handler
+  reports the address it was called from.
+    Control      a far CALL to a label 1005 instructions back lands on it.
+    Word 1       the compiler's CALLD.  LABEL, or the sled at the byte reading.
+    Word 2       a hand-encoded CALLD whose field is the byte distance (-64).
+                 LABEL under a byte reading; under an instruction reading it
+                 lands 256 bytes back, in a second sled.
+    Premises     each word's form and field are checked against its label's
+                 distance (the control as a byte count, word 1 in
+                 instructions, word 2 in bytes); the handler is still in place.
+  BYTES needs word 1 in the sled at its byte reading and word 2 on its label;
+  INSTRUCTIONS needs the reverse.  The two words differ, so they cannot both
+  land on a label.
+
+ARM B  Does a backward DJNZ x,##label land correctly in cog and in hub?
+  The compiler emits AUGS + DJNZ with an 18-bit count (-303), the same words
+  in cog and hub.  The cog case added as a positive offset lands in hub at
+  PC + $3FED1; a hub sled there reports the address.  The cog's LUT is filled
+  with CALL #\lutsled so a landing in LUT reports too.
+    Controls     a forward ## DJNZ and a near 9-bit DJNZ, in cog and in hub,
+                 each must land (loop counts exact).
+    Readings     LABEL (two passes of the loop, x = 0, and none of the three
+                 ADDs just before the label ran), or the hub sled at the
+                 predicted address, or another reported address.
+    Premises     the cog and hub words both hold the 18-bit instruction
+                 count; the handler is still in place.
+
+ARM C  Does a pending SETQ survive an instruction cancelled by a false
+  condition, or by SKIP?  Four registers are filled with a sentinel and a
+  plain RDLONG follows.  4 changed = SURVIVES, 1 changed = CONSUMED.
+    Controls     adjacent SETQ #3 / RDLONG reads 4; plain RDLONG reads 1.
+    Premise      the cancelled MOV writes x; x is cleared first and must
+                 still be 0, else that case is a RIG FAIL.
+
+ARM D  The same for AUGS and AUGD.  y = $0246_8BFF augmented, $1FF not.
+    Controls     no cancelled instruction gives the augmented value; no
+                 AUGS / AUGD gives $1FF.
+    Premise      the cancelled MOV's x, and the LUT long the cancelled WRLUT
+                 writes, are cleared first and must still be 0.
+
+ARM E  Do CALLA/RETA, CALLB/RETB and CALLD/JMP PA suspend a skip pattern?
+  SKIP #%101 before the call: bit 0 cancels an ADD to a marker, bit 1 is the
+  call.  The subroutine adds 16 and 32, the code after the call adds 1, 2,
+  4, 8.  The marker must still be 0 (the pattern was in force at the call),
+  else RIG FAIL.  After the last ADD, GETBRK D WC gives the CALL depth since
+  SKIP in D[31:28] (P2 Documentation, GETBRK); 0 means skipping has resumed.
+    sub 48, main 15, depth > 0   SUSPENDED, the return did not resume the
+                                 pattern (depth printed)
+  A control with a non-zero depth is RIG FAIL.  Depth %1111 (the preset: the
+  GETBRK did not run) is NO READING, and so is a non-zero depth beside a
+  48,14 or 32,15 sum, which is not a consistent state.
+    sub 48, main 14   SUSPENDED and resumed after the return
+    sub 32, main 15   NOT SUSPENDED: the subroutine consumed the pattern
+    sub 48, main 15   PATTERN ENDED at the call
+    Controls     CALL/RET reads 48, 14 (the P2 Documentation's rule for
+                 CALL); the same instructions inline, with no call, read
+                 32, 15.
+
+ARM F  Does ALTD / ALTS / ALTR apply past an instruction SKIP cancels?
+  The instruction between the ALT and its target is ADD mark,#1, executed in
+  one control and skipped in the case under test.
+    Controls     no instruction between: the ALT applies to the target; an
+                 executed ADD between: the ADD takes the ALT (its own
+                 signature: base[idx] + 1, mark = base+idx, or base[idx] = 1).
+    Premise      in the skip case mark must be 0 and the ADD's signature
+                 absent, else RIG FAIL.
+    Readings     APPLIES (base+idx changed, or x reads base+idx) or NOT
+                 (x changed, or x reads y).
+
+ARM G  Does a _RET_ SETQ2 #$A5 at the end of a bytecode routine leave Q for
+  the next routine?  The next routine's first instruction is MUXQ.
+    Controls     adjacent SETQ / MUXQ reads $A5; a QDIV with no SETQ before
+                 it leaves Q at 0.
+    Premises     bytecode 0's and bytecode 1's routines each set a marker;
+                 bytecode 0 clears the value read, and MUXQ of that 0 with
+                 all ones gives exactly Q.
+    Readings     $A5 LEFT, the table long XBYTE read, 0, or OTHER.
+
+ARM H  Does TRGINT1 branch while STALLI is active?  The ISR counts.
+    Controls     no trigger counts 0; TRGINT1 with ALLOWI counts 1.
+    Premise      GETBRK D WCZ: D[1] is 0 in the ALLOWI control and 1 just
+                 after STALLI and TRGINT1 (P2 Documentation, GETBRK).
+    Readings     (before ALLOWI, after) = (0,1) HELD, (1,1) BRANCHED,
+                 (0,0) LOST.
+
+NOT MEASURED
+  SKIPF, hub execution of arms C to H, other CALLD registers, other XBYTE
+  modes, INT2 and INT3.  One part, N = 1.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq        = 200_000_000
+  DEBUG_COGS      = %0000_0001
+
+  REC_N           = 32
+  R_DONE          = 0                   ' the worker writes DONE_V here last
+  R_MODE          = 1                   ' which step the worker runs
+  R_P1            = 2                   ' a hub address the step needs
+  R_V             = 3                   ' first result long
+  DONE_V          = $0D0E_0D0E
+  SENT            = $5E5E_5E5E          ' "not written"
+  STEP_MS         = 50
+  STACK_ROOM      = 8_192               ' room kept above the program for the Spin2 stack
+
+  HANDLER         = $0_FDA0             ' hub address every sled long calls
+  SLED_W          = $FDA0_FDA0          ' CALL #\$0FDA0, the same word at a 2-byte offset
+  SLEDB_LO        = $3_F000             ' hub sled for the cog-case landing of arm B
+  SLEDB_LONGS     = 5_120               ' $3F000..$43FFF
+
+  MK_LAND_C       = 1                   ' landing markers
+  MK_LAND_D       = 2
+  MK_LAND_H       = 3
+  MK_SLED         = 4
+  MK_FELL         = 5
+  MK_LUT          = 6
+  MK_LABEL        = 7
+  MK_CTL          = 8
+
+  L_LABEL         = 1                   ' landing classes
+  L_PRED          = 2
+  L_ELSE          = 3
+  L_NONE          = 4
+
+  A_KIND          = R_V
+  A_ADDR          = R_V + 1
+  B_KIND          = R_V
+  B_ADDR          = R_V + 1
+  B_HY            = R_V + 2             ' hits, or y in the controls
+  B_XF            = R_V + 3             ' x, or the forward miss count
+  BR_NEAR         = R_V + 4             ' near-branch loop count
+  BR_SLOP         = R_V + 5             ' ADDs executed just before cogtop
+
+  AUGV            = ($12345 << 9) | $1FF
+  F_LS            = $0F0                ' LUT slots for arm D (an immediate LUT address stops at 255)
+  F_LS2           = $0F1
+
+  M_C             = 0                   ' worker steps of the flow image
+  M_D             = 1
+  M_E0            = 2
+  M_E1            = 3
+  M_E2            = 4
+  M_E3            = 5
+  M_E4            = 6
+  M_F             = 7
+  M_G             = 8
+  M_H             = 9
+
+  E_SUSP          = 1                   ' arm E readings
+  E_NOT           = 2
+  E_ENDED         = 3
+  E_OTHER         = 4
+  E_HUNG          = 5
+  E_NOPAT         = 6
+  E_DEEP          = 7
+  E_SUSPNR        = 8
+  E_NOGB          = 9
+
+  XV              = $777                ' arm F register values
+  YV              = $999
+  BV2             = $BA5E_0002
+
+VAR ' ---- Rig State ----
+  long  rec[REC_N]
+  long  estk[16]                        ' hub stack for CALLA and CALLB
+  long  eDep[5]                         ' arm E CALL depth after each form's return
+  long  guardEnd
+
+PUB main()
+'' Run arms A to H and print every reading and verdict.
+''
+
+  p0(string("=== test-contract-gaps-p1-instruction-flow ==="))
+  if @guardEnd + STACK_ROOM > HANDLER
+    p1(string("RIG FAIL: the program reaches the sled handler address"), @guardEnd)
+  else
+    arm_a()
+    arm_b()
+    arm_c()
+    arm_d()
+    arm_e()
+    arm_f()
+    arm_g()
+    arm_h()
+  p0(string("=== END ==="))
+  debug("DEBUG_END_SESSION")
+  repeat
+
+PRI launch(pImg, mode, p1v) : ok | cog, t0
+' Run one step in a fresh worker cog and wait for its DONE.
+'
+' @param pImg - hub address of the worker image
+' @param mode - the step number
+' @param p1v - a hub address the step needs
+' @returns ok - TRUE when the worker wrote DONE in time
+
+' Local Variables:
+' @local cog - the worker cog
+' @local t0 - CT at the launch
+
+  longfill(@rec, SENT, REC_N)
+  rec[R_DONE] := 0
+  rec[R_MODE] := mode
+  rec[R_P1] := p1v
+  cog := coginit(COGEXEC_NEW, pImg, @rec)
+  if cog < 0
+    p0(string("RIG FAIL: no free cog for a step"))
+    return FALSE
+  t0 := getct()
+  repeat until rec[R_DONE] == DONE_V
+    if getct() - t0 > clkfreq / 1000 * STEP_MS
+      cogstop(cog)
+      p1(string("STEP HUNG: no DONE within the step limit, mode"), mode)
+      return FALSE
+  cogstop(cog)
+  ok := TRUE
+
+PRI landing(ok, kind, retAddr, mkLabel, pred) : cls
+' Classify where a branch landed.
+'
+' @param ok - the step finished
+' @param kind - the marker the step wrote
+' @param retAddr - return address a sled pushed (landing + 4 in hub)
+' @param mkLabel - the marker of the label under test
+' @param pred - the address the other reading predicts
+' @returns cls - L_LABEL, L_PRED, L_ELSE or L_NONE
+
+  cls := L_NONE
+  if not ok
+    return
+  if kind == mkLabel
+    cls := L_LABEL
+  elseif kind == MK_SLED
+    cls := (retAddr - 4 == pred) ? L_PRED : L_ELSE
+  elseif kind == MK_LUT
+    cls := L_ELSE
+
+' ---------------------------------------------------------------- arm A
+
+PRI arm_a() | ok0, ok1, ok2, k0, k1, k2, r1, r2, w0, w1, w2, f1, f2, eb, ei, s1, s2
+' Far CALLD PA in hub: the compiler's word and a hand-encoded byte-offset word.
+'
+
+  long[HANDLER] := long[@a_handler]
+  w0 := long[@a_e0]
+  w1 := long[@a_e1]
+  w2 := long[@a_hand]
+  f1 := (w1 & $F_FFFF) signx 19
+  f2 := (w2 & $F_FFFF) signx 19
+  eb := @a_e1 + 4 + f1                  ' word 1 read as bytes
+  ei := @a_hand + 4 + f2 * 4            ' word 2 read as instructions
+  ok0 := launch(@a_entry, 0, @a_e0)
+  k0 := rec[A_KIND]
+  ok1 := launch(@a_entry, 1, @a_e1)
+  k1 := rec[A_KIND]
+  r1 := rec[A_ADDR]
+  ok2 := launch(@a_entry, 2, @a_hand)
+  k2 := rec[A_KIND]
+  r2 := rec[A_ADDR]
+  s1 := landing(ok1, k1, r1, MK_LAND_D, eb)
+  s2 := landing(ok2, k2, r2, MK_LAND_H, ei)
+  p3(string("A words: far CALL control, compiler CALLD, hand-encoded CALLD"), w0, w1, w2)
+  p2(string("A fields: compiler, hand"), f1, f2)
+  p2(string("A labels: compiler target, hand target"), @a_land_d, @a_land_h)
+  p2(string("A predicted landings: word 1 as bytes, word 2 as instructions"), eb, ei)
+  p2(string("A control far CALL: finished, marker"), ok0, k0)
+  p4(string("A word 1: finished, marker, sled return, class"), ok1, k1, r1, s1)
+  p4(string("A word 2: finished, marker, sled return, class"), ok2, k2, r2, s2)
+  if not ok0
+    pv(string("A"), string("NO READING, the far CALL control step hung"))
+  elseif (w0 >> 20) <> $FDB or ((w0 & $F_FFFF) signx 19) <> @a_land_c - (@a_e0 + 4)
+    pv(string("A"), string("RIG FAIL, the control is not a 20-bit relative CALL holding its label's byte distance"))
+  elseif long[HANDLER] <> long[@a_handler]
+    pv(string("A"), string("RIG FAIL, the sled handler was overwritten during the run"))
+  elseif k0 <> MK_LAND_C
+    pv(string("A"), string("RIG FAIL, the far CALL control did not land on its label"))
+  elseif (w1 >> 20) <> $FE1 or f1 * 4 <> @a_land_d - (@a_e1 + 4)
+    pv(string("A"), string("RIG FAIL, word 1 is not a 20-bit CALLD PA holding the label's distance in instructions"))
+  elseif (w2 >> 20) <> $FE1 or f2 <> @a_land_h - (@a_hand + 4)
+    pv(string("A"), string("RIG FAIL, word 2 is not a 20-bit CALLD PA holding the label's distance in bytes"))
+  elseif s1 == L_PRED and s2 == L_LABEL
+    pv(string("A"), string("BYTES, the CALLD field is a byte offset in hub: the compiler's word lands 1006 bytes back, not on its label"))
+  elseif s1 == L_LABEL and s2 == L_PRED
+    pv(string("A"), string("INSTRUCTIONS, the CALLD field counts instructions in hub: the compiler's word lands on its label"))
+  else
+    pv(string("A"), string("NO READING, the two words did not land as one reading predicts; see the raw lines"))
+
+' ---------------------------------------------------------------- arm B
+
+PRI arm_b() | okc, okh, ok1, ok3, cy, cf, cn, hy, hf, hn, k1, r1, h1, x1, sl1, k3, r3, h3, x3, f1, fh, pc1, ec, s1, s3, ctl
+' Backward DJNZ with a ## target in cog and in hub, with its controls.
+'
+
+  longfill(SLEDB_LO, SLED_W, SLEDB_LONGS)
+  long[HANDLER] := long[@b_handler]
+  f1 := ((long[@b_bk] & $7F_FFFF) << 9) | (long[@b_bk + 4] & $1FF)
+  fh := ((long[@b_hbk] & $7F_FFFF) << 9) | (long[@b_hbk + 4] & $1FF)
+  pc1 := (@b_bk + 8 - @b_entry) >> 2
+  ec := (pc1 + f1) & $F_FFFF            ' the cog case with the field added as-is
+
+  okc := launch(@b_entry, 0, 0)
+  cy := rec[B_HY]
+  cf := rec[B_XF]
+  cn := rec[BR_NEAR]
+  okh := launch(@b_entry, 2, @b_hctl)
+  hy := rec[B_HY]
+  hf := rec[B_XF]
+  hn := rec[BR_NEAR]
+  ok1 := launch(@b_entry, 1, 0)
+  k1 := rec[B_KIND]
+  r1 := rec[B_ADDR]
+  h1 := rec[B_HY]
+  x1 := rec[B_XF]
+  sl1 := rec[BR_SLOP]
+  ok3 := launch(@b_entry, 3, @b_hback)
+  k3 := rec[B_KIND]
+  r3 := rec[B_ADDR]
+  h3 := rec[B_HY]
+  x3 := rec[B_XF]
+  if k1 == MK_LABEL and (h1 <> 2 or x1 <> 0)
+    k1 := MK_FELL                       ' reached the end, but not by two passes
+  if k3 == MK_LABEL and (h3 <> 2 or x3 <> 0)
+    k3 := MK_FELL
+  s1 := landing(ok1, k1, r1, MK_LABEL, ec)
+  s3 := landing(ok3, k3, r3, MK_LABEL, -1)
+
+  p4(string("B cog words AUGS, DJNZ; hub words AUGS, DJNZ"), long[@b_bk], long[@b_bk + 4], long[@b_hbk], long[@b_hbk + 4])
+  p3(string("B cog field, hub field, predicted cog landing as-is"), f1, fh, ec)
+  p4(string("B cog controls: finished, y, forward misses, near count"), okc, cy, cf, cn)
+  p4(string("B hub controls: finished, y, forward misses, near count"), okh, hy, hf, hn)
+  p4(string("B cog backward: finished, marker, sled return, class"), ok1, k1, r1, s1)
+  p3(string("B cog backward: passes, x, slop (ADDs just before the label, must be 0)"), h1, x1, sl1)
+  p4(string("B hub backward: finished, marker, sled return, class"), ok3, k3, r3, s3)
+  p2(string("B hub backward: passes, x"), h3, x3)
+  ctl := cy == 1 and cf == 0 and cn == 2 and hy == 1 and hf == 0 and hn == 2
+  if not okc or not okh
+    pv(string("B"), string("NO READING, a control step hung"))
+  elseif not ctl
+    pv(string("B"), string("RIG FAIL, a forward ## or near DJNZ control did not land"))
+  elseif f1 <> ((cogtop_addr() - pc1) & $3_FFFF)
+    pv(string("B"), string("RIG FAIL, the cog word does not hold the 18-bit count this arm measures"))
+  elseif fh <> (((@hubtop - (@b_hbk + 8)) / 4) & $3_FFFF)
+    pv(string("B"), string("RIG FAIL, the hub word does not hold the 18-bit instruction count this arm measures"))
+  elseif long[HANDLER] <> long[@b_handler]
+    pv(string("B"), string("RIG FAIL, the sled handler was overwritten during the run"))
+  else
+    if s1 == L_LABEL and sl1 <> 0
+      pv(string("B cog"), string("MISSES, lands 1 to 3 longs before its label (slop count above)"))
+    elseif s1 == L_LABEL
+      pv(string("B cog"), string("LANDS ON ITS LABEL"))
+    elseif s1 == L_PRED
+      pv(string("B cog"), string("MISSES, lands in hub at PC plus the field taken as a positive offset (address above)"))
+    elseif s1 == L_ELSE and k1 == MK_LUT
+      pv(string("B cog"), string("MISSES, lands in LUT; the address is the sled return minus 1"))
+    elseif s1 == L_ELSE
+      pv(string("B cog"), string("MISSES, lands in the hub sled at another address; the address is the sled return minus 4"))
+    else
+      pv(string("B cog"), string("NO READING, no landing marker; see the raw lines"))
+    if s3 == L_LABEL
+      pv(string("B hub"), string("LANDS ON ITS LABEL"))
+    elseif s3 == L_ELSE
+      pv(string("B hub"), string("MISSES, lands in a sled; see the sled return above"))
+    else
+      pv(string("B hub"), string("NO READING, no landing marker; see the raw lines"))
+
+PRI cogtop_addr() : a
+' The cog address of the cog-case loop top.
+'
+' @returns a - cog address of cogtop
+
+  a := (@cogtop - @b_entry) >> 2
+
+' ---------------------------------------------------------------- arm C
+
+PRI c_count(i0) : n | i, v
+' How many of four registers a RDLONG changed: 4, 1, or -1 for any other shape.
+'
+' @param i0 - index of the first of the four record longs
+' @returns n - 4, 1 or -1
+
+' Local Variables:
+' @local i - register index
+' @local v - the value read back
+
+  n := 0
+  repeat i from 0 to 3
+    v := rec[i0 + i]
+    if v == long[@c_data][i]
+      n++
+    elseif v <> SENT
+      return -1
+  if n == 1 and rec[i0] <> long[@c_data][0]
+    n := -1
+  elseif n <> 1 and n <> 4
+    n := -1
+
+PRI arm_c() | ok, n0, n1, n2, n3, x2, x3, i
+' SETQ across a cancelled instruction.  Each cancelled MOV writes x if it
+' runs; x is cleared first and must still be 0.
+'
+
+  ok := launch(@f_entry, M_C, @c_data)
+  repeat i from 0 to 3
+    p4(string("C step registers r0..r3"), rec[R_V + i * 4], rec[R_V + i * 4 + 1], rec[R_V + i * 4 + 2], rec[R_V + i * 4 + 3])
+  n0 := c_count(R_V)
+  n1 := c_count(R_V + 4)
+  n2 := c_count(R_V + 8)
+  n3 := c_count(R_V + 12)
+  x2 := rec[R_V + 16]
+  x3 := rec[R_V + 17]
+  p4(string("C changed: adjacent, plain, false condition, SKIP"), n0, n1, n2, n3)
+  p2(string("C cancelled MOV's x, must be 0: false condition, SKIP"), x2, x3)
+  if not ok
+    pv(string("C"), string("NO READING, step hung"))
+  elseif n0 <> 4 or n1 <> 1
+    pv(string("C"), string("RIG FAIL, the adjacent SETQ did not read 4 or the plain RDLONG did not read 1"))
+  else
+    say_case(string("C false condition"), x2, n2 == 4, n2 == 1)
+    say_case(string("C SKIP"), x3, n3 == 4, n3 == 1)
+
+PRI say_case(pArm, foot, bSurv, bCons)
+' Print a SURVIVES / CONSUMED / OTHER verdict, or RIG FAIL when the
+' instruction meant to be cancelled left its footprint.
+'
+' @param pArm - the arm and step name
+' @param foot - what the cancelled instruction writes if it runs; 0 when cancelled
+' @param bSurv - the survived reading was seen
+' @param bCons - the consumed reading was seen
+
+  if foot <> 0
+    pv(pArm, string("RIG FAIL, the instruction meant to be cancelled executed (footprint above)"))
+  elseif bSurv
+    pv(pArm, string("SURVIVES, the pending prefix reached the next instruction"))
+  elseif bCons
+    pv(pArm, string("CONSUMED, the cancelled instruction took the pending prefix"))
+  else
+    pv(pArm, string("OTHER, see the raw lines"))
+
+' ---------------------------------------------------------------- arm D
+
+PRI arm_d() | ok
+' AUGS and AUGD across a cancelled instruction.
+'
+
+  ok := launch(@f_entry, M_D, 0)
+  p4(string("D AUGS y: control aug, control none, false condition, SKIP"), rec[R_V], rec[R_V + 1], rec[R_V + 2], rec[R_V + 3])
+  p4(string("D AUGD y: control aug, control none, false condition, SKIP"), rec[R_V + 4], rec[R_V + 5], rec[R_V + 6], rec[R_V + 7])
+  p4(string("D cancelled footprints, must be 0: AUGS x false, x SKIP; AUGD LUT false, LUT SKIP"), rec[R_V + 8], rec[R_V + 9], rec[R_V + 10], rec[R_V + 11])
+  if not ok
+    pv(string("D"), string("NO READING, step hung"))
+  elseif rec[R_V] <> AUGV or rec[R_V + 1] <> $1FF or rec[R_V + 4] <> AUGV or rec[R_V + 5] <> $1FF
+    pv(string("D"), string("RIG FAIL, a control did not read the augmented value and $1FF"))
+  else
+    say_case(string("D AUGS false condition"), rec[R_V + 8], rec[R_V + 2] == AUGV, rec[R_V + 2] == $1FF)
+    say_case(string("D AUGS SKIP"), rec[R_V + 9], rec[R_V + 3] == AUGV, rec[R_V + 3] == $1FF)
+    say_case(string("D AUGD false condition"), rec[R_V + 10], rec[R_V + 6] == AUGV, rec[R_V + 6] == $1FF)
+    say_case(string("D AUGD SKIP"), rec[R_V + 11], rec[R_V + 7] == AUGV, rec[R_V + 7] == $1FF)
+
+' ---------------------------------------------------------------- arm E
+
+PRI e_step(mode, pName) : cls | ok, sb, mn, fl, pr, dp
+' Run one call form under SKIP and classify it.
+'
+' @param mode - the worker step
+' @param pName - the form's name
+' @returns cls - E_SUSP, E_NOT, E_ENDED or E_OTHER
+
+' Local Variables:
+' @local ok - the step finished
+' @local sb - subroutine marker sum
+' @local mn - main marker sum
+' @local fl - 1 when the return fell through
+' @local pr - the bit-0 marker, 0 when the pattern was in force
+' @local dp - CALL depth since SKIP after the return, from GETBRK WC D[31:28]
+
+  ok := launch(@f_entry, mode, @estk)
+  sb := rec[R_V]
+  mn := rec[R_V + 1]
+  fl := rec[R_V + 2]
+  pr := rec[R_V + 3]
+  dp := (rec[R_V + 4] >> 28) & $F
+  eDep[mode - M_E0] := dp
+  p4(pName, ok, sb, mn, fl)
+  p1(string("  marker on pattern bit 0 (0 = the pattern was in force at the call)"), pr)
+  p3(string("  GETBRK WC after the return: D, CALL depth D[31:28] (0 = skipping resumed), C"), rec[R_V + 4], dp, rec[R_V + 5])
+  cls := E_OTHER
+  if not ok
+    cls := E_HUNG
+  elseif pr <> 0
+    cls := E_NOPAT
+  elseif fl == 0
+    if sb == 48 and mn == 14
+      cls := E_SUSP
+    elseif sb == 32 and mn == 15
+      cls := E_NOT
+    elseif sb == 48 and mn == 15
+      cls := E_ENDED
+    if cls <> E_OTHER and dp == $F
+      cls := E_NOGB                     ' GETBRK never ran: the preset depth is still there
+    elseif cls == E_ENDED and dp <> 0
+      cls := E_SUSPNR                   ' full sub sum and a raised depth: suspended, not resumed
+    elseif cls <> E_OTHER and dp <> 0
+      cls := E_DEEP                     ' a raised depth beside 48,14 or 32,15 is not a consistent state
+
+PRI arm_e() | c0, c1, ca, cb, cd
+' Call forms under a skip pattern.
+'
+
+  c0 := e_step(M_E0, string("E CALL/RET control: finished, sub sum, main sum, fell through"))
+  c1 := e_step(M_E1, string("E inline control: finished, sub sum, main sum, fell through"))
+  ca := e_step(M_E2, string("E CALLA/RETA: finished, sub sum, main sum, fell through"))
+  cb := e_step(M_E3, string("E CALLB/RETB: finished, sub sum, main sum, fell through"))
+  cd := e_step(M_E4, string("E CALLD/JMP PA: finished, sub sum, main sum, fell through"))
+  if c0 == E_HUNG or c1 == E_HUNG
+    pv(string("E"), string("NO READING, a control step hung"))
+  elseif c0 == E_NOGB or c1 == E_NOGB
+    pv(string("E"), string("NO READING, a control's GETBRK did not run"))
+  elseif c0 == E_DEEP or c1 == E_DEEP or c0 == E_SUSPNR or c1 == E_SUSPNR
+    pv(string("E"), string("RIG FAIL, a control's CALL depth was not 0 after its return"))
+  elseif c0 <> E_SUSP or c1 <> E_NOT
+    pv(string("E"), string("RIG FAIL, CALL did not read 48,14 or the inline control did not read 32,15"))
+  else
+    say_e(string("E CALLA/RETA"), ca, eDep[M_E2 - M_E0])
+    say_e(string("E CALLB/RETB"), cb, eDep[M_E3 - M_E0])
+    say_e(string("E CALLD/JMP PA"), cd, eDep[M_E4 - M_E0])
+
+PRI say_e(pArm, cls, dp)
+' Print an arm E verdict.
+'
+' @param pArm - the call form
+' @param cls - its class
+' @param dp - its CALL depth after the return
+
+  case cls
+    E_SUSPNR: pvv(pArm, string("SUSPENDED, the return did not resume the pattern (depth)"), dp)
+    E_DEEP:  pvv(pArm, string("NO READING, a raised CALL depth beside a 48,14 or 32,15 sum is not a consistent state (depth)"), dp)
+    E_NOGB:  pv(pArm, string("NO READING, the GETBRK after the return did not run"))
+    E_SUSP:  pv(pArm, string("SUSPENDED, the subroutine ran whole and the pattern resumed after the return"))
+    E_NOT:   pv(pArm, string("NOT SUSPENDED, the subroutine's instructions consumed the pattern"))
+    E_ENDED: pv(pArm, string("PATTERN ENDED, the subroutine ran whole and nothing after the return was skipped"))
+    E_HUNG:  pv(pArm, string("NO READING, step hung"))
+    E_NOPAT: pv(pArm, string("RIG FAIL, the skip pattern was not in force at the call"))
+    other:   pv(pArm, string("OTHER, see the raw lines"))
+
+' ---------------------------------------------------------------- arm F
+
+PRI f_cls(kind, b2, x, mark) : cls | a2
+' Classify one ALT step: 1 applies to the final instruction, 2 does not,
+' 3 the in-between ADD f_mark,#1 ran and took the ALT, 0 other.
+'
+' @param kind - 0 ALTD, 1 ALTS, 2 ALTR
+' @param b2 - base[idx] after the step
+' @param x - x after the step
+' @param mark - f_mark after the step (cleared to 0 first)
+' @returns cls - 0..3
+
+' Local Variables:
+' @local a2 - cog address of base[idx], what ALTS puts in the ADD's S field
+
+  a2 := (@f_b2 - @f_entry) >> 2
+  cls := 0
+  case kind
+    0:
+      if b2 == 7 and x == XV and mark == 0
+        cls := 1
+      elseif b2 == BV2 and x == 7 and mark == 0
+        cls := 2
+      elseif b2 == BV2 + 1 and x == 7 and mark == 0
+        cls := 3
+    1:
+      if b2 == BV2 and x == BV2 and mark == 0
+        cls := 1
+      elseif b2 == BV2 and x == YV and mark == 0
+        cls := 2
+      elseif b2 == BV2 and x == YV and mark == a2
+        cls := 3
+    2:
+      if b2 == XV + 7 and x == XV and mark == 0
+        cls := 1
+      elseif b2 == BV2 and x == XV + 7 and mark == 0
+        cls := 2
+      elseif b2 == 1 and x == XV + 7 and mark == 0
+        cls := 3
+
+PRI arm_f() | ok, k, i, c0, c1, c2, pName
+' ALTD, ALTS and ALTR past a skipped instruction.  The instruction between
+' the ALT and its target is ADD f_mark,#1 in the control and in the skip
+' case, so whether it ran shows.
+'
+
+  ok := launch(@f_entry, M_F, 0)
+  repeat k from 0 to 2
+    i := R_V + k * 9
+    pName := lookupz(k: string("F ALTD"), string("F ALTS"), string("F ALTR"))
+    p0(pName)
+    p3(string("  base[idx], x, mark: nothing between"), rec[i], rec[i + 1], rec[i + 2])
+    p3(string("  base[idx], x, mark: ADD between, executed"), rec[i + 3], rec[i + 4], rec[i + 5])
+    p3(string("  base[idx], x, mark: ADD between, skipped"), rec[i + 6], rec[i + 7], rec[i + 8])
+    c0 := f_cls(k, rec[i], rec[i + 1], rec[i + 2])
+    c1 := f_cls(k, rec[i + 3], rec[i + 4], rec[i + 5])
+    c2 := f_cls(k, rec[i + 6], rec[i + 7], rec[i + 8])
+    p3(string("  classes (1 applies, 2 not, 3 the ADD took it, 0 other)"), c0, c1, c2)
+    if not ok
+      pv(pName, string("NO READING, step hung"))
+    elseif c0 <> 1 or c1 <> 3
+      pv(pName, string("RIG FAIL, the no-skip control did not apply or the executed ADD did not take the ALT"))
+    elseif c2 == 3 or rec[i + 8] <> 0
+      pv(pName, string("RIG FAIL, the instruction meant to be skipped executed"))
+    elseif c2 == 1
+      pv(pName, string("APPLIES past the skipped instruction"))
+    elseif c2 == 2
+      pv(pName, string("DOES NOT APPLY past the skipped instruction"))
+    else
+      pv(pName, string("OTHER, see the raw lines"))
+
+' ---------------------------------------------------------------- arm G
+
+PRI arm_g() | ok, q1, q2, lt, qx, seen, gran
+' Q across an XBYTE bytecode boundary after _RET_ SETQ2.
+'
+
+  ok := launch(@f_entry, M_G, @g_code)
+  q1 := rec[R_V]
+  q2 := rec[R_V + 1]
+  lt := rec[R_V + 2]
+  qx := rec[R_V + 3]
+  seen := rec[R_V + 4]
+  gran := rec[R_V + 5]
+  p4(string("G controls: adjacent MUXQ, after QDIV; table long; next routine MUXQ"), q1, q2, lt, qx)
+  p2(string("G routines ran: bytecode 0 (the _RET_ SETQ2), bytecode 1"), gran, seen)
+  if not ok
+    pv(string("G"), string("NO READING, step hung"))
+  elseif gran <> 1 or seen <> 1
+    pv(string("G"), string("RIG FAIL, bytecode 0's or bytecode 1's routine did not run"))
+  elseif q1 <> $A5 or q2 <> 0 or lt == $A5 or lt == 0 or lt == SENT
+    pv(string("G"), string("RIG FAIL, a Q control missed or the table long is not distinct"))
+  elseif qx == $A5
+    pv(string("G"), string("LEFT, the next bytecode's routine reads Q = $A5"))
+  elseif qx == lt
+    pv(string("G"), string("REPLACED, Q holds the table long XBYTE read for the next bytecode"))
+  elseif qx == 0
+    pv(string("G"), string("ZEROED, the next routine reads Q = 0"))
+  else
+    pv(string("G"), string("OTHER, see the raw line"))
+
+' ---------------------------------------------------------------- arm H
+
+PRI arm_h() | ok, n0, c0, cb, ca
+' TRGINT1 while STALLI is active.
+'
+
+  ok := launch(@f_entry, M_H, 0)
+  n0 := rec[R_V]
+  c0 := rec[R_V + 1]
+  cb := rec[R_V + 2]
+  ca := rec[R_V + 3]
+  p4(string("H ISR counts: no trigger, ALLOWI trigger, STALLI before ALLOWI, after"), n0, c0, cb, ca)
+  p2(string("H GETBRK status (bit 1 = STALLI mode): in the ALLOWI control, after STALLI and TRGINT1"), rec[R_V + 4], rec[R_V + 5])
+  if not ok
+    pv(string("H"), string("NO READING, step hung"))
+  elseif (rec[R_V + 4] & %10) <> 0 or (rec[R_V + 5] & %10) == 0
+    pv(string("H"), string("RIG FAIL, GETBRK did not show ALLOWI in the control and STALLI at the trigger"))
+  elseif n0 <> 0 or c0 <> 1
+    pv(string("H"), string("RIG FAIL, the ISR ran with no trigger or did not run on TRGINT1 with ALLOWI"))
+  elseif cb == 0 and ca == 1
+    pv(string("H"), string("HELD, TRGINT1 under STALLI branches only after ALLOWI"))
+  elseif cb == 1 and ca == 1
+    pv(string("H"), string("BRANCHED, TRGINT1 branches while STALLI is active"))
+  elseif cb == 0 and ca == 0
+    pv(string("H"), string("LOST, a TRGINT1 under STALLI never branches"))
+  else
+    pv(string("H"), string("OTHER, see the raw line"))
+
+' ---------------------------------------------------------------- printing
+
+PRI p0(pS)
+' Print a hub string.
+'
+' @param pS - the string
+
+  debug(zstr_(pS))
+
+PRI p1(pS, a)
+' Print a hub string and one value.
+'
+' @param pS - the string
+' @param a - the value
+
+  debug(zstr_(pS), " ", uhex_long_(a))
+
+PRI p2(pS, a, b)
+' Print a hub string and two values.
+'
+' @param pS - the string
+' @param a - first value
+' @param b - second value
+
+  debug(zstr_(pS), " ", uhex_long_(a), " ", uhex_long_(b))
+
+PRI p3(pS, a, b, c)
+' Print a hub string and three values.
+'
+' @param pS - the string
+' @param a - first value
+' @param b - second value
+' @param c - third value
+
+  debug(zstr_(pS), " ", uhex_long_(a), " ", uhex_long_(b), " ", uhex_long_(c))
+
+PRI p4(pS, a, b, c, d)
+' Print a hub string and four values.
+'
+' @param pS - the string
+' @param a - first value
+' @param b - second value
+' @param c - third value
+' @param d - fourth value
+
+  debug(zstr_(pS), " ", uhex_long_(a), " ", uhex_long_(b), " ", uhex_long_(c), " ", uhex_long_(d))
+
+PRI pv(pArm, pText)
+' Print one verdict line.
+'
+' @param pArm - the arm
+' @param pText - the verdict
+
+  debug("VERDICT ", zstr_(pArm), ": ", zstr_(pText))
+
+PRI pvv(pArm, pText, v)
+' Print one verdict line with its raw value.
+'
+' @param pArm - the arm
+' @param pText - the verdict
+' @param v - the raw value
+
+  debug("VERDICT ", zstr_(pArm), ": ", zstr_(pText), " ", uhex_long_(v))
+
+DAT ' ---- arm A worker: the cog side ----
+                alignl
+                org     0
+a_entry         rdlong  a_t, ptra[R_P1]
+                jmp     a_t                     ' into hub at the step's entry
+a_finish        wrlong  a_donev, ptra
+                jmp     #$
+a_sledhit       pop     a_t                     ' the sled's return address
+                and     a_t, a_m20
+                wrlong  a_t, ptra[A_ADDR]
+                wrlong  #MK_SLED, ptra[A_KIND]
+                jmp     #a_finish
+a_fell          wrlong  #MK_FELL, ptra[A_KIND]
+                jmp     #a_finish
+a_t             long    0
+a_donev         long    DONE_V
+a_m20           long    $F_FFFF
+
+' ---- arm A: the hub side ----
+                orgh
+                alignl
+a_sledh         long    SLED_W[64]              ' catches word 2 read as instructions
+a_land_h        wrlong  #MK_LAND_H, ptra[A_KIND]
+                jmp     #\a_finish
+                long    SLED_W[13]
+a_hand          long    $FE10_0000 | ((a_land_h - ($ + 4)) & $F_FFFF)  ' CALLD PA,#rel, field in bytes
+                jmp     #\a_fell
+a_land_c        wrlong  #MK_LAND_C, ptra[A_KIND]
+                ret
+a_land_d        wrlong  #MK_LAND_D, ptra[A_KIND]
+                jmp     #\a_finish
+a_gap           long    SLED_W[1001]            ' catches word 1 read as bytes
+a_e0            call    #a_land_c               ' control: far CALL
+                jmp     #\a_finish
+a_e1            calld   pa, #a_land_d           ' the compiler's far CALLD
+                jmp     #\a_fell
+a_handler       jmp     #\a_sledhit             ' copied to HANDLER at run time
+
+DAT ' ---- arm B worker: the cog side ----
+                alignl
+                org     0
+b_entry         jmp     #\b_setup               ' $000
+                add     b_slop, #1              ' a landing 1 to 3 longs early counts here
+                add     b_slop, #1
+                add     b_slop, #1
+cogtop          add     b_hits, #1              ' $004
+                long    0[300]
+b_bk            djnz    b_x, ##cogtop           ' backward, augmented, in cog
+                jmp     #\b_report
+b_hits          long    0
+b_y             long    0
+b_x             long    0                       ' $136
+b_setup         rdlong  b_mode, ptra[R_MODE]
+                rdlong  b_p1, ptra[R_P1]
+                mov     b_i, #0
+                rep     @.lf, ##512             ' a LUT landing calls b_lutsled
+                wrlut   b_lutw, b_i
+                add     b_i, #1
+.lf             cmp     b_mode, #0      wz
+        if_z    jmp     #b_m0
+                cmp     b_mode, #1      wz
+        if_z    jmp     #b_m1
+                jmp     b_p1                    ' modes 2 and 3 run in hub
+b_m0            mov     b_y, #2
+                mov     b_fm, #0
+                djnz    b_y, ##b_fwd            ' forward, augmented
+                add     b_fm, #1
+b_fwd           mov     b_z, #2
+                mov     b_nh, #0
+b_ntop          add     b_nh, #1
+                djnz    b_z, #b_ntop            ' near, 9-bit
+b_ctlout        wrlong  b_y, ptra[B_HY]
+                wrlong  b_fm, ptra[B_XF]
+                wrlong  b_nh, ptra[BR_NEAR]
+                wrlong  #MK_CTL, ptra[B_KIND]
+                jmp     #b_finish
+b_m1            mov     b_x, #2
+                mov     b_hits, #0
+                mov     b_slop, #0
+                jmp     #cogtop
+b_report        wrlong  b_hits, ptra[B_HY]
+                wrlong  b_x, ptra[B_XF]
+                wrlong  b_slop, ptra[BR_SLOP]
+                wrlong  #MK_LABEL, ptra[B_KIND]
+                jmp     #b_finish
+b_sledhit       pop     b_t
+                and     b_t, b_m20
+                wrlong  b_t, ptra[B_ADDR]
+                wrlong  b_hits, ptra[B_HY]
+                wrlong  b_x, ptra[B_XF]
+                wrlong  #MK_SLED, ptra[B_KIND]
+                jmp     #b_finish
+b_lutsled       pop     b_t
+                and     b_t, b_m20
+                wrlong  b_t, ptra[B_ADDR]
+                wrlong  b_hits, ptra[B_HY]
+                wrlong  b_x, ptra[B_XF]
+                wrlong  #MK_LUT, ptra[B_KIND]
+b_finish        wrlong  b_donev, ptra
+                jmp     #$
+b_lutw          call    #\b_lutsled             ' the LUT sled word
+b_mode          long    0
+b_slop          long    0
+b_p1            long    0
+b_i             long    0
+b_t             long    0
+b_fm            long    0
+b_z             long    0
+b_nh            long    0
+b_donev         long    DONE_V
+b_m20           long    $F_FFFF
+
+' ---- arm B: the hub side ----
+                orgh
+                alignl
+b_hctl          mov     b_y, #2
+                mov     b_fm, #0
+                djnz    b_y, ##b_hfwd           ' forward, augmented, in hub
+                add     b_fm, #1
+b_hfwd          mov     b_z, #2
+                mov     b_nh, #0
+b_hntop         add     b_nh, #1
+                djnz    b_z, #b_hntop           ' near, 9-bit, in hub
+                jmp     #\b_ctlout
+b_hback         mov     b_x, #2
+                mov     b_hits, #0
+hubtop          add     b_hits, #1
+                long    0[300]
+b_hbk           djnz    b_x, ##hubtop           ' backward, augmented, in hub
+                jmp     #\b_report
+b_handler       jmp     #\b_sledhit             ' copied to HANDLER at run time
+
+DAT ' ---- arms C to H worker ----
+                alignl
+                org     0
+f_entry         mov     f_rec, ptra
+                mov     f_wp, ptra
+                add     f_wp, #R_V * 4
+                rdlong  f_mode, ptra[R_MODE]
+                rdlong  f_p1, ptra[R_P1]
+                cmp     f_mode, #M_C    wz
+        if_z    jmp     #f_c
+                cmp     f_mode, #M_D    wz
+        if_z    jmp     #f_d
+                cmp     f_mode, #M_E0   wz
+        if_z    jmp     #f_e0
+                cmp     f_mode, #M_E1   wz
+        if_z    jmp     #f_e1
+                cmp     f_mode, #M_E2   wz
+        if_z    jmp     #f_e2
+                cmp     f_mode, #M_E3   wz
+        if_z    jmp     #f_e3
+                cmp     f_mode, #M_E4   wz
+        if_z    jmp     #f_e4
+                cmp     f_mode, #M_F    wz
+        if_z    jmp     #f_f
+                cmp     f_mode, #M_G    wz
+        if_z    jmp     #f_g
+                cmp     f_mode, #M_H    wz
+        if_z    jmp     #f_h
+                jmp     #f_done
+
+' arm C: four RDLONG shapes into f_r0..f_r3
+f_c             call    #f_cfill
+                setq    #3                      ' adjacent: reads 4
+                rdlong  f_r0, f_p1
+                call    #f_cput
+                call    #f_cfill
+                rdlong  f_r0, f_p1              ' plain: reads 1
+                call    #f_cput
+                call    #f_cfill
+                mov     f_x, #0                 ' x stays 0 unless the cancelled MOV runs
+                modc    _clr            wc
+                setq    #3
+        if_c    mov     f_x, #1                 ' cancelled by a false condition
+                rdlong  f_r0, f_p1
+                mov     f_fp0, f_x
+                call    #f_cput
+                call    #f_cfill
+                mov     f_x, #0
+                skip    #%10
+                setq    #3
+                mov     f_x, #2                 ' cancelled by SKIP
+                rdlong  f_r0, f_p1
+                mov     f_fp1, f_x
+                call    #f_cput
+                setq    #1                      ' the two footprints
+                wrlong  f_fp0, f_wp
+                jmp     #f_done
+
+f_cfill         mov     f_r0, f_sent
+                mov     f_r1, f_sent
+                mov     f_r2, f_sent
+        _ret_   mov     f_r3, f_sent
+
+f_cput          setq    #3
+                wrlong  f_r0, f_wp
+        _ret_   add     f_wp, #16
+
+' arm D: AUGS then AUGD
+f_d             augs    #$12345                 ' control: augmented
+                mov     f_y, #$1FF
+                call    #f_put1
+                mov     f_y, #$1FF              ' control: not augmented
+                call    #f_put1
+                mov     f_x, #0                 ' x stays 0 unless the cancelled MOV runs
+                modc    _clr            wc
+                augs    #$12345
+        if_c    mov     f_x, #3                 ' cancelled by a false condition
+                mov     f_y, #$1FF
+                mov     f_fp0, f_x
+                call    #f_put1
+                mov     f_x, #0
+                skip    #%10
+                augs    #$12345
+                mov     f_x, #3                 ' cancelled by SKIP
+                mov     f_y, #$1FF
+                mov     f_fp1, f_x
+                call    #f_put1
+                augd    #$12345                 ' control: augmented
+                wrlut   #$1FF, #F_LS
+                rdlut   f_y, #F_LS
+                call    #f_put1
+                wrlut   #$1FF, #F_LS            ' control: not augmented
+                rdlut   f_y, #F_LS
+                call    #f_put1
+                wrlut   #0, #F_LS2              ' LUT[F_LS2] stays 0 unless the cancelled WRLUT runs
+                modc    _clr            wc
+                augd    #$12345
+        if_c    wrlut   #3, #F_LS2              ' cancelled by a false condition
+                wrlut   #$1FF, #F_LS
+                rdlut   f_y, #F_LS
+                rdlut   f_fp2, #F_LS2
+                call    #f_put1
+                wrlut   #0, #F_LS2
+                skip    #%10
+                augd    #$12345
+                wrlut   #3, #F_LS2              ' cancelled by SKIP
+                wrlut   #$1FF, #F_LS
+                rdlut   f_y, #F_LS
+                rdlut   f_fp3, #F_LS2
+                call    #f_put1
+                setq    #3                      ' the four footprints
+                wrlong  f_fp0, f_wp
+                jmp     #f_done
+
+f_put1          wrlong  f_y, f_wp
+        _ret_   add     f_wp, #4
+
+' arm E: one call form per step.  Pattern %101: bit 0 cancels the ADD to
+' f_pre (which shows the pattern is in force), bit 1 runs the call, bit 2 is
+' the only other 1.  GETBRK WC after the last marker, where no model skips,
+' records the CALL depth since SKIP: 0 when skipping has resumed.
+f_e0            mov     f_sub, #0
+                mov     f_main, #0
+                mov     f_pre, #0
+                neg     f_dep, #1               ' depth reads %1111 unless GETBRK runs
+                skip    #%101
+                add     f_pre, #1
+                call    #\f_subc
+                add     f_main, #1
+                add     f_main, #2
+                add     f_main, #4
+                add     f_main, #8
+                getbrk  f_dep           wc      ' D[31:28] = CALL depth since SKIP; C = next pattern bit
+                wrc     f_depc
+                jmp     #f_eout
+
+f_e1            mov     f_sub, #0
+                mov     f_main, #0
+                mov     f_pre, #0
+                neg     f_dep, #1               ' depth reads %1111 unless GETBRK runs
+                skip    #%101
+                add     f_pre, #1
+                nop                             ' where the call would be
+                add     f_sub, #16
+                add     f_sub, #32
+                nop                             ' where the return would be
+                add     f_main, #1
+                add     f_main, #2
+                add     f_main, #4
+                add     f_main, #8
+                getbrk  f_dep           wc      ' D[31:28] = CALL depth since SKIP; C = next pattern bit
+                wrc     f_depc
+                jmp     #f_eout
+
+f_e2            mov     f_sub, #0
+                mov     f_main, #0
+                mov     ptra, f_p1              ' hub stack
+                mov     f_pre, #0
+                neg     f_dep, #1               ' depth reads %1111 unless GETBRK runs
+                skip    #%101
+                add     f_pre, #1
+                calla   #\f_suba
+                add     f_main, #1
+                add     f_main, #2
+                add     f_main, #4
+                add     f_main, #8
+                getbrk  f_dep           wc      ' D[31:28] = CALL depth since SKIP; C = next pattern bit
+                wrc     f_depc
+                jmp     #f_eout
+
+f_e3            mov     f_sub, #0
+                mov     f_main, #0
+                mov     ptrb, f_p1              ' hub stack
+                mov     f_pre, #0
+                neg     f_dep, #1               ' depth reads %1111 unless GETBRK runs
+                skip    #%101
+                add     f_pre, #1
+                callb   #\f_subb
+                add     f_main, #1
+                add     f_main, #2
+                add     f_main, #4
+                add     f_main, #8
+                getbrk  f_dep           wc      ' D[31:28] = CALL depth since SKIP; C = next pattern bit
+                wrc     f_depc
+                jmp     #f_eout
+
+f_e4            mov     f_sub, #0
+                mov     f_main, #0
+                mov     f_pre, #0
+                neg     f_dep, #1               ' depth reads %1111 unless GETBRK runs
+                skip    #%101
+                add     f_pre, #1
+                calld   pa, #\f_subd
+                add     f_main, #1
+                add     f_main, #2
+                add     f_main, #4
+                add     f_main, #8
+                getbrk  f_dep           wc      ' D[31:28] = CALL depth since SKIP; C = next pattern bit
+                wrc     f_depc
+                jmp     #f_eout
+
+f_subc          add     f_sub, #16
+                add     f_sub, #32
+                ret
+                jmp     #f_efell
+f_suba          add     f_sub, #16
+                add     f_sub, #32
+                reta
+                jmp     #f_efell
+f_subb          add     f_sub, #16
+                add     f_sub, #32
+                retb
+                jmp     #f_efell
+f_subd          add     f_sub, #16
+                add     f_sub, #32
+                jmp     pa
+                jmp     #f_efell
+
+f_eout          mov     ptra, f_rec
+                wrlong  f_sub, ptra[R_V]
+                wrlong  f_main, ptra[R_V + 1]
+                wrlong  #0, ptra[R_V + 2]
+                wrlong  f_pre, ptra[R_V + 3]
+                wrlong  f_dep, ptra[R_V + 4]
+                wrlong  f_depc, ptra[R_V + 5]
+                jmp     #f_done
+f_efell         mov     ptra, f_rec
+                wrlong  f_sub, ptra[R_V]
+                wrlong  f_main, ptra[R_V + 1]
+                wrlong  #1, ptra[R_V + 2]
+                wrlong  f_pre, ptra[R_V + 3]
+                wrlong  f_dep, ptra[R_V + 4]
+                wrlong  f_depc, ptra[R_V + 5]
+                jmp     #f_done
+
+' arm F: base[idx] and x after each step
+f_f             call    #f_finit
+                altd    f_idx, #f_b0            ' ALTD, no skip
+                mov     f_x, #7
+                call    #f_fput
+                call    #f_finit
+                altd    f_idx, #f_b0            ' ALTD, an executed ADD between
+                add     f_mark, #1
+                mov     f_x, #7
+                call    #f_fput
+                call    #f_finit
+                skip    #%10
+                altd    f_idx, #f_b0            ' ALTD, a skipped ADD between
+                add     f_mark, #1
+                mov     f_x, #7
+                call    #f_fput
+
+                call    #f_finit
+                alts    f_idx, #f_b0            ' ALTS, no skip
+                mov     f_x, f_y
+                call    #f_fput
+                call    #f_finit
+                alts    f_idx, #f_b0            ' ALTS, an executed ADD between
+                add     f_mark, #1
+                mov     f_x, f_y
+                call    #f_fput
+                call    #f_finit
+                skip    #%10
+                alts    f_idx, #f_b0            ' ALTS, a skipped ADD between
+                add     f_mark, #1
+                mov     f_x, f_y
+                call    #f_fput
+
+                call    #f_finit
+                altr    f_idx, #f_b0            ' ALTR, no skip
+                add     f_x, #7
+                call    #f_fput
+                call    #f_finit
+                altr    f_idx, #f_b0            ' ALTR, an executed ADD between
+                add     f_mark, #1
+                add     f_x, #7
+                call    #f_fput
+                call    #f_finit
+                skip    #%10
+                altr    f_idx, #f_b0            ' ALTR, a skipped ADD between
+                add     f_mark, #1
+                add     f_x, #7
+                call    #f_fput
+                jmp     #f_done
+
+f_finit         mov     f_b0, f_bv0
+                mov     f_b1, f_bv1
+                mov     f_b2, f_bv2
+                mov     f_b3, f_bv3
+                mov     f_x, f_xv
+                mov     f_mark, #0
+        _ret_   mov     f_y, f_yv
+
+f_fput          wrlong  f_b2, f_wp
+                add     f_wp, #4
+                wrlong  f_x, f_wp
+                add     f_wp, #4
+                wrlong  f_mark, f_wp
+        _ret_   add     f_wp, #4
+
+' arm G: two Q controls, then three bytecodes under XBYTE
+f_g             mov     f_q1, #0
+                setq    #$A5
+                muxq    f_q1, f_ones            ' control: adjacent, reads $A5
+                wrlong  f_q1, f_wp
+                add     f_wp, #4
+                nop
+                nop
+                nop
+                nop
+                qdiv    f_n, f_dv               ' no SETQ before it
+                getqx   f_t
+                getqy   f_t
+                mov     f_q2, #0
+                muxq    f_q2, f_ones            ' control: reads 0
+                wrlong  f_q2, f_wp
+                add     f_wp, #4
+                wrlut   f_lset, #$080
+                wrlut   f_lread, #$081
+                wrlut   f_lhalt, #$082
+                wrlong  f_lread, f_wp           ' the table long for bytecode 1
+                add     f_wp, #4
+                mov     f_gseen, #0
+                rdfast  #0, f_p1
+                push    #$1FF
+        _ret_   setq    #$A4                    ' XBYTE: 7-bit index, table at LUT $080
+
+f_gset          mov     f_gran, #1              ' bytecode 0: this routine ran
+                mov     f_qx, #0
+        _ret_   setq2   #$A5                    ' next bytecode only: same mode with F set
+f_gread         muxq    f_qx, f_ones            ' bytecode 1: the routine's first instruction
+        _ret_   mov     f_gseen, #1
+f_ghalt         pop     f_t                     ' bytecode 2: leave XBYTE
+                wrlong  f_qx, f_wp
+                add     f_wp, #4
+                wrlong  f_gseen, f_wp
+                add     f_wp, #4
+                wrlong  f_gran, f_wp
+                jmp     #f_done
+
+' arm H: interrupt counts
+f_h             mov     ijmp1, #f_isr
+                setint1 #0
+                mov     f_ic, #0
+                long    0[16]                   ' no trigger
+                wrlong  f_ic, f_wp
+                add     f_wp, #4
+                mov     f_ic, #0
+                trgint1                         ' control: ALLOWI is in force
+                long    0[16]
+                getbrk  f_br0           wcz     ' D[1] = 0 in ALLOWI mode
+                wrlong  f_ic, f_wp
+                add     f_wp, #4
+                mov     f_ic, #0
+                stalli
+                trgint1
+                getbrk  f_br1           wcz     ' D[1] = 1 in STALLI mode
+                long    0[16]
+                mov     f_cb, f_ic
+                allowi
+                long    0[16]
+                mov     f_ca, f_ic
+                wrlong  f_cb, f_wp
+                add     f_wp, #4
+                wrlong  f_ca, f_wp
+                add     f_wp, #4
+                wrlong  f_br0, f_wp
+                add     f_wp, #4
+                wrlong  f_br1, f_wp
+                jmp     #f_done
+
+f_isr           add     f_ic, #1
+                reti1
+
+f_done          mov     ptra, f_rec
+                wrlong  f_donev, ptra
+                jmp     #$
+
+f_rec           long    0
+f_wp            long    0
+f_mode          long    0
+f_p1            long    0
+f_t             long    0
+f_x             long    0
+f_y             long    0
+f_r0            long    0                       ' f_r0..f_r3 are one block
+f_r1            long    0
+f_r2            long    0
+f_r3            long    0
+f_sent          long    SENT
+f_fp0           long    0                       ' f_fp0..f_fp3: footprints of cancelled instructions
+f_fp1           long    0
+f_fp2           long    0
+f_fp3           long    0
+f_mark          long    0
+f_pre           long    0
+f_dep           long    0
+f_depc          long    0
+f_gran          long    0
+f_br0           long    0
+f_br1           long    0
+f_sub           long    0
+f_main          long    0
+f_b0            long    0                       ' f_b0..f_b3 are base[0..3]
+f_b1            long    0
+f_b2            long    0
+f_b3            long    0
+f_idx           long    2
+f_bv0           long    $BA5E_0000
+f_bv1           long    $BA5E_0001
+f_bv2           long    BV2
+f_bv3           long    $BA5E_0003
+f_xv            long    XV
+f_yv            long    YV
+f_ones          long    $FFFF_FFFF
+f_q1            long    0
+f_q2            long    0
+f_qx            long    SENT                    ' none of $A5, 0 or the table long
+f_gseen         long    0
+f_n             long    1000
+f_dv            long    3
+f_lset          long    f_gset
+f_lread         long    f_gread
+f_lhalt         long    f_ghalt
+f_ic            long    0
+f_cb            long    0
+f_ca            long    0
+f_donev         long    DONE_V
+
+DAT ' ---- hub data ----
+                orgh
+                alignl
+c_data          long    $C0DE_0001, $C0DE_0002, $C0DE_0003, $C0DE_0004, $C0DE_0005
+g_code          byte    0, 1, 2, 2

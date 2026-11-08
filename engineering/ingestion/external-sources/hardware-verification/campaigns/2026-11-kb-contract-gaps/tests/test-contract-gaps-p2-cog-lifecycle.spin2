@@ -1,0 +1,1439 @@
+'' ===========================================================================
+''
+''   File.......  test-contract-gaps-p2-cog-lifecycle.spin2
+''   Purpose....  Seven cog-lifecycle and data questions, arms I to O, each
+''                with controls that must come out both ways.  Pins P0..P2.
+''   Manual.....  P2 Knowledge Base
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Nov 2026
+''   Updated....  Nov 2026
+''
+'' ===========================================================================
+
+{ RIG
+  Bare P2 board, 200 MHz, NOTHING attached.  Pins touched: P0..P2 only.
+  Build pnut-ts -d.  Cog 0 supervises and prints; no other cog has the
+  debugger.  Every step runs in a worker cog that writes its record to hub
+  and DONE last; the supervisor stops a worker that has not finished in its
+  limit and reports the step as hung.  Results print before verdicts.
+
+ARM I  What survives COGINIT of a running cog, of a stopped cog, and of
+  itself?  One image is both the reader and the dirtier.  The reader's first
+  instructions capture: a skip detector (eight ADDs), C, Z, PA, PB, Q (MUXQ),
+  a REP detector (an ADD at $010 inside a three-instruction block), DIRA,
+  OUTA, a LUT long, eight POPs, and the CT1 event over a 5 ms window.
+    Baseline     the reader started in cog 7, never used since boot.
+    Dirty        DIR %011, OUT %101 on P0..P2, C = Z = 1, eight pushes, PA,
+                 PB, Q, a LUT long, CT1 due 2 ms ahead.  Skip: a pattern with
+                 pending 1s held by a SKIP loop.  REP: a REP over $010..$012.
+    Scenarios    the dirty cog restarted by cog 0 while running; stopped by
+                 cog 0, then restarted; restarting itself.
+    Control      the dirtier jumps into its own reader with no COGINIT: every
+                 class must read dirty.  For REP the jump lands on the REP
+                 instruction, since a branch inside a REP block cancels it.
+  Each class reads SURVIVES (= dirty, not baseline), RESET (= baseline, not
+  dirty), INCONCLUSIVE (baseline = dirty) or OTHER.  PA and PB sit in the
+  loaded range $000..$1F7, so their baseline is the image's own longs.  The
+  stack compares all eight pops; CT1 compares a form: fired within 200 clocks
+  of the dirty target, never fired, set at the reader's start, or fired at
+  another time.  A stack SURVIVES cannot tell a surviving stack pointer from
+  surviving stack RAM, since the 8-deep stack wraps.
+    Premises     cog 0 restarts or stops a running dirty cog 100 us after it
+                 reports ready.  The skip loop carries a heartbeat and an ADD
+                 on a pending 1-bit: the heartbeat must be moving and the
+                 ADD's count still 0; the self-restart runs the same canary
+                 just before its COGINIT.  The REP block writes its count to
+                 hub on every pass (a REP of 1,000,000 passes, about 100 ms):
+                 the count must be moving, and the REP must not have run out
+                 first.  The self-restart's REP is five instructions that pass
+                 once with the COGINIT cancelled, so a second pass, which only
+                 the REP brings, writes 2 and runs the COGINIT; the last count
+                 must be 2.  A missing premise makes that scenario a RIG FAIL.
+
+ARM J  Is a cog's OUT gated by its own DIR?  P0, read three times.
+    Controls     cog 0 DIR 1 OUT 0 alone reads 0; a worker DIR 1 OUT 1 alone
+                 reads 1; a worker DIR 1 OUT 0 alone reads 0; cog 0 DIR 1
+                 OUT 1 alone reads 1.
+    Measure      cog 0 DIR 1 OUT 0 with a worker DIR 0 OUT 1; then swapped.
+                 1 = INDEPENDENT, 0 = GATED.
+
+ARM K  Which read retires a CORDIC result?  QMUL k,$FFFF_FFFF gives
+  X = -k, Y = k - 1, so each value names its k.  Two results queued (k 3, 5).
+    Controls     four GETQX after four QMULs read k 3, 5, 7, 9 in order;
+                 GETQY then GETQX twice reads Y3 X3 Y5 X5.
+    Measure      GETQX twice, GETQX then GETQY, GETQY twice: the second read
+                 names k 5 (RETIRED) or k 3 (NOT RETIRED).
+
+ARM L  What does QDIV return when the quotient exceeds 32 bits?
+    Controls     1000 / 3 = 333 r 1; {1,0} / 4 = $4000_0000 r 0; a divide by
+                 zero with {$1234_5678, 7} gives NOT $1234_5678 r 7.
+    Measure      {3,7} / 2 and {5,11} / 4: WRAP ($8000_0003, $4000_0002, the
+                 low 32 bits), SATURATE ($FFFF_FFFF), or OTHER; the remainder
+                 against the true remainder.
+    Premise      without its SETQ each divide would give 3 r 1 and 2 r 3;
+                 either quotient seen means the high long is not shown.
+
+ARM M  What does GETQX return with nothing pending, and in how many clocks?
+    Controls     a back-to-back GETCT pair reads its 2-clock overhead; a
+                 GETQX with a QMUL pending waits, returns the result and
+                 leaves the empty flag clear.
+    Measure      two empty reads, each after a different result: the value
+                 (STALE = the last result, ZERO, or OTHER) and the clocks;
+                 the empty flag must be set.
+
+ARM N  The unit of RDLUT / WRLUT PTRA indexes and updates.  LUT[i] =
+  $C0DE_0000 + i, PTRA = 8.
+    Controls     a plain RDLUT reads its long; RDLONG PTRA[2] and PTRA++ on a
+                 hub long array step by 4; RDBYTE on a byte array steps by 1.
+    Measure      RDLUT PTRA[2] index read; RDLUT PTRA++ index and delta;
+                 WRLUT PTRA++ index written and delta.  LONGS or TIMES 4.
+
+ARM O  CRCNIB's bit order.  CRC 0, polynomial $8C, nibbles %1000 and %1101.
+    Control      four CRCBITs fed Q[31] down and fed Q[28] up must differ.
+    Measure      CRCNIB equals the down order (Q[31] FIRST) or the up order.
+
+NOT MEASURED
+  COGINIT that starts without loading (D[5] = 1), PTRA/PTRB, events other
+  than CT1, the LUT beyond one long, interrupts; other CORDIC operations; LUT
+  PTRB and the -- forms.  One part, N = 1.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq        = 200_000_000
+  DEBUG_COGS      = %0000_0001
+
+  REC_N           = 32
+  R_DONE          = 0
+  R_MODE          = 1
+  R_P1            = 2
+  R_P2            = 3
+  R_V             = 4                   ' first result long
+  DONE_V          = $0D0E_0D0E
+  SENT            = $5E5E_5E5E
+  STEP_MS         = 50
+
+  ' ---- arm I ----
+  I_READY         = 4                   ' the dirtier sets this when its state is in place
+  I_TD            = 5                   ' the CT1 target the dirtier set
+  I_CAP           = 6                   ' first of the captured longs
+  I_NCAP          = 22
+  IR_BEAT          = 28                  ' the skip loop's heartbeat
+  IR_LEAK          = 29                  ' 0 while the skip pattern cancels its pending ADD
+  COG_BASE        = 7                   ' never used before arm I
+  COG_TEST        = 6
+  READY_MS        = 100
+  READ_MS         = 300
+  HOLD_US         = 100                 ' after READY, before cog 0 restarts or stops the cog
+  SC_RUN          = 0
+  SC_STOP         = 1
+  SC_SELF         = 2
+  SC_JMP          = 3
+  V_PAS           = 1                   ' dirty variants: passive state, skip, REP
+  V_SKIP          = 2
+  V_REP           = 3
+  K_CTL           = 10                  ' REP count of the plain-jump control
+  K_SELF          = 20                  ' REP count around the self COGINIT
+  K_BIG           = 1_000_000           ' REP count held while cog 0 restarts the cog
+  CT_DEL          = 400_000             ' CT1 target 2 ms ahead
+  CT_WIN          = 1_000_000           ' the reader watches CT1 for 5 ms
+  CT_TOL          = 200
+  I_LS            = $0F0                ' the LUT long
+  D_DIR           = %011
+  D_OUT           = %101
+  D_PA            = $DA00_00A1
+  D_PB            = $DA00_00B1
+  D_Q             = $DA00_0051
+  D_LUT           = $DA00_0071
+  D_STK           = $5A00_0000          ' pushes D_STK + 1 .. D_STK + 8
+  IMG_PA          = $1A6E_00A1          ' the image's longs at $1F6, $1F7
+  IMG_PB          = $1A6E_00B1
+  C_SKM           = 0                   ' capture indexes
+  C_CV            = 1
+  C_ZV            = 2
+  C_PA            = 3
+  C_PB            = 4
+  C_Q             = 5
+  C_RPC           = 6
+  C_DIR           = 7
+  C_OUT           = 8
+  C_LUT           = 9
+  C_ST0           = 10
+  C_CT0           = 18
+  C_CTFL          = 19
+  C_CTF           = 20
+  C_CTST          = 21
+
+  ' ---- arm J ----
+  J_PIN           = 0
+  J_READY         = R_V
+  J_STATE         = R_V + 1             ' the worker's DIR | OUT << 1, read back
+
+  ' ---- arms K to O ----
+  M_KX4           = 0
+  M_KYX           = 1
+  M_KXX           = 2
+  M_KXY           = 3
+  M_KYY           = 4
+  M_L             = 5
+  M_M             = 6
+  M_N             = 7
+  M_O             = 8
+  LUTBASE         = $C0DE_0000
+  N_MARK          = $3A4B_5C6D
+
+VAR ' ---- Rig State ----
+  long  rec[REC_N]
+  long  recD[REC_N]                     ' the dirtier's record
+  long  recR[REC_N]                     ' the reader's record
+  long  ib[I_NCAP]                      ' arm I baseline
+  long  ic[I_NCAP]                      ' arm I plain-jump control
+  long  irn[I_NCAP]                     ' arm I running
+  long  ist[I_NCAP]                     ' arm I stopped
+  long  isl[I_NCAP]                     ' arm I itself
+  long  tdc, tdr, tds, tdl              ' CT1 targets: control, running, stopped, itself
+  long  okc, okr, oks, okl              ' each scenario finished
+  long  dirtyDone                       ' the dirtier finished its own REP before the restart
+  long  skipHeld                        ' the skip pattern or REP was shown in place at the restart
+  long  hr, hs, hl                      ' skipHeld for running, stopped, itself
+  long  outR, outS                      ' dirtyDone for running, stopped
+
+PUB main()
+'' Run arms I to O and print every reading and verdict.
+''
+
+  p0(string("=== test-contract-gaps-p2-cog-lifecycle ==="))
+  arm_i()
+  arm_j()
+  arm_k()
+  arm_l()
+  arm_m()
+  arm_n()
+  arm_o()
+  p0(string("=== END ==="))
+  debug("DEBUG_END_SESSION")
+  repeat
+
+PRI launch(pImg, mode, p1v, p2v) : ok | cog, t0
+' Run one step in a fresh worker cog and wait for its DONE.
+'
+' @param pImg - hub address of the worker image
+' @param mode - the step number
+' @param p1v - first hub address the step needs
+' @param p2v - second hub address the step needs
+' @returns ok - TRUE when the worker wrote DONE in time
+
+' Local Variables:
+' @local cog - the worker cog
+' @local t0 - CT at the launch
+
+  longfill(@rec, SENT, REC_N)
+  rec[R_DONE] := 0
+  rec[R_MODE] := mode
+  rec[R_P1] := p1v
+  rec[R_P2] := p2v
+  cog := coginit(COGEXEC_NEW, pImg, @rec)
+  if cog < 0
+    p0(string("RIG FAIL: no free cog for a step"))
+    return FALSE
+  t0 := getct()
+  repeat until rec[R_DONE] == DONE_V
+    if getct() - t0 > clkfreq / 1000 * STEP_MS
+      cogstop(cog)
+      p1(string("STEP HUNG: no DONE within the step limit, mode"), mode)
+      return FALSE
+  cogstop(cog)
+  ok := TRUE
+
+PRI wait_for(pRec, idx, value, ms) : ok | t0
+' Wait until a record long holds a value.
+'
+' @param pRec - the record
+' @param idx - the long's index
+' @param value - the value to wait for
+' @param ms - the limit
+' @returns ok - TRUE when it arrived in time
+
+  t0 := getct()
+  repeat until long[pRec][idx] == value
+    if getct() - t0 > clkfreq / 1000 * ms
+      return FALSE
+  ok := TRUE
+
+' ---------------------------------------------------------------- arm I
+
+PRI i_prep(pRec, mode, p1v)
+' Fill a record and set its mode.
+'
+' @param pRec - the record
+' @param mode - 0 to read, or a dirty mode
+' @param p1v - the record the restarted reader writes
+
+  longfill(pRec, SENT, REC_N)
+  long[pRec][R_DONE] := 0
+  long[pRec][R_MODE] := mode
+  long[pRec][R_P1] := p1v
+  long[pRec][R_P2] := @i_r00
+  long[pRec][I_READY] := 0
+
+PRI i_scen(v, sc, pDst) : ok | b1, b2
+' Run one scenario of variant v and copy the reader's captures.  Sets
+' dirtyDone when the dirty cog finished its own REP before the restart, and
+' skipHeld when the skip pattern or the REP was shown in place at the restart.
+'
+' @param v - V_PAS, V_SKIP or V_REP
+' @param sc - SC_RUN, SC_STOP, SC_SELF or SC_JMP
+' @param pDst - where the captures go
+' @returns ok - TRUE when the reader reported in time
+
+' Local Variables:
+' @local b1 - the skip loop's heartbeat before the restart
+' @local b2 - the heartbeat 20 us later
+
+  dirtyDone := FALSE
+  skipHeld := TRUE
+  b1 := SENT
+  b2 := SENT
+  i_prep(@recR, 0, 0)
+  if sc == SC_SELF
+    i_prep(@recD, v * 4 + sc, @recR)
+  else
+    i_prep(@recD, v * 4 + sc, 0)
+  coginit(COG_TEST, @i_r00, @recD)
+  case sc
+    SC_JMP:
+      ok := wait_for(@recD, R_DONE, DONE_V, READY_MS + READ_MS)
+      longmove(pDst, @recD[I_CAP], I_NCAP)
+    SC_SELF:
+      ok := wait_for(@recR, R_DONE, DONE_V, READY_MS + READ_MS)
+      longmove(pDst, @recR[I_CAP], I_NCAP)
+      if v == V_SKIP
+        skipHeld := recD[IR_LEAK] == 0
+      elseif v == V_REP
+        skipHeld := recD[IR_BEAT] == 2  ' the second pass, which only REP brings, ran the COGINIT
+    other:
+      ok := wait_for(@recD, I_READY, 1, READY_MS)
+      if ok
+        waitus(HOLD_US)                 ' the dirty cog is inside its loop, REP or skip by now
+        if v == V_SKIP or v == V_REP
+          b1 := recD[IR_BEAT]
+          waitus(20)
+          b2 := recD[IR_BEAT]
+          skipHeld := b1 <> SENT and b2 <> b1
+          if v == V_SKIP
+            skipHeld := skipHeld and recD[IR_LEAK] == 0
+        if sc == SC_STOP
+          cogstop(COG_TEST)
+        coginit(COG_TEST, @i_r00, @recR)
+        ok := wait_for(@recR, R_DONE, DONE_V, READ_MS)
+        dirtyDone := recD[R_DONE] == DONE_V
+      longmove(pDst, @recR[I_CAP], I_NCAP)
+  if v == V_SKIP and sc <> SC_JMP
+    p3(string("I skip premise: heartbeat, 20 us later, leak (0 = pattern cancelling)"), b1, b2, recD[IR_LEAK])
+  if v == V_REP and sc <> SC_JMP
+    p3(string("I REP premise: count, 20 us later (moving), last count written (2 = the restart ran inside the REP, itself)"), b1, b2, recD[IR_BEAT])
+  cogstop(COG_TEST)
+  waitms(1)
+
+PRI i_raw(pName, pCap, td)
+' Print one scenario's captures.
+'
+' @param pName - the scenario
+' @param pCap - its captures
+' @param td - its CT1 target
+
+  p0(pName)
+  p4(string("  skip, C, Z, PA"), long[pCap][C_SKM], long[pCap][C_CV], long[pCap][C_ZV], long[pCap][C_PA])
+  p4(string("  PB, Q, REP count, DIR"), long[pCap][C_PB], long[pCap][C_Q], long[pCap][C_RPC], long[pCap][C_DIR])
+  p4(string("  OUT, LUT, CT1 flag at start, CT1 fired"), long[pCap][C_OUT], long[pCap][C_LUT], long[pCap][C_CT0], long[pCap][C_CTFL])
+  p4(string("  CT1 fired at, reader start, target, fired minus target"), long[pCap][C_CTF], long[pCap][C_CTST], td, long[pCap][C_CTF] - td)
+  p4(string("  pops 1..4"), long[pCap][C_ST0], long[pCap][C_ST0 + 1], long[pCap][C_ST0 + 2], long[pCap][C_ST0 + 3])
+  p4(string("  pops 5..8"), long[pCap][C_ST0 + 4], long[pCap][C_ST0 + 5], long[pCap][C_ST0 + 6], long[pCap][C_ST0 + 7])
+
+PRI stk_form(pCap) : f | i
+' The stack class of a capture: 1 the dirty pushes, 2 the baseline's pops, 0 other.
+'
+' @param pCap - the captures
+' @returns f - 1, 2 or 0
+
+  f := 1
+  repeat i from 0 to 7
+    if long[pCap][C_ST0 + i] <> D_STK + 8 - i
+      f := 0
+  if f == 0
+    f := 2
+    repeat i from 0 to 7
+      if long[pCap][C_ST0 + i] <> ib[C_ST0 + i]
+        f := 0
+
+PRI ct_form(pCap, td) : f
+' The CT1 class of a capture: 1 fired at the dirty target, 2 never fired,
+' 3 already set when the reader started, 0 fired at another time.
+'
+' @param pCap - the captures
+' @param td - the dirty target
+' @returns f - 0..3
+
+  if long[pCap][C_CT0] <> 0
+    f := 3
+  elseif long[pCap][C_CTFL] == 0
+    f := 2
+  elseif long[pCap][C_CTF] - td >= 0 and long[pCap][C_CTF] - td <= CT_TOL
+    f := 1
+  else
+    f := 0
+
+PRI i_judge(pScen, pCls, ok, val, bv, dv, ctlOk, pSurv)
+' Print one class's verdict for one scenario.
+'
+' @param pScen - the scenario name
+' @param pCls - the class name
+' @param ok - the scenario finished
+' @param val - its reading
+' @param bv - the baseline reading
+' @param dv - the dirty value for this scenario
+' @param ctlOk - the plain-jump control read this class dirty
+' @param pSurv - the SURVIVES text for this class
+
+  if not ctlOk
+    pv2(pScen, pCls, string("RIG FAIL, the reader did not see this class on a plain jump"), val)
+  elseif not ok
+    pv2(pScen, pCls, string("NO READING, the scenario hung"), val)
+  elseif bv == dv
+    pv2(pScen, pCls, string("INCONCLUSIVE, the baseline equals the dirty value"), val)
+  elseif val == dv
+    pv2(pScen, pCls, pSurv, val)
+  elseif val == bv
+    pv2(pScen, pCls, string("RESET to the never-used cog's value"), val)
+  else
+    pv2(pScen, pCls, string("OTHER, neither baseline nor dirty"), val)
+
+PRI i_passive(pScen, pCap, ok, td, dq)
+' Judge the ten passive classes for one scenario.
+'
+' @param pScen - the scenario name
+' @param pCap - its captures
+' @param ok - it finished
+' @param td - its CT1 target
+' @param dq - the dirty Q for this scenario
+
+  i_judge(pScen, string("DIR"), ok, long[pCap][C_DIR], ib[C_DIR], D_DIR, ic[C_DIR] == D_DIR, @sSurv)
+  i_judge(pScen, string("OUT"), ok, long[pCap][C_OUT], ib[C_OUT], D_OUT, ic[C_OUT] == D_OUT, @sSurv)
+  i_judge(pScen, string("C"), ok, long[pCap][C_CV], ib[C_CV], 1, ic[C_CV] == 1, @sSurv)
+  i_judge(pScen, string("Z"), ok, long[pCap][C_ZV], ib[C_ZV], 1, ic[C_ZV] == 1, @sSurv)
+  i_judge(pScen, string("stack"), ok, stk_form(pCap), stk_form(@ib), 1, stk_form(@ic) == 1, string("SURVIVES, the eight pops returned the dirty pushes; this cannot tell a surviving stack pointer from surviving stack RAM, since the 8-deep stack wraps"))
+  i_judge(pScen, string("PA"), ok, long[pCap][C_PA], ib[C_PA], D_PA, ic[C_PA] == D_PA, @sSurv)
+  i_judge(pScen, string("PB"), ok, long[pCap][C_PB], ib[C_PB], D_PB, ic[C_PB] == D_PB, @sSurv)
+  i_judge(pScen, string("Q"), ok, long[pCap][C_Q], ib[C_Q], dq, ic[C_Q] == D_Q, @sSurv)
+  i_judge(pScen, string("LUT"), ok, long[pCap][C_LUT], ib[C_LUT], D_LUT, ic[C_LUT] == D_LUT, @sSurv)
+  i_judge(pScen, string("CT target"), ok, ct_form(pCap, td), ct_form(@ib, 0), 1, ct_form(@ic, tdc) == 1, @sSurv)
+
+PRI arm_i() | okb
+' What a COGINIT leaves, for three restarts and three dirty variants.
+'
+
+  i_prep(@recR, 0, 0)
+  coginit(COG_BASE, @i_r00, @recR)
+  okb := wait_for(@recR, R_DONE, DONE_V, READ_MS)
+  cogstop(COG_BASE)
+  longmove(@ib, @recR[I_CAP], I_NCAP)
+  i_raw(string("I baseline, never-used cog"), @ib, 0)
+  p3(string("I image PA, PB; baseline finished"), IMG_PA, IMG_PB, okb)
+  if not okb
+    pv(string("I"), string("NO READING, the baseline reader hung"))
+    return
+
+  ' passive classes
+  okc := i_scen(V_PAS, SC_JMP, @ic)
+  tdc := recD[I_TD]
+  okr := i_scen(V_PAS, SC_RUN, @irn)
+  tdr := recD[I_TD]
+  oks := i_scen(V_PAS, SC_STOP, @ist)
+  tds := recD[I_TD]
+  okl := i_scen(V_PAS, SC_SELF, @isl)
+  tdl := recD[I_TD]
+  i_raw(string("I passive, plain jump (control)"), @ic, tdc)
+  i_raw(string("I passive, COGINIT of the running cog"), @irn, tdr)
+  i_raw(string("I passive, COGINIT of the stopped cog"), @ist, tds)
+  i_raw(string("I passive, COGINIT of itself"), @isl, tdl)
+  p4(string("I passive finished: control, running, stopped, itself"), okc, okr, oks, okl)
+  p2(string("I dirty Q: cog 0 restarts, itself (the SETQ before its own COGINIT)"), D_Q, @recR)
+  if not okc
+    pv(string("I passive"), string("NO READING, the plain-jump control hung"))
+  else
+    i_passive(string("I running"), @irn, okr, tdr, D_Q)
+    i_passive(string("I stopped"), @ist, oks, tds, D_Q)
+    i_passive(string("I itself"), @isl, okl, tdl, @recR)
+
+  ' skip pattern
+  okc := i_scen(V_SKIP, SC_JMP, @ic)
+  okr := i_scen(V_SKIP, SC_RUN, @irn)
+  hr := skipHeld
+  oks := i_scen(V_SKIP, SC_STOP, @ist)
+  hs := skipHeld
+  okl := i_scen(V_SKIP, SC_SELF, @isl)
+  hl := skipHeld
+  p4(string("I skip detector (255 = nothing skipped): control, running, stopped, itself"), ic[C_SKM], irn[C_SKM], ist[C_SKM], isl[C_SKM])
+  p4(string("I skip finished: control, running, stopped, itself"), okc, okr, oks, okl)
+  p3(string("I skip pattern shown in place at the restart: running, stopped, itself"), hr, hs, hl)
+  p1(string("I skip detector, baseline"), ib[C_SKM])
+  if not okc
+    pv(string("I skip"), string("NO READING, the plain-jump control hung"))
+  elseif ib[C_SKM] <> 255 or ic[C_SKM] >= 255
+    pv(string("I skip"), string("RIG FAIL, the baseline skipped something or the plain-jump control skipped nothing"))
+  else
+    i_skip(string("I running"), okr, hr, irn[C_SKM])
+    i_skip(string("I stopped"), oks, hs, ist[C_SKM])
+    i_skip(string("I itself"), okl, hl, isl[C_SKM])
+    p0(string("  (I itself, skip: the canary shows the pattern cancelling two instructions before the COGINIT; that its later 1-bits were still pending at the COGINIT follows from the pattern loaded, not from a measurement)"))
+
+  ' REP
+  okc := i_scen(V_REP, SC_JMP, @ic)
+  okr := i_scen(V_REP, SC_RUN, @irn)
+  outR := dirtyDone
+  hr := skipHeld
+  oks := i_scen(V_REP, SC_STOP, @ist)
+  outS := dirtyDone
+  hs := skipHeld
+  okl := i_scen(V_REP, SC_SELF, @isl)
+  hl := skipHeld
+  p4(string("I REP detector (1 = once): control, running, stopped, itself"), ic[C_RPC], irn[C_RPC], ist[C_RPC], isl[C_RPC])
+  p4(string("I REP finished: control, running, stopped, itself"), okc, okr, oks, okl)
+  p2(string("I REP ran out before the restart (must be 0): running, stopped"), outR, outS)
+  p3(string("I REP shown in place at the restart: running, stopped, itself"), hr, hs, hl)
+  p1(string("I REP detector, baseline"), ib[C_RPC])
+  if not okc
+    pv(string("I REP"), string("NO READING, the plain-jump control hung"))
+  elseif ib[C_RPC] <> 1 or ic[C_RPC] <> K_CTL
+    pv(string("I REP"), string("RIG FAIL, the baseline was not 1 or the REP control was not 10"))
+  else
+    i_rep(string("I running"), okr, outR or not hr, irn[C_RPC])
+    i_rep(string("I stopped"), oks, outS or not hs, ist[C_RPC])
+    i_rep(string("I itself"), okl, not hl, isl[C_RPC])
+
+PRI i_skip(pScen, ok, held, skm)
+' Print a skip-pattern verdict.
+'
+' @param pScen - the scenario
+' @param ok - it finished
+' @param held - the pattern was shown in place at the restart
+' @param skm - the skip detector
+
+  if not ok
+    pv2(pScen, string("skip"), string("NO READING, the scenario hung"), skm)
+  elseif not held
+    pv2(pScen, string("skip"), string("RIG FAIL, the skip pattern was not shown in place at the restart"), skm)
+  elseif skm == 255
+    pv2(pScen, string("skip"), string("RESET, nothing in the new program was skipped"), skm)
+  elseif skm >= 0 and skm < 255
+    pv2(pScen, string("skip"), string("SURVIVES, the new program's first instructions were skipped"), skm)
+  else
+    pv2(pScen, string("skip"), string("OTHER"), skm)
+
+PRI i_rep(pScen, ok, ranOut, rpc)
+' Print a REP verdict.
+'
+' @param pScen - the scenario
+' @param ok - it finished
+' @param ranOut - the REP was not shown in force at the restart
+' @param rpc - the REP detector
+
+  if not ok
+    pv2(pScen, string("REP"), string("NO READING, the scenario hung"), rpc)
+  elseif ranOut
+    pv2(pScen, string("REP"), string("RIG FAIL, the REP was not shown in force at the restart"), rpc)
+  elseif rpc == 1
+    pv2(pScen, string("REP"), string("RESET, the block ran once"), rpc)
+  elseif rpc > 1
+    pv2(pScen, string("REP"), string("SURVIVES, the new program repeated the old block"), rpc)
+  else
+    pv2(pScen, string("REP"), string("OTHER"), rpc)
+
+' ---------------------------------------------------------------- arm J
+
+PRI c0set(d, o) : st
+' Set cog 0's DIR and OUT bits for the test pin and read them back.
+'
+' @param d - DIR bit
+' @param o - OUT bit
+' @returns st - DIR | OUT << 1 as read from cog 0's own registers
+
+  org
+        testb   o, #0           wc
+        outc    #J_PIN
+        testb   d, #0           wc
+        dirc    #J_PIN
+        testb   dira, #J_PIN    wc
+        wrc     st
+        testb   outa, #J_PIN    wc
+        bitc    st, #1
+  end
+
+PRI j_step(d0, o0, dw, ow) : r | cog, a, b, c, s0, sw
+' Read the test pin three times with cog 0 and an optional worker set.
+'
+' @param d0 - cog 0 DIR
+' @param o0 - cog 0 OUT
+' @param dw - worker DIR, or -1 for no worker
+' @param ow - worker OUT
+' @returns r - the pin, -1 when the three reads differ, -2 when the worker did
+'   not start, -3 when a cog's DIR or OUT read back other than set
+
+  r := -2
+  c0set(0, 0)
+  cog := -1
+  if dw >= 0
+    longfill(@rec, SENT, REC_N)
+    rec[J_READY] := 0
+    rec[R_P1] := dw
+    rec[R_P2] := ow
+    cog := coginit(COGEXEC_NEW, @j_entry, @rec)
+    if cog < 0
+      return
+    if not wait_for(@rec, J_READY, 1, STEP_MS)
+      cogstop(cog)
+      return
+  r := -1
+  s0 := c0set(d0, o0)
+  waitus(100)
+  a := pinread(J_PIN)
+  waitus(100)
+  b := pinread(J_PIN)
+  waitus(100)
+  c := pinread(J_PIN)
+  sw := (cog >= 0) ? rec[J_STATE] : -1
+  if cog >= 0
+    cogstop(cog)
+  c0set(0, 0)
+  waitus(100)
+  if s0 <> (d0 | o0 << 1) or (cog >= 0 and sw <> (dw | ow << 1))
+    r := -3
+  elseif a == b and b == c
+    r := a
+
+PRI arm_j() | j1, j2, j3, j4, j5, j6
+' Whether a cog's OUT reaches the pin without its own DIR.
+'
+
+  pinclear(0 addpins 2)                 ' clear what arm I left on P0..P2
+  wrpin(J_PIN, 0)
+  j1 := j_step(1, 0, -1, 0)
+  j2 := j_step(0, 0, 1, 1)
+  j3 := j_step(1, 0, 0, 1)
+  j4 := j_step(0, 0, 1, 0)
+  j5 := j_step(1, 1, -1, 0)
+  j6 := j_step(0, 1, 1, 0)
+  pinclear(J_PIN)
+  p4(string("J controls: cog 0 drives 0, worker drives 1, worker drives 0, cog 0 drives 1"), j1, j2, j4, j5)
+  p2(string("J measure: worker OUT 1 under cog 0's DIR; cog 0 OUT 1 under the worker's DIR"), j3, j6)
+  if j2 == -2 or j4 == -2
+    pv(string("J"), string("NO READING, a control's worker did not start"))
+  elseif j1 == -3 or j2 == -3 or j4 == -3 or j5 == -3
+    pv(string("J"), string("RIG FAIL, a control cog's DIR or OUT read back other than set"))
+  elseif j1 <> 0 or j2 <> 1 or j4 <> 0 or j5 <> 1
+    pv(string("J"), string("RIG FAIL, a control did not read its level"))
+  else
+    j_say(string("J worker OUT, cog 0 DIR"), j3)
+    j_say(string("J cog 0 OUT, worker DIR"), j6)
+
+PRI j_say(pArm, r)
+' Print an arm J verdict.
+'
+' @param pArm - which way round
+' @param r - the pin
+
+  if r == 1
+    pv(pArm, string("INDEPENDENT, a cog's OUT reaches the pin while only another cog's DIR is high"))
+  elseif r == 0
+    pv(pArm, string("GATED, a cog's OUT does not reach the pin without its own DIR"))
+  elseif r == -2
+    pv(pArm, string("NO READING, step hung: the worker did not start"))
+  elseif r == -3
+    pv(pArm, string("RIG FAIL, a cog's DIR or OUT read back other than set"))
+  else
+    pv(pArm, string("OTHER, the three reads differed"))
+
+' ---------------------------------------------------------------- arm K
+
+PRI kx(k) : x
+' X of QMUL k,$FFFF_FFFF.
+'
+' @param k - the multiplier
+' @returns x - the low long, -k
+
+  x := -k
+
+PRI ky(k) : y
+' Y of QMUL k,$FFFF_FFFF.
+'
+' @param k - the multiplier
+' @returns y - the high long, k - 1
+
+  y := k - 1
+
+PRI arm_k() | ok0, ok1, ok2, ok3, ok4, ctl, a2, b2, a3, b3, a4, b4
+' Which read retires a CORDIC result.
+'
+
+  ok0 := launch(@k_entry, M_KX4, 0, 0)
+  p4(string("K control X stream: X X X X"), rec[R_V], rec[R_V + 1], rec[R_V + 2], rec[R_V + 3])
+  ctl := ok0 and rec[R_V] == kx(3) and rec[R_V + 1] == kx(5) and rec[R_V + 2] == kx(7) and rec[R_V + 3] == kx(9)
+  ok1 := launch(@k_entry, M_KYX, 0, 0)
+  p4(string("K control Y then X: Y X Y X"), rec[R_V], rec[R_V + 1], rec[R_V + 2], rec[R_V + 3])
+  ctl := ctl and ok1 and rec[R_V] == ky(3) and rec[R_V + 1] == kx(3) and rec[R_V + 2] == ky(5) and rec[R_V + 3] == kx(5)
+  ok2 := launch(@k_entry, M_KXX, 0, 0)
+  a2 := rec[R_V]
+  b2 := rec[R_V + 1]
+  ok3 := launch(@k_entry, M_KXY, 0, 0)
+  a3 := rec[R_V]
+  b3 := rec[R_V + 1]
+  ok4 := launch(@k_entry, M_KYY, 0, 0)
+  a4 := rec[R_V]
+  b4 := rec[R_V + 1]
+  p2(string("K GETQX, GETQX"), a2, b2)
+  p2(string("K GETQX, GETQY"), a3, b3)
+  p2(string("K GETQY, GETQY"), a4, b4)
+  p4(string("K finished: X X, X Y, Y Y, controls"), ok2, ok3, ok4, ctl)
+  if not ok0 or not ok1
+    pv(string("K"), string("NO READING, a control step hung"))
+    return
+  if not ctl
+    pv(string("K"), string("RIG FAIL, a control stream did not read its results in order"))
+    return
+  k_say(string("K GETQX then GETQX"), ok2, a2 == kx(3), b2 == kx(5), b2 == kx(3))
+  k_say(string("K GETQX then GETQY"), ok3, a3 == kx(3), b3 == ky(5), b3 == ky(3))
+  k_say(string("K GETQY then GETQY"), ok4, a4 == ky(3), b4 == ky(5), b4 == ky(3))
+
+PRI k_say(pArm, ok, bFirst, bNext, bSame)
+' Print an arm K verdict.
+'
+' @param pArm - the read pair
+' @param ok - the step finished
+' @param bFirst - the first read named result 1
+' @param bNext - the second read named result 2
+' @param bSame - the second read named result 1
+
+  if not ok
+    pv(pArm, string("NO READING, step hung"))
+  elseif not bFirst
+    pv(pArm, string("OTHER, the first read did not name result 1"))
+  elseif bNext
+    pv(pArm, string("RETIRED, the first read moved on to result 2"))
+  elseif bSame
+    pv(pArm, string("NOT RETIRED, the second read still names result 1"))
+  else
+    pv(pArm, string("OTHER, see the raw line"))
+
+' ---------------------------------------------------------------- arm L
+
+PRI arm_l() | ok
+' QDIV with a quotient over 32 bits.
+'
+
+  ok := launch(@k_entry, M_L, 0, 0)
+  p2(string("L control 1000/3: quotient, remainder"), rec[R_V], rec[R_V + 1])
+  p2(string("L control {1,0}/4"), rec[R_V + 2], rec[R_V + 3])
+  p2(string("L {3,7}/2: true $1_8000_0003 r 1"), rec[R_V + 4], rec[R_V + 5])
+  p2(string("L {5,11}/4: true $1_4000_0002 r 3"), rec[R_V + 6], rec[R_V + 7])
+  p2(string("L control {$1234_5678,7}/0"), rec[R_V + 8], rec[R_V + 9])
+  if not ok
+    pv(string("L"), string("NO READING, step hung"))
+    return
+  if rec[R_V] <> 333 or rec[R_V + 1] <> 1 or rec[R_V + 2] <> $4000_0000 or rec[R_V + 3] <> 0 or rec[R_V + 8] <> !$1234_5678 or rec[R_V + 9] <> 7
+    pv(string("L"), string("RIG FAIL, a control quotient or remainder missed"))
+    return
+  if rec[R_V + 4] == 3 or rec[R_V + 6] == 2
+    pv(string("L"), string("RIG FAIL, a quotient is the low long's alone, so the SETQ high long is not shown"))
+    return
+  if rec[R_V + 4] == $8000_0003 and rec[R_V + 6] == $4000_0002
+    pv(string("L quotient"), string("WRAP, both quotients are the low 32 bits of the true quotient"))
+  elseif rec[R_V + 4] == $FFFF_FFFF and rec[R_V + 6] == $FFFF_FFFF
+    pv(string("L quotient"), string("SATURATE, both quotients are $FFFF_FFFF"))
+  else
+    pv(string("L quotient"), string("OTHER, see the raw lines"))
+  if rec[R_V + 5] == 1 and rec[R_V + 7] == 3
+    pv(string("L remainder"), string("TRUE, both remainders are the true remainders"))
+  else
+    pv(string("L remainder"), string("OTHER, see the raw lines"))
+
+' ---------------------------------------------------------------- arm M
+
+PRI arm_m() | ok, ov, i, bTime, bStale, bZero
+' GETQX with nothing pending.  Each read leaves value, clocks, empty flag.
+'
+
+  ok := launch(@k_entry, M_M, 0, 0)
+  ov := rec[R_V]
+  p1(string("M GETCT pair overhead"), ov)
+  repeat i from 0 to 1
+    p3(string("M pending read: value, clocks, empty flag"), rec[R_V + 1 + i * 6], rec[R_V + 2 + i * 6] - ov, rec[R_V + 3 + i * 6])
+    p3(string("M empty read: value, clocks, empty flag"), rec[R_V + 4 + i * 6], rec[R_V + 5 + i * 6] - ov, rec[R_V + 6 + i * 6])
+  if not ok
+    pv(string("M"), string("NO READING, step hung"))
+    return
+  if ov <> 2 or rec[R_V + 1] <> kx(3) or rec[R_V + 7] <> kx(5) or rec[R_V + 2] - ov <= 2 or rec[R_V + 8] - ov <= 2 or rec[R_V + 3] <> 0 or rec[R_V + 9] <> 0
+    pv(string("M"), string("RIG FAIL, the overhead was not 2 or a pending read did not wait, name its result and leave the flag clear"))
+    return
+  if rec[R_V + 6] <> 1 or rec[R_V + 12] <> 1
+    pv(string("M"), string("RIG FAIL, an empty read did not set the empty flag, so nothing-pending is not shown"))
+    return
+  bStale := rec[R_V + 4] == kx(3) and rec[R_V + 10] == kx(5)
+  bZero := rec[R_V + 4] == 0 and rec[R_V + 10] == 0
+  bTime := rec[R_V + 5] - ov == 2 and rec[R_V + 11] - ov == 2
+  if bStale
+    pv(string("M value"), string("STALE, an empty GETQX returns the last result it read"))
+  elseif bZero
+    pv(string("M value"), string("ZERO, an empty GETQX returns 0"))
+  else
+    pv(string("M value"), string("OTHER, see the raw lines"))
+  if bTime
+    pv(string("M clocks"), string("2, an empty GETQX takes two clocks"))
+  else
+    pv(string("M clocks"), string("OTHER, see the raw lines"))
+
+' ---------------------------------------------------------------- arm N
+
+PRI arm_n() | ok, ctl, ui, ur, uw, vi, vr, dr, dw, iw
+' RDLUT / WRLUT with PTRA expressions.
+'
+
+  ok := launch(@k_entry, M_N, @n_hl, @n_hb)
+  p1(string("N control LUT[5]"), rec[R_V])
+  p3(string("N control hub long: PTRA[2], PTRA++ read, delta"), rec[R_V + 1], rec[R_V + 2], rec[R_V + 3])
+  p3(string("N control hub byte: PTRA[2], PTRA++ read, delta"), rec[R_V + 4], rec[R_V + 5], rec[R_V + 6])
+  vi := rec[R_V + 7] - LUTBASE
+  vr := rec[R_V + 8] - LUTBASE
+  dr := rec[R_V + 9]
+  dw := rec[R_V + 10]
+  iw := rec[R_V + 11]
+  p2(string("N RDLUT PTRA[2] with PTRA 8: value, index"), rec[R_V + 7], vi)
+  p3(string("N RDLUT PTRA++: value, index, delta"), rec[R_V + 8], vr, dr)
+  p2(string("N WRLUT PTRA++: index written, delta"), iw, dw)
+  if not ok
+    pv(string("N"), string("NO READING, step hung"))
+    return
+  ctl := rec[R_V] == LUTBASE + 5 and rec[R_V + 1] == $AB00_0002 and rec[R_V + 2] == $AB00_0000 and rec[R_V + 3] == 4
+  ctl := ctl and rec[R_V + 4] == $42 and rec[R_V + 5] == $40 and rec[R_V + 6] == 1
+  if not ctl
+    pv(string("N"), string("RIG FAIL, the LUT contents or a hub pointer control missed"))
+    return
+  ui := (vi == 10) ? 1 : ((vi == 16) ? 4 : 0)
+  ur := (vr == 8 and dr == 1) ? 1 : ((vr == 8 and dr == 4) ? 4 : 0)
+  uw := (iw == 8 and dw == 1) ? 1 : ((iw == 8 and dw == 4) ? 4 : 0)
+  n_say(string("N RDLUT PTRA[2]"), ui)
+  n_say(string("N RDLUT PTRA++"), ur)
+  n_say(string("N WRLUT PTRA++"), uw)
+  if ui == 1 and ur == 1 and uw == 1
+    pv(string("N"), string("LONGS, LUT pointer indexes and updates count LUT longs"))
+  elseif ui == 4 and ur == 4 and uw == 4
+    pv(string("N"), string("TIMES 4, LUT pointer indexes and updates step by four as RDLONG does"))
+  else
+    pv(string("N"), string("MIXED, see the lines above"))
+
+PRI n_say(pForm, u)
+' Print one arm N form's unit.
+'
+' @param pForm - the form
+' @param u - 1, 4 or 0
+
+  case u
+    1:     pv(pForm, string("LONGS"))
+    4:     pv(pForm, string("TIMES 4"))
+    other: pv(pForm, string("OTHER, see the raw line"))
+
+' ---------------------------------------------------------------- arm O
+
+PRI arm_o() | ok, i, nib, dn, up, bDiff, bDown, bUp
+' CRCNIB's bit order against four CRCBITs.
+'
+
+  ok := launch(@k_entry, M_O, 0, 0)
+  bDiff := TRUE
+  bDown := TRUE
+  bUp := TRUE
+  repeat i from 0 to 1
+    nib := rec[R_V + i * 3]
+    dn := rec[R_V + i * 3 + 1]
+    up := rec[R_V + i * 3 + 2]
+    p4(string("O data, CRCNIB, CRCBIT Q[31] down, CRCBIT Q[28] up"), lookupz(i: $8000_0000, $D000_0000), nib, dn, up)
+    if dn == up
+      bDiff := FALSE
+    if nib <> dn
+      bDown := FALSE
+    if nib <> up
+      bUp := FALSE
+  if not ok
+    pv(string("O"), string("NO READING, step hung"))
+  elseif not bDiff
+    pv(string("O"), string("RIG FAIL, the two CRCBIT orders did not differ"))
+  elseif bDown
+    pv(string("O"), string("Q[31] FIRST, CRCNIB takes Q[31] down to Q[28]"))
+  elseif bUp
+    pv(string("O"), string("Q[28] FIRST, CRCNIB takes Q[28] up to Q[31]"))
+  else
+    pv(string("O"), string("OTHER, see the raw lines"))
+
+' ---------------------------------------------------------------- printing
+
+PRI p0(pS)
+' Print a hub string.
+'
+' @param pS - the string
+
+  debug(zstr_(pS))
+
+PRI p1(pS, a)
+' Print a hub string and one value.
+'
+' @param pS - the string
+' @param a - the value
+
+  debug(zstr_(pS), " ", uhex_long_(a))
+
+PRI p2(pS, a, b)
+' Print a hub string and two values.
+'
+' @param pS - the string
+' @param a - first value
+' @param b - second value
+
+  debug(zstr_(pS), " ", uhex_long_(a), " ", uhex_long_(b))
+
+PRI p3(pS, a, b, c)
+' Print a hub string and three values.
+'
+' @param pS - the string
+' @param a - first value
+' @param b - second value
+' @param c - third value
+
+  debug(zstr_(pS), " ", uhex_long_(a), " ", uhex_long_(b), " ", uhex_long_(c))
+
+PRI p4(pS, a, b, c, d)
+' Print a hub string and four values.
+'
+' @param pS - the string
+' @param a - first value
+' @param b - second value
+' @param c - third value
+' @param d - fourth value
+
+  debug(zstr_(pS), " ", uhex_long_(a), " ", uhex_long_(b), " ", uhex_long_(c), " ", uhex_long_(d))
+
+PRI pv(pArm, pText)
+' Print one verdict line.
+'
+' @param pArm - the arm
+' @param pText - the verdict
+
+  debug("VERDICT ", zstr_(pArm), ": ", zstr_(pText))
+
+PRI pv2(pArm, pCls, pText, v)
+' Print one verdict line for a class, with its reading.
+'
+' @param pArm - the arm and scenario
+' @param pCls - the class
+' @param pText - the verdict
+' @param v - the reading
+
+  debug("VERDICT ", zstr_(pArm), " ", zstr_(pCls), ": ", zstr_(pText), " ", uhex_long_(v))
+
+DAT ' ---- arm I: one image is the reader and the dirtier ----
+                alignl
+                org     0
+i_r00           add     i_skm, #1               ' $000 skip detector
+                add     i_skm, #2
+                add     i_skm, #4
+                add     i_skm, #8
+                add     i_skm, #16
+                add     i_skm, #32
+                add     i_skm, #64
+                add     i_skm, #128             ' $007
+                wrc     i_cv
+                wrz     i_zv
+                mov     i_pav, pa
+                mov     i_pbv, pb
+                mov     i_qv, #0
+                muxq    i_qv, i_ones
+                nop
+i_repsite       nop                             ' $00F the dirtier writes a REP here
+i_repblk        add     i_rpc, #1               ' $010 REP detector
+                wrlong  i_rpc, ptra[IR_BEAT]    ' $011 a held REP shows a moving count
+                nop                             ' $012
+                mov     i_dirv, dira
+                mov     i_outv, outa
+                rdlut   i_lutv, #I_LS
+                pop     i_st0
+                pop     i_st1
+                pop     i_st2
+                pop     i_st3
+                pop     i_st4
+                pop     i_st5
+                pop     i_st6
+                pop     i_st7
+                pollct1                 wc      ' clears the flag; C = already fired
+                wrc     i_ct0
+                getct   i_ctst
+.w              pollct1                 wc
+        if_c    jmp     #.hit
+                getct   i_t
+                sub     i_t, i_ctst
+                cmp     i_t, i_win      wc
+        if_c    jmp     #.w
+                mov     i_ctfl, #0
+                mov     i_ctf, #0
+                jmp     #.chk
+.hit            getct   i_ctf
+                mov     i_ctfl, #1
+.chk            tjnz    i_entered, #i_report    ' a plain jump back in reports
+                mov     i_entered, #1
+                rdlong  i_mode, ptra[R_MODE]
+                tjz     i_mode, #i_report       ' mode 0: a reader
+                rdlong  i_rec2, ptra[R_P1]
+                rdlong  i_img, ptra[R_P2]
+                mov     i_var, i_mode
+                shr     i_var, #2
+                and     i_mode, #3
+                cmp     i_var, #V_PAS   wz
+        if_z    jmp     #i_dp
+                cmp     i_var, #V_SKIP  wz
+        if_z    jmp     #i_ds
+                jmp     #i_dr
+
+i_report        mov     i_p, ptra
+                add     i_p, #I_CAP * 4
+                setq    #I_NCAP - 1
+                wrlong  i_skm, i_p
+                wrlong  i_donev, ptra
+                mov     dira, #0
+                jmp     #$
+
+' passive dirty state
+i_dp            mov     outa, #D_OUT
+                mov     dira, #D_DIR
+                push    i_s1
+                push    i_s2
+                push    i_s3
+                push    i_s4
+                push    i_s5
+                push    i_s6
+                push    i_s7
+                push    i_s8
+                wrlut   i_lutd, #I_LS
+                mov     pa, i_pad
+                mov     pb, i_pbd
+                getct   i_t
+                addct1  i_t, i_ctdel
+                wrlong  i_t, ptra[I_TD]
+                cmp     i_mode, #SC_SELF    wz
+        if_z    jmp     #.self
+                cmp     i_mode, #SC_JMP     wz
+        if_z    jmp     #.jmp
+                setq    i_qd                    ' running or stopped: hold here
+                modcz   _set, _set      wcz
+                wrlong  #1, ptra[I_READY]
+                jmp     #$
+.self           modcz   _set, _set      wcz
+                wrlong  #1, ptra[I_READY]
+                cogid   i_id
+                setq    i_rec2
+                coginit i_id, i_img
+.jmp            mov     i_skm, #0
+                mov     i_rpc, #0
+                setq    i_qd
+                modcz   _set, _set      wcz
+                wrlong  #1, ptra[I_READY]
+                jmp     #\i_r00
+
+' skip pattern held while the COGINIT arrives
+i_ds            mov     i_skm, #0
+                cmp     i_mode, #SC_SELF    wz
+        if_z    jmp     #.self
+                cmp     i_mode, #SC_JMP     wz
+        if_z    jmp     #.jmp
+                wrlong  #1, ptra[I_READY]
+.loop           skip    i_spat                  ' bit 2 and bits 7..31 pending
+                add     i_beat, #1              ' bit 0: the loop is running
+                wrlong  i_beat, ptra[IR_BEAT]    ' bit 1
+                add     i_leak, #1              ' bit 2: runs only if the pattern is gone
+                wrlong  i_leak, ptra[IR_LEAK]    ' bit 3
+                jmp     #.loop                  ' bit 4
+                long    0[32]
+                jmp     #.loop
+.self           wrlong  #1, ptra[I_READY]
+                cogid   i_id
+                skip    i_spself                ' bit 0 and bits 4..31 pending
+                add     i_leak, #1              ' bit 0: runs only if the pattern is gone
+                wrlong  i_leak, ptra[IR_LEAK]    ' bit 1
+                setq    i_rec2                  ' bit 2
+                coginit i_id, i_img             ' bit 3
+.jmp            wrlong  #1, ptra[I_READY]
+                skip    i_spjmp                 ' the JMP runs, eight pending 1s
+                jmp     #\i_r00
+
+' REP held while the COGINIT arrives
+i_dr            mov     i_rpc, #0
+                cmp     i_mode, #SC_SELF    wz
+        if_z    jmp     #.self
+                mov     i_repsite, i_reptpl
+                cmp     i_mode, #SC_JMP     wz
+        if_z    mov     i_rcnt, #K_CTL
+        if_nz   mov     i_rcnt, i_rbig
+                wrlong  #1, ptra[I_READY]
+                jmp     #i_repsite
+.self           mov     i_repsite, i_rep5tpl    ' REP #5 over $010..$014
+                mov     i_repblk + 2, i_selft0  ' $012: CMP i_rpc,#2 WZ
+                mov     i_repblk + 3, i_selft1  ' $013: IF_Z SETQ
+                mov     i_repblk + 4, i_selft2  ' $014: IF_Z COGINIT
+                mov     i_rcnt, #K_SELF
+                cogid   i_id
+                wrlong  #1, ptra[I_READY]
+                jmp     #i_repsite              ' pass 1 writes 1; only REP brings pass 2, which writes 2 and restarts
+
+i_skm           long    0                       ' i_skm .. i_ctst: the captures, in order
+i_cv            long    0
+i_zv            long    0
+i_pav           long    0
+i_pbv           long    0
+i_qv            long    0
+i_rpc           long    0
+i_dirv          long    0
+i_outv          long    0
+i_lutv          long    0
+i_st0           long    0
+i_st1           long    0
+i_st2           long    0
+i_st3           long    0
+i_st4           long    0
+i_st5           long    0
+i_st6           long    0
+i_st7           long    0
+i_ct0           long    0
+i_ctfl          long    0
+i_ctf           long    0
+i_ctst          long    0
+i_entered       long    0
+i_mode          long    0
+i_var           long    0
+i_t             long    0
+i_p             long    0
+i_id            long    0
+i_rec2          long    0
+i_img           long    0
+i_rcnt          long    0
+i_ones          long    $FFFF_FFFF
+i_win           long    CT_WIN
+i_ctdel         long    CT_DEL
+i_s1            long    D_STK + 1
+i_s2            long    D_STK + 2
+i_s3            long    D_STK + 3
+i_s4            long    D_STK + 4
+i_s5            long    D_STK + 5
+i_s6            long    D_STK + 6
+i_s7            long    D_STK + 7
+i_s8            long    D_STK + 8
+i_lutd          long    D_LUT
+i_pad           long    D_PA
+i_pbd           long    D_PB
+i_qd            long    D_Q
+i_spat          long    $FFFF_FF84
+i_spself        long    $FFFF_FFF1
+i_beat          long    0
+i_leak          long    0
+i_spjmp         long    $0000_01FE
+i_rbig          long    K_BIG
+i_donev         long    DONE_V
+i_reptpl        rep     #3, i_rcnt              ' templates, written into $00F and $012..$014
+i_rep5tpl       rep     #5, i_rcnt
+i_selft0        cmp     i_rpc, #2       wz
+i_selft1 if_z   setq    i_rec2
+i_selft2 if_z   coginit i_id, i_img
+                long    0[$1F6 - $]
+                long    IMG_PA, IMG_PB          ' loaded into PA and PB
+
+DAT ' ---- arm J worker ----
+                alignl
+                org     0
+j_entry         rdlong  j_d, ptra[R_P1]
+                rdlong  j_o, ptra[R_P2]
+                testb   j_o, #0         wc
+                outc    #J_PIN
+                testb   j_d, #0         wc
+                dirc    #J_PIN
+                testb   dira, #J_PIN    wc      ' read back DIR | OUT << 1
+                wrc     j_s
+                testb   outa, #J_PIN    wc
+                bitc    j_s, #1
+                wrlong  j_s, ptra[J_STATE]
+                wrlong  #1, ptra[J_READY]
+                jmp     #$
+j_d             long    0
+j_o             long    0
+j_s             long    0
+
+DAT ' ---- arms K to O worker ----
+                alignl
+                org     0
+k_entry         mov     k_rec, ptra
+                mov     k_wp, ptra
+                add     k_wp, #R_V * 4
+                rdlong  k_mode, ptra[R_MODE]
+                rdlong  k_p1, ptra[R_P1]
+                rdlong  k_p2, ptra[R_P2]
+                cmp     k_mode, #M_KX4  wz
+        if_z    jmp     #k_x4
+                cmp     k_mode, #M_KYX  wz
+        if_z    jmp     #k_yx
+                cmp     k_mode, #M_KXX  wz
+        if_z    jmp     #k_xx
+                cmp     k_mode, #M_KXY  wz
+        if_z    jmp     #k_xy
+                cmp     k_mode, #M_KYY  wz
+        if_z    jmp     #k_yy
+                cmp     k_mode, #M_L    wz
+        if_z    jmp     #k_l
+                cmp     k_mode, #M_M    wz
+        if_z    jmp     #k_m
+                cmp     k_mode, #M_N    wz
+        if_z    jmp     #k_n
+                cmp     k_mode, #M_O    wz
+        if_z    jmp     #k_o
+                jmp     #k_done
+
+' arm K
+k_x4            qmul    k_k3, k_ones
+                qmul    k_k5, k_ones
+                qmul    k_k7, k_ones
+                qmul    k_k9, k_ones
+                getqx   k_a
+                getqx   k_b
+                getqx   k_c
+                getqx   k_d
+                jmp     #k_put4
+k_yx            qmul    k_k3, k_ones
+                qmul    k_k5, k_ones
+                getqy   k_a
+                getqx   k_b
+                getqy   k_c
+                getqx   k_d
+                jmp     #k_put4
+k_xx            qmul    k_k3, k_ones
+                qmul    k_k5, k_ones
+                getqx   k_a
+                getqx   k_b
+                jmp     #k_put2
+k_xy            qmul    k_k3, k_ones
+                qmul    k_k5, k_ones
+                getqx   k_a
+                getqy   k_b
+                jmp     #k_put2
+k_yy            qmul    k_k3, k_ones
+                qmul    k_k5, k_ones
+                getqy   k_a
+                getqy   k_b
+                jmp     #k_put2
+
+k_put4          mov     k_v, k_a
+                call    #k_put
+                mov     k_v, k_b
+                call    #k_put
+                mov     k_v, k_c
+                call    #k_put
+                mov     k_v, k_d
+                call    #k_put
+                jmp     #k_drain
+k_put2          mov     k_v, k_a
+                call    #k_put
+                mov     k_v, k_b
+                call    #k_put
+k_drain         waitx   #100                    ' leave nothing pending for the next step
+                pollqmt                 wc
+                mov     k_n8, #8
+.d              getqx   k_t
+                jqmt    #k_done
+                djnz    k_n8, #.d
+                jmp     #k_done
+
+k_put           wrlong  k_v, k_wp
+        _ret_   add     k_wp, #4
+
+' arm L
+k_l             qdiv    k_1000, #3              ' control: 333 r 1
+                call    #k_qput
+                setq    #1
+                qdiv    k_0, #4                 ' control: {1,0}/4
+                call    #k_qput
+                setq    #3
+                qdiv    k_7, #2                 ' {3,7}/2; without the SETQ it would be 3 r 1
+                call    #k_qput
+                setq    #5
+                qdiv    k_11, #4                ' {5,11}/4; without the SETQ it would be 2 r 3
+                call    #k_qput
+                setq    k_hi
+                qdiv    k_7, #0                 ' control: divide by zero
+                call    #k_qput
+                jmp     #k_done
+
+k_qput          getqx   k_v
+                call    #k_put
+                getqy   k_v
+                jmp     #k_put
+
+' arm M
+k_m             getct   k_t0
+                getct   k_t1                    ' control: the pair's overhead
+                mov     k_v, k_t1
+                sub     k_v, k_t0
+                call    #k_put
+                pollqmt                 wc
+                qmul    k_k3, k_ones
+                call    #k_mread                ' pending
+                call    #k_mread                ' empty
+                qmul    k_k5, k_ones
+                call    #k_mread                ' pending
+                call    #k_mread                ' empty
+                jmp     #k_done
+
+k_mread         getct   k_t0
+                getqx   k_v
+                getct   k_t1
+                pollqmt                 wc      ' C = the empty flag
+                wrc     k_q
+                call    #k_put
+                mov     k_v, k_t1
+                sub     k_v, k_t0
+                call    #k_put
+                mov     k_v, k_q
+                jmp     #k_put
+
+' arm N
+k_n             mov     k_i, #0
+                rep     @.f, #32
+                mov     k_t, k_i
+                or      k_t, k_lutb
+                wrlut   k_t, k_i
+                add     k_i, #1
+.f              rdlut   k_v, #5                 ' control: known contents
+                call    #k_put
+                mov     ptra, k_p1              ' control: hub longs
+                rdlong  k_v, ptra[2]
+                call    #k_put
+                rdlong  k_v, ptra++
+                call    #k_put
+                mov     k_v, ptra
+                sub     k_v, k_p1
+                call    #k_put
+                mov     ptra, k_p2              ' control: hub bytes
+                rdbyte  k_v, ptra[2]
+                call    #k_put
+                rdbyte  k_v, ptra++
+                call    #k_put
+                mov     k_v, ptra
+                sub     k_v, k_p2
+                call    #k_put
+                mov     ptra, #8
+                rdlut   k_v, ptra[2]            ' indexed read
+                call    #k_put
+                mov     ptra, #8
+                rdlut   k_v, ptra++             ' post-increment read
+                call    #k_put
+                mov     k_v, ptra
+                sub     k_v, #8
+                call    #k_put
+                mov     ptra, #8
+                wrlut   k_mark, ptra++          ' post-increment write
+                mov     k_v, ptra
+                sub     k_v, #8
+                call    #k_put
+                mov     k_i, #0
+                neg     k_w, #1
+.s              rdlut   k_t, k_i                ' where the mark landed
+                cmp     k_t, k_mark     wz
+        if_z    mov     k_w, k_i
+                add     k_i, #1
+                cmp     k_i, #32        wc
+        if_c    jmp     #.s
+                mov     k_v, k_w
+                call    #k_put
+                mov     ptra, k_rec
+                jmp     #k_done
+
+' arm O
+k_o             mov     k_dat, k_d1
+                call    #k_crc
+                mov     k_dat, k_d2
+                call    #k_crc
+                jmp     #k_done
+
+k_crc           mov     k_v, #0
+                setq    k_dat
+                crcnib  k_v, #$8C
+                call    #k_put
+                mov     k_v, #0                 ' Q[31] down
+                testb   k_dat, #31      wc
+                crcbit  k_v, #$8C
+                testb   k_dat, #30      wc
+                crcbit  k_v, #$8C
+                testb   k_dat, #29      wc
+                crcbit  k_v, #$8C
+                testb   k_dat, #28      wc
+                crcbit  k_v, #$8C
+                call    #k_put
+                mov     k_v, #0                 ' Q[28] up
+                testb   k_dat, #28      wc
+                crcbit  k_v, #$8C
+                testb   k_dat, #29      wc
+                crcbit  k_v, #$8C
+                testb   k_dat, #30      wc
+                crcbit  k_v, #$8C
+                testb   k_dat, #31      wc
+                crcbit  k_v, #$8C
+                jmp     #k_put
+
+k_done          mov     ptra, k_rec
+                wrlong  k_donev, ptra
+                jmp     #$
+
+k_rec           long    0
+k_wp            long    0
+k_mode          long    0
+k_p1            long    0
+k_p2            long    0
+k_a             long    0
+k_b             long    0
+k_c             long    0
+k_d             long    0
+k_v             long    0
+k_t             long    0
+k_t0            long    0
+k_t1            long    0
+k_q             long    0
+k_n8            long    0
+k_i             long    0
+k_w             long    0
+k_dat           long    0
+k_k3            long    3
+k_k5            long    5
+k_k7            long    7
+k_k9            long    9
+k_ones          long    $FFFF_FFFF
+k_0             long    0
+k_1             long    1
+k_3             long    3
+k_7             long    7
+k_11            long    11
+k_1000          long    1000
+k_hi            long    $1234_5678
+k_lutb          long    LUTBASE
+k_mark          long    N_MARK
+k_d1            long    $8000_0000
+k_d2            long    $D000_0000
+k_donev         long    DONE_V
+
+DAT ' ---- hub data ----
+                orgh
+                alignl
+sSurv           byte    "SURVIVES", 0
+                alignl
+n_hl            long    $AB00_0000, $AB00_0001, $AB00_0002, $AB00_0003
+n_hb            byte    $40, $41, $42, $43, $44, $45, $46, $47
