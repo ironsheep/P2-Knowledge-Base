@@ -175,7 +175,6 @@ application-notes/p2an002-cordic-for-real-work.yaml
 architecture/p2-architecture-mental-model.yaml
 language/pasm2/alignw.yaml
 language/pasm2/concepts/cordic_solver.yaml
-language/pasm2/concepts/special_registers.yaml
 language/spin2/concepts/random_generation.yaml
 language/spin2/keywords/VAR.yaml
 language/spin2/operators/op_rand.yaml
