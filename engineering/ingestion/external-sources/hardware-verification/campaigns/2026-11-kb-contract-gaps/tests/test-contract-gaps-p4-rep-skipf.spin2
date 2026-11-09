@@ -1,0 +1,796 @@
+'' ===========================================================================
+''
+''   File.......  test-contract-gaps-p4-rep-skipf.spin2
+''   Purpose....  Whether REP nests, and what SKIPF does in hub execution,
+''                arms R and S.  No pins are used.
+''   Manual.....  P2 Knowledge Base
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Nov 2026
+''   Updated....  Nov 2026
+''
+'' ===========================================================================
+
+{ RIG
+  Bare P2 board, 200 MHz, NOTHING attached.  No pins are touched.
+  Build pnut-ts -d.  Cog 0 supervises and prints; no other cog has the
+  debugger.  Every run is one fresh worker cog; the supervisor stops a worker
+  that has not finished in its limit and reports the run as not finished, so
+  no step can hang the program.  Results print before verdicts, and every
+  reading not named below is printed raw.
+
+ARM R  What happens when a REP block contains another REP?
+  The P2 Documentation describes one REP at a time and says a branch inside
+  the block cancels it; it does not say what a second REP does.  The block
+  runs in cog RAM, once per case and per repeat:
+      site O: REP #5,#5  or NOP
+              ADD pre,#1            outer body 1
+      site I: REP #2,#3  or NOP     outer body 2
+              ADD in1,#1            outer body 3, inner body 1
+              ADD in2,#1            outer body 4, inner body 2
+              ADD post,#1           outer body 5
+  The two sites are patched in cog RAM before the block runs, so the three
+  cases differ only in those two words.
+    Control      outer only (site I is a NOP): every counter 5.
+    Control      inner only (site O is a NOP): pre 1, in1 3, in2 3, post 1.
+    Premise      the site words read back from cog RAM after the run are the
+                 words the case needs; in the case under test pre and in1 are
+                 at least 1, so the block reached the inner REP's slot and went
+                 past it.  The outer-only control shows the outer REP spans
+                 that slot; the inner-only control shows the same word in the
+                 same slot works as a REP.
+    Measure      both REPs in place, three repeats.
+
+  READINGS, every repeat of the case under test must agree:
+    NESTS            pre 5, in1 15, in2 15, post 5
+    INNER REPLACES   pre 1, in1 3, in2 3, post 1; the outer REP is gone
+    INNER IGNORED    pre 5, in1 5, in2 5, post 5; the inner REP did nothing
+    BOTH CANCELLED   pre 1, in1 1, in2 1, post 1; neither repeated
+    OTHER            one other set of counts, printed raw
+    MIXED            the repeats did not agree; the run lines are the raw values
+    NO READING       a premise or a control above missed, or a run did not finish
+
+ARM S  What does SKIPF do in hub execution?
+  The instruction table marks SKIPF illegal in hub execution.  The P2
+  Documentation says it reverts to SKIP, cancelling instructions in the
+  pipeline instead of stepping over them.  The body is one site and nine ADDs
+  of weights 1 to 256; the sum says exactly which ADDs ran, and two GETCTs
+  time the site and the ADDs.  The body exists once in cog RAM and once in hub
+  RAM, and the site is patched to SKIP or SKIPF before the body runs, so each
+  body runs both instructions at one address.  Pattern %1011_1110: the first,
+  seventh and ninth ADDs run, sum 321.  Pattern 0: all nine run, sum 511.
+    Control      cog SKIP, pattern: sum 321.
+    Control      cog SKIPF, pattern: sum 321, and fewer clocks than cog SKIP.
+                 Six instructions are stepped over, so the difference is the
+                 clocks a leap saves; it must exceed twice S_TOL or the time
+                 cannot separate the two readings.
+    Control      cog SKIPF, pattern 0: sum 511.
+    Control      hub SKIP, pattern: sum 321, and the five times agree to within
+                 S_TOL.
+    Control      hub SKIP, pattern 0: sum 511.
+    Premise      every run captures its own PC with CALL and POP just before
+                 the timed block.  Cog runs must read the cog address of the
+                 POP, hub runs the hub address of the POP (at or above $400).
+                 Every run reads its site word back and it must be the case's
+                 instruction.
+    Measure      hub SKIPF, pattern, five repeats.
+  S_TOL is the slack around each timed reading.  The two timed readings are
+  the measured saving apart, and the saving must exceed twice S_TOL, so no
+  time can fall in both.  S_TOL is one clock, less than the two clocks of one
+  instruction, so a run one instruction away from a reading is not that
+  reading.
+
+  READINGS, from the five hub SKIPF runs:
+    REVERTS TO SKIP  sum 321 every time, and every time within S_TOL clocks of
+                     the hub SKIP time; instructions were cancelled
+    LEAPS            sum 321 every time, and every time within S_TOL clocks of
+                     the hub SKIP time less the saving the cog control measured
+    NO EFFECT        sum 511 every time; the pattern was not applied
+    OTHER            sum 321 at any other time, or one other sum, printed raw
+    MIXED            the sums did not all agree; the run lines are the raw values
+    NO READING       a premise or a control above missed, or a run did not finish
+
+NOT MEASURED
+  REP or a nested REP in hub execution, a nested REP that ends on the outer
+  block's last instruction, a nested REP of a single instruction, a count of 0.
+  EXECF, SKIPF under other patterns, a SKIPF whose first instruction is
+  skipped, more than seven skipped in a row, SKIPF over a branch.  One part,
+  N = 1.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq        = 200_000_000
+  DEBUG_COGS      = %0000_0001
+
+  STEP_MS         = 200                 ' a worker unfinished by then is reported
+  DONE_V          = $600D_0001
+  SENT            = $DEAD_BEEF          ' a record field no worker wrote
+
+  ' record fields shared by both arms
+  F_DONE          = 0
+  F_MODE          = 1
+  F_P1            = 2                   ' arm S: hub address of the body
+  F_P2            = 3                   ' arm S: hub address of the site
+  REC_N           = 10
+
+  ' arm R
+  NR_OUT          = 5                   ' passes of the outer REP
+  NR_INN          = 3                   ' passes of the inner REP
+  NR_BOTH         = NR_OUT * NR_INN
+  N_R             = 3                   ' repeats of each case
+  CR_OUT          = 0                   ' outer only, mode %01
+  CR_INN          = 1                   ' inner only, mode %10
+  CR_BTH          = 2                   ' both, mode %11
+  CR_CASES        = 3
+  FR_PRE          = 4
+  FR_IN1          = 5
+  FR_IN2          = 6
+  FR_POST         = 7
+  FR_OW           = 8                   ' site O word, read back
+  FR_IW           = 9                   ' site I word, read back
+
+  ' arm S
+  N_S             = 5                   ' repeats of each case
+  PAT_V           = %1011_1110          ' ADDs 1, 7 and 9 run
+  SUM_PAT         = 1 + 64 + 256
+  SUM_ALL         = 511
+  S_TOL           = 1                   ' clocks, under one instruction; see the rig notes
+  SC_CS           = 0                   ' cog SKIP, pattern
+  SC_CF           = 1                   ' cog SKIPF, pattern
+  SC_C0           = 2                   ' cog SKIPF, zero pattern
+  SC_HS           = 3                   ' hub SKIP, pattern
+  SC_H0           = 4                   ' hub SKIP, zero pattern
+  SC_HF           = 5                   ' hub SKIPF, pattern: the case under test
+  SC_CASES        = 6
+  FS_SUM          = 4
+  FS_CLK          = 5
+  FS_PC           = 6                   ' the PC the body captured
+  FS_XPC          = 7                   ' cog runs: the cog address of the POP
+  FS_WORD         = 8                   ' site word, read back
+  FS_PROG         = 9                   ' how far the run got
+  PROG_IN         = 1                   ' about to enter the body
+  PROG_PC         = 2                   ' the body captured its PC
+  PROG_END        = 3                   ' the body finished
+  HUB_MIN         = $400                ' the lowest hub-execution address
+  COG_TOP         = $200                ' above every cog address the body uses
+
+VAR ' ---- Rig State ----
+  long  recR[CR_CASES * N_R * REC_N]
+  long  rOk[CR_CASES * N_R]
+  long  recS[SC_CASES * N_S * REC_N]
+  long  sOk[SC_CASES * N_S]
+
+PUB main()
+'' Run arms R and S and print every reading and verdict.
+''
+
+  p0(string("=== test-contract-gaps-p4-rep-skipf ==="))
+  run_r()
+  report_r()
+  run_s()
+  report_s()
+  p0(string("=== END ==="))
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------- the rig
+
+PRI launch(pImg, pRec, mode, p1v, p2v) : ok | cog, t0
+' Run one step in a fresh worker cog and wait for its DONE.
+'
+' @param pImg - hub address of the worker image
+' @param pRec - hub address of the step's record
+' @param mode - the step's mode word
+' @param p1v - first hub address the step needs
+' @param p2v - second hub address the step needs
+' @returns ok - TRUE when the worker wrote DONE in time
+
+' Local Variables:
+' @local cog - the worker cog
+' @local t0 - CT at the launch
+
+  longfill(pRec, SENT, REC_N)
+  long[pRec][F_DONE] := 0
+  long[pRec][F_MODE] := mode
+  long[pRec][F_P1] := p1v
+  long[pRec][F_P2] := p2v
+  cog := coginit(COGEXEC_NEW, pImg, pRec)
+  if cog < 0
+    p0(string("RIG FAIL: no free cog for a step"))
+    return FALSE
+  t0 := getct()
+  repeat until long[pRec][F_DONE] == DONE_V
+    if getct() - t0 > clkfreq / 1000 * STEP_MS
+      cogstop(cog)
+      p1(string("STEP HUNG: no DONE within the step limit, mode"), mode)
+      return FALSE
+  cogstop(cog)
+  ok := TRUE
+
+PRI rrec(k, i) : pr
+' Find one arm R record.
+'
+' @param k - the case
+' @param i - the repeat
+' @returns pr - hub address of the record
+
+  pr := @recR[(k * N_R + i) * REC_N]
+
+PRI srec(k, i) : pr
+' Find one arm S record.
+'
+' @param k - the case
+' @param i - the repeat
+' @returns pr - hub address of the record
+
+  pr := @recS[(k * N_S + i) * REC_N]
+
+PRI s_modeof(k) : m
+' Map an arm S case to its mode word.
+'
+' @param k - the case
+' @returns m - bit 0 SKIPF, bit 1 zero pattern, bit 2 hub
+
+  m := lookupz(k: %000, %001, %011, %100, %110, %101)
+
+PRI s_is_hub(k) : yes
+' Whether an arm S case runs from hub.
+'
+' @param k - the case
+' @returns yes - TRUE when it does
+
+  yes := (s_modeof(k) & %100) <> 0
+
+PRI run_r() | k, i
+' Run every case of arm R.
+'
+
+' Local Variables:
+' @local k - the case
+' @local i - the repeat
+
+  repeat k from 0 to CR_CASES - 1
+    repeat i from 0 to N_R - 1
+      rOk[k * N_R + i] := launch(@r_entry, rrec(k, i), k + 1, 0, 0)
+
+PRI run_s() | k, i
+' Run every case of arm S.
+'
+
+' Local Variables:
+' @local k - the case
+' @local i - the repeat
+
+  repeat k from 0 to SC_CASES - 1
+    repeat i from 0 to N_S - 1
+      sOk[k * N_S + i] := launch(@s_entry, srec(k, i), s_modeof(k), @h_body, @h_site)
+
+' ---------------------------------------------------------------- arm R verdict
+
+PRI r_match(pr, v0, v1, v2, v3) : yes
+' Whether a run's counters are these values.
+'
+' @param pr - the record
+' @param v0 - pre
+' @param v1 - in1
+' @param v2 - in2
+' @param v3 - post
+' @returns yes - TRUE when all four match
+
+  yes := long[pr][FR_PRE] == v0 and long[pr][FR_IN1] == v1 and long[pr][FR_IN2] == v2 and long[pr][FR_POST] == v3
+
+PRI r_ok_runs() : ok | k, i, pr, xo, xi
+' Whether every run finished with the site words its case needs.
+'
+' @returns ok - TRUE when they did
+
+' Local Variables:
+' @local k - the case
+' @local i - the repeat
+' @local pr - the record
+' @local xo - the site O word this case needs
+' @local xi - the site I word this case needs
+
+  repeat k from 0 to CR_CASES - 1
+    xo := ((k + 1) & 1) ? long[@r_to] : 0
+    xi := ((k + 1) & 2) ? long[@r_ti] : 0
+    repeat i from 0 to N_R - 1
+      pr := rrec(k, i)
+      if not rOk[k * N_R + i]
+        return FALSE
+      if long[pr][FR_OW] <> xo or long[pr][FR_IW] <> xi
+        return FALSE
+  ok := TRUE
+
+PRI r_ctl(k, v0, v1, v2, v3) : ok | i
+' Whether every repeat of a control read these values.
+'
+' @param k - the case
+' @param v0 - pre
+' @param v1 - in1
+' @param v2 - in2
+' @param v3 - post
+' @returns ok - TRUE when they all did
+
+' Local Variables:
+' @local i - the repeat
+
+  repeat i from 0 to N_R - 1
+    if not r_match(rrec(k, i), v0, v1, v2, v3)
+      return FALSE
+  ok := TRUE
+
+PRI r_reached() : ok | i, pr
+' Whether every run under test reached the inner REP's slot and went past it.
+'
+' @returns ok - TRUE when they did
+
+' Local Variables:
+' @local i - the repeat
+' @local pr - the record
+
+  repeat i from 0 to N_R - 1
+    pr := rrec(CR_BTH, i)
+    if long[pr][FR_PRE] < 1 or long[pr][FR_IN1] < 1
+      return FALSE
+  ok := TRUE
+
+PRI report_r() | k, i, pr, same, pArm
+' Print arm R's raw values, then its verdict from those values.
+'
+
+' Local Variables:
+' @local k - the case
+' @local i - the repeat
+' @local pr - the record
+' @local same - TRUE while every repeat under test matches the first
+' @local pArm - the arm's name
+
+  pArm := string("R REP inside REP")
+  p0(string("R cases: 0 outer only, 1 inner only, 2 both"))
+  p4(string("R outer REP word, inner REP word, outer passes, inner passes"), long[@r_to], long[@r_ti], NR_OUT, NR_INN)
+  repeat k from 0 to CR_CASES - 1
+    repeat i from 0 to N_R - 1
+      pr := rrec(k, i)
+      p4(string("R run: case, repeat, finished, pre"), k, i, rOk[k * N_R + i], long[pr][FR_PRE])
+      p4(string("R run: in1, in2, post, site O word"), long[pr][FR_IN1], long[pr][FR_IN2], long[pr][FR_POST], long[pr][FR_OW])
+      p1(string("R run: site I word"), long[pr][FR_IW])
+
+  if not r_ok_runs()
+    pv(pArm, string("NO READING, a run did not finish or a site word is not the one its case needs"))
+  elseif not r_ctl(CR_OUT, NR_OUT, NR_OUT, NR_OUT, NR_OUT)
+    pv(pArm, string("NO READING, the outer-only control did not count 5 of each"))
+  elseif not r_ctl(CR_INN, 1, NR_INN, NR_INN, 1)
+    pv(pArm, string("NO READING, the inner-only control did not read 1, 3, 3, 1"))
+  elseif not r_reached()
+    pv(pArm, string("NO READING, the block did not reach the inner REP's slot in every run"))
+  else
+    pr := rrec(CR_BTH, 0)
+    same := TRUE
+    repeat i from 1 to N_R - 1
+      if not r_match(rrec(CR_BTH, i), long[pr][FR_PRE], long[pr][FR_IN1], long[pr][FR_IN2], long[pr][FR_POST])
+        same := FALSE
+    if not same
+      pv(pArm, string("MIXED, the repeats did not agree; the raw values are the run lines"))
+    elseif r_match(pr, NR_OUT, NR_BOTH, NR_BOTH, NR_OUT)
+      pv(pArm, string("NESTS, the outer block repeated and the inner REP repeated inside it"))
+    elseif r_match(pr, 1, NR_INN, NR_INN, 1)
+      pv(pArm, string("INNER REPLACES, the inner REP ran and the outer REP is gone"))
+    elseif r_match(pr, NR_OUT, NR_OUT, NR_OUT, NR_OUT)
+      pv(pArm, string("INNER IGNORED, the outer block repeated and the inner REP did nothing"))
+    elseif r_match(pr, 1, 1, 1, 1)
+      pv(pArm, string("BOTH CANCELLED, the block ran once and neither REP repeated"))
+    else
+      pv4(pArm, string("OTHER, pre, in1, in2, post"), long[pr][FR_PRE], long[pr][FR_IN1], long[pr][FR_IN2], long[pr][FR_POST])
+
+' ---------------------------------------------------------------- arm S verdict
+
+PRI s_xpc_of(k, pr) : xp
+' The address a case's PC capture must read.
+'
+' @param k - the case
+' @param pr - the record
+' @returns xp - the hub or cog address of the POP
+
+  if s_is_hub(k)
+    xp := @h_pcm
+  else
+    xp := long[pr][FS_XPC]
+
+PRI s_ok_runs(kFirst, kLast) : ok | k, i
+' Whether every run of a span of cases finished and reached the end of its body.
+'
+' @param kFirst - the first case of the span
+' @param kLast - the last case of the span
+' @returns ok - TRUE when they did
+
+' Local Variables:
+' @local k - the case
+' @local i - the repeat
+
+  repeat k from kFirst to kLast
+    repeat i from 0 to N_S - 1
+      if not sOk[k * N_S + i] or long[srec(k, i)][FS_PROG] <> PROG_END
+        return FALSE
+  ok := TRUE
+
+PRI s_pc_ok() : ok | k, i, pr, xp
+' Whether every run captured the PC of the memory its case runs from.
+'
+' @returns ok - TRUE when they did
+
+' Local Variables:
+' @local k - the case
+' @local i - the repeat
+' @local pr - the record
+' @local xp - the address the capture must read
+
+  if @h_pcm < HUB_MIN
+    return FALSE
+  repeat k from 0 to SC_CASES - 1
+    repeat i from 0 to N_S - 1
+      pr := srec(k, i)
+      xp := s_xpc_of(k, pr)
+      if not s_is_hub(k) and (xp < 0 or xp >= COG_TOP)
+        return FALSE
+      if long[pr][FS_PC] <> xp
+        return FALSE
+  ok := TRUE
+
+PRI s_word_ok() : ok | k, i, xw
+' Whether every run read back the instruction its case needs at the site.
+'
+' @returns ok - TRUE when they did
+
+' Local Variables:
+' @local k - the case
+' @local i - the repeat
+' @local xw - the site word this case needs
+
+  repeat k from 0 to SC_CASES - 1
+    xw := (s_modeof(k) & 1) ? long[@s_t_skipf] : long[@s_t_skip]
+    repeat i from 0 to N_S - 1
+      if long[srec(k, i)][FS_WORD] <> xw
+        return FALSE
+  ok := TRUE
+
+PRI s_ctl_sum(k, xs) : ok | i
+' Whether every repeat of a control summed to this value.
+'
+' @param k - the case
+' @param xs - the expected sum
+' @returns ok - TRUE when they all did
+
+' Local Variables:
+' @local i - the repeat
+
+  repeat i from 0 to N_S - 1
+    if long[srec(k, i)][FS_SUM] <> xs
+      return FALSE
+  ok := TRUE
+
+PRI s_lo(k) : v | i, x
+' The smallest elapsed time of a case.
+'
+' @param k - the case
+' @returns v - the lowest clock count
+
+' Local Variables:
+' @local i - the repeat
+' @local x - one run's clocks
+
+  v := POSX
+  repeat i from 0 to N_S - 1
+    x := long[srec(k, i)][FS_CLK]
+    if x < v
+      v := x
+
+PRI s_hi(k) : v | i, x
+' The largest elapsed time of a case.
+'
+' @param k - the case
+' @returns v - the highest clock count
+
+' Local Variables:
+' @local i - the repeat
+' @local x - one run's clocks
+
+  v := NEGX
+  repeat i from 0 to N_S - 1
+    x := long[srec(k, i)][FS_CLK]
+    if x > v
+      v := x
+
+PRI report_s() | k, i, pr, pArm, sum0, same, base, save, inC, inL, x
+' Print arm S's raw values, then its verdict from those values.
+'
+
+' Local Variables:
+' @local k - the case
+' @local i - the repeat
+' @local pr - the record
+' @local pArm - the arm's name
+' @local sum0 - the first hub SKIPF run's sum
+' @local same - TRUE while every hub SKIPF sum matches the first
+' @local base - the hub SKIP control's lowest time
+' @local save - the clocks the cog control saved by leaping
+' @local inC - every hub SKIPF time is within S_TOL of base
+' @local inL - every hub SKIPF time is within S_TOL of base less save
+' @local x - one run's clocks
+
+  pArm := string("S SKIPF in hub")
+  p0(string("S cases: 0 cog SKIP, 1 cog SKIPF, 2 cog SKIPF zero, 3 hub SKIP, 4 hub SKIP zero, 5 hub SKIPF"))
+  p2(string("S SKIP word, SKIPF word"), long[@s_t_skip], long[@s_t_skipf])
+  p3(string("S hub body, hub POP, hub site"), @h_body, @h_pcm, @h_site)
+  repeat k from 0 to SC_CASES - 1
+    repeat i from 0 to N_S - 1
+      pr := srec(k, i)
+      p4(string("S run: case, repeat, finished, sum"), k, i, sOk[k * N_S + i], long[pr][FS_SUM])
+      p4(string("S run: clocks, PC read, PC expected, site word"), long[pr][FS_CLK], long[pr][FS_PC], s_xpc_of(k, pr), long[pr][FS_WORD])
+      p1(string("S run: progress (3 = finished)"), long[pr][FS_PROG])
+
+  base := s_lo(SC_HS)
+  save := s_lo(SC_CS) - s_lo(SC_CF)
+  p4(string("S times: cog SKIP low, cog SKIPF low, saving, hub SKIP low"), s_lo(SC_CS), s_lo(SC_CF), save, base)
+  p3(string("S times: hub SKIP high, hub SKIPF low, hub SKIPF high"), s_hi(SC_HS), s_lo(SC_HF), s_hi(SC_HF))
+
+  if not s_ok_runs(SC_CS, SC_H0)
+    pv(pArm, string("NO READING, a control run did not finish; the progress lines show where"))
+  elseif not s_ok_runs(SC_HF, SC_HF)
+    pv(pArm, string("NO READING, the controls finished but a hub SKIPF run did not; the progress lines show where"))
+  elseif not s_pc_ok()
+    pv(pArm, string("NO READING, a run's PC capture was not in the memory its case runs from"))
+  elseif not s_word_ok()
+    pv(pArm, string("NO READING, a site word is not the instruction its case needs"))
+  elseif not s_ctl_sum(SC_CS, SUM_PAT) or not s_ctl_sum(SC_CF, SUM_PAT)
+    pv(pArm, string("NO READING, a cog control under the pattern did not sum to 321"))
+  elseif not s_ctl_sum(SC_C0, SUM_ALL)
+    pv(pArm, string("NO READING, the cog zero-pattern control did not sum to 511"))
+  elseif not s_ctl_sum(SC_HS, SUM_PAT)
+    pv(pArm, string("NO READING, the hub SKIP control did not sum to 321"))
+  elseif not s_ctl_sum(SC_H0, SUM_ALL)
+    pv(pArm, string("NO READING, the hub zero-pattern control did not sum to 511"))
+  elseif save <= 2 * S_TOL
+    pv(pArm, string("NO READING, cog SKIPF did not save enough clocks over cog SKIP to tell the readings apart"))
+  elseif s_hi(SC_HS) - base > S_TOL
+    pv(pArm, string("NO READING, the hub SKIP control's times disagree by more than S_TOL"))
+  else
+    sum0 := long[srec(SC_HF, 0)][FS_SUM]
+    same := TRUE
+    repeat i from 1 to N_S - 1
+      if long[srec(SC_HF, i)][FS_SUM] <> sum0
+        same := FALSE
+    if not same
+      pv(pArm, string("MIXED, the hub SKIPF sums did not agree; the raw values are the run lines"))
+    elseif sum0 == SUM_PAT
+      inC := TRUE
+      inL := TRUE
+      repeat i from 0 to N_S - 1
+        x := long[srec(SC_HF, i)][FS_CLK]
+        if abs (x - base) > S_TOL
+          inC := FALSE
+        if abs (x - (base - save)) > S_TOL
+          inL := FALSE
+      if inC
+        pv(pArm, string("REVERTS TO SKIP, the pattern was followed at the hub SKIP time"))
+      elseif inL
+        pv(pArm, string("LEAPS, the pattern was followed at the hub SKIP time less the saving"))
+      else
+        pv4(pArm, string("OTHER, the pattern was followed at another time: hub SKIP low, saving, SKIPF low, SKIPF high"), base, save, s_lo(SC_HF), s_hi(SC_HF))
+    elseif sum0 == SUM_ALL
+      pv(pArm, string("NO EFFECT, all nine ADDs ran; the pattern was not applied"))
+    else
+      pv1(pArm, string("OTHER, every hub SKIPF run summed to this one value"), sum0)
+
+' ---------------------------------------------------------------- printing
+
+PRI p0(pS)
+' Print a hub string.
+'
+' @param pS - the string
+
+  debug(zstr_(pS))
+
+PRI p1(pS, a)
+' Print a hub string and one value.
+'
+' @param pS - the string
+' @param a - the value
+
+  debug(zstr_(pS), " ", uhex_long_(a))
+
+PRI p2(pS, a, b)
+' Print a hub string and two values.
+'
+' @param pS - the string
+' @param a - first value
+' @param b - second value
+
+  debug(zstr_(pS), " ", uhex_long_(a), " ", uhex_long_(b))
+
+PRI p3(pS, a, b, c)
+' Print a hub string and three values.
+'
+' @param pS - the string
+' @param a - first value
+' @param b - second value
+' @param c - third value
+
+  debug(zstr_(pS), " ", uhex_long_(a), " ", uhex_long_(b), " ", uhex_long_(c))
+
+PRI p4(pS, a, b, c, d)
+' Print a hub string and four values.
+'
+' @param pS - the string
+' @param a - first value
+' @param b - second value
+' @param c - third value
+' @param d - fourth value
+
+  debug(zstr_(pS), " ", uhex_long_(a), " ", uhex_long_(b), " ", uhex_long_(c), " ", uhex_long_(d))
+
+PRI pv(pArm, pText)
+' Print one verdict line.
+'
+' @param pArm - the arm
+' @param pText - the verdict
+
+  debug("VERDICT ", zstr_(pArm), ": ", zstr_(pText))
+
+PRI pv1(pArm, pText, v)
+' Print one verdict line with its reading.
+'
+' @param pArm - the arm
+' @param pText - the verdict
+' @param v - the reading
+
+  debug("VERDICT ", zstr_(pArm), ": ", zstr_(pText), " ", uhex_long_(v))
+
+PRI pv4(pArm, pText, a, b, c, d)
+' Print one verdict line with four readings.
+'
+' @param pArm - the arm
+' @param pText - the verdict
+' @param a - first reading
+' @param b - second reading
+' @param c - third reading
+' @param d - fourth reading
+
+  debug("VERDICT ", zstr_(pArm), ": ", zstr_(pText), " ", uhex_long_(a), " ", uhex_long_(b), " ", uhex_long_(c), " ", uhex_long_(d))
+
+DAT ' ---- arm R worker: runs in cog RAM ----
+                alignl
+                org     0
+r_entry         rdlong  r_mode, ptra[F_MODE]
+                testb   r_mode, #0      wc      ' bit 0: the outer REP is in place
+        if_c    mov     r_osite, r_to
+        if_nc   mov     r_osite, #0             ' the NOP word
+                testb   r_mode, #1      wc      ' bit 1: the inner REP is in place
+        if_c    mov     r_isite, r_ti
+        if_nc   mov     r_isite, #0
+                jmp     #r_osite                ' the branch clears the pipeline past the patches
+r_osite         nop                             ' site O: REP #5,#NR_OUT or NOP
+                add     r_pre, #1               ' outer body 1
+r_isite         nop                             ' site I, outer body 2: REP #2,#NR_INN or NOP
+                add     r_in1, #1               ' outer body 3, inner body 1
+                add     r_in2, #1               ' outer body 4, inner body 2
+                add     r_post, #1              ' outer body 5
+                wrlong  r_pre, ptra[FR_PRE]
+                wrlong  r_in1, ptra[FR_IN1]
+                wrlong  r_in2, ptra[FR_IN2]
+                wrlong  r_post, ptra[FR_POST]
+                wrlong  r_osite, ptra[FR_OW]
+                wrlong  r_isite, ptra[FR_IW]
+                wrlong  r_donev, ptra[F_DONE]
+                jmp     #$
+r_to            rep     #5, #NR_OUT             ' copied into site O
+r_ti            rep     #2, #NR_INN             ' copied into site I
+r_donev         long    DONE_V
+r_mode          long    0
+r_pre           long    0
+r_in1           long    0
+r_in2           long    0
+r_post          long    0
+
+DAT ' ---- arm S worker: the cog side and the cog body ----
+                alignl
+                org     0
+s_entry         rdlong  s_mode, ptra[F_MODE]
+                rdlong  s_phub, ptra[F_P1]
+                rdlong  s_psite, ptra[F_P2]
+                testb   s_mode, #0      wc      ' bit 0: SKIPF
+        if_c    mov     s_word, s_t_skipf
+        if_nc   mov     s_word, s_t_skip
+                testb   s_mode, #1      wc      ' bit 1: zero pattern
+        if_nc   mov     s_pat, s_patv
+        if_c    mov     s_pat, #0
+                testb   s_mode, #2      wc      ' bit 2: run from hub
+        if_c    jmp     #s_hubgo
+                mov     s_site, s_word
+                mov     s_rb, s_site
+                mov     s_xpc, #s_pcm_c
+                wrlong  #PROG_IN, ptra[FS_PROG]
+                jmp     #s_body                 ' the branch clears the pipeline past the patch
+s_hubgo         wrlong  s_word, s_psite         ' the site the hub body will run
+                rdlong  s_rb, s_psite
+                wrlong  #PROG_IN, ptra[FS_PROG]
+                jmp     s_phub
+s_body          call    #s_pcm_c
+s_pcm_c         pop     s_pc
+                and     s_pc, s_m20
+                wrlong  s_pc, ptra[FS_PC]
+                wrlong  #PROG_PC, ptra[FS_PROG]
+                nop                             ' the same lead-in as the hub body
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                getct   s_t0
+s_site          nop                             ' the site: SKIP or SKIPF, patched
+                add     s_acc, #1
+                add     s_acc, #2
+                add     s_acc, #4
+                add     s_acc, #8
+                add     s_acc, #16
+                add     s_acc, #32
+                add     s_acc, #64
+                add     s_acc, #128
+                add     s_acc, #256
+                getct   s_t1
+s_report        sub     s_t1, s_t0
+                wrlong  s_acc, ptra[FS_SUM]
+                wrlong  s_t1, ptra[FS_CLK]
+                wrlong  s_xpc, ptra[FS_XPC]
+                wrlong  s_rb, ptra[FS_WORD]
+                wrlong  #PROG_END, ptra[FS_PROG]
+                wrlong  s_donev, ptra[F_DONE]
+                jmp     #$
+s_t_skip        skip    s_pat                   ' copied to the site
+s_t_skipf       skipf   s_pat                   ' copied to the site
+s_patv          long    PAT_V
+s_m20           long    $F_FFFF
+s_donev         long    DONE_V
+s_mode          long    0
+s_phub          long    0
+s_psite         long    0
+s_word          long    0
+s_pat           long    0
+s_acc           long    0
+s_t0            long    0
+s_t1            long    0
+s_pc            long    0
+s_xpc           long    0
+s_rb            long    0
+
+' ---- arm S worker: the hub body ----
+                orgh
+                alignl
+h_body          call    #h_pcm
+h_pcm           pop     s_pc
+                and     s_pc, s_m20
+                wrlong  s_pc, ptra[FS_PC]
+                wrlong  #PROG_PC, ptra[FS_PROG]
+                nop                             ' lets the FIFO get ahead before the timed part
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                getct   s_t0
+h_site          nop                             ' the site: SKIP or SKIPF, written by the worker
+                add     s_acc, #1
+                add     s_acc, #2
+                add     s_acc, #4
+                add     s_acc, #8
+                add     s_acc, #16
+                add     s_acc, #32
+                add     s_acc, #64
+                add     s_acc, #128
+                add     s_acc, #256
+                getct   s_t1
+                jmp     #\s_report
