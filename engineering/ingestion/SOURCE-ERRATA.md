@@ -3,7 +3,7 @@
 > Backing doc **#5** of the ingestion set (README dashboard · `AUTHORITATIVE-SOURCES` ·
 > `DOCUMENT-LINEAGE` · `KNOWLEDGE-GAPS` · **this**). Standing register, created 2026-08-25.
 >
-> **Next erratum ID: `E-024`**
+> **Next erratum ID: `E-026`**
 
 ## What this register is for
 
@@ -106,6 +106,8 @@ nowhere else. It is never licence to state a fact no evidence supports — that 
 | E-021 | Spin2 Documentation v55 | the operator table lists `var\x` as an assign (statement) form; the compiler accepts it only as a term (CP-002) | never carried | `CONFIRMED` |
 | E-022 | Spin2 Documentation v55 | unknown escapes in `@\"..."` "passed verbatim"; the compiler rejects them (CP-003) | followed the source in `escape-strings.yaml` (S-345); now teaches the rejection | `CONFIRMED` |
 | E-023 | Spin2 Documentation v55 | PASM DEBUG() "can output … C/Z flags", `C_Z` "useful in PASM code"; the compiler rejects `C_Z` in PASM (CP-004) | never carried as code | `CONFIRMED` |
+| E-024 | PASM2 Manual 2022-11-01 **and** P2 Documentation v35 (Rev B/C) | the POLLQMT clearing list names **WAITQMT**, which does not exist (the Silicon Doc's own text says so at one place and lists it at another); the manual's sentence also names the **pin-pattern-detected** flag where the QMT flag is meant | follows the Silicon Doc's "no WAITQMT"; notes the other wording | `CONFIRMED` |
+| E-025 | P2 Documentation v35 (Rev B/C) | the PRNG-seeding example writes `SETB x,#31`; SETB is not a PASM2 instruction and the assembler refuses it (CP-039) | diverges: the KB example uses `BITH` | `CONFIRMED` |
 
 ---
 
@@ -696,6 +698,47 @@ inline assembly"; use case "Debugging PASM2 inline assembly code"); its version 
 (`requires_version: "Spin2_v46"`) matches the compiler. The page now teaches where `C_Z` compiles
 and that it is rejected in PASM, and the PASM-debugging prose and use cases are gone («#421»).
 Filed 2026-10-09 from the close-out study («#411»).
+
+---
+
+## E-024 — the POLLQMT clearing list names **WAITQMT**, which does not exist, and the manual's sentence names the **wrong flag** · `CONFIRMED`
+
+| Side | Document @ edition | Where | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Propeller 2 Assembly Language (PASM2) Manual**, Nov 1, 2022 release | POLLQMT, Explanation, last paragraph | *"The pin-pattern-detected event flag is cleared upon cog start or execution of POLLQMT, WAITQMT, JQMT, or JNQMT instructions."* (WAITQMT appears nowhere else in the manual) | `sources/pasm2-manual/pasm2-manual-text.txt:3367` |
+| Against (same paragraph) | same | POLLQMT, Explanation, the sentence before | *"The CORDIC-read-but-empty event flag is set whenever GETQX / GETQY executes without any CORDIC results available or in progress."* — the flag this paragraph is about is the CORDIC-read-but-empty flag, not the pin-pattern-detected flag (POLLPAT's) | `sources/pasm2-manual/pasm2-manual-text.txt:3367` (same line) |
+| The claim (second document) | **Parallax Propeller 2 Documentation** v35 (Rev B/C silicon; the Silicon Doc) | EVENTS, "POLLQMT event flag" | *"Also cleared on POLLQMT/WAITQMT/JQMT/JNQMT."* | `sources/silicon-doc/silicon-doc-text.txt:2211` (`p2-documentation.txt:5402`) |
+| Against (same document) | same | EVENTS, the WAITxxx list note | *"There's no 'WAITQMT' because the event could not happen while waiting."* | `sources/silicon-doc/silicon-doc-text.txt:2102` (`p2-documentation.txt:5242`) |
+
+**OUR FINDING.** There is no WAITQMT instruction, because the event cannot occur while waiting;
+the QMT flag (event 15, GETQX/GETQY executed with no CORDIC result available or in progress) is
+cleared on cog start and by POLLQMT, JQMT and JNQMT only. The manual's sentence also puts the
+pin-pattern-detected name on that flag.
+
+**Evidence tier:** the documents against themselves — the Silicon Doc says both things (`:2102`
+against `:2211`), and the manual's own paragraph names two different flags; no compile or bench
+run decides it (no compile proof was filed for a `waitqmt` line). · **Reached our KB?**
+**Follows the Silicon Doc's "no WAITQMT", and notes the other wording**: `architecture/event_system.yaml`
+(the sixteen events note; the `event_clearing` QMT row) and `language/pasm2/pollqmt.yaml` state that
+there is no WAITQMT and that Parallax's documents also name it in the clearing list. The
+Assembly Language Reference master (`part-ii/instructions-p.md`) already omits WAITQMT from the list. Filed
+2026-11-08 («#452»).
+
+## E-025 — the PRNG-seeding example writes **SETB**, which is not a PASM2 instruction · `CONFIRMED`
+
+| Side | Document @ edition | Where | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Parallax Propeller 2 Documentation** v35 (Rev B/C silicon; the Silicon Doc) | HUB, "Seeding the Xoroshiro128** PRNG", the example | *"SETB    x,#31   'set the MSB of x to make a PRNG seed command"* | `sources/silicon-doc/silicon-doc-text.txt:2856` |
+| Against | **P2 Instructions v35 - Rev B/C Silicon** (the instruction CSV) | the whole instruction list | no SETB row; the bit-set instruction is BITH (*"Bits D[S[9:5]+S[4:0]:S[4:0]] = 1"*) | `sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv` (BITH row) |
+| Against | **pnut-ts** v1.55.10 | assembling the example | `setb x,#31` refused: *"Expected a unique name, BYTE, WORD, LONG, or assembly instruction"*; the same sequence with `bith x,#31` assembles | `external-sources/compiler-verification/COMPILE-PROOFS.md` CP-039 |
+
+**OUR FINDING.** SETB is not a PASM2 instruction; the seed command sets bit 31 of D with BITH (or
+any instruction that sets D[31]) and then executes HUBSET D. The rest of the paragraph (HUBSET with
+the MSB of D set writes {1'b1, D[30:0]} into 32 of the 128 state bits) stands.
+
+**Evidence tier:** compile proof (CP-039) against the document's example; the instruction CSV has
+no SETB. · **Reached our KB?** **Diverges**: `language/pasm2/hubset.yaml` `examples.seed_prng`
+uses `BITH seedval,#31`, with the document's SETB recorded in its source field. Filed 2026-11-08 («#452»).
 
 ---
 
