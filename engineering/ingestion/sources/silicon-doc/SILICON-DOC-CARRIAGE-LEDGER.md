@@ -84,6 +84,9 @@ two entries, and E-031 came from the disagreement recorded at range 8.
 
 ## Not compared
 
-SD:3032-3037 and SD:3259-3298 (operand figures and block-move tables) are blank in the text extraction,
-so those rows rest on the prose around them. The smart-pin schematics are images only. Both are read from
-the PDF in the sprint.
+SD:3032-3037 and SD:3259-3298 are not blank in the text extraction. SD:3028-3037 carries the
+RDFAST/WRFAST/FBLOCK operand layouts, and SD:3259-3298 the block-move syntax and pointer forms. Both were
+compared against the PDF and against the YAML files in range 5 (`carriage-walk-2026-11-07/range-5.md`, note
+under the title). Only the cell extraction of Tables 31 to 33 is fragmented. The smart-pin schematics are
+images of the pin circuit, the analog mechanism behind the mode text; they carry no contract row, and the
+modes a program selects are all in the text.
