@@ -283,3 +283,4 @@ language/pasm2/muxnibs.yaml
 language/pasm2/pollfbw.yaml
 language/pasm2/fle.yaml
 language/pasm2/setbyte.yaml
+language/pasm2/concepts/pixel_mixer.yaml
