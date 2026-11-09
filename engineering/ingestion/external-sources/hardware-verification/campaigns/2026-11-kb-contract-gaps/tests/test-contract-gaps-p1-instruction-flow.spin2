@@ -1,3 +1,4 @@
+{Spin2_v52}
 '' ===========================================================================
 ''
 ''   File.......  test-contract-gaps-p1-instruction-flow.spin2
@@ -56,7 +57,7 @@ ARM C  Does a pending SETQ survive an instruction cancelled by a false
     Premise      the cancelled MOV writes x; x is cleared first and must
                  still be 0, else that case is a RIG FAIL.
 
-ARM D  The same for AUGS and AUGD.  y = $0246_8BFF augmented, $1FF not.
+ARM D  The same for AUGS and AUGD.  y = $0001_23FF augmented, $1FF not.
     Controls     no cancelled instruction gives the augmented value; no
                  AUGS / AUGD gives $1FF.
     Premise      the cancelled MOV's x, and the LUT long the cancelled WRLUT
@@ -154,7 +155,7 @@ CON ' ---- Rig Parameters ----
   BR_NEAR         = R_V + 4             ' near-branch loop count
   BR_SLOP         = R_V + 5             ' ADDs executed just before cogtop
 
-  AUGV            = ($12345 << 9) | $1FF
+  AUGV            = ($12345 & !$1FF) | $1FF    ' AUGS/AUGD #n keeps bits 31:9 of n
   F_LS            = $0F0                ' LUT slots for arm D (an immediate LUT address stops at 255)
   F_LS2           = $0F1
 
@@ -206,7 +207,7 @@ PUB main()
     arm_g()
     arm_h()
   p0(string("=== END ==="))
-  debug("DEBUG_END_SESSION")
+  debug(DEBUG_END_SESSION)
   repeat
 
 PRI launch(pImg, mode, p1v) : ok | cog, t0

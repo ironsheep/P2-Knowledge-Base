@@ -10,7 +10,7 @@ Four programs. **Bare board, nothing attached, no jumpers.**
    - `pnut-ts -d tests/test-contract-gaps-p2-cog-lifecycle.spin2`
    - `pnut-ts -d tests/test-contract-gaps-p3-coginit-no-free-cog.spin2`
    - `pnut-ts -d tests/test-contract-gaps-p4-rep-skipf.spin2`
-4. Check that the log's `DOWNLOAD TO RAM` line names the program's binary: `test-contract-gaps-p1-instruction-flow.bin` (27,654 bytes from pnut-ts 1.55.10), `test-contract-gaps-p2-cog-lifecycle.bin` (22,506 bytes), `test-contract-gaps-p3-coginit-no-free-cog.bin` (11,240 bytes) or `test-contract-gaps-p4-rep-skipf.bin` (14,134 bytes).
+4. Check that the log's `DOWNLOAD TO RAM` line names the program's binary: `test-contract-gaps-p1-instruction-flow.bin` (27,638 bytes from pnut-ts 1.55.10), `test-contract-gaps-p2-cog-lifecycle.bin` (22,506 bytes), `test-contract-gaps-p3-coginit-no-free-cog.bin` (11,240 bytes) or `test-contract-gaps-p4-rep-skipf.bin` (14,134 bytes).
 5. **Save the whole console output** of each run into `tests/logs/` (create the folder if it is not there). The terminal's own file name is fine.
 6. If no `=== END ===` appears within the hang limit: power-cycle and save the log as it is. That is a hang, not a result.
 
