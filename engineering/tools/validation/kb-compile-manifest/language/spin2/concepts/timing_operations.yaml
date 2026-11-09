@@ -11,7 +11,7 @@ blocks:
     wrap: spin2-top
     assumes: [do_periodic_work()->1/0]
   - at: patterns[1].code
-    fp: "c9f5bea4a8846a5f"
+    fp: "456087dbc3d37245"
     compile: fragment
     wrap: spin2-top
     assumes: [response_ready()->1/0]
@@ -28,12 +28,12 @@ blocks:
     fp: "fa9a400d21e46165"
     compile: program
   - at: patterns[6].code
-    fp: "42dea5f0de2aaee7"
+    fp: "96eba459e2384651"
     compile: fragment
     wrap: spin2-top
     assumes: [handle_timer_expired()->1/1]
   - at: patterns[7].code
-    fp: "44dbc6e7941bb1c1"
+    fp: "f2a2e0eb251e15ad"
     compile: fragment
     wrap: spin2-top
     assumes: [do_work()->1/0]
@@ -43,10 +43,10 @@ blocks:
     wrap: spin2-top
     assumes: [perform_operation()->1/0]
   - at: anti_patterns[0].wrong
-    fp: "460ac9c3f1781899"
+    fp: "9c19630e67ccec31"
     compile: program
   - at: anti_patterns[0].correct
-    fp: "0d4a6be8e2c4ddd5"
+    fp: "44a299ef75ee07ab"
     compile: program
   - at: anti_patterns[1].wrong
     fp: "a12261d942c28073"
@@ -59,12 +59,12 @@ blocks:
     wrap: spin2-top
     assumes: [do_work()->0/0]
   - at: anti_patterns[2].wrong
-    fp: "b2f09bb75f44ea3d"
+    fp: "eabc9ecc97b8eea9"
     compile: fragment
     wrap: spin2-top
     assumes: [sd_busy_released()->1/0, SD_OK=con, ERR_TIMEOUT=con]
   - at: anti_patterns[2].correct
-    fp: "d1a695b6b6c5d04e"
+    fp: "eadbaec8a2fdb9a0"
     compile: fragment
     wrap: spin2-top
     assumes: [sd_busy_released()->1/0, SD_OK=con, ERR_TIMEOUT=con]
@@ -82,7 +82,7 @@ blocks:
     fp: "6b4127e907d2a552"
     compile: program
   - at: anti_patterns[4].correct
-    fp: "1eb688ee7f916d91"
+    fp: "9d6c2554a3d955eb"
     compile: program
   - at: anti_patterns[5].wrong
     fp: "e154d762e1881a6b"
@@ -90,16 +90,16 @@ blocks:
     wrap: spin2-top
     assumes: [request_reading()->0/0, get_reading()->1/0]
   - at: anti_patterns[5].correct
-    fp: "15146d7c412e034b"
+    fp: "0ec8f96bf932237e"
     compile: fragment
     wrap: spin2-top
     assumes: [request_reading()->0/0]
   - at: system_counter.rollover_safe_subtraction
-    fp: "4829c7fd1055a671"
+    fp: "a5cfb9fa0fdd51fb"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: method_selection.description
-    fp: "a2dd92e2b45eb342"
+    fp: "73e54fb24c2422b4"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: time_conversions.formulas[0].formula

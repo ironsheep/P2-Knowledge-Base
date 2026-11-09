@@ -5,27 +5,20 @@ encoding:
   write: —
   c: —
   z: —
-  clocks: '3...10*'
+  clocks: '3...10 / 3...20 (+1 if the word crosses a hub long)'
 timing:
-  cycles: "3...10 (cog) / 3...20 (hub-exec)"
+  cycles: "3...10 (cog or LUT exec) / 3...20 (hub exec)"
   type: variable
   source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (clocks column), p.155"
-  notes: "Hub-window dependent; minimum 3 clocks when window is hit. +1 clock if the word crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
+  notes: "+1 clock if the word crosses a hub long."
 description: Write word in D[15:0] to hub address {#}S/PTRx.
 flags_affected:
   C: No effect
   Z: No effect
 silicon_errata:
-  after_no_wait_rdfast: "Started fewer than 16 clocks after a no-wait RDFAST (D[31]=1), WRWORD can complete before its write lands; if a hub read follows at once, the write is lost or that read returns the previous hub read's long instead. Rule: use the waiting RDFAST (D[31]=0), or start this WRWORD at least 16 clocks after the no-wait RDFAST (e.g. WAITX #12 directly after it). Full account: language/pasm2/rdfast.yaml silicon_errata."
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.155"
+  after_no_wait_rdfast: "In cog execution, started fewer than 16 clocks after a no-wait RDFAST (D[31]=1), WRWORD can complete before its write lands; if a hub read follows at once, the write is lost or that read returns the previous hub read's long instead. Workaround: use the waiting RDFAST (D[31]=0), or start this WRWORD at least 16 clocks after the no-wait RDFAST (e.g. WAITX #12 directly after it). Full account: language/pasm2/rdfast.yaml silicon_errata."
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.155; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), RANDOM ACCESS INTERFACE (the S/#/PTRx operand forms); EF-086 and EF-088 (no-wait RDFAST then WRWORD at word offsets 0 and 2, cog execution, 200 MHz, tested conditions)"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_lsp
-  pattern: D/#,S/#/PTRA/PTRB
-  description: 'Memory operation: destination/immediate, source/immediate/pointer'
-  valueType: 16
-compiler_encoding:
-  operandFormat: 16
 syntax_variants:
 - WRWORD {#}D,{#}S/P
 last_updated: '2025-09-19T16:04:17.097515'
@@ -33,14 +26,13 @@ category: Hub RAM
 oneliner: Write word to hub RAM
 immediate_address_note:
   note: >-
-    A plain immediate source/address operand is limited to 0-255 (the 9-bit S
-    field's bit 8 is the pointer/expression selector, so a literal spans only bits
-    7:0). For 20-bit hub addresses this rarely matters - use a register, a
-    PTRA/PTRB pointer, or the ## augmented form for the full range. This cap is
-    shared across the hub-memory operand family (RDLONG WRLONG RDBYTE WRBYTE RDWORD
-    WRWORD WMLONG) and is felt most with RDLUT/WRLUT, where small LUT addresses are
-    written as bare literals.
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, RANDOM ACCESS INTERFACE (the S/#/PTRx operand: #%0AAAAAAAA 8-bit immediate address versus #%1SUPNNNNN PTR expression)"
+    The S/#/PTRx operand gives the hub address in one of five forms: a register
+    (address $000..$1FF) whose 20 LSBs are used as the hub address; an 8-bit immediate hub
+    address (#$00..$FF); a 20-bit immediate hub address (##$00000..$FFFFF, which
+    invokes AUGS); a PTR expression with a 5-bit scaled index (PTRx {[index5]});
+    or a PTR expression with a 20-bit unscaled index (PTRx {[##index20]}, which
+    invokes AUGS).
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, RANDOM ACCESS INTERFACE (the five ways to express a hub address in the S/#/PTRx operand)"
 
 related:
   - language/pasm2/wrlong.yaml

@@ -3,10 +3,14 @@ syntax: MUXNZ   D,{#}S   {WC/WZ/WCZ}
 category: Math and Logic
 description: >-
   MUXNZ alters the Dest bit(s) designated by Src (high bits) to equal the inverse
-  state of the Z flag. Dest bit(s) described by Src are set to !Z; the rest are left
-  as-is. Flags are optionally updated with parity and zero status of the result.
+  state of the Z flag. D = (!S & D) | (S & {32{!Z}}). Dest bit(s) described by Src
+  are set to !Z; the rest are left as-is.
+  If the WC or WCZ effect is specified, the C flag is set (1) if the number of high
+  (1) bits in the result is odd, or is cleared (0) if it is even.
+  If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero,
+  or is cleared (0) if it is not zero.
 parameters:
-- Dest is the register whose value will have one or more bits set to Z or !Z.
+- Dest is the register whose value will have one or more bits set to !Z.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value identifies
   the bit(s) to modify.
 - WC, WZ, or WCZ are optional effects to update flags.
@@ -16,20 +20,18 @@ flags_affected:
 timing:
   cycles: 2
   type: fixed
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 0101111 CZI DDDDDDDDD SSSSSSSSS
   write: D
   c: parity of result
   z: Result == 0
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, MUXZ / MUXNZ, p.102"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 57 (MUXNZ D,{#}S {WC/WZ/WCZ}: mux !Z into each D bit that is '1' in S, D = (!S & D) | (S & {32{!Z}}), C = parity of result; footnote * Z = (result == 0); 2 clocks; write D)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.37 (MUXNZ D,{#}S {WC/WZ/WCZ}, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, MUXZ / MUXNZ, p.102 (Result line, Dest and Src parameters; encoding row 0101111 CZI, write D, C flag parity of result, Z flag Result = 0, 2 clocks; Dest bits corresponding to high bits in Src are set to the inverse state of Z and all other bits unchanged; C set if the number of high bits in the result is odd; Z set if the result is zero)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 0101111 CZI DDDDDDDDD SSSSSSSSS MUXNZ D,S/# {WC/WZ/WCZ})"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 0
 last_updated: '2025-09-19T16:04:17.304032'
-oneliner: Set discrete bits to Z or !Z
+oneliner: Mux !Z into each D bit that is '1' in S

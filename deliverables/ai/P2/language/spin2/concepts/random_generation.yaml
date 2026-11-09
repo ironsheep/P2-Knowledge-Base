@@ -12,10 +12,9 @@ description: |
   - XORO32: PASM instruction for the same generator in assembly code
 
   Key distinction: GETRND needs no seed and is not repeatable, while ?? is repeatable:
-  the same starting value gives the same sequence (games, simulations, reproducibility).
-  Neither is cryptographic.
+  the same starting value gives the same sequence.
 
-hardware_vs_prng:
+getrnd_vs_xoro32_operator:
   comparison:
     - aspect: "Source"
       getrnd: "The cog's 32 bits of the chip's xoroshiro128** generator, seeded at boot from ADC thermal noise"
@@ -29,18 +28,6 @@ hardware_vs_prng:
     - aspect: "Seeding"
       getrnd: "Not required (the boot ROM seeds the generator)"
       prng: "Required: start the variable at a non-zero value (a zero state is absorbing)"
-    - aspect: "Security"
-      getrnd: "Not cryptographic"
-      prng: "NOT for cryptography"
-
-  when_to_use_getrnd:
-    - "Random values that need no seed and need not repeat"
-    - "Initial PRNG seeding"
-
-  when_to_use_prng:
-    - "Game mechanics (dice rolls, card shuffling)"
-    - "Simulations requiring reproducibility"
-    - "Testing with reproducible sequences"
 
 xoro32_algorithm:
   description: |
@@ -49,10 +36,9 @@ xoro32_algorithm:
     produces. The variable holds the generator state and is updated in place.
 
   properties:
-    - "One XORO32 instruction on the cog"
+    - "Not documented: the XORO32 algorithm's constants, and how the result and the new state are computed from the old state"
     - "Reproducible: the same starting value gives the same sequence"
     - "Seed it with a non-zero value: a zero state is absorbing - with x = 0, ??x returns 0 and x stays 0"
-    - "NOT suitable for cryptography"
 
 common_patterns:
   - pattern: "random_range_0_to_n"
@@ -109,6 +95,10 @@ common_patterns:
         WEIGHT_COMMON   = 70     ' 70% chance
         WEIGHT_UNCOMMON = 90     ' 20% chance
         WEIGHT_RARE     = 100    ' 10% chance
+        ' Result values
+        CATEGORY_COMMON   = 0
+        CATEGORY_UNCOMMON = 1
+        CATEGORY_RARE     = 2
 
       PUB weighted_random() : result | roll
         roll := GETRND() +// 100
@@ -131,8 +121,8 @@ common_patterns:
           LONG[array_ptr][i] := LONG[array_ptr][j]
           LONG[array_ptr][j] := temp
 
-  - pattern: "noise_generation"
-    description: "Generate noise samples for audio/signals"
+  - pattern: "top_byte_sample"
+    description: "Bits 31..24 of a ?? result, minus 128"
     code: |
       VAR
         LONG noise_state
@@ -142,8 +132,8 @@ common_patterns:
         IF noise_state == 0
           noise_state := 1
 
-      PUB white_noise() : sample
-        ' Generate white noise sample (-128 to 127)
+      PUB top_byte_sample() : sample
+        ' bits 31..24 of the ?? result, minus 128
         sample := (??noise_state >> 24) - 128
 
 seeding_strategies:
@@ -194,23 +184,23 @@ anti_patterns:
         IF state == 0
           state := 1         ' Ensure non-zero
 
-  - anti_pattern: "modulo_bias"
+  - anti_pattern: "signed_modulo"
     severity: "moderate"
     description: "// is the signed remainder, so a negative random long gives a negative result"
     wrong: |
       value := GETRND() // 10    ' signed remainder: -9..9
     correct: |
-      value := GETRND() +// 10   ' unsigned remainder: 0..9 (2^32 mod 10 = 6, so residues 0..5 are one count more likely: 429496730 vs 429496729)
+      value := GETRND() +// 10   ' unsigned remainder: 0..9
 
   - anti_pattern: "uninitialized_prng"
     severity: "critical"
     description: "Using PRNG without initialization"
     wrong: |
       VAR
-        LONG prng          ' May be 0!
+        LONG prng          ' Starts at 0 (VAR variables are initialized to zero at run time)
 
       PUB random() : value
-        value := ??prng    ' May always return 0!
+        value := ??prng    ' A zero state returns 0 every time
     correct: |
       VAR
         LONG prng
@@ -224,31 +214,18 @@ anti_patterns:
           initialized := TRUE
         value := ??prng
 
-  - anti_pattern: "reseeding_every_call"
-    severity: "performance"
-    description: "Reseeding PRNG on every call wastes GETRND"
-    wrong: |
-      PUB bad_random() : value
-        seed := GETRND()     ' Reseeds on every call
-        value := ??seed      ' PRNG adds no value
-    correct: |
-      PUB random() : value
-        value := ??state     ' Use existing PRNG state
-
 notes:
   - "Use the unsigned remainder (+//) for range limiting: // is the signed remainder and can return negative values"
-  - "+// 256 and & $FF give identical results for a power-of-two range"
   - "?? operator modifies the variable in-place"
   - "A zero state is absorbing for ??: seed with a non-zero value"
   - "Each cog receives its own 32 bits of the generator's output"
-  - "Use ?? when a reproducible sequence is acceptable or wanted"
-  - "Use GETRND to seed a ?? variable"
+  - "GETRND can supply the seed of a ?? variable"
 
 sources:
-  - "EF-101"
   - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Seeding the Xoroshiro128** PRNG"
   - "Parallax Propeller 2 Spin2 Language Documentation v55, Operators (??var)"
   - "Parallax Propeller 2 Spin2 Language Documentation v55, Math Methods (GETRND)"
+  - "EF-101 (the zero state is absorbing for ?? and XORO32; the recorded ?? and XORO32 results for three nonzero starting states, in its test log, include values with bits set in bits 31..24)"
 
 related:
   - language/spin2/methods/getrnd.yaml
@@ -256,10 +233,5 @@ related:
   - language/pasm2/xoro32.yaml
   - language/pasm2/getrnd.yaml
   - language/spin2/concepts/operators.yaml
-
-see_also:
-  - "Monte Carlo simulation"
-  - "Noise generation"
-  - "Game development"
 
 oneliner: "Random number generation using GETRND (hardware generator, boot-seeded) and the ?? operator (XORO32, repeatable)"

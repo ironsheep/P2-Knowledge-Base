@@ -56,7 +56,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [my_id]
   - at: event_configuration.attention_event.setup_for_interrupt
-    fp: "bf9238dd03bbd379"
+    fp: "018d0fafe44195d9"
     compile: fragment
     wrap: pasm2-dat
   - at: programming_patterns[0].code
@@ -100,3 +100,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [atn_log_ptr, ct]
+  - at: description
+    fp: "947cd52f5df67c32"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

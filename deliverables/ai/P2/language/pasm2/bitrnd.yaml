@@ -17,12 +17,13 @@ description: >-
   AUGS instruction prior.
 
   When Src is a register, the register's value bits [9:0] are used as-is to
-  form the 10-bit ID range, unless a SETQ instruction immediately precedes the
-  BITRND instruction; substituting SETQ's Dest[4:0] in place of value bits[9:5],
-  for BITRND's use.
+  form the 10-bit ID range, unless a prior SETQ overrides value bits[9:5] with
+  the low five bits of the SETQ value. An ALTx between the SETQ and BITRND keeps
+  the override (SETQ #0, ALTB, BITRND forces a single bit), and a SETQ separated
+  from BITRND by other instructions is not documented.
 
   If the WCZ effect is specified, the C and Z flags are updated to the original
-  state of Dest's base bit, identified by Src.
+  state of Dest's base bit, identified by Src. BITRND takes no effect or WCZ.
 result: >-
   Dest bit(s) described by Src are each set randomly low or high; the rest are
   left as-is.
@@ -33,8 +34,8 @@ parameters:
   identifies the bit(s) to modify.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  C: Set to original D[S[4:0]] (original state of base bit before modification)
-  Z: Set to original D[S[4:0]] (original state of base bit before modification)
+  C: With WCZ, set to original D[S[4:0]] (original state of base bit before modification)
+  Z: With WCZ, set to original D[S[4:0]] (original state of base bit before modification)
 syntax_variants:
 - BITRND Dest, {#}Src {WCZ}
 timing:
@@ -46,21 +47,21 @@ encoding:
   c: Original D base bit
   z: Original D base bit
   clocks: '2'
+encoding_notes:
+- BITRND and TESTB with XORC or XORZ share the INSTR field 0100110; the effect bits tell them apart (BITRND no effect = C Z 00, WCZ = 11; TESTB XORC = 10, XORZ = 01). BITRND takes either no effect or WCZ.
+sources:
+  - "encoding row and flags: P2 Instructions v35 - Rev B/C Silicon, row 48 (BITRND: bits D[S[9:5]+S[4:0]:S[4:0]] = RNDs; other bits unaffected; prior SETQ overrides S[9:5]; C,Z = original D[S[4:0]]; 2 clocks; write D); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 0100110 CZI ... BITRND D,S/# {WCZ}; the same INSTR field as TESTB D,S/# XORC/XORZ) and its list of changes (the span of bits, +S[9:5]; prior SETQ overrides S[9:5])"
+  - "description (Src[4:0] and Src[9:5], the WCZ rule, the literal forms, the Xoroshiro128** source): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BITRND, p.54"
+  - "description (SETQ #0 then ALTB then BITxxx forces Src[9:5] to 0): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, pp.38-39; the manual's BITRND text says a SETQ immediately preceding substitutes its Dest[4:0]; a SETQ separated by other instructions is in no source"
+  - "encoding_notes: CP-033 (BITRND assembles as EEEE 0100110 with C Z = 00 with no effect and 11 with WCZ; TESTB XORC/XORZ share 0100110 with C Z = 10/01)"
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BITRND, p.54"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_bitx
-  pattern: D,S/#
-  description: 'Bit manipulation with optional effect flags: Destination register,
-    bit position'
-  valueType: 1
-compiler_encoding:
-  operandFormat: 1
 last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
 oneliner: Set bit(s) random low/high
 related:
-- BITZ
-- BITNZ
-- BITC
-- BITNC
+- language/pasm2/bitz.yaml
+- language/pasm2/bitnz.yaml
+- language/pasm2/bitc.yaml
+- language/pasm2/bitnc.yaml
+- language/pasm2/testb.yaml

@@ -7,6 +7,11 @@ description: >-
   and either stores it as-is, or bitwise ANDs, ORs, or XORs it into C or Z. The pin
   number is specified by Dest[5:0] (0-63). The WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC,
   or XORZ effect determines how the inverted pin state is applied to the selected flag.
+  If the WC or WZ effect is specified, the C or Z flag is overwritten with the inverse
+  state of the pin. If the ANDC or ANDZ effect is specified, the C or Z flag is bitwise
+  ANDed with the inverse state of the pin. If the ORC or ORZ effect is specified, the C
+  or Z flag is bitwise ORed with the inverse state of the pin. If the XORC or XORZ effect
+  is specified, the C or Z flag is bitwise XORed with the inverse state of the pin.
 result: >-
   The inverted state of the I/O pin described by Dest is read and either stored as-is,
   or bitwise ANDed, ORed, or XORed into C or Z.
@@ -17,13 +22,18 @@ parameters:
 flags_affected:
   C: Set to !IN[D[5:0]] (inverted pin state), or AND/OR/XOR with C
   Z: Set to !IN[D[5:0]] (inverted pin state), or AND/OR/XOR with Z
+syntax_variants:
+- TESTPN {#}Dest WC|WZ
+- TESTPN {#}Dest ANDC|ANDZ
+- TESTPN {#}Dest ORC|ORZ
+- TESTPN {#}Dest XORC|XORZ
 timing:
   cycles: 2
   type: fixed
   pin_sampling_latency: |
     TESTPN reads pin state from 2 system-clock cycles BEFORE the instruction starts.
     This is "fresher" data than reading INx registers (which are 3 clocks old).
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZL DDDDDDDDD 001000001
   write: —
   c: '!IN[D[5:0]]'
@@ -31,34 +41,34 @@ encoding:
   clocks: '2'
 - bits: EEEE 1101011 CZL DDDDDDDDD 001000011
   write: —
-  c: C/Z AND !IN[D[5:0]]
-  z: C/Z AND !IN[D[5:0]]
+  c: C AND !IN[D[5:0]]
+  z: Z AND !IN[D[5:0]]
   clocks: '2'
 - bits: EEEE 1101011 CZL DDDDDDDDD 001000101
   write: —
-  c: C/Z OR !IN[D[5:0]]
-  z: C/Z OR !IN[D[5:0]]
+  c: C OR !IN[D[5:0]]
+  z: Z OR !IN[D[5:0]]
   clocks: '2'
 - bits: EEEE 1101011 CZL DDDDDDDDD 001000111
   write: —
-  c: C/Z XOR !IN[D[5:0]]
-  z: C/Z XOR !IN[D[5:0]]
+  c: C XOR !IN[D[5:0]]
+  z: Z XOR !IN[D[5:0]]
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TESTP / TESTPN, p.136; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (in smart pin modes the IN bit serves as a flag)"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, rows 342, 344, 346 and 348 (TESTPN {#}D with WC/WZ, ANDC/ANDZ, ORC/ORZ, XORC/XORZ: test !IN bit of pin D[5:0] and write, AND, OR or XOR it into C/Z; 2 clocks)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin & Smart Pin Instructions, p.40 (TESTPN {#}D with WC/WZ, ORC/ORZ, ANDC/ANDZ and XORC/XORZ, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TESTP / TESTPN, p.136 (the four TESTPN syntax lines, Result line, Dest and required-effect parameters, the four TESTPN encoding rows 001000001 / 001000011 / 001000101 / 001000111, write none, C and Z columns, 2 clocks, Related TESTB and TESTBN, Dest[5:0] pin number 0-63, the WC/WZ, ANDC/ANDZ, ORC/ORZ and XORC/XORZ explanations)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), I/O PIN TIMING (TESTP / TESTPN read the pin state registered two clocks before the instruction starts, fresher than the INx registers, which reflect the pins registered three clocks before; TESTPN {#}D reads pin D bit in !INx and affects C or Z), SMART PINS (in smart pin modes the IN bit serves as a flag), and instruction encoding listing (EEEE 1101011 CZL DDDDDDDDD 001000001 / 001000011 / 001000101 / 001000111 TESTPN D/#, and the same four codes for DIRH, DIRNC, DIRNZ and DIRNOT D/# {WCZ}, used by encoding_notes)"
 documentation_level: comprehensive
 notes:
 - On a pin in a smart-pin mode the IN bit that TESTPN inverts serves as a flag. See architecture/smart_pins.yaml
-compiler_operand_format:
-  name: operand_testp
-  pattern: D/#0..511 WC/ANDC/ORC/XORC | WZ/ANDZ/ORZ/XORZ
-  description: 'Test pin: destination/immediate pin number 0-511 with REQUIRED logic
-    function'
-  valueType: 31
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 31
+encoding_notes:
+- "TESTPN uses the S-field codes 001000001 (WC or WZ), 001000011 (ANDC or ANDZ), 001000101 (ORC or ORZ) and 001000111 (XORC or XORZ), the same codes as DIRH, DIRNC, DIRNZ and DIRNOT. They are separate instructions that take different effects: TESTPN requires one of the eight effects, and the DIRx instructions take no effect or WCZ."
 last_updated: '2025-09-19T16:04:16.995105'
-oneliner: Test pin and either store, AND, OR, or XOR the result or inverse result
-  into C/Z
+oneliner: Test the inverse of the pin state and store, AND, OR or XOR it into C or Z
 related:
-- TESTB
-- TESTBN
+- language/pasm2/testb.yaml
+- language/pasm2/testbn.yaml
+- architecture/io_pin_timing.yaml
+- language/pasm2/testp.yaml

@@ -1,38 +1,38 @@
 method: RDPIN
 type: method
 description: |
-  Read smart pin result and clear IN flag (acknowledge)
+  Read smart pin result and acknowledge the smart pin
 category: Smart Pin Operations
-syntax: "result := RDPIN(PinField)"
+syntax: "result := RDPIN(Pin)"
 parameters:
-  - name: "PinField"
-    type: "pin_field"
-    description: "Pin number (0-63) or pin field expression"
+  - name: "Pin"
+    type: "long"
+    description: "Pin number (0-63)"
 returns:
   type: "long"
   description: "32-bit result with bit 31 containing the pin's C flag state"
 examples:
   - code: |
-      ' Read ADC result from pin 16
-      adc_value := RDPIN(16)
-    description: "Read ADC conversion result"
+      ' Read pin 16's smart pin result with bit 31 (the C flag) masked off
+      adc_value := RDPIN(16) & $7FFF_FFFF
+    description: "Read the result bits of pin 16"
   - code: |
-      ' Read pulse width measurement
-      width := RDPIN(8) & $7FFF_FFFF  ' Mask off C flag
-    description: "Read pulse width, remove C flag"
+      ' Read pin 8's result and mask off bit 31
+      width := RDPIN(8) & $7FFF_FFFF
+    description: "Read the result bits of pin 8"
   - code: |
       ' Check C flag while reading
       value := RDPIN(pin)
-      if value < 0  ' C flag was set (bit 31)
-        ' Handle C flag condition
+      if value < 0  ' bit 31 is set: the C flag was set
+        value &= $7FFF_FFFF
     description: "Read value and check C flag state"
 notes:
-  - "Clears the smart pin's IN flag after reading"
+  - "Acknowledges the smart pin, which lowers its IN signal"
   - "Bit 31 of result contains the pin's C flag state"
-  - "Lower 31 bits contain the smart pin measurement/result"
-  - "Reading acknowledges the smart pin, allowing next measurement"
-  - "Use RQPIN to read without acknowledging"
-  - "Smart pin must be configured with WRPIN/WXPIN/WYPIN first"
+  - "The other bits contain the smart pin's result"
+  - "RQPIN reads without acknowledging"
+  - "Not documented: the value RDPIN returns from a smart pin in an ADC mode or in asynchronous receive mode before that pin has completed its first sample period or received its first word"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Pin Methods (RDPIN (Pin) : Zval, read Pin smart pin and acknowledge, Zval[31] = C flag from RDPIN, other bits are RDPIN data); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (RDPIN or AKPIN causes the smart pin to lower its IN signal)"
 timing:
   execution_model: |
     Spin2 methods execute via the bytecode interpreter. Method-call clock count: not documented.

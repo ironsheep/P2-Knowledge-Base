@@ -23,6 +23,7 @@ x_register:
   function: "Base period for transitions"
   X[15:0]: "Period in clocks between transitions"
   timing: "Each edge occurs after X[15:0] clocks"
+  base_period_counter: "The base-period counter decrements and reloads continuously from the moment the smart pin is out of reset; all transition outputs are synchronized to this free-running base period"
 
 y_register:
   function: "Number of transitions"
@@ -31,7 +32,7 @@ y_register:
   note: "Y=2 creates one complete cycle"
   y_zero: "Y=0 leaves the pin idle (no transitions). It does NOT generate a continuous wave -- for a free-running square wave use an NCO mode (%00110/%00111)."
 
-z_register: "Not used"
+z_register: "Not documented: a Z (RDPIN/RQPIN) result for this mode"
 
 in_flag: "Raised when Y transitions complete"
 
@@ -42,7 +43,7 @@ pin_behavior:
   reset_state: "IN=0, output=0, Y=0"
   output_control: "Toggles on each transition"
   final_state: "Holds last state after completion"
-  timing: "Starts at next base period after Y written"
+  timing: "Starts at the next base period of the free-running base-period counter after Y is written; the time from the write to that first base period boundary is not documented"
 
 # Complete Spin2 Example
 spin2_complete: |
@@ -124,9 +125,9 @@ pasm2_complete: |
           RET
   
   ' Variables
-  pin           RES   1
   period        LONG  1000
   count         LONG  16
+  pin           RES   1
 
 # Inline PASM2 in Spin2
 spin2_inline: |
@@ -147,22 +148,14 @@ transition_counting: |
 
 init_order: |
   General smart-pin init order: reset (PINCLEAR/DIRL) -> setup (WRPIN/WXPIN)
-  -> ENABLE (PINHIGH/DIRH) -> OPERATE (WYPIN). For trigger modes like %00101 the
-  Y-write MUST come AFTER enable -- Y is held 0 during reset, so writing Y while
-  still disabled never triggers. NOTE: pinstart() writes Y before raising DIR, so
-  it is UNSAFE for the trigger modes (%00100/%00101); use the explicit sequence.
+  -> enable (PINHIGH/DIRH) -> operate (WYPIN). For trigger modes like %00101 the
+  Y write comes after enable -- Y is held 0 during reset, so writing Y while
+  still disabled never triggers. PINSTART writes Y before raising DIR, so its
+  Yval does not trigger the trigger modes (%00100/%00101); use the explicit sequence.
 
 synchronization: |
-  Perfect for clock generation
-  Commonly paired with sync serial modes
+  The transition output can supply the clock for a sync serial pin
   Start after data pin configured
-
-common_uses:
-  - "Clock generation for sync serial"
-  - "Stepper motor stepping"
-  - "Square wave generation"
-  - "Pulse train output"
-  - "Bit-banged protocol clocking"
 
 related:
   - "00100 (Pulse)"
@@ -176,3 +169,8 @@ related:
   - architecture/boot-rom/spi-flash-boot.yaml
   - code-examples/flash-loader-case-study.yaml
   - architecture/smart-pins/spi-implementation-guide.yaml
+
+sources:
+  - "operation, x_register, y_register, in_flag, pin_behavior, base_period_counter: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%00101 transition output)"
+  - "init_order (Y write after enable): EF-011"
+  - "y_register.y_zero (Y = 0 leaves the pin idle): EF-010"

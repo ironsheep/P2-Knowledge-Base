@@ -24,9 +24,10 @@ boot_sequence:
     p63: "Serial in -- 'the Propeller 2 can be loaded via asynchronous serial stream into P63'"
     p62: "Serial out -- \"The loader's response messages are sent back serially over P62 at the same baud rate that the sender used.\" P62 is normally driven continuously during the serial protocol, but will go into open-drain mode when either the INA or INB mask of a command is non-0 (for multiprogramming)."
 
-  line_format: "8 data bits, no parity, 1 stop bit, 9,600 to 2,000,000 baud. The signal should be inverted; start bit is low, stop bit is high, and data bits are high for 0 and low for 1."
+  line_format: "8 data bits, no parity, 1 stop bit, 9,600 to 2,000,000 baud, asynchronous serial into P63. The start bit is low and the stop bit is high."
 
   timing:
+    source: "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Download Propeller Application, p.61"
     loader_active: "Unless forbidden by the Boot Pattern or preempted by a program in an SPI memory chip, the serial loader becomes active within 15ms of reset being released."
     short_window: "100 ms -- the serial window that precedes a flash boot attempt."
     long_window: "60 s -- the serial-primary window, and the fallback window after a failed flash or microSD boot."
@@ -42,16 +43,16 @@ auto_baud_detection:
   supported_rates:
     minimum: "9600 baud"
     maximum: "2 Mbaud"
-    common: [9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600, 1000000, 2000000]
 
 protocol_commands:
   source: "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Download Propeller Application (Serial Loading Protocol Commands), p.61; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SERIAL LOADING PROTOCOL"
   whitespace: "Whitespace is required between command keywords and data. TAB ($09), LF ($0A), CR ($0D), SPACE ($20) and '=' ($3D, Base64 padding), singly or in any contiguous combination, constitute a single whitespace."
-  chip_identifier: "Each command keyword is followed by four 32-bit hex values <INAmask> <INAdata> <INBmask> <INBdata>; the normal case is zeros for each, which talks to any and all connected chips."
+  chip_identifier: "Each command keyword is followed by four 32-bit hex values <INAmask> <INAdata> <INBmask> <INBdata>; the normal case is zeros for each, which talks to any and all connected chips. A chip whose INA and INB ports do not match the received mask and data values waits for another command."
 
   prop_chk:
     syntax: "Prop_Chk <INAmask> <INAdata> <INBmask> <INBdata>"
-    response: "CR+LF+\"Prop_Ver\"+SPACE+<version_character>+CR+LF, where <version_character> is \"A\"..\"Z\" and indicates the version of Propeller 2. The Rev B/C silicon responds with \"G\" (A-F were FPGA builds)."
+    response: "CR+LF+\"Prop_Ver\"+SPACE+<version_character>+CR+LF, where <version_character> is \"A\"..\"Z\" and indicates the version of Propeller 2. The Rev B/C silicon responds with \"G\". The letters \"A\" to \"F\" identify FPGA images and \"G\" identifies Propeller 2 silicon."
+    source: "Parallax Propeller 2 ROM Booter v33_01j, CON block (ver = \"A\" Prop123-A9 / BeMicro-A9 8 cogs, \"B\" DE2-115, \"C\" DE0-Nano, \"D\" BeMicro-A2, \"E\" Prop123-A7, \"F\" Prop123-A9 / BeMicro-A9 16 cogs, \"G\" Prop2 Silicon v2) and text_ver (the Prop_Ver reply)"
     purpose: "Verify the Propeller 2 connection and retrieve its version"
     exchange: "Sender: \"> Prop_Chk 0 0 0 0\"+CR / Loader: CR+LF+\"Prop_Ver G\"+CR+LF"
 
@@ -62,17 +63,17 @@ protocol_commands:
     purpose: "Update the clock source, as if HUBSET ##$0xxxxxxx were executed"
     response: "A '.' immediately for a valid command; then the loader switches to the internal 20 MHz clock, sets the desired configuration (except mode), waits about 5 ms for the clock hardware to settle, and enables the desired clock mode. The sender should wait an additional 10 ms, then send '> ' to adjust the baud rate to the new clock configuration."
     example: "Set PLL to 148.5 MHz: Sender: \"> Prop_Clk 0 0 0 0 19D28F8\"+CR / Loader: \".\" / Sender: (wait about 10 ms) / Sender: \"> Prop_Clk 0 0 0 0 19D28FB\"+CR / Loader: \".\". Return to the boot clock: \"> Prop_Clk 0 0 0 0 F0\"+CR / Loader: \".\""
+    initial_clock_command: "An initial 'Prop_Clk 0 0 0 0 F0' is not required: the clock circuit starts up in that mode."
     note: "If an image is loaded after switching to a PLL clock mode different from the mode that image uses, the image may need to issue HUBSET #$F0 before switching to its clock mode; or use the same clock configuration as the image."
 
   prop_hex:
     syntax: "Prop_Hex <INAmask> <INAdata> <INBmask> <INBdata> <hexdatabytes> ~ | ?"
-    format: "whitespace-separated raw hex bytes (NOT Intel HEX)"
+    format: "whitespace-separated hex bytes"
     purpose: "Load byte data into hub starting at $00000, then execute"
     terminator: "~ executes unconditionally; ? validates an embedded checksum first"
     data_format: |
-      Raw hex byte values separated by whitespace.
+      Hex byte values separated by whitespace.
       Only the bottom 8 bits of each hex value are used as data.
-      No record structure, no address fields, no per-record checksums.
     embedded_checksum: |
       Optional: include a checksum-complement long computed as $706F7250
       ('Prop' read as a little-endian long) minus the sum of all data longs. It
@@ -80,10 +81,19 @@ protocol_commands:
       With a '?' terminator the loader sends '.' for a valid checksum (then runs
       the code) or '!' for an invalid one (then waits for another command).
     example: "Prop_Hex 0 0 0 0 FB F7 23 F6 FD FB 23 F6 25 26 80 FF 1F 80 66 FD F0 FF 9F FD ~"
-    
+    example_program: |
+      DAT
+              org
+              not     dirb                    ' all outputs
+      .lp     not     outb                    ' toggle the states
+              waitx   ##20_000_000/4          ' wait a quarter second
+              jmp     #.lp                    ' loop
+    example_program_bytes: "The program above assembles to the 20 bytes FB F7 23 F6 FD FB 23 F6 25 26 80 FF 1F 80 66 FD F0 FF 9F FD (five little-endian longs)."
+
   prop_txt:
     syntax: "Prop_Txt <INAmask> <INAdata> <INBmask> <INBdata> <base64chrs> ~ | ?"
     format: "Base64 encoded binary (A-Z, a-z, 0-9, +, /), six bits per character, assembled into bytes as received"
+    alphabet: "'A'..'Z' = $00..$19; 'a'..'z' = $1A..$33; '0'..'9' = $34..$3D; '+' = $3E; '/' = $3F"
     purpose: "Like Prop_Hex, but delivers Base64 data; this format is 2.25x denser than hex"
     terminator: "~ runs the image without verification; ? verifies the checksum, responds, then runs it"
 
@@ -94,7 +104,7 @@ protocol_commands:
     features:
       - "Whitespace among Base64 characters is ignored"
       - "While waiting for a new command, Base64 data destined for another chip is ignored, because each command keyword contains an underscore, an illegal Base64 character"
-    exchange: "Sender: \"> Prop_Txt 0 0 0 0 +/cj9v37I/YlJoD/H4Bm/fD/n/0 ~\" (the Prop_Hex example program); with the checksum complement appended and a '?' terminator: \"> Prop_Txt 0 0 0 0 +/cj9v37I/YlJoD/H4Bm/fD/n/0k2KCJ ?\" / Loader: \".\""
+    exchange: "Sender: \"> Prop_Txt 0 0 0 0 +/cj9v37I/YlJoD/H4Bm/fD/n/0 ~\" (the same 20-byte image as the Prop_Hex line); with the checksum complement appended and a '?' terminator: \"> Prop_Txt 0 0 0 0 +/cj9v37I/YlJoD/H4Bm/fD/n/0k2KCJ ?\" / Loader: \".\""
 
 response_codes:
   dot: "'.' - a valid Prop_Clk command was accepted; or a Prop_Hex/Prop_Txt checksum was valid (when terminated with '?')"
@@ -117,8 +127,8 @@ loading_process:
     base64_mode:
       - "Decode Base64 stream"
       - "Write to hub memory"
-      - "Stop on '~' character"
-      
+      - "Stop on '~' (run) or '?' (verify the embedded checksum, then run or wait for another command)"
+
   execution:
     checksum: "Only with a '?' terminator: the embedded checksum-complement long is verified"
     start_address: "$00000 in hub"
@@ -126,12 +136,16 @@ loading_process:
 
 multi_chip_support:
   ina_masking:
-    description: "Use INA pattern to select specific chip"
-    pins: "P31-P0 state must match"
-    
+    description: "The INA mask and data values select a chip by its P31-P0 states"
+    pins: "P31-P0"
+
   inb_masking:
-    description: "Use INB pattern to select specific chip"
-    pins: "P63-P32 state must match"
+    description: "The INB mask and data values select a chip by its P63-P32 states"
+    pins: "P63-P32"
+
+  non_matching_chip: "A chip that receives mask and data values which do not match its own INA and INB ports waits for another command."
+
+  loading_many_chips: "Many chips can be loaded from the same serial signal by giving each a different INA/INB signature and not connecting SPI memory chips or SD cards to P61..P58."
 
   ina_limit: "INA[1:0] (P0 and P1) cannot be matched: the loader configures them as smart pins monitoring P63 for automatic baud detection, so all ID patterns are valid using pins P2 and beyond."
 
@@ -166,7 +180,7 @@ terminal_software:
   requirements:
     - "ASCII terminal mode"
     - "8N1 format (8 bits, no parity, 1 stop)"
-    - "CR line endings"
+    - "No line-ending convention is required: TAB, LF, CR, SPACE and '=' are each whitespace, so PC, Mac and Unix new-line differences do not matter"
 
   terminal_software_named:
     claim: "For the interactive mode (P2 Monitor / TAQOZ), the Datasheet names Parallax Serial Terminal, TeraTerm and RealTerm as serial terminal software, with character echo disabled."
@@ -179,10 +193,8 @@ validation_format:
     worked_sum: "A 5-long image summing to $E6CE9A2C has complement $706F7250 - $E6CE9A2C = $89A0D824, sent as the bytes 24 D8 A0 89"
 
 special_features:
-  debug_friendly: "Plain text protocol"
-  human_readable: "Can type commands manually"
-  error_recovery: "Non-destructive errors"
-  clock_switching: "Can change frequency before loading"
+  human_readable: "Commands can be typed in a terminal program on a PC connected to the Propeller 2"
+  clock_switching: "The Prop_Clk command changes the clock setting before a program is loaded"
 
 related_components:
   boot_rom: "Contains serial loader code"

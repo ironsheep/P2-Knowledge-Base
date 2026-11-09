@@ -5,89 +5,69 @@ description: Three distinct memory spaces where code can execute with different 
 
 overview: |
   The P2 supports three execution modes based on where instructions are fetched from: Register (cog RAM),
-  Lookup (LUT RAM), and Hub (shared memory). Each mode has unique performance characteristics, capacity
-  limits, and use cases. Code can seamlessly transition between modes using branches and calls.
+  Lookup (LUT RAM), and Hub (shared memory). Each mode has its own timing and capacity
+  limits. Code moves between modes with a branch; rolling the PC from $3FF to $400 does not start hub execution.
 
 execution_modes:
   register_execution:
     name: "Register Execution (cogexec)"
     memory: "Cog RAM"
     address_range: "$000-$1FF (0-511)"
-    capacity: "512 longs (2KB)"
+    capacity: "512 longs"
     performance:
-      - typical_instruction: "2 clocks (deterministic) for ALU ops (ADD, MOV, etc.)"
+      - typical_instruction: "2 clocks for ALU ops (ADD, MOV, etc.) when the pipeline is full"
       - branch_instruction: "4 clocks (JMP, CALL, RET)"
-      - deterministic: "Always 2 clocks per typical instruction; no hub-window dependency"
-      - pipeline: "Full speed, no stalls"
+      - stalls: "An instruction that stalls for additional clocks stalls all following instructions in the pipeline"
     characteristics:
-      - "Fastest deterministic execution mode"
-      - "Completely deterministic timing"
+      - "2 clocks for typical ALU instructions and 4 clocks for a branch"
       - "Limited to 512 instructions"
       - "Private to each cog"
       - "Can read/write itself as data"
-    typical_uses:
-      - "Time-critical drivers"
-      - "Interrupt handlers"
-      - "Inner loops"
-      - "Real-time control"
     entry: "JMP/CALL to $000-$1FF"
 
   lookup_execution:
     name: "Lookup Execution (lutexec)"
     memory: "LUT RAM"
     address_range: "$200-$3FF (512-1023)"
-    capacity: "512 longs (2KB)"
+    capacity: "512 longs"
     performance:
-      - typical_instruction: "2 clocks (deterministic) for ALU ops"
+      - typical_instruction: "2 clocks for ALU ops when the pipeline is full"
       - branch_instruction: "4 clocks (JMP, CALL, RET)"
-      - deterministic: "Always 2 clocks per typical instruction; no hub-window dependency"
-      - pipeline: "Full speed, no stalls"
+      - stalls: "An instruction that stalls for additional clocks stalls all following instructions in the pipeline"
     characteristics:
-      - "Same speed as register execution"
-      - "Completely deterministic timing"
+      - "Same speed as register execution: 2 clocks for typical ALU instructions and 4 clocks for a branch"
       - "Additional 512 instructions"
-      - "Private to each cog"
+      - "Each cog has its own lookup RAM; an adjacent paired cog can be allowed to write into it (SETLUTS)"
       - "Can be used as data lookup table"
-      - "Shared with streamer/colorspace operations"
-    typical_uses:
-      - "Extension of cog code space"
-      - "Lookup tables (when not executing)"
-      - "Fast subroutines"
-      - "Code that needs cog+LUT space"
+      - "Lookup RAM can be streamed to DACs and pins or the HDMI modulator"
     entry: "JMP/CALL to $200-$3FF"
 
   hub_execution:
     name: "Hub Execution (hubexec)"
     memory: "Hub RAM"
-    address_range: "$00400-$FFFFF (1024-1048575) — cannot host hubexec at $00000-$003FF"
-    capacity: "512KB total hub memory"
+    address_range: "$00400-$FFFFF (1024-1048575) — cannot host hubexec at $00000-$003FF. Parallax's documents also give $7FFFF as the top of the range."
+    capacity: "On the 512 KB silicon, hub RAM is $00000..$7FFFF; the top 16 KB is also addressable at $FC000..$FFFFF. $80000..$FBFFF reads $00; with the top 16 KB hidden from its normal range, $7C000..$FBFFF reads $00."
+    source: "P2 Instructions v35 Rev B/C Silicon, ADD/MOV/NOP rows (hub execution mode: same as cog execution), RDLONG/WRLONG/JMP rows (hub execution values); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Hub Execution, p.21 (PC range $00400 to $7FFFF); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Hub Execution, p.15 (PC range $00400 to $7FFFF); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB RAM (hub memory map table,the P2X8C4M64PES row: lower RAM $00000..$7FFFF, gap $80000..$FBFFF reads $00, top 16KB $FC000..$FFFFF; and the paragraph on the last 16KB being addressable at both its normal range and $FC000..$FFFFF); THE COG -to- HUB RAM INTERFACE (each cog accesses the next RAM slice at every clock; a cog waits up to #cogs-1 clocks for its initial slice)"
     performance:
-      - sequential_instruction: "2 clocks per instruction (FIFO streaming — SAME as cogexec)"
-      - branch_instruction: "Minimum 13 clocks (+1 if target not long-aligned)"
-      - egg_beater: "8-cycle hub rotation per slot, 8 cogs"
-      - fifo_depth: "(cogs+11) = 19 stages on 8-cog P2"
-      - fifo_refill_threshold: "Loads continuously when fewer than (cogs+7) = 15 stages filled"
-      - typical_for_streaming_code: "2 clocks per instruction — IDENTICAL to cogexec"
-      - typical_for_branch_heavy_code: "Body cost + 13+ clocks per branch"
+      - sequential_instruction: "ALU instructions such as ADD, MOV and NOP take 2 clocks in hub execution, the same as in cog execution. Not documented: the clocks per sequential instruction in hub execution as a general rule; each instruction's own hub-execution clocks are in its instruction row (RDLONG 9...26, WRLONG 3...20)."
+      - branch_instruction: "Minimum 13 clocks (+1 if target not long-aligned); 13...20"
+      - hub_slice_access: "Each cog can access the next hub RAM slice at every clock; a cog waits up to cogs-1 clocks to reach its initial slice, then reads or writes one long per clock"
+      - fifo_depth: "The FIFO contains (cogs+11) stages"
+      - fifo_refill_threshold: "The FIFO loads continuously whenever fewer than (cogs+7) stages are filled"
+      - branches: "A branch to a hub address takes a minimum of 13 clocks"
     characteristics:
-      - "Large code space"
-      - "Shared between all cogs"
-      - "Sequential timing matches cogexec; branch timing non-deterministic (FIFO refill window)"
-      - "19-stage prefetch FIFO ensures sequential code runs at full pipeline speed"
-      - "Can execute very large programs"
+      - "Code space is hub RAM from $00400 up"
+      - "Hub RAM is shared between all cogs"
+      - "A branch takes 13...20 clocks"
+      - "When executing from hub RAM the cog employs the FIFO hardware to spool up instructions so that a stream of instructions is available for continuous execution"
     forbidden_instructions:
       rationale: "FIFO is dedicated to instruction prefetch in hubexec"
-      list: ["RDFAST", "WRFAST", "FBLOCK", "RFBYTE", "RFWORD", "RFLONG", "RFVAR", "RFVARS", "WFBYTE", "WFWORD", "WFLONG", "XINIT", "XZERO", "XCONT (when streamer engages FIFO)"]
+      list: ["RDFAST", "WRFAST", "FBLOCK", "RFBYTE", "RFWORD", "RFLONG", "RFVAR", "RFVARS", "WFBYTE", "WFWORD", "WFLONG", "XINIT / XZERO / XCONT (when the streamer mode engages the FIFO)"]
       source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION"
     works_in_hubexec_with_caveats:
-      REP: "Works, but executes a hidden jump to get back to the top of the repeated instructions. Each iteration's hidden jump costs 13+ clocks (hub branch)."
+      REP: "Works, but executes a hidden jump to get back to the top of the repeated instructions. Not documented: the cost of the hidden jump."
       ALTx_family: "None of the ALTx instructions (ALTI/ALTS/ALTD/ALTR/ALTB/ALTSN/ALTSB/ALTSW/ALTGN/ALTGB/ALTGW) is in the hub-execution forbidden list, so they are not excluded from hubexec."
       source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION"
-    typical_uses:
-      - "Application logic"
-      - "High-level code"
-      - "Large programs"
-      - "Non-timing-critical code"
     entry: "JMP/CALL to $400+"
 
 mode_transitions:
@@ -116,28 +96,30 @@ mode_transitions:
 
 performance_comparison:
   instruction_timing:
-    register_exec: "2 clocks per typical ALU instruction (deterministic)"
-    lookup_exec: "2 clocks per typical ALU instruction (deterministic)"
-    hub_exec_sequential: "2 clocks per instruction (FIFO streaming — SAME as cog/LUT)"
+    register_exec: "2 clocks per typical ALU instruction"
+    lookup_exec: "2 clocks per typical ALU instruction"
+    hub_exec_sequential: "ALU instructions such as ADD, MOV and NOP take 2 clocks, the same as in cog/LUT execution. Not documented: the clocks per sequential instruction in hub execution as a general rule."
     hub_exec_branch: "Minimum 13 clocks (+1 if target not long-aligned)"
 
   branch_penalties:
-    within_cog: "4 clocks total for the branch instruction (per jmp/call/ret YAMLs)"
-    within_lut: "4 clocks total for the branch instruction"
-    within_hub: "Minimum 13 clocks (+1 if target not long-aligned). Range 13-20 in YAML; minimum 13."
+    within_cog: "4 clocks for the branch instruction"
+    within_lut: "4 clocks for the branch instruction"
+    within_hub: "13...20 clocks for a branch executed from hub; a branch to a hub address takes a minimum of 13 clocks, one more if the target is not long-aligned"
+    source: "P2 Instructions v35 Rev B/C Silicon, JMP/CALL/RET rows (4 cog / 13...20 hub); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION"
     cog_to_hub: "Minimum 13 clocks (entering hub-exec triggers FIFO load)"
-    hub_to_cog: "4 clocks (cog branch timing, no FIFO concern)"
+    hub_to_cog: "13...20 clocks for a branch instruction executed from hub. Not documented: a separate figure for a branch whose target is in cog or LUT."
 
-  determinism:
-    cog_lut: "100% deterministic for ALU ops; branches always 4 clocks"
-    hub: "Sequential code is deterministic at 2 clocks/instruction; branch refill cost depends on hub-window alignment (13 minimum, +1 if not long-aligned, +up to ~6 hub-window slip)"
+  clocks_by_mode:
+    cog_lut: "ALU ops take 2 clocks; a branch executed from cog/LUT takes 4 clocks"
+    hub: "ALU instructions such as ADD, MOV and NOP take 2 clocks; a branch executed from hub takes 13...20 clocks, one more if the target is not long-aligned"
 
 memory_organization:
   address_space:
     $000_$1FF: "Cog RAM (register execution)"
     $200_$3FF: "LUT RAM (lookup execution)"
     $400_$7FFFF: "Hub RAM (hub execution)"
-    $80000_$FFFFF: "Usually ROM/Boot (hub execution)"
+    $80000_$FBFFF: "Reads $00 on a 512KB part; $7C000_$FBFFF reads $00 when the top 16KB is hidden from its normal range"
+    $FC000_$FFFFF: "Top 16KB of hub RAM (also addressable at its normal range, $7C000_$7FFFF on a 512KB part), hub execution"
 
   overlapping_uses:
     cog_ram:
@@ -147,40 +129,38 @@ memory_organization:
     lut_ram:
       - "Instructions (when executing)"
       - "Lookup tables"
-      - "Streamer data"
-      - "HDMI color tables"
+      - "Streamer data (lookup RAM can be streamed to DACs and pins or the HDMI modulator)"
 
 fifo_operation:
   hub_execution_fifo:
     purpose: "Prefetch hub instructions for hubexec"
-    depth: "(cogs+11) = 19 stages on 8-cog P2"
-    refill_threshold: "Loads continuously when fewer than (cogs+7) = 15 stages filled"
+    depth: "The FIFO contains (cogs+11) stages"
+    refill_threshold: "The FIFO loads continuously whenever fewer than (cogs+7) stages are filled"
     overflow_margin: "After threshold reached, up to 5 more longs may stream in, potentially filling all (cogs+11) stages"
     operation:
-      - "Automatically prefetches during hub execution at 2-clock instruction throughput"
-      - "Reloads on branches at minimum 13-clock cost (+1 if target not long-aligned)"
-      - "In hubexec, FIFO is dedicated to instruction prefetch — cannot also be used for streamer transfers"
+      - "Spools up instructions during hub execution so that a stream of instructions is available for continuous execution"
+      - "A branch to a hub address takes a minimum of 13 clocks (+1 if target not long-aligned)"
+      - "In hubexec, the FIFO is dedicated to instruction prefetch — it cannot be used for anything else, which is why XINIT/XZERO/XCONT are barred when the streamer mode engages the FIFO"
     control_in_cogexec_only:
       - "RDFAST to configure for streamer reads"
       - "WRFAST to configure for streamer writes"
       - "FBLOCK for block operations"
-      - "These FIFO control instructions are FORBIDDEN in hubexec"
-    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION; HUB, FAST SEQUENTIAL FIFO INTERFACE"
+      - "These FIFO control instructions cannot be used in hubexec"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION; HUB, FAST SEQUENTIAL FIFO INTERFACE (the FIFO contains (cogs+11) stages; loads continuously whenever fewer than (cogs+7) stages are filled); P2 Instructions v35 Rev B/C Silicon, ADD/MOV/NOP rows (hub execution mode: same as cog execution), RDLONG/WRLONG/JMP rows"
 
 code_organization:
   mixed_mode:
-    strategy: "Combine modes for optimal performance"
     example: |
-      ' Hub execution for main logic
+      ' Hub execution: the main loop
       main_loop
-        CALL #\critical_driver  ' Call cog routine
-        ' Non-critical processing
+        CALL #\cog_driver  ' Call a routine in cog RAM; its longs must already have been loaded into cog RAM at cog_driver (see loading_code)
+        ' (other main-loop instructions run from hub RAM)
         JMP #main_loop
-      
-      ' Cog execution for timing-critical
+
+      ' Cog execution: the called routine, assembled for cog address 0
       ORG 0
-      critical_driver
-        ' Deterministic code here
+      cog_driver
+        ' (routine body runs from cog RAM)
         RET
 
   loading_code:
@@ -191,36 +171,16 @@ code_organization:
       SETQ2 #511              ' Load 512 longs  
       RDLONG 0, hub_addr      ' LUT[0..511] from hub (first LUT long is 0, not $200)
 
-best_practices:
-  mode_selection:
-    - "Use cog/LUT for timing-critical code"
-    - "Use hub for large programs"
-    - "Keep interrupt handlers in cog"
-    - "Use LUT for fast lookup tables"
-
-  optimization:
-    - "Align hub code to long boundaries"
-    - "Group related hub code for FIFO efficiency"
-    - "Minimize mode transitions in hot paths"
-    - "Use REP loops in cog/LUT for speed"
-
-  memory_usage:
-    - "Reserve cog space for drivers"
-    - "Use LUT for extended cog code"
-    - "Keep frequently-called functions in cog/LUT"
-    - "Use hub for application logic"
+timing_notes:
+  hub_and_rep:
+    - "A branch to a hub address that is not long-aligned takes one additional clock"
+    - "REP repeats instructions without branching delays in cog/LUT memory; in hub memory it executes a hidden jump on each repeat"
 
 debugging:
   mode_awareness:
-    - "PC indicates current mode"
-    - "$000-$3FF = cog/LUT execution"
+    - "The PC range gives the mode"
+    - "$000-$1FF = cog register execution; $200-$3FF = LUT execution"
     - "$400+ = hub execution"
-    - "Return addresses encode mode"
-
-  timing_analysis:
-    - "Cog/LUT timing is predictable"
-    - "Hub timing varies with access patterns"
-    - "Use CT registers for measurements"
 
 hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 

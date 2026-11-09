@@ -3,5 +3,5 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "6b36783e43a25fe7"
+    fp: "fc346626e60c8316"
     compile: program

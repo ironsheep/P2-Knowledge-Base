@@ -9,8 +9,7 @@ detailed_description:
   operation: |
     Level-sensitive counter that counts system clock cycles while inputs are high. When Y[0]=0,
     counts only while A-input is high. When Y[0]=1, increments while A-input high and decrements
-    while B-input high. Useful for duty cycle measurement, pulse width timing, or time-based
-    accumulation. Counts every clock cycle, not edges.
+    while B-input high. Counts every clock cycle, not edges.
   
   timing: |
     Continuous mode (X=0): Z register always holds current clock count
@@ -23,7 +22,7 @@ registers:
     bits_31_0: "Measurement period in clocks (0=continuous totalizer)"
   y_register:  
     bit_0: "0=count A-high only, 1=inc on A-high/dec on B-high"
-    bits_31_1: "Unused"
+    bits_31_1: "Not documented: a role for Y[31:1] in this mode"
   z_register:
     function: "32-bit clock count (unsigned if Y[0]=0, signed if Y[0]=1)"
 
@@ -47,43 +46,32 @@ code_examples:
         repeat
           ' Wait for measurement complete
           repeat until pinr(signal_pin)
-          high_time := rdpin(signal_pin)         ' Clocks while high
+          high_time := rdpin(signal_pin) & $7FFF_FFFF   ' Clocks while high; clear bit 31, where RDPIN() puts C
           
           ' Calculate duty cycle percentage
           duty_percent := muldiv64(high_time, 100, _clkfreq)   ' 64-bit intermediate: high_time * 100 overflows 32 bits
           debug("Duty cycle: ", udec(duty_percent), "%")
       
       DAT
-      ' PASM2 pulse width measurement
+      ' PASM2 high-time measurement over a 1-second window
         org
         dirl    #signal_pin                      ' Reset smart pin
         wrpin   ##P_COUNT_HIGHS, #signal_pin
-        wxpin   #0, #signal_pin                  ' Continuous mode
+        wxpin   ##_clkfreq, #signal_pin          ' Periodic mode: 1-second measurement period
         wypin   #0, #signal_pin                  ' Count A-high only
         dirh    #signal_pin                      ' Enable counter
-      .wait_low
-        testp   #signal_pin wz                   ' Wait for low
-        if_nz   jmp #.wait_low
-      .wait_high  
-        testp   #signal_pin wz                   ' Wait for high
-        if_z    jmp #.wait_high
-        akpin   #signal_pin                      ' Clear counter
-      .wait_low2
-        testp   #signal_pin wz                   ' Wait for low again
-        if_nz   jmp #.wait_low2
-        rdpin   pulse_width, #signal_pin         ' Read pulse width
-
-common_applications:
-  - "Duty cycle measurement"
-  - "Pulse width measurement in clock cycles"
-  - "Active time accumulation"
-  - "PWM signal analysis"
+      .wait_done
+        testp   #signal_pin wc                   ' IN is the smart pin's flag, raised at the end of the period
+        if_nc   jmp #.wait_done
+        rdpin   high_clocks, #signal_pin         ' Clocks A was high in the period; RDPIN acknowledges the pin
+        jmp     #.wait_done                      ' Wait for the next period
+      high_clocks   res 1
 
 related_modes:
   - "Mode %10001: Time consecutive highs"
   - "Mode %10000: Time state durations"
   - "Mode %01110: Count edges (not level-sensitive)"
-  - "Mode %01100: Gated edge counter"
+  - "Mode %01100: Count A-input positive edges when B-input is high"
 
 configuration_constants:
   mode_constant: "P_COUNT_HIGHS"
@@ -92,17 +80,22 @@ configuration_constants:
     - "P_PLUS1_B - Use next pin for decrement signal"
     - "P_INVERT_A - Count while A low instead of high"
     - "P_INVERT_B - Decrement while B low"
-    - "P_FILT1_AB - Add filtering to reduce glitches"
+    - "P_FILT1_AB - Filter the A and B inputs using the global filt1 settings"
 
 notes:
   - "Counts clock cycles, not edges - level sensitive"
   - "Y[0]=0: Simple high-time accumulator"
   - "Y[0]=1: Differential time accumulator"
-  - "Perfect for precise pulse width measurement"
+  - "In a smart pin mode IN is the pin's flag, not its logic level: TESTP on this pin reads the flag. AKPIN and RDPIN lower the flag"
   - "32-bit counter allows ~21 seconds at 200MHz before overflow (2^32 clocks / 200_000_000 = 21.5 s; the count is a 32-bit value)"
   - "The Y written before DIRH (as in the PASM2 example) is in force after DIRH: this mode is order-safe, so Y may be written before or after DIRH"
+  - "In periodic mode all events get counted across measurements: the accumulator is set to the 0/1/-1 value that would otherwise have been added into it. During reset (DIR=0), IN is low and Z is set to the adder value (0/1/-1)"
+  - "The Spin2 example reads the count with RDPIN() & $7FFF_FFFF: the Spin2 RDPIN() method returns the C flag in bit 31. With Y[0]=0 and a period X below $8000_0000 the count is at most X, so bit 31 of Z is 0 and the mask keeps the whole count. A count that can reach bit 31 (continuous mode, or Y[0]=1 where it can go negative) is read with inline PASM2 RDPIN, which reads all 32 bits of Z. Not documented: the C flag of RDPIN in this mode."
 # Source (32-bit count note): Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Smart Pins, %01111
 
 sources:
-  - "notes (32-bit count): Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Smart Pins, %01111"
+  - "notes (IN is a flag, acknowledged by RDPIN/AKPIN; Z unaffected): Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (IN signal and acknowledgement) and SMART PIN MODES (%01111)"
+  - "notes (32-bit count; periodic accumulator and reset adder value): Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Smart Pins, %01111"
+  - "operation (counts while the A input is high, every clock): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%01111 AND !Y.[0] = Count A-input highs; %01111 AND Y.[0] = Increment on A-input high and decrement on B-input high)"
+  - "notes (Spin2 RDPIN() bit 31): Parallax Propeller 2 Spin2 Language Documentation v55, smart pin methods (RDPIN (Pin) : Zval, Zval[31] = C flag from RDPIN, other bits are RDPIN data); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (C is either a mode-related flag or the MSB of the Z result)"
   - "EF-097 (Y-before-DIRH order-safety bench-measured on one board, one Y value for this mode)"

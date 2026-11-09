@@ -13,17 +13,21 @@ description: Mix bytes of S into bytes of D, using SETPIX and SETPIV values.
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.158"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.158; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), PIXEL OPERATIONS (formula and Table 13, MIXPIX: DMIX by M[5:3], SMIX by M[2:0], the eight codes)"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:
-  operandFormat: 0
 syntax_variants:
 - MIXPIX D,{#}S
 last_updated: '2025-09-19T16:04:17.635318'
 category: Pixel Mixer
 oneliner: Mix bytes of S into bytes of D, using SETPIX and SETPIV values
+mixer_values:
+  DMIX: "selected by M[5:3]"
+  SMIX: "selected by M[2:0]"
+  codes_for_each_field: "%000 = $00, %001 = $FF, %010 = V, %011 = !V, %100 = S[byte], %101 = !S[byte], %110 = D[byte], %111 = !D[byte]"
+  per_byte: "D[byte] = ((D[byte] * DMIX + S[byte] * SMIX + $FF) >> 8) max $FF"
+  M: "the MIXPIX mode M[5:0] set by SETPIX"
+  V: "the blend factor V[7:0] set by SETPIV"
+related:
+- language/pasm2/concepts/pixel_mixer.yaml
+- language/pasm2/setpix.yaml
+- language/pasm2/setpiv.yaml

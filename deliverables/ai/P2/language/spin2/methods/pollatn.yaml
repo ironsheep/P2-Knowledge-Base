@@ -37,7 +37,7 @@ notes:
   - "Non-blocking alternative to WAITATN"
   - "Returns immediately with TRUE/FALSE"
   - "Clears ATN flag if it was set"
-  - "Another cog uses COGATN to send the signal"
+  - "COGATN sends the signal, from another cog or from this cog itself (CogMask naming this cog)"
   - "Useful for cooperative multitasking"
   - "Can be used in main loop for interrupt-like behavior"
 timing:
@@ -45,6 +45,9 @@ timing:
     Spin2 methods execute via the bytecode interpreter. Method-call clock count: not documented.
   underlying_pasm: "POLLATN"
   underlying_pasm_timing: "2 clocks (fixed)"
+sources:
+  - "returns: Parallax Propeller 2 Spin2 Language Documentation v55, POLLATN() (AtnFlag = -1 if ATN strobed or 0 if not strobed)"
+  - "notes (a cog's own COGATN sets its flag): EF-099"
 
 related:
   - WAITATN

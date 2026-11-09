@@ -1,13 +1,8 @@
 # Spin2-PASM2 Integration Patterns - Complete Reference  
 # Source: Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE and CALLING PASM FROM SPIN2
-# Layer 1: Direct statements of the Spin2 documentation
 
 
-# Findability index (2026-09-05). This file named itself in no
-# top-level field, so neither it nor anything it documents was reachable by
-# name through the published index -- only by guessing its camelCase key.
-# An alias is a lookup key, never a definition; every name below is defined
-# in this file.
+# An alias is a lookup key, never a definition.
 aliases:
   - "Spin2 PASM2 integration"
   - "mixing Spin2 and PASM2"
@@ -17,7 +12,7 @@ aliases:
 spin2_pasm2_integration:
   schema_version: "1.0.0"
   source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE and CALLING PASM FROM SPIN2"
-  total_patterns: 15
+  total_patterns: 13
   integration_types: 5
   
   # Complete integration pattern definitions
@@ -28,7 +23,7 @@ spin2_pasm2_integration:
       integration_type: "inline_pasm"
       description: "Direct inline assembly within Spin2 methods using ORG...END blocks"
       spin2_constructs: ["ORG", "END", "RET", "method variables"]
-      pasm2_instructions: ["MOV", "ADD", "SHL", "RET", "CALL"]
+      pasm2_instructions: ["MOV", "ADD", "SHL", "RET"]
       syntax_examples:
         - spin2_code: |
             PUB calculate(a, b) : result | temp
@@ -44,11 +39,7 @@ spin2_pasm2_integration:
             ' Variables automatically mapped:
             ' a → $1E0, b → $1E1, result → $1E2, temp → $1E3
           explanation: "Variables automatically copied to/from cog registers $1E0-$1EF"
-      use_cases:
-        - "High-performance calculations within Spin2 methods"
-        - "Direct hardware register access from high-level code"
-        - "Critical timing sections requiring assembly speed"
-    
+
     - integration_id: "variable_mapping"
       integration_type: "inline_pasm"
       description: "Automatic mapping of first 16 method variables to cog registers"
@@ -71,14 +62,10 @@ spin2_pasm2_integration:
             ' All symbolic names resolve to $1E0-$1EF registers
             ' Changes automatically copied back to hub
           explanation: "First 16 LONG variables automatically accessible in PASM"
-      use_cases:
-        - "Seamless data exchange between Spin2 and PASM"
-        - "High-performance parameter processing"
-        - "Direct register manipulation of method variables"
-    
+
     - integration_id: "org_placement"
       integration_type: "inline_pasm"
-      description: "Flexible ORG placement for code organization and memory management"
+      description: "ORG with an optional start register and limit places inline PASM code in cog registers"
       spin2_constructs: ["ORG", "ORG address", "ORG start, limit"]
       pasm2_instructions: ["memory layout control"]
       syntax_examples:
@@ -95,11 +82,7 @@ spin2_pasm2_integration:
               ORG $100, $120        ' Start $100, limit $120
                 ' High memory code
               END
-          explanation: "Control exactly where PASM code loads in cog registers"
-      use_cases:
-        - "Memory optimization in complex methods"
-        - "Avoiding conflicts with multiple PASM sections"
-        - "Strategic register usage for performance"
+          explanation: "ORG sets the first cog register the PASM code is assembled into and, as a second value, the limit it must not pass"
 
     # Method Call Integration
     - integration_id: "call_cog_registers"
@@ -126,12 +109,8 @@ spin2_pasm2_integration:
             ' REGLOAD copies the chunk (two header words, then the code) into cog registers starting at $080
             ' CALL(#label) is a blocking call: execution does not
             ' return to the caller until the PASM code executes RET
-          explanation: "# prefix with a label calls PASM code by cog register address. CALL(#label) with a bare numeric literal (e.g. CALL(#$080)) is not accepted by the compiler -- always call through a label. CALL blocks the calling code until the target returns; it does not start a background task (use COGINIT for that)."
-      use_cases:
-        - "Calling PASM routines loaded into cog registers"
-        - "Interrupt service routine setup"
-        - "Performance-critical repeated operations"
-    
+          explanation: "# prefix with a label calls PASM code by cog register address. CALL(#label) with a bare numeric literal (e.g. CALL(#$080)) is not accepted by the compiler -- always call through a label. CALL blocks the calling code until the target returns; it does not start a background task (COGINIT starts a cog)."
+
     - integration_id: "call_hub_ram"
       integration_type: "method_calls"
       description: "Call PASM code stored in hub RAM using @ addressing"
@@ -142,21 +121,16 @@ spin2_pasm2_integration:
             DAT
             hubCode
               MOV OUTA, #$FF
-              WAITX ##1000          ' delay in clock cycles (WAITUS is Spin2-only, not a PASM instruction)
+              WAITX ##1000          ' waits 2 + D clocks
               MOV OUTA, #$00
               RET                   ' return to the calling Spin2 code
 
             PUB example()
               CALL(@hubCode)        ' Call hub-based PASM
           pasm2_code: |
-            ' Runs in hub execution mode
-            ' Full instruction set available
-            ' Slower but more flexible
+            ' Runs in hub execution mode, straight from hub RAM
+            ' Hub-exec limitations apply (no RDFAST, XINIT, etc.)
           explanation: "@ prefix indicates hub RAM address"
-      use_cases:
-        - "Large PASM routines that don't fit in cog"
-        - "Shared PASM code between multiple cogs"
-        - "Complex algorithms requiring full instruction set"
 
     # Register Management Integration  
     - integration_id: "regload_chunks"
@@ -166,10 +140,11 @@ spin2_pasm2_integration:
       pasm2_instructions: ["any PASM code/data"]
       syntax_examples:
         - spin2_code: |
-            PUB loadCode()
+            PUB loadCode() : r
               REGLOAD(@mathChunk)    ' Load into specified registers
               CALL(#codeStart)       ' Call loaded code (CALL does not return a value;
-                                      ' read mresult separately if you need it)
+                                      ' the PASM code leaves its result in PR0)
+              r := PR0               ' Spin2 reads PR0 directly
 
             DAT
             mathChunk
@@ -178,20 +153,15 @@ spin2_pasm2_integration:
             codeStart
               MOV temp, #42
               MUL temp, #17
-              MOV mresult, temp
+              MOV PR0, temp
               RET
             temp long 0
-            mresult long 0
             codeEnd
           pasm2_code: |
             ' Chunk format: WORD startReg, numRegs-1
             ' Followed by actual code/data
-          explanation: "Load arbitrary code/data to any cog registers. CALL() is a statement, not a function -- it cannot be used in an assignment (`x := CALL(...)` fails to compile); call it as a statement and read any result through a register the PASM code writes to."
-      use_cases:
-        - "Dynamic code loading"
-        - "Multiple PASM routines in single method"
-        - "Optimized register usage strategies"
-    
+          explanation: "Load arbitrary code/data to any cog registers. CALL() is a statement, not a function -- it cannot be used in an assignment (`x := CALL(...)` fails to compile); call it as a statement and read any result through PR0, a register both PASM and Spin2 code can read and write."
+
     - integration_id: "regexec_immediate"
       integration_type: "register_access"
       description: "Load and immediately execute PASM chunks"
@@ -205,8 +175,8 @@ spin2_pasm2_integration:
 
             DAT
             timerChunk
-              WORD $118, setupEnd-setupStart-1
-              ORG $118
+              WORD $100, setupEnd-setupStart-1
+              ORG $100
             setupStart
               MOV IJMP1, #timerISR
               GETCT PR0
@@ -218,18 +188,14 @@ spin2_pasm2_integration:
               ADDCT1 PR0, ##1_000_000
               RETI1
             setupEnd
-          explanation: "Combines REGLOAD and CALL for setup operations"
-      use_cases:
-        - "Interrupt handler installation"
-        - "Hardware initialization routines"
-        - "One-time configuration code"
+          explanation: "Combines REGLOAD and CALL: the chunk is loaded into cog registers and then executed"
 
     # Data Sharing Integration
     - integration_id: "bitfield_access"
       integration_type: "data_sharing"
       description: "Access individual bits and bit ranges in Spin2 variables"
       spin2_constructs: ["variable.[bit]", "variable.[high..low]"]
-      pasm2_instructions: ["TESTB", "BITL", "BITH", "GETBITS"]
+      pasm2_instructions: []
       syntax_examples:
         - spin2_code: |
             VAR
@@ -240,55 +206,47 @@ spin2_pasm2_integration:
               status.[31] := 0             ' Clear bit 31
               config.[15..8] := $FF        ' Set bits 15-8
               
-              IF status.[5]                ' Test bit 5 (Spin2 has no THEN keyword)
+              IF status.[5]                ' Test bit 5 (an IF takes no THEN)
                 config.[23..16] := status.[7..0]  ' Copy bit range
-          pasm2_code: |
-            ' Equivalent PASM operations:
-            ' BITL status, #0    (clear bit)
-            ' BITH status, #0    (set bit)
-            ' TESTB status, #5   (test bit)
           explanation: "Bit-level access to any variable from Spin2"
-      use_cases:
-        - "Hardware register manipulation"
-        - "Flag and status bit management"  
-        - "Packed data structure access"
-    
+
     - integration_id: "struct_field_access"
       integration_type: "data_sharing"
-      description: "Access named structure fields and pass a field's address by reference"
-      spin2_constructs: ["{Spin2_v45}", "CON STRUCT name(fields)", "structvar.field", "@structvar.field"]
-      pasm2_instructions: ["RDLONG", "WRLONG", "address arithmetic"]
+      description: "Access named structure fields and pass a structure's address to a method that takes a structure pointer"
+      spin2_constructs: ["{Spin2_v45}", "CON STRUCT name(fields)", "structvar.field", "@structvar", "^structname pointer parameter"]
+      pasm2_instructions: []
       syntax_examples:
         - spin2_code: |
             {Spin2_v45}
             CON
-              STRUCT point(x, y)         ' Define a named structure (v45+)
+              STRUCT point(x, y)         ' Define a named structure
 
             PUB example() | point p
               p.x := 100
               p.y := 200
 
-              processPoint(@p.x)         ' Pass field address by reference
+              processPoint(@p)           ' Pass the structure's address
 
-            PUB processPoint(px)
-              LONG[px] += 50              ' Modify through pointer
-          explanation: "STRUCT (introduced in Spin2 v45, requires the {Spin2_v45} version-gate comment) defines named fields on a structure variable; @structvar.field yields the field's hub address for pass-by-reference. This is unrelated to the separate FIELD-pointer mechanism (^@variable / FIELD[fieldpointer]), which addresses arbitrary bit-ranges, not named structure fields, and does not use dot-field syntax."
+            PUB processPoint(^point pp)  ' pp is a pointer to a point structure
+              pp.x += 50                 ' Members are accessed the same way through the pointer
+          explanation: "The STRUCT keyword needs {Spin2_v45} or later. STRUCT defines named fields in a CON block; a structure variable is declared in a VAR block, in a DAT block (its contents filled in on the lines that follow), or in a PUB/PRI header as a parameter, return value or local. A structure's base address is passed with @, and a parameter declared ^structname is a structure pointer; structures and structure pointers access members the same way. The separate FIELD-pointer mechanism (^@variable and FIELD[fieldpointer]) returns a field pointer for any hub byte, word or long, or for registers, including any bitfield."
+          source: "Parallax Propeller 2 Spin2 Language Documentation v55, Document Status, v45 row (STRUCT in CON blocks; structure variables declared in VAR blocks, in PUB/PRI blocks as parameters, return values and locals, and in DAT blocks filled in on trailing lines; ^structname pointer variables)"
 
     # Cog Interface Integration
     - integration_id: "cog_startup_pasm"
       integration_type: "cog_interface"
       description: "Start dedicated PASM cogs from Spin2"
-      spin2_constructs: ["COGINIT", "COGSTOP", "@pasm_code"]
+      spin2_constructs: ["COGINIT", "@pasm_code"]
       pasm2_instructions: ["full PASM program", "cog initialization", "GETCT", "ADDCT1", "WAITCT1"]
       syntax_examples:
         - spin2_code: |
             DAT
             pasmCog
               ORG 0
-              MOV dira, ##$FF000000
+              MOV dira, ##$FF000000   ' Pins 24-31 are outputs
             mainLoop
               GETCT ctval
-              ADD outa, #1
+              ADD outa, ##$0100_0000  ' Increment the top byte of OUTA, pins 24-31
               ADDCT1 ctval, ##160_000_000
               WAITCT1
               JMP #mainLoop
@@ -300,12 +258,8 @@ spin2_pasm2_integration:
           pasm2_code: |
             ' Full PASM cog running independently
             ' Starts at hub address, copies to cog
-          explanation: "Dedicated PASM cogs for parallel processing. P2 has no WAITCNT instruction and no 'cnt' system register (both are P1-only) -- periodic timing on P2 uses GETCT to sample the free-running system counter, ADDCT1 to set the next CT1 target, and WAITCT1 to wait for it."
-      use_cases:
-        - "Parallel processing tasks"
-        - "Real-time signal processing"
-        - "Independent hardware control"
-    
+          explanation: "COGINIT starts a PASM program in its own cog. The compiler refuses a WAITCNT instruction and a 'cnt' register -- periodic timing on P2 uses GETCT to sample the free-running system counter, ADDCT1 to set the next CT1 target, and WAITCT1 to wait for it."
+
     - integration_id: "shared_memory_access"
       integration_type: "cog_interface" 
       description: "Share data between Spin2 and PASM cogs via hub RAM"
@@ -336,11 +290,7 @@ spin2_pasm2_integration:
               JMP #loop
             ptr_cmd long 0
             temp long 0
-          explanation: "Hub RAM variables accessible to all cogs. COGINIT's third argument is delivered directly into the new cog's PTRA register (Spin2 COGINIT(CogNum,PASMaddr,PTRAvalue)) -- there is no 'par' register on P2 (that is a P1-only concept), so PTRA is used as-is rather than copied from anything."
-      use_cases:
-        - "Inter-cog communication"
-        - "Shared data processing"
-        - "Command/status protocols"
+          explanation: "Hub RAM variables accessible to all cogs. COGINIT's third argument is delivered directly into the new cog's PTRA register (Spin2 COGINIT(CogNum,PASMaddr,PTRAvalue)) -- the compiler refuses a 'par' register in PASM, so PTRA is used as-is."
 
     # Advanced Integration Patterns
     - integration_id: "mixed_execution_modes"
@@ -353,25 +303,23 @@ spin2_pasm2_integration:
             DAT
             fastCode     ' Loads into cog registers
               ORG 0
+            fastLoop
               REP @endFast, ##1000  ' repeat the instructions up to endFast, 1000 times
                 MOV outa, ina
             endFast
-              JMP #\@slowCode       ' Jump to the hub copy of the code
+              JMP ptra              ' PTRA holds the run-time hub address of slowCode
 
+              ORGH
             slowCode     ' Runs from hub
-              CALL #\@complexMath   ' Hub subroutine
-              JMP #\@fastCode       ' Back to the hub copy of fastCode
+              CALL #complexMath     ' Hub subroutine, a relative call
+              JMP #\fastLoop        ' Back to the cog code at cog address 0
 
             complexMath
               RET
 
             PUB start()
-              COGINIT(COGEXEC_NEW, @fastCode, 0)  ' Start in a free cog, cog mode
-          explanation: "Strategic use of both execution modes for optimization. REP's repeat-count (S) operand needs the ## prefix for values above 511 (a single # only encodes a 9-bit immediate); complexMath must be a defined label, since RET has nothing to return to otherwise."
-      use_cases:
-        - "Performance optimization"
-        - "Memory usage optimization"
-        - "Mixed speed/complexity requirements"
+              COGINIT(COGEXEC_NEW, @fastCode, @slowCode)  ' Start in a free cog, cog mode, with slowCode's hub address in PTRA
+          explanation: "Cog code jumps to hub code and back. The cog code ends with JMP ptra: COGINIT's third argument is delivered into the new cog's PTRA, so the Spin2 @slowCode operator supplies the run-time hub address. In a Spin2 object no immediate form of a hub label gives that address (see hub_address_resolution below), so the address is passed in rather than written as an immediate. Branches between hub labels, such as CALL #complexMath, are relative and need no address. The jump back to a cog address is absolute: JMP #\\fastLoop assembles to cog address 0. REP's repeat-count (S) operand needs the ## prefix for values above 511 (a single # only encodes a 9-bit immediate); complexMath must be a defined label, since RET has nothing to return to otherwise."
     
     - integration_id: "interrupt_coordination"
       integration_type: "cog_interface"
@@ -403,10 +351,13 @@ spin2_pasm2_integration:
               ORG $110
             intStart
               MOV IJMP1, #handler
-              SETINT1 #EVENT_CT1
+              GETCT PR0                 ' Get the system counter
+              ADDCT1 PR0, ##10_000_000  ' Set the first CT1 target
+              SETINT1 #1                ' Interrupt 1 on the CT-passed-CT1 event
               RET
 
             handler
+              ADDCT1 PR0, ##10_000_000  ' Set the next CT1 target
               ' Set flag for Spin2
               MOV temp, ##-1
               WRLONG temp, shared_flag_addr
@@ -414,31 +365,25 @@ spin2_pasm2_integration:
             temp long 0
             shared_flag_addr long 0
             intEnd
-          explanation: "Interrupts handled in PASM, communicate with Spin2. A DAT-block PASM fragment cannot reach a Spin2 VAR by its bare name or by ##hubsymbol (see hub_address_resolution below) -- the caller pokes the real hub address of shared_flag into shared_flag_addr before REGEXEC starts the handler. A single # cannot hold a negative immediate (0..511 only); ##-1 is required."
-      use_cases:
-        - "Real-time event processing"
-        - "Hardware interrupt handling"
-        - "Time-critical response coordination"
+          explanation: "Interrupts handled in PASM, communicate with Spin2. A DAT-block PASM fragment cannot reach a Spin2 VAR by its bare name (the compiler refuses it), and in a Spin2 object no immediate form of a hub label gives a run-time hub address (see hub_address_resolution below) -- the caller pokes the real hub address of shared_flag into shared_flag_addr before REGEXEC starts the handler. A single # cannot hold a negative immediate (0..511 only); ##-1 is required."
 
 # Memory Layout Reference
 memory_layout:
   cog_registers:
-    user_code: "$000-$11F (288 longs) - Available for PASM code"
-    interpreter: "$120-$1D7 - Spin2 interpreter (DO NOT TOUCH)"
-    general_purpose: "$1D8-$1DF - PR0-PR7 (8 longs)"
-    method_variables: "$1E0-$1EF - First 16 method variables (16 longs)"
+    user_code: "$000-$11F - Free cog registers for PASM code"
+    interpreter: "$120-$1D7 - Occupied by the Spin2 interpreter"
+    general_purpose: "$1D8-$1DF - PR0-PR7, general-purpose registers available to both PASM and Spin2 code"
+    method_variables: "$1E0-$1EF - The method's first 16 long variables"
     special_registers: "$1F0-$1FF - IJMP, IRET, PA, PB, INA, etc."
   
   lut_space:
-    user_available: "$000-$00F (16 longs) - Available for user code/data"
-    interpreter: "$010-$1FF - Spin2 interpreter (DO NOT TOUCH)"
+    user_available: "$000-$00F - Available for any use"
+    interpreter: "$010-$1FF - Occupied by the Spin2 interpreter"
   
   hub_ram:
-    method_space: "Method variables beyond first 16"
-    dat_blocks: "PASM code and data for hub execution"
-    shared_data: "Variables accessible to all cogs"
+    method_variables: "The method's first 16 long variables are held in hub RAM; in-line PASM copies them to cog registers $1E0..$1EF and back"
 
-# Critical Integration Rules
+# Integration rules
 integration_rules:
   variable_access:
     rule: "Only first 16 method variables automatically mapped to cog registers"
@@ -448,25 +393,24 @@ integration_rules:
   execution_context:
     inline_pasm: "Runs in current cog, returns to Spin2 method"
     cog_call: "Runs in the calling cog and blocks the caller until the PASM code executes RET (CALL starts no background task)"
-    hub_call: "Runs in hub execution mode, slower but more flexible"
+    hub_call: "Runs in hub execution mode, straight from hub RAM"
     
   hub_address_resolution:
-    rule: "INSIDE A SPIN2 OBJECT, HUB ADDRESSES IN A DAT BLOCK ARE RELATIVE TO THE OBJECT, AND NO IMMEDIATE FORM GIVES A HUB SYMBOL'S RUNTIME HUB ADDRESS. `##hubsymbol` assembles to $400 plus an offset, the same value whichever object it is in, so the PASM reads other memory and returns garbage. `#hubsymbol` and `#\\hubsymbol` from cog code assemble to that value too. `##@hubsymbol` and `LONG @hubsymbol` assemble to the offset from the start of the object."
+    rule: "Inside a Spin2 object, hub addresses in a DAT block are relative to the object, and no immediate form gives a hub symbol's run-time hub address. `##hubsymbol` assembles to $400 plus an offset, the same value whichever object it is in, so the PASM reads other memory and returns garbage. `#hubsymbol` and `#\\hubsymbol` from cog code assemble to that value too. `##@hubsymbol` and `LONG @hubsymbol` assemble to the offset from the start of the object."
     cog_symbols: "A symbol defined under ORG and used as a cog address is unaffected: `#cogsym` and `##cogsym` assemble to its cog address."
     correct_in: "A PASM-only file, where hub addresses are absolute: `##hubsym` and `##@hubsym` are both correct."
     at_at: "`@@x` is the hub address of this object + x, for a stored offset read in a Spin2 method. The compiler rejects it in a DAT block, as `##@@sym` and as `LONG @@sym`."
-    why_it_bites: "A PASM fragment copied out of a guide or reference into a Spin2 object — which is how most P2 code is written — carries this defect invisibly. It assembles, it runs, and it reads the wrong memory."
+    why_it_bites: "A PASM fragment copied out of a guide or reference into a Spin2 object carries this defect invisibly. It assembles and reads the wrong memory."
     workaround: "Pass hub addresses in from Spin2 with `@`: COGINIT(COGEXEC_NEW, @entry, @buffer) puts @buffer in the new cog's PTRA. In a Spin2 method, `@@table[i]` converts a stored offset first."
-    behaviour: "`@disp` reports $1AF9 from Spin2 while `##disp` gives $0651 from PASM in the same object — 5,288 bytes apart."
+    behaviour: "`@disp` reports $1AF9 from Spin2 while `##disp` gives $0651 from PASM in the same object."
     source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (hub addresses in Spin2+PASM and in PASM-only programs), Operators (@@); EF-060 (real P2 silicon); CP-030"
 
   memory_safety:
-    cog_limits: "$000-$11F safe for user code, $120+ reserved"
-    lut_limits: "$000-$00F safe for user, $010+ reserved"
-    hub_safety: "All hub RAM accessible, coordinate shared access"
-    
+    cog_limits: "Cog registers $000-$11F are free for in-line PASM code; $120-$1D7 are occupied by the Spin2 interpreter"
+    lut_limits: "LUT $000-$00F is free for any use; LUT $010-$1FF is occupied by the Spin2 interpreter"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE (free cog registers $000..$11F; LUT $000..$00F available for any use; the interpreter occupies registers $120..$1D7 and LUT $010..$1FF)"
+
   performance_considerations:
-    cog_execution: "2 clocks per typical ALU instruction; 4 clocks per branch (per per-instruction YAMLs)"
-    hub_execution: "Sequential code: 2 clocks/instruction (same as cogexec via the (cogs+11)=19-stage prefetch FIFO). Branches: minimum 13 clocks (+1 if not long-aligned)."
-    variable_access: "$1E0-$1EF fastest, hub variables slower"
-    source: "hub_execution: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION (branch to a hub address: minimum 13 clocks, one more if not long-aligned); the (cogs+11)-stage FIFO: the same document, the hub FIFO interface description (three ways the FIFO can be used: hub execution, streamer, software)"
+    cog_execution: "With the execution pipeline full, an instruction takes as little as 2 clocks. A branch flushes the pipeline, so the first instruction after it takes at least 4 clocks. Parallax's documents also give at least 5 clocks."
+    hub_execution: "The cog spools instructions up through the FIFO for continuous execution. The FIFO contains (cogs+11) stages. Branching to a hub address takes a minimum of 13 clocks, one more if the target is not long-aligned. ALU instructions such as ADD, MOV and NOP take 2 clocks in hub execution, the same as in cog execution. Not documented: the clocks per sequential instruction in hub execution as a general rule."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION (the FIFO spools up instructions for continuous execution; branching to a hub address takes a minimum of 13 clocks, one more if not long-aligned); the pipelined execution description (as little as two clock cycles per instruction when the pipeline is full; the first instruction after a branch takes at least four); the same sentence in the Propeller 2 Documentation v35 (Rev B/C Silicon) pipeline description, the Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Execution, p.14, and the Propeller 2 Hardware Manual, Instruction Pipeline, p.16 (at least five clock cycles); the FIFO description (the FIFO contains (cogs+11) stages); the register order of method variables (parameters, then return values, then locals, from $1E0): CP-053 (inline variable registers) and Parallax Spin2 Interpreter v55 (2026.05.07), inline entry (loads the first 16 local variables from hub RAM into the buffer registers at $1E0); WAITX waits 2 + D clocks: P2 Instructions v35 Rev B/C Silicon, WAITX row; ADD, MOV and NOP in hub execution: the same document, those rows (hub execution mode: same as cog execution); compiler refusals and the decoded jump word: CP-046 (CALL operands), CP-047 (VAR name in DAT), CP-048 (9-bit immediate range), CP-049 (WAITCNT, cnt, par), CP-051 (IF with THEN), CP-052 (hub-to-cog jump words)"

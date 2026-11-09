@@ -17,19 +17,17 @@ description: 'Release LOCK D[3:0]. If D is a register and WC, get current/last c
 
   Key features:
 
-  - Releases previously acquired lock
+  - Releases a lock taken by LOCKTRY; only the cog that has taken the lock can release
+  it
 
-  - Optional owner identification with WC
-
-  - Essential for proper resource cleanup
-
-  - Must balance with LOCKTRY calls
+  - Optional lock status and owner identification with WC
 
   '
 flags_affected:
   C: 'When WC: C = 1 if lock is currently taken (last/owner state)'
   Z: No effect
 documentation_level: comprehensive
+documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LOCKS, Using Locks; P2 Instructions v35 - Rev B/C Silicon, LOCKREL row"
 examples:
 - name: Basic Lock Release
   description: Release lock after resource access
@@ -78,17 +76,9 @@ related_instructions:
 - LOCKRET: Return lock to pool
 - COGID: Get current COG ID
 notes:
-- Always release locks when done
 - WC option reports whether the lock is taken (C) and the current/last owner cog ID (a register D)
-- Releasing unheld lock is safe (no-op)
-- Critical for preventing deadlocks
-compiler_operand_format:
-  name: operand_l
-  pattern: D/#0..511
-  description: Destination or immediate value 0-511
-  valueType: 26
-compiler_encoding:
-  operandFormat: 26
+- If the cog executing LOCKREL with WC is also the cog holding the lock, the lock is released
+- A held lock is also released when its holding cog is stopped by COGSTOP or restarted by COGINIT, or when LOCKRET is executed for the lock
 last_updated: '2025-09-19T16:04:17.105107'
 category: Hub Control
 oneliner: Release LOCK

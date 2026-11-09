@@ -40,17 +40,17 @@ blocks:
     wrap: pasm2-dat
     assumes: [timeout]
   - at: programming_patterns[0].code
-    fp: "6bae18ff08b3cce8"
+    fp: "5e05fc68e9b47919"
     compile: fragment
     wrap: pasm2-dat
     assumes: [timeout]
   - at: programming_patterns[1].code
-    fp: "84ad23454bcdcfd8"
+    fp: "1db395c06dac9c32"
     compile: fragment
     wrap: pasm2-dat
     assumes: [PIN=con]
   - at: programming_patterns[2].code
-    fp: "3591838b0b8567be"
+    fp: "b0566661d31e3349"
     compile: fragment
     wrap: pasm2-dat
   - at: programming_patterns[3].code
@@ -58,7 +58,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: debugging_considerations[0].code
-    fp: "3fab918e038a3d64"
+    fp: "5113ff2e46f3b641"
     compile: fragment
     wrap: pasm2-dat
     assumes: [start_time, end_time]

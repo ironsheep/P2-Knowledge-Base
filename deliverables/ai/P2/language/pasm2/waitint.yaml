@@ -1,6 +1,6 @@
 instruction: WAITINT
 syntax: WAITINT {WC|WZ|WCZ}
-no_setq_behavior: "With no preceding SETQ, no timeout is armed, so the event always satisfies the wait first: the effect then clears the flag it names (WC: C, WZ: Z, WCZ: both C and Z; each carries the same timeout result). Using this instruction with WCZ and no SETQ is therefore a legitimate one-instruction way to clear C and Z."
+no_setq_behavior: "With no preceding SETQ, no timeout is armed, so the event always satisfies the wait first: the effect then clears the flag it names (WC: C, WZ: Z, WCZ: both C and Z; each carries the same timeout result). Using this instruction with WCZ and no SETQ therefore clears C and Z in one instruction; the instruction still waits for its event (and clears the event flag), so C and Z are cleared once the event has occurred."
 source: "EF-020 (the no-SETQ flag clear, run on WAITSEx; same mechanism here, not run on this instruction)"
 brief_description: Wait interrupt
 category: Event
@@ -16,38 +16,36 @@ description: >-
   before the event, or is cleared (0) if the event occurred before the timeout.
   Without a SETQ no timeout is armed and the effect clears the named flags. During
   a wait, the pipeline is stalled; no instructions execute and no interrupts are
-  processed in the cog until the wait condition ends. The interrupt-occurred event
+  processed in the cog until the wait condition ends. WAITINT stalls the cog to
+  save power while it waits for an interrupt to occur. The interrupt-occurred event
   flag is set whenever interrupt 1, 2, or 3 occurs -- debug interrupts are ignored.
   The interrupt-occurred event flag is cleared upon cog start, or execution of POLLINT,
   WAITINT, JINT, or JNINT instructions.
-result: >-
-  Wait for interrupt-occurred event, then clear the flag; optionally aborting on
-  timeout and setting C and/or Z on abort.
+result: Waits for the interrupt-occurred event, clears the flag, and resumes. With a prior SETQ and the WC, WZ or WCZ effect, C and/or Z are set if the timeout occurred before the event.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C: Set if timeout occurred before event
-  Z: Set if timeout occurred before event
+  C: "With a prior SETQ and the WC or WCZ effect, 1 if the timeout came first, otherwise 0; with no SETQ the effect clears the flag"
+  Z: "With a prior SETQ and the WZ or WCZ effect, 1 if the timeout came first, otherwise 0; with no SETQ the effect clears the flag"
 syntax_variants:
 - WAITINT {WC|WZ|WCZ}
 timing:
   cycles: 2+
   type: variable
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZ0 000010000 000100100
   write: —
   c: Timeout Abort
   z: Timeout Abort
   clocks: 2+
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, WAITINT, p.141"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 287 (WAITINT {WC/WZ/WCZ}: wait for INT event flag, then clear it; prior SETQ sets optional CT timeout value; C/Z = timeout; 2+ clocks)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Event Instructions, p.43 (WAITINT {WC/WZ/WCZ}, 2+ clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, WAITINT, p.141 (Result line, WC / WZ / WCZ parameter, encoding row 000010000 / 000100100, write none, C and Z Timeout Abort, 2+ clocks, Related list, wait-then-clear explanation, SETQ timeout, C and Z set if a timeout occurred before the event and cleared if the event occurred before the timeout, pipeline stalled during a wait, set condition (interrupt 1, 2 or 3; debug interrupts ignored) and clearing list)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (WAITxxx waits for the event flag and then clears it unless it is set again by the event sensor; a SETQ right before supplies a future CT target that ends the wait prematurely, and with WAITxxx WC, C is set if the timeout occurred before the event and otherwise cleared; POLLINT / WAITINT event flag: cleared on cog start, set whenever interrupt 1, 2, or 3 occurs with debug interrupts ignored, also cleared on POLLINT / WAITINT / JINT / JNINT; WAITINT: wait for an interrupt to occur, stalls the cog to save power), and instruction encoding listing (EEEE 1101011 CZ0 000010000 000100100 WAITINT {WC/WZ/WCZ})"
+  - "EF-020 (SETQ plus WAITSEx releases on whichever of event and timeout comes first and reports it in C, and with no SETQ a WCZ wait clears C and Z; the ledger states the mechanism is shared by the wait family)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pollwait
-  pattern: ''
-  description: No operands - poll/wait instruction (moves S to D, sets S to $024)
-  valueType: 28
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 28
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Wait for and clear interrupt-occurred event flag
@@ -55,3 +53,4 @@ related:
 - POLLINT
 - JINT
 - JNINT
+- architecture/event_system.yaml

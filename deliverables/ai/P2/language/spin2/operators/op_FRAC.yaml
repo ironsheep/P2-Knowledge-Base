@@ -1,9 +1,8 @@
 operator: "FRAC"
 type: operator
 description: |
-  Unsigned fraction: x FRAC y = (x << 32) / y. The result is a 32-bit fraction of
-  2^32, so it fits only while x < y: 1 FRAC 3 = $5555_5555, 2 FRAC 7 = $4924_9249.
-  The interpreter runs it as the CORDIC QFRAC.
+  Unsigned fraction: x FRAC y = (x << 32) / y. 1 FRAC 3 = $5555_5555,
+  2 FRAC 7 = $4924_9249.
 category: Math
 priority: 7
 term_form: "x FRAC y"
@@ -11,8 +10,8 @@ assign_form: "var FRAC= y   (PUB/PRI only, priority 17)"
 block_usage: "Term in all blocks; assignment form in PUB/PRI only"
 examples:
   - "frac_part := dividend FRAC divisor"
-divide_by_zero: "x FRAC 0 does not trap: it returns NOT x (1 -> $FFFF_FFFE, $8000_0000 -> $7FFF_FFFF, $FFFF_FFFF -> 0), every time."
-source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+divide_by_zero: "x FRAC 0 returns NOT x with a run-time divisor (1 -> $FFFF_FFFE, $8000_0000 -> $7FFF_FFFF, $FFFF_FFFF -> 0), every time."
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators; divide by zero: hardware-verified EF-089"
 aliases:
   - "FRAC"
   - "unsigned fraction"

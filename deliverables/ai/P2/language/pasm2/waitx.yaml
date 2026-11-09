@@ -11,67 +11,78 @@ timing:
   type: variable
 description: >-
   Wait 2+D clock cycles if no WC/WZ/WCZ is specified. If WC/WZ/WCZ is specified,
-  wait 2+(D AND RND) clock cycles, where RND is a random value, producing a
-  randomized delay; the flag(s) the effect names are cleared to 0 after
-  completion (WC: C, WZ: Z, WCZ: both -- a flag column applies only when its
-  effect is given). The 2-cycle
-  overhead is inherent to the instruction. Stalls the cog pipeline during the wait;
-  no instructions execute and no interrupts are processed until the wait completes.
-  Critical for bit-banging protocols, PWM generation, and timing-sensitive operations
-  where precise delays are required.
+  wait 2+(D AND RND) clock cycles, a range-limited random number of clocks; the
+  flag(s) the effect names are cleared to 0 after completion (WC: C, WZ: Z, WCZ:
+  both -- a flag column applies only when its effect is given). While the cog is
+  stalled in a WAITx instruction, a pending interrupt does not branch.
 flags_affected:
   C: Set to 0 only when WC or WCZ is specified
   Z: Set to 0 only when WZ or WCZ is specified
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release (2022/11/01), Propeller 2 Assembly Language (PASM2) in Brief, p.159; Parallax PASM2 Manual p.30 (description: flag column applies only when its effect is given); P2 Instructions v35 - Rev B/C Silicon, Sheet1"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release (2022/11/01), Propeller 2 Assembly Language (PASM2) in Brief, p.159; Parallax PASM2 Manual p.30 (description: flag column applies only when its effect is given); P2 Instructions v35 - Rev B/C Silicon, Sheet1; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INTERRUPTS (the cog must not be stalled in any WAITx instruction for a pending interrupt to branch)"
 documentation_level: comprehensive
 examples:
 - name: Inline PASM2 Timing
-  description: Precise timing in inline PASM2 code
-  code: "PUB pulse_pin(pin, width) | x\n  ORG\n    drvh    pin              ' Drive\
-    \ pin high\n    waitx   width            ' Wait specified cycles\n    drvl   \
-    \ pin              ' Drive pin low\n  END\n"
+  description: Drive a pin high, wait with WAITX, and drive it low in inline PASM2
+  code: |
+    PUB pulse_pin(pin, width)
+      ORG
+        drvh    pin              ' Drive pin high
+        waitx   width            ' Wait 2 + width clocks
+        drvl    pin              ' Drive pin low
+      END
 - name: SPI Bit-Bang Timing
-  description: Software SPI with controlled timing
-  code: "' Software SPI with precise timing\nspi_write_byte\n        mov     bit_count,\
-    \ #8\n.loop   rol     data, #1    wc   ' Get MSB\n        muxc    outa, mosi_mask\
-    \  ' Set MOSI\n        waitx   #4               ' Setup time\n        drvh   \
-    \ sck_pin          ' Clock high\n        waitx   #4               ' Clock high\
-    \ time\n        drvl    sck_pin          ' Clock low\n        waitx   #4     \
-    \          ' Clock low time\n        djnz    bit_count, #.loop\n        ret\n"
+  description: Shift a byte out MSB first on a data pin, with a WAITX after each pin change
+  code: |
+    ' Shift one byte out MSB first, with a WAITX after each pin change
+    spi_write_byte
+            mov     bit_count, #8
+    .loop   rol     data, #1    wc   ' C = bit 31 of data, data rotated left by 1
+            muxc    outa, mosi_mask  ' Copy C into the OUTA bits selected by mosi_mask
+            waitx   #4               ' Wait 2 + 4 clocks
+            drvh    sck_pin          ' Drive sck_pin high
+            waitx   #4               ' Wait 2 + 4 clocks
+            drvl    sck_pin          ' Drive sck_pin low
+            waitx   #4               ' Wait 2 + 4 clocks
+            djnz    bit_count, #.loop
+            ret
 - name: PWM Generation
-  description: Generate PWM without smart pins
-  code: "' Software PWM generation\npwm_loop\n        drvh    pwm_pin          ' Output\
-    \ high\n        waitx   high_time        ' High duration\n        drvl    pwm_pin\
-    \          ' Output low\n        waitx   low_time         ' Low duration\n   \
-    \     jmp     #pwm_loop        ' Repeat\n        \n' For 1kHz PWM at 200MHz clock:\n\
-    ' period = 200,000 cycles\n' 50% duty = 100,000 high, 100,000 low\n"
+  description: Alternate a pin high and low, holding each level with WAITX
+  code: |
+    ' Drive the pin high and low in turn
+    pwm_loop
+            drvh    pwm_pin          ' Drive pin high
+            waitx   high_time        ' Wait 2 + high_time clocks
+            drvl    pwm_pin          ' Drive pin low
+            waitx   low_time         ' Wait 2 + low_time clocks
+            jmp     #pwm_loop        ' Repeat
 - name: Debounce Delay
-  description: Button debounce timing
-  code: "' Wait for button to stabilize\ncheck_button\n        testp   button_pin\
-    \  wc   ' Read button\n        if_nc   ret              ' Not pressed\n      \
-    \  waitx   ##20_000         ' 100us @ 200MHz\n        testp   button_pin  wc \
-    \  ' Read again\n        if_nc   ret              ' Bounce - ignore\n        '\
-    \ Button confirmed pressed\n        ret\n"
+  description: Sample a pin, wait with WAITX, and sample it again; return if the pin reads low at either sample
+  code: |
+    ' Sample button_pin, wait, sample it again
+    check_button
+            testp   button_pin  wc   ' C = state of button_pin
+            if_nc   ret              ' Return if the pin is low
+            waitx   ##20_000         ' Wait 2 + 20_000 clocks
+            testp   button_pin  wc   ' C = state of button_pin
+            if_nc   ret              ' Return if the pin is low
+            ret                      ' The pin was high at both samples
 related_instructions:
-- WAITCT1/2/3: Wait for specific CT value
-- WAITATN: Wait for attention signal
-- WAITPAT: Wait for pin pattern
-- WAITSE1-4: Wait for selectable event
-- POLLCT1-3: Poll timer without waiting
+- WAITCT1
+- WAITCT2
+- WAITCT3
+- WAITATN
+- WAITPAT
+- WAITSE1
+- WAITSE2
+- WAITSE3
+- WAITSE4
+- POLLCT1
+- POLLCT2
+- POLLCT3
 notes:
-- Total wait is 2+D clock cycles (2-cycle instruction overhead plus D additional cycles)
-- With WC/WZ/WCZ, D is ANDed with a random value before the wait, producing a randomized delay of 2+(D AND RND) cycles
-- Blocks cog execution completely; no interrupts processed during wait
-- Use smart pins for continuous PWM
-- For long delays, consider WAITCT
-- Critical for bit-banged protocols
-compiler_operand_format:
-  name: operand_l
-  pattern: D/#0..511
-  description: Destination or immediate value 0-511
-  valueType: 26
-compiler_encoding:
-  operandFormat: 26
+- Total wait is 2+D clock cycles
+- With WC/WZ/WCZ, the total wait is 2+(D AND RND) clock cycles
+- A pending interrupt does not branch while the cog is stalled in a WAITx instruction
 last_updated: '2026-02-27'
 category: Miscellaneous
 oneliner: Wait 2+D clock cycles, or 2+(D AND RND) with WC/WZ/WCZ

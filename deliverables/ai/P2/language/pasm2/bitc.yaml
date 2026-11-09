@@ -9,23 +9,26 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: BITC alters the Dest bit(s) designated by Src to equal the state of the C flag. Dest bit(s) described by Src are set to C; the rest are left as-is. Src[4:0] is the bit number (0-31) and Src[9:5] is how many further contiguous bits are affected, so a non-zero Src[9:5] changes a span of bits rather than one; a SETQ immediately before the instruction overrides Src[9:5] (a SETQ of zero forces a single bit). If WCZ is specified, the Z flag is updated to the original state of the target bit.
+description: "BITC alters the Dest bit(s) designated by Src to equal the state of the C flag. Dest bit(s) described by Src are set to C; the rest are left as-is. Src[4:0] is the bit number (0-31) and Src[9:5] is how many further contiguous bits are affected, so a non-zero Src[9:5] changes a span of bits rather than one; a prior SETQ overrides Src[9:5] with the low five bits of the SETQ value; an ALTx between the SETQ and BITC keeps the override (SETQ #0, ALTB, BITC forces a single bit), and a SETQ separated from BITC by other instructions is not documented. If WCZ is specified, the C and Z flags are set to the original state of the base bit D[Src[4:0]]. BITC takes no effect or WCZ."
 flags_affected:
-  C: Set to original D[S[4:0]] (original state of target bit)
-  Z: Set to original D[S[4:0]] (original state of target bit)
+  C: With WCZ, set to original D[S[4:0]] (original state of target bit)
+  Z: With WCZ, set to original D[S[4:0]] (original state of target bit)
+encoding_notes:
+- BITC and TESTB with ANDC or ANDZ share the INSTR field 0100010; the effect bits tell them apart (BITC no effect = C Z 00, WCZ = 11; TESTB ANDC = 10, ANDZ = 01). BITC takes no effect or WCZ.
+sources:
+  - "encoding row and flags: P2 Instructions v35 - Rev B/C Silicon, row 44 (BITC: bits D[S[9:5]+S[4:0]:S[4:0]] = C; other bits unaffected; prior SETQ overrides S[9:5]; C,Z = original D[S[4:0]]; 2 clocks; write D); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 0100010 CZI ... BITC D,S/# {WCZ}; the same INSTR field as TESTB D,S/# ANDC/ANDZ) and its list of changes (the span of bits, +S[9:5]; prior SETQ overrides S[9:5])"
+  - "description (Src[4:0] and Src[9:5], the WCZ rule, the literal forms): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BITC / BITNC, p.52"
+  - "description (SETQ #0 then ALTB then BITxxx forces Src[9:5] to 0): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, pp.38-39; the manual's BITC / BITNC text says a SETQ immediately preceding substitutes its Dest[4:0]; a SETQ separated by other instructions is in no source"
+  - "encoding_notes: CP-033 (BITC assembles as EEEE 0100010 with C Z = 00 with no effect and 11 with WCZ; TESTB ANDC/ANDZ share 0100010 with C Z = 10/01)"
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BITC / BITNC, p.52"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_bitx
-  pattern: D,S/#
-  description: 'Bit manipulation with optional effect flags: Destination register,
-    bit position'
-  valueType: 1
-compiler_encoding:
-  operandFormat: 1
 parameters:
 - Dest is the register whose value will have one or more bits set to C.
 - Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
+- WCZ is an optional effect to update flags.
 last_updated: '2025-09-19T16:04:17.389666'
 category: Math and Logic
-oneliner: Set bit(s) low/high according to C or !C
+oneliner: Set bit(s) low/high according to C
+related:
+- language/pasm2/bitnc.yaml
+- language/pasm2/testb.yaml

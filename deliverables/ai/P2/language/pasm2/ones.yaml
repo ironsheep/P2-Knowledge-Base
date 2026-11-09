@@ -4,7 +4,7 @@ brief_description: Ones
 category: Math and Logic
 description: >-
   ONES tallies the number of high bits (1s) of Src, or Dest, and stores the count
-  into Dest. This is a population count (popcount) operation.
+  into Dest.
   If the WC or WCZ effect is specified, the C flag is set (1) if the count is odd,
   or is cleared (0) if it is even.
   If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
@@ -27,7 +27,7 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 0111101 CZI DDDDDDDDD SSSSSSSSS
   write: D
   c: Result is odd
@@ -38,15 +38,13 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   c: Result is odd
   z: Result == 0
   clocks: '2'
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ONES, p.106"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ONES, pp.106-107"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, rows 79-80 (ONES D,{#}S {WC/WZ/WCZ}: get number of '1's in S into D, D = number of '1's in S (0..32), C = LSB of result; the alias ONES D: get number of '1's in D into D; footnote * Z = (result == 0); 2 clocks; write D)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.37 (ONES D,{#}S and ONES D {WC/WZ/WCZ}, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ONES, pp.106-107 (heading on p.106; Result line, Dest and Src parameters, both encoding rows 0111101 CZI / CZ0, write D, C Result is odd, Z Result = 0, 2 clocks, and the WC odd-count and WZ zero rules on p.107)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 0111101 CZI DDDDDDDDD SSSSSSSSS ONES D,S/# {WC/WZ/WCZ})"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_du
-  pattern: D{,S/#}
-  description: Destination register, optional Source register or immediate (unary/binary)
-  valueType: 3
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 3
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Get number of 1s from Dest or Src into Dest

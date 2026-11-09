@@ -103,13 +103,6 @@ class P2CompleteReferenceUpdater:
                 "parameters": inst.get("parameters", []),
                 "syntax_variants": inst.get("syntax_variants", []),
                 "related": inst.get("related", []),
-                "compiler_info": {
-                    "syntax": inst.get("compiler_syntax", ""),
-                    "encoding": inst.get("compiler_encoding", {}),
-                    "category": inst.get("compiler_category", ""),
-                    "effects": inst.get("compiler_effects", []),
-                    "operand_format": inst.get("compiler_operand_format", {})
-                },
                 "documentation_source": inst.get("documentation_source", ""),
                 "documentation_level": inst.get("documentation_level", "")
             }

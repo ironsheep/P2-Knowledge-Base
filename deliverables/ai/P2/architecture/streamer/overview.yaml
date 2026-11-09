@@ -22,25 +22,34 @@ aliases:
   - streamer never stops
 
 description: |
-  High-speed data streaming engine with NCO timing control. Operates 
-  independently of COG execution for zero-overhead I/O operations.
+  Each cog has a streamer which can automatically output timed state sequences
+  to pins and DACs. It can also capture pin and ADC readings to hub RAM and
+  perform Goertzel computations. A numerically-controlled oscillator (NCO) times
+  its operation.
+source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (the introduction, the NCO paragraph, the command-buffer paragraph, the four DAC output channels, the mode table and the count paragraphs); DDS/Goertzel (the mode paragraph and the 9-bit lookup RAM location); Digital Video Output (DVI/HDMI)"
 
 # What the streamer does
 capabilities:
-  - Stream data from Hub memory to pins/DACs at system clock rates
-  - Capture pin states and ADC readings to Hub memory
-  - Generate video signals (VGA, HDMI, composite)
-  - Output multi-channel audio via DAC
-  - Perform Goertzel frequency analysis in hardware
-  - Synthesize waveforms via DDS
+  - Output timed state sequences to pins and DACs, from the S operand, from hub RAM through the FIFO, or through lookup RAM
+  - Capture pin and ADC readings to hub RAM
+  - Translate hub RAM pixels into R, G, B on DAC channels X3, X2, X1 (architecture/streamer/modes-reference.yaml rgb_modes)
+  - Serialize its 32-pin output into 8-pin/10-bit digital video (DVI/HDMI) format (architecture/streamer/colorspace-and-dvi.yaml)
+  - Direct digital synthesis (DDS) on up to four DAC channels, with simultaneous Goertzel analysis of up to four ADC bit streams summed together (architecture/streamer/dds-goertzel.yaml)
 
 # Resources per COG
 resources_per_cog:
   nco: "One 32-bit phase accumulator"
-  command_buffer: "Single-level (one pending command)"
-  dac_channels: "Four 8-bit channels (X0, X1, X2, X3)"
-  goertzel: "One analyzer unit"
-  lut_access: "Full access to COG's 512-entry LUT"
+  command_buffer: >-
+    A single-level command buffer: the streamer accepts two initial commands before
+    it makes the cog wait for the first command to finish before accepting another.
+    This buffer lets streamer activity be coordinated with smart pin activity: by
+    executing an XINIT and then an XCONT, the time during the XINIT command can be
+    used to set up a smart pin whose operation then correlates with the queued XCONT
+    command.
+  dac_channels: "Four DAC output channels, X0, X1, X2 and X3, which can selectively override the four SETDACS values on a per-DAC basis"
+  goertzel: "One Goertzel analyzer, with sine and cosine accumulators"
+  lut_access: "Reads the cog's lookup RAM in the LUT modes and, at a 9-bit location, in DDS/Goertzel mode"
+  hub_fifo: "Hub RAM transfers go through the cog's hub FIFO interface, which is established by a RDFAST or WRFAST executed from cog RAM. The FIFO interface can be used for only one of hub execution, streamer use or software use (the RFxxxx/WFxxxx instructions) at a time."
 
 # Data flow paths (which mode categories to use)
 data_paths:
@@ -65,61 +74,64 @@ data_paths:
     setup: "WRFAST instruction before streamer command"
     
   rgb_video:
-    description: "Hub pixels unpacked by the streamer into R, G, B on the way to
-      the pins. The cog's colorspace converter is a SEPARATE downstream stage that
-      transforms the DAC channels; it is not part of this path and needs no
-      configuration for these modes."
-    modes: "RGB modes (%1011 with config)"
+    description: "Hub pixels translated by the streamer into {R[7:0], G[7:0], B[7:0], 8'b0} and output to X3, X2, X1 and X0 (architecture/streamer/modes-reference.yaml rgb_modes). The cog's colorspace converter, which acts on the DAC channels, is in architecture/streamer/colorspace-and-dvi.yaml."
+    modes: "RGB modes (%1011 with D[19:16] %0010-%0110)"
     setup: "RDFAST before the streamer command"
-    
+
   dds_goertzel:
-    description: "Waveform synthesis with frequency analysis"
-    modes: "DDS/Goertzel (%1111_x111)"
+    description: "Direct digital synthesis with simultaneous Goertzel analysis"
+    modes: "DDS/Goertzel (%1111 with D[18:16] = %111)"
     setup: "Sine/cosine table in LUT"
 
 # Instruction quick reference
 instructions:
   SETXFRQ:
     syntax: "SETXFRQ {#}D"
-    purpose: "Set NCO frequency (timing rate)"
+    purpose: "Set NCO frequency"
     details: architecture/streamer/nco-timing.yaml
-    
+
   XINIT:
     syntax: "XINIT {#}D,{#}S"
-    purpose: "Start immediately, zero phase"
-    note: "Use to begin streaming"
-    
+    purpose: "Issue command immediately, zeroing phase"
+    details: language/pasm2/xinit.yaml
+
   XCONT:
     syntax: "XCONT {#}D,{#}S"
-    purpose: "Buffer command, continue phase"
-    note: "Seamless chaining without gaps"
-    
+    purpose: "Issue command on final NCO rollover (waits), continuing phase"
+    details: language/pasm2/xcont.yaml
+
   XZERO:
     syntax: "XZERO {#}D,{#}S"
-    purpose: "Buffer command, zero phase"
-    note: "Use at video line boundaries"
-    
+    purpose: "Issue command on final NCO rollover (waits), zeroing phase"
+    details: language/pasm2/xzero.yaml
+
   XSTOP:
     syntax: "XSTOP"
     purpose: "Stop immediately"
-    note: "Equivalent to XINIT #0,#0. Also the way a PERPETUAL command ends — see count_field."
+    note: "Alias for XINIT #0,#0. Also the way a PERPETUAL command ends — see count_field."
 
   GETXACC:
     syntax: "GETXACC D"
-    purpose: "Get Goertzel accumulators"
+    purpose: "Get the Goertzel X accumulator into D and the Y accumulator into the next instruction's S. On silicon it clears the accumulators only while a Goertzel burst runs; read idle, it returns the running totals and clears nothing. Parallax's documents also give GETXACC as clearing the accumulators, with no condition."
     details: architecture/streamer/dds-goertzel.yaml
+    source: "P2 Instructions v35 - Rev B/C Silicon, GETXACC row; EF-069 (idle and other-mode reads clear nothing; reads during a Goertzel burst clear)"
 
 count_field:
   location: "D[15:0] of the streamer command"
-  terminating: "Counts down to zero, then the command completes. Largest terminating count: $FFFE."
+  terminating: >-
+    An initial counter value, decremented on each subsequent NCO rollover, each rollover
+    causing new streamer data to be output or input. When the counter equals 1 and the
+    NCO is rolling over for the last time for the current command, a buffered XZERO/XCONT
+    command begins seamlessly; with none buffered the counter goes to 0.
+  zero: >-
+    When the counter reaches 0, or is set to 0, streamer operation stops and all
+    streamer DAC overrides and streamer pin outputs cease.
   perpetual: >-
-    A count of $FFFF runs the command PERPETUALLY — the counter does not decrement and
-    the command never completes on its own. It ends when a new command is issued or XSTOP
-    stops it.
-  the_trap: >-
-    $FFFF is the top of the field, so a transfer sized to "the maximum count" becomes an
-    endless command rather than the largest possible transfer, and a chunked chain built
-    that way collapses into its first chunk. Size terminating transfers to $FFFE or below.
+    By setting the D[15:0] count to its maximal value of $FFFF, a streamer command runs
+    perpetually, without decrementing its counter. A new XZERO/XCONT command then waits
+    only for the next NCO rollover, at which point the streamer begins executing the new
+    command. 'XINIT #0,#0' stops the streamer immediately, and XSTOP is an alias for it.
+  largest_terminating_count: "$FFFE. A count of $FFFF does not mean 65,535 rollovers: it runs the command perpetually."
   related:
     - language/pasm2/xinit.yaml
     - language/pasm2/xstop.yaml
@@ -128,20 +140,22 @@ count_field:
 # Command word structure (D operand)
 command_format:
   fields_are_positional_and_vary_by_mode: |
-    THE MAP BELOW IS THE COMMON CASE, NOT A UNIVERSAL LAYOUT. Each mode has its own
+    The map below is the common case, not a universal layout. Each mode has its own
     template, and a field present in one mode may be fixed or absent in another —
-    e.g. in DDS/Goertzel D[23] selects SINC1/SINC2 (not pin-output enable) and the
-    four-pin input BLOCK sits in D[22:19]; in X_1ADC8_0P_1DAC8_WFBYTE D[22:20] are
-    fixed zeros with NO pin field at all, and the channel is chosen in S[1:0].
-    Check the mode's own template in architecture/streamer/modes-reference.yaml before composing a command,
-    and compose with `|` rather than `+` — adding a shifted value into bits the mode
-    already defines silently selects A DIFFERENT MODE instead of raising an error.
+    e.g. in DDS/Goertzel D[23] selects SINC1/SINC2 and the four-pin input block sits
+    in D[22:19]; in X_1ADC8_0P_1DAC8_WFBYTE the mode table marks D[22:20] --- and the
+    channel is chosen in S[1:0]. The mode's own
+    template is in architecture/streamer/modes-reference.yaml. In the two modes
+    tested, adding (`+`) a pin number shifted left 17 into bits the mode template
+    already sets carried into the neighbouring field and selected a different mode:
+    adc_pin<<17 in X_1ADC8_0P_1DAC8_WFBYTE, and 20<<17 in X_IMM_4X8_1DAC8.
   D_31_28: "Mode selector"
   D_27_24: "DAC routing (%dddd)"
   D_23: "Enable pin output (%e) or WRFAST (%w)"
   D_22_20: "Pin group (%ppp)"
   D_19_16: "Mode-specific config"
   D_15_0: "Count (NCO rollovers)"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (the mode table, the %dddd, %e, %w, %ppp and %a paragraphs, the DDS/Goertzel D[23] and %pppp lines); EF-059, EF-065 (a carry out of an added pin term changes the mode)"
   
   details:
     modes: architecture/streamer/modes-reference.yaml
@@ -166,18 +180,17 @@ usage_pattern:
     ' 5. Wait for completion
     waitxfi
 
-# Debugging streamer code — read this before trusting a measurement
+# Debug interrupt and the streamer
 debug_interaction:
   problem: |
-    DEBUG_COGS defaults to %11111111 — every cog has debug capability at runtime. So
-    compiling with -d, the normal way to debug, puts the P2's HIGHEST-PRIORITY INTERRUPT
-    inside the cog running your streamer.
-  fix: |
+    DEBUG_COGS defaults to %11111111: bits 7..0 enable debugging interrupts in cogs
+    7..0. So compiling with -d puts the debug interrupt, which has priority over the
+    three visible interrupts, inside the cog running the streamer.
+  debug_cogs_setting: |
     CON
-      DEBUG_COGS = %0000_0001   ' only the reporting cog carries the debug interrupt
-  measured_cost: "With the default mask a streamer probe crashed into the single-step debugger's memory dump and its Goertzel accumulators read 1,000,000-7,000,000 of corruption; restricting DEBUG_COGS to cog 0 collapsed them to their true values in the hundreds."
-  general_rule: "Any hardware sequencer measured under the debugger may be perturbed by it. Restrict DEBUG_COGS to the reporting cog when measuring."
-  source: "EF-057 (2026-08-14)"
+      DEBUG_COGS = %0000_0001   ' only cog 0 has its debug interrupt enabled
+  effect: "With the default mask, in a program compiled with -d whose launched cog ran a DDS/Goertzel command, the Goertzel accumulators read 1,000,000 to 7,000,000 where the same program with DEBUG_COGS = %0000_0001 read values in the hundreds."
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (the DEBUG_COGS row of the debug symbols table); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT (priority over all the others); effect: EF-057"
   see_also:
     - "architecture/debug_interrupt.yaml"
     - "language/spin2/constants/special-configuration-symbols.yaml"
@@ -188,6 +201,14 @@ events:
   EVENT_XFI: "Finished, no pending command (event 11)"
   EVENT_XRO: "NCO rollover occurred (event 12)"
   EVENT_XRL: "Read LUT address $1FF (event 13)"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (the streamer event flags and their numbers 10-13); Parallax Propeller 2 Spin2 Language Documentation v55, event symbols (EVENT_XMT, EVENT_XFI, EVENT_XRO, EVENT_XRL)"
+
+anti_patterns:
+  ffff_as_a_count:
+    wrong: "A streamer command with D[15:0] = $FFFF, meant as 65,535 NCO rollovers, followed by WAITXFI or a check that the streamer has finished."
+    correct: "Use a count of $FFFE or less for a command that ends; use $FFFF only for a command meant to run until XINIT #0,#0 (XSTOP) or a new XZERO/XCONT replaces it."
+    reason: "By setting the D[15:0] count to its maximal value of $FFFF, a streamer command will run perpetually, without decrementing its counter."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (the count paragraphs: $FFFF runs perpetually; XZERO/XCONT after a $FFFF command wait only for the next NCO rollover; XINIT #0,#0 stops the streamer immediately)"
 
 # See also
 hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
@@ -201,3 +222,5 @@ see_also:
   - architecture/streamer/dac-routing.yaml
   - architecture/streamer/pin-selection.yaml
   - architecture/streamer/nco-timing.yaml
+  - architecture/streamer/dds-goertzel.yaml
+  - architecture/streamer/colorspace-and-dvi.yaml

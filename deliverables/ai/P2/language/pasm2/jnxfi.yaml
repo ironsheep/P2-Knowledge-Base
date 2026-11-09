@@ -1,35 +1,66 @@
 instruction: JNXFI
 syntax: JNXFI   {#}S
+syntax_variants:
+- JNXFI {#}S
 category: Event
-description: Jump to S if XFI (streamer finished) event flag is clear.
+description: >-
+  JNXFI checks the cog's streamer finished event flag and jumps to the address
+  described by Src if the flag is clear. The flag is set whenever the streamer runs
+  out of commands to process. The flag is cleared by JNXFI whether or not the branch
+  is taken, unless the event sets it again.
+
+  The address (Src) can be absolute or relative. To specify an absolute address,
+  Src must be a register containing a 20-bit address value. To specify a relative
+  address, use #Label for a 9-bit signed offset (a range of -256 to +255
+  instructions). Offsets are relative to the
+  instruction following the JNXFI. The signed offset value is in units of whole
+  instructions-- it is added to PC as-is when in Cog/LUT execution mode and is
+  multiplied by 4 then added to PC when in Hub execution mode (long-aligned Hub
+  code not required).
+  ##Label (or a prior AUGS instruction) assembles as an AUGS word plus the
+  instruction, with an 18-bit offset field; the rule above is for #Label, and a
+  backward ##Label in Cog execution is covered under anti_patterns.
 flags_affected:
   C: No effect
   Z: No effect
 parameters:
-- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
+- 'Src is a register, 9-bit literal, or ## augmented literal whose value is the
   absolute or relative address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
 timing:
-  cycles: 2
+  cycles: '2 or 4 (cog/LUT) / 2 or 13...20 (hub-exec)'
   type: variable
-  range: 13...20
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1011110 01I 000011011 SSSSSSSSS
-  write: —
+  write: PC
   c: —
   z: —
-  clocks: 2 or 4
+  clocks: 2 or 4 / 2 or 13...20
 encoding_notes:
-- PC is written only when the streamer ﬁnished event ﬂag is set (or is clear in syntax
-  2).
+- PC is written only when the streamer finished event flag is clear.
+anti_patterns:
+- pattern: "Backward JNXFI ##Label"
+  reason: >-
+    Not documented: whether a backward JNXFI ##Label lands on its label. JNXFI shares
+    DJNZ's encoding (AUGS plus the instruction, an 18-bit field as assembled), and
+    only backward DJNZ has been run: a target 303 longs back (field -303) landed on its
+    label in Hub execution and missed it in Cog execution, going to hub at PC plus
+    the field taken as a positive offset. A near #Label (within -256 to +255
+    instructions) avoids the ##Label form. A register holding the target
+    address as Src assembles with no AUGS word (assembled for DJNZ, TJS and JINT
+    only; not run on the board). Parallax's documents also give the ##Label form a 20-bit signed
+    offset (-524288 to +524287).
+  source: "P2 hardware verification, EF-107 (backward DJNZ only; this instruction not run); CP-031 (the ## S-branch assembles an AUGS word plus the instruction, an 18-bit offset field; shown for DJNZ and TJZ of the family); CP-056 (a backward ##label assembles for all 47 S-branch instructions as AUGS plus the instruction with an 18-bit field that counts longs, -303 for this distance; a register Src assembles with no AUGS for DJNZ, TJS and JINT, assembled only, not run on the board); Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, JXFI / JNXFI, p.95 (##Label given as a 20-bit signed offset, -524288 to +524287)"
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, JXFI / JNXFI, p.95"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 208 (JNXFI {#}S: jump to S if XFI event flag is clear; 2 or 4 cog/LUT, 2 or 13...20 hub; footnote: if #S and cogex PC += signed(S), if #S and hubex PC += signed(S*4), if S PC = register S)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Event instructions, p.42 (JNXFI {#}S, 2 or 4 / 2 or 13...20)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, JXFI / JNXFI, p.95 (encoding row 000011011, write PC, clocks 2 or 4 / 2 or 13-20, footnote 1; the streamer finished flag; absolute address in a register of 20 bits, #Label 9-bit signed offset -256 to +255 instructions, offsets relative to the instruction following, in whole instructions in cog/LUT mode and times 4 in hub mode; the manual's text gives the ## offset as 20-bit)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (Jxxx/JNxxx: the event-occurred flag is cleared whether or not a branch occurs, unless set again by the event sensor; JXFI/JNXFI jump if the streamer-finished event flag is set/clear), POLLXFI/WAITXFI event flag (set whenever the streamer runs out of commands; also cleared on JNXFI); instruction encoding listing (EEEE 1011110 01I 000011011 SSSSSSSSS JNXFI S/#rel9)"
+  - "CP-031, shown for DJNZ and TJZ of the same S-branch family (the 9-bit S field is in instructions in cog and times four in hub; the ## S-branch assembles an AUGS word plus the instruction, an 18-bit offset field)"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_jpoll
-  pattern: S/#
-  description: 'Poll jump: target address/immediate'
-  valueType: 21
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 21
 last_updated: '2025-09-19T16:04:17.747218'
-oneliner: Branch
+oneliner: Jump if streamer finished event flag is clear
+related:
+  - language/pasm2/concepts/branch_addressing.yaml
+  - architecture/event_system.yaml

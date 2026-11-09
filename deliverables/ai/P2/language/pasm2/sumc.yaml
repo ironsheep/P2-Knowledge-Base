@@ -3,26 +3,28 @@ syntax: SUMC    D,{#}S   {WC/WZ/WCZ}
 encoding:
 - bits: EEEE 0011100 CZI DDDDDDDDD SSSSSSSSS
   write: D
-  c: true sign of (D +/- S)
+  c: correct sign of (D +/- S)
   z: Result == 0
   clocks: '2'
 timing:
   cycles: 2
   type: fixed
-description: Sum +/-S into D by C. If C = 1 then D = D - S, else D = D + S. C = true
-  sign of (D +/- S).
+description: >-
+  Sum +/-S into D by C. If C = 1 then D = D - S, else D = D + S. With
+  WC or WCZ, C is the correct sign of (D +/- S), the sign of the full-precision
+  result: set if the result is negative and cleared if it is positive. When the sum
+  overflows, C differs from bit 31 of the stored D; that difference is what TJV
+  tests (D[31] != C). With WZ or WCZ, Z is set if the result is zero and cleared if
+  it is non-zero.
 flags_affected:
-  C: Set to true sign of result (D +/- S)
-  Z: Set if result equals zero
+  C: With WC or WCZ, the correct sign of (D +/- S) - set if negative, cleared if positive; differs from D[31] when the sum overflows
+  Z: With WZ or WCZ, set if the result equals zero, cleared if non-zero
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SUMC / SUMNC, p.132"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 30 (SUMC D,{#}S: sum +/-S into D by C, if C = 1 then D = D - S, else D = D + S, C = correct sign of (D +/- S), Z = (result == 0); 2 clocks; write D) and row 180 (TJV: jump if D overflowed, D[31] != C, C = 'correct sign' from the last addition/subtraction)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SUMC / SUMNC, p.132 (encoding table C sign of (D +/- S); C set if the result is negative, cleared if positive; Z rule); PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (SUMC: C = correct sign of (D +/- S)); TJV, p.138 (TJV requires that C be updated to the correct sign by a previous SUMx instruction, and tests Dest[31] != C)"
+  - "No measurement covers SUMC (EF-018 covers ADDS, SUBS and CMPS)"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:
-  operandFormat: 0
 syntax_variants:
 - SUMC D,{#}S
 last_updated: '2025-09-19T16:04:16.910403'

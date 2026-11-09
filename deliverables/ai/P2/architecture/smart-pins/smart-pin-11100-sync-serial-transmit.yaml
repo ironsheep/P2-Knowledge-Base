@@ -11,27 +11,24 @@ constants:
   pasm2: "P_SYNC_TX"  # Same constants work in PASM2
   mode_bits: "%11100"  # Binary value for reference
 
-# CRITICAL REQUIREMENTS - READ FIRST
+# Clock input
 critical_requirements:
   clock_routing: |
-    MANDATORY FOR SPI: The B-input provides the clock signal. By default, B-input
-    reads from the LOCAL pin (P_LOCAL_B), which is useless for SPI where the clock
-    is on a DIFFERENT pin.
+    The B input is the clock: each new bit is output two internal clock cycles after a
+    positive edge on the B input. The default B input is this pin's read state.
+    The B input selector also selects another pin's read state:
+    - P_PLUS1_B  = relative +1 pin's read state
+    - P_MINUS1_B = relative -1 pin's read state
+    - P_PLUS2_B, P_PLUS3_B, P_MINUS2_B, P_MINUS3_B for the other offsets
 
-    YOU MUST ADD a pin-selection constant to route clock from the correct pin:
-    - P_PLUS1_B  = clock on pin+1 (most common for SPI)
-    - P_MINUS1_B = clock on pin-1
-    - P_PLUS2_B, P_PLUS3_B, P_MINUS2_B, P_MINUS3_B for other offsets
+    Example: mode := P_SYNC_TX | P_OE | P_PLUS1_B      ' B input = pin+1 read state
 
-    WRONG: mode := P_SYNC_TX | P_OE                    ' NO CLOCK ROUTING!
-    RIGHT: mode := P_SYNC_TX | P_OE | P_PLUS1_B        ' Clock from adjacent pin
-
-    Without pin routing, the smart pin will not receive clock edges and will not transmit.
+    Not documented: transmit behavior when the B input is this pin's own read state.
 
 # Operation
 operation: |
-  Transmits 1-32 bits synchronized with clock. LSB first. OUT overridden.
-  A=data output, B=clock input. Supports continuous/start-stop modes.
+  Transmits 1-32 bits synchronized with the clock on the B input. LSB first. OUT overridden.
+  The pin output carries the data. Supports continuous/start-stop modes.
 
 # Critical: MSB-first requires bit reversal (SHL #(32-bits), REV)
 
@@ -42,13 +39,13 @@ x_register:
 
 y_register: "Data to transmit (LSB first)"
 
-z_register: "Not used"
+z_register: "Not documented: the Z register in this mode."
 
-in_flag: "High when buffer empty (ready for next data)"
+in_flag: "IN is raised each time the buffer advances into the shifter, indicating that a new output word can be written via WYPIN"
 
 # Pin Usage
 pins:
-  data_pin: "Outputs serial data (A-input)"
+  data_pin: "Outputs serial data"
   clock_pin: "Receives clock signal (B-input)"
   clock_edge:
     positive: "Default B input (bits shift on the clock's rising edge)"
@@ -61,41 +58,47 @@ spin2_complete: |
     CLK_PIN = 42                             ' TX_PIN + 1, matching P_PLUS1_B
 
   PUB main() | mode
-    ' 8-bit SPI master TX, positive edge
+    ' 8-bit synchronous transmit, positive edge
     mode := P_SYNC_TX | P_OE | P_PLUS1_B     ' Clock from pin+1
-    PINSTART(TX_PIN, mode, %1_00111, 0)      ' Start-stop, 8-bit (Y=0: see below)
+    PINSTART(TX_PIN, mode, %1_00111, 0)      ' Start-stop, 8-bit; Y = 0 written while DIR is low
     WYPIN(TX_PIN, $A5)                       ' data AFTER enable
 
     ' Setup companion clock -- a PINSTART Yval is lost in a trigger mode
     PINSTART(CLK_PIN, P_TRANSITION | P_OE, $1000, 0)
     WYPIN(CLK_PIN, 16)                       ' 16 transitions, AFTER enable
     
-  PUB stream_continuous() | mode
-    ' Continuous streaming with negative edge
+  PUB stream_continuous(count, next_word) | mode
+    ' Continuous streaming with negative edge; bits shift on clock edges from
+    ' CLK_PIN, which this method does not drive
     mode := P_SYNC_TX | P_OE | P_PLUS1_B | P_INVERT_B  ' clock from pin+1, inverted
     PINCLEAR(TX_PIN)
     WRPIN(TX_PIN, mode)
     WXPIN(TX_PIN, %0_00111)                  ' Continuous, 8-bit
-    WYPIN(TX_PIN, first_data)                ' Prime the shifter WHILE DIR IS LOW
-    PINHIGH(TX_PIN)                          ' Enable
-    WYPIN(TX_PIN, second_data)               ' Load buffer (double-buffered, gapless)
-    
-    REPEAT
-      IF PINREAD(TX_PIN)                     ' Check IN flag
-        WYPIN(TX_PIN, get_next_data())       ' Load next
+    WYPIN(TX_PIN, $A5)                       ' First word, written while DIR is low
+    PINHIGH(TX_PIN)                          ' DIR high
+    WYPIN(TX_PIN, $5A)                       ' Second word, buffered
+
+    REPEAT count
+      ORG
+  .wait
+        TESTP   #TX_PIN WC                   ' IN into C
+        IF_NC   JMP #.wait                   ' Wait for IN to be raised
+        WYPIN   next_word, #TX_PIN           ' Load the next word
+        NOP                                  ' 2 clocks for IN to drop before it is polled again
+      END
 
 # Complete PASM2 Example
 pasm2_complete: |
   DAT
           ORG
-  
-  ' Pin assignments and mode constants
-  tx_pin        LONG  41
-  clk_pin       LONG  42                               ' tx_pin + 1 (P_PLUS1_B)
-  sync_tx_pos   LONG  P_SYNC_TX | P_OE | P_PLUS1_B                ' %0000_0001_000_0000000000000_01_11100_0
-  sync_tx_neg   LONG  P_SYNC_TX | P_OE | P_PLUS1_B | P_INVERT_B   ' %0000_1001_000_0000000000000_01_11100_0
-  clk_mode      LONG  P_TRANSITION | P_OE              ' %0000_0000_000_0000000000000_01_00101_0
-  
+
+  entry
+          CALL  #setup_tx             ' Configure the data pin and the clock pin
+          MOV   data, #$A5            ' Byte to send
+          CALL  #send_msb_first
+  .done
+          JMP   #.done                ' Byte queued: nothing to return to
+
   ' Initialize sync serial transmit
   setup_tx
           MOV   pin, tx_pin
@@ -114,16 +117,23 @@ pasm2_complete: |
           DIRH  pin
           RET
   
-  ' Transmit byte with MSB-first workaround
+  ' Transmit a byte MSB-first (SHL then REV)
   send_msb_first
           SHL   data, #24             ' Position for 8-bit
           REV   data                  ' Reverse bits
           MOV   pin, tx_pin
-          WYPIN data, pin             ' Send MSB-first
+          WYPIN data, pin             ' Load the reversed word
           MOV   pin, clk_pin
           WYPIN #16, pin              ' 16 clock transitions
           RET
-  
+
+  ' Pin assignments and mode constants
+  tx_pin        LONG  41
+  clk_pin       LONG  42                               ' tx_pin + 1 (P_PLUS1_B)
+  sync_tx_pos   LONG  P_SYNC_TX | P_OE | P_PLUS1_B                ' %0000_0001_000_0000000000000_01_11100_0
+  sync_tx_neg   LONG  P_SYNC_TX | P_OE | P_PLUS1_B | P_INVERT_B   ' %0000_1001_000_0000000000000_01_11100_0
+  clk_mode      LONG  P_TRANSITION | P_OE              ' %0000_0000_000_0000000000000_01_00101_0
+
   ' Variables
   pin     RES   1
   mode    RES   1
@@ -144,16 +154,22 @@ spin2_inline: |
 timing:
   continuous_mode: "Double-buffered for gapless transmission. Write the FIRST word with WYPIN while DIR is low: it primes the shifter and is the first word sent. Then raise DIR and WYPIN the second word into the buffer. Written after DIR rises, the first of two words is lost and the second is sent twice."
   source: "continuous_mode: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %11100 = synchronous serial transmit ('a first word is written via WYPIN during reset (DIR=0) to prime the shifter'); bench-measured, EF-090"
-  start_stop_mode: "Can modify data before clock starts"
-  hold_time: "Data stable 2+ clocks after edge when X[5]=1"
+  start_stop_mode: "The current output word can always be updated via WYPIN before the first clock, flowing right through the buffer into the shifter. A WYPIN issued after the first clock is buffered and loaded into the shifter after the last clock of the current output word, at which time it can be changed again via WYPIN. Useful for setting up the output word before a stream of clocks is issued to shift it out."
+  bit_timing: "Each new bit is output two internal clock cycles after registering a positive edge on the B input (in either update mode), and the data is steady for two internal clocks after the B edge was registered. X[5] selects the update mode (0 = continuous, 1 = start-stop)."
+  reset_state: "During reset (DIR=0) the output is held low. Upon release of reset, the output reflects the LSB of the output word written by any WYPIN during reset. Not documented: IN during reset."
+
+max_baud_rate:
+  statement: "Synchronous serial transmit and receive, 1 to 32 bits, up to clock/2 baud rate"
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, smart I/O pin features, p.3; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), OVERVIEW (smart I/O pin features)"
 
 initialization: "Configure while DIR is low (held in reset); WRPIN while DIR is high gives unpredictable behavior"
 
-common_uses:
-  - "SPI master"
-  - "Shift register control (74HC595)"
-  - "LED strips (APA102)"
-
-companion_clock: "Use P_TRANSITION mode on adjacent pin for clock generation"
-
 related: ["11101 (Sync RX)", "00101 (Transition)", "11110 (Async TX)"]
+
+sources:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %11100 = synchronous serial transmit (WYPIN loads the output words into a single-stage buffer before the shifter; IN is raised each time the buffer is advanced into the shifter)"
+  - "initialization: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (a smart pin is configured while DIR is low; a WRPIN while DIR is high gives unpredictable behavior in the newly selected mode)"
+  - "clock_routing (the B input selectors and P_LOCAL_B default): Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS, the B input selector table; Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Smart Pin Configuration"
+  - "spin2_complete (a PINSTART Yval is lost in a trigger mode, so the companion clock is written after enable): EF-011"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (after WRPIN/WXPIN/WYPIN/RDPIN/AKPIN it takes two clocks for IN to drop before it can be polled again; the TESTP polling example)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %11100 = synchronous serial transmit (output two internal clock cycles after a registered B rise; start-stop buffering after the first clock; output held low in reset, then the LSB of the word written in reset); Propeller 2 P2X8C4M64P Hardware Manual, Nov 1, 2022 Release, Synchronous Serial Transmit (%11100), p.58"

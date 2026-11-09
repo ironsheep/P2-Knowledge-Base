@@ -25,23 +25,19 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 0010111 CZI DDDDDDDDD SSSSSSSSS
-  write: D1
+  write: D (only if a subtraction was performed)
   c: Unsigned(D => S)
   z: Result == 0
   clocks: '2'
 encoding_notes:
 - Dest is only written if a subtraction was performed on it.
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CMPSUB, p.61"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 25 (CMPSUB: compare and subtract S from D if D >= S; if D => S then D = D - S and C = 1, else D same and C = 0; Z = (result == 0); write D; 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CMPSUB, p.61 (encoding table: write D with the footnote 'Dest is only written if a subtraction was performed on it', C Unsigned(D => S), Z Result = 0, 2 clocks; description; WC/WZ/WCZ effects)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 0
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Compare two unsigned values and subtract the second if it is lesser or equal

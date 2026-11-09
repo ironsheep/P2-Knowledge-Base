@@ -3,7 +3,8 @@
 # Use this file to identify which file contains the information you need
 
 component: streamer
-description: High-speed NCO-driven DMA engine for autonomous I/O
+description: Each cog's streamer outputs NCO-timed state sequences to pins and DACs and captures pin and ADC readings to hub RAM; the files below cover it, with the cog's colorspace converter and DVI output
+source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (introduction, NCO); COLORSPACE CONVERTER"
 
 aliases:
   - "streamer index"
@@ -11,14 +12,10 @@ aliases:
   - "streamer files"
   - "streamer manifest"
 
-version: "2.0"
-last_updated: "2026-01-22"
-
 # File manifest - download only what you need
 files:
   overview:
     path: overview.yaml
-    size: ~80 lines
     use_when:
       - "Need general understanding of streamer capabilities"
       - "Want list of streamer instructions"
@@ -30,31 +27,31 @@ files:
 
   modes:
     path: modes-reference.yaml
-    size: ~150 lines
     use_when:
       - "Need specific mode encoding (D[31:28])"
       - "Looking up mode symbol name or value"
       - "Choosing mode for output/input operation"
+      - "Which data bits reach which DAC channel in a mode"
+      - "RGB pixel modes (LUMA8, RGBI8, RGB8, RGB16, RGB24) and ADC capture modes"
     contains:
-      - Complete mode encoding table
-      - Mode categories and variants
+      - The mode encoding table, with each mode's S operand, pins and DAC-channel layout
+      - Mode categories and each group's data rule
       - D[19:16] configuration bits per mode
+      - RGB translation tables and the ADC capture rules
 
   dac:
     path: dac-routing.yaml
-    size: ~60 lines
     use_when:
       - "Configuring DAC channel output"
-      - "Setting up stereo or differential audio"
+      - "Setting up single, paired or differential DAC outputs"
       - "Understanding DAC-to-pin mapping"
     contains:
-      - Complete %dddd routing table
+      - The %dddd routing table
       - DAC channel to pin mapping
-      - Common DAC configurations
+      - Pin setup for a streamer-fed DAC
 
   pins:
     path: pin-selection.yaml
-    size: ~50 lines
     use_when:
       - "Selecting pin group (%ppp field)"
       - "Understanding sub-pin selection"
@@ -66,19 +63,28 @@ files:
 
   timing:
     path: nco-timing.yaml
-    size: ~60 lines
     use_when:
       - "Calculating NCO frequency values"
-      - "Setting pixel rates for video"
       - "Understanding NCO rollover behavior"
     contains:
       - NCO operation details
       - Frequency calculation formula
-      - Common frequency values table
+      - The system clock multiplier table
+
+  colorspace_dvi:
+    path: colorspace-and-dvi.yaml
+    use_when:
+      - "Programming the colorspace converter (SETCY, SETCI, SETCQ, SETCFRQ, SETCMOD)"
+      - "VGA, HDTV, composite or S-Video output through the DAC channels"
+      - "Digital video (DVI/HDMI) output from the streamer"
+    contains:
+      - The CMOD bit map
+      - The Y/I/Q matrix, the modulator and the output terms
+      - The CMOD[6:5] output select table
+      - DVI pin order, TMDS/literal select, the 10x clock and NCO rule, and the 640x480 example
 
   pin_capture:
     path: pin-capture.yaml
-    size: ~310 lines
     use_when:
       - "Capturing digital pin state into hub RAM"
       - "Monitoring or sniffing a bus that smart pins are already running"
@@ -92,7 +98,6 @@ files:
 
   goertzel:
     path: dds-goertzel.yaml
-    size: ~80 lines
     use_when:
       - "Implementing DDS waveform synthesis"
       - "Using Goertzel frequency detection"
@@ -110,6 +115,7 @@ decision_tree:
   "Which pins will be used?": pin-selection.yaml
   "What frequency value for X rate?": nco-timing.yaml
   "How does Goertzel analysis work?": dds-goertzel.yaml
+  "How do I set up the colorspace converter or DVI/HDMI output?": colorspace-and-dvi.yaml
   "How do I capture pin state into hub RAM?": pin-capture.yaml
   "How do I watch a bus my smart pins are running?": pin-capture.yaml
 
@@ -122,6 +128,8 @@ related:
   - language/pasm2/xstop.yaml
   - language/pasm2/setxfrq.yaml
   - language/pasm2/getxacc.yaml
+  # Colorspace converter instructions
+  - language/pasm2/setcmod.yaml
   # Streamer symbols
   - language/spin2/symbols/streamer-symbols.yaml
   # Related components

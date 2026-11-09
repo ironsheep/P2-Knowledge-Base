@@ -7,26 +7,63 @@ encoding:
   z: —
   clocks: '2...9'
 timing:
-  cycles: 2
-  type: fixed
+  cycles: "2...9"
+  type: variable
+  source: "P2 Instructions v35 Rev B/C Silicon, HUBSET row (clocks 2...9); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, HUBSET row (2...9), p.41"
 description: |
-  Set hub configuration to D. HUBSET configures various hub parameters including
-  clock source, crystal settings, and PLL configuration. The exact operation
-  depends on the bits set in D.
+  Set hub configuration to D. HUBSET configures the hub's global circuits. The
+  single D operand both selects the circuit to configure, by its top bits, and
+  supplies that circuit's configuration data. See operand_modes for the five
+  selections.
 
-  Primary use is clock configuration: selecting clock source (RCFAST, RCSLOW,
-  crystal, PLL), configuring PLL dividers and multipliers, and switching between
-  clock sources. Chip reset uses a separate HUBSET mode: HUBSET ##$1000_0000
-  (D[31:28]=%0001 selects hard reset/reboot). In clock mode, D[31]=1 selects PRNG seed, not reset.
+  The clock generator mode selects the clock source (RCFAST, RCSLOW, XI pin,
+  PLL), the XI/XO crystal pin configuration, and the PLL dividers and multiplier.
+  Chip reset is a separate mode: HUBSET ##$1000_0000 (D[31:28]=%0001 selects
+  hard reset/reboot). A D with its top bit set seeds the Xoroshiro128** PRNG
+  and is neither a clock setting nor a reset (see prng_seeding).
+
+operand_modes:
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, Configuration (the HUBSET operand table); the clock-mode example form %0000_000E_DDDD_DDMM_MMMM_MMMM_PPPP_CCSS: HUB, Configuring the Clock Generator"
+  selected_by: "The top bits of D: D[31:28] for the first four rows, D[31] alone for the last row."
+  rows:
+    - d_top_bits: "%0000"
+      d_format: "%0000_xxxE_DDDD_DDMM_MMMM_MMMM_PPPP_CCSS"
+      effect: "Set clock generator mode"
+      detail: "The clock-mode form is also written %0000_000E_DDDD_DDMM_MMMM_MMMM_PPPP_CCSS. Fields: clock_configuration."
+    - d_top_bits: "%0001"
+      d_format: "%0001_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx"
+      effect: "Hard reset, reboots chip"
+      detail: "HUBSET ##$1000_0000 generates an internal reset pulse to reboot."
+    - d_top_bits: "%0010"
+      d_format: "%0010_xxxx_xxxx_xxLW_DDDD_DDDD_DDDD_DDDD"
+      effect: "Set write-protect and debug enables"
+      detail: "The L, W and D fields are defined once, in architecture/hub.yaml (write_protection)."
+    - d_top_bits: "%0100"
+      d_format: "%0100_xxxx_xxxx_xxxx_xxxx_xxxR_RLLT_TTTT"
+      effect: "Set filter R to length L and tap T"
+      detail: "Configures one of the four global digital filters (filt0..filt3) that a smart pin can use to low-pass filter its incoming pin states. R = D[8:7] selects the filter (0..3 = filt0..filt3). L = D[6:5] is the filter length, 0..3 for 2, 3, 5 or 8 flipflops. T = D[4:0] is the timing tap, 0..31, selecting a lower bit of CT so the pin state is sampled every clock, every 2nd clock, every 4th clock, ... every 2,147,483,648th clock. Assembled as HUBSET ##$4000_0000 + Length<<5 + Tap for filt0, with $4000_0080, $4000_0100 and $4000_0180 for filt1, filt2 and filt3. The filter output goes high or low only when all the flipflops agree. Reset defaults and how a pin selects a filter: architecture/smart_pins.yaml (global_digital_filters)."
+    - d_top_bits: "%1"
+      d_format: "%1DDD_DDDD_DDDD_DDDD_DDDD_DDDD_DDDD_DDDD"
+      effect: "Seed Xoroshiro128** PRNG with D"
+      detail: "D[31]=1 selects this mode. See prng_seeding."
+  unassigned: "Not documented: D[31:28] values %0011, %0101, %0110 and %0111."
+
+prng_seeding:
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, Seeding the Xoroshiro128** PRNG; P2 Hardware Manual, the Pseudo-Random Number Generator seeding section"
+  description: |
+    HUBSET with D[31] set writes {1'b1, D[30:0]} into 32 of the PRNG's 128 state
+    bits, affecting 1/4th of its total state. The forced 1 bit keeps the overall
+    state from going to zero. The 128 state bits rotate, shift and XOR against each
+    other, so they are spread around within a few clocks.
+  boot_seeding: "After reset, the boot ROM uses HUBSET to seed the PRNG fifty times, each time with 31 bits of thermal noise from pin 63 while in ADC calibration mode."
+  distribution: "The PRNG iterates on every clock, generating 64 fresh bits that are spread among all cogs and smart pins. Each cog receives a unique set of 32 different bits, in a scrambled arrangement with some bits inverted. Each smart pin receives a unique set of 8 different bits. Reading and applying the bits: language/pasm2/getrnd.yaml, language/pasm2/bitrnd.yaml, language/pasm2/drvrnd.yaml, language/spin2/concepts/random_generation.yaml."
 
 clock_configuration:
+  bit_bounds: "The clock configuration setting is 25 bits (D[24:0]); the four LSBs (CCSS) are all that is needed to switch among clock sources and select all but the PLL settings."
   bit_fields:
-    d31:
-      name: "PRNG Seed (MSB)"
-      description: "In clock mode, write 1 (with D[30:0] as seed data) to seed the Xoroshiro128** PRNG; does NOT reset the chip. Chip reset is a separate mode: HUBSET ##$1000_0000."
     d24:
-      name: "PLL Enable"
-      description: "1 = PLL powered on, 0 = PLL off"
+      name: "PLL Enable (E)"
+      description: "0 = PLL off, 1 = PLL on. The XI input must be enabled by CC."
     d23_18:
       name: "Input Divider (DIVD)"
       description: "PLL input divider - 1 (6 bits)"
@@ -38,61 +75,72 @@ clock_configuration:
     d7_4:
       name: "Post Divider (PPPP)"
       description: "PLL output divider (4 bits): %0000 = VCO/2, %0001 = VCO/4, ... %1110 = VCO/30 (VCO / ((PPPP+1)*2)), and %1111 = VCO/1"
-      source: "description: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, Configuring the Clock Generator"
+      source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, Configuring the Clock Generator"
     d3_2:
       name: "Crystal Config (CC)"
+      source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, Configuring the Clock Generator (the %CC table)"
       values:
-        0b00: "XI/XO Hi-Z (oscillator off)"
-        0b01: "1MΩ feedback, no caps"
-        0b10: "1MΩ feedback, 15pF caps (crystals >= 16 MHz)"
-        0b11: "1MΩ feedback, 30pF caps (crystals < 16 MHz)"
+        0b00: "XI ignored, XO floats; XI/XO impedance Hi-Z; loading caps OFF"
+        0b01: "XI input, XO 600-ohm drive; XI/XO impedance 1M-ohm; loading caps OFF"
+        0b10: "XI input, XO 600-ohm drive; XI/XO impedance 1M-ohm; loading caps 15pF per pin"
+        0b11: "XI input, XO 600-ohm drive; XI/XO impedance 1M-ohm; loading caps 30pF per pin"
     d1_0:
       name: "Clock Source (SS)"
+      source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, Configuring the Clock Generator (the %SS table and the RC oscillator paragraph)"
       values:
-        0b00: "RCFAST (~20 MHz)"
-        0b01: "RCSLOW (~20 kHz)"
-        0b10: "XI pin (crystal/external)"
-        0b11: "PLL output"
+        0b00: "RCFAST: 20 MHz+ (always at least 20 MHz, worst case); can be switched to at any time; used on boot-up"
+        0b01: "RCSLOW: ~20 kHz; can be switched to at any time"
+        0b10: "XI pin (clock input or crystal oscillator input); CC != %00"
+        0b11: "PLL output; CC != %00 and E=1"
 
 safe_clock_switching:
-  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock (%SS clock-source table: allow 10ms for crystal+PLL to stabilize before switching to PLL), p.18; independently in Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, Configuring the Clock Generator"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, Configuring the Clock Generator (the %SS table: allow 10ms for crystal+PLL, 5ms for the crystal; the four-step PLL example for 148.5 MHz from a 20 MHz crystal; the deglitching paragraph: select mode %00 or %01 while waiting for the crystal and/or PLL to settle, before switching over to either); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock, pp.18-19 (the same table, example and paragraph)"
   description: |
-    When switching to PLL, follow this three-step sequence to avoid glitches:
-    1. Configure PLL but stay on current source
-    2. Wait for PLL to lock (~10ms)
-    3. Switch clock source to PLL
+    The %SS selector must select %00 (RCFAST) or %01 (RCSLOW) while the crystal
+    and/or PLL settle into operation, before switching over to either XI or the
+    PLL. Switching to the PLL therefore takes these steps:
+    1. Select RCFAST (%SS = %00), here with HUBSET #$F0.
+    2. Enable the crystal (%CC != %00) and the PLL (E = 1), with the PLL
+       divider, multiplier and post-divider fields, while %SS stays %00.
+    3. Wait ~10ms for the crystal+PLL to stabilize, still on RCFAST.
+    4. Switch %SS to %11 (PLL) with the same other fields.
+    Switching to the crystal alone follows steps 2 to 4 with E = 0, a ~5ms wait,
+    and a last step that sets %SS to %10 (XI) instead of %11. Switching away from the PLL has its own rule: see
+    architecture/clock_system.yaml (clock_switching).
   sequence:
     step_1:
-      description: "Configure PLL without switching to it"
+      description: "Select RCFAST, with %PPPP = %1111"
       code: |
-        HUBSET  ##pll_config_mode     ' PLL settings, source bits = current
+        HUBSET  #$F0                                ' set 20 MHz+ (RCFAST) mode
     step_2:
-      description: "Wait for PLL to stabilize"
+      description: "Enable the crystal and PLL while staying on RCFAST: 20 MHz / 40 * 297 = 148.5 MHz, VCO / 1, 15pF crystal mode"
       code: |
-        RDLONG  clkf, #$44            ' clkfreq lives at hub long $44
-        QDIV    clkf, #100
-        GETQX   pll_wait
-        WAITX   pll_wait              ' Wait ~10ms for PLL lock
+        HUBSET  ##%1_100111_0100101000_1111_10_00   ' enable crystal+PLL, stay in RCFAST mode
     step_3:
-      description: "Switch to PLL"
+      description: "Wait for the crystal+PLL to stabilize, still on RCFAST"
       code: |
-        HUBSET  ##pll_active_mode     ' Same config, source bits = 11 (PLL)
+        WAITX   ##20_000_000/100                    ' wait ~10ms for crystal+PLL to stabilize
+    step_4:
+      description: "Switch to the PLL"
+      code: |
+        HUBSET  ##%1_100111_0100101000_1111_10_11   ' now switch to PLL running at 148.5 MHz
 
 examples:
   enable_crystal:
-    description: "Enable 20 MHz crystal oscillator (the low nibble is %CC_SS)"
+    description: "Enable 20 MHz crystal oscillator (the low nibble is %CC_SS). The wait runs on RCFAST (20 MHz min, 24 MHz typical, 30 MHz max), so its length in clocks is set for the fastest RCFAST: 200_000 clocks are at least 6.7ms, more than the 5ms the crystal needs, where 100_000 clocks (##20_000_000/200) would be about 4.2ms at 24 MHz. Parallax's documents also give WAITX ##20_000_000/200 for this wait, which is 5ms only at the 20 MHz RCFAST minimum."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, Configuring the Clock Generator (the %SS table: allow 5ms for the crystal); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics (RCFAST 20 / 24 / 30 MHz), p.48; Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup (the external-clock sequence with WAITX ##20_000_000/100, given for the crystal-only mode too); P2 Instructions v35 Rev B/C Silicon, WAITX row (2 + D clocks); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), the HDMI example (waitx ##20_000_000 / 200, 'allow crystal+PLL 5ms')"
     code: |
       HUBSET  ##%10_00              ' CC=%10 (15pF caps), SS=%00 stay on RCFAST
-      WAITX   ##20_000_000/200      ' Wait 5ms for crystal to stabilize
+      WAITX   ##20_000_000/100      ' 200_000 RCFAST clocks: 6.7-10ms, at least the crystal's 5ms
       HUBSET  ##%10_10              ' SS=%10 switch to crystal (XI source)
 
   pll_200mhz:
-    description: "Configure PLL for 200 MHz from 20 MHz crystal (fields %E_DDDDDD_MMMMMMMMMM_PPPP_CC_SS)"
+    description: "Configure PLL for 200 MHz from 20 MHz crystal (fields %E_DDDDDD_MMMMMMMMMM_PPPP_CC_SS). HUBSET #$F0 writes %PPPP = %1111, %CC = %00 and %SS = %00, so it does not keep the %CC setting. Parallax's documents also give, for leaving the PLL, switching to RC while keeping %PPPP and %CC: see architecture/clock_system.yaml (hubset_configuration.cross_source_conflict)."
     code: |
-      ' Step 1: RCFAST with PPPP=%1111 (safe base before using the PLL)
+      ' Step 1: RCFAST (SS=%00) with PPPP=%1111
       HUBSET  #$F0
 
-      ' Step 2: PLL on, crystal on, stay on RCFAST (SS=%00)
+      ' Step 2: PLL on, crystal on (CC=%10, 15pF), stay on RCFAST (SS=%00)
       '   DDDDDD=0 (/1), MMMMMMMMMM=9 (x10) -> VCO 200 MHz, PPPP=%1111 -> VCO/1
       HUBSET  ##%1_000000_0000001001_1111_10_00
       WAITX   ##20_000_000/100      ' Wait 10ms for crystal+PLL
@@ -104,18 +152,20 @@ examples:
     description: "Reset (reboot) the entire chip -- D[31:28]=%0001 selects hard-reset mode"
     code: |
       HUBSET  ##$1000_0000          ' D[31:28]=%0001 = hard reset, reboots chip
+
+  seed_prng:
+    description: "Seed 32 bits of the Xoroshiro128** state from a value held in a register"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, Seeding the Xoroshiro128** PRNG (its example writes SETB, which the assembler refuses; BITH is the bit-set instruction: CP-039)"
+    code: |2
+              BITH    seedval, #31  ' set the MSB of seedval to make a PRNG seed command
+              HUBSET  seedval       ' seed 32 bits of the Xoroshiro128** state
+
+      seedval       long    0       ' the seed value register
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.154"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.154; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB (Configuration; Configuring the Clock Generator; Write-Protecting the Last 16KB of Hub RAM and Enabling Debug Interrupts; Seeding the Xoroshiro128** PRNG; Rebooting the Chip)"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_l
-  pattern: D/#0..511
-  description: Destination or immediate value 0-511
-  valueType: 26
-compiler_encoding:
-  operandFormat: 26
 syntax_variants:
 - HUBSET {#}D
 last_updated: '2025-09-19T16:04:17.201537'
@@ -129,6 +179,12 @@ related:
   - language/spin2/system-variables/clkmode.yaml
   - language/spin2/constants/special-configuration-symbols.yaml
   - architecture/clock_system.yaml
+  - architecture/hub.yaml
+  - language/pasm2/getrnd.yaml
+  - language/pasm2/bitrnd.yaml
+  - language/pasm2/drvrnd.yaml
+  - language/pasm2/xoro32.yaml
+  - language/spin2/concepts/random_generation.yaml
   - architecture/boot-rom/_index.yaml
   - architecture/boot-rom/spi-flash-boot.yaml
   # HUBSET #%0010 (%SS = XI with %CC = %00, XI ignored) stops the clock until the next

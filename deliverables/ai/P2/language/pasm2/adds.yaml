@@ -3,7 +3,7 @@ syntax: ADDS Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Add signed
 category: Math and Logic
 description: >-
-  ADDS sums the two signed values of Dest and Src together and stores the result into the Dest register. If Src is a 9-bit literal, its value is interpreted as positive (0-511; it is not sign-extended) -- use ##Value (or insert a prior AUGS instruction) for a 32-bit signed value; negative or positive. If the WC or WCZ effect is specified, the C flag is set to the true sign of the result -- the sign of (D + S) at full precision (overflow-corrected) (C=1 if negative, C=0 if non-negative). C is NOT a signed-overflow indicator. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it is non-zero. To add signed, multi-long values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as described in Adding Two Multi-Long Values.
+  ADDS sums the two signed values of Dest and Src together and stores the result into the Dest register. If Src is a 9-bit literal, its value is interpreted as positive (0-511; it is not sign-extended) -- use ##Value (or insert a prior AUGS instruction) for a 32-bit signed value; negative or positive. If the WC or WCZ effect is specified, the C flag is set to the true sign of the result -- the sign of (D + S) at full precision (overflow-corrected) (C=1 if negative, C=0 if non-negative); C differs from Result[31] when the sum overflows, and it is not a signed-overflow flag. Parallax's documents also describe C as set (1) when the summation results in a signed overflow (signed carry), or cleared (0) when it does not. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it is non-zero. To add signed, multi-long values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as described in Adding Two Multi-Long Values.
 result: Sum of signed Src and signed Dest is stored in Dest.
 parameters:
 - Dest is a register containing the value to add Src to, and is where the result is
@@ -12,28 +12,26 @@ parameters:
   into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C: Set to the true sign of the result -- the sign of (D + S) at full precision (overflow-corrected); 1=negative, 0=non-negative; NOT signed overflow
+  C: Set to the true sign of the result -- the sign of (D + S) at full precision (overflow-corrected); 1=negative, 0=non-negative; not a signed-overflow flag
   Z: Set if result equals zero
 syntax_variants:
 - ADDS Dest, {#}Src {WC|WZ|WCZ}
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 0001010 CZI DDDDDDDDD SSSSSSSSS
   write: D
   c: true sign of (D + S)
   z: Result == 0
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ADDS, p.33"
+sources:
+  - "C flag: P2 Instructions v35 - Rev B/C Silicon, row 12 (ADDS: C = correct sign of (D + S); Z = result == 0)"
+  - "C flag: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ADDS encoding table (sign of (D + S)), p.33; PASM2 IN BRIEF (C = correct sign of (D + S)), p.148"
+  - "C flag, source disagreement: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ADDS, p.33 (its prose says the C flag is set on a signed overflow)"
+  - "C flag measured on silicon: ADDS $7FFFFFFF + $1 gives C = 0 (result $80000000) and ADDS $80000000 + $FFFFFFFF gives C = 1 (result $7FFFFFFF), 2026-07-04 (hardware-verification ledger EF-018)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 0
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Add two signed values

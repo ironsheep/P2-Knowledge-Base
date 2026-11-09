@@ -3,7 +3,11 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: quick_example
-    fp: "9408f0a6092e6396"
+    fp: "3872bb6a527da7b8"
     compile: fragment
     wrap: pasm2-dat
     assumes: [handler=con]
+  - at: description
+    fp: "2b32e0ca03b83d0b"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

@@ -21,8 +21,8 @@ detailed_description:
 registers:
   x_register:
     bits_31_0: "Measurement period in clocks (0=continuous totalizer)"
-  y_register:  
-    function: "Not used in this mode"
+  y_register:
+    function: "Not documented: a role for Y in this mode"
   z_register:
     function: "32-bit count of gated positive edges"
 
@@ -47,7 +47,7 @@ code_examples:
         repeat
           ' Wait for measurement complete
           repeat until pinr(sig_pin)
-          freq := rdpin(sig_pin)                 ' Read frequency in Hz
+          freq := rdpin(sig_pin) & $7FFF_FFFF    ' A rises counted while B was high, over 1 second: Hz if the gate stayed high; clear bit 31, where RDPIN() puts C
           
           debug("Frequency: ", udec(freq), " Hz")
       
@@ -74,8 +74,8 @@ common_applications:
 related_modes:
   - "Mode %01011: Quadrature encoder (uses both A and B)"
   - "Mode %01101: Up/down counter based on B state"
-  - "Mode %01110: Count A-rise and B-rise separately"
-  - "Mode %01111: Count while A or B high"
+  - "Mode %01110: Count A-input positive edges; with Y[0] = 1, increment on A-input positive edge and decrement on B-input positive edge"
+  - "Mode %01111: Count A-input highs; with Y[0] = 1, increment on A-input high and decrement on B-input high"
 
 configuration_constants:
   mode_constant: "P_REG_UP"
@@ -92,3 +92,7 @@ notes:
   - "No edges lost at measurement period boundaries"
   - "Does not provide switch debouncing - add filtering if needed"
   - "32-bit counter allows long accumulation periods"
+  - "During reset (DIR=0), IN is low and Z is set to the adder value (0/1)"
+
+sources:
+  - "operation, timing, registers, flags, notes, related_modes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%01100 count A-input positive edges when B-input is high: X period, continuous totalizer at X = 0, the 0/1 adder value carried across measurements, reset state; %01110 and %01111 mode lines)"

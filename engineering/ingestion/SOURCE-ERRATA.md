@@ -3,7 +3,7 @@
 > Backing doc **#5** of the ingestion set (README dashboard · `AUTHORITATIVE-SOURCES` ·
 > `DOCUMENT-LINEAGE` · `KNOWLEDGE-GAPS` · **this**). Standing register, created 2026-08-25.
 >
-> **Next erratum ID: `E-032`**
+> **Next erratum ID: `E-033`**
 
 ## What this register is for
 
@@ -114,6 +114,7 @@ nowhere else. It is never licence to state a fact no evidence supports — that 
 | E-029 | P2 Documentation v35 (Rev B/C) | the booter prose runs the SPI program at once on a **P60** pull-up, and the loader-preemption sentence names the same P60 pull-up; the document's own Table 36, the Hardware Manual and the ROM booter make fast boot a **P59 pull-down** | follows the table and the booter | `CONFIRMED` |
 | E-030 | P2 Hardware Manual | the serial loader's line format says the signal "should be inverted … data bits are high for 0"; the Silicon Doc, the loader's receive configuration and its autobaud pattern are plain non-inverted 8-N-1 | diverges deliberately (`serial_loader.yaml` copied it until «#459») | `CONFIRMED` |
 | E-031 | Spin2 Documentation v55 | the DAT Cog-exec example gives `ORG $100` a default cog limit of **`$1F8`**; the assembler gives `$200` (CP-045) | follows the assembler (`org.yaml`) | `CONFIRMED` |
+| E-032 | P2 Documentation v35 (Rev B/C) | the XZERO paragraph gives the ~1/3 NCO fraction as **`%5555_5555`**; the same section's SETXFRQ table gives 1/3 as **`$2AAA_AAAA+1`** | follows the table (`xzero.yaml`) | `CONFIRMED` |
 
 ---
 
@@ -914,6 +915,28 @@ disagree on legality, the KB teaches what compiles.
 limit has cog limit $200; 256 longs assemble from $100 and the 257th is refused"), grepped
 2026-11-09. Filed 2026-11-09 («#460»), from the carriage walk (range 8, the unexplained note at its
 lines 182-184).
+
+---
+
+## E-032 — the XZERO paragraph gives ~1/3 as **`%5555_5555`**; the SETXFRQ table gives **`$2AAA_AAAA+1`** · `CONFIRMED`
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Propeller 2 Documentation**, v35 (Rev B/C silicon; the Silicon Doc) | STREAMER, the XZERO paragraph | *"due to imperfect fractions like %5555_5555 = ~1/3"* | `sources/silicon-doc/silicon-doc-text.txt:1409` |
+| Against (same document) | the same, STREAMER, SETXFRQ | the scale and the table row | *"D/# expresses a fractional 0-to-1 multiplier for the system clock, which value must be multiplied by $8000_0000"*; table row *"1 / 3 $2AAA_AAAA+1 *"*; NCO *"phase = (phase & $7FFF_FFFF) + frequency"* | `silicon-doc-text.txt:1294`, `:1298`, `:1290` |
+
+**OUR FINDING.** On the SETXFRQ scale ~1/3 is `$2AAA_AAAA+1`. `$5555_5555` is ~2/3 on that scale, and
+~1/3 only as a fraction of 2^32 (the QFRAC scale). The `%` prefix marks a binary literal, which
+`5555_5555` cannot be.
+
+**Would it disappear if Parallax fixed the document tomorrow?** Yes — writing `$2AAA_AAAA+1` in the
+XZERO paragraph removes it. Erratum.
+
+**Evidence tier:** the document against its own table; no bench. · **Reached our KB?** It did, in
+`language/pasm2/xzero.yaml` fractional_frequency_glitch; the file now follows the table and names the
+document's other value (v1.26.0 change-set audit fix pass, 2026-11-09, «#467»). The Assembly
+Language Reference master `part-i/chapter-05-hardware.md:325` still carries `%5555_5555` (manual
+reach row).
 
 ---
 

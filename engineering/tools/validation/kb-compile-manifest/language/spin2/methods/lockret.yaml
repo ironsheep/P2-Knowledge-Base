@@ -8,10 +8,10 @@ blocks:
     wrap: spin2-method
     assumes: [lock_id]
   - at: examples[1].code
-    fp: "72141765cb977194"
+    fp: "89803bc5609b35c7"
     compile: fragment
     wrap: spin2-top
-    assumes: [lock_id]
+    assumes: [lock_plus_1]
   - at: examples[2].code
     fp: "be1f39b99e5f7e2d"
     compile: fragment

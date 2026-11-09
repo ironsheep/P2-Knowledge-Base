@@ -4,50 +4,39 @@
 component: CORDIC
 category: math_engine
 description: |
-  54-stage pipelined CORDIC (COordinate Rotation DIgital Computer) solver shared by
-  all COGs via hub rotation. Each COG gets access every 8 clocks, enabling several
-  operations in flight per COG simultaneously (derived: up to ~6-7 = 54-stage pipeline
-  divided by the 8-clock hub slot).
+  54-stage pipelined CORDIC (COordinate Rotation DIgital Computer) solver that computes
+  its functions for all cogs. A cog waits for its hub slot to hand a command to the solver,
+  and each cog can start a CORDIC operation every 8 clocks, so several operations can be
+  in flight per cog simultaneously. A sequence of eight SETQ+QROTATE commands given back
+  to back, followed by one result read for each further command given and eight trailing
+  result reads, is given as a complete overlapped sequence (eight commands outstanding).
+  Not documented: the maximum count.
 
 architecture:
   pipeline_stages: 54
-  pipeline_type: "Fully pipelined"
-  access_model: "Hub rotation (like hub RAM)"
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), CORDIC Solver and OVERLAPPING CORDIC COMMANDS; the fill depth of 7 on real P2 silicon: EF-053"
-  cog_access_interval: "Every 8 clocks per COG (P2X8C4M64P with 8 cogs; 'every 1/2/4/8/16 (#cogs) clocks')"
-  ops_in_flight_per_cog: "up to ~6-7 (54-stage pipeline / 8-clock hub slot = 54/8; the documentation says 'several', stating no hard count). A register-only fill and drain stays correct through a fill depth of 7, so deep pipelining is real and is not limited to a shallow result buffer."
-  system_throughput: "1 operation per clock (all COGs combined)"
+  pipeline_type: "Pipelined"
+  access_model: "A cog waits for its hub slot, which is zero to (cogs-1) clocks away, to hand a command to the CORDIC solver"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), CORDIC Solver (a cog must wait for its hub slot to hand off the command) and OVERLAPPING CORDIC COMMANDS (the overlapping command listing: eight SETQ+QROTATE commands before the first result read, then one in and one out, then eight trailing results); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES (hub: cogs can start CORDIC operations every 8 clocks), p.2; the fill depth of 7 on real P2 silicon: EF-053"
+  cog_access_interval: "Every 8 clocks per cog"
+  ops_in_flight_per_cog: "several; eight outstanding commands is a complete overlapped sequence: eight SETQ+QROTATE commands, then one result read per further command, then eight trailing result reads. Not documented: the maximum count."
   result_latency: "55 clocks ('Fifty-five clocks later, results will be available via the GETQX and GETQY instructions')"
-  pipeline_depth: "54 clocks (separate from result latency; this is the depth that enables overlapping ops)"
+  pipeline_depth: "54 stages; the pipeline is 54 clocks long, which with the hub slot is what makes it possible to overlap CORDIC commands"
   shared_resource: true
-  arbitration: "Round-robin via hub rotation"
 
 critical_usage_pattern:
-  fill_phase: "Submit ~6-7 ops before expecting results (derived: 54/8 = 6.75; the first result returns ~55 clocks after issue)"
-  steady_state: "Each 8-clock slot: retrieve one result + submit one op"
-  drain_phase: "Retrieve remaining results (may stall)"
-  warning: "GETQX/GETQY stalls COG if result not ready - there is no non-blocking result-ready test (POLLQMT is not one); schedule the read at least 55 clocks after the command"
+  fill_phase: "Give several commands to the CORDIC solver first; the first result is available 55 clocks after its command"
+  steady_state: "Read a result, then give another command, indefinitely"
+  drain_phase: "At the end, read the trailing results"
+  warning: "GETQX/GETQY waits, in case the result has not arrived (2...58 clocks); POLLQMT is not a result-ready test"
 
-  keep_hub_access_out_of_both_loops:
+  hub_access_in_fill_and_drain_loops:
     rule: |
-      KEEP HUB ACCESS OUT OF BOTH THE FILL LOOP AND THE DRAIN LOOP. Read inputs into
-      cog registers (or compute them in-register) BEFORE the fill, keep fill and drain
-      to register-only operations, and batch the hub writes AFTER the drain.
-    why_it_matters: |
-      The failure is SILENT. A pipelined sequence with hub I/O inside a loop returns
-      wrong numbers, not missing ones — the code looks correct and the results look
-      plausible. There is no flag, no stall, and no error to notice.
-    observed_failures: |
-      Compared against single-operation results at fill depths 1-7:
-        - RDLONG inside the fill loop   -> first wrong result at fill depth 2
-        - WRLONG inside the drain loop  -> first wrong result at fill depth 3
-        - register-only fill AND drain, hub I/O batched outside -> correct through 7
-    scope: |
-      This is the shape that fails, not a general law. It shows WHERE results are
-      lost, not why; it covers RDLONG in the fill loop and WRLONG in the drain loop,
-      not every hub operation or cadence. Do not generalize it to "any hub access
-      anywhere" and do not prescribe a clock-level discipline.
-    source: "EF-053 (real P2 silicon, four arms differing only in where hub access sat, swept over fill depths 1-7 against single-operation ground truth; seven consistent runs, with a control -- queue one, retrieve immediately -- that stalled 58 clocks, the documented GETQX maximum)"
+      With RDLONG in the fill loop, results are first wrong at a fill depth of 2; with
+      WRLONG in the drain loop, at a fill depth of 3. With register-only fill and drain
+      loops, results are correct through a fill depth of 7.
+      Not documented: other hub operations or cadences in these loops, and why the
+      results are lost.
+    source: "EF-053 (real P2 silicon, four arms differing only in where hub access sat, swept over fill depths 1-7 against single-operation ground truth; register-only fill and drain correct through fill depth 7; RDLONG in the fill loop first wrong at fill depth 2, WRLONG in the drain loop at fill depth 3; seven consistent runs, with a control -- queue one, retrieve immediately -- that stalled 58 clocks, the documented GETQX maximum)"
 
 operations:
   multiply:
@@ -64,13 +53,14 @@ operations:
     setup: "SETQ {#}D (upper 32 bits of the dividend) then QDIV dividend_low,divisor"
     result: "Quotient in X, remainder in Y"
     notes: "SETQ provides upper 32 bits of 64-bit dividend"
+    quotient_over_32_bits: "With the {SETQ value, D} dividend {3,7} and divisor 2 (true quotient $1_8000_0003, remainder 1), GETQX returns $FFFF_FFFE and GETQY $0000_000B. With {5,11} and divisor 4 (true quotient $1_4000_0002, remainder 3), GETQX returns $FFFF_FFFE and GETQY $0000_0013. Neither quotient is the low 32 bits of the true quotient, and neither is $FFFF_FFFF. Not documented: the result for any other dividend whose quotient exceeds 32 bits."
+    source: "P2 hardware verification, EF-116 (one board, cog execution, the two cases above; in-range controls 1000/3 = 333 r 1 and {1,0}/4 = $4000_0000 r 0 and divide-by-zero with {$1234_5678,7} read as expected, and the SETQ high long was shown by quotients other than 3 and 2)"
     
   fractional_divide:
     instruction: "QFRAC"
-    operation: "64÷32 → 32-bit fractional quotient (unsigned DIVIDE, not a multiply)"
+    operation: "Unsigned division of {D, SETQ value or 32'b0} by S"
     setup: "QFRAC D,S/# - divide {D, SETQ-or-0} by S (D is the upper 32 bits of the numerator)"
-    result: "32-bit fractional quotient in X (remainder via GETQY)"
-    usage: "Fixed-point / fractional arithmetic (integer part in D, fraction in SETQ)"
+    result: "Quotient in X (GETQX), remainder in Y (GETQY)"
     
   square_root:
     instruction: "QSQRT"
@@ -101,28 +91,30 @@ operations:
     instruction: "QLOG"
     operation: "Base-2 logarithm (5:27 fixed-point)"
     setup: "QLOG D"
-    result: "log2(D) in X, 5:27 fixed-point (whole part = bit number, fractional part = mantissa)"
+    result: "log2(D) in X (GETQX), 5:27 fixed-point: the top 5 bits hold the whole part of the power-of-2 exponent and the bottom 27 bits hold the fractional part"
     
   exponential:
     instruction: "QEXP"
-    operation: "2 to the power of D (antilog, inverse of QLOG)"
+    operation: "Logarithm-to-number conversion: 2 to the power of D"
     setup: "QEXP D"
-    input_format: "5:27 fixed-point"
-    result: "2^D in X"
+    input_format: "5:27-bit logarithm"
+    result: "32-bit unsigned integer in X (GETQX)"
 
 result_retrieval:
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), CORDIC Solver and OVERLAPPING CORDIC COMMANDS"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), CORDIC Solver and OVERLAPPING CORDIC COMMANDS; read orders: P2 hardware verification, EF-115 (one board, cog execution; two QMUL k,$FFFF_FFFF results queued, k = 3 and 5, X = -k and Y = k - 1, read in the orders named; controls X X X X over four QMULs, and Y X Y X over two); empty read: P2 hardware verification, EF-117 (one board, cog execution; GETQX with no QMUL pending, directly after the GETQX that read a QMUL result, in two cases with different results: value the last X read, 2 clocks, QMT flag set; pending control waited and left the flag clear)"
+  read_order: "With two QMUL results queued, in cog execution: GETQX then GETQX returns the first result's X then the second's X; GETQY then GETQY returns the first result's Y then the second's Y; GETQX then GETQY returns the first result's X then the first result's Y; GETQY, GETQX, GETQY, GETQX returns the first result's Y, its X, then the second result's Y, its X. In these orders the X reads and the Y reads advance independently. Not documented: other read orders."
   getqx:
     instruction: "GETQX"
     operation: "Retrieve X result from CORDIC"
     behavior: "Stalls if result not ready"
-    timing: "2 clocks if no CORDIC operation is in progress ('GETQX/GETQY will only take two clock and the QMT (CORDIC empty) event flag will be set'). Otherwise waits for the next available result — worst case approaching the 55-clock CORDIC result latency from when the operation was issued."
-    
+    timing: "2 clocks if no CORDIC operation is in progress ('GETQX/GETQY will only take two clock and the QMT (CORDIC empty) event flag will be set'). Otherwise it waits for the result: 2...58 clocks."
+    empty_read: "With no result pending or in progress, GETQX takes two clocks and the QMT flag is set. Directly after a GETQX that read a QMUL result, an empty GETQX returns that same X result again. Not documented: the value of an empty read before any result, after a different CORDIC command, or by GETQY."
+
   getqy:
     instruction: "GETQY"
     operation: "Retrieve Y result from CORDIC"
     behavior: "Stalls if result not ready"
-    timing: "2 clocks if no CORDIC operation is in progress. Otherwise waits for the next available result — worst case approaching the 55-clock CORDIC result latency from when the operation was issued."
+    timing: "2 clocks if no CORDIC operation is in progress. Otherwise it waits for the result: 2...58 clocks."
     
   pollqmt:
     instruction: "POLLQMT"
@@ -135,12 +127,18 @@ pipeline_behavior:
   multiple_operations: |
     Multiple operations can be in flight simultaneously.
     Each COG can have multiple operations pending.
-    Results retrieved in order submitted.
+    Each cog's active CORDIC instructions and forthcoming results are completely isolated from each other, as well as from other cogs; each result must be retrieved on time or else it is overwritten by the following result, if any.
+    Results are read with GETQX and GETQY.
     
   stall_conditions:
     - "GETQX/GETQY when result not ready"
-    - "New operation when pipeline full (rare)"
-    
+
+  result_overwrite:
+    source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, CORDIC Solver (each result must be retrieved on time or else it will be overwritten by the following result, if any), p.20; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), OVERLAPPING CORDIC COMMANDS (you must not have interrupts enabled during such a juggle, or enough clocks could be stolen by the interrupt service routine that one or more of your results could be overwritten before you can read them); EF-053 (results lost silently with hub access in a fill or drain loop, tested shape only)"
+    rule: "A result that is not retrieved on time is overwritten by the following result, if any."
+    interrupts: "Interrupts must not be enabled during an overlapped CORDIC sequence: the interrupt service routine can take enough clocks that one or more results are overwritten before they can be read."
+    hub_access_in_loops: "See critical_usage_pattern.hub_access_in_fill_and_drain_loops."
+
   event_generation:
     event_15: "CORDIC read but empty"
     usage: "Can trigger interrupt or be polled"
@@ -165,8 +163,8 @@ programming_patterns:
     code: |
       QVECTOR x_coord, y_coord
       ' ... do other work ...
-      GETQX   magnitude         ' sqrt(x²+y²)
-      GETQY   angle            ' atan2(y,x)
+      GETQX   magnitude         ' length
+      GETQY   angle             ' angle
       
   rotation_matrix:
     code: |
@@ -179,71 +177,48 @@ programming_patterns:
 accuracy:
   source: >-
     Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (hub features: CORDIC solver summary), which states the solver and each operation's result format.
-    Per-operation detail lives in the instruction entries below; this block states only the result formats and does not restate them.
+    Each operation is described in the QMUL, QDIV, QSQRT, QLOG, QEXP, QROTATE and QVECTOR entries listed under related; this block states only the result formats and does not restate them.
     The truncated (floor) square root: EF-104.
   solver: "32-bit, pipelined, with scale-factor correction"
-  multiply: "Exact -- 32 x 32 unsigned, 64-bit result (see language/pasm2/qmul.yaml)"
-  divide: "Exact -- 64 / 32 unsigned, 32-bit quotient and 32-bit remainder (see language/pasm2/qdiv.yaml)"
+  multiply: "32 x 32 unsigned, 64-bit result (see language/pasm2/qmul.yaml)"
+  divide: "64 / 32 unsigned, 32-bit quotient and 32-bit remainder (see language/pasm2/qdiv.yaml)"
   square_root: "64-bit -> 32-bit square root, truncated (floor) (see language/pasm2/qsqrt.yaml)"
   logarithm: "32-bit unsigned -> 5.27 fixed-point logarithm (see language/pasm2/qlog.yaml)"
   exponential: "5.27 fixed-point logarithm -> 32-bit unsigned (see language/pasm2/qexp.yaml)"
   trigonometric: >-
-    Rotate, polar-to-cartesian and cartesian-to-polar are iterative, so the low bits of a
-    result are approximate; the magnitude scale factor is corrected in hardware. NO PARALLAX
-    SOURCE STATES A BIT COUNT for that residual and none is asserted here -- the bit count
-    is unknown. Check it against your own tolerance.
+    Not documented: the accuracy of the rotate, polar-to-cartesian and
+    cartesian-to-polar results. The solver applies scale-factor correction.
 
 special_features:
   parallel_operations: |
-    All 8 COGs can use CORDIC simultaneously.
-    Pipeline handles interleaved operations.
-    No COG monopolizes the resource.
-    
-  automatic_stalling: |
-    Hardware manages result synchronization.
-    COG stalls automatically if result not ready.
-    No polling required for single operations.
-    
-  event_system: |
-    Can generate event when CORDIC empty.
-    Useful for interrupt-driven computation.
-    Event 15 dedicated to CORDIC status.
+    The CORDIC solver computes its functions for all cogs.
+    Each cog's active CORDIC instructions and forthcoming results are completely isolated from each other, as well as from other cogs.
 
-applications:
-  signal_processing:
-    - "FFT butterfly operations"
-    - "Digital filtering"
-    - "Goertzel algorithm support"
-    
-  graphics:
-    - "2D/3D transformations"
-    - "Rotation matrices"
-    - "Perspective calculations"
-    
-  control_systems:
-    - "PID calculations"
-    - "Motor control vectors"
-    - "Sensor fusion"
-    
-  communications:
-    - "Phase/frequency calculations"
-    - "Modulation/demodulation"
-    - "Error correction codes"
+  automatic_stalling: |
+    COG stalls automatically if result not ready (GETQX/GETQY wait, in case the results have not arrived).
+
+  event_system: |
+    Event 15 is the CORDIC-read-but-empty event (GETQX/GETQY executed with no results available or in progress).
+
+goertzel_streamer:
+  description: "Goertzel analysis is done by the streamer's DDS/Goertzel mode, read with GETXACC; it returns sine and cosine accumulations which can be converted into polar coordinates using the QVECTOR instruction, yielding power and phase information"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (DDS/Goertzel mode); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, GETXACC, p.45"
 
 performance:
-  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES (hub: each cog can start CORDIC operations every 8 clocks and get results 55 clocks later), p.2; Parallax Propeller 2 Documentation v35 (Rev B/C silicon), CORDIC Solver and OVERLAPPING CORDIC COMMANDS. The rates below are arithmetic on those stated intervals."
-  throughput: "160 MOPS at 160MHz clock (1 op per clock system-wide via hub rotation)"
-  latency: "343.75ns at 160MHz (55 clocks, as stated in the Parallax Propeller 2 Documentation)"
-  efficiency: "~100% utilization possible by overlapping operations across the 54-stage pipeline"
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES (hub: each cog can start CORDIC operations every 8 clocks and get results 55 clocks later), p.2; Parallax Propeller 2 Documentation v35 (Rev B/C silicon), CORDIC Solver and OVERLAPPING CORDIC COMMANDS."
+  issue_interval: "Each cog can start a CORDIC operation every 8 clocks"
+  latency: "55 clocks from command to result"
 
 related_components:
-  architecture/streamer/overview.yaml: "Can use CORDIC results for DDS"
-  smart_pins: "CORDIC supports Goertzel mode calculations"
-  math_instructions: "Complements MUL/MULS/SCA/SCAS instructions"
+  architecture/streamer/overview.yaml: "The streamer's DDS/Goertzel mode returns accumulations that QVECTOR converts to polar coordinates"
+  language/pasm2/mul.yaml: "MUL, MULS, SCA and SCAS are the cog's own 16 x 16-bit multiplies, 2 clocks each, beside the CORDIC solver's 32 x 32-bit QMUL"
+  language/pasm2/muls.yaml: "MULS: the signed 16 x 16-bit multiply"
+  language/pasm2/sca.yaml: "SCA: unsigned 16 x 16-bit multiply, the product shifted right 16 bits as the next instruction's S value"
+  language/pasm2/scas.yaml: "SCAS: signed 16 x 16-bit multiply, the product shifted right 14 bits as the next instruction's S value"
 
-# Redirected 2026-09-10 per Sacred Rule #7: these were bare prose ("QMUL instruction
-# details"), which `see_also:` never resolves, so a consumer following them reached
-# nothing. The same concepts now resolve as full paths in `related:` below.
+sources:
+  - "related_components (the cog multiplies): P2 Instructions v35 - Rev B/C Silicon, rows 137-140 (MUL D = unsigned (D[15:0] * S[15:0]); MULS signed; SCA next instruction's S value = unsigned (D[15:0] * S[15:0]) >> 16; SCAS signed, >> 14; 2 clocks each)"
+
 related:
   - language/pasm2/qmul.yaml
   - language/pasm2/qdiv.yaml
@@ -252,9 +227,5 @@ related:
   - language/pasm2/qexp.yaml
   - language/pasm2/qrotate.yaml
   - language/pasm2/qvector.yaml
-  # Pipeline optimization techniques: documented in cordic_solver.yaml
-  # ("processing large datasets where pipeline optimization provides significant
-  # benefit") and worked as a runnable fill/steady/drain recipe in the P2AN002
-  # companion.
   - language/spin2/concepts/cordic_solver.yaml
   - p2kbAppNoteP2an002CordicForRealWork

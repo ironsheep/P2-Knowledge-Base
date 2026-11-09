@@ -15,32 +15,32 @@ blocks:
     compile: fragment
     wrap: spin2-top
   - at: syntax_forms[3].syntax
-    fp: "1c5f8be157dd4308"
+    fp: "b94feb8330ccbcec"
     compile: program
   - at: syntax_forms[4].syntax
     fp: "ddb692885107a2b6"
     compile: program
   - at: syntax_forms[4].contrast_with_org_inline
-    fp: "5f8bbc51702a6bea"
+    fp: "4d9cca5aba7e0f8c"
     compile: not-code
     reason: "notation with prose: two lines `ORG..END : code copied into cog RAM...` / `ORGH..END : ...` contrasting the two inline forms; not a statement sequence"
   - at: register_access.example
     fp: "0a28a279b3d75aa0"
     compile: program
   - at: data_sharing_patterns[0].code
-    fp: "e9820128155bb3d6"
+    fp: "ca887aeeb3d50195"
     compile: program
   - at: data_sharing_patterns[1].code
     fp: "e4c815d3f599f963"
     compile: program
   - at: data_sharing_patterns[2].code
-    fp: "6bb7e13b48da8ee8"
+    fp: "317ab325fe328078"
     compile: program
   - at: common_use_cases[0].code
     fp: "1711caae4e632a78"
     compile: program
   - at: common_use_cases[1].code
-    fp: "975d3721c054b980"
+    fp: "1447b34c28c347f2"
     compile: program
   - at: common_use_cases[2].code
     fp: "6750b0c547a1f5c6"
@@ -49,12 +49,12 @@ blocks:
     fp: "6a75ea477776eb50"
     compile: program
   - at: cog_loading.basic_pattern
-    fp: "af5471a694ddfea0"
+    fp: "c6d379dd57b0a07d"
     compile: fragment
     wrap: spin2-top
     assumes: [parameters]
   - at: cog_loading.with_communication
-    fp: "ad4092024bc875d0"
+    fp: "c050d41b894f654d"
     compile: fragment
     wrap: spin2-top
     assumes: [temp]

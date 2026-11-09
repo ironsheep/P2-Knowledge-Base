@@ -14,15 +14,8 @@ description: 'Return by popping stack (K). C = K[31], Z = K[30], PC = K[19:0].'
 flags_affected:
   C: Set to K[31] (bit 31 of popped stack value)
   Z: Set to K[30] (bit 30 of popped stack value)
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153; ret_prefix_form: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Conditions ( IF_x ), p.68, and P2 Instructions v35 - Rev B/C Silicon, row 410"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153; ret_prefix_form: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Conditions ( IF_x ), p.68, and P2 Instructions v35 - Rev B/C Silicon, Sheet1, RET row; ret_prefix_form (_RET_ CALL is a plain CALL): EF-058"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_xlat
-  pattern: ''
-  description: No operands - translated instruction (RET*/RESI*/XSTOP)
-  valueType: 33
-compiler_encoding:
-  operandFormat: 33
 syntax_variants:
 - RET {WC/WZ/WCZ}
 last_updated: '2025-09-19T16:04:17.426381'
@@ -35,12 +28,10 @@ aliases:
 - "return from subroutine"
 - "call and return"
 ret_prefix_form: >-
-  The same return can be folded into a preceding instruction with the _RET_
-  prefix (condition EEEE=%0000): the instruction executes and a return is then
-  performed ONLY IF that instruction did not branch. On a BRANCHING instruction
-  the branch stands and no return occurs, so '_RET_ CALL #target' is silently a
-  plain CALL and never returns -- write 'CALL #target' followed by 'RET' instead.
-  Full rule: language/pasm2/concepts/conditional_execution.yaml (ret_prefix_rule).
+  The _RET_ prefix (condition EEEE=%0000) executes the instruction and then
+  returns if the instruction did not branch, with no C/Z context restore. On a
+  branching instruction the branch stands and no return occurs, so '_RET_ CALL
+  #target' is a plain CALL.
 related:
 - language/pasm2/call.yaml
 - language/pasm2/concepts/conditional_execution.yaml

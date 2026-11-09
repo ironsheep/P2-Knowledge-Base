@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: overview
-    fp: "39a30c978a97f9e4"
+    fp: "69dc2447c03fd8bb"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: mode_transitions.cog_to_hub.example
@@ -21,7 +21,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: code_organization.mixed_mode.example
-    fp: "21ecb99e7db9a7eb"
+    fp: "cea5c33eb14b48c6"
     compile: fragment
     wrap: pasm2-dat
   - at: code_organization.loading_code.to_cog

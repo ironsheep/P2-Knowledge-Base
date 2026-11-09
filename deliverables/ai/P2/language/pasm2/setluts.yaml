@@ -16,24 +16,18 @@ flags_affected:
   Z: No effect
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release (2022/11/01), Propeller 2 Assembly Language (PASM2) in Brief, p.158; P2 Instructions v35 - Rev B/C Silicon, Sheet1"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_l
-  pattern: D/#0..511
-  description: Destination or immediate value 0-511
-  valueType: 26
-compiler_encoding:
-  operandFormat: 26
 last_updated: '2025-09-19T16:04:17.496285'
 category: Lookup Table
 oneliner: If D[0] = 1 then enable LUT sharing
 notes:
+- 'SETLUTS #0 disallows writes from the other cog (the default); SETLUTS #1 allows them.'
 - 'The writes that reach the receiving cog include SETQ2 block loads into the sender''s LUT
   and the start-up image of a Spin2 sender; the sender''s inline WRLUT also arrives. Enabling
   after those writes brings nothing that was written earlier (not retroactive).'
 - "A COGINIT of the receiving cog resets its enable, so SETLUTS #1 must be executed again;
   a COGINIT of the sending cog leaves the receiver's enable in force."
-- 'The timing of a write against a concurrent enable is not stated.'
-source: "EF-096 (measured on one pair at a time, in cog execution)"
+- 'Not documented: the timing of a write against a concurrent enable.'
+source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), RAM SHARING BETWEEN PAIRED COGS, p.15 (SETLUTS #0 and #1); EF-096 (tested on one pair at a time, in cog execution)"
 related:
 - architecture/lookup_ram.yaml
 - language/pasm2/coginit.yaml

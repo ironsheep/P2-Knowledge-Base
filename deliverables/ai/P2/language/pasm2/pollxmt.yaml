@@ -22,21 +22,19 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZ0 000001010 000100100
   write: —
   c: XMT Event
   z: XMT Event
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLXMT, p.115"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 281 (POLLXMT {WC/WZ/WCZ}: get XMT event flag into C/Z, then clear it; 2 clocks)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Event instructions, p.43 (POLLXMT {WC/WZ/WCZ}, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLXMT, p.115 (Result line, WC / WZ / WCZ parameter, encoding row 000001010 / 000100100, write none, C and Z XMT Event, 2 clocks, Related list; the flag is set whenever the streamer is ready for a new command; cleared upon XINIT, XZERO, XCONT, POLLXMT, WAITXMT, JXMT or JNXMT)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (the POLLxxx instructions simultaneously return their event-occurred flag into C and/or Z and clear it unless it is set again by the event sensor; POLLXMT event flag: cleared on XINIT / XZERO / XCONT, set whenever the streamer is ready for a new command, also cleared on POLLXMT / WAITXMT / JXMT / JNXMT), instruction encoding listing (EEEE 1101011 CZ0 000001010 000100100 POLLXMT {WC/WZ/WCZ})"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pollwait
-  pattern: ''
-  description: No operands - poll/wait instruction (moves S to D, sets S to $024)
-  valueType: 28
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 28
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Retrieve and clear streamer-empty event flag
@@ -47,3 +45,4 @@ related:
 - WAITXMT
 - JXMT
 - JNXMT
+- architecture/event_system.yaml

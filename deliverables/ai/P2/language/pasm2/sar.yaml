@@ -2,35 +2,24 @@ instruction: SAR
 syntax: SAR Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Shift arithmetic right
 category: Math and Logic
-description: 'The bits of Dest are shifted right by Src bits, extending Dest[31] (the
-  sign bit) into new leftmost bits.
+description: >-
+  The bits of Dest are shifted right by Src bits, extending Dest[31] (the sign bit)
+  into new leftmost bits.
 
-
-  SAR shifts Dest''s binary value right by Src places (0-31 bits) and sets the new
-  MSBs to that of the original
-
-
-  Dest[31]; preserving the sign of a signed integer. This is useful for bit stream
-  manipulation and for swift division--
-
-
-  it is similar to SHR for swift division by a power-of-two, but is for signed
-  integers; use SHR for unsigned values (SAR on an unsigned value with bit 31 set
-  shifts in 1s).
-
+  SAR shifts Dest's binary value right by Src places (0-31 bits) and sets the new
+  MSBs to that of the original Dest[31]; preserving the sign of a signed integer.
+  This is useful for bit stream manipulation and for swift division-- it is similar
+  to SHR for swift division by a power-of-two, but the new MSBs are copies of Dest[31]
+  where SHR inserts zeros, so SAR is for signed values; for unsigned 32-bit division by
+  a power-of-two use SHR (an unsigned value with bit 31 set gains 1s from SAR).
+  Parallax's documents also describe SAR as safe for both signed and unsigned integers.
 
   If the WC or WCZ effect is specified, the C flag is updated to the value of the
-  last bit shifted out (effectively C =
-
-
-  result bit "-1") if Src is 1-31, or to Dest[0] if Src is 0.
-
+  last bit shifted out (effectively C = result bit "-1") if Src is 1-31, or to Dest[0]
+  if Src is 0.
 
   If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest result equals
-  zero, or is cleared (0) if it is
-
-
-  non-zero.'
+  zero, or is cleared (0) if it is non-zero.
 result: The bits of Dest are shifted right by Src bits, extending Dest[31] (the sign
   bit) into new leftmost bits.
 parameters:
@@ -43,12 +32,10 @@ flags_affected:
   Z: Set if result equals zero
 syntax_variants:
 - SAR Dest, {#}Src {WC|WZ|WCZ}
-- SAR shifts Dest's binary value right by Src places (0-31 bits) and sets the new
-  MSBs to that of the original
 timing:
   cycles: 2
   type: fixed
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 0000110 CZI DDDDDDDDD SSSSSSSSS
   write: D
   c: last bit shifted out if S[4:0] > 0, else D[0]
@@ -56,19 +43,18 @@ encoding:
   clocks: '2'
 encoding_notes:
 - C = last bit shifted out if Src[4:0] > 0, else C = Dest[0].
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SAR, p.122"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SAR, pp.122-123"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 8 (SAR D,{#}S {WC/WZ/WCZ}: shift arithmetic right, D = [31:0] of ({{32{D[31]}}, D[31:0]} >> S[4:0]), C = last bit shifted out if S[4:0] > 0, else D[0]; footnote * Z = (result == 0); 2 clocks; write D)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.37 (SAR D,{#}S {WC/WZ/WCZ}, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SAR, pp.122-123 (Result line, Dest and Src parameters, encoding row 0000110 CZI, write D, C last bit out, Z Result = 0, 2 clocks, footnote C = last bit shifted out if Src[4:0] > 0 else Dest[0], Related list SHR and SH on p.122; the explanation that the new MSBs take the original Dest[31], the swift-division sentence and its 'safe for both signed and unsigned integers' wording, the WC rule (effectively result bit -1 if Src is 1-31, Dest[0] if Src is 0) and the WZ rule on p.123)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 0000110 CZI DDDDDDDDD SSSSSSSSS SAR D,S/# {WC/WZ/WCZ})"
+  - "SHR for unsigned values: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SHR, p.128 ('unsigned 32-bit integer division by a power-of-two. For similar division of a signed value, use SAR instead'); the 1s an unsigned value with bit 31 set gains follow from the CSV row 8 sign fill ({32{D[31]}}); the manual's SAR sentence 'safe for both signed and unsigned integers' (p.123) disagrees with both"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 0
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Divide signed 32-bit integer by power-of-two; a.k.a shift bits right, extending
   the MSB
 related:
-- SHR
-- SH
+- language/pasm2/shr.yaml
+- language/pasm2/shl.yaml

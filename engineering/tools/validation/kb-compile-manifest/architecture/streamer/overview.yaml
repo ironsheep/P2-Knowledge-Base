@@ -7,8 +7,8 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [buffer_addr=con, frequency_value=con, mode_command=con, next_command=con]
-  - at: debug_interaction.fix
-    fp: "44e275425065d003"
+  - at: debug_interaction.debug_cogs_setting
+    fp: "40afad30dada4895"
     compile: fragment
     wrap: spin2-top
   - at: data_paths.hub_to_pins.setup
@@ -35,3 +35,11 @@ blocks:
     fp: "82792c166679af3c"
     compile: not-code
     reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: anti_patterns.ffff_as_a_count.wrong
+    fp: "0eb22c05921b5a5e"
+    compile: not-code
+    reason: "English prose (the wrong usage, described in a sentence), not code"
+  - at: anti_patterns.ffff_as_a_count.correct
+    fp: "dae1259d97f75c72"
+    compile: not-code
+    reason: "English prose (the correct usage, described in a sentence), not code"

@@ -1,70 +1,88 @@
 concept: special_registers
 title: PASM2 Special Purpose Registers
 category: core_architecture
-description: Hardware registers with dedicated functions accessible through specific instructions
+description: Hardware registers with dedicated functions; some are ordinary register operands, others are reached through specific instructions
 
 overview: |
-  Special registers in PASM2 provide access to critical hardware state and control. Unlike general-purpose 
-  registers (cog RAM $000-$1FF), special registers have fixed hardware functions and require specific 
-  instructions to access. They cannot be used as regular memory operands.
+  Special registers in PASM2 provide access to hardware state and control. Unlike general-purpose
+  registers (cog RAM $000-$1EF), special registers have fixed hardware functions; some are reached only
+  through specific instructions, and the cog-register ones ($1F0-$1F7 when their function is in use, and
+  $1F8-$1FF) are also ordinary register operands. The full register map is in
+  architecture/system-registers/complete-system-registers-index.yaml.
 
 registers:
   program_counter:
     - name: PC
     - description: Program counter (20-bit)
-    - access: No direct read instruction; captured as the return address saved by CALLD/CALL/CALLPA/CALLPB; modified by jumps/calls
-    - range: $00000-$FFFFF (hub address space)
-    - notes: Auto-increments, wraps at hub boundary
+    - access: Changed by jumps, calls and returns; a call saves the return address (CALL, CALLPA and CALLPB on the hardware stack, CALLD in its D register, CALLA in the hub long at PTRA++, CALLB in the hub long at PTRB++)
+    - range: "$00000-$FFFFF: cog register RAM $00000-$001FF, lookup RAM $00200-$003FF, hub RAM $00400-$FFFFF (Parallax's documents also give $7FFFF as the top of the range)"
+    - notes: Cogs use 20-bit addresses for program counters, an execution space of up to 1MB
     
   stack_pointers:
     - name: PTRA/PTRB
     - description: Hub pointer registers with auto-increment/decrement
     - access: "Direct as registers ($1F8/$1F9: MOV x, PTRA / MOV PTRA, ##addr) and as pointer expressions (PTRA++, PTRA[index])"
-    - range: 20-bit hub addresses
+    - range: 32-bit register holding a hub RAM address (hub address space is 20 bits)
     - features:
       - Auto-increment/decrement modes (++, --)
-      - Indexed addressing [PTRx + offset]
+      - Indexed addressing PTRx[index] (the index is scaled by the access size)
       - Stack operations (PUSHA/PUSHB, POPA/POPB)
     
   interrupt_vectors:
-    - name: IJMP0/IJMP1/IJMP2/IJMP3
-    - description: Interrupt jump vectors
-    - access: Via SETINT1/SETINT2/SETINT3
-    - usage: Hold interrupt handler addresses
+    - name: IJMP1/IJMP2/IJMP3 and IRET1/IRET2/IRET3
+    - description: Interrupt call and return addresses for INT1, INT2 and INT3
+    - access: Cog registers, RAM unless the interrupt function is in use (IJMP3 $1F0, IRET3 $1F1, IJMP2 $1F2, IRET2 $1F3, IJMP1 $1F4, IRET1 $1F5), written like any register, for example MOV IJMP1,#isr1; the interrupt event is then selected with SETINT1/SETINT2/SETINT3
+    - usage: IJMPx holds the interrupt call address and IRETx the interrupt return address
+    - debug: "During a debug ISR, INA ($1FE) and INB ($1FF) become the RAM registers IJMP0 and IRET0, the debug interrupt call and return addresses (BRK's L bit selects whether INA/INB map normally or as IJMP0/IRET0)"
     
   event_configuration:
     - name: Internal event state
     - description: Event detection and configuration
-    - access: Via SETSEx, GETSEx, POLLxxx, WAITxxx
-    - types: 16 selectable event sources per cog
+    - access: Via SETSE1..SETSE4 (select the selectable events), POLLxxx, WAITxxx, Jxxx/JNxxx
+    - types: 16 unique event trackers that can be polled and waited upon
 
   q_register:
     - name: Q
-    - description: "Q register (32-bit): block-transfer count for SETQ/SETQ2, and the 32-bit extension/aux value for CORDIC commands"
-    - access: Via GETQX/GETQY after CORDIC, SETQ/SETQ2 for block ops
-    - uses:
-      - CORDIC result retrieval
-      - Block move/fill operations
-      - Extended math operations
-    
+    - description: "Q register (32-bit): an extra operand that SETQ and SETQ2 write for the instruction that follows them. Q is not where CORDIC results are held; GETQX and GETQY return the CORDIC solver's X and Y results, not Q."
+    - written_by: "SETQ and SETQ2 write Q and are meant to precede a companion instruction. XORO32, RDLUT, GETXACC and CRCNIB also change Q, and COGINIT, QDIV, QFRAC and QROTATE set it to zero when no SETQ precedes them (see persistence)."
+    - supplied_to:
+      - "RDLONG/WRLONG/WMLONG: the number of longs to transfer, minus 1 (SETQ transfers to or from cog register RAM, SETQ2 to or from lookup RAM)"
+      - "COGINIT: the value written to the started cog's PTRA"
+      - "QDIV: the upper 32 bits of the numerator; QFRAC: the lower 32 bits of the numerator; QROTATE: the Y coordinate"
+      - "MUXQ: the bit mask"
+      - "WAITxxx: a CT target that ends the wait early"
+      - "XINIT/XZERO/XCONT: a new NCO frequency"
+      - "CRCNIB: Q[31:28] are the four bits it iterates over"
+    - span_override: "A prior SETQ replaces the span field of the span instructions. BITL, BITH, BITC, BITNC, BITZ, BITNZ, BITRND and BITNOT work on a span of bits, S[9:5] more than the first bit, and SETQ overrides S[9:5]. DIRx, OUTx, FLTx and DRVx work on a span of pins, D[10:6] more than the first pin, and SETQ overrides D[10:6]. WRPIN, WXPIN, WYPIN and AKPIN work on a span of pins, S[10:6] more than the first pin, and SETQ overrides S[10:6]."
+    - persistence:
+      - "The value written by SETQ/SETQ2 persists until one of these events occurs:"
+      - "XORO32 executes: Q is set to the XORO32 result"
+      - "RDLUT executes: Q is set to the data read from lookup RAM"
+      - "GETXACC executes: Q is set to the Goertzel sine accumulator value"
+      - "CRCNIB executes: Q is shifted left by four bits"
+      - "COGINIT, QDIV, QFRAC or QROTATE executes without a preceding SETQ: Q is set to zero"
+    - across_bytecodes: "A _RET_ SETQ2 at the end of an XBYTE routine leaves Q for the next bytecode's routine: a MUXQ as that routine's first instruction reads the SETQ2 value, in cog execution."
+    - interruption: "SETQ and SETQ2 shield the next instruction from interruption, so an interrupt service routine cannot alter Q before the intended instruction uses it. CRCNIB both takes Q as input and outputs Q, so a SETQ followed by CRCNIB instructions must not be disrupted: protect the sequence from interrupts with STALLI/ALLOWI or put it in a REP block, which is shielded from interrupts, including non-stallable debug interrupts."
+    - read_back: "Q can be read with a MUXQ into a zeroed register: MOV qval,#0 then MUXQ qval,##$FFFFFFFF. Each 1 bit in Q sets the same bit in qval."
+
   random_generator:
     - name: RANDOM
     - description: Pseudo-random number generator
     - access: Via GETRND instruction
-    - features: xoroshiro128** PRNG, seeded at boot, iterating every clock (not a true-random source)
+    - features: xoroshiro128** pseudo-random generator, true-random seeded at start-up, updated every clock
 
   ct_registers:
     - name: CT (Current Time)
     - description: System counter access
     - access: Via GETCT, ADDCT1/2/3, WAITCT1/2/3
     - resolution: System clock cycles
-    - width: 64-bit free-running (Rev B/C silicon); GETCT returns lower 32 bits by default, upper 32 bits with WC
+    - width: 64-bit free-running; GETCT returns lower 32 bits by default, upper 32 bits with WC
 
   flags:
     - name: C and Z
     - description: Carry and Zero flags
     - access: Set by instructions with WC/WZ/WCZ, tested by conditionals
-    - persistence: Maintained until explicitly modified
+    - persistence: "An instruction writes C and Z only when its effect writes them (WC, WZ or WCZ); when the effect is omitted the flags remain as-is. Two writes come from outside an instruction's effect: XBYTE, when the %F bit of its SETQ/SETQ2 configuration is set, writes C and Z with bits 1 and 0 of the bytecode's index field; and a COGINIT that loads a cog from hub starts it with C and Z at 0, whatever they held before"
 
 access_patterns:
   explicit_access:
@@ -82,7 +100,7 @@ access_patterns:
       - PC increments after each instruction
       - PTRA/PTRB auto-modify in indexed operations
       - Flags update when WC/WZ specified
-      - "SETQ sets Q for the next block transfer or CORDIC command; CORDIC results come from GETQX/GETQY (QDIV: quotient in X, remainder in Y)"
+      - "SETQ writes Q for the companion instruction that follows (block transfer, CORDIC command, MUXQ mask, COGINIT PTRA value); CORDIC results come from GETQX/GETQY, not from Q (QDIV: quotient in X, remainder in Y)"
 
   block_operations:
     - method: SETQ/SETQ2 + instruction
@@ -91,17 +109,18 @@ access_patterns:
       - "RDLONG 0, PTRA ' Read 16 longs from hub"
 
 critical_behaviors:
-  - PC wraps at 20-bit boundary (hub memory limit)
-  - PTRA/PTRB modifications affect subsequent indexed operations
-  - Event state persists until explicitly cleared
-  - CORDIC commands can be overlapped; results come back in submission order (read each with GETQX/GETQY)
-  - Random generator continuously generates new values
-  - CT register is global (same for all cogs reading simultaneously)
+  - The PC is 20 bits (an execution space of up to 1MB)
+  - "A PTRx expression is evaluated against the current value of PTRx: PTRx[index] uses PTRx + index*SCALE"
+  - An event-occurred flag is cleared by its own POLLxxx, WAITxxx and Jxxx/JNxxx instructions, unless the event sensor sets it again; most flags are also cleared by another event (cog start, ADDCT1-3, SETPAT, RDFAST/WRFAST/FBLOCK, XINIT/XZERO/XCONT, SETSE1-4), listed per event in architecture/event_system.yaml
+  - Q keeps the value SETQ/SETQ2 wrote until XORO32, RDLUT, GETXACC or CRCNIB changes it, or COGINIT, QDIV, QFRAC or QROTATE executes without a preceding SETQ and sets it to zero
+  - Q can be read back (MOV qval,#0 then MUXQ qval,##$FFFFFFFF); GETQX/GETQY return CORDIC results, not Q
+  - CORDIC commands can be overlapped; read each result with GETQX/GETQY
+  - The Xoroshiro128** PRNG iterates on every clock
 
 common_patterns:
   stack_operation:
     - pattern: "PUSHA value / POPA value"
-    - description: Hardware stack using PTRA
+    - description: A hub-RAM stack addressed by PTRA (PUSHA writes a long at PTRA++, POPA reads a long at --PTRA); distinct from the 8-level hardware stack used by CALL/RET
     
   cordic_operation:
     - pattern: "QROTATE / GETQX result / GETQY result"  
@@ -109,7 +128,21 @@ common_patterns:
     
   timed_wait:
     - pattern: "GETCT target / ADDCT1 target, ##delay / WAITCT1"
-    - description: Precise timing using CT register
+    - description: Wait for a future CT value (the CT1 target set with ADDCT1)
+
+related:
+  - architecture/cog_state.yaml
+  - architecture/system-registers/complete-system-registers-index.yaml
+  - language/pasm2/setq.yaml
+  - language/pasm2/setq2.yaml
+  - language/pasm2/muxq.yaml
+  - language/pasm2/concepts/setq_block_ops.yaml
 
 sources:
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SPECIAL-PURPOSE REGISTERS"
+  - "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Hub Execution, p.21 (PC range $00400 to $7FFFF); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Hub Execution, p.15 (PC range $00400 to $7FFFF)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, CALLA and CALLB rows, p.40"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Effects (WC/WZ/WCZ; flags remain as-is when the effect is omitted; C and Z flag definitions), p.80"
+  - "P2 hardware verification, EF-111 (_RET_ SETQ2 #$A5 at the end of an XBYTE routine, MUXQ first in the next routine, one part, cog execution)"
+  - "P2 hardware verification, EF-113 (COGINIT of a running cog, of a stopped cog and of the cog itself, loading from hub: C and Z read 0 after C = Z = 1 were set; one board)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), XBYTE (the %F bit of the SETQ/SETQ2 {#}D value enables C and Z to receive bits 1 and 0 of the index field of the bytecode; Table 8 clock 5, 'Write C,Z with bit1,bit0 of RDLUT address, if enabled')"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COGS, COG RAM (General Purpose, Dual-Purpose and Special-Purpose Registers); INSTRUCTION MODES; INTERRUPTS (mov ijmp1,#isr1); EVENTS (POLLxxx, WAITxxx, Jxxx/JNxxx); CORDIC Solver; SETQ CONSIDERATIONS (what changes Q, the readback sequence, the shield); STREAMER (SETQ before XINIT/XZERO/XCONT); P2 Instructions v35 - Rev B/C Silicon, Sheet1 (the SETQ, BITx, DIRx/OUTx/FLTx/DRVx, WRPIN/WXPIN/WYPIN/AKPIN, CRCNIB and MUXQ rows)"

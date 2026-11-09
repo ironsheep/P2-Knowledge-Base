@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "14155568b921cab5"
+    fp: "4bc070e5849bdb74"
     compile: program
   - at: examples[1].code
     fp: "7eaab62ffdad2680"
@@ -11,12 +11,12 @@ blocks:
     wrap: spin2-top
     assumes: [buffer, buffer_size, pin_number, driver_code]
   - at: examples[2].code
-    fp: "1ec214a1b5f6bf4a"
+    fp: "4f75bd29bbc2536d"
     compile: fragment
     wrap: spin2-method
     assumes: [new_code, config]
   - at: examples[3].code
-    fp: "058ee25672ff229c"
+    fp: "3bb03369083292f1"
     compile: fragment
     wrap: spin2-method
     assumes: [hub_code, data]

@@ -3,27 +3,26 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "5a715629ed74f832"
+    fp: "b21853dc8e9a7387"
     compile: fragment
     wrap: pasm2-dat
     assumes: [sqrt_result]
   - at: examples[1].code
-    fp: "1bfb854cb0cf0db4"
+    fp: "7815f607d03bb6f9"
     compile: fragment
     wrap: pasm2-dat
     assumes: [big_sqrt]
   - at: examples[2].code
-    fp: "7b9ddbba15d447cd"
+    fp: "3e7e4905319bfe04"
     compile: fragment
     wrap: pasm2-dat
     assumes: [coord_x, x_squared_low, x_squared_high, coord_y, y_squared_low, y_squared_high, sum_low, sum_high, distance]
   - at: examples[3].code
-    fp: "a3ca7aa72b4a8381"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [squares_low, squares_high, rms_value]
-  - at: examples[4].code
     fp: "970e33a30fc208bd"
     compile: fragment
     wrap: pasm2-dat
     assumes: [input_low, input_high, result, zero_case]
+  - at: long_description
+    fp: "8011fede2f0c9503"
+    compile: not-code
+    reason: "English prose description, not code"

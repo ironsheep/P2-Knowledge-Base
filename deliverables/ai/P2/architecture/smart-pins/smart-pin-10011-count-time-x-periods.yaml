@@ -24,7 +24,7 @@ registers:
     bits_31_0: "Number of periods to accumulate"
   y_register:  
     bits_1_0: "Event types: 00=A-rise/B-rise, 01=A-rise/B-edge, 10=A-edge/B-rise, 11=A-edge/B-edge"
-    bits_31_2: "Unused"
+    bits_31_2: "Not documented: a role for Y[31:2] in this mode"
   z_register:
     function: "Total accumulated time for X periods in clocks"
     reset_value: "$00000000 during reset (DIR=0) — note this period-counting mode preloads 0, unlike the %10000/%10001/%10010 state/timing modes which preload $00000001; IN is low"
@@ -36,20 +36,20 @@ flags:
 
 code_examples:
   - title: "Average Period Measurement"
-    description: "Measure average period over 10 cycles"
+    description: "Measure average period over 10 cycles of one signal (A and B both on the pin, the default)"
     code: |
       CON
         _clkfreq = 200_000_000
         signal_pin = 53
-      
+
       PUB main() | total_time, avg_period
-        ' Configure for 10 period measurement
-        pinstart(signal_pin, P_PERIODS_TICKS | P_PLUS1_B, 10, %00)
-        
+        ' Configure for 10 period measurement, A-rise to A-rise on the one pin
+        pinstart(signal_pin, P_PERIODS_TICKS, 10, %00)
+
         repeat
           repeat until pinr(signal_pin)          ' Wait for completion
-          total_time := rdpin(signal_pin)
-          
+          total_time := rdpin(signal_pin) & $7FFF_FFFF   ' clear bit 31, where RDPIN() puts C
+
           avg_period := total_time / 10
           debug("Average period: ", udec(avg_period), " clocks")
       
@@ -67,12 +67,6 @@ code_examples:
         rdpin   phase_time, #signal_pin          ' A-rise to B-rise time
         jmp     #.loop
 
-common_applications:
-  - "Average frequency measurement"
-  - "Phase delay measurement"
-  - "Multi-cycle timing analysis"
-  - "Communication protocol timing"
-
 related_modes:
   - "Mode %10100: Count states over X periods"
   - "Mode %10101-%10111: Time-window period modes"
@@ -84,7 +78,7 @@ configuration_constants:
   common_modifiers:
     - "P_PLUS1_B - Use adjacent pin for B input"
     - "P_LOCAL_B - Use same pin for both A and B (single signal)"
-    - "P_FILT1_AB - Add filtering"
+    - "P_FILT1_AB - Filter the A and B inputs using the global filt1 settings"
 
 notes:
   - "Accumulates time over multiple periods for averaging"
@@ -92,7 +86,11 @@ notes:
   - "Use BBBB bits to select B input source"
   - "Setting B=A measures single signal period"
   - "Z register accumulates all X period times"
+  - "If the A-input rise/edge is coincident with the B-input rise/edge at the end of a period, the start of the next period is registered; upon completion of X periods a new measurement begins"
+  - "The Spin2 example reads Z with RDPIN() & $7FFF_FFFF: the Spin2 RDPIN() method returns the C flag in bit 31, and Z in this mode is limited to $80000000, so the mask keeps every total below $8000_0000; a Z of exactly $80000000 (the limit) reads as 0. Inline PASM2 RDPIN reads all 32 bits of Z. Not documented: the C flag of RDPIN in this mode."
   - "A Y written while DIR is low (before DIRH, as pinstart() and the WYPIN-before-DIRH line in the PASM2 example do) is in force after DIRH: this mode is order-safe"
 
 sources:
+  - "operation, timing, registers, notes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%10011 = For X periods, count time: X periods of A-input rise/edge to B-input rise/edge; Y[1:0] sensitivity; the B-input can be set to the same pin as the A-input for single-pin cycle measurement; coincident edges register the next period; Z limited to $80000000; reset Z = $00000000) and SMART PINS (C is either a mode-related flag or the MSB of the Z result; %FFF = 101 uses the global filt1 settings)"
+  - "notes (Spin2 RDPIN() bit 31): Parallax Propeller 2 Spin2 Language Documentation v55, smart pin methods (RDPIN (Pin) : Zval, Zval[31] = C flag from RDPIN, other bits are RDPIN data)"
   - "EF-097 (Y-before-DIRH order-safety bench-measured on one board, one Y value for this mode)"

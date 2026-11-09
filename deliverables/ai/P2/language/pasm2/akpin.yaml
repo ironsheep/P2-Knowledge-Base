@@ -2,8 +2,9 @@ instruction: AKPIN
 syntax: AKPIN {#}Src
 brief_description: Acknowledge pin
 category: Smart Pin
-description: 'AKPIN acknowledges the Smart Pin(s) designated by Src. This lowers the corresponding IN signal(s) so that future Smart Pin events may raise them again later. Src[5:0] indicates the pin number (0-63). For a range of Smart Pins, Src[5:0] indicates the first pin number (0-63) and Src[10:6] indicates how many contiguous pins beyond the first should be affected (1-31). A 9-bit literal Src is enough to express the starting pin (Src[5:0]) and a range of up to 8 contiguous pins (Src[8:6]). If needed, use the augmented literal feature (##Src) to augment Src to the required 11-bit literal value-- this inserts an AUGS instruction prior. When Src is a register, the register''s value bits [10:0] are used as-is to form the 11-bit Smart Pin range, unless a SETQ instruction immediately precedes the AKPIN instruction; substituting SETQ''s Dest[4:0] in place of value bits[10:6], for AKPIN''s use. The range calculation (from Src[5:0] up to Src[5:0]+Src[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.'
+description: 'AKPIN acknowledges the Smart Pin(s) designated by Src. This lowers the corresponding IN signal(s) so that future Smart Pin events may raise them again later. Src[5:0] indicates the pin number (0-63). For a range of Smart Pins, Src[5:0] indicates the first pin number (0-63) and Src[10:6] indicates how many contiguous pins beyond the first should be affected (1-31). A 9-bit literal Src is enough to express the starting pin (Src[5:0]) and a range of up to 8 contiguous pins (Src[8:6]). If needed, use the augmented literal feature (##Src) to augment Src to the required 11-bit literal value-- this inserts an AUGS instruction prior. When Src is a register, the register''s value bits [10:0] are used as-is to form the 11-bit Smart Pin range. A prior SETQ overrides Src[10:6] with the low five bits of the SETQ value; an ALTx between the SETQ and AKPIN keeps the override, and a SETQ separated from AKPIN by other instructions is not documented. The range calculation (from Src[5:0] up to Src[5:0]+Src[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.'
 result: One or more Smart Pins is acknowledged; lowering their corresponding IN signal(s).
+multi_cog_access: Cogs that execute WRPIN, WXPIN, WYPIN, RDPIN or AKPIN on the same smart pin must do so at different times, because the pin OR's the write-data and acknowledgement buses of all cogs and simultaneous use clobbers the bus data.
 flags_affected:
   C: No effect
   Z: No effect
@@ -16,24 +17,25 @@ timing:
   cycles: 2
   type: fixed
   in_flag_reset_latency: |
-    After AKPIN executes, the Smart Pin requires 2 system-clock cycles to reset
-    the IN flag to logic-0 before a program can poll the flag again.
-    Insert NOP instructions before testing the IN flag.
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+    After AKPIN executes, it takes two clocks for the Smart Pin's IN signal to
+    drop before it can be polled again. A NOP between the AKPIN and the poll
+    (for example TESTP pin WC) elapses those clocks.
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1100000 01I 000000001 SSSSSSSSS
   write: Ack Bus
   c: —
   z: —
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, AKPIN, p.35"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 216 (AKPIN {#}S: acknowledge smart pins S[10:6]+S[5:0]..S[5:0]; wraps within A/B pins; prior SETQ overrides S[10:6]; 2 clocks)"
+  - "description (a prior SETQ overrides S[10:6]): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), list of changes (WRPIN/WXPIN/WYPIN/AKPIN can now work on a span of pins, +S[10:6] pins; prior SETQ overrides S[10:6])"
+  - "description (an ALTx between the SETQ and AKPIN keeps the override): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, pp.38-39 (SETQ / SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction); a SETQ separated by other instructions is in no source"
+  - "multi_cog_access: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (cog-to-smart-pin buses)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), smart pin IN signal and acknowledgement (after WRPIN/WXPIN/WYPIN/RDPIN/AKPIN it takes two clocks for IN to drop before it can be polled again; the example elapses them with one NOP)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_akpin
-  pattern: S/#
-  description: 'Acknowledge pin: pin number/immediate'
-  valueType: 34
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 34
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Acknowledge smart pin(s)
+related:
+  - architecture/io_pin_timing.yaml

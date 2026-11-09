@@ -13,7 +13,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [input_value, logarithm]
   - at: examples[2].code
-    fp: "b46b4dff17ee2dd9"
+    fp: "95dbfc2b7d9ca0fe"
     compile: fragment
     wrap: pasm2-dat
     assumes: [number, log_result, exponent, mantissa]

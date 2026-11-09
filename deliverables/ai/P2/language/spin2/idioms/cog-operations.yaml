@@ -1,13 +1,11 @@
 name: Cog Management Idioms
-description: Common patterns for managing P2 cogs
+description: Patterns for managing P2 cogs
 category: cog_management
-frequency: high
 
 idioms:
   - name: get_cog_id
     pattern: "cogid()"
     description: Get current cog ID
-    usage_count: 1252
     examples:
       - "cogid()"
       - "mycog := cogid()"
@@ -17,17 +15,15 @@ idioms:
   - name: stop_cog
     pattern: "cogstop({cog_id})"
     description: Stop specified cog
-    usage_count: 102
     examples:
       - "cogstop(cog-1)"
       - "cogstop(mycog)"
       - "cogstop(0)"
-    context: Terminate cog execution, often in cleanup
+    context: Stops the named cog
 
   - name: init_cog
     pattern: "coginit({mode}, @{code}, @{params})"
     description: Initialize cog with code and parameters
-    usage_count: 91
     examples:
       - "coginit(COGEXEC_NEW, @uart_mgr, @rxp)"
       - "coginit(cogexec_new, @uart_mgr, @rxp)"
@@ -36,8 +32,13 @@ idioms:
 
   - name: new_cog
     pattern: "coginit(COGEXEC_NEW, @{code}, @{params})"
-    description: Start PASM code in the next free cog (P2 replacement for the P1 COGNEW; COGNEW does not exist on P2; Spin2 methods start with COGSPIN(NEWCOG, method(), stack))
+    description: Start PASM code in an available cog; Spin2 methods start with COGSPIN(NEWCOG, method(), stack). COGNEW is not a Spin2 keyword.
     examples:
       - "coginit(COGEXEC_NEW, @driver, @params)"
       - "coginit(COGEXEC_NEW, @pasm_code, @mailbox)"
-    context: Launch code in the next available cog; as an expression term it returns the cog id (-1 if none free)
+    context: Used as an expression term it returns the cog ID, or $8000_000F with no cog free and all 8 cogs running (test the result with < 0). Parallax's documents also give -1 for no cog free.
+
+sources:
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (COGID, COGSTOP, COGINIT, COGSPIN), Built-In Symbols for COGINIT() and COGSPIN() Usage, DAT Cog-exec (COGINIT(16, ...))"
+  - "P2 hardware verification, EF-120 (COGINIT(COGEXEC_NEW, ...) as an expression, all 8 cogs running, every call returned $8000_000F)"
+  - "COGNEW is not a keyword: CP-057 (pnut-ts 1.55.10 refuses cognew(...) in a Spin2 method)"

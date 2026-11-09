@@ -23,7 +23,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [pin]
   - at: critical_requirements.reset_before_configure.correct_sequence.pasm2[4]
-    fp: "2f6091a9795edb4b"
+    fp: "b08e86403dc44974"
     compile: fragment
     wrap: pasm2-dat
     assumes: [y, pin]
@@ -48,7 +48,7 @@ blocks:
     wrap: spin2-method
     assumes: [pin]
   - at: critical_requirements.reset_before_configure.correct_sequence.spin2[4]
-    fp: "85b10c679b764d08"
+    fp: "15e6347c4c423d19"
     compile: fragment
     wrap: spin2-method
     assumes: [pin, y]
@@ -57,15 +57,15 @@ blocks:
     compile: not-code
     reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
   - at: x_y_z_registers.x_register.examples[0]
-    fp: "8747e092bd3bf744"
+    fp: "06e70d8d7cf7c3d8"
     compile: not-code
     reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
   - at: x_y_z_registers.x_register.examples[1]
-    fp: "7725616e1a5b096c"
+    fp: "2008787616cb21cd"
     compile: not-code
     reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
   - at: x_y_z_registers.x_register.examples[2]
-    fp: "9e4f2d3d4c56fbe4"
+    fp: "5596c3e0777bb89b"
     compile: not-code
     reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
   - at: x_y_z_registers.y_register.usage
@@ -73,27 +73,39 @@ blocks:
     compile: not-code
     reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
   - at: x_y_z_registers.y_register.examples[0]
-    fp: "4ae2f7bdcf65dc36"
-    compile: not-code
-    reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
-  - at: x_y_z_registers.y_register.examples[1]
-    fp: "ff01aa11f0b64140"
+    fp: "d79d294eb1003f6e"
     compile: not-code
     reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
   - at: x_y_z_registers.y_register.examples[2]
-    fp: "7b41f061d9bc1400"
+    fp: "5a35698c2ebc69d9"
     compile: not-code
     reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
+  - at: x_y_z_registers.y_register.examples[3]
+    fp: "7923e7bf7ecedaad"
+    compile: not-code
+    reason: "short usage phrase (English: \"Counting variant select (Y[0] in %01110 and %01111)\"), not code"
   - at: x_y_z_registers.z_register.usage
     fp: "8adf9b62bee9fd3a"
     compile: not-code
     reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
   - at: in_flag.event_driven_waiting.example
-    fp: "ef686e675636db99"
+    fp: "1619436a869030a2"
     compile: fragment
     wrap: pasm2-dat
     assumes: [pin=con, result]
   - at: live_update_behavior.principle
-    fp: "5fcb3c21e5acb902"
+    fp: "46eeb8ac224bf110"
     compile: not-code
     reason: "English explanation of WRPIN / DIR behaviour (prose), not code"
+  - at: critical_requirements.reset_before_configure.correct_sequence.note
+    fp: "81fddaa958c7446b"
+    compile: not-code
+    reason: "prose note on configuration order; names instructions, contains no code"
+  - at: x_y_z_registers.mode_register.usage
+    fp: "2fae4e49978baab0"
+    compile: not-code
+    reason: "prose description, not code"
+  - at: x_y_z_registers.y_register.examples[1]
+    fp: "d974b1ce79468dc1"
+    compile: not-code
+    reason: "prose description, not code"

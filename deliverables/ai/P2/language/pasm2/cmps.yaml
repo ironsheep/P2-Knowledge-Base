@@ -15,21 +15,18 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 0010010 CZI DDDDDDDDD SSSSSSSSS
   write: —
   c: Signed (D < S)
   z: D==S
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CMPS, p.61"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 20 (CMPS: C = correct sign of (D - S); Z = (D == S); 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CMPS, p.61 (encoding table: C Signed (D < S), Z D = S, 2 clocks; description; multi-long note)"
+  - "hardware-verification ledger EF-018 (the signed C flag of ADDS, SUBS and CMPS is the true sign of the full-precision result, not bit 31 of the stored result)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 0
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Compare two signed values

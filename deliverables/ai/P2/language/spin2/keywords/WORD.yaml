@@ -3,8 +3,7 @@ type: keyword
 category: "Data Types"
 
 description: |
-  16-bit data type. Unsigned range: 0 to 65,535. Signed range: -32,768 to 32,767.
-  Used in multiple contexts: variable declarations (VAR), local variables,
+  16-bit data type. Used in multiple contexts: variable declarations (VAR), local variables,
   DAT data, memory access operators, type override (.WORD[n]), typed pointers
   (^WORD, including pointer parameters and results), and data constructors (WORD(...)).
   PUB/PRI parameters and results are always longs (or pointers); there are no WORD
@@ -26,7 +25,7 @@ usage_contexts:
     syntax: "PUB method() : ^WORD result"
     example: "PUB getTable() : ^WORD pTable"
   - context: "DAT data"
-    syntax: "label WORD value1, value2, ..."
+    syntax: "label WORD data{[count]}{, data{[count]}...}"
     example: "myWords WORD 1000, 2000, 3000"
   - context: "Memory access"
     syntax: "WORD[address] or WORD[base][index]"
@@ -57,8 +56,6 @@ examples:
 
 notes:
   - "Size: 16 bits (2 bytes)"
-  - "Unsigned range: 0 to 65,535"
-  - "Signed range: -32,768 to 32,767"
   - "Default type is LONG if no type specifier given"
   - "V54+: WORD struct members may carry named bitfields (bits 0..15), and a STRUCT may contain a single nameless WORD member. See language/spin2/concepts/struct-bitfields.yaml"
 
@@ -74,3 +71,4 @@ related:
   - language/spin2/concepts/struct-bitfields.yaml
 
 oneliner: "16-bit data type used for declarations, memory access, pointers, and data constructors"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (WORD data in DAT); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), assembler directives (WORD data{[count]}{,data{[count]}...})"

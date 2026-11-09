@@ -377,8 +377,7 @@ class P2ReleasePackager:
                 "timing": {"type": "object"},
                 "flags_affected": {"type": "object"},
                 "parameters": {"type": "array"},
-                "related": {"type": "array"},
-                "compiler_info": {"type": "object"}
+                "related": {"type": "array"}
             }
         }
         

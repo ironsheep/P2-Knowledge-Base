@@ -9,8 +9,7 @@ detailed_description:
   operation: |
     Two distinct modes controlled by Y[2]. When Y[2]=0, times duration until X events occur
     (highs/rises/edges). When Y[2]=1, detects timeout if no event occurs within X clocks,
-    maintaining running count since last event. Useful for frequency measurement, watchdog
-    timers, and communication timeout detection.
+    maintaining running count since last event.
   
   timing: |
     Event timing mode (Y[2]=0): Measures time for X events
@@ -25,14 +24,14 @@ registers:
   y_register:  
     bit_2: "0=time X events, 1=timeout detection"
     bits_1_0: "Event type: 00=high, 01=rise, 1x=edge"
-    bits_31_3: "Unused"
+    bits_31_3: "Not documented: a role for Y[31:3]"
   z_register:
     function: "Clock count (event timing) or clocks since last event (timeout)"
     reset_value: "$00000001 during reset (DIR=0); also reloaded to $00000001 when an event restarts the timeout window; IN is low"
 
 flags:
   in_flag: "Raised when X events complete or timeout occurs"
-  acknowledge_restarts: "Reading the result with RDPIN acknowledges it and the next measurement starts automatically: no new WYPIN is needed, and successive measurements arrive back to back (the loop in the example relies on this)."
+  repeat_measurements: "Event timing (Y[2]=0): with an RDPIN between them, a second measurement arrives after the first, with no new WYPIN (the loop in the example relies on this). Timeout (Y[2]=1): when the timeout elapses, IN is raised and a new timeout period of X clocks begins; when an event occurs, a new timeout period of X clocks begins."
   a_input: "Signal to monitor for events"
 
 code_examples:
@@ -63,7 +62,7 @@ code_examples:
         qdiv    clkf, #10
         getqx   window                           ' 100ms timeout
         wxpin   window, #freq_pin
-        wypin   #%101, #freq_pin                 ' Timeout on missing edge
+        wypin   #%101, #freq_pin                 ' Timeout on missing rising edge
         dirh    #freq_pin
       .loop
         testp   #freq_pin wc                     ' Check for timeout
@@ -76,12 +75,6 @@ code_examples:
         ' Handle communication loss
         ret
 
-common_applications:
-  - "Frequency and period measurement"
-  - "Communication watchdog timers"
-  - "Event rate monitoring"
-  - "Missing pulse detection"
-
 related_modes:
   - "Mode %10000: Time state durations"
   - "Mode %10001: Time high periods only"
@@ -92,7 +85,7 @@ configuration_constants:
   binary_value: "%10010"
   common_modifiers:
     - "P_INVERT_A - Invert input signal"
-    - "P_FILT1_AB - Add filtering for noise immunity"
+    - "P_FILT1_AB - Filter the A and B inputs using the global filt1 settings"
 
 notes:
   - "Y[2]=0: Times until X events occur"
@@ -103,4 +96,8 @@ notes:
   - "A Y written before DIRH (pinstart(), and the WYPIN-before-DIRH line in the PASM2 example) is in force after DIRH: this mode is order-safe"
 
 sources:
+  - "code_examples (clkfreq as a hub long): Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup (the clkfreq hub variable at LONG[$44], read from PASM as RDLONG x,#@clkfreq)"
+  - "configuration_constants.common_modifiers (P_FILT1_AB): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (%FFF = 101 uses the global filt1 settings)"
+  - "flags.repeat_measurements (event timing): EF-015 (two successive event-timing measurements both arrived with RDPIN between them)"
+  - "flags.repeat_measurements (timeout), operation, timing, registers: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES (%10010)"
   - "EF-097 (Y-before-DIRH order-safety bench-measured on one board, one Y value for this mode)"

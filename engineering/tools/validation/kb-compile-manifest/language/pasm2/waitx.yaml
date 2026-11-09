@@ -3,20 +3,20 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "b3ac8e841033923b"
+    fp: "699108e913874ac7"
     compile: program
   - at: examples[1].code
-    fp: "938a9572e4f5aefc"
+    fp: "39ab859a0d31464e"
     compile: fragment
     wrap: pasm2-dat
     assumes: [bit_count, data, mosi_mask, sck_pin]
   - at: examples[2].code
-    fp: "5b0d1cbff98a3cbb"
+    fp: "ec0b89bc209ec4e2"
     compile: fragment
     wrap: pasm2-dat
     assumes: [pwm_pin, high_time, low_time]
   - at: examples[3].code
-    fp: "265d13fbfc71e1d7"
+    fp: "f09a14dc7c807297"
     compile: fragment
     wrap: pasm2-dat
     assumes: [button_pin]

@@ -7,7 +7,7 @@ blocks:
     compile: not-code
     reason: "instruction operand followed by `--` and an English gloss; the HUBSET operand values are verbatim from the silicon doc (silicon-doc-text.txt:2765-2770), the `--` text is prose, and `--` is not a PASM2 comment"
   - at: memory_organization.write_protection.examples[1]
-    fp: "1dd07d6148eb7ac4"
+    fp: "92de9546439110f2"
     compile: not-code
     reason: "instruction operand followed by `--` and an English gloss; the HUBSET operand values are verbatim from the silicon doc (silicon-doc-text.txt:2765-2770), the `--` text is prose, and `--` is not a PASM2 comment"
   - at: memory_organization.write_protection.examples[2]
@@ -25,12 +25,12 @@ blocks:
     wrap: pasm2-dat
     assumes: [count=con:16, start_addr, hub_addr]
   - at: programming_patterns.fifo_streaming.code
-    fp: "7b2d759528c4c645"
+    fp: "a6684da02a974e61"
     compile: fragment
     wrap: pasm2-dat
     assumes: [hub_addr, count=con:16, data]
   - at: programming_patterns.circular_buffer.code
-    fp: "3f88f332978d91f1"
+    fp: "1c51c0a4bc01decb"
     compile: fragment
     wrap: pasm2-dat
     assumes: [mask, hub_addr]

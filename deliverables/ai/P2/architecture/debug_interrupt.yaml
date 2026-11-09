@@ -15,25 +15,30 @@ component_name: "Debug Interrupt"
 component_type: "hardware_debug_controller"
 
 description: |
-  The P2 debug interrupt system provides hardware debugging capabilities with single-stepping,
-  breakpoints, and interrupt-on-instruction features. It operates at the highest interrupt 
-  priority, allowing it to interrupt any code including other interrupt service routines.
-  The debug interrupt enables powerful debugging without external hardware debuggers.
+  Each cog has a fourth, hidden interrupt, the debug interrupt, with priority over INT1,
+  INT2 and INT3. It is inaccessible to normal cog programs and is enabled per cog via HUBSET.
+  Its trigger conditions, set by BRK inside each debug ISR, include single-stepping,
+  breakpoint address match, event match, ISR entry, a BRK instruction in the debugged
+  program, and an asynchronous breakpoint from another cog's COGBRK. The scheme was designed
+  to operate stealthily, without any cooperation from the cog program being debugged.
 
 architecture:
   priority: "Highest (above INT1/2/3)"
   
   enable: >-
     Debug interrupts are enabled per cog via HUBSET. A debug-enabled cog takes a debug
-    interrupt on every (re)start from a COGINIT exercised upon it. Each debug ISR must set
-    the trigger condition(s) for the NEXT debug interrupt with BRK before it exits; if it
-    sets none, no further debug interrupts occur until the cog is restarted.
+    interrupt on every (re)start from a COGINIT exercised upon it. Within each debug ISR,
+    multiple trigger conditions may be set for the next debug interrupt; if a subsequent
+    debug interrupt is desired, a BRK instruction is executed before the debug ISR exits.
+    If no trigger conditions are set before the debug ISR ends, no more debug interrupts
+    occur until the cog is restarted from another COGINIT.
   
   trigger_modes:
     source: >-
       The complete set, taken from the BRK D-operand format --
-      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT. There are
-      exactly these conditions; each is one enable bit in BRK's D operand.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT. Each condition is selected by enable bits in BRK's D operand (one bit for
+      the breakpoint-address, event-code, asynchronous and BRK-instruction conditions; three
+      bits %H / %G / %F for ISR entry; four bits %D / %C / %B / %A for single step).
     modes:
     - mode: "breakpoint_address_match"
       bit: "%K"
@@ -59,18 +64,42 @@ architecture:
       bit: "%D / %C / %B / %A"
       description: >-
         Interrupt on each instruction of INT3 ISR code / INT2 ISR code / INT1 ISR code /
-        non-ISR code -- the four single-step scopes are enabled independently
+        non-ISR code -- each scope has its own enable bit
   
   register_handling:
     description: >-
-      There is no debug shadow register set. Two things happen instead. First, INA and
-      INB -- normally read-only input registers -- become the readable/writable registers
-      IJMP0 and IRET0 for the duration of the debug ISR, and IJMP0 is initialised to $1F8
-      on COGINIT. Second, an execute-only ROM at cog registers $1F8..$1FF provides
+      INA and INB -- normally read-only input registers -- become the readable/writable
+      registers IJMP0 and IRET0 for the duration of the debug ISR, and IJMP0 is initialised
+      to $1F8 on COGINIT. An execute-only ROM at cog registers $1F8..$1FF provides
       entry/exit routines that copy cog registers $000..$00F out to hub RAM and back.
-      Nothing preserves PA, PB, PTRA, PTRB or any other register automatically.
-    isr_entry_rom: "$1F8..$1FC -- saves $000..$00F to hub, loads the debugger, JMP #0"
-    isr_exit_rom: "$1FD..$1FF -- restores $000..$00F from hub, then RETI0"
+      Not documented: any other automatic save of registers (PA, PB, PTRA, PTRB or
+      general registers).
+    isr_entry_rom: "$1F8..$1FC -- saves $000..$00F to hub, loads the debugger, JMP #0. IJMP0 is initialized to $1F8 on COGINIT."
+    isr_exit_rom: "$1FD..$1FF -- restores $000..$00F from hub, then RETI0. A debug ISR exits through this routine with JMP #$1FD."
+    rom_words:
+      note: "The eight instructions in the execute-only ROM at cog registers $1F8..$1FF, where %cccc = !CogNumber. Their 32-bit encodings: not documented."
+      words:
+        - "$1F8 - SETQ #$0F 'save registers $000..$00F"
+        - "$1F9 - WRLONG 0,* '* = %1111_1111_1ccc_c000_0000"
+        - "$1FA - SETQ #$0F 'load program into $000..$00F"
+        - "$1FB - RDLONG 0,* '* = %1111_1111_1ccc_c100_0000"
+        - "$1FC - JMP #0 'jump to loaded program"
+        - "$1FD - SETQ #$0F 'restore registers $000..$00F"
+        - "$1FE - RDLONG 0,* '* = %1111_1111_1ccc_c000_0000"
+        - "$1FF - RETI0 'CALLD IRET0,IRET0 WCZ"
+    ending_a_debug_isr: >-
+      Not only RETI0 (CALLD INB,INB WCZ) ends a debug interrupt, but any CALLD with that S
+      and WCZ, whatever D is (CALLD anyreg,INB WCZ). RESI0 (CALLD INA,INB WCZ) writes the
+      next address into IJMP0, so the next debug interrupt resumes from where this debug ISR
+      left off. Using RESI0 this way implies that the debug-ISR-entry and -exit routines in the
+      cog-register ROM are not used and the debugger code is located permanently in some cog
+      registers, so the debugger program is already present at the start of the debug
+      interrupt.
+    redirecting_ijmp0: >-
+      The first debug interrupt after a cog (re)start always uses the entry routine at $1F8.
+      A debug ISR may redirect IJMP0 to point elsewhere for later debug interrupts; those then
+      lose the register saving done by the ROM at $1F8, so the debugger must keep its state in
+      cog registers that do not interfere with the program being debugged.
     hub_save_area: >-
       Registers $000..$00F are saved at ($FF800 + !CogNumber << 7) and the ISR image is
       loaded from ($FF840 + !CogNumber << 7). The last 16KB of hub RAM, also mapped at
@@ -78,13 +107,16 @@ architecture:
       write-protected so that it is writable only from within a debug ISR.
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT,
-      including its per-cog address table.
+      including its per-cog address table, table 24 (the execute-only ROM in cog registers
+      $1F8..$1FF), the exit by 'JMP #$1FD', the IJMP0 redirect paragraph and the
+      CALLD anyreg,INB WCZ paragraph.
 
 configuration:
   note: >-
-    The debug interrupt has no configuration REGISTERS. It is configured by the D operand
-    of a BRK instruction executed inside a debug ISR, and IJMP0/IRET0 (INA/INB remapped)
-    hold its vectors. SKIP and SKIPF are ordinary PASM2 instructions with no debug role.
+    The D operand of a BRK instruction executed inside a debug ISR establishes the next
+    debug interrupt condition(s), and IJMP0/IRET0 (INA/INB remapped) are used by the debug
+    interrupt as jump and return addresses. GETBRK with WC or WZ reports the SKIP/SKIPF/EXECF/XBYTE state
+    of the debugged program.
   brk_operand_format:
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT, BRK D/#.
@@ -154,8 +186,11 @@ instructions:
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT, COGBRK D/#; encoding: Assembly Language (instruction encodings).
       Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.43.
+      D[2:0]: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGBRK, p.64.
+      D[3:0]: P2 Instructions v35 - Rev B/C Silicon, row 330. %CCCC: Parallax Propeller 2 Documentation v35, COGBRK D/#.
     operation: |
-      D/# = %CCCC, the cog in which to trigger an asynchronous breakpoint.
+      D/# selects the cog in which to trigger an asynchronous breakpoint (cog IDs 0-7).
+      Parallax's documents also give the field as %CCCC, D[3:0] and D[2:0].
       TWO preconditions, both required:
         - the cog EXECUTING COGBRK must itself be inside its own debug ISR, and
         - the TARGET cog must have its asynchronous-breakpoint interrupt enabled
@@ -166,8 +201,8 @@ instructions:
   - instruction: "GETBRK"
     encoding: "EEEE 1101011 CZ0 DDDDDDDDD 000110101"
     description: >-
-      Read cog status. GETBRK does NOT read back a break configuration -- the effect
-      selector chooses which of three unrelated status words it returns.
+      Read cog status. GETBRK returns cog status; the WC, WZ or WCZ effect selects which
+      of the three status words is returned.
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT, GETBRK; encoding: Assembly Language (instruction encodings).
       Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.43.
@@ -186,7 +221,7 @@ instructions:
         Z = 1 if no pattern is queued.
     flags_affected: "C and/or Z, per the form selected -- see above"
     usage_example: |
-      GETBRK  status WCZ      ' Cog internal status; C = STALLI mode
+      GETBRK  status WCZ      ' Cog internal status; outside a debug ISR C = STALLI mode, inside one C = COGINIT flag
 
 debug_modes:
   - mode: "single_step"
@@ -197,17 +232,12 @@ debug_modes:
     handler: |
       debug_isr
           ' Save any additional context
-          WRLONG  INB, trace_ptr      ' INB is IRET0 here: the interrupted address
+          WRLONG  INB, trace_ptr      ' INB is IRET0 here: the return address with C and Z in bits 31:30
           ADD     trace_ptr, #4
           ' Optionally modify execution
           BRK     #%0000_0000_0001    ' Re-arm single-step: bits L..A are cleared on ISR entry
           RETI0               ' Continue execution
-    
-    use_cases:
-      - "Instruction tracing"
-      - "Register monitoring"
-      - "Execution flow analysis"
-  
+
   - mode: "address_breakpoint"
     configuration: |
       ' Inside the debug ISR: break at a 20-bit address (%K, bit 10)
@@ -216,19 +246,13 @@ debug_modes:
     handler: |
       debug_isr
           ' Hit breakpoint
-          WRLONG  INB, break_log      ' INB is IRET0 here: the interrupted address
+          WRLONG  INB, break_log      ' INB is IRET0 here: the return address with C and Z in bits 31:30
           ' Examine state
           RDLONG  value, watch_addr
           ' Re-arm the breakpoint: bits L..A are cleared on ISR entry
           BRK     ##(break_addr << 12) | (1 << 10)
-          ' Continue or halt
-          RETI0
-    
-    use_cases:
-      - "Function entry/exit monitoring"
-      - "Loop iteration counting"
-      - "Conditional breakpoints"
-  
+          RETI0               ' Continue execution
+
   - mode: "brk_instruction_break"
     configuration: |
       ' Inside the debug ISR: break when the program executes BRK (%E, bit 4)
@@ -241,13 +265,9 @@ debug_modes:
           ' dispatch on the code
           BRK     #%0000_0001_0000     ' Re-arm the BRK trigger: bits L..A are cleared on ISR entry
           RETI0
-    
-    use_cases:
-      - "Software-planted breakpoints carrying an 8-bit code"
-      - "System call interception"
+
     note: >-
-      There is no "break on a matching instruction pattern" trigger. The eight trigger
-      conditions are exactly those in architecture.trigger_modes.
+      The trigger conditions are those listed in architecture.trigger_modes.
 
 programming_patterns:
   - pattern: "execution_tracer"
@@ -262,7 +282,7 @@ programming_patterns:
               BRK     #%0000_0000_0001     ' Single-step non-ISR code (%A)
 
       trace_isr
-              WRLONG  INB, trace_ptr       ' INB is IRET0 here: save the return PC
+              WRLONG  INB, trace_ptr       ' INB is IRET0 here: the return address with C and Z in bits 31:30
               ADD     trace_ptr, #4
               CMP     trace_ptr, ##TRACE_END WZ
       IF_Z    MOV     trace_ptr, ##TRACE_BUFFER ' Wrap
@@ -270,35 +290,34 @@ programming_patterns:
               RETI0                        ' Continue
   
   - pattern: "conditional_breakpoint"
-    description: "Break only when conditions are met"
+    description: "Act on an address breakpoint only when a watched hub long holds a given value; the breakpoint is re-armed on both paths, so the check repeats each time execution reaches the address"
     code: |
-      ' Conditional breakpoint handler
+      ' Conditional breakpoint: a debug ISR entered on an address breakpoint (%K)
       debug_isr
               RDLONG  value, watch_var     ' Check variable
               CMP     value, break_value WZ
-      IF_NZ   RETI0                        ' Continue if no match
-              
-              ' Condition met - handle break
-              COGID   pa                   ' Save COG ID
-              WRLONG  pa, debug_cog
+      IF_NZ   JMP     #.rearm              ' No match: re-arm and resume
+
+              ' Condition met - record the break
+              COGID   cog_id               ' This cog's ID, into a debugger register (PA belongs to the debugged program)
+              WRLONG  cog_id, debug_cog
               WRLONG  value, debug_value
-              ' Could halt here or continue
-              ' No BRK is executed in this ISR, so no further debug interrupt occurs: bits
-              ' L..A are cleared on ISR entry. Execute a BRK before exiting to arm the next one.
+      .rearm  BRK     ##(break_addr << 12) | (1 << 10)  ' Re-arm the breakpoint: bits L..A are cleared on ISR entry
               RETI0
+    note: "A debug ISR that ends without executing a BRK sets no trigger condition, so no more debug interrupts occur until the cog is restarted by another COGINIT. The ROM entry routine saves only registers $000..$00F, so the ISR keeps its own values in debugger registers rather than in PA, PB, PTRA or PTRB."
 
   - pattern: "profiler"
     description: "Profile code execution timing"
     code: |
-      ' Instruction profiler
+      ' Instruction profiler: a debug ISR entered on single steps of non-ISR code (%A)
       profile_isr
               GETCT   current_time
-              SUB     current_time, last_time
-              ADD     total_time, current_time
+              MOV     delta, current_time
+              SUB     delta, last_time         ' clocks since the previous debug interrupt
+              ADD     total_time, delta
               ADD     instruction_count, #1
               MOV     last_time, current_time
-              ' No BRK is executed in this ISR, so no further debug interrupt occurs: bits
-              ' L..A are cleared on ISR entry. Execute a BRK before exiting to arm the next one.
+              BRK     #%0000_0000_0001         ' Re-arm single-step (%A): bits L..A are cleared on ISR entry
               RETI0
 
   - pattern: "remote_debugging"
@@ -308,78 +327,73 @@ programming_patterns:
       ' and the target must have its asynchronous-breakpoint bit (%I) enabled.
       debug_control
               COGBRK  #target_cog          ' Break target
-              ' Wait for target to hit breakpoint
+              ' WAITX with D = 1000 (waits 2 + D clocks)
               WAITX   ##1000
-              ' Read target's state from shared memory
+              ' Read the long the target's debug ISR wrote to hub RAM
               RDLONG  target_pc, debug_data
-              
+
       ' Target COG debug handler
       target_debug_isr
-              WRLONG  INB, debug_data      ' INB is IRET0 here: share the return PC
-              WRLONG  some_var, debug_data+4
+              WRLONG  INB, debug_data      ' INB is IRET0 here: the return address with C and Z in bits 31:30
+              MOV     hub_ptr, debug_data  ' debug_data holds a hub address
+              ADD     hub_ptr, #4          ' the next hub long
+              WRLONG  some_var, hub_ptr
               ' Wait for debugger commands
               ' No BRK is executed in this ISR, so no further debug interrupt occurs: bits
-              ' L..A are cleared on ISR entry. Execute a BRK before exiting to arm the next one.
+              ' L..A are cleared on ISR entry.
               RETI0
 
 debugging_capabilities:
   - capability: "state_inspection"
-    description: "Examine all COG state at breakpoint"
+    description: "Examine cog state at a breakpoint"
     accessible:
-      - "All COG RAM locations"
-      - "All special registers"
-      - "Flag states"
+      - "Cog registers $000..$00F: the ROM entry routine saves them to hub RAM and loads the debugger program into them. Registers $1F8..$1FF cannot be transferred to hub RAM via SETQ+WRLONG/WMLONG"
+      - "C and Z of the interrupted program: IRET0 (INB during a debug ISR) holds them in bits 31 and 30, since the interrupt stores the C/Z flags and return address into the IRET register and RETI0 (CALLD IRET0,IRET0 WCZ) sets C = IRET0[31] and Z = IRET0[30]. GETBRK WC returns C = LSB of the SKIP/SKIPF/EXECF/XBYTE pattern; GETBRK WZ returns Z = 1 if no pattern is queued"
       - "Streamer-active and FIFO read/write state (GETBRK D[21] and D[20])"
   
   - capability: "execution_modification"
     description: "Modify execution flow from debug handler"
     techniques:
-      - "Change IRET0 to alter return address"
-      - "Modify COG RAM before return"
-      - "Skip instructions using SKIPF"
-  
+      - "Change IRET0 to alter return address: RETI0 is CALLD IRET0,IRET0 WCZ, so it jumps to the address held in IRET0"
+
   - capability: "cross_cog_debugging"
-    description: "Debug any COG from any other COG"
+    description: "A cog inside its own debug ISR can trigger an asynchronous breakpoint in another cog, provided that cog has its asynchronous breakpoint interrupt enabled (BRK's %I bit, set in its own prior debug ISR)"
     mechanism: "COGBRK instruction triggers remote debug"
 
 best_practices:
-  - practice: "minimal_debug_overhead"
-    description: "Keep debug ISR lightweight"
-    rationale: "Reduces impact on timing-sensitive code"
-  
-  - practice: "circular_trace_buffer"
-    description: "Use circular buffer for execution traces"
-    rationale: "Captures most recent execution history"
-  
-  - practice: "debug_communication"
-    description: "Use hub memory for debug data exchange"
-    rationale: "Allows debugger COG to examine state"
-  
-  - practice: "production_disable"
-    description: "Disable debug interrupts in production"
-    rationale: "A debug-enabled cog takes a debug interrupt on every (re)start from a COGINIT, and the debug ISR costs cog clocks"
+  - practice: "debug_isr_speed"
+    description: "If no register saving or restoring or host communication is required, a debug ISR may execute very quickly"
+    rationale: "The ROM entry routine saves cog registers $000..$00F to hub RAM and loads $000..$00F from hub RAM; the exit routine restores $000..$00F from hub RAM"
+
+  - practice: "upper_hub_ram_debug_area"
+    description: "The last 16KB of hub RAM holds the per-cog register save areas, the ISR images and the initial debug ISR routines. Once initialized it can be write-protected, after which it is mapped only at $FC000..$FFFFF and is writable only from within debug ISRs."
+    rationale: "The ROM entry and exit routines save to and load from this area (hub_save_area)"
+
+  - practice: "debug_enable_default"
+    description: "Debug interrupts are disabled for each cog by default; HUBSET's %D bits enable them per cog"
+    rationale: "A debug-enabled cog takes a debug interrupt on every (re)start from a COGINIT"
 
 performance_impact:
   dispatch_overhead:
-    description: "Debug interrupt uses the same CALLD-based dispatch mechanism as INT1/INT2/INT3 (see architecture/interrupts.yaml)"
-    cogexec_entry: "4 clocks for the dispatched CALLD"
-    cogexec_exit: "4 clocks for the RETIx-equivalent return"
-    cogexec_round_trip_minimum: "8 clocks (excluding ISR body)"
-    note: "A debug ISR executes strictly in cog register space, so it does not disturb the hub FIFO state. Total per-instruction single-step cost = round-trip overhead + ISR body length. No single 'minimal ISR' clock count applies because the ISR body is user-defined."
+    description: "The debug interrupt has its own jump and return registers, IJMP0 and IRET0 (INA and INB during a debug ISR)"
+    cogexec_entry: "Not documented: a clock count for the debug interrupt branch"
+    cogexec_exit: "RETI0 takes 4 clocks in cog execution, after the exit routine's SETQ and RDLONG when JMP #$1FD is used"
+    cogexec_round_trip_minimum: "Not documented: the debug interrupt branch has no clock count"
+    note: "A debug ISR executes strictly in cog register space, so it does not disturb the hub FIFO state. No single 'minimal ISR' clock count applies because the ISR body is user-defined."
 
   breakpoint_overhead:
-    on_hit: "ISR dispatch overhead + ISR body execution time"
+    on_hit: "The debug interrupt branch (no clock count given) + the ISR body, including the ROM entry and exit routines when they are used"
 
 limitations:
   - limitation: "single_debug_level"
     description: "The single-step scopes are INT3 / INT2 / INT1 ISR code and non-ISR code; debug ISR code is not one of them"
 
   - limitation: "hub_access_timing"
-    description: "Debug ISR hub access affects timing"
-    workaround: "Use COG RAM buffering when possible"
+    description: "A debug ISR's hub reads and writes, including the 16-long transfers in the ROM entry and exit routines, wait for the hub RAM slice like any cog's: up to 7 clocks to reach the first slice"
+    source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Cog-to-Hub RAM Interface, p.16 (up to 7 clocks); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB (hub RAM slices)"
 
   - limitation: "streamer_interaction"
-    description: "With every cog debug-enabled (the default), streamer-based Goertzel results were corrupted (accumulators read in the millions; they read in the hundreds, the true values, once DEBUG_COGS was restricted to one cog). The streamer's pin and DAC output was unchanged with a live debug interrupt. No source states the mechanism."
+    description: "In one bench program compiled with -d, with the DEBUG_COGS compile constant at its default (all eight cogs) so that the debug interrupt was live in the cog running a DDS/Goertzel streamer command, the Goertzel accumulators read 1,000,000 to 7,000,000 where the same program with DEBUG_COGS = %0000_0001 read values in the hundreds. In the bench tests of streamer pin and DAC output, that output was unchanged by a live debug interrupt. Not documented: the mechanism, or whether other streamer measurements are affected."
     workaround: "When measuring with the streamer, restrict DEBUG_COGS to the reporting cog"
     source: "EF-057 (Goertzel corruption), EF-062 and EF-063 (pin and DAC output unchanged); Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Debug Interrupt (the debug ISR runs strictly in cog register space)"
 
@@ -388,14 +402,17 @@ related_topics:
     relationship: "Debug is highest priority interrupt"
   
   - topic: "cog_operations"
-    relationship: "Can debug any COG from any COG"
+    relationship: "COGBRK from a cog's own debug ISR breaks another cog whose asynchronous breakpoint interrupt is enabled"
   
   - topic: "development_tools"
-    relationship: "Basis for software debuggers"
+    relationship: "The debug ISR is the hook a debugger program is realized in"
 
 sources:
     - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Write-Protecting the Last 16KB of Hub RAM and Enabling Debug Interrupts (%D: debug interrupt disabled for cog n by default) and HUB RAM (wait up to #cogs-1 clocks for the initial RAM slice)"
+    - "P2 Instructions v35 - Rev B/C Silicon, row 165 (RETI0, 4 cog/LUT, 13...20 hub)"
+    - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGBRK, p.64 (Dest[2:0])"
     - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language (instruction encodings: GETBRK, COGBRK, BRK)"
     - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES (hidden debug interrupt), p.2"
-    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Register RAM (cog register note: INA/INB as debug call/return), p.13"
+    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Cog RAM (cog register note: INA/INB as debug call/return), p.13"
     - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (BRK/COGBRK/GETBRK), p.43"

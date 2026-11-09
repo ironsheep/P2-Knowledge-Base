@@ -11,7 +11,7 @@ timing:
   type: fixed
 description: |
   Iterate D with xoroshiro32+ PRNG algorithm and put PRNG result into next
-  instruction's S. Fast pseudo-random number generation for PASM2 code.
+  instruction's S.
 
 algorithm:
   name: "XORO32 (xoroshiro32+)"
@@ -20,69 +20,56 @@ algorithm:
     the pseudo-random result replaces the S operand of the next instruction (it is also left in Q).
   properties:
     - "2-clock execution"
-    - "Reproducible: the same starting state gives the same sequence"
+    - "For each of three nonzero starting states tested ($0000_0001, $DEADBEEF, $0001_0000) the same sequence of results and states is produced on every repetition"
     - "A zero state is absorbing: the result is 0 and the state stays 0"
-    - "NOT suitable for cryptography"
+    - "Not documented: the algorithm's constants, and how the result and the new state are computed from the old state"
   source: "EF-101 (zero-state absorption hardware-verified on real P2 silicon, for XORO32 and the Spin2 ?? operator); Parallax Propeller 2 (P2X8C4M64P) Datasheet, Release November 1, 2022, p.38"
 
 critical_warning:
-  issue: "Seed with a non-zero value"
+  issue: "A zero state is absorbing"
   description: |
-    Always give XORO32 a non-zero starting state. A zero state is absorbing: with D = 0 every call
-    returns 0 and D stays 0 (for XORO32 and for the Spin2 ?? operator).
+    With D = 0 every call returns 0 and D stays 0 (for XORO32 and for the Spin2 ?? operator).
   solution: |
-    ' Ensure non-zero seed
-    GETRND  seed           ' Get a pseudo-random seed
-    CMP     seed, #0   WZ  ' Check if zero
-    IF_Z    MOV     seed, #1  ' Force non-zero (conditional)
+    ' seed from GETRND, replaced by 1 when it is 0
+    GETRND  seed           ' seed = a GETRND value
+    CMP     seed, #0   WZ  ' Z = 1 when seed is 0
+    IF_Z    MOV     seed, #1  ' when Z is set, seed = 1
   source: "EF-101"
 
 examples:
   - description: "Generate random number"
     code: |
-            MOV     seed, rnd_init    ' Initialize seed
-            XORO32  seed              ' Generate random
+            MOV     seed, rnd_init    ' seed = rnd_init
+            XORO32  seed              ' iterate seed; the result goes to the next instruction's S
             MOV     result, seed      ' result = the XORO32 result (this S operand is replaced); seed = new state
 
   - description: "Random number in range"
     code: |
-            XORO32  seed              ' Generate 32-bit random
+            XORO32  seed              ' iterate seed; the result goes to the next instruction's S
             MOV     temp, seed        ' temp = the XORO32 result (this S operand is replaced by it)
-            SETQ    #0                ' upper half of the dividend = 0 (XORO32 leaves its result in Q)
+            SETQ    #0                ' SETQ #0 supplies the upper half of the dividend explicitly (0)
             QDIV    temp, #100
             GETQY   temp              ' temp = remainder, 0..99
 
-  - description: "Properly initialized PRNG"
+  - description: "PRNG seeded from GETRND with a non-zero state"
     code: |
-      GETRND  seed              ' Seed from GETRND
-      CMP     seed, #0    WZ
-      IF_Z    MOV     seed, #1  ' Ensure non-zero (conditional)
-      ' Now safe to use XORO32
+      GETRND  seed              ' seed = a GETRND value
+      CMP     seed, #0    WZ    ' Z = 1 when seed is 0
+      IF_Z    MOV     seed, #1  ' when Z is set, seed = 1
+      ' seed is 1 or a non-zero GETRND value here
       .loop   XORO32  seed
-      ' Process seed...
+      MOV     temp, seed        ' temp = the XORO32 result (this S operand is replaced); seed = new state
+      ' Process temp...
       JMP     #.loop
+
+      temp    long    0         ' (data, outside the executed path)
 
 flags_affected:
   C: No effect
   Z: No effect
 
-vs_getrnd:
-  xoro32_advantages:
-    - "Reproducible sequences"
-    - "The state is a register you own, so the sequence does not depend on other cogs or on GETRND"
-  getrnd_advantages:
-    - "No state to keep and no seeding required"
-    - "Draws on the cog's xoroshiro128** PRNG, seeded at boot and iterating every clock (not a true-random source)"
-
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.151"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_d
-  pattern: D
-  description: Destination register only
-  valueType: 24
-compiler_encoding:
-  operandFormat: 24
 syntax_variants:
 - XORO32 D
 last_updated: '2025-09-19T16:04:17.566506'
@@ -90,14 +77,14 @@ category: Math and Logic
 
 notes:
   - "D holds the new state; the PRNG result replaces the S operand of the next instruction"
-  - "CRITICAL: seed D with a non-zero value - a zero state is absorbing (the result is 0 and D stays 0)"
+  - "A zero state is absorbing (the result is 0 and D stays 0)"
+  - "XORO32 sets Q to the PRNG result, replacing any value an earlier SETQ left there (see language/pasm2/concepts/special_registers.yaml q_register)"
   - "Equivalent to the Spin2 ?? operator, which executes XORO32"
-  - "GETRND is a convenient seed source"
-  - "NOT suitable for cryptographic applications"
 
 related:
   - language/pasm2/getrnd.yaml
+  - language/pasm2/concepts/special_registers.yaml
   - language/spin2/operators/op_rand.yaml
   - language/spin2/concepts/random_generation.yaml
 
-oneliner: "Iterate D with xoroshiro32+ PRNG algorithm (seed with a non-zero value)"
+oneliner: "Iterate D with xoroshiro32+ PRNG algorithm"

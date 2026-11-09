@@ -18,13 +18,6 @@ parameters:
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value will be bitwise ANDed with Dest.
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, AND / ANDN, p.49"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:
-  operandFormat: 0
 last_updated: '2025-01-19'
 brief_description: Bitwise AND
 manual_extraction_date: '2025-01-19'
@@ -33,4 +26,4 @@ grouped_with:
 - AND
 - ANDN
 category: Math and Logic
-oneliner: Bitwise AND a value with another, or with the NOT of another
+oneliner: Bitwise AND a value with another

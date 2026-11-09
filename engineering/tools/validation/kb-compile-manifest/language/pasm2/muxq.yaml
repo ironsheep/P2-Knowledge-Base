@@ -7,7 +7,7 @@ blocks:
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: examples[0].code
-    fp: "3f4b05753412389e"
+    fp: "ec5eac2d97aa352d"
     compile: fragment
     wrap: pasm2-dat
     assumes: [maskRgb12, reg_value]
@@ -17,11 +17,16 @@ blocks:
     wrap: pasm2-dat
     assumes: [update_mask, status, new_bits, config]
   - at: examples[2].code
-    fp: "1125490a122bc0f0"
+    fp: "9180d8b87eb75501"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [qval]
+  - at: examples[3].code
+    fp: "3f868c4bf307a57b"
     compile: fragment
     wrap: pasm2-dat
     assumes: [mask, dest, source]
-  - at: examples[3].code
+  - at: examples[4].code
     fp: "b14441d248dedde6"
     compile: fragment
     wrap: pasm2-dat

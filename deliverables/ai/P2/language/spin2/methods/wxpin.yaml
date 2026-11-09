@@ -7,7 +7,8 @@ category: "smart_pin_operations"
 type: "method"
 description: |
   Write the X parameter register of one or more smart pins.
-  The X register typically controls timing, frequency, or configuration parameters.
+  X is a mode-specific parameter (32 bits, write-only): a base period, a measurement
+  period, a bit period and word size, or a long to store, depending on the mode.
   Meaning depends on the smart pin mode set by WRPIN.
 
 syntax: "WXPIN(PinField, XValue)"
@@ -37,8 +38,8 @@ returns: "none"
 x_register_usage_by_mode:
   async_serial_modes: |
     Async serial (P_ASYNC_TX %11110 / P_ASYNC_RX %11111):
-      X[31:16] = clocks per bit (integer)
-      X[15:10] = clocks per bit (base-2 fractional, optional)
+      X[31:16] = number of clocks in a bit period
+      X[15:10] = number of fractional clocks in a bit period, when X[31:26] is zero
       X[4:0]   = word size minus 1 (write 7 for 8 data bits)
     Formula:  X = ((CLKFREQ / baud_rate) << 16) | (data_bits - 1)
 
@@ -59,8 +60,7 @@ x_register_usage_by_mode:
     NCO frequency (P_NCO_FREQ):
       X[15:0]  = base period in clocks
       X[31:16] = initial phase (written to Z[31:16])
-    The frequency goes in Y: Y is added into Z at each base period, so with a
-    base period of 1, Y = frequency FRAC CLKFREQ.
+    The frequency goes in Y: Y[31:0] is added into Z[31:0] at each base period.
 
   measurement: |
     Measurement window:
@@ -80,11 +80,11 @@ examples:
     description: "Set PWM base period and frame count"
 
   - code: |
-      ' Configure 1MHz NCO frequency: base period 1 clock, frequency in Y
+      ' NCO frequency: base period 1 clock, increment added into Z in Y
       freq := 1_000_000
       WXPIN(pin, 1)
-      WYPIN(pin, freq FRAC CLKFREQ)
-    description: "Set NCO frequency"
+      WYPIN(pin, freq FRAC CLKFREQ)   ' FRAC divides {freq, 32'b0} by CLKFREQ
+    description: "Set NCO base period and increment"
     
   - code: |
       ' Set measurement window to 1 second
@@ -97,14 +97,15 @@ examples:
     description: "SPI configuration"
 
 mode_specific_x_values:
-  P_ASYNC_TX: "Clocks per bit in X[31:16] (fraction in X[15:10]), word size minus 1 in X[4:0]"
-  P_ASYNC_RX: "Clocks per bit in X[31:16] (fraction in X[15:10]), word size minus 1 in X[4:0]"
+  P_ASYNC_TX: "Clocks per bit in X[31:16] (fractional clocks in X[15:10] only when X[31:26] is zero), word size minus 1 in X[4:0]"
+  P_ASYNC_RX: "Clocks per bit in X[31:16] (fractional clocks in X[15:10] only when X[31:26] is zero), word size minus 1 in X[4:0]"
   P_PULSE: "Base period in X[15:0]; X[31:16] is compared with the base period counter (output high while the counter is above it)"
   P_TRANSITION: "Base period in X[15:0]"
   P_NCO_FREQ: "Base period in X[15:0], initial phase in X[31:16]; the frequency goes in Y"
   P_NCO_DUTY: "Base period in X[15:0], initial phase in X[31:16]; the duty goes in Y"
   P_PWM_TRIANGLE: "Base period in X[15:0], frame period (in base periods) in X[31:16]"
   P_PWM_SAWTOOTH: "Base period in X[15:0], frame period (in base periods) in X[31:16]"
+  P_REPOSITORY: "The long to store, written once DIR is high (ignored during reset); RDPIN or RQPIN reads it back"
   P_QUADRATURE: "Measurement period in clocks (0 = continuous count, like a totalizer)"
   P_COUNT_RISES: "Measurement period"
   P_COUNT_HIGHS: "Measurement period"
@@ -117,8 +118,9 @@ calculation_examples:
       WXPIN(pin, x)
 
   pwm_frequency: |
-    ' Set PWM by frequency: base period 1 clock, frame of CLKFREQ / freq base periods
-    ' (the frame count is X[31:16], so CLKFREQ / freq must fit in 16 bits)
+    ' Set sawtooth PWM (P_PWM_SAWTOOTH) by frequency: base period 1 clock, frame of CLKFREQ / freq base periods
+    ' (the frame count is X[31:16], so CLKFREQ / freq must fit in 16 bits).
+    ' A triangle PWM (P_PWM_TRIANGLE) period is two frame periods, so its frame would be CLKFREQ / (2 * freq).
     PUB set_pwm_freq(pin, freq) | x
       x := ((CLKFREQ / freq) << 16) | 1
       WXPIN(pin, x)
@@ -133,13 +135,6 @@ calculation_examples:
       x := CLKFREQ / 1000 * ms
       WXPIN(pin, x)
 
-common_uses:
-  - "Setting baud rates"
-  - "Configuring PWM periods"
-  - "Setting NCO frequencies"
-  - "Defining measurement windows"
-  - "Protocol timing configuration"
-
 related_methods:
   - "WRPIN"
   - "WYPIN"
@@ -148,26 +143,29 @@ related_methods:
   - "PINSTART"
 
 timing_considerations:
-  - "In the NCO modes, WXPIN writes X[31:16] into Z[31:16] (the phase), even during reset"
-  - "Can be changed while pin is active"
-  - "Some modes latch X at specific times"
-  - "Check mode documentation for specifics"
+  - "In NCO frequency mode (P_NCO_FREQ, %00110), WXPIN writes X[31:16] into Z[31:16] (the phase), even during reset"
+  - "In NCO duty mode (P_NCO_DUTY, %00111), WXPIN writes X[31:16] into Z[31:16]; Z is set to zero during reset. Not documented: whether a phase written during reset is kept"
+  - "In long repository mode (P_REPOSITORY), WXPIN is ignored during reset (DIR low); raise DIR first, then write the long"
+  - "Depending on the mode, new data can be fed with WXPIN/WYPIN after DIR is raised"
+  - "Cogs that execute WRPIN, WXPIN, WYPIN, RDPIN or AKPIN on the same smart pin must do so at different times; their buses to the pin are OR'd and simultaneous writes clobber each other. Any number of cogs can read a smart pin at the same time with RQPIN"
 
 notes:
-  - "X register is mode-dependent"
-  - "Usually represents timing or period"
-  - "32-bit value allows wide range"
-  - "Can be updated during operation"
-  - "Value interpretation varies by mode"
+  - "The meaning of X depends on the smart pin mode"
 
 warnings:
   - "Must set correct mode first with WRPIN"
-  - "Zero may disable some functions"
-  - "Very small values may not work"
-  - "Check mode limits in documentation"
 
 see_also:
   - "language/spin2/methods/wrpin.yaml"
   - "language/spin2/methods/wypin.yaml"
   - "language/spin2/methods/rdpin.yaml"
   - "architecture/smart_pins.yaml"
+
+sources:
+  - "description, sync_serial_modes (X[5:0], LSB first, clocked by the B input): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (mode, X, Y write-only, Z read-only) and SMART PIN MODES (%11100 and %11101: X.[5] update mode or sample position, X.[4..0] bits minus 1, words of 1 to 32 bits shifted LSB first)"
+  - "async_serial_modes, mode_specific_x_values (P_ASYNC_TX, P_ASYNC_RX): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%11110 and %11111: X[31:16] clocks in a bit period, X[15:10] fractional clocks in case X[31:26] is zero)"
+  - "pwm_frequency (triangle period is two frame periods; sawtooth counts one up to the frame period): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%01000, %01001)"
+  - "mode_specific_x_values (P_PULSE, P_TRANSITION, P_PWM_TRIANGLE, P_PWM_SAWTOOTH, P_QUADRATURE, P_COUNT_RISES, P_COUNT_HIGHS) and x_register_usage_by_mode.pwm_modes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%00100 pulse/cycle X[15:0] and X[31:16]; %00101 transition X[15:0]; %01000 and %01001 PWM X[15:0] base period and X[31:16] frame period; %01011 quadrature X period, zero = continuous; %01100 to %01111 X measurement period)"
+  - "timing_considerations (new data after DIR is raised): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (After configuration, depending on the mode, new data can be fed via WXPIN/WYPIN)"
+  - "timing_considerations, mode_specific_x_values (P_REPOSITORY, NCO modes): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%00001..%00011 long repository, %00110 NCO frequency, %00111 NCO duty)"
+  - "timing_considerations (multi-cog access): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (cog-to-smart-pin buses)"

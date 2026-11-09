@@ -13,32 +13,26 @@ constants:
 
 # Operation
 operation: |
-  NCO with variable duty cycle control.
-  Z accumulator adds Y value every X[15:0] clocks.
-  Output high on Z overflow, low otherwise.
-  Creates PWM with precise duty control.
+  This mode overrides OUT to control the pin output state.
+  Y[31:0] is added into Z[31:0] at each base period (X[15:0] clocks).
+  The pin output reflects Z overflow.
+  IN is raised whenever Z overflows.
 
 # Parameters
 x_register:
   function: "Base period and initial phase"
   X[15:0]: "Base period in clocks"
-  X[31:16]: "Initial phase load to Z[31:16]"
-  
+  X[31:16]: "Initial phase load to Z[31:16] upon WXPIN"
+  reset_phase: "During reset (DIR=0), Z is set to zero. Not documented: whether a phase written with WXPIN during reset is kept after DIR is raised"
+
 y_register:
-  function: "Duty cycle control"
-  Y[31:0]: "Added to Z each base period"
-  duty_formula: "Duty% = (Y / 2^32) × 100"
-  examples:
-    - "$80000000 = 50% duty"
-    - "$40000000 = 25% duty"
-    - "$C0000000 = 75% duty"
-  zero: "Y = 0 produces no output: the pin never reads high and IN is never raised."
-  source: "EF-098"
+  function: "Value added into Z"
+  Y[31:0]: "Added into Z[31:0] at each base period"
+  zero: "Y = 0 gives no output and raises no IN."
 
 z_register:
   function: "32-bit accumulator"
-  overflow: "Output high during overflow"
-  behavior: "Overflow duration sets duty cycle"
+  overflow: "The pin output reflects Z overflow; IN is raised whenever Z overflows"
 
 in_flag: "Raised on each Z overflow"
 
@@ -51,32 +45,32 @@ spin2_complete: |
     _clkfreq = 200_000_000
     
   PUB main()
-    ' Variable duty PWM
-    pwm_duty(PWM_PIN, 50)      ' 50% duty
+    ' NCO duty output
+    nco_duty(PWM_PIN, 25)      ' Y = 25 / 100 of 2^32
 
-  PUB pwm_duty(pin, duty_percent) | mode, y_value
+  PUB nco_duty(pin, percent) | mode, y_value
     mode := P_NCO_DUTY | P_OE
 
-    ' Convert percentage (0..99) to Y value: (percent << 32) / 100
-    y_value := duty_percent FRAC 100
+    ' FRAC divides {percent, 32'b0} by 100: y_value = percent * 2^32 / 100
+    y_value := percent FRAC 100
 
     PINCLEAR(pin)
     WRPIN(pin, mode)
     WXPIN(pin, 1000)            ' 1000 clock base period
-    PINHIGH(pin)                ' Enable FIRST (general init order)
-    WYPIN(pin, y_value)         ' THEN set duty cycle
-    
-  PUB led_dimmer(brightness) | mode, y_value
-    ' LED brightness control (0-255)
+    PINHIGH(pin)                ' Enable first (general init order)
+    WYPIN(pin, y_value)         ' Then write Y: added into Z at each base period
+
+  PUB nco_duty_byte(level) | mode, y_value
+    ' Y is the 8-bit level in the top byte
     mode := P_NCO_DUTY | P_OE
-    
-    y_value := brightness << 24  ' Scale to 32-bit
-    
+
+    y_value := level << 24      ' Level in Y[31:24]
+
     PINCLEAR(PWM_PIN)
     WRPIN(PWM_PIN, mode)
-    WXPIN(PWM_PIN, 256)         ' Fast PWM for LEDs
-    PINHIGH(PWM_PIN)            ' Enable FIRST (general init order)
-    WYPIN(PWM_PIN, y_value)     ' THEN set duty
+    WXPIN(PWM_PIN, 256)         ' 256 clock base period
+    PINHIGH(PWM_PIN)            ' Enable first (general init order)
+    WYPIN(PWM_PIN, y_value)     ' Then write Y
 
 # Complete PASM2 Example
 pasm2_complete: |
@@ -94,80 +88,71 @@ pasm2_complete: |
           WRPIN nco_duty_mode, pin
           WXPIN base_period, pin     ' Set base
           
-          ' Calculate Y for duty%
-          QFRAC duty_pct, #100        ' {duty_pct, 32'b0} / 100 = duty_pct x 2^32 / 100
-          GETQX y_value               ' Y for duty_pct percent
+          ' Calculate Y from duty_pct
+          QFRAC duty_pct, #100        ' {duty_pct, 32'b0} / 100
+          GETQX y_value               ' y_value = duty_pct * 2^32 / 100
 
-          DIRH  pin                  ' Enable FIRST (general init order)
-          WYPIN y_value, pin         ' THEN set duty
+          DIRH  pin                  ' Enable first (general init order)
+          WYPIN y_value, pin         ' Then write Y
           RET
   
-  ' Ramp duty cycle
+  ' Step Y upward
   duty_ramp
           MOV   pin, pwm_pin
           DIRL  pin
           WRPIN nco_duty_mode, pin
           WXPIN ##1000, pin
-          DIRH  pin                  ' Enable ONCE before the loop (general init order)
+          DIRH  pin                  ' Enable once before the loop (general init order)
 
           MOV   y_value, #0
-  .loop   WYPIN y_value, pin         ' update duty each step (operate)
+  .loop   WYPIN y_value, pin         ' write Y each step (operate)
           WAITX ##100_000
           ADD   y_value, ##$01000000
           TJNZ  y_value, #.loop      ' Until wrap
           RET
   
-  ' Breathing LED effect
+  ' Step Y through a 16-entry byte table
   breathing
           MOV   index, #0
-  .loop   MOV   ptra, ##@breath_table
+  .loop   MOV   ptra, ##@level_table
           ADD   ptra, index
           RDBYTE temp, ptra
-          SHL   temp, #24            ' Scale to 32-bit
-          
+          SHL   temp, #24            ' Level in Y[31:24]
+
           MOV   pin, pwm_pin
           WYPIN temp, pin
-          
+
           ADD   index, #1
-          AND   index, #63           ' 64 steps
+          AND   index, #15           ' 16 table entries
           WAITX ##1_000_000
           JMP   #.loop
-  
-  ' Breathing pattern table
-  breath_table  BYTE  0,4,16,36,64,100,144,196
-                BYTE  255,255,255,196,144,100,64,36
-                BYTE  16,4,0,0,0,0,0,0
-                ' (abbreviated)
-  
+
+  ' Level table (16 entries)
+  level_table   BYTE  0,4,16,36,64,100,144,196
+                BYTE  255,196,144,100,64,36,16,4
+
   ' Variables
+  base_period   LONG  10000
+  duty_pct      LONG  75              ' 75 / 100 of 2^32
   pin           RES   1
   y_value       RES   1
-  base_period   LONG  10000
-  duty_pct      LONG  75              ' 75%
   index         RES   1
   temp          RES   1
 
 # Key Points
-duty_calculation: |
-  Duty% = (Y / 2^32) × 100
-  Y = $80000000 for 50% duty
-  Resolution depends on base period
-
-overflow_behavior: |
-  Output high during Z overflow
-  Overflow frequency = base_freq × (Y/2^32)
-  Pulse width = overflow duration
+accumulator: |
+  Y[31:0] is added into Z[31:0] at each base period
+  The pin output reflects Z overflow
+  IN is raised whenever Z overflows
 
 vs_nco_freq: |
   NCO_FREQ: Output follows Z[31]
   NCO_DUTY: Output follows Z overflow
-  DUTY better for PWM applications
 
-common_uses:
-  - "PWM motor control"
-  - "LED dimming"
-  - "Power regulation"
-  - "Audio modulation"
+sources:
+  - "operation, x_register, y_register, z_register, in_flag, pin_behavior, accumulator, vs_nco_freq: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%00110 NCO frequency and %00111 NCO duty)"
+  - "y_register.zero: EF-098 (%00111 with Y = 0 gives no output and raises no IN)"
+  - "examples (FRAC and QFRAC forms): Parallax Propeller 2 Spin2 Language Documentation v55, FRAC; instruction CSV QFRAC"
 
 hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 related: ["00110 (NCO Freq)", "01000-01001 (PWM modes)", "00100 (Pulse)"]

@@ -6,7 +6,7 @@ description: Dynamic runtime modification of instruction operands using ALTx pre
 overview: |
   Register indirection in P2 allows instructions to use computed addresses for their source (S) and 
   destination (D) operands. The ALTx instructions modify the next instruction's operand fields at 
-  runtime, enabling table lookups, computed jumps, and dynamic data access without self-modifying code.
+  runtime, so a register can supply a computed source, destination or result address without self-modifying code.
 
 altx_instructions:
   ALTS:
@@ -19,10 +19,6 @@ altx_instructions:
         MOV index, #5
         ALTS index, #table_base
         MOV result, 0-0         ' Actually reads from table_base+5
-    use_cases:
-      - Table lookups
-      - Array indexing
-      - Switch/case implementation
 
   ALTD:
     function: "Substitute D field of next instruction"
@@ -34,10 +30,6 @@ altx_instructions:
         MOV index, #10
         ALTD index, #array_start
         MOV 0-0, value          ' Actually writes to array_start+10
-    use_cases:
-      - Dynamic destination selection
-      - Array element assignment
-      - Scatter operations
 
   ALTR:
     function: "Substitute result destination"
@@ -49,25 +41,17 @@ altx_instructions:
         MOV offset, #3
         ALTR offset, #base_reg
         ADD base_reg, value     ' Result goes to base_reg+3
-    use_cases:
-      - Indexed result storage
-      - Relative addressing
-      - Structure field updates
 
   ALTI:
-    function: "Substitute next instruction entirely"
-    syntax: "ALTI exec_reg"
-    operation: "Execute instruction from exec_reg"
-    behavior: "Next instruction slot executes exec_reg contents"
+    function: "Substitute fields of the next instruction (Result, D and S, with increment or decrement of the template), or substitute the whole instruction"
+    syntax: "ALTI template, {#}Src (syntax 1) or ALTI template (syntax 2)"
+    operation: "Syntax 1: Src is six 3-bit fields, %rrr_ddd_sss_RRR_DDD_SSS. The template register holds a value laid out like an opcode: Result in [27:19], D in [17:9], S in [8:0]. The %RRR, %DDD and %SSS codes choose which of those fields are substituted into the next instruction and whether the template field increments or decrements; the %rrr, %ddd and %sss codes set how many LSBs of each template field take part in the increment or decrement (000 = 9 bits, down to 111 = 2 LSBs). Syntax 2: ALTI template is ALTI template,#%101_100_100, which executes the template register in place of the next instruction without altering it."
+    behavior: "The substitution happens in the instruction pipeline only; the code is not altered. The table of codes is in language/pasm2/alti.yaml."
     examples:
       - |
         MOV exec_reg, ##$F100_0000 | (dst<<9) | src   ' an ADD dst, src instruction word
         ALTI exec_reg
         NOP                     ' This becomes ADD dst, src
-    use_cases:
-      - Computed operations
-      - Instruction synthesis
-      - Interpreters
 
   ALTB:
     function: "Substitute the D (register) field of the next BITxxx/TESTB instruction"
@@ -80,10 +64,6 @@ altx_instructions:
         MOV bit_num, #7
         ALTB bit_num, #flags
         BITH 0-0, bit_num       ' Actually sets bit 7 of flags
-    use_cases:
-      - Dynamic bit manipulation
-      - Bit array operations
-      - Flag management
 
 advanced_features:
   increment_modes:
@@ -99,7 +79,7 @@ advanced_features:
     examples:
       - |
         MOV index, #0
-        REP #3, #10
+        REP #4, #10                  ' repeat the next 4 instructions (AUGS, ALTS, MOV, ADD) 10 times
           ALTS index, ##$200 + table   ' Index increments after use
           MOV sum, 0-0
           ADD total, sum
@@ -115,31 +95,21 @@ advanced_features:
         MOV  0-0, 0-0
 
   conditional_execution:
-    description: "ALTx instructions can be conditional"
-    examples:
-      - |
-        CMP mode, #INDEXED WZ
-        IF_Z ALTS index, #table
-        MOV result, default_source  ' Uses indexed or default
+    description: "ALTx instructions carry the EEEE condition field in their encoding"
+    source: "P2 Instructions v35 - Rev B/C Silicon, Sheet1 (ALTS, ALTD, ALTR, ALTB, ALTI rows: Encoding column begins EEEE)"
 
 operational_details:
   timing:
-    - ALTx takes 2 cycles
-    - Modified instruction executes normally
-    - No pipeline stall
-    - ALTx alters only the next instruction, even when that instruction is itself an ALTx
+    - ALTx takes 2 clocks
+    - The next instruction is shielded from interrupts
+    - ALTx alters the next instruction regardless of its kind
 
   scope:
     - Affects ONLY the next instruction
-    - Cannot affect instructions after branches
-    - Works across conditional execution
-    - Works in hub execution mode
 
   preservation:
-    - Original instruction unchanged
-    - Only execution affected
+    - The field substitution happens in the instruction pipeline only; the code is not altered and the values do not persist
     - No self-modifying code needed
-    - Thread-safe in multi-cog systems
 
 common_patterns:
   table_lookup:
@@ -150,7 +120,7 @@ common_patterns:
 
   array_copy:
     code: |
-      REP #4, count
+      REP #6, count             ' repeat the next 6 instructions (2 AUGS, 2 ALTx, 2 MOV) count times
       ALTS src_ptr, ##$200      ' next S = src_ptr, then src_ptr += 1
       MOV  tmp, 0-0             ' tmp = cog[src_ptr]
       ALTD dst_ptr, ##$200      ' next D = dst_ptr, then dst_ptr += 1
@@ -170,28 +140,13 @@ common_patterns:
     description: "Find first set bit"
 
 limitations:
-  - Cannot modify immediate values
   - Limited to 9-bit address range (0-511)
-  - Cannot chain (each affects only next instruction)
-  - No effect on AUGS/AUGD augmentation
-
-best_practices:
-  - Use for table-driven code
-  - Prefer over self-modifying code
-  - Document computed addresses clearly
-  - Validate index bounds before use
-  - Consider REP for repeated operations
-
-debugging:
-  challenges:
-    - Actual addresses computed at runtime
-    - Disassembly shows placeholder values
-    - Single-stepping through ALTx complex
-
-  techniques:
-    - Add guards to check computed addresses
-    - Use fixed values during development
-    - Log computed addresses for verification
+  - Each ALTx affects only the next instruction
+  - "An ALTx with an immediate #S operand placed between an AUGS and the instruction the AUGS was written for also takes the AUGS value (see architecture/silicon_errata.yaml)"
 
 sources:
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), REGISTER INDIRECTION"
+  - "REP block counts in the examples: CP-038 (REP @label over a body with a ## operand assembles a count that includes the inserted AUGS word)"
+  - "Propeller 2 Assembly Language (PASM2) Manual, ALTB, pp.38-39 (a SETQ #0 followed by the ALTB then BITxxx instructions forces BITxxx's Src[9:5] bits to 0, the single-bit form)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), REGISTER INDIRECTION (ALTS/ALTD/ALTR/ALTB, ALTI syntax 1 and 2, the %rrr_ddd_sss_RRR_DDD_SSS Src layout, the substitution happening in the pipeline only) and KNOWN SILICON BUGS (an intervening ALTx with an immediate #S between AUGS and its target)"
+  - "Propeller 2 Assembly Language (PASM2) Manual, ALTS Notes, p.46 ('The instruction following ALTS is shielded from interrupt'; 'ALTS alters the next instruction regardless of its kind')"
+  - "P2 Instructions v35 - Rev B/C Silicon, Sheet1 (ALTS, ALTD, ALTR, ALTB, ALTI: 2 clocks; the next instruction shielded from interrupts)"

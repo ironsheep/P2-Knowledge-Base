@@ -1,31 +1,37 @@
 instruction: BITNC
 syntax: BITNC   D,{#}S         {WCZ}
 category: Math and Logic
-description: BITNC alters the Dest bit(s) designated by Src to equal the inverse state of the C flag (!C). Dest bit(s) described by Src are set to !C; the rest are left as-is. Src[4:0] is the bit number (0-31) and Src[9:5] is how many further contiguous bits are affected, so a non-zero Src[9:5] changes a span of bits rather than one; a SETQ immediately before the instruction overrides Src[9:5] (a SETQ of zero forces a single bit). If WCZ is specified, the Z flag is updated to the original state of the target bit.
+description: "BITNC alters the Dest bit(s) designated by Src to equal the inverse state of the C flag (!C). All other bits are left unchanged. Src[4:0] indicates the bit number (0-31). For a range of bits, Src[4:0] indicates the base bit number (0-31) and Src[9:5] indicates how many contiguous bits beyond the base should be affected (1-31). A 9-bit literal Src is enough to express the base bit (Src[4:0]) and a range of up to 16 contiguous bits (Src[8:5]). If needed, use the augmented literal feature (##Src) to augment Src to a 10-bit literal value. When Src is a register, the register's value bits [9:0] are used as-is to form the 10-bit ID range, unless a prior SETQ overrides value bits[9:5] with the low five bits of the SETQ value. An ALTx between the SETQ and BITNC keeps the override (SETQ #0, ALTB, BITNC forces a single bit), and a SETQ separated from BITNC by other instructions is not documented. If the WCZ effect is specified, the C and Z flags are updated to the original state of Dest's base bit, identified by Src. BITNC takes no effect or WCZ."
+result: Dest bit(s) described by Src are set to !C; the rest are left as-is.
 parameters:
 - Dest is the register whose value will have one or more bits set to !C.
 - Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
+- WCZ is an optional effect to update flags.
 flags_affected:
-  C: Set to original D[S[4:0]] (original state of target bit)
-  Z: Set to original D[S[4:0]] (original state of target bit)
+  C: With WCZ, set to original D[S[4:0]] (original state of target bit)
+  Z: With WCZ, set to original D[S[4:0]] (original state of target bit)
 timing:
   cycles: 2
   type: fixed
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 0100011 CZI DDDDDDDDD SSSSSSSSS
   write: D
   c: original D[S[4:0]]
   z: original D[S[4:0]]
   clocks: '2'
+encoding_notes:
+- BITNC and TESTBN with ANDC or ANDZ share the INSTR field 0100011; the effect bits tell them apart (BITNC no effect = C Z 00, WCZ = 11; TESTBN ANDC = 10, ANDZ = 01). BITNC takes either no effect or WCZ.
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BITC / BITNC, p.52"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 45 (BITNC: bits D[S[9:5]+S[4:0]:S[4:0]] = !C; other bits unaffected; prior SETQ overrides S[9:5]; C,Z = original D[S[4:0]]; 2 clocks; write D)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 0100011 CZI ... BITNC D,S/# {WCZ}; the same INSTR field as TESTBN D,S/# ANDC/ANDZ)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BITC / BITNC, p.52 (Src[4:0] and Src[9:5], the 9-bit literal range of Src[8:5], ##Src, the SETQ substitution, C and Z set to the original base bit, 2 clocks)"
+  - "CP-033 (BITNC assembles as EEEE 0100011 with C Z = 00 with no effect and 11 with WCZ; TESTBN ANDC/ANDZ share 0100011 with C Z = 10/01)"
+  - "description (prior SETQ overrides S[9:5]): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), list of changes (BITL/BITH/BITC/BITNC/BITZ/BITNZ/BITRND/BITNOT span of bits, prior SETQ overrides S[9:5])"
+  - "description (SETQ #0 then ALTB then BITxxx forces Src[9:5] to 0): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, pp.38-39; the manual's BITC / BITNC text says a SETQ immediately preceding substitutes its Dest[4:0]; a SETQ separated by other instructions is in no source"
+related:
+- language/pasm2/bitc.yaml
+- language/pasm2/testbn.yaml
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_bitx
-  pattern: D,S/#
-  description: 'Bit manipulation with optional effect flags: Destination register,
-    bit position'
-  valueType: 1
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 1
 last_updated: '2025-09-19T16:04:17.063529'
-oneliner: Set bit(s) low/high according to C or !C
+oneliner: Set bit(s) to the inverse of C

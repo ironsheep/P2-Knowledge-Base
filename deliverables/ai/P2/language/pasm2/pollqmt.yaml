@@ -10,9 +10,8 @@ description: >-
   The CORDIC-read-but-empty event flag is set whenever GETQX / GETQY executes without
   any CORDIC results available or in progress. The flag is cleared upon cog start or
   execution of POLLQMT, JQMT, or JNQMT instructions (there is no WAITQMT: the event
-  could not happen while waiting).
-sources:
-  - "description (no WAITQMT): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (the WAITxxx list: there is no WAITQMT because the event could not happen while waiting)"
+  could not happen while waiting). Parallax's documents also name WAITQMT among the
+  instructions that clear the flag.
 result: CORDIC-read-but-empty event flag is optionally copied into C and/or Z, then
   it is cleared.
 flags_affected:
@@ -25,24 +24,23 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZ0 000001111 000100100
   write: —
   c: QMT Event
   z: QMT Event
   clocks: '2'
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLQMT, p.113"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLQMT, pp.113-114"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 286 (POLLQMT {WC/WZ/WCZ}: get QMT event flag into C/Z, then clear it; 2 clocks)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Event instructions, p.43 (POLLQMT {WC/WZ/WCZ}, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLQMT, pp.113-114 (Result line, WC / WZ / WCZ parameter, encoding row 000001111 / 000100100, write none, C and Z QMT Event, 2 clocks, Related list, the copy-then-clear explanation on p.113; the set condition and the clearing list on p.114, where the list names WAITQMT and the manual's text calls the flag the pin-pattern-detected flag)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (the POLLxxx instructions simultaneously return their event-occurred flag into C and/or Z and clear it unless it is set again by the event sensor; the WAITxxx list has no WAITQMT because the event could not happen while waiting; POLLQMT event flag: cleared on cog start, set whenever GETQX / GETQY executes without any CORDIC results available or in progress, also cleared on POLLQMT / WAITQMT / JQMT / JNQMT), instruction encoding listing (EEEE 1101011 CZ0 000001111 000100100 POLLQMT {WC/WZ/WCZ})"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pollwait
-  pattern: ''
-  description: No operands - poll/wait instruction (moves S to D, sets S to $024)
-  valueType: 28
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 28
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Retrieve and clear CORDIC-read-but-empty event flag
 related:
 - JQMT
 - JNQMT
+- architecture/event_system.yaml

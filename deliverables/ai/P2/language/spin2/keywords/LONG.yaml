@@ -3,8 +3,8 @@ type: keyword
 category: "Data Types"
 
 description: |
-  32-bit data type and the default type for all Spin2 operations.
-  Unsigned range: 0 to 4,294,967,295. Signed range: -2,147,483,648 to 2,147,483,647.
+  32-bit data type and the default type when no type specifier is given.
+  Unsigned range: 0 to 4,294,967,295. Signed range: -2,147,483,648 to +2,147,483,647.
   Used in multiple contexts: variable declarations (VAR), local variables,
   DAT data, memory access operators, type override (.LONG[n]), typed pointers
   (^LONG, including pointer parameters and results), and data constructors (LONG(...)).
@@ -33,7 +33,7 @@ usage_contexts:
     syntax: "PUB method() : ^LONG result"
     example: "PUB getValues() : ^LONG pValues"
   - context: "DAT data"
-    syntax: "label LONG value1, value2, ..."
+    syntax: "label LONG data{[count]}{, data{[count]}...}"
     example: "myLongs LONG 1_000_000, $DEADBEEF"
   - context: "Memory access"
     syntax: "LONG[address] or LONG[base][index]"
@@ -71,9 +71,8 @@ examples:
   - "LONG data_buffer[256]"
 
 notes:
-  - "Size: 32 bits (4 bytes) — native word size of the P2"
-  - "Unsigned range: 0 to 4,294,967,295"
-  - "Signed range: -2,147,483,648 to 2,147,483,647"
+  - "Size: 32 bits (4 bytes)"
+  - "Unsigned range: 0 to 4,294,967,295; signed range: -2,147,483,648 to +2,147,483,647"
   - "LONG is the implicit default type — omitting a type specifier means LONG"
   - "All pointers are LONG-sized regardless of what they point to"
   - "V54+: LONG struct members may carry named bitfields (bits 0..31), and a STRUCT may contain a single nameless LONG member. See language/spin2/concepts/struct-bitfields.yaml"
@@ -89,4 +88,5 @@ related:
   - language/spin2/concepts/type-propagation.yaml
   - language/spin2/concepts/struct-bitfields.yaml
 
-oneliner: "32-bit data type — default type for all Spin2 operations"
+oneliner: "32-bit data type — the default type when no type specifier is given"
+source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Assembly Language Reference, Multi-Long ADD/SUB/CMP Operations, p.11 (integer quantities within 32 bits: 0 to 4,294,967,295 or -2,147,483,648 to +2,147,483,647); Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (LONG data in DAT); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), assembler directives (LONG data{[count]}{,data{[count]}...})"

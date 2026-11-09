@@ -2,27 +2,34 @@ instruction: RESI0
 syntax: RESI0
 encoding:
 - bits: EEEE 1011001 110 111111110 111111111
-  write: D
-  c: —
-  z: —
-  clocks: '4'
+  write: D (IJMP0) and PC
+  c: IRET0[31]
+  z: IRET0[30]
+  clocks: '4 / 13...20'
 timing:
   cycles: 4
   type: variable
   range: 4 / 13...20
-description: Resume from INT0. (CALLD $1FE,$1FF WCZ).
+description: >-
+  Resume from INT0, the debug interrupt. (CALLD $1FE,$1FF WCZ). During a debug
+  ISR, INA ($1FE) and INB ($1FF) are the readable/writable IJMP0 and IRET0
+  registers, so RESI0 is CALLD IJMP0,IRET0 WCZ: it ends the debug interrupt,
+  jumps to the return address held in IRET0, sets C and Z from IRET0[31] and
+  IRET0[30], and writes {C, Z, 10'b0, PC[19:0]} (the flags and the address of its
+  next instruction) into IJMP0, so that
+  the next debug interrupt resumes from where this debug ISR left off. Resuming
+  this way implies that the debug-ISR-entry and -exit routines in the cog-register
+  ROM are not being used and that the debugger code is located permanently in cog
+  registers, already present at the start of the debug interrupt.
 flags_affected:
-  C: No effect
-  Z: No effect
+  C: Set to IRET0[31]
+  Z: Set to IRET0[30]
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153"
+sources:
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153 (RESI0: Resume from INT0. (CALLD $1FE,$1FF WCZ), 4 / 13...20; CALLD D,{#}S: write {C, Z, 10'b0, PC[19:0]} to D, C = S[31], Z = S[30])"
+  - "P2 Instructions v35 - Rev B/C Silicon, row 161 (RESI0, EEEE 1011001 110 111111110 111111111, alias, 4 / 13...20, register write D) and row 157 (CALLD D,{#}S: C = S[31], Z = S[30])"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT (during a debug ISR INA and INB become the readable/writable IJMP0 and IRET0; any CALLD anyreg,INB WCZ terminates a debug interrupt; RESI0 (CALLD INA,INB WCZ) may be used to resume next time from where this debug ISR left off, implying the debug-ISR-entry and -exit routines in the cog-register ROM are not used and the debugger code is permanently located in cog registers)"
 documentation_level: structured
-compiler_operand_format:
-  name: operand_xlat
-  pattern: ''
-  description: No operands - translated instruction (RET*/RESI*/XSTOP)
-  valueType: 33
-compiler_encoding:
-  operandFormat: 33
 syntax_variants:
 - RESI0 Resume
 last_updated: '2025-09-19T16:04:17.210564'
@@ -39,3 +46,8 @@ specifics:
 has_group_documentation: true
 category: Branch
 oneliner: Resume from interrupt 0
+related:
+  - language/pasm2/calld.yaml
+  - language/pasm2/reti0.yaml
+  - architecture/debug_interrupt.yaml
+  - architecture/interrupts.yaml

@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "fa46f8268347f648"
+    fp: "154be2778a3094af"
     compile: program
   - at: examples[1].code
     fp: "f11552f26804e68d"
@@ -20,12 +20,8 @@ blocks:
     compile: fragment
     wrap: spin2-top
     assumes: [process_chunk()->0/1]
-  - at: production_patterns.indexed_stack_allocation.code
+  - at: stack_array_example.indexed_stack_allocation.code
     fp: "eb981343d2629908"
     compile: fragment
     wrap: spin2-top
     assumes: [NUM_COGS=con, STACK_SIZE=con, worker()->1/1]
-  - at: parameters[0].description
-    fp: "8a9ab4fe349f4641"
-    compile: not-code
-    reason: "YAML description prose (English sentences), not code (parameter description)"

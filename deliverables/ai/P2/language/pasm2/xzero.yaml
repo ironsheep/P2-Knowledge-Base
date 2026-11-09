@@ -10,47 +10,49 @@ timing:
   cycles: 2
   type: variable
 description: Buffer new streamer command to be issued on final NCO rollover of current
-  command, zeroing phase. Unlike XCONT which continues phase, XZERO resets phase
-  accumulator to zero when the new command begins - essential for precise timing
-  alignment in video sync generation and audio sample boundaries.
+  command, zeroing phase. XZERO clears out the phase accumulator when it executes.
 flags_affected:
   C: No effect
   Z: No effect
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.159"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_ls
-  pattern: D/#,S/#
-  description: 'Two operands: destination/immediate, source/immediate'
-  valueType: 13
-compiler_encoding:
-  operandFormat: 13
 syntax_variants:
 - XZERO {#}D,{#}S
 last_updated: '2025-09-19T16:04:17.352183'
 category: Streamer
 oneliner: Buffer new streamer command, zeroing phase
 examples:
-  - context: Video line timing with phase reset
+  - context: Horizontal sync in a 640x480 digital video driver
     code: |
-      ' Start new video line with precise timing
-      xzero   m_sync, sync_val    ' Queue sync pulse, reset phase
-      xcont   m_back, #0          ' Chain back porch (continues phase)
-      xcont   m_visible, #0       ' Chain visible pixels
-    notes: XZERO at line start ensures consistent timing across all lines
-  - context: Audio sample boundary alignment
-    code: |
-      ' Start new audio block with aligned phase
-      xzero   m_audio, samples    ' Reset phase for sample alignment
-    notes: Phase reset ensures samples align to expected boundaries
+      hsync           xcont   m_bs,hsync0             'horizontal sync
+                      xzero   m_sn,hsync1
+              _ret_   xcont   m_bv,hsync0
+    notes: The sync segment is issued with XZERO, so the phase accumulator is cleared once per line. The whole driver is in architecture/streamer/colorspace-and-dvi.yaml (dvi.example).
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER, Digital Video Output (DVI/HDMI), Table 22 (the hsync subroutine)"
+waiting: >-
+  XZERO waits for the prior command's last clock cycle. If the streamer count has
+  already run down to 0, XZERO proceeds at once. If the prior command used $FFFF for its
+  initial count, so that the streamer is running perpetually without decrementing its
+  counter, XZERO waits only for the next NCO rollover, at which point the streamer
+  begins executing the new command.
+fractional_frequency_glitch: >-
+  Clearing the phase is desirable when, say, pixels are being output at 1/3 of the
+  clock and a 1-clock delay (glitch) every ~30 seconds, due to imperfect fractions
+  like the ~1/3 value $2AAA_AAAA+1 (SETXFRQ scale, where $8000_0000 is the full system
+  clock), is not wanted. In such a case XZERO initiates the horizontal sync pulse, with
+  XCONT used everywhere else. Parallax's documents also give %5555_5555 as the ~1/3
+  value. The frequency-increment rule is in
+  architecture/streamer/nco-timing.yaml (frequency_calculation).
 related_instructions:
-  - XCONT: Buffer command continuing phase (seamless chaining)
-  - XINIT: Start streamer immediately (no buffering)
+  - XCONT: Buffer new streamer command to be issued on final NCO rollover of current command, continuing phase
+  - XINIT: Issue streamer command immediately, zeroing phase
   - XSTOP: 'Stop streamer immediately (alias for XINIT #0,#0)'
 sources:
   - "related_instructions (XSTOP alias for XINIT #0,#0): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER"
-notes:
-  - XZERO vs XCONT: Both buffer commands for seamless chaining
-  - XZERO resets phase to zero - use at timing boundaries
-  - XCONT continues phase - use for seamless data flow
-  - Typical pattern: XZERO at video line start, XCONT for segments within line
+  - "description (clears the phase accumulator), waiting, fractional_frequency_glitch: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (the XZERO/XCONT waiting paragraph and the XZERO paragraph, which writes the ~1/3 fraction as '%5555_5555'; the same section's SETXFRQ multiplier table gives 1/3 as '$2AAA_AAAA+1' on the scale where the D/# value is the multiplier times $8000_0000)"
+related:
+  - language/pasm2/xinit.yaml
+  - language/pasm2/xcont.yaml
+  - language/pasm2/xstop.yaml
+  - architecture/streamer/nco-timing.yaml
+  - architecture/streamer/colorspace-and-dvi.yaml

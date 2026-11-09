@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "68340fce50930935"
+    fp: "86cf3be493888939"
     compile: fragment
     wrap: pasm2-dat
     assumes: [rmode, tranp, spi_ck=con]
@@ -17,13 +17,3 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [x, spi_ck=con, wmode]
-  - at: patterns[0].implementation
-    fp: "92f7fe36ede2b0f1"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [mode, data, count, clk_pin=con]
-  - at: large_transfer_chunking.implementation
-    fp: "1b77ef004223cb79"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [x, count, mode, clk_pin=con]

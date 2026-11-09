@@ -20,17 +20,21 @@ operation: |
 # Parameters - Repository Mode
 repository_mode:
   x_register: "32-bit value to store (written by WXPIN)"
-  y_register: "Not used"
+  y_register: "Not documented: a Y role for this mode"
   z_register: "Reads back stored value (RDPIN/RQPIN)"
   in_flag: "Raised when WXPIN writes the long (DIR=1)"
+  reset: "During reset (DIR=0), WXPIN instructions are ignored and IN is low: write the long after DIR is raised"
+  multi_cog_access: "Cogs that execute WRPIN, WXPIN, WYPIN, RDPIN or AKPIN on this pin must do so at different times; any number of cogs can read it at once with RQPIN"
 
 # Parameters - DAC Noise Mode
 dac_noise_mode:
-  x_register: "Optional sample period in clocks for IN timing (0 = max 65536-clock period, lowest switching power)"
-  y_register: "Not used (8-bit DAC is fed pseudo-random data every clock automatically)"
+  x_register: "X[15:0] can be set to a sample period, in clock cycles, to mark time with IN raising at each period completion. If a sample period is not wanted, set X[15:0] to zero (65,536 clocks) to maximize the unused sample period, thereby reducing switching power"
+  y_register: "Not documented: a Y role for this mode. The mode overrides M[7:0] to feed the pin's 8-bit DAC pseudo-random data on every clock"
   z_register: "16-bit ADC accumulation from last sample period (RDPIN/RQPIN)"
-  adc_enable: "With TT = %0x, OUT switches the pin's ADC -- but only while TT bit 0 is also set (P_OE / P_TT_01): with TT = %00 raising OUT runs nothing, and with TT bit 0 set the DAC drives the pin while the ADC runs (architecture/smart_pins.yaml silicon_errata)."
+  adc_enable: "OUT runs the pin's ADC only with TT bit 0 set (TT = %01, P_OE / P_TT_01), and the DAC then drives the pin while the ADC runs; with TT = %00 raising OUT runs nothing. Parallax's documents also give OUT as enabling the ADC with TT = %0x, which includes %00. TT = %1x was not tested (architecture/silicon_errata.yaml)."
   requires: "M[12:10]=%101 in WRPIN mode value"
+  pattern: "Each pin in this mode receives a unique data pattern"
+  reset: "During reset (DIR=0), IN is low"
 
 # Complete Spin2 Example
 spin2_complete: |
@@ -45,15 +49,18 @@ spin2_complete: |
     ' Repository mode - share data between cogs
     setup_repository()
     
-    ' DAC noise mode - generate random analog output
+    ' DAC noise mode - the 8-bit DAC is fed pseudo-random data
     setup_dac_noise()
     
   PUB setup_repository() | mode
     mode := P_REPOSITORY
-    PINSTART(REPO_PIN, mode, $12345678, 0)  ' Store value in X (xval)
+    PINCLEAR(REPO_PIN)                      ' DIR low: smart pin in reset
+    WRPIN(REPO_PIN, mode)                   ' Configure the mode
+    PINHIGH(REPO_PIN)                       ' DIR high: smart pin active
+    WXPIN(REPO_PIN, $12345678)              ' Store the value (WXPIN is ignored while DIR is low)
 
     ' Another cog can read this
-    shared_value := RDPIN(REPO_PIN)         ' Read repository
+    shared_value := read_repository()       ' Read repository
 
   PUB setup_dac_noise() | mode
     ' Combine with DAC mode bits
@@ -67,7 +74,11 @@ spin2_complete: |
     WXPIN(REPO_PIN, value)          ' Update stored value
     
   PUB read_repository() : value
-    value := RDPIN(REPO_PIN)        ' Read without clearing IN
+    ' Read the long; RDPIN acknowledges the pin and lowers IN (RQPIN reads without acknowledging).
+    ' PASM2 RDPIN keeps all 32 bits (the Spin2 RDPIN() method returns the C flag in bit 31)
+    ORG
+      RDPIN value, #REPO_PIN
+    END
 
 # Complete PASM2 Example
 pasm2_complete: |
@@ -123,18 +134,19 @@ spin2_inline: |
 # Key Points
 repository_use: |
   Share 32-bit values between cogs
-  Non-blocking read/write
   IN flag indicates new data
+  Read the long with PASM2 RDPIN/RQPIN (inline in Spin2) to keep all 32 bits: the Spin2
+  RDPIN() and RQPIN() methods return the C flag in bit 31, and in this mode it is not
+  documented whether C is the MSB of the long
   
 dac_noise_use: |
   Requires DAC mode bits in WRPIN
-  Generates white noise output (fed to DAC every clock automatically)
+  Overrides M[7:0] to feed the pin's 8-bit DAC pseudo-random data on every clock
   X sets an optional sample period (IN timing only)
-  
-common_uses:
-  - "Inter-cog communication"
-  - "Flags and semaphores"
-  - "Random analog signals"
-  - "Audio noise generation"
 
 related: ["00010 (DAC Dither PRNG)", "00011 (DAC Dither PWM)"]
+
+sources:
+  - "dac_noise_mode.adc_enable: EF-071 (in DAC-noise mode %00001, raising OUT with TT = %00 runs nothing; with TT bit 0 set OUT runs the ADC and the DAC drives the pin while it runs)"
+  - "operation, repository_mode, dac_noise_mode, multi_cog_access, examples: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (acknowledge instructions, multi-cog bus) and SMART PIN MODES (%00001..%00011 long repository; %00001 DAC noise)"
+  - "repository_use (Spin2 RDPIN() bit 31): Parallax Propeller 2 Spin2 Language Documentation v55, smart pin methods (RDPIN (Pin) : Zval, Zval[31] = C flag from RDPIN, other bits are RDPIN data); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (C is either a mode-related flag or the MSB of the Z result)"

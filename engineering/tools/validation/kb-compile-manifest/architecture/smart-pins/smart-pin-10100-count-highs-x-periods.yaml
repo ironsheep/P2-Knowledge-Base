@@ -3,10 +3,10 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: code_examples[0].code
-    fp: "da8000e0df0e83bd"
+    fp: "cfcd88a84e6b3ae5"
     compile: fragment
     wrap: spin2-top
     assumes: [high_time]
   - at: code_examples[1].code
-    fp: "db52c2f097b02468"
+    fp: "b8fcae378d042218"
     compile: program

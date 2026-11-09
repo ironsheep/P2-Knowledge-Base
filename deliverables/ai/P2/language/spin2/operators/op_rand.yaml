@@ -1,23 +1,21 @@
 operator: "??"
 type: operator
 description: |
-  Pseudo-random operator: `??var` iterates the long variable var per the XORO32
+  Var-Prefix operator: `??var` iterates the long variable var per the XORO32
   instruction (the xoroshiro32+ algorithm) and returns the pseudo-random value. The
   variable holds the generator state and is updated in place. Priority 1, PUB/PRI only;
-  the operand must be a variable (`value := ??` alone is rejected).
+  the operand is a variable (??var).
 category: Var-modify
 priority: 1
 term_form: "??var"
 assign_form: "??var   (PUB/PRI only)"
 block_usage: "PUB/PRI only"
 syntax: "value := ??variable"
-returns: "32-bit pseudo-random number"
+returns: "The pseudo-random value. Results recorded on silicon for the starting states $0000_0001, $DEAD_BEEF and $0001_0000 included values with bits set in bits 31..24 (for example $D719_4AE8). Not documented: the width of the ?? result."
 
 properties:
-  - "One XORO32 instruction per call"
   - "Reproducible: the same starting value gives the same sequence"
   - "Seed it with a non-zero value"
-  - "NOT suitable for cryptography"
 
 seeding:
   rule: "Seed the variable with a non-zero value before the first use"
@@ -56,10 +54,11 @@ examples:
           value := ??seed
           DEBUG("Random[", UDEC(i), "] = ", UHEX(value))
 
-  - description: "Noise generation"
+  - description: "Top byte of the ?? result"
     code: |
-      PUB white_noise_byte() : sample
-        sample := ??noise_state >> 24   ' High 8 bits
+      PUB top_byte() : sample | state
+        state := $DEAD_BEEF
+        sample := ??state >> 24   ' bits 31..24 of the result
 
 common_patterns:
   - pattern: "seeded_prng"
@@ -111,28 +110,26 @@ anti_patterns:
 
   - anti_pattern: "operand_missing"
     severity: "critical"
-    description: "?? needs a variable to iterate"
+    description: "?? needs a variable to iterate; the compiler refuses it with no operand"
     wrong: |
-      value := ??        ' rejected: ?? needs a variable
+      value := ??        ' refused: ?? needs a variable
     correct: |
       value := ??seed
 
 vs_getrnd:
   prng_advantages:
     - "Reproducible sequences with same seed"
-    - "Good for games, simulations, testing"
   getrnd_advantages:
     - "No seed variable to initialize or keep"
-    - "Use to seed the PRNG"
+    - "Can supply the seed for the PRNG"
 
 notes:
-  - "?? modifies variable in-place AND returns new value"
+  - "?? returns the XORO32 result and stores the new generator state in the variable"
   - "Seed with a non-zero value before first use"
-  - "Use GETRND() to seed for best initial randomness"
-  - "NOT suitable for cryptographic applications"
-  - "Executes the XORO32 instruction on the cog"
+  - "GETRND() can supply the initial seed"
+  - "Not documented: the XORO32 algorithm's constants, and how the result and the new state are computed from the old state"
 
-source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Operators (??var: iterate long var per XORO32, return pseudo-random value); CP-035 (?? with no variable operand is refused); EF-101 (a zero state is absorbing; the recorded results for three nonzero starting states, in its test log)"
 
 aliases:
   - "??"
@@ -150,8 +147,6 @@ related:
 
 see_also:
   - "Pseudo-random number generation"
-  - "XORO32 algorithm"
-  - "Game randomness"
-  - "Reproducible testing"
+  - "Reproducible sequences"
 
 oneliner: "XORO32 pseudo-random number generator operator (seed with a non-zero value)"

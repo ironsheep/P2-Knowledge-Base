@@ -3,11 +3,6 @@
 # Comprehensive reference for all P2 system registers
 
 
-# Findability index. This file named itself in no
-# top-level field, so neither it nor anything it documents was reachable by
-# name through the published index -- only by guessing its camelCase key.
-# An alias is a lookup key, never a definition; every name below is defined
-# in this file.
 aliases:
   - "system registers"
   - "special purpose registers"
@@ -33,7 +28,7 @@ memory_regions:
     address_range: "$000-$1EF"
     count: 496
     description: "General-purpose RAM for code and data"
-    access: "Standard RAM accessible by all instructions"
+    access: "RAM registers for code and data usage"
     
   dual_purpose:
     address_range: "$1F0-$1F7"  
@@ -88,10 +83,7 @@ dual_purpose_registers:
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COGS, COG RAM (Dual-Purpose Registers).
       Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Dual-Purpose Registers, p.15.
       Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Register RAM, p.13.
-    note: >-
-      PA holds the RETURN address written by a CALLD with an immediate operand -- it is
-      not that instruction's parameter. Separately, PA is the parameter register read by
-      CALLPA. Both roles are real and they are different.
+    note: "PA holds the return address written by CALLD with an immediate operand, the parameter copied by CALLPA, or the address written by LOC."
 
   "$1F7":
     normal_use: "General-purpose RAM"
@@ -102,10 +94,7 @@ dual_purpose_registers:
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COGS, COG RAM (Dual-Purpose Registers).
       Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Dual-Purpose Registers, p.15.
       Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Register RAM, p.13.
-    note: >-
-      PB mirrors PA: the CALLD-imm return address, and the parameter register read by
-      CALLPB (not CALLPA). These two rows are deliberately NOT identical: the sources
-      draw the CALLPA/CALLPB distinction.
+    note: "PB holds the return address written by CALLD with an immediate operand, the parameter copied by CALLPB, or the address written by LOC."
 
 # Special-Purpose Registers ($1F8-$1FF)
 special_purpose_registers:
@@ -116,8 +105,8 @@ special_purpose_registers:
     category: "hub_access"
     yaml_file: "architecture/system-registers/ptra-register.yaml"
     key_features:
-      - "32-bit hub RAM pointer"
-      - "Auto-increment/decrement support"  
+      - "32-bit register holding a hub RAM address (hub address space is 20 bits)"
+      - "Auto-increment/decrement support"
       - "Initialized by COGINIT SETQ value"
       - "Used with RDxxxx/WRxxxx instructions"
       
@@ -127,7 +116,7 @@ special_purpose_registers:
     access: "Read/Write"
     category: "hub_access"
     key_features:
-      - "32-bit hub RAM pointer"
+      - "32-bit register holding a hub RAM address (hub address space is 20 bits)"
       - "Auto-increment/decrement support"
       - "Initialized by COGINIT S operand"
       - "Used with RDxxxx/WRxxxx instructions"
@@ -140,10 +129,12 @@ special_purpose_registers:
     yaml_file: "architecture/system-registers/dira-dirb-registers.yaml"
     key_features:
       - "Controls output enable for pins P31-P0"
-      - "1=output enabled, 0=input/high-Z"
+      - "1=output enabled, 0=input (float); DAC modes use DIR as 0: disable, 1: enable"
       - "Interacts with smart pin configuration"
-      - "Cleared on reset and COGINIT"
-      
+      - "With all the cogs terminated, all I/O pin DIR bits are naturally low (input)"
+      - "After a COGINIT with D[5] = 0 of a running cog, a stopped cog or the cog itself, the new program reads DIRA = 0, with DIRA bits set on P0..P2 beforehand"
+      - "Not documented: the value after reset (while RESn is low the I/O pins are floating) or after a COGINIT with D[5] = 1. What COGINIT does to cog state, piece by piece, is in architecture/cog_state.yaml"
+
   "$1FB":
     name: "DIRB" 
     description: "Output enables for P63..P32"
@@ -152,10 +143,11 @@ special_purpose_registers:
     yaml_file: "architecture/system-registers/dira-dirb-registers.yaml"
     key_features:
       - "Controls output enable for pins P63-P32"
-      - "1=output enabled, 0=input/high-Z"
+      - "1=output enabled, 0=input (float); DAC modes use DIR as 0: disable, 1: enable"
       - "Interacts with smart pin configuration"
-      - "Cleared on reset and COGINIT"
-      
+      - "With all the cogs terminated, all I/O pin DIR bits are naturally low (input)"
+      - "Not documented: the value after reset or COGINIT (while RESn is low the I/O pins are floating). What COGINIT does to cog state, piece by piece, is in architecture/cog_state.yaml"
+
   "$1FC":
     name: "OUTA"
     description: "Output states for P31..P0"
@@ -185,9 +177,8 @@ special_purpose_registers:
     category: "io_status"
     special_mode: "Becomes IJMP0 (R/W) during debug ISR"
     key_features:
-      - "Read actual pin states P31-P0"
-      - "Reflects pin voltage levels"
-      - "Updated continuously"
+      - "Read pin states P31-P0"
+      - "In smart pin modes the IN bit is a flag that the smart pin has completed some function or an event has occurred"
       - "Debug ISR transforms to IJMP0"
       
   "$1FF":
@@ -197,9 +188,8 @@ special_purpose_registers:
     category: "io_status"
     special_mode: "Becomes IRET0 (R/W) during debug ISR"
     key_features:
-      - "Read actual pin states P63-P32"
-      - "Reflects pin voltage levels"
-      - "Updated continuously"
+      - "Read pin states P63-P32"
+      - "In smart pin modes the IN bit is a flag that the smart pin has completed some function or an event has occurred"
       - "Debug ISR transforms to IRET0"
 
 # Register Categories
@@ -230,19 +220,18 @@ register_categories:
       
   interrupt_support:
     description: "Dual-purpose registers supporting interrupts"
-    registers: ["IJMP0-3", "IRET0-3"]
+    registers: ["IJMP1-3", "IRET1-3"]
     key_functions:
       - "Interrupt vector storage"
       - "Return address storage"
-      - "ISR context management"
-      
+
   call_support:
     description: "Dual-purpose registers supporting calls"
     registers: ["PA", "PB"]
     key_functions:
-      - "CALLD parameter passing"
+      - "CALLD-immediate return address"
+      - "CALLPA and CALLPB parameter"
       - "LOC address storage"
-      - "Function call optimization"
 
 # Special Behaviors and Modes
 special_behaviors:
@@ -256,14 +245,16 @@ special_behaviors:
   execute_only_rom:
     address_range: "$1F8-$1FF"
     description: "Contains debug ISR entry/exit routines"
-    dual_purpose: "Same addresses serve as special registers AND ROM routines"
-    entry_point: "Debug entry routine at $1F8 performs register save/restore"
+    dual_purpose: "The same addresses serve as special registers and as the execute-only ROM routines"
+    entry_point: "The debug-ISR-entry routine at $1F8 saves registers $000..$00F to hub RAM, loads a program into them from hub RAM, and jumps to $000"
     
   coginit_initialization:
     ptra_init: "Gets SETQ value if present, else cleared to 0"
-    ptrb_init: "Gets S operand of COGINIT (execution start address)"
-    dir_clear: "DIRA/DIRB cleared to 0 (all pins as inputs)"
-    out_preserved: "OUTA/OUTB values preserved from previous state"
+    ptrb_init: "Gets the S operand of COGINIT (Parallax's documents differ on whether all 32 bits or S[19:0] are written)"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS (S, all 32 bits, is written into PTRB); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Hub Control instructions, p.41 (S[19:0] sets the hub startup address and PTRB of the cog); dir_state and out_state: P2 hardware verification, EF-113 (DIR %011 and OUT %101 on P0..P2, COGINIT with D[5] = 0 of a running cog, a stopped cog and itself, one part)"
+    dir_state: "After a COGINIT with D[5] = 0 of a running cog, a stopped cog or the cog itself, the new program reads DIRA = 0, with DIRA bits set on P0..P2 beforehand. Not documented: DIRB after COGINIT, and DIRA or DIRB after a COGINIT with D[5] = 1"
+    out_state: "After a COGINIT with D[5] = 0 of a running cog, a stopped cog or the cog itself, the new program reads OUTA = 0, with OUTA bits set on P0..P2 beforehand. Not documented: OUTB after COGINIT, and OUTA or OUTB after a COGINIT with D[5] = 1"
+    full_cog_state: "What COGINIT does to each piece of cog state is in architecture/cog_state.yaml"
 
 # Access Patterns and Usage
 access_patterns:
@@ -271,60 +262,58 @@ access_patterns:
     examples:
       - "MOV $1F8, ##$3000  ' Same as MOV PTRA, ##$3000"
       - "MOV result, $1FE   ' Same as MOV result, INA"
-    advantage: "Can use immediate addresses in calculated addressing"
-    
+
   symbolic_addressing:
     examples:
       - "MOV PTRA, ##buffer_address"
       - "MOV DIRA, ##pin_mask"
-    advantage: "More readable and maintainable code"
-    
+
   bit_manipulation:
     examples:
       - "OR DIRA, ##%00001111     ' Set P3-P0 as outputs"
       - "ANDN OUTB, ##%00001111   ' Clear P35-P32 outputs"
-    advantage: "Efficient multi-pin operations"
 
 # Register Interactions
 register_interactions:
   dir_out_relationship:
     dependency: "OUT register values only drive pins when corresponding DIR bit = 1"
-    floating: "When DIR = 0, pin is high impedance regardless of OUT value"
-    
+    floating: "DIR = 0: input (float); DIR = 1: output (drive)"
+
   smart_pin_override:
-    dir_override: "Smart pin %TT bits can override DIR control"
-    out_override: "Some smart pin modes override OUT signal"
+    dir_override: "In smart pin modes the DIR bit is used as an active-low reset signal to the smart pin circuitry, while the output enable state is controlled by a configuration bit; while a smart pin is configured, the %TT bits govern the pin's output enable regardless of the DIR state"
+    out_override: "In some smart pin modes the smart pin takes over driving the output state, in which case the OUT bit is ignored"
     coordination: "Configure smart pins while DIR = 0"
     
   ptr_instruction_synergy:
     rd_instructions: "RDxxxx instructions use PTRA/PTRB for addressing"
     wr_instructions: "WRxxxx instructions use PTRA/PTRB for addressing"
-    auto_increment: "Pointer arithmetic handled automatically"
+    auto_increment: "A PTRx expression can add to or subtract from PTRx as part of the access (PTRx++, PTRx--, ++PTRx, --PTRx)"
 
 # Performance Considerations
 performance_notes:
   hub_access_timing: "PTRA/PTRB hub access follows hub timing rules: from cog-exec code a hub read (RDLONG) takes 9...16 clocks and a hub write (WRLONG) 3...10 clocks, depending on when the cog's hub slot arrives"
-  io_update_timing: "DIR/OUT changes take effect immediately"
-  in_read_timing: "IN register reflects pin states with minimal delay"
+  io_update_timing: "When a DIRx/OUTx bit is changed by any instruction, it takes three additional clocks after the instruction before the pin starts transitioning to the new state"
+  in_read_timing: "When an INx register is read by an instruction, it reflects the state of the pins registered three clocks before the start of the instruction; TESTP/TESTPN reflect the state registered two clocks before the start of the instruction"
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, I/O pin timing, p.22; P2 Instructions v35 - Rev B/C Silicon, Sheet1 (RDLONG and WRLONG rows)"
 
 # Common Usage Patterns
 usage_patterns:
   memory_operations:
-    pattern: "PTRA/PTRB with auto-increment for buffer processing"
+    pattern: "A PTRA++ expression uses PTRA, then adds the access size to PTRA"
     example: "RDLONG data, PTRA++  ' Read and advance pointer"
-    
+
   io_initialization:
-    pattern: "Set DIR then OUT for output pins"
+    pattern: "DIRA and OUTA written as whole registers"
     example: |
       MOV DIRA, pin_mask
       MOV OUTA, initial_states
-    
+
   pin_manipulation:
-    pattern: "Use bit operations for selective pin control" 
+    pattern: "An OR with a bit mask sets individual DIR bits and leaves the others unchanged"
     example: "OR DIRA, pin_bit  ' Enable output for one pin"
-    
+
   parameter_passing:
-    pattern: "SETQ before COGINIT for parameter block"
+    pattern: "A SETQ before COGINIT writes its value into the target cog's PTRA"
     example: |
       SETQ ##params
       COGINIT #cog, ##entry
@@ -336,8 +325,9 @@ see_also:
   - "Smart Pin Configuration"
   - "COGINIT Parameter Passing"
   - "Debug ISR System"
+  - "architecture/cog_state.yaml"
 
 source:
-  document: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COGS, COG RAM (Dual-Purpose Registers and Special-Purpose Registers)"
+  document: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COGS, COG RAM (Dual-Purpose Registers and Special-Purpose Registers), RANDOM ACCESS INTERFACE (PTRx expressions), DEBUG INTERRUPT, SMART PINS (the IN bit; %TT); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Shutdown, p.12 (DIR bits with all the cogs terminated)"
 
 hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."

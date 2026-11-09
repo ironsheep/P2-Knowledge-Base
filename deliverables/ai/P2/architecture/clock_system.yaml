@@ -14,20 +14,27 @@ aliases:
   - XO
   - HUBSET
 description: |
-  Flexible clock generation system supporting multiple clock sources with PLL
-  multiplication, programmable dividers, and automatic source switching. Provides
-  stable timing for CPU cores and peripherals.
+  The system clock is the time base for all internal components. It comes from
+  one of four sources, selected by HUBSET under software control: the internal
+  RCFAST oscillator (the boot-up source), the internal RCSLOW oscillator (for
+  low-power operation), the XI pin (an external clock or a crystal on XI and
+  XO), or the PLL fed by XI (clock_sources gives the frequencies). The PLL divides the
+  XI frequency by 1..64, multiplies it by 1..1024 in the VCO, and passes the VCO
+  output on directly or divided by 2, 4, 6, ... 30. The clock can also be
+  stopped for lowest power until reset.
+source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock, p.17; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), OVERVIEW (clock modes: software control, glitch-free switching between sources, clock can be stopped for lowest power until reset) and HUB, Configuring the Clock Generator"
 
-# Compile-time configuration constants (defined in top-level CON block)
+# Spin2 hub variables holding the current clock setup
 hub_variables:
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup (for Spin2 programs, two hub variables are maintained which reflect the current clock setup)"
   CLKFREQ:
     address: "$00044"
-    description: "Current clock frequency in Hz"
-    access: "Read/Write"
+    description: "Current clock frequency in Hz, located at LONG[$44] in Spin2 programs; initialized with the clkfreq_ value"
+    access: "Read/Write (writing directly is not recommended; CLKSET updates both variables and switches the clock safely)"
   CLKMODE:
     address: "$00040"
-    description: "Current clock mode register value"
-    access: "Read/Write"
+    description: "Current clock mode, located at LONG[$40] in Spin2 programs; initialized with the clkmode_ value"
+    access: "Read/Write (writing directly is not recommended; CLKSET updates both variables and switches the clock safely)"
 
 # Compile-time clock-setup symbols. The definition home for these symbols is
 # language/spin2/constants/special-configuration-symbols.yaml; this block names the
@@ -127,10 +134,10 @@ pll_system:
     pll_when_pppp_is_15: "PLL = VCO"
     pll_otherwise: "PLL = VCO / ((%PPPP + 1) * 2)"
   overclocking: "For fastest overclocking, the PLL can be pushed to 350 MHz using the 'VCO / 1' mode (%PPPP = 15)."
-  cross_source_conflict: "The P2 Hardware Manual's equivalent table states the recommended VCO range as 100 MHz to 350 MHz rather than 100 MHz to 200 MHz. The 100-200 MHz recommendation and the separate 350 MHz overclock ceiling are the form used here."
+  cross_source_conflict: "Parallax's documents also give the VCO range as 100 MHz to 350 MHz rather than 100 MHz to 200 MHz. The 100-200 MHz range and the separate 350 MHz overclocking statement are the form used here."
 
 hubset_configuration:
-  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock, p.18; Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator; safe_switching_warning: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock, p.18; deglitching: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock, p.19"
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock, p.18; Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator; safe_switching_warning: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock (WARNING), p.18, and Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, System Clock Configuration (WARNING), p.26; cross_source_conflict, the recipe that keeps %PPPP and %CC: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator (WARNING after the %SS table); deglitching: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock, p.19, and Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator"
   instruction: "HUBSET ##%0000_000E_DDDD_DDMM_MMMM_MMMM_PPPP_CCSS   'set clock mode"
   fields:
     E: "PLL off/on"
@@ -140,10 +147,20 @@ hubset_configuration:
     CC: "XI/XO crystal and loading-cap configuration"
     SS: "clock source select"
   safe_switching_warning: "Incorrectly switching away from the PLL setting (%SS = %11) can cause a glitch which will hang the clock circuit. In order to safely switch, always start by switching to an internal oscillator using either HUBSET #$F0 (for RCFAST) or HUBSET #$F1 (for RCSLOW)."
+  cross_source_conflict: >-
+    Parallax's documents give two recipes for switching away from the PLL. One:
+    switching away from the PLL setting (%SS = %11 and %CC <> %00) with
+    %PPPP = %1111 incorrectly can cause a clock glitch that hangs the P2 until a
+    reset; start by switching to an internal RC oscillator (%SS = %00 or %01)
+    while keeping %PPPP = %1111 and the %CC setting. The other: start by
+    switching with HUBSET #$F0 (RCFAST) or HUBSET #$F1 (RCSLOW), as in
+    safe_switching_warning. Those immediates write %PPPP = %1111 with %CC = %00,
+    E = 0 and the divider and multiplier fields 0, so they do not keep the %CC
+    setting. Not documented: which recipe holds where the two differ.
   deglitching: "The clock selector controlled by the %SS bits has a deglitching circuit which waits for a positive edge on the old clock source before disengaging, holding its output high, and then waiting for a positive edge on the new clock source before switching over to it. It is necessary to select mode %00 or %01 while waiting for the crystal and/or PLL to settle into operation, before switching over to either."
   worked_sequence:
-    description: "The datasheet's own worked example: a 20 MHz crystal driven to 148.5 MHz, %DDDDDD = 39, %MMMMMMMMMM = 296, %PPPP = %1111."
-    source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock (PLL Example), p.19"
+    description: "A 20 MHz crystal and the PLL give 148.5 MHz: %DDDDDD = 39 divides the crystal by 40 to a 500 kHz reference, %MMMMMMMMMM = 296 multiplies it by 297 in the VCO to 148.5 MHz, and %PPPP = %1111 uses the VCO output directly. %CC = %10 selects 15 pF crystal mode. The PLL is enabled while the clock stays on RCFAST (%SS = %00), and the clock switches to the PLL (%SS = %11) only after the ~10 ms crystal+PLL wait."
+    source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock (PLL Example), p.19; the same four steps: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator (PLL Example)"
     code: |
       HUBSET    #$F0                                         'set 20 MHz+ (RCFAST) mode
       HUBSET    ##%1_100111_0100101000_1111_10_00            'enable crystal+PLL, stay in RCFAST mode
@@ -168,88 +185,91 @@ clock_modes:
       "%00": {clock_source: "RCFAST", notes: "20+ MHz (nominally ~24 MHz) can be switched to at any time -- used on boot up."}
 
 stabilization_timing:
-  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock (%SS clock-source table), p.18; independently in Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator"
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock (%SS clock-source table), p.18, PLL Example and deglitching paragraph, p.19, AC Characteristics (RCFAST 20 / 24 / 30 MHz), p.48; independently in Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator (the %SS table, the PLL example and the deglitching paragraph)"
   crystal_plus_pll: "Allow 10ms for crystal+PLL to stabilize before switching to PLL (%SS = %11)."
   crystal_only: "Allow 5ms for crystal to stabilize before switching to XI pin (%SS = %10)."
   rcfast: "Can be switched to at any time."
   rcslow: "Can be switched to at any time."
-  emitted_wait: "WAITX ##20_000_000/100 -- the wait the sources themselves emit for the 10ms case, computed at the RCFAST rate the code is still running at."
+  pll_example_wait: "The ## form of WAITX ##20_000_000/100 is an AUGD (2 clocks) plus a WAITX (2 + D clocks when no WC/WZ/WCZ is given) with D = 200_000. The wait runs while the clock is still on RCFAST (20 MHz min, 24 MHz typical, 30 MHz max), so it lasts 10 ms at 20 MHz, about 8.3 ms at 24 MHz and about 6.7 ms at 30 MHz: at least the 5 ms a crystal alone needs at any RCFAST frequency, and the full 10 ms for crystal+PLL only when RCFAST runs at 20 MHz. A WAITX of D = 100_000 (##20_000_000/200) lasts 5 ms only at 20 MHz and about 4.2 ms at 24 MHz, so on RCFAST it falls short of the crystal's 5 ms."
+  pll_and_crystal_settle_on_rc: "The %SS selector must select %00 (RCFAST) or %01 (RCSLOW) while the crystal and/or PLL settle into operation, before switching over to either XI (%SS = %10) or the PLL (%SS = %11)."
 
 clock_sources:
   source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics (Oscillator Frequency table), p.48; FEATURES (clock modes), p.3; Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator"
   rcfast:
-    description: "Internal RC oscillator - fast mode"
-    frequency: "20-30 MHz across process/voltage/temperature"
+    description: "Internal RC oscillator, 20 MHz+, designed to always run at least 20 MHz, worst-case, to accommodate 2M baud serial loading during boot"
+    frequency: "20 MHz min / 24 MHz typ / 30 MHz max"
     spec_min: "20 MHz"
     spec_typical: "~24 MHz"
     spec_max: "30 MHz"
-    stability: "Wide variation: 20 MHz min to 30 MHz max; not for precision timing"
+    stability: "Not documented: a temperature or voltage coefficient. RCFAST is 20 MHz min to 30 MHz max over the -40 degC to +105 degC operating range."
     boot_default: true
 
   rcslow:
-    description: "Internal RC oscillator - slow mode"
+    description: "Internal RC oscillator, ~20 kHz, intended for low-power operation"
     frequency: "~20 kHz"
     stability: "12 kHz min / 20 kHz typ / 30 kHz max"
     power: "Low-power operation (130 µA)"
 
   crystal:
-    description: "External crystal oscillator"
-    frequency_range: "10-20 MHz recommended"
-    xi_pin: "Crystal input"
-    xo_pin: "Crystal output"
-    loading_capacitors: "Internal, programmable"
+    description: "Crystal oscillator on XI and XO"
+    frequency_range: "XO is a crystal-feedback output for 10 MHz-20 MHz crystals; the oscillator frequency limits for a crystal between XI and XO are 1 MHz to 50 MHz"
+    xi_pin: "Input"
+    xo_pin: "Crystal-feedback output (600-ohm drive when %CC != %00)"
+    loading_capacitors: "Internal loading caps on XI and XO for crystal impedance matching: off, 15 pF or 30 pF per pin, selected by %CC"
 
   external:
     description: "External clock input"
     input_pin: "XI pin"
     frequency_range: "DC to 200 MHz"
-    note: "DC-200 MHz is the direct-drive-into-XI limit (P2 datasheet AC Characteristics). 350 MHz is the absolute VCO/1 overclock ceiling, NOT the XI-input limit; PLL output max = 320 MHz (180 MHz typical)."
+    note: "DC-200 MHz is the direct-drive-into-XI range. For the PLL output (fed by direct drive or crystal), Parallax's documents give 3.33 MHz min, 180 MHz typical and 320 MHz max in one place, and in another that the PLL can be pushed to 350 MHz using the 'VCO / 1' mode (%PPPP = 15)."
 
 clock_switching:
   glitch_free: true
-  switch_away_from_pll_warning: "No automatic fallback is documented. Switching away from the PLL (SS=%11, CC<>%00) with PPPP=%1111 can glitch the clock and hang the chip until reset; first switch to an RC oscillator (SS=%00 or %01) keeping PPPP=%1111 and CC."
+  glitch_free_note: "Switching between sources is glitch-free through the %SS deglitching circuit (hubset_configuration.deglitching), with the exception in switch_away_from_pll_warning."
+  switch_away_from_pll_warning: "Switching away from the PLL (SS=%11, CC<>%00) with PPPP=%1111 incorrectly can glitch the clock and hang the chip until reset; first switch to an RC oscillator (SS=%00 or %01) keeping PPPP=%1111 and CC. Parallax's documents also give HUBSET #$F0 or #$F1 as that first step, which clears CC: see hubset_configuration.cross_source_conflict. Not documented: an automatic fallback to an RC oscillator."
   sources:
-    - "switch_away_from_pll_warning: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator"
-  
+    - "glitch_free: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (six clock modes, all under software control with glitch-free switching between sources)"
+    - "switch_away_from_pll_warning: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator; the HUBSET #$F0 / #$F1 form: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock, p.18"
+    - "sequence: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator (the %SS table, the PLL example and the deglitching paragraph); Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup (HUBSET ##clkmode_ & !3, WAITX ##20_000_000/100, HUBSET ##clkmode_)"
+
   sequence:
-    - "Configure new clock source"
-    - "Enable source (crystal/PLL)"
-    - "Wait for stabilization"
-    - "Switch to new source"
-    - "Optional: Disable old source"
+    - "Select RCFAST or RCSLOW (%SS = %00 or %01) if the clock is not already on one"
+    - "With %SS still %00 or %01, enable the crystal (%CC != %00) and, for the PLL, the PLL (E = 1) with its divider, multiplier and post-divider fields"
+    - "Wait while the clock stays on RCFAST or RCSLOW: 5ms for the crystal alone, 10ms for crystal+PLL"
+    - "Switch %SS to the new source, XI (%10) or the PLL (%11), with the same other fields"
+    - "Switching away from the PLL: switch_away_from_pll_warning"
 
 programming_examples:
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator (the four-step PLL example, the %SS table's 5ms and 10ms waits, the deglitching paragraph, the %PPPP = 15 overclock); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock (PLL Example), p.19, and AC Characteristics (RCFAST 20 / 24 / 30 MHz), p.48; Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup (the external-clock sequence HUBSET ##clkmode_ & !%11, WAITX ##20_000_000/100, HUBSET ##clkmode_, given for the crystal-only and XI-only modes as well as the PLL modes)"
   basic_crystal_20mhz:
     code: |
-      ' 20 MHz crystal, no PLL
-      HUBSET  ##%10_00      ' Enable crystal with 15pF caps, stay on RCFAST
-      WAITX   ##20_000_000/100  ' Wait 10ms
-      HUBSET  ##%10_10      ' Switch to crystal (XI)
-      
+      ' 20 MHz crystal, no PLL; starts on RCFAST
+      HUBSET  ##%10_00            ' crystal on (CC=%10, 15pF), stay on RCFAST (SS=%00)
+      WAITX   ##20_000_000/100    ' 200_000 RCFAST clocks: 6.7-10ms, at least the crystal's 5ms
+      HUBSET  ##%10_10            ' switch to the crystal (SS=%10, XI)
+
   pll_160mhz_from_20mhz_crystal:
     code: |
-      ' 20 MHz crystal → 160 MHz via PLL
-      ' VCO = 20 MHz * 8 = 160 MHz (inside the 100-200 MHz range); %PPPP = 15 selects VCO / 1
-      HUBSET  ##%10_00                              ' Enable crystal (15pF), stay on RCFAST
-      WAITX   ##20_000_000/100                      ' Wait 10ms
-      HUBSET  ##%10_10                              ' Switch to crystal (XI)
-      HUBSET  ##%0000_0001_0000_0000_0000_0111_1111_1010  ' PLL on, /1 * 8 / 1, source still XI
-      WAITX   ##20_000_000/100                      ' Wait ~10ms for crystal+PLL to stabilize
-      HUBSET  ##%0000_0001_0000_0000_0000_0111_1111_1011  ' Switch to PLL output
-      
+      ' 20 MHz crystal -> 160 MHz via the PLL
+      ' DDDDDD=0 (/1), MMMMMMMMMM=7 (x8): VCO = 20 MHz / 1 * 8 = 160 MHz, inside 100-200 MHz
+      ' PPPP=%1111 selects VCO / 1, so the system clock is 160 MHz
+      HUBSET  #$F0                                ' set RCFAST mode (SS=%00), PPPP=%1111
+      HUBSET  ##%1_000000_0000000111_1111_10_00   ' enable crystal+PLL, stay in RCFAST mode
+      WAITX   ##20_000_000/100                    ' wait ~10ms for crystal+PLL to stabilize
+      HUBSET  ##%1_000000_0000000111_1111_10_11   ' now switch to the PLL (SS=%11): 160 MHz
+
   overclock_250mhz:
     code: |
-      ' 20 MHz crystal → 250 MHz (overclock)
-      ' VCO = 20 MHz / 2 * 25 = 250 MHz, above the 100-200 MHz range (overclock); %PPPP = 15 selects VCO / 1
-      HUBSET  ##%10_00                              ' Enable crystal (15pF), stay on RCFAST
-      WAITX   ##20_000_000/100                      ' Wait 10ms
-      HUBSET  ##%10_10                              ' Switch to crystal (XI)
-      HUBSET  ##%0000_0001_0000_0100_0001_1000_1111_1010  ' PLL on, /2 * 25 / 1, source still XI
-      WAITX   ##20_000_000/100                      ' Wait ~10ms for crystal+PLL to stabilize
-      HUBSET  ##%0000_0001_0000_0100_0001_1000_1111_1011  ' Switch to PLL output
+      ' 20 MHz crystal -> 250 MHz via the PLL (overclock)
+      ' DDDDDD=1 (/2), MMMMMMMMMM=24 (x25): VCO = 20 MHz / 2 * 25 = 250 MHz, above 100-200 MHz
+      ' PPPP=%1111 selects VCO / 1, so the system clock is 250 MHz
+      HUBSET  #$F0                                ' set RCFAST mode (SS=%00), PPPP=%1111
+      HUBSET  ##%1_000001_0000011000_1111_10_00   ' enable crystal+PLL, stay in RCFAST mode
+      WAITX   ##20_000_000/100                    ' wait ~10ms for crystal+PLL to stabilize
+      HUBSET  ##%1_000001_0000011000_1111_10_11   ' now switch to the PLL (SS=%11): 250 MHz
 
 clock_specifications:
-  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics (Oscillator Frequency table), p.48; overclock_ceiling: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator"
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics (Oscillator Frequency table), p.48; pll_push_frequency: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator"
   measurement_condition: "Data in the Typical \"Typ\" column is T = 25 degC unless otherwise stated."
   oscillator_frequency:
     rcslow_internal: {min: "12 kHz", typ: "20 kHz", max: "30 kHz"}
@@ -263,66 +283,47 @@ clock_specifications:
     mode_1_direct_drive: "2 pF"
     mode_2_crystal_ge_16mhz: "15 pF"
     mode_3_crystal_lt_16mhz: "30 pF"
-  overclock_ceiling: "For fastest overclocking, the PLL can be pushed to 350 MHz using the 'VCO / 1' mode (%PPPP = 15)."
+  pll_push_frequency: "For fastest overclocking, the PLL can be pushed to 350 MHz using the 'VCO / 1' mode (%PPPP = 15)."
 
 clock_distribution:
-  system_clock: "Main clock for all COGs"
-  peripheral_clock: "Same as system clock"
-  smart_pin_clock: "Derived from system clock"
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock, p.17; Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (64-bit free-running counter which increments every clock) and SMART PINS (%11000, internally clocked: the A input is sampled on every clock)"
+  system_clock: "The time base for all internal components"
+  counter: "The 64-bit free-running counter increments every clock and is cleared on reset"
   adc_clock: "Internally clocked ADC modes sample the A input on every system clock"
-  
-  clock_domains:
-    - "COG execution units"
-    - "Hub memory and arbitration"
-    - "CORDIC pipeline"
-    - "Smart pins"
-    - "Streamer NCOs"
-    - "Video generation"
 
 power_management:
-  clock_gating: "Automatic for idle COGs"
-  
-  power_modes:
-    full_power: "All clocks active"
-    reduced_power: "Lower frequency operation"
-    sleep_mode: "RCSLOW with most circuits off"
-    
-  power_reduction:
-    - "Use lower clock frequencies when possible"
-    - "Stop unused COGs"
-    - "Disable PLL when not needed"
-    - "Use RCSLOW for standby"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (internal ~20 kHz RC oscillator for low-power operation, 130 µA; clock can be stopped for lowest power until reset, 100 µA, due to leakage), EVENTS (WAITINT stalls the cog to save power) and HUB, Configuring the Clock Generator (the ~20 kHz oscillator is intended for low-power operation)"
+  rcslow: "The internal ~20 kHz RCSLOW oscillator is intended for low-power operation (130 µA)."
+  clock_stopped: "The clock can be stopped for lowest power until reset (100 µA, due to leakage). A HUBSET idiom for it: language/pasm2/idioms/halt-and-fault-response.yaml."
+  waitint: "WAITINT stalls the cog to save power while it waits for an interrupt."
+  clock_gating: "Not documented: which circuits are clock-gated, or when."
 
 frequency_measurement:
-  getct_instruction: "Read 64-bit system counter"
-  counter_frequency: "Same as system clock"
-  
-  measuring_actual_frequency:
-    code: |
-      GETCT   start_count
-      WAITX   ##measure_time
-      GETCT   end_count
-      SUB     end_count, start_count
-      ' Frequency = end_count / (measure_time / nominal_freq)
+  getct_instruction: "GETCT D reads the lower 32 bits of the 64-bit counter; GETCT D WC reads the upper 32 bits"
+  counter_frequency: "The counter increments every system clock"
+  measuring_actual_frequency: "Not documented: an on-chip method of measuring the actual system clock frequency. CT and WAITX both count system clocks, so a GETCT before and after a WAITX differ by the WAITX count plus the instructions' own clocks, whatever the clock frequency."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (64-bit free-running counter which increments every clock; GETCT WC retrieves the upper 32 bits) and EVENTS (CT is the lower 32 bits of the free-running 64-bit global counter); P2 Instructions v35 - Rev B/C Silicon, GETCT and WAITX rows"
 
 related_systems:
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS (CT-passed-CT1, ADDCT1), SMART PIN MODES (base periods and sample periods in clock cycles) and HUB, Configuring the Digital Filters for Smart Pins (the timing tap is one of the lower 32 bits of CT)"
   counter_system: "64-bit free-running counter"
-  event_system: "CT events for timing"
-  smart_pins: "Clock-based timing modes"
-  video_generation: "Pixel clock derivation"
+  event_system: "CT-passed-CT1..CT3 events, set when CT passes a target made by ADDCT1..ADDCT3"
+  smart_pins: "Smart pin timing parameters (periods, baud rates) are counted in system clocks"
+  digital_filters: "The four global smart pin input filters take their timing tap from one of the lower 32 bits of CT"
 
 debugging:
-  clock_output: "Can output clock on pins for measurement"
-  pll_lock_detection: "Check PLL stability before switching"
-  switch_away_warning: "Switch away from the PLL only via an RC source with PPPP=%1111 and CC held; no automatic fallback to RCFAST is documented"
+  clock_output: "Not documented: a dedicated system-clock output pin."
+  pll_lock_detection: "Not documented: a PLL-lock status. Parallax's documents give 10ms for crystal+PLL to stabilize before switching to the PLL."
+  switch_away_warning: "Switch away from the PLL via an RC source (%SS = %00 or %01) first; Parallax's documents differ on whether that step keeps %CC (hubset_configuration.cross_source_conflict). Not documented: an automatic fallback to RCFAST."
   sources:
-    - "switch_away_warning: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator"
+    - "switch_away_warning: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock, p.18"
+    - "pll_lock_detection: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator (%E and %SS rows: allow 10ms for crystal+PLL to stabilize)"
 
 # Only the wrong/correct pairs the sources state.
 anti_patterns:
   conflicting_definitions:
     wrong: "_rcfast together with _clkfreq"
-    reason: "v55 states the clock-setup symbols as a closed set of combinations: \"These symbols must be defined in one of the following combinations.\" _rcfast and _rcslow each appear alone."
+    reason: "The clock-setup symbols are defined only in the listed combinations; _rcfast and _rcslow each appear alone."
     source: "Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup"
 
   missing_crystal_frequency:
@@ -336,11 +337,17 @@ anti_patterns:
     correct: "Enable crystal+PLL while staying in RCFAST, WAITX ##20_000_000/100 for ~10ms, then HUBSET again to switch to the PLL."
     source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock (PLL Example), p.19"
 
+  enable_pll_while_on_xi:
+    wrong: "Switch to XI (%SS = %10), then enable the PLL and wait for it to settle while the clock is still on XI."
+    correct: "Enable the crystal and PLL while %SS selects %00 (RCFAST) or %01 (RCSLOW), wait ~10ms, then switch %SS straight to %11 (PLL)."
+    reason: "It is necessary to select mode %00 or %01 while waiting for the crystal and/or PLL to settle into operation, before switching over to either."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator (deglitching paragraph and PLL example); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock, p.19"
+
   unsafe_switch_away_from_pll:
     wrong: "Switching directly from %SS = %11 to another clock source."
-    correct: "Always start by switching to an internal oscillator using either HUBSET #$F0 (for RCFAST) or HUBSET #$F1 (for RCSLOW)."
+    correct: "Start by switching to an internal RC oscillator (%SS = %00 or %01). Parallax's documents give this first step two ways, keeping %PPPP = %1111 and %CC, or HUBSET #$F0 (RCFAST) / HUBSET #$F1 (RCSLOW), which clears %CC: hubset_configuration.cross_source_conflict."
     reason: "Incorrectly switching away from the PLL setting (%SS = %11) can cause a glitch which will hang the clock circuit."
-    source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock, p.18"
+    source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, System Clock, p.18; Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB, Configuring the Clock Generator (WARNING after the %SS table)"
 
 related:
   - language/pasm2/hubset.yaml

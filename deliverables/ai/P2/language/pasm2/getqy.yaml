@@ -12,22 +12,22 @@ timing:
   range: 2...58
 description: >-
   Retrieve CORDIC result Y into D. Waits in case result is not ready. If the WC
-  effect is specified, C is set to Y[31] (the sign bit). If the WZ effect is
+  effect is specified, C is set to Y[31]. If the WZ effect is
   specified, Z is set if the result equals zero.
 flags_affected:
-  C: Set to Y[31] (sign bit)
+  C: Set to Y[31]
   Z: Set if result is zero
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.158"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.158; Parallax Propeller 2 Documentation v35 Rev B/C Silicon, CORDIC Solver (Overlapping CORDIC Commands) and POLLQMT/WAITQMT event flag"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_d
-  pattern: D
-  description: Destination register only
-  valueType: 24
-compiler_encoding:
-  operandFormat: 24
 syntax_variants:
 - GETQY D
 last_updated: '2025-09-19T16:04:17.398545'
 category: CORDIC Solver
 oneliner: '{WC/WZ/WCZ} Retrieve CORDIC result Y into D'
+timing_notes: |
+  The result may not have arrived yet, in which case the instruction waits for it.
+  When no CORDIC result is available or in progress, the instruction takes two
+  clocks and the QMT (CORDIC empty) event flag is set.
+read_order: "With two QMUL results queued, GETQY then GETQY returns the first result's Y then the second's Y, and GETQX then GETQY returns the first result's X then its Y. The other read orders are in architecture/cordic.yaml result_retrieval."
+sources:
+  - "P2 hardware verification, EF-115 (one board, cog execution; two QMUL results queued, GETQY then GETQY and GETQX then GETQY)"

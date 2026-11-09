@@ -19,7 +19,7 @@ documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 
 documentation_level: comprehensive
 examples:
 - context: SPI Flash Programming with Smart Pin Coordination
-  code: ''' Streamer + Smart Pin parallel operation for max throughput
+  code: ''' Program a flash page: streamer data out, smart pin clock
 
     xinit   rmode, pa        '' Start streamer outputting 256*8 bits
 
@@ -53,7 +53,7 @@ examples:
 
     '
   source: "Parallax SPI Flash Programmer and Boot Loader v51, Programmer, SPI command, 1 byte (spi_cmd1) and Data (bmode)"
-- context: High-Speed Data Reception
+- context: Reading SPI flash data into hub RAM
   code: |
     ' Receive data from SPI flash to hub
     shl     x, #5                    ' number of bits to receive (x = number of longs)
@@ -67,74 +67,27 @@ examples:
     ' Where:
     ' wmode = $C081_0000 + spi_do<<17  ' 1-pin input, bytes-msb-first, to hub; D[15:0] (the bit count) is set by the SETWORD above
   source: "Parallax SPI Flash Programmer and Boot Loader v51, Loader, Read in remaining application longs (.block) and Data (wmode)"
-patterns:
-- name: Streamer-SmartPin Synchronization
-  description: 'Combines streamer for data transfer with smart pin for clock generation,
-
-    enabling parallel operation without CPU intervention.
-
-    '
-  implementation: ''' Pattern: Start both streamer and smart pin simultaneously
-
-    xinit   mode, data       '' Start data transfer
-
-    wypin   count, #clk_pin  '' Start clock generation
-
-    waitxfi                  '' Wait for completion
-
-
-    '' This achieves maximum throughput by offloading both
-
-    '' data movement and clock generation to hardware.
-
-    '
 related_instructions:
-- XSTOP: Stop streamer immediately
-- XCONT: Continue streamer from current phase
-- WAITXFI: Wait for streamer to finish
-- WYPIN: Set smart pin Y parameter (clock count)
-- SETXFRQ: Set streamer frequency
+- XSTOP: "Stop streamer immediately (alias for XINIT #0,#0)"
+- XCONT: Buffer new streamer command to be issued on final NCO rollover of current command, continuing phase
+- XZERO: Buffer new streamer command to be issued on final NCO rollover of current command, zeroing phase
+- WAITXFI: Wait for the streamer-finished event (set whenever the streamer runs out of commands)
+- WYPIN: Write the smart pin Y parameter
+- SETXFRQ: Set streamer NCO frequency
 notes:
-- XINIT zeros the phase accumulator, starting fresh
-- Streamer and smart pins can work in parallel for maximum efficiency
-- Mode word in D configures transfer direction, pin count, and data format
-- S supplies various data, selects sub-modes, or is ignored, depending on the mode in D; S is never a hub address - hub data moves through the RDFAST/WRFAST FIFO
-- "A count of `$FFFF` selects PERPETUAL streaming: the command runs without decrementing its counter until a new command is issued or XSTOP stops it. So `$FFFF` is not the largest finite transfer — it is not a transfer at all, and a chunk chain sized to it collapses into one endless command. The largest TERMINATING count is `$FFFE`."
-- "WHAT THE COUNT COUNTS, which resolves the per-mode question: D[15:0] is an initial counter value decremented on each NCO ROLLOVER, with each rollover moving new streamer data. That is the same 16-bit field and the same $FFFE terminating maximum in EVERY mode — granularity does not change the count limit. What granularity changes is how much DATA one rollover moves, so a command's capacity is (count x data-per-rollover) and the bit-granularity figure above (2047 longs) is that arithmetic for a 32-bits-per-rollover mode. For the data-per-rollover of a specific mode see architecture/streamer/modes-reference.yaml."
-- "Maximum block per XINIT for bit-counted streamer modes: 2047 longs (65504 bits). The streamer's bit-count field is 16 bits, and `$FFFF` is reserved for perpetual streaming, so a terminating transfer in a bit-granularity mode must satisfy `longs * 32 <= 65534`. For larger payloads, chunk by looping with successive XINIT calls — the hub FIFO is configured once via RDFAST/WRFAST and does not need to be reissued per chunk. See pattern `large_transfer_chunking` below."
-- "THE COUNT IS NOT RANGE-CHECKED. Bits above 15 of D land in D[31:16], with no error or warning. With X_IMM_32X1_1DAC1 + X_PINS_ON, a count of 131,072 assembles to the word for the next pin with count 0. A count of 0 stops the streamer."
+- "XINIT (re)starts the streamer, no matter what state it is in, and zeros the phase accumulator. 'XINIT #0,#0' always stops the streamer immediately; XSTOP (no operands) is an alias for it."
+- D/#[31:16] conveys the streamer command (the mode) and D/#[15:0] the number of NCO rollovers the command is active for; the mode templates are in architecture/streamer/modes-reference.yaml
+- S supplies various data, selects sub-modes, or is ignored, depending on the mode in D. Hub data moves through the hub RAM FIFO, which RDFAST or WRFAST sets up beforehand.
+- "By setting the D[15:0] count to its maximal value of `$FFFF`, a streamer command runs perpetually, without decrementing its counter."
+- "D[15:0] is an initial counter value decremented on each NCO rollover, with each rollover causing new streamer data to be output or input. It is the same 16-bit field in every mode. What the mode changes is how much data one rollover moves; for the data per rollover of a specific mode see architecture/streamer/modes-reference.yaml."
+- "A flash-loader loop that reissues XINIT per block is in code-examples/flash-loader-case-study.yaml (large_transfer_chunking)."
+- "A count above $FFFF spills into D[31:16]. With X_IMM_32X1_1DAC1 + X_PINS_ON, a count of 131,072 assembles to the word for the next pin with count 0."
+- "A count of 0 stops the streamer; architecture/streamer/overview.yaml (count_field.zero) gives what stops with it."
 sources:
-  - "notes (S supplies data, selects sub-modes, or is ignored): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER"
-  - "notes (THE COUNT IS NOT RANGE-CHECKED): CP-023 (assembled words); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (a count of 0 stops the streamer)"
+  - "notes (XINIT restarts the streamer, XINIT #0,#0, XSTOP; D[31:16] and D[15:0]; S supplies data, selects sub-modes, or is ignored; RDFAST/WRFAST beforehand; $FFFF; the count decremented on each rollover; a count of 0): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER"
+  - "notes (a count above $FFFF spills into D[31:16]): CP-023 (assembled words)"
+  - "related_instructions (WAITXFI): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (the streamer-finished event flag)"
 
-large_transfer_chunking:
-  name: Large-transfer chunking
-  description: |
-    For streamer transfers larger than 2047 longs in bit-counted modes,
-    divide and conquer by reissuing XINIT in a loop. The hub FIFO is
-    already configured from a single RDFAST/WRFAST; only the streamer
-    count needs to be reissued each iteration.
-  implementation: |
-    ' Drain `count` longs from FIFO to a streamer-paced output pin
-    .block      bmask   x, #10              ' x = $7FF = 2047 longs cap
-                fle     x, count            ' clamp x to min(x, remaining)
-                sub     count, x
-                shl     x, #5               ' convert longs to bit count
-                setword mode, x, #0         ' patch into streamer mode word
-                shl     x, #1               ' edges = 2 * bits for SCK pin
-                wypin   x, #clk_pin         ' kick the SCK smart pin
-                waitx   #3                  ' alignment pad — see language/pasm2/concepts/streamer_smartpin_control.yaml
-                xinit   mode, #0            ' start streamer with patched count
-                waitxfi                     ' wait for chunk to complete
-                tjnz    count, #.block      ' loop until all chunks done
-  source: "Parallax SPI Flash Programmer and Boot Loader v51, Loader, Read in remaining application longs (.block: 'try max streamer block size for longs ($7FF)')"
-compiler_operand_format:
-  name: operand_ls
-  pattern: D/#,S/#
-  description: 'Two operands: destination/immediate, source/immediate'
-  valueType: 13
-compiler_encoding:
-  operandFormat: 13
 last_updated: '2025-09-19T16:04:16.945659'
 category: Streamer
 oneliner: Issue streamer command immediately, zeroing phase

@@ -3,13 +3,13 @@
 # Purpose: Stop a running cog
 
 method: "COGSTOP"
-documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, REPEAT ('if you don't want the cog to stop and cease driving its I/O's'); DEBUG (LOCK[15] is allocated by the debugger); EF-105 (pin and smart-pin state after a stop)"
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, REPEAT ('if you don't want the cog to stop and cease driving its I/O's'); DEBUG (LOCK[15] is allocated by the debugger); VAR (variables are initialized to zero at run time); FLOW CONTROL ('IF cog / COGSTOP(cog-1)', the cog kept as ID + 1); Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STARTING AND STOPPING COGS (the 4 LSBs of the D/# operand supply the cog ID) and LOCKS (a held lock is implicitly released if its cog is stopped via COGSTOP or restarted via COGINIT; LOCKRET returns an allocated lock to the pool); PASM2 Manual COGINIT (cog RAM is retained during the terminated state; a restart may begin at an address in existing Reg or LUT RAM); EF-105 (pin and smart-pin state after a stop); EF-113 (COGINIT of a stopped cog resets DIR, OUT, C and Z; the lookup RAM long survives); EF-120 (a stopped cog returns to the free pool: the next start returns its ID)"
 category: "cog_management"
 type: "method"
 description: |
   Stop a specified cog immediately.
   The cog stops executing and becomes available for reuse.
-  No effect if the cog is already stopped.
+  Not documented: what COGSTOP does to a cog that is already stopped.
 
 syntax: "COGSTOP(CogNum)"
 
@@ -32,15 +32,15 @@ timing:
 examples:
   - code: |
       VAR
-        LONG driver_cog
+        LONG driver_cog_plus_1      ' cog ID + 1; 0 = no cog
         LONG driver_lock
 
       PUB stop_driver()
-        IF driver_cog >= 0
-          COGSTOP(driver_cog)       ' a lock it HELD is free now
+        IF driver_cog_plus_1
+          COGSTOP(driver_cog_plus_1 - 1)  ' a lock it HELD is free now
           LOCKRET(driver_lock)      ' ...but only this returns the NUMBER
-          driver_cog := -1
-    description: "Stop a driver cog and mark as stopped"
+          driver_cog_plus_1 := 0
+    description: "Stop a driver cog and mark as stopped. The cog is kept as ID + 1: VAR variables start at zero and 0 is a valid cog ID, so a raw ID tested with >= 0 would stop cog 0 when stop_driver() runs before any start"
     
   - code: |
       ' Emergency stop all other cogs
@@ -71,7 +71,7 @@ effects:
     - "A smart pin the cog configured (measured on NCO frequency with P_OE; other modes untested) keeps its mode, X and Y. With no other cog holding the pin's DIR high its output stops toggling; raising DIR from another cog makes it toggle again with no WRPIN, WXPIN or WYPIN, and while another cog holds DIR high it keeps toggling through the stop"
 
   resources:
-    - "A lock the cog HELD goes free. Ownership stops holding the moment the cog becomes inactive - for any cause, not only COGSTOP - so nothing has to release it"
+    - "A lock the cog HELD goes free: a held lock is released when its cog is stopped by COGSTOP (or restarted by COGINIT), so nothing has to release it"
     - "The lock's ALLOCATION does not go free. The number stays issued and LOCKNEW will not hand it out again. Only LOCKRET returns a lock number to the pool"
     - "So stopping a cog that holds locks LEAKS lock numbers: sixteen leaks (one fewer in a -d build, where the debugger allocates lock 15) and LOCKNEW returns nothing, ever, and the failure surfaces at some later LOCKNEW in unrelated code"
     - "Hub RAM is NOT affected"
@@ -90,7 +90,6 @@ related_methods:
   - "COGCHK"
 
 notes:
-  - "Safe to call on already-stopped cog"
   - "COGSTOP uses the 4 low bits of the cog number, so COGSTOP(-1) addresses id 15, which does not exist on 8-cog silicon"
   - "A cog that has written hub RAM with WRFAST and then stops itself should first execute WAITX #20, to let lingering FIFO data reach the hub"
   - "Stopping current cog ends execution immediately"
@@ -98,15 +97,15 @@ notes:
   - "LOCKRET every lock the cog owns before stopping it. Not to free the lock - stopping frees the held state by itself - but because LOCKRET is the only thing that returns the NUMBER to the pool"
 
 best_practices:
-  - "Track cog numbers in variables"
-  - "Set cog variable to -1 after stopping"
+  - "Track cog numbers in variables, kept as ID + 1 so a VAR's starting zero means no cog"
+  - "Clear the cog variable to 0 after stopping"
   - "LOCKRET before stopping a cog, on every path including error and shutdown paths - every LOCKNEW needs a matching LOCKRET or the number is gone until reset"
   - "Stop dependent cogs in correct order"
   - "Ensure pins are in safe state first"
 
 warnings:
   - "Stopping a cog does not clean up its resources, and the one it appears to clean up it does not: a held lock reads free afterwards while its number stays permanently allocated"
-  - "Cannot recover cog state after stopping"
+  - "Execution cannot resume where it stopped. A stopped cog keeps its register RAM and lookup RAM, and COGINIT can restart it at an address in that RAM, but it starts afresh: COGINIT resets its DIR, OUT, C and Z"
   - "No notification to other cogs"
 
 see_also:

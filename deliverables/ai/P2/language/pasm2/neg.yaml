@@ -45,13 +45,6 @@ encoding:
   notes: Syntax 2 - negate Dest (S=D)
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, NEG, p.102"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_du
-  pattern: D{,S/#}
-  description: Destination register, optional Source register or immediate (unary/binary)
-  valueType: 3
-compiler_encoding:
-  operandFormat: 3
 last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
 oneliner: Negate a value

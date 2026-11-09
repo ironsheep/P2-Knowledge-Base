@@ -8,17 +8,17 @@ blocks:
     wrap: spin2-method
     assumes: [start_ms, elapsed]
   - at: examples[1].code
-    fp: "348d8e33127bcb06"
+    fp: "5181e7138da3f861"
     compile: fragment
     wrap: spin2-method
-    assumes: [timeout_ms, check_condition()->1/0]
+    assumes: [start_ms, check_condition()->1/0]
   - at: examples[2].code
     fp: "77abd3967c84bbc0"
     compile: fragment
     wrap: spin2-method
     assumes: [ms, seconds, minutes, hours]
   - at: examples[3].code
-    fp: "df69fdb2ffea4db5"
+    fp: "8ece13362132d73e"
     compile: fragment
     wrap: spin2-method-result
-    assumes: [timeout_ms, sd_busy_released()->1/0, SD_OK=con, ERR_WRITE_TIMEOUT=con]
+    assumes: [start_ms, sd_busy_released()->1/0, SD_OK=con, ERR_WRITE_TIMEOUT=con]

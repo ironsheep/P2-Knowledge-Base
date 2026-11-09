@@ -25,9 +25,6 @@ blocks:
     compile: fragment
     wrap: spin2-top
     assumes: [setup()->1/0, loop()->1/0]
-  - at: special_behaviors[1].example
-    fp: "bdeab345a7203566"
-    compile: program
   - at: method_visibility.pub_methods.example
     fp: "d67477e927a132f7"
     compile: fragment
@@ -42,7 +39,7 @@ blocks:
     fp: "06bf94a48ede360c"
     compile: program
   - at: parameter_handling.default_values
-    fp: "0bea79f9152f6733"
+    fp: "d3da05e803ede5e4"
     compile: fragment
     wrap: spin2-top
     assumes: [OUTPUT=con, NO_PULL=con]
@@ -75,7 +72,7 @@ blocks:
     fp: "b018b91bfda66956"
     compile: program
   - at: common_patterns[0].code
-    fp: "34136fb987d1ef6b"
+    fp: "311ef53b76e9cba1"
     compile: fragment
     wrap: spin2-top
     assumes: [pasm_code, params]

@@ -2,35 +2,33 @@
 # ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
-  - at: common_mistake.wrong_code
-    fp: "7798594dad80c9f0"
-    compile: fragment
-    wrap: spin2-method
-    assumes: [mode, mosi_pin]
-  - at: common_mistake.correct_code
-    fp: "8e35232db628fbfc"
-    compile: fragment
-    wrap: spin2-method
-    assumes: [mode, mosi_pin]
   - at: complete_spi_master_example.spin2
-    fp: "97c0a5e37bca40a2"
+    fp: "9ac287cb7aa7aad6"
     compile: fragment
     wrap: spin2-top
-    assumes: [clk_period]
   - at: complete_spi_master_example.pasm2
-    fp: "2cb3233d53b302b0"
+    fp: "ec048125b5fac839"
     compile: fragment
     wrap: spin2-top
-    assumes: [clk_period=con]
-  - at: recommended_pin_layout.layout_1.comment
+  - at: example_pin_layouts.layout_1.comment
     fp: "00938df40d493468"
     compile: not-code
     reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
-  - at: recommended_pin_layout.layout_2.comment
-    fp: "1b1726f6ca042f58"
+  - at: default_b_input_example.default_example
+    fp: "3a6ff9da5a7e41af"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mode, mosi_pin]
+  - at: default_b_input_example.selector_example
+    fp: "1948d7a468c86c10"
+    compile: fragment
+    wrap: spin2-method
+    assumes: [mode, mosi_pin]
+  - at: example_pin_layouts.layout_2.comment
+    fp: "562cc5c8847f8688"
     compile: not-code
     reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
-  - at: recommended_pin_layout.layout_3.comment
-    fp: "bf86ce8c3286bed0"
+  - at: example_pin_layouts.layout_3.comment
+    fp: "edf7f3beab377f10"
     compile: not-code
     reason: "English prose (a step, sentence or caption shown under a one-line key), not code"

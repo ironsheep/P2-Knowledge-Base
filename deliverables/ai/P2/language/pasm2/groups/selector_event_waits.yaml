@@ -1,12 +1,12 @@
 group_id: selector_event_waits
-title: Selector Event Wait Instructions
+title: Selectable Event Wait Instructions
 members:
-  WAITSE1: Wait for selector 1 event flag, then clear it
-  WAITSE2: Wait for selector 2 event flag, then clear it
-  WAITSE3: Wait for selector 3 event flag, then clear it
-  WAITSE4: Wait for selector 4 event flag, then clear it
+  WAITSE1: Wait for and clear selectable event 1 flag
+  WAITSE2: Wait for and clear selectable event 2 flag
+  WAITSE3: Wait for and clear selectable event 3 flag
+  WAITSE4: Wait for and clear selectable event 4 flag
 shared_documentation:
-  explanation: These instructions are part of the Selector Event Wait Instructions
+  explanation: These instructions are part of the Selectable Event Wait Instructions
     family.
   timing_details: See individual instructions for specific timing.
   addressing: null
@@ -21,4 +21,4 @@ related_instructions:
 - POLLSE4
 examples: []
 created: '2025-09-19T15:11:04.923145'
-source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, WAITSE1/2/3/4, p.142"
+source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, WAITSE1/2/3/4, p.142; the member wording from the same manual's instruction list (Wait for and clear selectable event 1..4 flag)"

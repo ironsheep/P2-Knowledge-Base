@@ -13,19 +13,20 @@ component_type: "inter_cog_signaling"
 
 description: |
   The COG Attention (ATN) system provides a lightweight inter-COG signaling mechanism
-  that allows any COG to signal any combination of other COGs simultaneously. Each COG
-  has an attention flag that can be set by other COGs and monitored via polling, waiting,
-  or interrupt triggering. This creates an efficient broadcast or multicast signaling
-  system without consuming hub bandwidth.
+  that allows any COG to signal any combination of COGs, itself included, with one
+  COGATN. Each COG has an attention flag that an attention strobe sets and that is
+  monitored via polling, waiting, or interrupt triggering. This creates a broadcast or
+  multicast signaling system without consuming hub bandwidth.
 
 architecture:
   signal_matrix: "8×8 (any COG to any COGs)"
   operand_field: >-
-    COGATN's D operand carries the cog-select bit pattern; bit N selects cog N. The P2
-    Datasheet describes the lower 8 bits and a composite set of 8 strobes, which is
-    the shape the eight physical cogs use.
+    COGATN's D operand supplies a 16-bit value, D[15:0], in which bits 0..15 represent
+    cogs 0..15; bit N selects cog N. The 16 attention strobe outputs from all cogs are
+    OR'd together into a composite set of 16 strobes. Parallax's documents also give the
+    lower 8 bits and a composite set of 8 strobes.
   sources:
-    - "operand_field: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Cog Attention, pp.15-16"
+    - "operand_field: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG ATTENTION (D/# supplies a 16-bit value, bits 0..15 represent cogs 0..15; 16 strobe outputs OR'd into a composite set of 16); P2 Instructions v35 - Rev B/C Silicon, row 340 (COGATN: D[15:0]); the lower 8 bits: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Cog Attention, pp.15-16"
   
   attention_flags:
     per_cog: 1
@@ -45,7 +46,7 @@ architecture:
       example: "COG 0 signals COGs 1-7"
     
     - mode: "self_signal"
-      description: "A COG can signal itself: COGATN with the issuing COG's own bit set raises that COG's attention event flag, which POLLATN, JATN, WAITATN and the Spin2 POLLATN() then see (the attention interrupt path was not tested)"
+      description: "A COG can signal itself: COGATN with the issuing COG's own bit set raises that COG's attention event flag, which POLLATN, JATN, WAITATN and the Spin2 POLLATN() then see. Not documented: whether a self strobe also triggers an attention interrupt"
       example: "COG 3 signals COG 3"
       source: "EF-099"
   
@@ -134,12 +135,15 @@ instructions:
     encoding: "EEEE 1101011 C0L DDDDDDDDD 000000001"
     description: >-
       Write this cog's ID into D (D a register, WC omitted), or with WC report whether
-      the cog selected by D[2:0] is running.
+      the cog selected by D[3:0] is running. Parallax's documents also give the field
+      as D[2:0].
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language
-      (instruction encodings).
-    flags_affected: "C (with WC) = 1 if the D[2:0] cog is running, 0 if stopped"
-    timing: "2 clocks"
+      (instruction encodings); P2 Instructions v35 - Rev B/C Silicon, row 242 (COGID:
+      if WC, check status of cog D[3:0], C = 1 if on; 2...9, +2 if result); D[2:0]:
+      Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGID, p.64.
+    flags_affected: "C (with WC) = 1 if the selected cog is running, 0 if it is free"
+    timing: "2...9 clocks, +2 if result"
     usage_example: |
       COGID   my_id           ' Get own cog ID into my_id
 
@@ -151,7 +155,8 @@ event_configuration:
       Attention was requested by another cog or other cogs"); and the INTERRUPTS
       event-source table. Event 15 is GETQX/GETQY-with-no-CORDIC-result, not attention.
       setup_for_event: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS.
-    trigger: "An attention strobe from another cog sets this cog's ATN event flag"
+      trigger (a cog's own strobe): EF-099.
+    trigger: "An attention strobe sets this cog's ATN event flag; the strobe can come from another cog or, with this cog's own bit set in COGATN's D, from this cog itself"
     
     setup_for_interrupt: |
       ' Configure ATN to trigger interrupt
@@ -160,7 +165,6 @@ event_configuration:
       
       atn_handler
           ' Handle attention signal
-          ' ATN flag auto-cleared by WAITATN
           RETI1
     
     setup_for_event: >-
@@ -286,12 +290,13 @@ common_applications:
 
 best_practices:
   - practice: "clear_after_check"
-    description: "Always use WC with POLLATN to auto-clear"
-    rationale: "Prevents missing subsequent signals"
-  
+    description: "POLLATN WC (or WZ, WCZ) copies the attention flag into C and/or Z and clears the flag, unless the event sensor is setting it again"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS (POLLxxx instructions simultaneously return their event-occurred flag into C and/or Z and clear it, unless it is being set again by the event sensor); Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLATN, p.111"
+
   - practice: "avoid_polling_loops"
     description: "Use WAITATN or interrupts instead of tight polling"
-    rationale: "Reduces power consumption and hub congestion"
+    rationale: "During a wait the pipeline is stalled; no instructions execute in the cog until the wait condition ends"
+    source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, WAITATN, p.139 (during a wait, the pipeline is stalled)"
   
   - practice: "document_signal_meanings"
     description: "Clearly define what each ATN signal means"
@@ -302,7 +307,7 @@ best_practices:
     rationale: "ATN for notification, mailbox for data"
 
 performance_characteristics:
-  signaling_latency: "2 clock cycles to set flags"
+  signaling_latency: "COGATN takes 2 clocks. Not documented: the clocks from a COGATN to the receiving cog's flag being set"
   
   response_latency:
     polling: "Varies with polling frequency"
@@ -313,7 +318,7 @@ performance_characteristics:
   
   scalability:
     simultaneous_signals: "All 8 COGs can signal simultaneously"
-    no_collision: "Hardware manages all signals independently"
+    strobe_merging: "The attention strobe outputs of all cogs are OR'd together, so strobes sent to one cog by several cogs merge into its single flag"
 
 comparison_to_alternatives:
   vs_hub_polling:

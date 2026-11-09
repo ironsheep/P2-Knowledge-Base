@@ -12,11 +12,13 @@ timing:
   in_flag_reset_latency: |
     After WYPIN executes (which acknowledges the Smart Pin), the Smart Pin requires
     2 system-clock cycles to reset the IN flag to logic-0 before a program can poll
-    the flag again. Insert NOP instructions before testing the IN flag.
+    the flag again. A NOP between the WYPIN and the poll elapses those clocks.
 description: 'Set "Y" register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge
   smart pins.
 
-  Wraps within A/B pins. Prior SETQ overrides S[10:6].
+  Wraps within A/B pins. A prior SETQ overrides S[10:6] with the low five bits of
+  the SETQ value; an ALTx between the SETQ and WYPIN keeps the override, and a SETQ
+  separated from WYPIN by other instructions is not documented.
 
 
   The Y register serves multiple purposes:
@@ -26,7 +28,13 @@ description: 'Set "Y" register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknow
   - For PWM modes: Y[15:0] is the output value captured at each frame start (the base
   period and frame count are set by WXPIN, not WYPIN)
 
-  - For DAC modes: Y[15:0] is the DAC output value captured at each sample period
+  - For the DAC dither modes (%00010, %00011): Y[15:0] is the DAC output value captured at each sample period
+
+  - For the NCO modes (%00110, %00111): Y[31:0] is added into Z[31:0] at each base period
+
+  - For %10010: Y[1:0] selects A-input high (%00), rise (%01) or edge (%1x) sensitivity, and Y[2] selects timing of X events (0) or timeout on X clocks (1)
+
+  - For %10011 to %10111: Y[1:0] selects the A-input and B-input rise/edge sensitivity (%00 A rise to B rise, %01 A rise to B edge, %10 A edge to B rise, %11 A edge to B edge)
 
   - For sync/async serial and USB: Y loads the output word/byte to transmit
 
@@ -34,34 +42,41 @@ description: 'Set "Y" register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknow
   (1), not a count value; the measurement period is X
 
   - For ADC modes other than SINC2 sampling: WYPIN may replace the period set by WXPIN
-  with Y[13:0] - it does not initiate conversions
+  with Y[13:0]
 
   - Writing Y also acknowledges the pin
 
+
+  Cogs that execute WRPIN, WXPIN, WYPIN, RDPIN or AKPIN on the same smart pin must do
+  so at different times: the pin OR''s the write-data and acknowledgement buses of all
+  cogs, and simultaneous use clobbers the bus data.
+
   '
 sources:
+  - "description (set Y of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge; wraps within A/B pins; prior SETQ overrides S[10:6]; 2 clocks): P2 Instructions v35 - Rev B/C Silicon, row 219; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), list of changes (WRPIN/WXPIN/WYPIN/AKPIN can now work on a span of pins, +S[10:6] pins; prior SETQ overrides S[10:6])"
+  - "description (an ALTx between the SETQ and WYPIN keeps the override): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, pp.38-39 (SETQ / SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction); a SETQ separated by other instructions is in no source"
+  - "timing (two clocks for IN to drop before it can be polled again): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS"
   - "description (Y register by smart pin mode): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES"
+  - "description (multi-cog bus rule); related_instructions (the instruction summaries): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS"
 flags_affected:
   C: No effect
   Z: No effect
 documentation_level: comprehensive
 related_instructions:
-- WXPIN: Configure smart pin X parameter
-- WRPIN: Configure smart pin mode
-- RDPIN: Read smart pin result
-- RQPIN: Read smart pin status
-- AKPIN: Acknowledge smart pin
+- WXPIN
+- WRPIN
+- RDPIN
+- RQPIN
+- AKPIN
+init_order:
+  description: 'Reset (DIRL), then setup (WRPIN and WXPIN), then enable (DIRH), then operate (WYPIN). For the pulse/cycle (%00100) and transition (%00101) output modes and asynchronous serial transmit (%11110), a WYPIN issued before the pin is enabled does not take effect. In synchronous serial transmit (%11100) continuous mode the first word is written with WYPIN during reset; enabling first and then writing loses that first word.'
+  source: "Smart pin init order: EF-011 (pulse, transition and asynchronous transmit; WYPIN before enable never triggered, WYPIN after enable did) and EF-090 (synchronous transmit %11100 continuous); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (a first word written with WYPIN during reset primes the shifter)"
 notes:
-- Writing Y register automatically acknowledges pin
+- Writing the Y register acknowledges the pin
 - Y register meaning depends on smart pin mode
-- Y is used by the output, PWM, DAC, serial, USB, counter and ADC-period modes listed in the description
-compiler_operand_format:
-  name: operand_ls
-  pattern: D/#,S/#
-  description: 'Two operands: destination/immediate, source/immediate'
-  valueType: 13
-compiler_encoding:
-  operandFormat: 13
+- Y is used by the output, NCO, PWM, DAC, serial, USB, counter, timing and ADC-period modes listed in the description
 last_updated: '2025-09-19T16:04:17.369522'
 category: Smart Pin
 oneliner: Set "Y" register of smart pins S[10:6]+S[5:0]
+related:
+  - architecture/io_pin_timing.yaml

@@ -1,45 +1,48 @@
 instruction: SUMNZ
 syntax: SUMNZ D,{#}S {WC|WZ|WCZ}
-brief_description: Sum with negated zero condition
+brief_description: Sum not Z
 category: Math and Logic
 description: >-
   SUMNZ adjusts the signed Dest value by Src or -Src (depending on !Z) and stores
   the result into the Dest register. If !Z is true (Z=0), Dest = Dest - Src. If !Z
   is false (Z=1), Dest = Dest + Src. If the WC or WCZ effect is specified, the C flag
-  is updated to the true sign of the result. If the WZ or WCZ effect is specified,
-  the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero.
+  is updated to the correct sign of (D +/- S), the sign of the full-precision result:
+  set if the result is negative and cleared if it is positive. When the sum overflows,
+  C differs from bit 31 of the stored Dest; that difference is what TJV tests
+  (D[31] != C). If the WZ or WCZ effect is specified, the Z flag is set (1) if the
+  result equals zero, or is cleared (0) if non-zero.
 result: >-
   The sum of signed Dest and either Src or -Src (according to !Z) is stored in Dest
   and optionally the C and Z flags are updated to the sign and zero status.
 parameters:
 - Dest is a register containing the signed value to adjust by Src or -Src, and is
   where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value (if Z=0
-  or !Z=0) or negated value (if Z=1 or !Z=1) is added into Dest.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is
+  subtracted from Dest if Z=0 (!Z=1) and added into Dest if Z=1 (!Z=0).
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C: Set to true sign of result (D +/- S)
-  Z: Set if result equals zero
+  C: With WC or WCZ, the correct sign of (D +/- S) - set if negative, cleared if positive; differs from D[31] when the sum overflows
+  Z: With WZ or WCZ, set if the result equals zero, cleared if non-zero
 timing:
   cycles: 2
   type: fixed
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 0011111 CZI DDDDDDDDD SSSSSSSSS
   write: D
-  c: true sign of (D +/- S)
+  c: correct sign of (D +/- S)
   z: Result == 0
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SUMZ / SUMNZ, p.133"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 33 (SUMNZ D,{#}S: sum +/-S into D by !Z, if Z = 0 then D = D - S, else D = D + S, C = correct sign of (D +/- S), Z = (result == 0); 2 clocks; write D)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.38 (SUMNZ D,{#}S {WC/WZ/WCZ}, if Z = 0 then D = D - S, else D = D + S, C = correct sign of (D +/- S), 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SUMZ / SUMNZ, p.133 (Result line, Dest, Src and effect parameters, encoding row 0011111 CZI, write D, C sign of (D +/- S), Z Result = 0, 2 clocks, Related list, Src negated if !Z is 1, C set if the result is negative and cleared if positive, Z rule); the manual's Src parameter line is written for the SUMZ / SUMNZ pair and is not served"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 0011111 CZI DDDDDDDDD SSSSSSSSS SUMNZ D,S/# {WC/WZ/WCZ}); no measurement covers SUMNZ"
+  - "C on overflow: P2 Instructions v35 - Rev B/C Silicon, row 180 (TJV: jump if D overflowed, D[31] != C, C = 'correct sign' from the last addition/subtraction); Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TJV, p.138 (TJV requires that C be updated to the correct sign by a previous SUMx instruction, and tests Dest[31] != C)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 0
 last_updated: '2025-09-19T16:04:16.959617'
-oneliner: Adjust signed value by other Z-negated or !Z-negated value
+oneliner: Adjust signed value by other value, negated when !Z is 1
 related:
-- SUMC
-- SUMNC
+- language/pasm2/sumc.yaml
+- language/pasm2/sumnc.yaml
+- language/pasm2/sumz.yaml

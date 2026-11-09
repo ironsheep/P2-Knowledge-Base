@@ -25,7 +25,7 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 0000000 CZI DDDDDDDDD SSSSSSSSS
   write: D
   c: last bit shifted out if S[4:0] > 0, else D[0]
@@ -33,15 +33,13 @@ encoding:
   clocks: '2'
 encoding_notes:
 - C = last bit rotated out if Src[4:0] > 0, else C = Dest[0].
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ROR, p.121"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ROR, pp.121-122"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 2 (ROR D,{#}S {WC/WZ/WCZ}: rotate right, D = [31:0] of ({D[31:0], D[31:0]} >> S[4:0]), C = last bit shifted out if S[4:0] > 0, else D[0]; footnote * Z = (result == 0); 2 clocks; write D)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.37 (ROR D,{#}S {WC/WZ/WCZ}, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ROR, pp.121-122 (Result line, Dest and Src parameters, encoding row 0000000 CZI, write D, C last bit out, Z Result = 0, 2 clocks, footnote C = last bit rotated out if Src[4:0] > 0 else Dest[0] and the rotate explanation on p.121; the WC rule (last bit rotated out, effectively result bit 31, if Src is 1-31, Dest[0] if Src is 0), the WZ rule and the sentence that the result is zero only if Dest started at zero on p.122)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 0000000 CZI DDDDDDDDD SSSSSSSSS ROR D,S/# {WC/WZ/WCZ})"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 0
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Rotate bits right

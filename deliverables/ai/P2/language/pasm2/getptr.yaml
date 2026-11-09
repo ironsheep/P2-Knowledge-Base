@@ -10,35 +10,22 @@ timing:
   cycles: 2
   type: mode_dependent
 description: >-
-  Get current FIFO hub pointer into D. Returns the current position of the hub FIFO
-  pointer, which advances as data is read from or written to the hub FIFO.
+  Get current FIFO hub pointer into D.
 
 loader_size_idiom: |
-  NARROW APPLICATION — applies ONLY at the entry point of a serial-downloaded
-  program, BEFORE any RDFAST or WRFAST has been issued in that cog: GETPTR
-  returns the byte count of the just-downloaded image, because the FIFO write
-  pointer was left at the post-download position by the PNut serial downloader.
+  A loader reads the pointer with GETPTR, commented "get size of download in bytes",
+  and later shifts it right by 2, commented "get size of download in longs".
 
-  Example:
-    getptr  size_in_bytes        ' bytes downloaded by the serial loader
-    shr     size_in_bytes, #2    ' convert to longs
-
-  This idiom does NOT apply in general code — once any RDFAST/WRFAST runs,
-  the FIFO pointer reflects that operation, not the download. The pattern is
-  loader-specific (the flash loader's programmer opens with GETPTR to get
-  the size of the download in bytes).
+  Not documented: how the FIFO pointer comes to hold the download size at that point.
+pointer_note: "GETPTR returns the hub address of the next unread byte of the FIFO read stream; each RFVAR or RFVARS read advances it by the bytes the value occupied."
+sources:
+  - "XF-019 (GETPTR advance after RFVAR and RFVARS reads at every length boundary)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet, Release November 1, 2022, p.41 (GETPTR D: get current FIFO hub pointer into D)"
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.154"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.154; Parallax SPI Flash Programmer and Boot Loader v51, Get number of bytes, add $400 zero bytes after download, verify checksum"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_d
-  pattern: D
-  description: Destination register only
-  valueType: 24
-compiler_encoding:
-  operandFormat: 24
 syntax_variants:
 - GETPTR D
 last_updated: '2025-09-19T16:04:17.242860'

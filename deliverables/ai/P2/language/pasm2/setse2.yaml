@@ -12,15 +12,15 @@ timing:
 description: |
   Set SE2 event configuration to D[8:0]. Configures selectable event 2 to trigger
   on the specified pin, LUT, or lock condition. Also clears the SE2 event flag.
-
-  IMPORTANT: SETSE can ONLY configure pin, LUT, or lock events.
-  See language/pasm2/setse1.yaml for complete D[8:0] encoding table.
+  SE2 is set whenever the configured event occurs. The matched polling, waiting
+  and branching instructions clear it, as does SETSE2.
 d_encoding_summary: |
-  D[8:0] encoding (see language/pasm2/setse1.yaml for full details):
-  %000_xx_xxxx = LUT access events
-  %000_01_LLLL = Lock rises, %000_10_LLLL = Lock falls, %000_11_LLLL = Lock changes
-  %001_PPPPPP = Pin rises, %010_PPPPPP = Pin falls, %011_PPPPPP = Pin changes
-  %10x_PPPPPP = Pin low, %11x_PPPPPP = Pin high
+  D[8:0] configuration values (AA = the low two bits of the LUT address %1111111AA):
+  %000_00_00AA = this cog reads the LUT address, %000_00_01AA = this cog writes it
+  %000_00_10AA = odd/even companion cog reads it, %000_00_11AA = companion cog writes it
+  %000_01_LLLL = hub lock LLLL rises, %000_10_LLLL = falls, %000_11_LLLL = changes
+  %001_PPPPPP = pin PPPPPP rises, %010_PPPPPP = falls, %011_PPPPPP = changes
+  %10x_PPPPPP = pin PPPPPP is low, %11x_PPPPPP = pin PPPPPP is high
 flags_affected:
   C: No effect
   Z: No effect
@@ -33,15 +33,8 @@ related:
   - language/pasm2/setse1.yaml
   - language/pasm2/waitse2.yaml
   - language/pasm2/pollse2.yaml
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.156; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (Selectable Events)"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.156; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (Selectable Events), p.48"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_l
-  pattern: D/#0..511
-  description: Destination or immediate value 0-511
-  valueType: 26
-compiler_encoding:
-  operandFormat: 26
 syntax_variants:
 - SETSE2 {#}D
 last_updated: '2026-01-17'

@@ -7,11 +7,12 @@ aliases:
   - "AUGS in a skip pattern"
   - "## inside a SKIP sequence"
 category: control_flow
-description: Hardware-based instruction skipping for efficient conditional execution without branches
+description: Hardware instruction skipping (SKIP and SKIPF skip selected ones of the next 32 instructions encountered, per a bit pattern; EXECF jumps and starts a SKIPF at the same time)
 
 overview: |
-  P2's SKIP, SKIPF and EXECF instructions selectively skip up to the next 32 instructions based on a
-  bit pattern, with no branch needed. SKIP cancels each skipped instruction as it comes through the
+  P2's SKIP and SKIPF instructions selectively skip any of the next 32 instructions encountered,
+  based on a bit pattern. EXECF jumps to a cog/LUT address and initiates a SKIPF with
+  its 22-bit pattern at the same time, so the pattern applies from the jump target. SKIP cancels each skipped instruction as it comes through the
   pipeline (it becomes a 2-clock NOP). SKIPF, in cog/LUT memory, leaps over skipped instructions
   instead, with no clock penalty, except where an instruction is already in the pipeline and must be
   cancelled (see skip_behavior). Skipping only works in main code, not within interrupt service routines.
@@ -19,8 +20,8 @@ overview: |
 
 skip_instructions:
   SKIP:
-    description: "Skip instructions based on immediate bit pattern"
-    syntax: "SKIP #{#}pattern"
+    description: "Skip instructions based on a bit pattern (register or immediate)"
+    syntax: "SKIP {#}pattern"
     pattern_size: "Up to 32 bits"
     operation: "Each 1 bit skips corresponding instruction"
     examples:
@@ -34,7 +35,7 @@ skip_instructions:
       - "timing: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION SKIPPING"
 
   SKIPF:
-    description: "Like SKIP, but faster: cog/LUT only, PC steps over skipped instructions"
+    description: "Like SKIP, but in cog/LUT memory the PC steps over skipped instructions (no clock penalty, except the cancel cases)"
     syntax: "SKIPF {#}pattern"
     pattern_source: "32-bit pattern from a register or an immediate (# / ##)"
     operation: "In cog/LUT memory the PC steps 1..8 to leap over skipped instructions (no clock penalty); in hub exec it reverts to SKIP behavior. An instruction is cancelled (2-clock NOP) instead of stepped over when it is the first instruction after SKIPF/EXECF with pattern LSB = 1, or the 8th in a row being skipped (only 7 can be stepped over at once)."
@@ -45,13 +46,12 @@ skip_instructions:
         MOV pattern, #%11001100
         SKIPF pattern
         ' Next 8 instructions follow pattern
-    use_case: "Runtime-determined conditionals"
 
   EXECF:
-    description: "Jump to a cog/LUT address, then skip instructions there by a pattern"
+    description: "Jump to a cog/LUT address and initiate a SKIPF by a pattern at the same time"
     syntax: "EXECF {#}D"
     encoding: "D[31:10] = SKIPF pattern, D[9:0] = jump target (cog/LUT address)"
-    operation: "Jumps to D[9:0] in cog/LUT first, then initiates SKIPF using D[31:10]; the pattern applies to the instructions starting at the jump target"
+    operation: "Jumps to D[9:0] in cog/LUT and initiates SKIPF using D[31:10] at the same time (a JMP and a SKIPF in one instruction); the pattern applies to the instructions starting at the jump target"
     sources:
       - "operation: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION SKIPPING"
     examples:
@@ -61,7 +61,6 @@ skip_instructions:
         target  ADD x, #1       ' Skipped
                 SUB y, #1       ' Executed
                 MOV z, #0       ' Skipped
-    use_case: "Enter a block of instructions with a skip pattern chosen at the jump"
 
 pattern_encoding:
   bit_mapping:
@@ -71,7 +70,7 @@ pattern_encoding:
     - "1 = skip, 0 = execute"
 
   pattern_size:
-    immediate: "1-32 bits via # or ##"
+    immediate: "# gives up to 9 bits; ## gives the full 32 bits"
     register: "Full 32 bits"
     examples:
       - "SKIP #%1"            # Skip next instruction
@@ -81,21 +80,24 @@ pattern_encoding:
   pattern_consumption:
     - "Each instruction consumes one pattern bit"
     - "Pattern shifts after each instruction"
-    - "Exhausted pattern = normal execution resumes"
+    - "Once the remaining pattern bits are all 0, the following instructions execute"
     - "A CALL/CALLPA/CALLPB that is not skipped runs its whole subroutine normally; the skip sequence resumes after the returning RET/_RET_"
+    - "CALLA with RETA, CALLB with RETB, and CALLD PA with JMP PA do not suspend a skip pattern under SKIP in cog execution: the subroutine's instructions consume the pattern bits as they execute, with SKIP cancelling a subroutine instruction on a 1 bit. Measured with the absolute (#\\) call forms, the pattern %101 and one call per pattern. Not documented for these three forms: SKIPF, hub execution, the relative call forms and a subroutine that makes a second call"
     - "The AUGS that a ## S operand emits is an instruction of its own and consumes its own pattern bit (under SKIP and SKIPF), so every bit after a ## line moves up by one"
     - "Skipping the instruction but not its AUGS leaves the AUGS pending: it augments the next instruction that has an immediate S"
+    - "Under SKIP in cog execution, an AUGD before a skipped instruction stays pending the same way: it augments the next instruction that has an immediate D"
   sources:
     - "pattern_consumption (CALL/CALLPA/CALLPB subroutine): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION SKIPPING"
-    - "pattern_consumption (AUGS takes a bit; a pending AUGS augments the next immediate): bench-measured under SKIP and SKIPF, EF-091 (AUGD not run)"
+    - "pattern_consumption (CALLA/RETA, CALLB/RETB, CALLD PA/JMP PA do not suspend a skip pattern): P2 hardware verification, EF-109 (SKIP #%101 with the call on a 0 bit, absolute #\\ call forms, one call per pattern, one part, cog execution; a CALL/RET control suspended and an inline control did not; SKIPF, CALLPA/CALLPB, a second call in the subroutine, other CALLD registers and hub execution not run)"
+    - "pattern_consumption (AUGS takes a bit; a pending AUGS augments the next immediate): P2 hardware verification, EF-091 (under SKIP and SKIPF; AUGD not run)"
+    - "pattern_consumption (AUGD pending past a skipped instruction): P2 hardware verification, EF-123 (AUGD, a WRLUT with immediate #D cancelled by SKIP, then WRLUT #$1FF; SKIPF and hub execution not run)"
 
 skip_behavior:
   instruction_handling:
     skipped:
       - "SKIP: instruction is cancelled in the pipeline (a 2-clock NOP); not executed"
       - "SKIPF/EXECF in cog/LUT: PC steps over it, no clocks consumed, except the cancel cases above"
-      - "No side effects (flags, writes, etc.)"
-      - "PC advances normally"
+      - "The skipped instruction does not execute"
     
     executed:
       - "Normal instruction execution"
@@ -106,11 +108,14 @@ skip_behavior:
     REP_interaction:
       - "SKIP is fully compatible with REP: it only cancels instructions, so REP keeps accurate instruction counts"
       - "SKIPF works with REP only if every SKIPF pattern results in the same instruction count, which REP must be initiated with"
-      - "The pattern advances one bit per instruction encountered, not per REP iteration"
+      - "The pattern is shifted right by one bit for each instruction encountered"
+      - "Not documented: how the pattern advances across the iterations of a REP loop."
 
     branches_in_skipf_sequences:
       - "If the instruction after a CALL/CALLPA/CALLPB might be skipped, its immediate branch address must be absolute (CALL #\\address; registers are absolute; not possible for CALLPA/CALLPB)"
       - "Immediate-relative branches work through SKIPF; after an absolute-address branch (#\\label, register, RET) the first instruction after the branch must not be skipped"
+      - "SKIPF works through all immediate-relative branches, the default for immediate branches in cog/LUT memory, because its variable PC stepping lands the PC on the first instruction of interest at, or beyond, the branch address."
+      - "Not documented: what else a plain JMP does to the pattern, including whether a skipped JMP is taken and which pattern bit applies to the first instruction after a taken JMP."
 
     interrupts:
       - "Skipping only works outside of interrupt service routines (in main code)"
@@ -120,6 +125,7 @@ skip_behavior:
       - "REP_interaction (SKIPF with REP, same instruction count): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION SKIPPING"
       - "branches_in_skipf_sequences (CALL/CALLPA/CALLPB absolute branch address): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION SKIPPING; bench-verified under XBYTE (a relative call # before a skipped instruction corrupted the VM, the absolute call #\\ ran it right), EF-092"
       - "branches_in_skipf_sequences (after an absolute-address branch): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION SKIPPING"
+      - "branches_in_skipf_sequences (the pattern shifts right by one bit per instruction encountered; SKIPF works through immediate-relative branches): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION SKIPPING (the pattern is shifted right by one bit for each instruction encountered; Special SKIPF Branching Rules)"
       - "interrupts (ISR during a skipping sequence): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION SKIPPING"
 
 common_patterns:
@@ -162,7 +168,7 @@ common_patterns:
 execf_branching:
   concept: "Only EXECF carries a jump target; SKIP and SKIPF have none"
   encoding: "D[31:10] = skip pattern, D[9:0] = jump target"
-  behavior: "The jump happens first; the pattern then applies from the target. SKIPF does not branch."
+  behavior: "The jump and the start of the SKIPF are one instruction, so the pattern applies from the target. SKIPF does not branch."
   examples:
     - |
       ' Jump to next_section and skip its 2nd and 4th instructions

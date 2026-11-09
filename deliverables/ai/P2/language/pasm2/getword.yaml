@@ -11,6 +11,8 @@ description: >-
 
   Syntax 2 is intended for use after an ALTGW instruction; i.e. in a loop to
   iteratively read a series of word values within contiguous long registers.
+
+  The word is written to Dest as {16'b0, word}.
 result: >-
   Word Num (0-1) of Src, or a word from a source described by prior ALTGW
   instruction, is written to Dest.
@@ -41,25 +43,18 @@ encoding:
   z: —
   clocks: '2'
   notes: Syntax 2 - after ALTGW
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, GETWORD, p.88"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, GETWORD, p.88; Parallax P2 Instructions v35 Rev B/C Silicon spreadsheet, GETWORD row"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds1get
-  pattern: D{,S/#,#0..1}
-  description: 'Get word: destination, optional source and word index 0-1'
-  valueType: 11
-compiler_encoding:
-  operandFormat: 11
 last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
 oneliner: Get a word from a value
 related:
-- ALTGW
-- GETNIB
-- GETBYTE
-- SETNIB
-- SETBYTE
-- SETWORD
-- ROLNIB
-- ROLBYTE
-- ROLWORD
+- language/pasm2/altgw.yaml
+- language/pasm2/getnib.yaml
+- language/pasm2/getbyte.yaml
+- language/pasm2/setnib.yaml
+- language/pasm2/setbyte.yaml
+- language/pasm2/setword.yaml
+- language/pasm2/rolnib.yaml
+- language/pasm2/rolbyte.yaml
+- language/pasm2/rolword.yaml

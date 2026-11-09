@@ -8,11 +8,6 @@ blocks:
     wrap: pasm2-dat
     assumes: [log_value, integer_result]
   - at: examples[1].code
-    fp: "cc76babd78d3935b"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [base, log_base, exponent, log_result, power_result]
-  - at: examples[2].code
     fp: "77dbf9b6de6893d3"
     compile: fragment
     wrap: pasm2-dat

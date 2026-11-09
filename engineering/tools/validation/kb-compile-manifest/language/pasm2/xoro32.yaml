@@ -3,22 +3,22 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: critical_warning.solution
-    fp: "58b03c83ea789614"
+    fp: "755b7f3e29aa1547"
     compile: fragment
     wrap: pasm2-dat
     assumes: [seed]
   - at: examples[0].code
-    fp: "32d2c9ca6cea7837"
+    fp: "81e461bee80a4183"
     compile: fragment
     wrap: pasm2-dat
     assumes: [seed, rnd_init, result]
   - at: examples[1].code
-    fp: "29e3496c537bfea9"
+    fp: "9723761b51ae2c04"
     compile: fragment
     wrap: pasm2-dat
     assumes: [seed, temp]
   - at: examples[2].code
-    fp: "4a219c9a5bceef56"
+    fp: "8b93690133e32c3a"
     compile: fragment
     wrap: pasm2-dat
     assumes: [seed]

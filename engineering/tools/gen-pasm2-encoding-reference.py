@@ -41,13 +41,10 @@ for path in sorted(glob.glob(os.path.join(SRC, "*.yaml"))):
         continue
 
     mnem = str(d.get("instruction", "")).strip()
-    cat = (d.get("category") or d.get("compiler_category") or "Uncategorized").strip()
+    cat = (d.get("category") or "Uncategorized").strip()
     syntax = (d.get("syntax") or "").strip()
     oneliner = (d.get("oneliner") or d.get("brief_description") or "").strip()
-    operand = ""
-    cof = d.get("compiler_operand_format")
-    if isinstance(cof, dict):
-        operand = (cof.get("pattern") or cof.get("name") or "").strip()
+    operand = syntax.split(None, 1)[1].strip() if len(syntax.split(None, 1)) > 1 else ""
 
     # encoding bit patterns (may be multiple forms)
     bits_list = []
@@ -146,7 +143,12 @@ if cond_rows:
         # Keep the source block's own line structure: it is a lead-in plus two
         # citation bullets plus an EF corroboration. Flattening it to one paragraph
         # is how a citation stops looking like a citation.
-        srcs = [l.rstrip() for l in (ret_rule.get("source") or "").splitlines() if l.strip()]
+        src = ret_rule.get("source") or []
+        if isinstance(src, str):
+            src = src.splitlines()
+        else:
+            src = ["- " + str(s) for s in src]
+        srcs = [l.rstrip() for l in src if l.strip()]
         if srcs:
             lines.append(">")
             # Indentation carries the structure: a bullet or an un-indented line

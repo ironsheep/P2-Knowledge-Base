@@ -4,15 +4,22 @@ description: |
   Configure and start smart pin with mode and parameters.
   Supports pin groups via ADDPINS operator for parallel operations.
 
-  TRIGGER AND ASYNC SERIAL MODES: PINSTART's Yval is LOST. PINSTART writes Y before it
+  Trigger and async serial modes: PINSTART's Yval is lost. PINSTART writes Y before it
   raises DIR, and a WYPIN issued while DIR is low (the pin held in reset) never starts a
   pulse/cycle (%00100), transition (%00101) or asynchronous serial transmit (%11110)
-  output. Pass Yval = 0 and issue the triggering WYPIN AFTER PINSTART (reset -> WRPIN/WXPIN
+  output. Pass Yval = 0 and issue the triggering WYPIN after PINSTART (reset -> WRPIN/WXPIN
   -> DIR high -> WYPIN). Value modes keep the Y that PINSTART writes (an NCO started by
-  PINSTART runs at its Yval). SYNCHRONOUS serial transmit (%11100) is the opposite: a word
+  PINSTART runs at its Yval).
+
+  Long repository mode (%00001..%00011 without DAC_MODE): PINSTART's Xval is lost. PINSTART
+  writes X before it raises DIR, and WXPIN is ignored while DIR is low. Pass Xval = 0 and
+  issue WXPIN(pin, value) after PINSTART (reset -> WRPIN -> DIR high -> WXPIN).
+
+  Synchronous serial transmit (%11100) differs: a word
   written while DIR is low primes its shifter and is sent once clocking starts, so
   PINSTART's Yval is the first word transmitted.
 sources:
+  - "description (long repository: WXPIN is ignored during reset): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%00001..%00011 long repository)"
   - "description (%11100 keeps the reset-time word): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%11100 section); bench-verified in continuous mode, EF-090"
 category: Smart Pin Operations
 documentation_level: comprehensive
@@ -110,11 +117,6 @@ pin_field_operators:
       - "16 ADDPINS 0  ' Single pin (16)"
       - "16 ADDPINS 3  ' 4 pins (16-19)"
       - "16 ADDPINS 7  ' 8 pins (16-23)"
-    use_cases:
-      - "Parallel data buses"
-      - "LED arrays"
-      - "Sensor arrays"
-      - "Multi-bit I/O"
 critical_requirement:
   reset_before_configure: true
   description: |
@@ -130,6 +132,7 @@ critical_requirement:
 notes:
   - "Automatically performs the DIR=0 reset while configuring, then raises DIR"
   - "Complete initialization for value modes; in trigger and async-serial-TX modes the Yval is lost (written before DIR rises) -- pass 0 and WYPIN after PINSTART; sync serial TX (%11100) sends it (it primes the shifter)"
+  - "Exception: in long repository mode (%00001..%00011 without DAC_MODE) the Xval is lost (WXPIN is ignored while DIR is low) -- pass 0 and WXPIN after PINSTART"
   - "Mode constants defined in Spin2 (P_ADC, P_PWM_TRIANGLE, etc.)"
   - "X and Y parameters are mode-specific"
   - "Pin starts operating immediately after DIR=1"

@@ -7,7 +7,7 @@ brief_description: "Generates triangle-wave PWM with configurable base period an
 
 detailed_description:
   operation: |
-    Uses up-down counter to create symmetrical triangle PWM waveform. Counter counts from frame
+    Uses an up-down counter. Counter counts from frame
     period down to 1, then back up to frame period. Output high when counter ≤ duty value.
     Total PWM period is twice the frame period. Mode overrides OUT signal for direct pin control.
   
@@ -23,10 +23,10 @@ registers:
     bits_31_16: "Frame period in base periods (a zero acts as 65,536)"
     source: "EF-100"
   y_register:  
-    bits_15_0: "PWM duty value (0 to frame period value)"
-    bits_31_16: "Unused"
+    bits_15_0: "PWM output value, captured at each frame start; it should range from zero to the frame period (the value specified in X[31:16])"
+    bits_31_16: "Not documented: a role for Y[31:16]"
   z_register:
-    function: "Not used in this mode"
+    function: "Not documented: a Z (RDPIN/RQPIN) result for this mode"
 
 flags:
   in_flag: "Raised when Y[15:0] captured at frame start"
@@ -60,14 +60,8 @@ code_examples:
       .loop
         jmp     #.loop                           ' PWM runs independently
 
-common_applications:
-  - "Motor control with smooth acceleration profiles"
-  - "LED dimming with linear brightness response"
-  - "Audio amplifier bias control"
-  - "Power supply voltage regulation"
-
 related_modes:
-  - "Mode %01001: PWM Sawtooth (asymmetric waveform)"
+  - "Mode %01001: PWM Sawtooth (counter counts up only)"
   - "Mode %01010: PWM SMPS (switch-mode power supply)"
   - "Mode %00110: NCO Frequency (square wave output)"
 
@@ -83,5 +77,7 @@ notes:
   - "Output always starts low during reset (DIR=0)"
   - "Y=0 produces constant low output"  
   - "Y=frame period value produces constant high"
-  - "Symmetrical rise/fall times due to triangle counting"
-  - "2-clock delay after WRPIN/WXPIN/WYPIN before IN flag valid"
+  - "After WRPIN/WXPIN/WYPIN, IN takes two clocks to drop before it can be polled again"
+
+sources:
+  - "operation, timing, registers, notes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%01000 PWM triangle) and SMART PINS (IN acknowledgement)"

@@ -7,28 +7,24 @@ blocks:
     compile: not-code
     reason: "bit-pattern template (`%pppa`, `%pp0a`, `%p00a`) or English note for the streamer D[19:16] field; notation, not source"
   - at: sub_pin_selection.bits_free_by_width[1].template
-    fp: "5bae9bd5b1b7b191"
+    fp: "22d1a705e5e6a662"
     compile: not-code
     reason: "bit-pattern template (`%pppa`, `%pp0a`, `%p00a`) or English note for the streamer D[19:16] field; notation, not source"
   - at: sub_pin_selection.bits_free_by_width[2].template
-    fp: "d146fbf1da2a7076"
+    fp: "410a1425eca4728c"
     compile: not-code
     reason: "bit-pattern template (`%pppa`, `%pp0a`, `%p00a`) or English note for the streamer D[19:16] field; notation, not source"
   - at: sub_pin_selection.bits_free_by_width[3].template
-    fp: "ae14e59269b46f84"
+    fp: "15ff6fae311f1677"
     compile: not-code
     reason: "bit-pattern template (`%pppa`, `%pp0a`, `%p00a`) or English note for the streamer D[19:16] field; notation, not source"
   - at: pin_base_encoding.example
-    fp: "1bc23906467e8fe6"
+    fp: "48718612d62d8a2d"
     compile: fragment
     wrap: spin2-method
     assumes: [mode, count]
-  - at: common_configs.vga_pins_0_3.code
+  - at: common_configs.four_pin_base_0.code
     fp: "bf310db4e684c153"
-    compile: not-code
-    reason: "operand-expression notation (`mode | (0<<17)`): a value expression with `mode` standing for a streamer mode word, not a statement"
-  - at: common_configs.hdmi_pins_8_15.code
-    fp: "189281443b302cd6"
     compile: not-code
     reason: "operand-expression notation (`mode | (0<<17)`): a value expression with `mode` standing for a streamer mode word, not a statement"
   - at: common_configs.spi_single_pin.code
@@ -39,3 +35,7 @@ blocks:
     fp: "78fb0e6e95bae93e"
     compile: not-code
     reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"
+  - at: common_configs.dvi_base.code
+    fp: "6c9edc8fce3bebd1"
+    compile: not-code
+    reason: "operand-expression notation: the mode-word expression of the DVI example with `hdmi_base` and `count` standing for values, not a statement"

@@ -1,40 +1,69 @@
 instruction: JNSE4
 syntax: JNSE4   {#}S
-brief_description: Jump if selector 4 event flag is NOT set
+brief_description: Jump if selectable event 4 flag is clear
 category: Event
-description: Jump to S if SE4 (selector 4) event flag is clear.
+description: >-
+  JNSE4 checks the cog's selectable event 4 flag (SE4) and jumps to the address
+  described by Src if the flag is clear. SE4 is set whenever the event configured
+  for selectable event 4 by SETSE4 occurs. The flag is cleared by JNSE4 whether or
+  not the branch is taken, unless the event sets it again.
+
+  The address (Src) can be absolute or relative. To specify an absolute address,
+  Src must be a register containing a 20-bit address value. To specify a relative
+  address, use #Label for a 9-bit signed offset (a range of -256 to +255
+  instructions). Offsets are relative to the
+  instruction following the JNSE4. The signed offset value is in units of whole
+  instructions-- it is added to PC as-is when in Cog/LUT execution mode and is
+  multiplied by 4 then added to PC when in Hub execution mode (long-aligned Hub
+  code not required).
+  ##Label (or a prior AUGS instruction) assembles as an AUGS word plus the
+  instruction, with an 18-bit offset field; the rule above is for #Label, and a
+  backward ##Label in Cog execution is covered under anti_patterns.
+parameters:
+- 'Src is a register, 9-bit literal, or ## augmented literal whose value is the
+  absolute or relative address to set PC to. Use # for relative addressing; omit #
+  for absolute addressing.'
 flags_affected:
   C: No effect
   Z: No effect
 syntax_variants:
 - JNSE4 {#}S
 timing:
-  cycles: 2
+  cycles: '2 or 4 (cog/LUT) / 2 or 13...20 (hub-exec)'
   type: variable
-  range: 13...20
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1011110 01I 000010111 SSSSSSSSS
-  write: —
+  write: PC
   c: —
   z: —
-  clocks: 2 or 4
+  clocks: 2 or 4 / 2 or 13...20
 encoding_notes:
 - PC is written only when the SE4 event flag is clear.
+anti_patterns:
+- pattern: "Backward JNSE4 ##Label"
+  reason: >-
+    Not documented: whether a backward JNSE4 ##Label lands on its label. JNSE4 shares
+    DJNZ's encoding (AUGS plus the instruction, an 18-bit field as assembled), and
+    only backward DJNZ has been run: a target 303 longs back (field -303) landed on its
+    label in Hub execution and missed it in Cog execution, going to hub at PC plus
+    the field taken as a positive offset. A near #Label (within -256 to +255
+    instructions) avoids the ##Label form. A register holding the target
+    address as Src assembles with no AUGS word (assembled for DJNZ, TJS and JINT
+    only; not run on the board). Parallax's documents also give the ##Label form a 20-bit signed
+    offset (-524288 to +524287).
+  source: "P2 hardware verification, EF-107 (backward DJNZ only; this instruction not run); CP-031 (the ## S-branch assembles an AUGS word plus the instruction, an 18-bit offset field; shown for DJNZ and TJZ of the family); CP-056 (a backward ##label assembles for all 47 S-branch instructions as AUGS plus the instruction with an 18-bit field that counts longs, -303 for this distance; a register Src assembles with no AUGS for DJNZ, TJS and JINT, assembled only, not run on the board); Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, JSE1/2/3/4 / JNSE1/2/3/4, p.94 (##Label given as a 20-bit signed offset, -524288 to +524287)"
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, JSE1/2/3/4 / JNSE1/2/3/4, p.94"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 204 (JNSE4 {#}S: jump to S if SE4 event flag is clear; 2 or 4 cog/LUT, 2 or 13...20 hub; footnote: if #S and cogex PC += signed(S), if #S and hubex PC += signed(S*4), if S PC = register S)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Event instructions, p.42 (JNSE4 {#}S, 2 or 4 / 2 or 13...20)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, JSE1/2/3/4 / JNSE1/2/3/4, p.94 (encoding row 000010111, write PC, clocks 2 or 4 / 2 or 13-20, footnote 1; selectable event 4 flag; absolute address in a register of 20 bits, #Label 9-bit signed offset -256 to +255 instructions, offsets relative to the instruction following, in whole instructions in cog/LUT mode and times 4 in hub mode; the manual's text gives the ## offset as 20-bit)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (Jxxx/JNxxx: the event-occurred flag is cleared whether or not a branch occurs, unless set again by the event sensor; JSE4/JNSE4 jump if the selectable-event-4 event flag is set/clear), Selectable Events (SEn is set whenever the configured event occurs; cleared on matched POLLSEn / WAITSEn / JSEn / JNSEn and when the matched SETSEn is called); instruction encoding listing (EEEE 1011110 01I 000010111 SSSSSSSSS JNSE4 S/#rel9)"
+  - "CP-031, shown for DJNZ and TJZ of the same S-branch family (the 9-bit S field is in instructions in cog and times four in hub; the ## S-branch assembles an AUGS word plus the instruction, an 18-bit offset field)"
 documentation_level: structured
-compiler_operand_format:
-  name: operand_jpoll
-  pattern: S/#
-  description: 'Poll jump: target address/immediate'
-  valueType: 21
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 21
 last_updated: '2025-09-19T16:04:16.964299'
-oneliner: Branch
-long_description: 'If selectable event 1, 2, 3, or 4 flag is set (or is clear in syntax
-  5-8), PC is set to a new relative (#Src) or
-
-  absolute (Src) address.'
+oneliner: Jump if selectable event 4 flag is clear
+long_description: 'If selectable event 4 flag is clear, PC is set to a new relative
+  (#Src) or absolute (Src) address.'
 group_membership:
   group_id: selector_event_jumps
   group_file: language/pasm2/groups/selector_event_jumps.yaml
@@ -50,5 +79,8 @@ specifics:
   selector_number: 4
   event_flag: SE4
   condition: not set
-quick_example: "JNSE4 #handler  ' Jump if selector 4 event flag is NOT set"
+quick_example: "JNSE4 #handler  ' Jump if selectable event 4 flag is clear"
 has_group_documentation: true
+related:
+  - language/pasm2/concepts/branch_addressing.yaml
+  - architecture/event_system.yaml

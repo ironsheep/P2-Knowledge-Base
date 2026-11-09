@@ -7,19 +7,23 @@ blocks:
     compile: fragment
     wrap: spin2-method
   - at: examples[1].code
-    fp: "1481667207e6c7eb"
+    fp: "4a8eab092e156d76"
     compile: fragment
     wrap: spin2-method
   - at: examples[2].code
-    fp: "74236393bbf79dd2"
+    fp: "5f0a03dfb1f8bc5d"
     compile: program
   - at: examples[3].code
-    fp: "94acbaca72f19ab4"
+    fp: "94c1d01933cf167b"
     compile: fragment
     wrap: spin2-top
     assumes: [TX_PIN=con]
   - at: examples[4].code
-    fp: "8d5331e51d4afdee"
+    fp: "559072b03dc16de9"
     compile: fragment
     wrap: spin2-method
     assumes: [SCL=con, data, SDA=con]
+  - at: description
+    fp: "2cd90404446ad081"
+    compile: not-code
+    reason: "English prose description, not code"

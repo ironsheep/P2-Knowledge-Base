@@ -338,8 +338,7 @@ class CompleteKnowledgeBasePackager:
                 },
                 "flags_affected": {"type": "object"},
                 "parameters": {"type": "array", "items": {"type": "string"}},
-                "related": {"type": "array", "items": {"type": "string"}},
-                "compiler_info": {"type": "object"}
+                "related": {"type": "array", "items": {"type": "string"}}
             }
         }
         

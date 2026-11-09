@@ -7,8 +7,8 @@ category: "timing"
 type: "method"
 description: |
   Delay execution for a specified number of microseconds.
-  Provides microsecond-resolution timing delay that automatically accounts for system clock frequency.
-  More precise than WAITMS for short delays.
+  The delay is converted to clocks through CLKFREQ.
+  WAITUS is a Spin2 method; the compiler refuses it as a PASM instruction.
 
 syntax: "WAITUS(Microseconds)"
 
@@ -35,57 +35,50 @@ examples:
     description: "Delay for 10 microseconds"
     
   - code: |
-      ' Generate 50% duty cycle square wave
+      ' Pin 0 high 10 microseconds, low 10 microseconds, repeated
       REPEAT
         PINHIGH(0)
         WAITUS(10)
         PINLOW(0)
         WAITUS(10)
-    description: "50kHz square wave (20µs period)"
+    description: "Repeatedly drive pin 0 high, wait 10 microseconds, drive it low, wait 10 microseconds"
     
   - code: |
-      ' Pulse width generation
+      ' Pin high for width_us microseconds, then low
       PUB pulse(pin, width_us)
         PINHIGH(pin)
         WAITUS(width_us)
         PINLOW(pin)
-    description: "Generate precise pulse width"
+    description: "Pulse of width_us microseconds"
     
   - code: |
-      ' Bit-banged serial timing
+      ' Write a value to a pin, then wait 104 microseconds
       PUB send_bit(value)
         PINWRITE(TX_PIN, value)
-        WAITUS(104)  ' 9600 baud bit time
-    description: "Serial bit timing at 9600 baud"
-    
+        WAITUS(104)
+    description: "Write a pin, then wait 104 microseconds"
+
   - code: |
-      ' I2C clock stretching
+      ' Drive SCL high, wait, read SDA, wait, drive SCL low
       PINHIGH(SCL)
-      WAITUS(5)  ' Setup time
+      WAITUS(5)
       data := PINREAD(SDA)
-      WAITUS(5)  ' Hold time
+      WAITUS(5)
       PINLOW(SCL)
-    description: "I2C timing compliance"
+    description: "Two 5 microsecond waits around a pin read"
 
 underlying_implementation:
   description: |
-    NOT a WAITX. The interpreter reads the system counter, computes
-    (CLKFREQ/1_000_000) * microseconds, ADDS the current counter to make an ABSOLUTE
-    TARGET, and then waits the way WAITCT does - looping while the MSB of
-    (CT - target) is set.
+    The interpreter reads the system counter, multiplies CLKFREQ by Microseconds,
+    divides the product by 1_000_000, adds that result to the counter value it read
+    to make an absolute target, and then waits the way WAITCT does: the cog polls the
+    counter in a loop while the MSB of (CT - target) is set. WAITUS does not use WAITX.
     The $8000_0000-clock bound: see limitations.past_the_bound.
-    Automatically adjusts for system clock frequency.
-    At lower frequencies, resolution degrades.
+    The conversion uses CLKFREQ.
+  pasm_refusal:
+    fact: "WAITUS appears in a Spin2 method and the compiler accepts it; written as a DAT (PASM) instruction it is refused with 'Expected a unique name, BYTE, WORD, LONG, or assembly instruction'. PASM WAITX is accepted."
+    source: "CP-050 (pnut-ts, WAITUS in a Spin2 method accepted; WAITUS as a PASM instruction refused)"
   related_pasm: "language/pasm2/waitx.yaml"
-
-common_uses:
-  - "Pulse width generation"
-  - "Bit-banged communication protocols"
-  - "Sensor timing requirements"
-  - "Setup and hold times"
-  - "Servo control pulses"
-  - "Ultrasonic sensor timing"
-  - "Fine-grained delays"
 
 related_methods:
   - "WAITMS"
@@ -96,27 +89,25 @@ related_methods:
 notes:
   source: "Parallax Spin2 Documentation v55, Timing Methods (the WAITUS row); choosing_between_waits: the WAITMS and WAITCT rows of the same table"
   v55_definition: "WAITUS(Microseconds) -- Wait Microseconds, uses CLKFREQ, duration must not exceed $8000_0000 clocks."
-  choosing_between_waits:
-    - "For millisecond-scale delays use WAITMS(Milliseconds) -- same $8000_0000-clock bound."
-    - "For cycle-accurate delays use WAITCT(Tick) -- Wait for system counter to get past 'Tick'."
-  blocking: "The cog is stopped in the wait for its duration."
+  related_waits:
+    - "WAITMS(Milliseconds) has the same $8000_0000-clock bound."
+    - "WAITCT(Tick): Wait for system counter to get past 'Tick'."
+  blocking: "The cog polls the system counter in a loop for the duration of the wait."
 
 limitations:
-  source: "Parallax Spin2 Language Documentation v55, Timing Methods; Parallax Spin2 interpreter v55 (WAITMS/WAITUS compute an absolute target and wait in the WAITCT loop)"
+  source: "Parallax Spin2 Language Documentation v55, Timing Methods; Parallax Spin2 Interpreter v55 (2026.05.07), waitus_ (getct, rdlong clkfreq, qmul, qdiv by 1_000_000, add counter) and pwct (the polling loop shared with WAITCT)"
   hard_bound: "duration must not exceed $8000_0000 clocks"
-  ceiling_formula: "max Microseconds = $8000_0000 / (CLKFREQ / 1_000_000)"
+  clock_conversion: "The interpreter multiplies CLKFREQ by Microseconds, then divides by 1_000_000, giving the duration in clocks. The bound applies to that result."
   past_the_bound: |
     The bound is $8000_0000 clocks. The call computes an absolute counter target from
     the duration and waits for it as WAITCT does; what a call past the bound does is
-    not documented. Keep every call within the bound.
+    not documented.
   resolution: "1 µs -- the argument's unit"
 
 clock_frequency_impact:
   source: "Parallax Spin2 Documentation v55, Timing Methods (the WAITUS row: \"uses CLKFREQ\")"
-  what_scales: "WAITUS converts its argument through CLKFREQ, so both the granularity and the ceiling move with the clock."
-  clocks_per_microsecond: "CLKFREQ / 1_000_000"
-  granularity_floor: "At a clock below 1 MHz, one microsecond is less than one clock and WAITUS cannot resolve its own unit."
-  when_to_use_waitx_instead: "For a delay expressed directly in clocks -- the form the Parallax sources themselves emit during boot, e.g. WAITX ##20_000_000/100 -- use WAITX and skip the CLKFREQ conversion."
+  what_scales: "WAITUS converts its argument through CLKFREQ, so the ceiling in microseconds moves with the clock."
+  waitx_in_clocks: "WAITX takes its delay directly in clocks, with no CLKFREQ conversion."
 
 see_also:
   - "language/spin2/methods/waitms.yaml"

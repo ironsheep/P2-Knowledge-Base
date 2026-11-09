@@ -7,8 +7,8 @@ encoding:
   z: —
   clocks: '2...9'
 timing:
-  cycles: 2
-  type: fixed
+  cycles: "2...9"
+  type: variable
 description: Perform 64÷32 unsigned fractional division with D as upper 32 bits. Numerator
   formed from {D, SETQ value or 32'b0}, divided by S. Results retrieved via GETQX
   (quotient) and GETQY (remainder) instructions 55 clocks later.
@@ -16,54 +16,42 @@ flags_affected:
   C: No effect
   Z: No effect
 long_description: 'The QFRAC instruction performs fractional division using the P2''s
-  54-stage pipelined CORDIC solver. It divides a 64-bit numerator by a 32-bit denominator,
-  but differs from QDIV in the operand arrangement: D forms the upper 32 bits while
-  SETQ (or 32''b0) forms the lower 32 bits.
+  54-stage pipelined CORDIC solver. It divides a 64-bit numerator by a 32-bit denominator.
 
 
   The 64-bit numerator is formed by concatenating the D operand as the upper 32 bits
-  with the SETQ value (or 32''b0 if SETQ not used) as the lower 32 bits. This arrangement
-  makes QFRAC particularly suitable for fractional arithmetic where the integer part
-  is in D and the fractional part is in SETQ.
+  with the SETQ value (or 32''b0 if SETQ not used) as the lower 32 bits: the numerator
+  is {D, SETQ}.
 
 
   After 55 clocks, the quotient can be retrieved using GETQX and the remainder using
-  GETQY. The quotient is 32 bits, so it fits only while D < S: QFRAC returns a FRACTION
-  of 2^32 (a ratio below 1), e.g. QFRAC #1,#3 gives $5555_5555. For a quotient of 1 or
-  more, use QDIV.
-
-
-  The key difference from QDIV is the bit arrangement: QFRAC uses {D, SETQ} while
-  QDIV uses {SETQ, D}, making QFRAC more natural for fractional operations where D
-  represents the whole number portion.
+  GETQY. The quotient is 32 bits. QFRAC #1,#3 gives $5555_5555 remainder 1.
 
   '
 examples:
-- code: ''' A ratio as a 32-bit fraction: 1 / 3
+- code: ''' Fractional division: {1, 0} / 3
 
     QFRAC   #1, #3         '' {1, 0} / 3 = 2^32 / 3
 
-    GETQX   fraction       '' $5555_5555 = 0.3333... of 2^32 (GETQX waits)
+    GETQX   fraction       '' $5555_5555 (GETQX waits)
 
     GETQY   remainder      '' 1
 
     '
-  description: "Fractional result. {D, Q} / S fits in 32 bits only while D < S, so QFRAC yields a fraction of 2^32 -- use it for a ratio below 1."
-- code: ''' With SETQ: {1, $8000_0000} / 4 = 1.5 / 4 = 0.375
+  description: "Fractional result: {1, 0} / 3 gives $5555_5555 remainder 1."
+- code: ''' With SETQ: {1, $8000_0000} / 4
 
-    SETQ    ##$8000_0000   '' lower 32 bits of the numerator: 0.5
+    SETQ    ##$8000_0000   '' lower 32 bits of the numerator
 
     QFRAC   #1, #4         '' {D, SETQ} / S
 
-    GETQX   fraction       '' $6000_0000 = 0.375 of 2^32
+    GETQX   fraction       '' $6000_0000
 
     GETQY   remainder      '' 0
 
     '
   description: Fractional numerator via SETQ
-- code: ''' Percentage calculation: what percentage is A of B?
-
-    '' Formula: (A * 100) / B where A is in D, 100*2^32 scaling
+- code: ''' (A * 100) / B, dividing the full 64-bit product
 
     QMUL    value_a, #100         '' First multiply A * 100
 
@@ -73,7 +61,7 @@ examples:
 
     GETQY   scaled_high
 
-    SETQ    scaled_low            '' Use low part as fraction
+    SETQ    scaled_low            '' Use low part as the lower 32 bits
 
     QFRAC   scaled_high, value_b  '' {high, low} / B
 
@@ -82,40 +70,33 @@ examples:
     GETQX   percentage
 
     '
-  description: Percentage calculation using fractional division
+  description: Divide the 64-bit product {high, low} by B
 related_instructions:
 - GETQX
 - GETQY
 - SETQ
 - QDIV
 - QMUL
+related:
+- language/pasm2/concepts/special_registers.yaml
+- language/pasm2/setq.yaml
+- language/pasm2/qdiv.yaml
 operand_details:
-  D: Upper 32 bits of 64-bit numerator (integer portion)
-  SETQ: Lower 32 bits of 64-bit numerator (fractional portion, optional, defaults
-    to 0)
+  D: Upper 32 bits of 64-bit numerator
+  SETQ: Lower 32 bits of 64-bit numerator (optional, defaults to 0)
   S: 32-bit denominator (divisor)
 result_details:
   GETQX: 32-bit quotient
   GETQY: 32-bit remainder
-timing_notes: Result available 55 clocks after instruction issue. Each cog can issue
+timing_notes: The cog first waits for its hub slot to hand the command to the CORDIC solver; the result is available 55 clocks after that, and GETQX/GETQY wait for it if it has not arrived. Each cog can issue
   one CORDIC instruction per hub window (every 8 clocks).
-usage_notes: QFRAC uses {D, SETQ} bit arrangement, opposite of QDIV's {SETQ, D}. Use
-  SETQ before QFRAC to specify fractional part. Without SETQ, lower 32 bits default
-  to 0.
-divide_by_zero: "S = 0 does not trap or stall: GETQX returns NOT D (the upper 32 bits of the numerator) and GETQY the SETQ value (or 0), every time, in the same time as a non-zero divide, and the next CORDIC operation is unaffected: QFRAC #1,#0 -> $FFFF_FFFE, D = $8000_0000 -> $7FFF_FFFF, D = $FFFF_FFFF -> 0. No Parallax document states it."
-applications: Fixed-point arithmetic, fractional scaling, percentage calculations,
-  algorithms requiring integer.fraction dividend format.
-key_difference: 'QFRAC: {D, SETQ} / S vs QDIV: {SETQ, D} / S - QFRAC puts integer
-  part in primary operand D.'
-documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.20, and CORDIC Solver Instructions, p.44; P2 Instructions v35 - Rev B/C Silicon, Sheet1"
+usage_notes: QFRAC uses the {D, SETQ} bit arrangement (D upper 32 bits, Q lower 32 bits). A
+  SETQ before QFRAC supplies the lower 32 bits. Without SETQ, the lower 32 bits
+  are 0, and QFRAC sets Q to zero (see language/pasm2/concepts/special_registers.yaml
+  q_register).
+divide_by_zero: "With S = 0 in cog execution, GETQX returns NOT D (the upper 32 bits of the numerator) and GETQY the SETQ value (or 0), every time, in the same time as a non-zero divide, and the next CORDIC operation is unaffected: with no SETQ, QFRAC #1,#0 gives $FFFF_FFFE, D = $8000_0000 gives $7FFF_FFFF, D = $FFFF_FFFF gives 0, each with remainder 0."
+documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.20, and CORDIC Solver Instructions, p.44; P2 Instructions v35 - Rev B/C Silicon, Sheet1; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), CORDIC Solver (DIVIDE) and SETQ CONSIDERATIONS (COGINIT/QDIV/QFRAC/QROTATE without a preceding SETQ set Q to zero); divide by zero: hardware-verified EF-089"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ls
-  pattern: D/#,S/#
-  description: 'Two operands: destination/immediate, source/immediate'
-  valueType: 13
-compiler_encoding:
-  operandFormat: 13
 last_updated: '2025-09-19T16:04:17.150939'
 category: CORDIC Solver
 oneliner: Perform 64÷32 unsigned fractional division with D as upper 32 bits

@@ -8,11 +8,11 @@ blocks:
     wrap: pasm2-dat
     assumes: [lock_num, no_locks_left]
   - at: instructions[0].operation
-    fp: "ae9b7c716d6906f2"
+    fp: "be1e49ff6ffd329b"
     compile: not-code
     reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
   - at: instructions[0].usage_example
-    fp: "35c5371781ea7e3a"
+    fp: "7794f99a5c842748"
     compile: fragment
     wrap: pasm2-dat
     assumes: [lock_num, got_lock]
@@ -58,12 +58,12 @@ blocks:
     wrap: pasm2-dat
     assumes: [lock_num]
   - at: programming_patterns[1].code
-    fp: "66b02bb0d299137a"
+    fp: "981d83d06aafcd21"
     compile: fragment
     wrap: pasm2-dat
     assumes: [timeout, lock_num, current, label:.timeout_error]
   - at: programming_patterns[2].code
-    fp: "8f01da41bc92c813"
+    fp: "3659755ad1da1269"
     compile: fragment
     wrap: pasm2-dat
     assumes: [LOCK_A=con, LOCK_B=con, retry]
@@ -88,7 +88,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [lock_num, item, queue_tail]
   - at: common_applications[3].example
-    fp: "c3399f071c4ce52d"
+    fp: "e32bb72e40600d22"
     compile: fragment
     wrap: pasm2-dat
     assumes: [lock_num, do_initialization]
@@ -97,7 +97,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [lock_num]
-  - at: debugging_tips[2].example
+  - at: debugging_tips[1].example
     fp: "733ba1ec7e270633"
     compile: not-code
     reason: "comment-only block (a list of \"system lock assignments\" in `'` lines); there is no statement to compile (the assignments themselves are unsourced, see the observations)"

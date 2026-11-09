@@ -8,8 +8,11 @@ description: >-
   (0-511; it is not sign-extended) -- use ##Value (or insert a prior AUGS instruction)
   for a 32-bit signed value; negative or positive. If the WC or WCZ effect is
   specified, the C flag is set to the true sign of the result -- the sign of
-  (D - S) at full precision (overflow-corrected) (C=1 if negative, C=0 if non-negative); it is
-  NOT a signed-underflow or borrow indicator. If the WZ or WCZ effect is
+  (D - S) at full precision (overflow-corrected) (C=1 if negative, C=0 if non-negative);
+  C differs from Result[31] when the difference overflows, and it is not a
+  signed-overflow flag. Parallax's documents also describe C as set (1) if the
+  subtraction results in a signed underflow (signed borrow), or cleared (0) if no
+  underflow. If the WZ or WCZ effect is
   specified, the Z flag is set (1) if the result of Dest - Src is zero, or is cleared
   (0) if it is non-zero. To subtract signed, multi-long values, use SUB (not SUBS)
   followed possibly by SUBX, and finally SUBSX as described in Subtracting Two
@@ -31,21 +34,22 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 0001110 CZI DDDDDDDDD SSSSSSSSS
   write: D
   c: true sign of (D - S)
   z: Result == 0
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SUBS, p.131"
+sources:
+  - "C flag: P2 Instructions v35 - Rev B/C Silicon, row 16 (SUBS D,{#}S: subtract S from D, signed, D = D - S, C = correct sign of (D - S), Z = (result == 0); 2 clocks; write D)"
+  - "C flag: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SUBS encoding table (sign of (D - S)), p.131; PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.150"
+  - "C flag, source disagreement: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SUBS, p.131 (its prose says the C flag is set on a signed underflow (signed borrow); its own encoding table says sign of (D - S))"
+  - "C flag measured on silicon: the hardware-verification ledger EF-018 (signed ADDS, SUBS and CMPS) records C as the true overflow-corrected sign, not bit 31 and not a signed-overflow flag, 2026-07-04; the operand values it quotes are for ADDS ($7FFFFFFF + $1 gives C = 0, $80000000 + $FFFFFFFF gives C = 1) and it states that SUBS behaves likewise"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.38 (SUBS D,{#}S {WC/WZ/WCZ}, C = correct sign of (D - S), 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SUBS, p.131 (Result line, Dest, Src and effect parameters, encoding row 0001110 CZI, write D, Z Result = 0, 2 clocks, Related list, 9-bit literal not sign-extended, Z rule, multi-long note)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 0001110 CZI DDDDDDDDD SSSSSSSSS SUBS D,S/# {WC/WZ/WCZ})"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 0
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Subtract one signed value from another

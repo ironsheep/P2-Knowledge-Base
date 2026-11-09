@@ -12,11 +12,10 @@ overview: |
 
 architecture:
   pipeline_depth: 54
-  result_latency: 55 clocks (1 clock to enter + 54 stages)
+  result_latency: 55 clocks
   access_interval: 8 clocks (hub rotation window)
-  max_in_flight: 6-7 operations per COG (54 / 8)
+  operations_in_flight: several per COG (the documentation gives no count)
   shared_resource: true
-  queue_based: true
 
 operations:
   multiply:
@@ -47,7 +46,7 @@ operations:
     instruction: QROTATE
     inputs: "SETQ (Y coord), D (X coord), S (angle)"
     outputs: "GETQX (rotated X), GETQY (rotated Y)"
-    description: "Coordinate rotation / polar-to-cartesian conversion"
+    description: "Coordinate rotation"
 
   vector:
     instruction: QVECTOR
@@ -79,9 +78,9 @@ usage_patterns:
   pipelined_pattern:
     description: Maximum throughput via overlapped operations
     phases:
-      - fill: "Queue 6-7 operations before expecting results"
-      - steady_state: "Retrieve one result, queue one operation per 8 clocks"
-      - drain: "Retrieve remaining results without queuing"
+      - fill: "Give several commands to the CORDIC solver first"
+      - steady_state: "Read a result, then give another command, indefinitely"
+      - drain: "At the end, read the trailing results"
     code: |
       ' Fill phase
       QMUL a0, b0
@@ -96,20 +95,25 @@ usage_patterns:
         QMUL  a_next, b_next
         DJNZ  count, #.loop
 
-      ' Drain phase
-      REP @.drain, #6
-        GETQX result_lo
-        GETQY result_hi
+      ' Drain phase: a REP count of 0 repeats forever, so skip the REP when nothing is outstanding
+        TJZ   queued_count, #.done     ' queued_count = number of commands still outstanding
+        REP   @.drain, queued_count
+          GETQX result_lo
+          GETQY result_hi
       .drain
+      .done
+        RET
+
+      queued_count long 0
 
   no_result_ready_poll:
     description: There is no non-blocking "result ready" test for the CORDIC
     code: |
       QMUL    a, b
-      ' ... 55 or more clocks of other work ...
+      ' ... other work ...
       GETQX   result_lo       ' waits for the result if it is not ready yet
       GETQY   result_hi
-    note: "POLLQMT is not a result-ready poll: its flag is set only when a GETQX/GETQY executed with nothing queued or in progress, which is a programming error (event 15). To avoid a stall, schedule the read at least 55 clocks after the command."
+    note: "POLLQMT is not a result-ready poll: its flag is set only when a GETQX/GETQY executed with nothing queued or in progress, which is a programming error (event 15). GETQX/GETQY wait, in case the result has not arrived (2...58 clocks)."
 
 interrupt_protection:
   applicability: |
@@ -135,36 +139,29 @@ interrupt_protection:
     code: |
       REP     #99, #1               ' Large block, 1 iteration
       QSQRT   value, #0
+      GETQX   value                 ' read each result before the next command
       QLOG    value
+      GETQX   value
       QEXP    value
-      ' ... more operations ...
-      _ret_ MOV output, result      ' REP exits at _ret_
+      GETQX   value
+      _ret_ MOV output, value       ' REP exits at _ret_
 
   when_needed:
-    - DSP inner loops requiring precise timing
-    - Fixed-point arithmetic chains
-    - Real-time control applications
-
-  when_unnecessary:
-    - PASM2 without interrupts (SETINT not used)
-    - Background calculations with explicit 55-clock padding
-    - Pipelined processing with fill-drain pattern
+    - "Interrupts must not be enabled while overlapping CORDIC commands: the interrupt service routine can steal enough clocks that one or more results are overwritten before they are read"
 
 result_retrieval:
   blocking_behavior: |
-    GETQX and GETQY stall if the result is not yet ready. The COG waits automatically,
-    simplifying programming but potentially impacting performance if retrieval is premature.
+    GETQX and GETQY wait, in case the result has not arrived (2...58 clocks).
 
   event_generation: |
     Event 15 is generated when GETQX/GETQY executes with no results available.
     This detects programming errors where retrieval occurs before any operations were queued.
 
 timing_considerations:
-  - Results available exactly 55 clocks after queuing
+  - "A cog waits for its hub slot (zero to #cogs-1 clocks) to hand the command to the CORDIC solver; 55 clocks later the results are available via GETQX and GETQY"
   - Each COG gets CORDIC access every 8 clocks (hub rotation)
   - GETQX/GETQY will stall if called too early
-  - Pipeline is FIFO - results retrieved in submission order
-  - Multiple COGs share the CORDIC; no interference between COGs
+  - Multiple COGs share the CORDIC; each cog's active CORDIC instructions and forthcoming results are completely isolated from each other, as well as from other cogs, and each result must be retrieved on time or else it is overwritten by the following result, if any
 
 related:
   - language/pasm2/qmul.yaml

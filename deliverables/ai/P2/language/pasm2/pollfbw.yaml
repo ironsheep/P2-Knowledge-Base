@@ -23,21 +23,19 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZ0 000001001 000100100
   write: —
   c: FBW Event
   z: FBW Event
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLFBW, p.112"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 280 (POLLFBW {WC/WZ/WCZ}: get FBW event flag into C/Z, then clear it; 2 clocks)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Event instructions, p.43 (POLLFBW {WC/WZ/WCZ}, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLFBW, p.112 (Result line, WC / WZ / WCZ parameter, encoding row 000001001 / 000100100, write none, C and Z FBW Event, 2 clocks, Related list; the flag is set when the Hub RAM FIFO interface exhausts its block count and reloads its block count and start address; cleared upon RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW or JNFBW)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (the POLLxxx instructions simultaneously return their event-occurred flag into C and/or Z and clear it unless it is set again by the event sensor; POLLFBW event flag: cleared on RDFAST / WRFAST / FBLOCK, set whenever the hub RAM FIFO interface exhausts its block count and reloads its block count and start address, also cleared on POLLFBW / WAITFBW / JFBW / JNFBW), instruction encoding listing (EEEE 1101011 CZ0 000001001 000100100 POLLFBW {WC/WZ/WCZ})"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pollwait
-  pattern: ''
-  description: No operands - poll/wait instruction (moves S to D, sets S to $024)
-  valueType: 28
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 28
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Retrieve and clear FIFO-interface-block-wrap event flag
@@ -48,3 +46,4 @@ related:
 - WAITFBW
 - JFBW
 - JNFBW
+- architecture/event_system.yaml

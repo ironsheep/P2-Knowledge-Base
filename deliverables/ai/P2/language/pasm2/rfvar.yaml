@@ -11,8 +11,8 @@ timing:
   type: mode_dependent
 description: Used after RDFAST. Read one variable-length unsigned value (1 to 4 bytes,
   up to 29 bits) from the FIFO into D, zero-extended. The FIFO pointer advances by
-  the bytes the value occupied, so mixed-length values read back-to-back with no length
-  bookkeeping. FVAR emits this format in DAT data.
+  the bytes the value occupied, so mixed-length values can be read back-to-back. FVAR
+  emits this format in DAT data.
 aliases:
 - variable-length integer
 - variable-length value from FIFO
@@ -26,21 +26,22 @@ value_format:
     byte follows and 0 ends the value; bits 6..0 carry 7 value bits. A 4th byte is always
     the last and carries all 8 bits.
   lengths:
-  - "1 byte: 0vvvvvvv (bits 6..0); 7 bits; 0 .. 127"
-  - "2 bytes: 1vvvvvvv (6..0), 0vvvvvvv (13..7); 14 bits; 128 .. 16_383"
-  - "3 bytes: 1vvvvvvv (6..0), 1vvvvvvv (13..7), 0vvvvvvv (20..14); 21 bits; 16_384 .. 2_097_151"
-  - "4 bytes: 1vvvvvvv (6..0), 1vvvvvvv (13..7), 1vvvvvvv (20..14), vvvvvvvv (28..21); 29 bits; 2_097_152 .. $1FFF_FFFF"
+  - "1 byte: 0vvvvvvv (bits 6..0); 7 value bits"
+  - "2 bytes: 1vvvvvvv (6..0), 0vvvvvvv (13..7); 14 value bits"
+  - "3 bytes: 1vvvvvvv (6..0), 1vvvvvvv (13..7), 0vvvvvvv (20..14); 21 value bits"
+  - "4 bytes: 1vvvvvvv (6..0), 1vvvvvvv (13..7), 1vvvvvvv (20..14), vvvvvvvv (28..21); 29 value bits; the result ranges 0 .. $1FFF_FFFF"
   source: "XF-019; Parallax Spin2 Interpreter v55 (2026.05.07), hub_ap (hub-variable offsets read with RFVAR)"
 preconditions:
-- Point the FIFO with RDFAST first; see rdfast for the waiting and no-wait forms.
+- Used after RDFAST, which points the FIFO.
 - Not usable in hub execution, where the FIFO is busy fetching instructions. Inline ORG..END code runs in the cog and may use it; inline ORGH..END code runs in hub-exec and may not.
-- Reads are sequential. To jump, issue a new RDFAST. GETPTR returns the address of the next unread byte.
-- RFBYTE, RFWORD, RFLONG, RFVAR and RFVARS draw from the same byte stream, so a record can mix them.
-- Variable-length entries cannot be indexed directly; read them in order from a known start.
-interpreter_use: "The Spin2 interpreter reads these inline operands with RFVAR: hub-variable offsets, object and method indices, local-long counts, ++/-- step sizes, bitfield specs, stack pops and struct offsets."
+- Reads are sequential. A new RDFAST moves the read position. GETPTR returns the hub address of the next unread byte.
+- RFVAR reads from the same FIFO byte stream as the fixed-width FIFO reads, so a record can mix them.
+interpreter_use: "Spin2 bytecode operands read with RFVAR: hub-variable offsets, object and method indices, local-long counts, ++/-- step sizes, bitfield specs, stack pops and struct offsets."
 sources:
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION, p.12, and the RFVAR and RFVARS byte table, p.64"
   - "XF-019"
+  - "GETPTR: P2 Instructions v35 - Rev B/C Silicon, row 328 (GETPTR D: get current FIFO hub pointer into D); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LUT EXECF, the bytecode-loop example ('rfbyte pa' then 'getptr pb', commented 'get next bytecode address into pb')"
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (FVAR / FVARS overrides can be read via RFVAR / RFVARS); Parallax Propeller 2 Spin2 Language Documentation v55, Inline Assembly Code (ORGH inline code executes from hub RAM; hub-exec limitations apply, no RDFAST, XINIT, etc.); CP-030 (##@hubsym assembles to the object offset)"
   - "Parallax Spin2 Interpreter v55 (2026.05.07), resume (RDFAST restarts the bytecode stream after inline code returns); hub_ap, callobj, callsub, callgo, set_incr, bit_rfvar, popx, hub_sv"
   - "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (hub addresses are relative to the start of the object)"
 examples:
@@ -55,16 +56,9 @@ examples:
 
     DAT
     lengths         byte    FVAR 300, FVAR 70_000
-  description: "Inline PASM. Take the table's address in Spin2 and pass it in a local: inside ORG..END, ##@lengths assembles to the label's offset within the object, not its hub address."
+  description: "Inline PASM. The table's absolute hub address is taken in Spin2 and passed in a local; in a Spin2 object ##@lengths assembles to the label's offset within the object, not its hub address."
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.154"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_d
-  pattern: D
-  description: Destination register only
-  valueType: 24
-compiler_encoding:
-  operandFormat: 24
 syntax_variants:
 - RFVAR D
 last_updated: '2025-09-19T16:04:16.912086'

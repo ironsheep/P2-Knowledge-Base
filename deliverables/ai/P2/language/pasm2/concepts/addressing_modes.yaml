@@ -6,7 +6,7 @@ description: Methods for specifying operands in PASM2 instructions
 overview: |
   PASM2 provides multiple addressing modes for flexible operand specification. Understanding these modes
   is critical for efficient code generation. Each mode has specific use cases and encoding requirements.
-  The P2 automatically determines addressing mode based on operand syntax and range.
+  The operand syntax selects the mode: no prefix, #, ##, or a PTRx expression.
 
 modes:
   immediate:
@@ -31,16 +31,16 @@ modes:
     notes: Most common mode for cog operations
 
   register_indirect:
-    syntax: "[register]"
-    encoding: Special encoding with PTR registers
+    syntax: "PTRx"
+    encoding: "PTR expression with no index and no update (see ptr_expression_encoding)"
     registers: PTRA, PTRB only
     examples:
       - RDLONG value, PTRA    ' Read from hub[PTRA]
       - WRLONG value, PTRB    ' Write to hub[PTRB]
-    notes: Hub memory access only
+    notes: "Hub memory access only. A plain register S is also a hub address for these instructions: its 20 LSBs are used as the address."
 
   indexed:
-    syntax: "[base_ptr + index]"
+    syntax: "PTRx[index]"
     encoding: PTR with offset encoding
     base: PTRA or PTRB
     index_range: -32 to +31 (6-bit signed)
@@ -50,8 +50,8 @@ modes:
     scaling:
       - RDBYTE/WRBYTE: index × 1
       - RDWORD/WRWORD: index × 2
-      - RDLONG/WRLONG: index × 4
-    notes: Index scaling automatic based on operation size
+      - RDLONG/WRLONG/WMLONG: index × 4
+    notes: The index is scaled by the operation size
 
   auto_increment:
     syntax: "PTRx++"
@@ -92,7 +92,7 @@ modes:
     notes: Uses AUGS for 20-bit address
 
   bit_addressing:
-    syntax: "register.bit or register.[bit_expr]"
+    syntax: "BITx register, #bit_number"
     encoding: Bit number in immediate field
     range: Bit 0-31
     examples:
@@ -101,13 +101,66 @@ modes:
       - "TESTB flags, #4 WC    ' Test bit 4, update C"
     notes: Bit operations only
 
+ptr_expression_encoding:
+  applies_to: "The S/#/PTRx operand of RDBYTE, RDWORD, RDLONG, WRBYTE, WRWORD, WRLONG and WMLONG"
+  hub_address_operands:
+    - "$000..$1FF: a register whose 20 LSBs are used as the hub address"
+    - "#$00..$FF: an 8-bit immediate hub address"
+    - "##$00000..$FFFFF: a 20-bit immediate hub address (invokes AUGS)"
+    - "PTRx {[index5]}: a PTR expression with a 5-bit scaled index"
+    - "PTRx {[##index20]}: a PTR expression with a 20-bit unscaled index (invokes AUGS)"
+  layout: "%1SUPNNNNN in the 9-bit S field (no AUGS); a leading 0 (#%0AAAAAAAA) is an 8-bit immediate address instead"
+  fields:
+    S: "0 for PTRA, 1 for PTRB"
+    U: "0 keeps PTRx the same, 1 updates PTRx (PTRx += INDEX*SCALE)"
+    P: "0 uses PTRx + INDEX*SCALE, 1 uses PTRx (post-modify)"
+    N: "the index, in the five bits NNNNN (or nnnnn). The non-updating forms (U = 0) read the P bit and NNNNN together as the six-bit index IIIIII."
+  index:
+    INDEX6: "-32..+31 for non-updating offsets; IIIIII uses %100000..%111111 for -32..-1 and %000000..%011111 for 0..31"
+    INDEX: "1..16 for the ++ and -- forms; NNNNN uses %00001..%01111 for 1..15 and %00000 for 16"
+    nnnnn: "-INDEX: %10000..%11111 for -16..-1"
+    SCALE: "1 for RDBYTE/WRBYTE, 2 for RDWORD/WRWORD, 4 for RDLONG/WRLONG/WMLONG"
+  forms:
+    - {bits: "100000000", form: "PTRA", meaning: "use PTRA"}
+    - {bits: "110000000", form: "PTRB", meaning: "use PTRB"}
+    - {bits: "100IIIIII", form: "PTRA[INDEX6]", meaning: "use PTRA + INDEX6*SCALE"}
+    - {bits: "110IIIIII", form: "PTRB[INDEX6]", meaning: "use PTRB + INDEX6*SCALE"}
+    - {bits: "101100001", form: "PTRA++", meaning: "use PTRA, PTRA += SCALE"}
+    - {bits: "111100001", form: "PTRB++", meaning: "use PTRB, PTRB += SCALE"}
+    - {bits: "101111111", form: "PTRA--", meaning: "use PTRA, PTRA -= SCALE"}
+    - {bits: "111111111", form: "PTRB--", meaning: "use PTRB, PTRB -= SCALE"}
+    - {bits: "101000001", form: "++PTRA", meaning: "use PTRA + SCALE, PTRA += SCALE"}
+    - {bits: "111000001", form: "++PTRB", meaning: "use PTRB + SCALE, PTRB += SCALE"}
+    - {bits: "101011111", form: "--PTRA", meaning: "use PTRA - SCALE, PTRA -= SCALE"}
+    - {bits: "111011111", form: "--PTRB", meaning: "use PTRB - SCALE, PTRB -= SCALE"}
+    - {bits: "1011NNNNN", form: "PTRA++[INDEX]", meaning: "use PTRA, PTRA += INDEX*SCALE"}
+    - {bits: "1111NNNNN", form: "PTRB++[INDEX]", meaning: "use PTRB, PTRB += INDEX*SCALE"}
+    - {bits: "1011nnnnn", form: "PTRA--[INDEX]", meaning: "use PTRA, PTRA -= INDEX*SCALE"}
+    - {bits: "1111nnnnn", form: "PTRB--[INDEX]", meaning: "use PTRB, PTRB -= INDEX*SCALE"}
+    - {bits: "1010NNNNN", form: "++PTRA[INDEX]", meaning: "use PTRA + INDEX*SCALE, PTRA += INDEX*SCALE"}
+    - {bits: "1110NNNNN", form: "++PTRB[INDEX]", meaning: "use PTRB + INDEX*SCALE, PTRB += INDEX*SCALE"}
+    - {bits: "1010nnnnn", form: "--PTRA[INDEX]", meaning: "use PTRA - INDEX*SCALE, PTRA -= INDEX*SCALE"}
+    - {bits: "1110nnnnn", form: "--PTRB[INDEX]", meaning: "use PTRB - INDEX*SCALE, PTRB -= INDEX*SCALE"}
+  encoded_examples:
+    - "ptra++ assembles S = %101100001 ($161); ++ptra $141; ptra-- $17F; --ptra $15F"
+    - "ptra[3] assembles S = $103; ptra[-20] $12C; ptrb[31] $19F"
+    - "ptra++[16] assembles S = $160 (the index field 00000 stands for 16); ptra--[16] $170"
+  augmented_form:
+    syntax: "PTRx[##index20] (the assembler inserts an AUGS)"
+    layout: "##%000000001SUPNNNNNNNNNNN_NNNNNNNNN: after AUGS, bit 23 marks a PTR expression, S, U and P follow, and the 20-bit index N is unscaled"
+    rewrite: "RDBYTE D,++PTRB[##$12345] becomes AUGS #$00E12345 followed by RDBYTE D,#$00E12345 & $1FF"
+    encoded_examples:
+      - "ptra[##1000] assembles the 20-bit index word $8003E8"
+      - "ptra++[##1000] assembles the 20-bit index word $B003E8"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), RANDOM ACCESS INTERFACE (the five ways to express a hub address; PTRx expressions without AUGS; PTRx expressions with AUGS); the S values and the two index words above are what the assembler emits (CP-032, pnut-ts v1.55.10)"
+
 special_cases:
   altx_modified:
     description: ALTX instructions modify subsequent instruction's addressing
     examples:
-      - "ALTS index            ' Next S field = cog[index]"
-      - "ALTD index            ' Next D field = cog[index]"
-      - "ALTR index            ' Next result register = cog[index]"
+      - "ALTS index            ' Next instruction's S field = index[8:0]"
+      - "ALTD index            ' Next instruction's D field = index[8:0]"
+      - "ALTR index            ' Next instruction's result register = index[8:0]"
     notes: Enables computed addressing
 
   setq_block:
@@ -118,29 +171,21 @@ special_cases:
     notes: Count is SETQ value + 1
 
   rep_block:
-    description: REP creates zero-overhead loops
+    description: REP repeats instructions without branching delays in cog/LUT memory
     examples:
       - "REP #4, #10           ' Repeat next 4 instructions 10 times"
       - "REP @end_label, count ' Repeat until end_label, count times"
     notes: Not addressing per se, but affects instruction flow
 
 encoding_selection:
-  automatic:
-    - Assembler chooses optimal encoding
-    - '## forces augmented encoding'
-    - '# forces immediate encoding'
-    - No prefix forces register encoding
+  by_prefix:
+    - '## invokes the augmented encoding'
+    - '# is the immediate encoding'
+    - No prefix is the register encoding
 
   size_based:
     - 'Values 0-511: Direct immediate (#)'
-    - 'Values 512 and up: augmented immediate (##) - AUGS for a Src literal, AUGD for a Dest literal'
-
-best_practices:
-  - Use immediate for constants known at compile time
-  - Use PTR registers for sequential hub access
-  - Use indexed mode for structure access
-  - Use ALTX for computed jumps and table access
-  - Prefer auto-increment for array processing
+    - 'Values larger than 9 bits: augmented immediate (##) - AUGS for a Src literal, AUGD for a Dest literal'
 
 hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 

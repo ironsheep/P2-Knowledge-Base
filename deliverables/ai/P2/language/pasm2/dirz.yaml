@@ -10,8 +10,9 @@ timing:
   cycles: 2
   type: fixed
 description: >-
-  DIRZ or DIRNZ alters the direction register's bit(s) designated by Dest to equal
-  the state, or inverse state, of the Z flag. All other bits are left unchanged.
+  DIRZ alters the direction register's bit(s) designated by Dest to equal
+  the state of the Z flag. High (1) bits set the pin(s) to output, low (0) to input.
+  All other bits are left unchanged.
 
   Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates
   the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond
@@ -23,9 +24,9 @@ description: >-
   instruction prior.
 
   When Dest is a register, the register's value bits [10:0] are used as-is to form
-  the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRZ
-  instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for
-  DIRZ's use.
+  the 11-bit ID range. A prior SETQ overrides Dest[10:6] with the low five bits of
+  the SETQ value; an ALTx between the SETQ and DIRZ keeps the override, and a SETQ
+  separated from DIRZ by other instructions is not documented.
 
   The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within
   the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.
@@ -33,27 +34,29 @@ description: >-
   If the WCZ effect is specified, the C and Z flags are set to the original
   (pre-instruction) state of the base pin's DIR bit (DIRA / DIRB), identified by Dest.
 result: >-
-  The I/O pin direction bit(s), described by Dest, are set to output/input according
-  to Z or !Z; the rest are left as-is.
+  The I/O pin direction bit(s), described by Dest, are set to Z; the rest are
+  left as-is.
 flags_affected:
   C: Set to the original (pre-instruction) state of the base pin's DIR bit
   Z: Set to the original (pre-instruction) state of the base pin's DIR bit
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DIRZ / DIRNZ, p.73"
+encoding_notes:
+- Parallax's documents also write the FX field of this instruction as CZI.
+- "DIRZ uses the S-field code 001000100, the same code as TESTP with ORC or ORZ."
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DIRZ / DIRNZ, p.73; P2 Instructions v35 - Rev B/C Silicon, row 353 (DIRZ {#}D {WCZ}: DIR bits = Z; wraps within DIRA/DIRB; prior SETQ overrides D[10:6]; C,Z = DIR bit; write DIRx; 2 clocks); encoding_notes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 1101011 CZL DDDDDDDDD 001000100 for both TESTP D/# ORC/ORZ and DIRZ D/# {WCZ})"
+sources:
+  - "description (a prior SETQ overrides D[10:6]): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), list of changes (DIRx/OUTx/FLTx/DRVx can now work on a span of pins, +D[10:6] pins; prior SETQ overrides D[10:6])"
+  - "description (an ALTx between the SETQ and DIRZ keeps the override): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, pp.38-39 (SETQ / SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction); a SETQ separated by other instructions is in no source"
+  - "description (set pin to the output (1) or input (0) direction): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DIRZ / DIRNZ, p.73"
+  - "encoding_notes (FX field): the PASM2 Manual p.73 DIRZ / DIRNZ encoding rows write the FX field as CZI; the instruction CSV row 353 and the Parallax Propeller 2 Documentation v35 (Rev B/C Silicon) instruction encoding listing write it as CZL"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pinop
-  pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
-    flags'
-  valueType: 30
-compiler_encoding:
-  operandFormat: 30
 syntax_variants:
 - DIRZ {#}D
 last_updated: '2025-09-19T16:04:17.011625'
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
-  the I/O pin(s) to set to output or input.
+  the I/O pin(s) whose DIR bit is set to Z.
 - WCZ is an optional effect to update flags.
 category: Pin
-oneliner: Set pin(s) direction to input/output according to Z or !Z
+oneliner: Set pin(s) DIR bit to Z
+related:
+  - architecture/io_pin_timing.yaml

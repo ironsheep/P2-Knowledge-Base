@@ -2,27 +2,32 @@ instruction: RESI2
 syntax: RESI2
 encoding:
 - bits: EEEE 1011001 110 111110010 111110011
-  write: D
-  c: —
-  z: —
-  clocks: '4'
+  write: D (IJMP2) and PC
+  c: IRET2[31]
+  z: IRET2[30]
+  clocks: '4 / 13...20'
 timing:
   cycles: 4
   type: variable
   range: 4 / 13...20
-description: Resume from INT2. (CALLD $1F2,$1F3 WCZ).
+description: >-
+  Resume from INT2. (CALLD $1F2,$1F3 WCZ). RESI2 is CALLD IJMP2,IRET2 WCZ: it
+  jumps to the return address held in IRET2 ($1F3), sets C and Z from IRET2[31]
+  and IRET2[30], and writes {C, Z, 10'b0, PC[19:0]} (the flags and the address of
+  its next instruction) into IJMP2
+  ($1F2), so that the ISR resumes at that instruction when the next INT2
+  interrupt occurs. A CALLD with S = IRET2 and WCZ signals the cog that the
+  interrupt is complete: the cog clears its interrupt-busy flag for INT2, so
+  that another INT2 interrupt can occur.
 flags_affected:
-  C: No effect
-  Z: No effect
+  C: Set to IRET2[31], where the INT2 interrupt stored C
+  Z: Set to IRET2[30], where the INT2 interrupt stored Z
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153"
+sources:
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153 (RESI2: Resume from INT2. (CALLD $1F2,$1F3 WCZ), 4 / 13...20; CALLD D,{#}S: write {C, Z, 10'b0, PC[19:0]} to D, C = S[31], Z = S[30])"
+  - "P2 Instructions v35 - Rev B/C Silicon, row 159 (RESI2, EEEE 1011001 110 111110010 111110011, alias, 4 / 13...20, register write D) and row 157 (CALLD D,{#}S: C = S[31], Z = S[30])"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INTERRUPTS (the interrupt stores the C/Z flags and return address in IRETx; RESI2 = CALLD IJMP2,IRET2 WCZ, so the ISR resumes at the next instruction when the next interrupt occurs; a CALLD with D = any register, S = IRETx and WCZ clears the cog's interrupt-busy flag for that interrupt, so another interrupt can occur)"
 documentation_level: structured
-compiler_operand_format:
-  name: operand_xlat
-  pattern: ''
-  description: No operands - translated instruction (RET*/RESI*/XSTOP)
-  valueType: 33
-compiler_encoding:
-  operandFormat: 33
 syntax_variants:
 - RESI2 Resume
 last_updated: '2025-09-19T16:04:17.376879'
@@ -39,3 +44,7 @@ specifics:
 has_group_documentation: true
 category: Branch
 oneliner: Resume from interrupt 2
+related:
+  - language/pasm2/calld.yaml
+  - language/pasm2/reti2.yaml
+  - architecture/interrupts.yaml

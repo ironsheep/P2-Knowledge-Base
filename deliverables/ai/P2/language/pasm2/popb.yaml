@@ -7,29 +7,22 @@ encoding:
   z: Result == 0
   clocks: '9...16 *'
 timing:
-  cycles: "9...16 (cog) / 9...26 (hub-exec)"
+  cycles: "9...16 (cog or LUT exec) / 9...26 (hub exec)"
   type: variable
   source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (clocks column), p.154"
-  notes: "Reads long from hub at --PTRB; hub-window dependent. +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
+  notes: "+1 clock if the long crosses a hub long."
 description: Read long from hub address --PTRB into D.
 flags_affected:
-  C: Set to MSB of long (bit 31 of popped value)
-  Z: Set if result equals zero
+  C: With WC or WCZ, set to the MSB of the long (bit 31)
+  Z: With WZ or WCZ, set if the result is zero
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.154"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_pushpop
-  pattern: D/# | D
-  description: Push immediate/register or Pop to register (PUSHA/PUSHB/POPA/POPB)
-  valueType: 32
-compiler_encoding:
-  operandFormat: 32
 syntax_variants:
 - POPB D
 last_updated: '2025-01-19'
-brief_description: Pop long from stack using PTRB
+brief_description: Read long from hub address --PTRB into D
 parameters:
-- Dest is the destination register to receive the popped value
-- PTRB is automatically decremented before the read
+- Dest is the destination register to receive the long read
+- PTRB is decremented before the read (--PTRB)
 category: Hub RAM
-oneliner: Pop long from hub stack using PTRB (pre-decrement)
+oneliner: Read long from hub address --PTRB into D

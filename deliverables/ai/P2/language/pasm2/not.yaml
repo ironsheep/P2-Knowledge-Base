@@ -26,7 +26,7 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 0110001 CZI DDDDDDDDD SSSSSSSSS
   write: D
   c: '!S[31]'
@@ -37,15 +37,13 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   c: '!D[31]'
   z: Result == 0
   clocks: '2'
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, NOT, p.105"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, NOT, pp.105-106"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, rows 59-60 (NOT D,{#}S {WC/WZ/WCZ}: get !S into D, D = !S, C = !S[31]; the alias NOT D: get !D into D, D = !D, C = !D[31]; footnote * Z = (result == 0); 2 clocks; write D)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.37 (NOT D,{#}S and NOT D {WC/WZ/WCZ}, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, NOT, pp.105-106 (Result line, Dest and Src parameters, both encoding rows 0110001 CZI / CZ0, write D, C !S[31] / !D[31], Z Result = 0, 2 clocks; explanation of the WC inversion and the WZ zero rule)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 0110001 CZI DDDDDDDDD SSSSSSSSS NOT D,S/# {WC/WZ/WCZ})"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_du
-  pattern: D{,S/#}
-  description: Destination register, optional Source register or immediate (unary/binary)
-  valueType: 3
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 3
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Bitwise NOT a value

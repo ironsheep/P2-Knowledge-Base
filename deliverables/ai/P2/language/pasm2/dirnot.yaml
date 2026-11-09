@@ -16,9 +16,9 @@ description: >-
   instruction prior.
 
   When Dest is a register, the register's value bits [10:0] are used as-is to form
-  the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRNOT
-  instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for
-  DIRNOT's use.
+  the 11-bit ID range. A prior SETQ overrides Dest[10:6] with the low five bits of
+  the SETQ value; an ALTx between the SETQ and DIRNOT keeps the override, and a SETQ
+  separated from DIRNOT by other instructions is not documented.
 
   The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within
   the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.
@@ -39,22 +39,23 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZL DDDDDDDDD 001000111
   write: DIRx
   c: Orig DIRx base bit
   z: Orig DIRx base bit
   clocks: '2'
+encoding_notes:
+- "DIRNOT uses the S-field code 001000111, the same code as TESTPN with XORC or XORZ."
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DIRNOT, p.72"
+sources:
+  - "description (a prior SETQ overrides D[10:6]): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), list of changes (DIRx/OUTx/FLTx/DRVx can now work on a span of pins, +D[10:6] pins; prior SETQ overrides D[10:6])"
+  - "description (an ALTx between the SETQ and DIRNOT keeps the override): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, pp.38-39 (SETQ / SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction); a SETQ separated by other instructions is in no source"
+  - "encoding_notes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 1101011 CZL DDDDDDDDD 001000111 for both TESTPN D/# XORC/XORZ and DIRNOT D/# {WCZ})"
+  - "P2 Instructions v35 - Rev B/C Silicon, row 356 (DIRNOT {#}D {WCZ}: toggle DIR bits of pins D[10:6]+D[5:0]..D[5:0]; wraps within DIRA/DIRB; prior SETQ overrides D[10:6]; C,Z = DIR bit; write DIRx; 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DIRNOT, p.72 (encoding table; Dest[5:0], Dest[10:6], the 9-bit literal range of Dest[8:6], ##Dest, the SETQ substitution, the wrap within DIRA or DIRB, C and Z set to the original base bit, 2 clocks; related list)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin instructions, p.39 (DIRNOT {#}D {WCZ}, 2 clocks)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pinop
-  pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
-    flags'
-  valueType: 30
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 30
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Toggle pin(s) to the opposite direction
@@ -66,3 +67,4 @@ related:
 - DIRNC
 - DIRZ
 - DIRNZ
+- architecture/io_pin_timing.yaml

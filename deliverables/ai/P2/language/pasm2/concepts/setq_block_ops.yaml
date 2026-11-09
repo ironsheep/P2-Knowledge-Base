@@ -1,44 +1,42 @@
 concept: setq_block_operations
 title: SETQ/SETQ2 Block Operations
 category: memory_operations
-description: Hardware-accelerated block memory transfers and operations using SETQ/SETQ2 prefixes
+description: Block memory transfers and operations using SETQ/SETQ2 prefixes
 documentation_level: comprehensive
 aliases:
-  - "erratum E1"
-  - "P2 erratum E1"
-  - "E1 erratum"
   - "SETQ Block Transfers Lose Their Pointer Step"
   - "SETQ block PTRx step lost"
 
 overview: |
-  SETQ and SETQ2 are prefix instructions that modify the next instruction to perform block operations.
-  They enable fast, hardware-accelerated transfers between hub and cog/LUT memory, block arithmetic,
-  and multi-long operations. These are essential for efficient data movement and initialization.
-  
-  Critical for waveform tables, debug state preservation, and high-speed data processing.
+  SETQ and SETQ2 set Q. Before RDLONG, WRLONG or WMLONG, SETQ invokes a block transfer between hub RAM and
+  cog register RAM, and SETQ2 a block transfer between hub RAM and cog lookup RAM.
+
+  Block moves yield to the hub FIFO interface, so they can be used during hub execution.
+  A block RDLONG with WC/WZ/WCZ sets the flags according to the last long read in the
+  sequence. Cog registers $1F8..$1FF are special-purpose registers which cannot be
+  transferred to hub RAM via SETQ+WRLONG/WMLONG.
 
 silicon_errata:
   intervening_altx_augs_augd_cancels_ptrx_block_delta:
-    severity: critical
     applies_to: "A SETQ/SETQ2 block RDLONG/WRLONG/WMLONG that uses a PTRx update expression (e.g. ptra++), with an ALTx, AUGS or AUGD between the SETQ/SETQ2 and the transfer"
     description: |
-      An ALTx, AUGS, or AUGD instruction placed BETWEEN SETQ/SETQ2 and the block
+      An ALTx, AUGS, or AUGD instruction placed between SETQ/SETQ2 and the block
       RDLONG/WRLONG/WMLONG cancels the special-case block-size PTRx delta. The expected
       number of longs still transfers, but PTRx is then modified only by the normal PTRx
-      expression's own step (+4 for ptra++, +12 for ptra++[3]), NOT by N*4.
+      expression's own step (+4 for ptra++, +12 for ptra++[3]), not by N*4.
     example: |
       SETQ   #16-1            ' ready to load 16 longs
-      ALTD   start_reg        ' alter start register -- this intervening ALTD CANCELS the block-size PTRx delta
-      RDLONG 0, ptra++        ' ptra is incremented by 4 (1 long), NOT 16*4 as anticipated
+      ALTD   start_reg        ' alter start register: the intervening ALTD cancels the block-size PTRx delta
+      RDLONG 0, ptra++        ' ptra is incremented by 4 (1 long), not by 16*4
     workaround: "Keep SETQ/SETQ2 immediately adjacent to the block transfer -- place no ALTx/AUGS/AUGD between them."
-    status: "Active in Rev C silicon (current production)."
+    status: "Present in the Rev C silicon tested."
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS. Hardware-verified on Rev C (EF-067): the whole block moves to the ALTD destination; ptra++ steps +4 and ptra++[3] +12, across PTRA/PTRB, RDLONG/WRLONG, SETQ2 and an 8-long block (only ALTD tested as the intervening instruction)."
 
 setq_instructions:
   SETQ:
     function: "Set block count for cog RAM operations"
     syntax: "SETQ #count-1"
-    range: "0-511 (transfer 1-512 longs)"
+    range: "Number of longs minus 1. Not documented: the maximum count"
     target: "Cog RAM ($000-$1FF)"
     encoding: "9-bit immediate or register"
     example: |
@@ -48,14 +46,14 @@ setq_instructions:
   SETQ2:
     function: "Set block count for LUT RAM operations"
     syntax: "SETQ2 #count-1"
-    range: "0-511 (transfer 1-512 longs)"
-    target: "LUT RAM ($200-$3FF in logical space)"
+    range: "Number of longs minus 1. Not documented: the maximum count"
+    target: "Lookup RAM ($000-$1FF)"
     encoding: "9-bit immediate or register"
-    critical_note: "SETQ2 targets LUT, SETQ targets COG - don't confuse!"
+    critical_note: "SETQ2 targets LUT; SETQ targets cog"
     example: |
       SETQ2 #255         ' Setup for 256 longs
       RDLONG 0, PTRB     ' Read 256 longs from hub to LUT[0..255]
-      ' Note: Use 0 for LUT start, not $200!
+      ' 0 is the first lookup RAM long
 
 block_operations:
   hub_to_cog_transfer:
@@ -65,6 +63,8 @@ block_operations:
       SETQ #count-1
       RDLONG first_cog_reg, hub_address
     timing: "One long per clock, unless the hub FIFO is accessing the same hub RAM slice on the same cycle"
+    flags: "RDLONG with WC/WZ/WCZ sets the flags according to the last long read in the sequence"
+    hub_execution: "Block moves yield to the hub FIFO interface, so they can be used during hub execution"
     example: |
       SETQ #31           ' 32 longs
       RDLONG buffer, ##source_data
@@ -81,19 +81,19 @@ block_operations:
     syntax: |
       SETQ #count-1
       WRLONG first_cog_reg, hub_address
-    timing: "One long per clock, unless the hub FIFO is accessing the same hub RAM slice on the same cycle"
+    timing: "One long per clock. Not documented: whether a FIFO access to the same hub RAM slice delays a block write"
     example: |
       SETQ #63           ' 64 longs
       WRLONG results, PTRA
       ' Writes cog[results..results+63] to hub[PTRA..PTRA+255]
-    source: "timing: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES"
+    source: "timing: Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Hub RAM, Sequential Access, pp.24-25 (fast block moves read or write a sequential series of longs at one per clock cycle); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES (the FIFO-priority statement is made for RDLONG only)"
 
   hub_to_lut_transfer:
     instruction: "SETQ2 + RDLONG"
     operation: "Read multiple longs from hub to LUT"
     syntax: |
       SETQ2 #count-1
-      RDLONG 0, hub_address  ' Use 0 for LUT start!
+      RDLONG 0, hub_address  ' 0 is the first lookup RAM long
     critical_pattern: |
       ' Load complete waveform table to LUT
       load_sine_table
@@ -111,7 +111,7 @@ block_operations:
     operation: "Write multiple longs from LUT to hub"
     syntax: |
       SETQ2 #count-1
-      WRLONG 0, hub_address  ' Use 0 for LUT start!
+      WRLONG 0, hub_address  ' 0 is the first lookup RAM long
     debug_pattern: |
       ' Spin2 debugger: move hub longs in blocks of up to $100 through this cog's LUT
       .block  decod   pb,#8           'determine number of longs in block ($100 max)
@@ -125,9 +125,22 @@ block_operations:
               _ret_   tjnz    pa,#.block      'another block?
     source: "Parallax Spin2/PASM Debugger v51 (2025.04.02), Debugger Setup, move routine ('Move pa bytes from @ptra to @ptrb')"
 
+ptrx_with_block_transfers:
+  rule: "With a prior SETQ/SETQ2, the PTRx expression's index is overridden by the number of longs, with bit 4 of the encoded index serving as the ++/-- indicator. In plain PTRA/PTRB the index is overridden with zero. The updating forms move the pointer by the whole block."
+  forms:
+    - "RDLONG first_reg,PTRA: reads x+1 longs from PTRA"
+    - "RDLONG first_reg,PTRA++: reads x+1 longs from PTRA, PTRA += (x+1)*4"
+    - "RDLONG first_reg,PTRA--: reads x+1 longs from PTRA, PTRA -= (x+1)*4"
+    - "RDLONG first_reg,++PTRA: reads x+1 longs from PTRA+(x+1)*4, PTRA += (x+1)*4"
+    - "RDLONG first_reg,--PTRA: reads x+1 longs from PTRA-(x+1)*4, PTRA -= (x+1)*4"
+  count: "x is the SETQ/SETQ2 value: the number of longs, minus 1"
+  worked_case: "SETQ #3 (4 longs) then RDLONG first_reg,ptra++ moves PTRA by 16"
+  cancelled_by: "An ALTx, AUGS or AUGD between SETQ/SETQ2 and the transfer cancels the block-size step: the block still moves, and PTRx takes only the ordinary expression's step. Preceded by ALTD, SETQ #3 with ptra++ steps PTRA by 4 instead of 16, and ptra++[3] steps it by 12."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES (index overridden with the number of longs; bit 4 of the encoded index as the ++/-- indicator; plain PTRA/PTRB overridden with zero), KNOWN SILICON BUGS; the ALTD case: EF-067 (real P2 silicon; only ALTD tested as the intervening instruction)"
+
 production_patterns:
   waveform_buffer_management:
-    description: "Use LUT as waveform buffer"
+    description: "A SETQ2 block transfer into lookup RAM, processing there, and a SETQ2 block transfer back to hub RAM"
     code: |
       ' Process audio/waveform data via LUT
       process_waveform
@@ -135,11 +148,11 @@ production_patterns:
               setq2   #128-1
               rdlong  0, sample_ptr
               
-              ' Process in LUT (faster than HUB)
+              ' Process the samples in LUT
               mov     index, #0
       .loop   rdlut   sample, index
-              ' Apply DSP operations
-              sar     sample, #1      ' Volume control
+              ' Halve each sample, then add an offset
+              sar     sample, #1      ' arithmetic shift right by 1
               add     sample, dc_offset
               wrlut   sample, index
               incmod  index, #127
@@ -152,37 +165,26 @@ production_patterns:
     
 special_operations:
   block_math:
-    description: "SETQ modifies certain math operations"
+    description: "SETQ supplies Q to the instruction that follows"
     operations:
       MUXQ:
         syntax: "SETQ mask + MUXQ dest, source"
         operation: "dest = (dest & !mask) | (source & mask)"
-        use: "Masked merge operation"
       
       COGINIT:
-        syntax: "SETQ #ptra_ptrb + COGINIT #cog, #address"
-        operation: "Initialize cog with PTRA/PTRB values"
-        encoding: "PTRA[19:0] in bits 19:0, PTRB[19:0] in bits 39:20"
+        syntax: "SETQ value + COGINIT D, S"
+        operation: "The SETQ value is written into the started cog's PTRA register (a 32-bit value, e.g. a pointer to a runtime data structure or a parameter); without a SETQ, PTRA is cleared to zero. S is written into the started cog's PTRB."
+        source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS (COGINIT)"
 
   full_width_q_value:
     description: |
       SETQ sets Q = D. With a register operand (or a ## immediate, which the
-      assembler implements via AUGS), Q can hold a full 32-bit value. This matters
-      for Q uses that need all 32 bits -- e.g. a MUXQ mask, or the packed PTRA/PTRB
-      for SETQ+COGINIT.
-    block_count_limit: |
-      It does NOT extend a block-move COUNT beyond 512. SETQ/SETQ2 block transfers
-      target cog register RAM or cog lookup RAM, each of which is 512 longs, so the
-      maximum block transfer is 512 longs (count field = number of longs minus 1).
+      assembler implements via AUGS), Q can hold a full 32-bit value, as used by
+      a MUXQ mask and the 32-bit PTRA value of SETQ+COGINIT.
+    block_count_limit: "The block-move count is the number of longs minus 1. Cog register RAM and cog lookup RAM are each 512 longs. Not documented: the maximum block-move count."
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG RAM, LOOKUP RAM (cog and LUT are each 512 x 32-bit longs); FAST BLOCK MOVES ('x = number of longs, minus 1')"
 
 block_fill:
-  cog_fill:
-    instruction: "none"
-    operation: "No SETQ block form fills cog registers with a value"
-    note: "WRLONG/WMLONG write HUB memory, so SETQ + WRLONG cannot fill cog registers; SETQ + RDLONG copies hub longs INTO the cog."
-    source: "note: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES"
-
   hub_fill:
     instruction: "SETQ + WRLONG/WMLONG with an immediate D"
     operation: "Fill hub memory with an immediate value"
@@ -192,20 +194,20 @@ block_fill:
     example: |
       SETQ #15
       WRLONG #0, ##buffer_hub  ' Clear 16 hub longs
-    note: "Only an immediate D fills; a register D writes that many cog-register longs to hub instead."
-    source: "note: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES"
+    note: "With an immediate D the instruction writes that immediate value to hub RAM; with a register D it writes that many cog-register longs to hub."
+    cog_and_lookup_ram: "The fill writes hub RAM only. No SETQ/SETQ2 block form fills cog register RAM or lookup RAM with a value: the block forms are RDLONG, which copies hub longs into cog register RAM or lookup RAM, and WRLONG/WMLONG, which write register longs, lookup RAM longs or an immediate value into hub RAM."
+    source: "note and cog_and_lookup_ram: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES (the SETQ/SETQ2 + RDLONG and SETQ/SETQ2 + WRLONG/WMLONG forms; an immediate D writes that value to RAM as a memory filler)"
 
 performance:
-  transfer_rate: "One long per clock, unless the hub FIFO is accessing the same hub RAM slice on the same cycle (the FIFO gets priority and the block move waits for the slice to come around again)"
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES"
-  lut_advantage: "After load, RDLUT reads a LUT long in 3 clocks and WRLUT writes one in 2"
+  transfer_rate: "One long per clock. For a block RDLONG, unless the hub FIFO is accessing the same hub RAM slice on the same cycle (the FIFO gets priority and the block move waits for the slice to come around again). Not documented: whether a FIFO access to the same slice delays a block write"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES (rate and FIFO priority stated for RDLONG); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Hub RAM, Sequential Access, pp.24-25 (reads and writes at one per clock cycle)"
+  lookup_ram_access_clocks: "RDLUT reads a lookup RAM long in 3 clocks and WRLUT writes one in 2"
 
   limitations:
-    - "Maximum 512 longs per operation"
-    - "Must be contiguous memory"
-    - "Cannot cross cog/LUT boundary"
+    - "Not documented: the maximum number of longs per operation"
+    - "The instruction table lists one RDLONG range (9...16 clocks in cog or LUT execution) and one WRLONG range (3...10), each noting that a prior SETQ/SETQ2 invokes a block transfer. Not documented: how those ranges apply to a block transfer, and the clocks a block transfer spends before its first long moves"
     - "SETQ/SETQ2 shields the next instruction from interruption"
-    - "LUT addressing starts at 0, not $200 for SETQ2"
+    - "RDLUT and WRLUT address lookup RAM longs $000 to $1FF. Not documented: whether the first_lut address of a SETQ2 block transfer takes any value outside $000 to $1FF"
 
 common_patterns:
   array_copy:
@@ -217,14 +219,15 @@ common_patterns:
   buffer_clear:
     code: |
       SETQ #buffer_size-1
-      WRLONG #0, #buffer_start
+      WRLONG #0, ##buffer_start
     description: "Clear buffer to zero"
 
   context_save:
     code: |
       SETQ #31              ' Save 32 registers
       WRLONG 0, context_ptr ' Save cog[0..31]
-    description: "Save register context"
+    description: "Save register context. Registers $1F8..$1FF cannot be transferred to hub RAM via SETQ+WRLONG/WMLONG, so a save of the full register range does not include them."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES ($1F8..$1FF cannot be block-written to hub)"
 
   context_restore:
     code: |
@@ -235,7 +238,7 @@ common_patterns:
   lut_table_load:
     code: |
       SETQ2 #255            ' Half of LUT
-      RDLONG 0, ##sine_table ' Note: 0, not $200!
+      RDLONG 0, ##sine_table ' 0 is the first lookup RAM long
     description: "Load lookup table"
 
   fast_memcpy:
@@ -248,7 +251,7 @@ common_patterns:
         WRLONG temp_buffer, dst_ptr
         ADD dst_ptr, ##512
         DJNZ count, #.copy_loop
-    description: "Fast memory copy routine"
+    description: "Memory copy routine"
 
 advanced_usage:
   partial_transfers:
@@ -260,8 +263,7 @@ advanced_usage:
       RDLONG buffer, PTRA
 
   strided_access:
-    description: "Cannot do strided - must be contiguous"
-    workaround: "Use multiple SETQ operations"
+    description: "A block transfer moves x+1 consecutive longs; this loop copies every 4th long without one"
     example: |
       ' Copy every 4th long
       MOV index, #0
@@ -279,26 +281,11 @@ advanced_usage:
 
 debugging:
   verification:
-    - "Check SETQ count is N-1, not N"
-    - "Verify address alignment"
-    - "Confirm no boundary crossing"
-    - "Test with small counts first"
-    - "Remember: LUT uses 0, not $200 with SETQ2"
+    - "The SETQ/SETQ2 value is the number of longs minus 1"
 
   common_errors:
     off_by_one: "Using count instead of count-1"
-    boundary_cross: "Transfer across cog/LUT boundary"
-    wrong_prefix: "Swapping prefixes — SETQ2 is for LUT, SETQ for cog/hub"
-    lut_addressing: "Using $200 instead of 0 with SETQ2"
-
-best_practices:
-  - "Always use count-1 in SETQ/SETQ2"
-  - "Align transfers to long boundaries"
-  - "Use for initialization and bulk copies"
-  - "Document transfer sizes clearly"
-  - "Test boundary conditions"
-  - "Use LUT for frequently accessed tables"
-  - "Preserve debug state with SETQ blocks"
+    wrong_prefix: "Swapping prefixes: SETQ2 is for lookup RAM, SETQ for cog register RAM"
 
 sources:
   - "Parallax SPI Flash Programmer and Boot Loader v51, Loader (SETQ moves code from cog to hub) and Move application down to $00000+ (SETQ2 block copy)"

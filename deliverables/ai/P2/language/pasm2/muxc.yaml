@@ -11,19 +11,13 @@ timing:
   type: fixed
 description: >-
   Mux C into each D bit that is '1' in S. D = (!S & D) | (S & {32{C}}).
-  Each bit position in D where S has a '1' is replaced with the C flag value.
+  Each bit position in D where S has a '1' is replaced with the C flag value; all
+  other D bits are left unchanged.
 flags_affected:
-  C: Set to parity of result
-  Z: Set if result equals zero
+  C: With WC or WCZ, set if the number of high bits in the result is odd, cleared if even
+  Z: With WZ or WCZ, set if the result is zero, cleared if not
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, MUXC / MUXNC, p.100"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:
-  operandFormat: 0
 syntax_variants:
 - MUXC D,{#}S
 last_updated: '2025-09-19T16:04:17.272624'

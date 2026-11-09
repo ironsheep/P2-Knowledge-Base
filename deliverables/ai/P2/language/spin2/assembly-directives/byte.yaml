@@ -2,7 +2,7 @@ directive: BYTE
 name: Insert Byte Data
 description: Insert byte data into the assembly image at the current origin at assembly
   time
-syntax: BYTE value1 {, value2, ...}
+syntax: BYTE data{[count]}{, data{[count]}...}
 examples:
 - BYTE  $FF              ' Single byte value
 - BYTE  10, 20, 30       ' Multiple byte values
@@ -24,7 +24,7 @@ see_also:
 - ALIGNL
 - ALIGNW
 - language/pasm2/fvar.yaml
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Categorical Listing Of Propeller 2 Assembly Language (Directives), p.15; Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (DAT Symbols and Data)"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Categorical Listing Of Propeller 2 Assembly Language (Directives), p.15; Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (DAT Symbols and Data); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), assembler directives (BYTE data{[count]}{,data{[count]}...})"
 created_date: '2025-09-19'
 group: Data Declaration
 last_updated: '2025-09-19T16:04:17.652869'

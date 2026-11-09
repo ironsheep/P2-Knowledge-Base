@@ -13,12 +13,41 @@ component_name: "Interrupt System"
 
 component_type: "hardware_interrupt_controller"
 
+aliases:
+  - "interrupts"
+  - "interrupt priority"
+  - "interrupt priority levels"
+  - "interrupt sources"
+  - "interrupt event sources"
+  - "interrupt latency"
+  - "interrupt rate"
+  - "INT1 INT2 INT3"
+  - "IJMP1 IJMP2 IJMP3"
+  - "IRET1 IRET2 IRET3"
+  - "interrupt jump address"
+  - "interrupt service routine"
+  - "ISR"
+  - "return from interrupt"
+  - "interrupt return"
+  - "nested interrupts"
+  - "interrupt nesting depth"
+  - "same level interrupt events ignored"
+  - "interrupt branch deferral"
+  - "stall interrupts"
+  - "critical section"
+  - "software interrupt trigger"
+  - "cancel a pending interrupt"
+  - "timer interrupt"
+  - "pin change interrupt"
+  - "what is saved on interrupt"
+
 description: |
-  The P2 provides a sophisticated three-level interrupt system plus debug interrupt capability 
-  for each COG. Interrupts enable event-driven programming with automatic context switching,
-  allowing COGs to respond quickly to hardware events while preserving their execution state.
-  Each level has its own dedicated IJMPx/IRETx pair. It does NOT have a shadow register bank --
-  see automatic_state_save below, which states what the hardware does and does not preserve.
+  Each cog has three interrupts, INT1, INT2 and INT3, where INT1 has the
+  highest priority, INT2 the middle priority and INT3 the lowest, and a fourth, hidden debug interrupt that has priority over all of them. Each
+  of INT1..INT3 takes its event from one of 16 sources selected by SETINTx, and
+  has its own IJMPx/IRETx register pair: the interrupt jumps to where IJMPx
+  points and stores the C/Z flags and return address in IRETx. See
+  automatic_state_save below for what the interrupt branch writes.
 
 architecture:
   interrupt_levels: 3
@@ -33,18 +62,17 @@ architecture:
   
   automatic_state_save:
     description: >-
-      There are no shadow register banks. An interrupt branch is realised by inserting a
-      'CALLD IRETx,IJMPx WCZ' into the instruction pipeline, and that CALLD is the whole
-      of the automatic save: the return address and the C and Z flags are written into
-      the level's dedicated IRETx register. Nothing else is preserved by hardware -- PA,
-      PB, PTRA, PTRB, the CORDIC result queue and every general register are shared with
-      the interrupted code and must be saved by the ISR if it disturbs them.
+      An interrupt branch is realised by inserting a
+      'CALLD IRETx,IJMPx WCZ' into the instruction pipeline. That CALLD writes the
+      return address and the C and Z flags into the level's dedicated IRETx register.
+      Not documented: any other automatic save of registers (PA, PB, PTRA, PTRB or
+      general registers).
     saved_automatically:
       - "Return address -- into IRETx"
       - "C and Z flags -- into IRETx (the CALLD carries WCZ)"
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS.
-    context_switch_time: "Not documented as a clock count. IJMPx/IRETx are dedicated registers."
+    context_switch_time: "Not documented: a clock count for the interrupt branch. IJMPx/IRETx are dedicated registers."
   
   interrupt_sources:
     total_sources: 16
@@ -85,48 +113,51 @@ architecture:
       
       - type: "attention"
         sources: ["14 = attention requested by other cog(s)"]
-        description: "Inter-cog attention signal, raised by COGATN"
+        description: >-
+          Attention signal, raised by COGATN. A COGATN that names the issuing cog's own
+          bit also raises that cog's attention event flag. Not documented: whether that
+          self strobe also triggers an attention interrupt
       
       - type: "cordic"
         sources: ["15 = GETQX/GETQY executed with no CORDIC result available or in progress"]
-        description: "A CORDIC result was read when none was pending -- not a completion event"
+        description: "GETQX/GETQY executed without any CORDIC results available or in progress"
 
 configuration_registers:
   source: >-
     Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS.
-    Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Special-Purpose Registers (cog special-purpose register table), p.13.
+    Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Dual-purpose Registers (IJMPx/IRETx rows), p.13. Instruction CSV row 157 (CALLD writes {C, Z, 10'b0, PC[19:0]} to D).
     Both list INT3 at the LOWEST addresses and INT1 at the highest; the RETIx alias definitions in
     Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language, agree (RETI1 = CALLD INB,$1F5).
   registers:
     - register: "IJMP3"
       address: "$1F0"
       description: "Interrupt call (jump) address for INT3"
-      format: "20-bit address in hub or cog memory"
+      format: "Holds the address the interrupt branch jumps to (the S of the inserted CALLD IRETx,IJMPx WCZ)"
     
     - register: "IRET3"
       address: "$1F1"
       description: "Interrupt return address for INT3 (written by the dispatched CALLD)"
-      format: "20-bit return address, with the C and Z flags captured by the CALLD's WCZ"
+      format: "{C, Z, 10'b0, PC[19:0]}, written by the CALLD (WCZ captures C and Z)"
     
     - register: "IJMP2"
       address: "$1F2"
       description: "Interrupt call (jump) address for INT2"
-      format: "20-bit address in hub or cog memory"
+      format: "Holds the address the interrupt branch jumps to (the S of the inserted CALLD IRETx,IJMPx WCZ)"
     
     - register: "IRET2"
       address: "$1F3"
       description: "Interrupt return address for INT2 (written by the dispatched CALLD)"
-      format: "20-bit return address, with the C and Z flags captured by the CALLD's WCZ"
+      format: "{C, Z, 10'b0, PC[19:0]}, written by the CALLD (WCZ captures C and Z)"
     
     - register: "IJMP1"
       address: "$1F4"
       description: "Interrupt call (jump) address for INT1"
-      format: "20-bit address in hub or cog memory"
+      format: "Holds the address the interrupt branch jumps to (the S of the inserted CALLD IRETx,IJMPx WCZ)"
     
     - register: "IRET1"
       address: "$1F5"
       description: "Interrupt return address for INT1 (written by the dispatched CALLD)"
-      format: "20-bit return address, with the C and Z flags captured by the CALLD's WCZ"
+      format: "{C, Z, 10'b0, PC[19:0]}, written by the CALLD (WCZ captures C and Z)"
 
 instructions:
   - instruction: "STALLI"
@@ -199,16 +230,22 @@ instructions:
   
   - instruction: "NIXINT1"
     encoding: "EEEE 1101011 000 000100101 000100100"
-    description: "Cancel pending interrupt 1"
-    operation: "Clear interrupt 1 pending flag"
-  
+    description: "Cancel INT1: nix an INT1 interrupt that has been triggered and is waiting to branch"
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS (NIXINTx); encoding:
+      P2 Instructions v35 - Rev B/C Silicon, rows 307-309.
+    operation: |
+      An interrupt that has been triggered and is waiting to branch does not branch.
+      NIXINTx is only useful in main code after STALLI executes, or in an ISR that
+      needs to stop a lower-level interrupt from executing after the current ISR exits.
+
   - instruction: "NIXINT2"
     encoding: "EEEE 1101011 000 000100110 000100100"
-    description: "Cancel pending interrupt 2"
-  
+    description: "Cancel INT2: nix an INT2 interrupt that has been triggered and is waiting to branch"
+
   - instruction: "NIXINT3"
     encoding: "EEEE 1101011 000 000100111 000100100"
-    description: "Cancel pending interrupt 3"
+    description: "Cancel INT3: nix an INT3 interrupt that has been triggered and is waiting to branch"
   
   - instruction: "RETI0"
     encoding: "EEEE 1011001 110 111111111 111111111"
@@ -223,7 +260,7 @@ instructions:
       RETI0 = CALLD INB,INB WCZ
       Returns to the interrupted cog program and restores C and Z from IRET0.
     flags_affected: "C, Z (restored from IRET0)"
-    timing: "4 clocks"
+    timing: "4 clocks cog/LUT, 13...20 hub"
     usage_example: |
       RETI0                   ' Return from a debug ISR
   
@@ -233,7 +270,7 @@ instructions:
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS; alias
       definition: Assembly Language (alias definitions).
-    timing: "4 clocks"
+    timing: "4 clocks cog/LUT, 13...20 hub"
   
   - instruction: "RETI2"
     encoding: "EEEE 1011001 110 111111111 111110011"
@@ -241,7 +278,7 @@ instructions:
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS; alias
       definition: Assembly Language (alias definitions).
-    timing: "4 clocks"
+    timing: "4 clocks cog/LUT, 13...20 hub"
   
   - instruction: "RETI3"
     encoding: "EEEE 1011001 110 111111111 111110001"
@@ -249,12 +286,12 @@ instructions:
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS; alias
       definition: Assembly Language (alias definitions).
-    timing: "4 clocks"
+    timing: "4 clocks cog/LUT, 13...20 hub"
 
 interrupt_sources_detail:
   - source_id: "%0000"
     name: "Disabled"
-    description: "Interrupt disabled"
+    description: "<off>, the default on cog start for INT1/INT2/INT3"
   
   - source_id: "%0001"
     name: "CT-passed-CT1"
@@ -291,7 +328,7 @@ interrupt_sources_detail:
   
   - source_id: "%1000"
     name: "PAT-event"
-    description: "Pin pattern match or mismatch (PAT register event)"
+    description: "Pin pattern match or mismatch occurred, established by SETPAT"
 
   - source_id: "%1001"
     name: "FIFO-event"
@@ -315,13 +352,15 @@ interrupt_sources_detail:
 
   - source_id: "%1110"
     name: "ATN-event"
-    description: "Attention (ATN) from another COG"
+    description: >-
+      Attention (ATN) requested by other cog(s) with COGATN. A COGATN that names this
+      cog's own bit also sets its attention event flag. Not documented: whether that
+      self strobe also triggers this interrupt
 
   - source_id: "%1111"
     name: "QMT-CORDIC-read-with-no-result"
     description: >-
-      GETQX/GETQY executed without any CORDIC result available or in progress. This fires
-      on a read that had nothing to read -- it is NOT a "CORDIC finished" event.
+      GETQX/GETQY executed without any CORDIC results available or in progress.
 
 programming_patterns:
   - pattern: "timer_interrupt"
@@ -332,7 +371,10 @@ programming_patterns:
               GETCT   timeout
               ADDCT1  timeout, ##160_000   ' 1ms at 160MHz
               SETINT1 #%0001               ' CT passed CT1
-              
+
+      main    ' ... main program; it must not run on into the ISR ...
+              JMP     #main
+
       timer_isr
               ' Interrupt code here
               ADDCT1  timeout, ##160_000   ' Setup next interrupt
@@ -345,7 +387,10 @@ programming_patterns:
               MOV     IJMP2, #pin_isr      ' Set ISR address
               SETSE1  #%001_000000 + PIN   ' SE1 = INA/INB bit of PIN rises
               SETINT2 #%0100               ' INT2 from SE1
-              
+
+      main    ' ... main program; it must not run on into the ISR ...
+              JMP     #main
+
       pin_isr
               ' Handle pin change. POLLSE1 clears the SE1 event flag.
               POLLSE1
@@ -362,7 +407,10 @@ programming_patterns:
               SETINT1 #%0001              ' Timer
               SETINT2 #%0100              ' Pin event
               SETINT3 #%1110              ' ATN event (source 14)
-              
+
+      main    ' ... main program; it must not run on into the ISRs ...
+              JMP     #main
+
       ' ISRs can interrupt each other based on priority
       int1_isr
               ' INT1 - highest; cannot be interrupted by INT2 or INT3
@@ -387,46 +435,55 @@ programming_patterns:
               ALLOWI                      ' Allow interrupt branches
 
 best_practices:
-  - practice: "keep_isr_short"
-    description: "Minimize code in interrupt service routines"
-    rationale: "INT1 can interrupt INT2 and INT3, INT2 can interrupt INT3, and INT3 can only interrupt non-interrupt code"
-  
-  - practice: "acknowledge_sources"
-    description: "Clear interrupt sources within ISR"
-  
-  - practice: "save_registers"
+  - practice: "same_level_events_ignored"
     description: >-
-      Hardware saves ONLY the return address and the C/Z flags, into IRETx. PA, PB, PTRA,
-      PTRB, the CORDIC queue and every general register are shared with the interrupted
-      code -- an ISR that touches them must save and restore them itself.
-    rationale: "There are no shadow register banks"
-    source: "rationale: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS"
+      While an interrupt is waiting to branch and while its ISR executes, every
+      further event at the same priority level is ignored, not held: an ISR that
+      runs past its level's next event misses that event. INT1 can interrupt INT2 and
+      INT3, INT2 can interrupt INT3, and INT3 can only interrupt non-interrupt code.
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS (the three interrupt states; during states 2 and 3 intervening events at the same priority level are ignored; the INT1/INT2/INT3 priority rules)"
+
+  - practice: "isr_end_and_event_flags"
+    description: >-
+      When an ISR ends, its interrupt returns to waiting for a new interrupt event.
+      An ISR for a CT1 interrupt sets the next CT1 target with ADDCT1 before RETI1;
+      ADDCT1 also clears the CT-passed-CT1 event flag. Not documented:
+      whether an interrupt branch clears its source's event flag.
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS (the three interrupt states; Example: Using INT1 as a CT1 interrupt) and EVENTS (ADDCT1 clears the CT-passed-CT1 event flag)"
+
+  - practice: "automatic_save"
+    description: >-
+      The CALLD that realises the interrupt branch writes the return address and the C/Z
+      flags into IRETx. Not documented: any other automatic save.
+    rationale: "Not documented: any register save beyond the CALLD's write into IRETx"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS"
   
-  - practice: "avoid_hub_ops"
-    description: "Minimize hub operations in ISRs"
-    rationale: "A hub operation waits for the cog's hub slot"
+  - practice: "hub_access_in_isr"
+    description: "A hub read or write in an ISR waits, as anywhere, up to 7 clocks to reach the hub RAM slice it needs, and that time is part of the ISR's run time"
+    rationale: "When a cog wants to read or write the hub RAM, it must wait up to 7 clocks to access the initial RAM slice of interest"
+    source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Cog-to-Hub RAM Interface, p.16 (up to 7 clocks); Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB (hub RAM slices)"
 
 performance_characteristics:
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INTERRUPTS"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INTERRUPTS; CALLD and RETIx/RESIx clocks: P2 Instructions v35 - Rev B/C Silicon, rows 157-165 (4 cog/LUT, 13...20 hub)"
   dispatch_mechanism: |
     Interrupt dispatch mechanism: "Interrupt branches are realized, internally,
     by inserting a 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline
     while holding the program counter at its current value, so that the
     interrupt later returns to the address saved in IRETx."
-  
+
   entry_overhead:
-    cogexec: "4 clocks for the dispatched CALLD (per language/pasm2/calld.yaml encoding 4 / 13-20)"
-    hubexec: "13-20 clocks for the dispatched CALLD (FIFO refill on the branch)"
-    note: "These are CALLD's own timings; the source states the CALLD insertion, not a clock count for interrupt entry. They assume none of the deferral conditions apply. Time spent waiting for those conditions to clear is additional."
-  
+    cogexec: "Not documented: a clock count for the interrupt branch. A CALLD instruction takes 4 clocks in cog/LUT execution."
+    hubexec: "Not documented: a clock count for the interrupt branch. A CALLD instruction takes 13...20 clocks in hub execution."
+    note: "The interrupt branch is an inserted CALLD; no clock count is given for it. Time spent waiting for the deferral conditions to clear comes before the branch."
+
   exit_overhead:
-    description: "RETIx / RESIx are themselves CALLD instructions and follow the same timing"
-    cogexec: "4 clocks (per language/pasm2/reti1.yaml (likewise reti2, reti3) and language/pasm2/resi1.yaml (likewise resi2, resi3) encoding)"
-    hubexec: "13-20 clocks"
-  
+    description: "RETIx / RESIx are themselves CALLD instructions and follow CALLD's timing"
+    cogexec: "4 clocks"
+    hubexec: "13...20 clocks"
+
   round_trip_minimum:
-    cogexec: "8 clocks (4 entry + 4 exit), excluding the ISR body"
-    hubexec: "~26 clocks (13 entry + 13 exit), excluding the ISR body"
+    cogexec: "Not documented: the interrupt branch has no clock count. The return (RETIx or RESIx) takes 4 clocks."
+    hubexec: "Not documented: the interrupt branch has no clock count. The return (RETIx or RESIx) takes 13...20 clocks."
   
   deferral_conditions:
     description: "The interrupt branch is held off while any of these are in progress"
@@ -437,47 +494,61 @@ performance_characteristics:
       - "STALLI..ALLOWI window"
       - "WAITx stall"
   
-  context_switch_overhead: "Not documented as a clock count. IJMPx/IRETx are dedicated registers; the dispatched CALLD captures C/Z and PC into IRETx automatically"
-  
+  context_switch_overhead: "Not documented: a clock count. IJMPx/IRETx are dedicated registers; the dispatched CALLD captures C/Z and PC into IRETx"
+
   interrupt_rate:
     note: |
-      Sustained rate is limited by entry overhead (4 clocks cog / 13-20 clocks
-      hub), exit overhead (same), and the ISR body. No 'one
-      interrupt every N clocks' figure applies because the achievable rate depends on
-      ISR length and execution mode.
-    sustained: "Limited by ISR execution time + entry/exit overhead"
-  
+      Not documented: a maximum interrupt rate. Each interrupt takes its branch
+      (no clock count given), the ISR body, and the return (4 clocks cog/LUT,
+      13...20 hub). Events at the same level that arrive before the ISR returns
+      are ignored (priority_preemption.interrupt_states).
+    sustained: "Limited by the ISR's run time and the branch and return; same-level events during that time are lost"
+
   priority_preemption:
-    description: "Higher priority interrupts preempt lower"
-    nesting_depth: 3
+    description: "Higher priority interrupts preempt lower: INT1 can interrupt INT2 and INT3, INT2 can interrupt INT3, INT3 can only interrupt non-interrupt code"
+    nesting_depth: "Not documented: a stated maximum nesting depth. The levels are the debug interrupt, INT1, INT2 and INT3; higher interrupts can interrupt lower ISRs"
+    interrupt_states:
+      description: >-
+        Each interrupt loops through three states: 1. waiting for an interrupt
+        event; 2. waiting for the interrupt branch; 3. executing the interrupt
+        service routine. During states 2 and 3, any intervening interrupt events
+        at the same priority level are ignored. When state 1 is returned to, a new interrupt
+        event is waited for. The ISR returns to state 1 with a CALLD whose S is
+        IRETx and which carries WCZ (RETIx or RESIx): the cog clears its
+        interrupt-busy flag for that interrupt, so that another one can occur.
+      states:
+        - "1: waiting for interrupt event"
+        - "2: waiting for interrupt branch (the deferral conditions, STALLI)"
+        - "3: executing interrupt service routine"
+      source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS (Interrupts loop through these three states; during states 2 and 3, any intervening interrupt events at the same priority level are ignored; when state 1 is returned to, a new interrupt event will be waited for; the CALLD with S = IRETx and WCZ clears the internal interrupt-busy flag; the branch-deferral conditions; STALLI holds off interrupt branches)"
 
 debugging_considerations:
   - consideration: "interrupt_timing"
-    description: "Use CT registers to measure ISR execution time"
+    description: "The difference between a GETCT at the ISR's entry and a GETCT before its return, in clocks, includes the clocks of the GETCT instructions themselves"
     code: |
       isr
           GETCT   start_time
           ' ... ISR code ...
           GETCT   end_time
           SUB     end_time, start_time
-          ' end_time contains ISR duration
+          ' end_time now holds the clocks between the two GETCTs
   
   - consideration: "interrupt_counting"
-    description: "Count interrupt occurrences for profiling"
-    
+    description: "A count kept by the ISR counts interrupts that branched; same-level events ignored during states 2 and 3 are not counted"
+
   - consideration: "debug_interrupt"
-    description: "Use debug interrupt for breakpoints"
+    description: "The debug interrupt provides breakpoints and single-stepping (architecture/debug_interrupt.yaml)"
     note: "Debug interrupt has highest priority"
 
 related_topics:
   - topic: "events"
     relationship: "Events can trigger interrupts"
-  
+
   - topic: "smart_pins"
     relationship: "A pin's INA/INB bit, selected with SETSEn, can trigger an interrupt"
-  
+
   - topic: "timers"
-    relationship: "CT timers primary interrupt source"
+    relationship: "CT-passed-CT1..CT3 are interrupt sources 1..3"
   
   - topic: "cog_attention"
     relationship: "ATN signals can trigger interrupts"
@@ -485,8 +556,11 @@ related_topics:
 sources:
     - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS"
     - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language (instruction encodings; RESIx / RETIx alias definitions)"
-    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Special-Purpose Registers (IJMPx/IRETx), p.13"
+    - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Dual-purpose Registers (IJMPx/IRETx), p.13"
     - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (SETINTx), p.44"
+    - "P2 Instructions v35 - Rev B/C Silicon, rows 157-165 (CALLD, RESIx, RETIx: 4 cog/LUT, 13...20 hub) and rows 303-309 (STALLI, TRGINTx, NIXINTx)"
+    - "EF-099 (COGATN with the issuing cog's own bit raises that cog's attention event flag; event flag only, the attention interrupt path not tested)"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SETQ CONSIDERATIONS (CRCNIB sequences protected from interrupts by STALLI/ALLOWI or by a REP block, which is automatically shielded from interrupts, including non-stallable debug interrupts)"
 
 # Per-instruction encodings for the RETIx aliases are carried in the RETI0..3
 # entries (the RESIx counterparts are language/pasm2/resi0.yaml .. resi3.yaml).

@@ -1,7 +1,9 @@
 method: WAITATN
 type: method
 description: |
-  Wait for attention signal from another cog
+  Wait for this cog to receive an ATN strobe. The strobe comes from a COGATN in
+  another cog, or from this cog's own COGATN when its CogMask names this cog.
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, COGATN (16-bit CogMask) and WAITATN (wait for this cog to receive an ATN strobe); the cog's own strobe: EF-099"
 category: COG Management
 syntax: "WAITATN()"
 parameters: []
@@ -33,7 +35,7 @@ examples:
 notes:
   - "Blocks execution until ATN signal received"
   - "ATN flag is cleared after WAITATN returns"
-  - "Another cog uses COGATN to send the signal"
+  - "COGATN sends the signal, from another cog or from this cog itself"
   - "Each cog has its own ATN flag"
   - "More efficient than polling shared variables"
   - "Use POLLATN for non-blocking check"

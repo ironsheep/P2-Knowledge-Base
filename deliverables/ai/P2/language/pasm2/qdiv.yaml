@@ -7,15 +7,15 @@ encoding:
   z: —
   clocks: '2...9'
 timing:
-  cycles: 2
-  type: fixed
+  cycles: "2...9"
+  type: variable
 description: Perform 64÷32 unsigned division with 32-bit quotient and remainder. Numerator
   formed from {SETQ value or 32'b0, D}, divided by S. Results retrieved via GETQX
   (quotient) and GETQY (remainder) instructions 55 clocks later.
 flags_affected:
   C: No effect
   Z: No effect
-long_description: 'The QDIV instruction performs high-precision unsigned division
+long_description: 'The QDIV instruction performs unsigned division
   using the P2''s 54-stage pipelined CORDIC solver. It divides a 64-bit numerator
   by a 32-bit denominator, producing both a 32-bit quotient and 32-bit remainder.
 
@@ -26,14 +26,8 @@ long_description: 'The QDIV instruction performs high-precision unsigned divisio
   GETQX and the remainder using GETQY.
 
 
-  This instruction is essential for precise arithmetic operations where full 64-bit
-  precision is needed in the dividend, such as fixed-point mathematics, scaling operations,
-  and algorithms requiring exact division results without precision loss.
-
-
-  The optional SETQ instruction allows for true 64-bit division when high precision
-  is required, while omitting SETQ effectively performs 32-bit division (equivalent
-  to {0, D} / S).
+  A preceding SETQ supplies the upper 32 bits of the 64-bit numerator; without SETQ
+  the numerator is {0, D}, a 32-bit division.
 
   '
 examples:
@@ -60,7 +54,7 @@ examples:
     GETQY   remainder      '' 2
 
     '
-  description: "64-bit numerator division. The quotient must fit in 32 bits: keep the SETQ value below the divisor."
+  description: "64-bit numerator division; the quotient is 32 bits."
 - code: ''' Variable division with remainder checking
 
     SETQ    dividend_high
@@ -79,9 +73,7 @@ examples:
 
     '
   description: Division with remainder analysis
-- code: ''' Fixed-point scaling: scale 32.32 fixed-point by integer
-
-    '' Example: scale value by 75% (multiply by 3, divide by 4)
+- code: ''' Scaling: multiply a 32-bit value by 3, then divide the 64-bit product by 4
 
     QMUL    fixed_point_low, #3   '' First multiply by 3
 
@@ -100,13 +92,16 @@ examples:
     GETQX   final_result
 
     '
-  description: Fixed-point arithmetic with scaling
+  description: Multiply by 3, then divide the 64-bit product by 4
 related_instructions:
 - GETQX
 - GETQY
 - SETQ
 - QFRAC
 - QMUL
+related:
+- language/pasm2/concepts/special_registers.yaml
+- language/pasm2/setq.yaml
 operand_details:
   SETQ: Upper 32 bits of 64-bit numerator (optional, defaults to 0)
   D: Lower 32 bits of 64-bit numerator
@@ -114,22 +109,15 @@ operand_details:
 result_details:
   GETQX: 32-bit quotient
   GETQY: 32-bit remainder
-timing_notes: Result available 55 clocks after instruction issue. Each cog can issue
+timing_notes: The cog first waits for its hub slot to hand the command to the CORDIC solver; the result is available 55 clocks after that, and GETQX/GETQY wait for it if it has not arrived. Each cog can issue
   one CORDIC instruction per hub window (every 8 clocks).
-usage_notes: Use SETQ before QDIV to specify upper 32 bits of numerator. Without SETQ,
-  upper 32 bits default to 0.
-divide_by_zero: "S = 0 does not trap or stall: GETQX returns NOT (the upper 32 bits of the numerator) and GETQY the lower 32 bits (D), every time, in the same time as a non-zero divide, and the next CORDIC operation is unaffected. So without SETQ: QDIV D,#0 -> $FFFF_FFFF remainder D; SETQ #1 -> $FFFF_FFFE; SETQ $FFFF_FFFF -> 0. Immediate #0 and a zero register behave the same. No Parallax document states it."
-applications: High-precision arithmetic, fixed-point scaling, remainder calculations,
-  algorithm implementations requiring exact division.
-documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.20, and CORDIC Solver Instructions, p.44; P2 Instructions v35 - Rev B/C Silicon, Sheet1"
+usage_notes: A SETQ before QDIV specifies the upper 32 bits of the numerator. Without SETQ,
+  the upper 32 bits are 0, and QDIV sets Q to zero (see language/pasm2/concepts/special_registers.yaml
+  q_register).
+divide_by_zero: "With S = 0 in cog execution, GETQX returns NOT (the upper 32 bits of the numerator) and GETQY the lower 32 bits (D), every time, in the same time as a non-zero divide, and the next CORDIC operation is unaffected. QDIV D,#0 with no SETQ gives $FFFF_FFFF remainder D; with SETQ #1 it gives $FFFF_FFFE; with SETQ $FFFF_FFFF it gives 0. Immediate #0 and a zero register give the same results."
+quotient_over_32_bits: "With a true quotient over 32 bits, in cog execution: SETQ #3 then QDIV of 7 by 2 (true quotient $1_8000_0003, remainder 1) gives GETQX $FFFF_FFFE and GETQY $0000_000B; SETQ #5 then QDIV of 11 by 4 (true quotient $1_4000_0002, remainder 3) gives GETQX $FFFF_FFFE and GETQY $0000_0013. Neither quotient is the low 32 bits of the true quotient, and neither is $FFFF_FFFF. Not documented: the result for any other dividend whose quotient exceeds 32 bits."
+documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.20, and CORDIC Solver Instructions, p.44; P2 Instructions v35 - Rev B/C Silicon, Sheet1; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), CORDIC Solver (DIVIDE) and SETQ CONSIDERATIONS (COGINIT/QDIV/QFRAC/QROTATE without a preceding SETQ set Q to zero); divide by zero: hardware-verified EF-089; quotient over 32 bits: P2 hardware verification, EF-116 (one board, cog execution, the two cases stated)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ls
-  pattern: D/#,S/#
-  description: 'Two operands: destination/immediate, source/immediate'
-  valueType: 13
-compiler_encoding:
-  operandFormat: 13
 last_updated: '2025-09-19T16:04:17.443443'
 category: CORDIC Solver
 oneliner: Perform 64÷32 unsigned division with 32-bit quotient and remainder

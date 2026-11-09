@@ -8,10 +8,10 @@ blocks:
     wrap: pasm2-dat
     assumes: [lowerpin]
   - at: code_examples[0].code
-    fp: "d0ec7983f55cbcb1"
+    fp: "14a795cf75b9ae62"
     compile: fragment
     wrap: spin2-top
     assumes: [x_config, y_config]
   - at: code_examples[1].code
-    fp: "882d476f398ad2a4"
+    fp: "dfccf268eeee9fa3"
     compile: program

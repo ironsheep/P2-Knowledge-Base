@@ -14,20 +14,20 @@ constants:
   
 # Critical: Requires DAC mode configuration
 dac_requirement: |
-  M[12:10] MUST be %101 for DAC output
+  M[12:10] must be %101 for DAC output
   Use: P_DAC_DITHER_RND | P_DAC_124R_3V | P_OE
   Other DAC options: P_DAC_990R_3V, P_DAC_600R_2V, P_DAC_75R_2V
 
 # Operation
 operation: |
-  Outputs 16-bit DAC value using 8-bit DAC with pseudo-random dithering.
-  Dithers between adjacent DAC levels every clock to achieve 16-bit
-  resolution averaged over time. No fixed period required.
+  Overrides M[7:0] to feed the pin's 8-bit DAC with pseudo-randomly-dithered data
+  on every clock. Pseudo-random dithering does not require any kind of fixed period,
+  as it randomly dithers the 8-bit DAC between adjacent levels, in order to achieve
+  16-bit DAC output, averaged over time.
 
 accuracy_caveat: |
-  The "16-bit" output is a NOMINAL, time-averaged figure: the smart pin dithers
-  the underlying 8-bit DAC between adjacent levels to achieve 16-bit DAC output
-  averaged over time.
+  The 16-bit DAC output is achieved by randomly dithering the 8-bit DAC between
+  adjacent levels, averaged over time.
 
 # Parameters
 x_register:
@@ -38,12 +38,13 @@ x_register:
 y_register:
   function: "16-bit DAC output value"
   Y[15:0]: "DAC value captured at each sample period"
+  limit: "Y[15:0] values larger than $FF00 are invalid and are clipped down to $FF00"
   update: "Coordinate with IN flag or use X=1 for immediate"
 
 z_register:
   function: "ADC accumulation (if OUT=1)"
-  usage: "16-bit ADC reading from last sample period"
-  enable: "Set OUT=1 to enable ADC feedback -- with TT bit 0 set in the WRPIN word (P_OE / P_TT_01). With TT = %00 raising OUT runs nothing; with TT bit 0 set the DAC drives the pin while the ADC runs (architecture/smart_pins.yaml silicon_errata)."
+  usage: "16-bit ADC accumulation from the last sample period, read with RDPIN/RQPIN; it can be used to measure loading on the DAC pin. The Spin2 RDPIN() method returns the C flag in bit 31, so the Spin2 example masks the result to its 16 bits"
+  enable: "If OUT is high, the ADC is enabled. In DAC-noise mode (%00001) on silicon, raising OUT with TT = %00 runs nothing, and with TT bit 0 set (P_OE / P_TT_01) the DAC drives the pin while the ADC runs (architecture/smart_pins.yaml silicon_errata). Not documented: the behavior of this mode with TT = %00."
 
 in_flag: |
   Raised at end of each sample period
@@ -92,13 +93,14 @@ spin2_complete: |
     PINCLEAR(DAC_PIN)
     WRPIN(DAC_PIN, mode)
     WXPIN(DAC_PIN, 1000)       ' 1000 clock sample period
-    PINWRITE(DAC_PIN, 1)        ' OUT=1 enables ADC (set before enable)
+    PINWRITE(DAC_PIN, 1)        ' OUT=1 enables the ADC; PINWRITE also raises DIR
     PINHIGH(DAC_PIN)            ' Enable FIRST (general init order)
     WYPIN(DAC_PIN, $8000)       ' THEN write Y: mid-scale
     
   PUB read_loading() : adc_value
-    ' Read ADC accumulation (requires OUT=1)
-    adc_value := RDPIN(DAC_PIN)
+    ' Read the 16-bit ADC accumulation (requires OUT=1); the mask drops the C flag
+    ' that the Spin2 RDPIN() method returns in bit 31
+    adc_value := RDPIN(DAC_PIN) & $FFFF
 
 # Complete PASM2 Example
 pasm2_complete: |
@@ -125,24 +127,23 @@ pasm2_complete: |
           WYPIN value16, pin          ' Write 16-bit value
           RET
   
-  ' Generate sine wave using table
-  sine_wave
+  ' Step through a 16-entry byte table
+  table_wave
           MOV   index, #0
-  .loop   MOV   ptra, ##@sine_table
+  .loop   MOV   ptra, ##@level_table
           ADD   ptra, index
-          RDBYTE value16, ptra        ' Get 8-bit sine
-          SHL   value16, #8           ' Scale to 16-bit
+          RDBYTE value16, ptra        ' Get an 8-bit level
+          SHL   value16, #8           ' Level in Y[15:8] (at most $FF00)
           CALL  #output_value
           ADD   index, #1
-          AND   index, #255           ' Wrap at 256
+          AND   index, #15            ' Wrap at 16 entries
           WAITX ##10_000              ' Delay
           JMP   #.loop
-  
-  ' Sine lookup table (256 entries, 8-bit)
-  sine_table    BYTE  $80,$83,$86,$89,$8C,$8F,$92,$95
+
+  ' Level table (16 entries, 8-bit)
+  level_table   BYTE  $80,$83,$86,$89,$8C,$8F,$92,$95
                 BYTE  $98,$9B,$9E,$A1,$A4,$A7,$AA,$AD
-                ' ... (abbreviated for space)
-  
+
   ' Variables
   pin           RES   1
   value16       RES   1
@@ -164,31 +165,26 @@ spin2_inline: |
 
 # Key Points
 resolution: |
-  Nominal 16-bit output through temporal dithering (see accuracy_caveat)
-  8-bit DAC switches between adjacent levels
-  The 16-bit output is the average over time
+  The 8-bit DAC is randomly dithered between adjacent levels to achieve 16-bit DAC output, averaged over time
   
 update_modes: |
   X=1: Immediate updates, no IN flag cycling
   X>1: Periodic updates, synchronized with IN flag
   
 feedback_mode: |
-  OUT=1 enables ADC for load measurement
-  Useful for detecting external loading
+  OUT=1 enables ADC; the accumulation can be used to measure loading on the DAC pin
   Read with RDPIN/RQPIN
-  
-common_uses:
-  - "High-resolution analog output"
-  - "Audio DAC applications"
-  - "Precision voltage references"
-  - "Waveform generation"
-  - "Control voltage output"
 
 timing_considerations: |
   Dithering occurs every clock cycle
   No fixed period required for dithering
-  Sample period only affects Y capture timing
-  Immediate mode (X=1) best for real-time
+  X=1: an updated Y takes immediate effect and IN stays high
+
+sources:
+  - "y_register.limit: Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, DAC 16-Bit With Noise Dither (%00010 and DAC_MODE), p.46"
+  - "z_register.enable: EF-071 (in DAC-noise mode %00001, OUT runs the ADC only with TT bit 0 set; the other DAC smart pin modes are not documented)"
+  - "operation, x_register, y_register, z_register.usage, in_flag, pin_behavior: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES, %00010 and DAC_MODE"
+  - "z_register.usage (Spin2 RDPIN() bit 31): Parallax Propeller 2 Spin2 Language Documentation v55, smart pin methods (RDPIN (Pin) : Zval, Zval[31] = C flag from RDPIN, other bits are RDPIN data)"
 
 hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 related: ["00011 (DAC PWM Dither)", "00001 (DAC Noise)", "Normal mode with P_DAC_*"]

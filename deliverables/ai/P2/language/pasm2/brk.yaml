@@ -9,7 +9,7 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: 'BRK triggers a breakpoint in the current cog and either defines a breakpoint code or the next breakpoint condition(s). The cog must have debug interrupts enabled, and if BRK is to be executed within the normal program (outside the Debug ISR), the "BRK instruction" interrupt must first be enabled from within a prior Debug ISR. During normal program execution, the BRK instruction is used to generate a debug interrupt with an 8-bit code (from D[7:0]) which can be read within the Debug ISR using a GETBRK instruction. During a Debug ISR, the BRK instruction is used instead to establish the next debug interrupt condition(s) and to select INA/INB, instead of the IJMP0/IRET0 registers exposed during the ISR, so that the pins'' inputs states may be read. The format of Dest for Debug ISR use is %AAAAAAAAAAAAAAAAAAAA_BCDEFGHIJKLM where A is the 20-bit breakpoint address or 4-bit event code, and bits B-M control various interrupt enable conditions.'
+description: 'BRK triggers a breakpoint in the current cog and either defines a breakpoint code or the next breakpoint condition(s). The cog must have debug interrupts enabled, and if BRK is to be executed within the normal program (outside the Debug ISR), the "BRK instruction" interrupt must first be enabled from within a prior Debug ISR. During normal program execution, the BRK instruction is used to generate a debug interrupt with an 8-bit code (from D[7:0]) which can be read within the Debug ISR using a GETBRK instruction. During a Debug ISR, the BRK instruction is used instead to establish the next debug interrupt condition(s) and to select INA/INB, instead of the IJMP0/IRET0 registers exposed during the ISR, so that the pins'' inputs states may be read. The format of Dest for Debug ISR use is %aaaaaaaaaaaaaaaaeeee_LKJIHGFEDCBA where %aaaaaaaaaaaaaaaaeeee is the 20-bit breakpoint address or the 4-bit event code (%eeee). L: 1 = map INA/INB normally, 0 = map IJMP0/IRET0 at INA/INB (the default during the ISR; if the Debug ISR sets it to 1, it must be reset to 0 before exiting the Debug ISR so that RETI0 can see IJMP0 and IRET0). K: 1 = enable interrupt on breakpoint address match. J: 1 = enable interrupt on event %eeee. I: 1 = enable interrupt on asynchronous breakpoint (via COGBRK on another cog). H: 1 = enable interrupt on INT3 ISR entry. G: 1 = enable interrupt on INT2 ISR entry. F: 1 = enable interrupt on INT1 ISR entry. E: 1 = enable interrupt on BRK instruction. D: 1 = enable interrupt on INT3 ISR code (single step). C: 1 = enable interrupt on INT2 ISR code (single step). B: 1 = enable interrupt on INT1 ISR code (single step). A: 1 = enable interrupt on non-ISR code (single step). On Debug ISR entry, bits L to A are cleared to 0; if a subsequent debug interrupt is desired, a BRK instruction must be executed before exiting the Debug ISR to establish the next breakpoint condition(s).'
 flags_affected:
   C: No effect
   Z: No effect
@@ -40,7 +40,7 @@ examples:
             brk     #DEBUG_WARNING           ' Warning-level break
 
     ' Debugger filters based on level
-condition_behavior: "Regardless of its execution condition, BRK triggers the debug interrupt (if enabled); the condition only gates the writing of the 8-bit code. So 'if_c brk #code' with C = 0 still enters the debug ISR, and GETBRK there shows the code of the last BRK whose condition was true, not this one. To make a break conditional: an opposite-condition SKIP #1 before it, or a JMP around an unconditional BRK -- both cancel the break and the code. pnut-ts compiles a conditional DEBUG() to the SKIP form, but leaves a hand-written conditional BRK as written, without a warning. Documented behaviour, not a silicon erratum."
+condition_behavior: "Regardless of its execution condition, BRK triggers the debug interrupt (if enabled); the condition only gates the writing of the 8-bit code. So 'if_c brk #code' with C = 0 still enters the debug ISR, and GETBRK there shows the code of the last BRK whose condition was true, not this one. To make a break conditional: an opposite-condition SKIP #1 before it, or a JMP around an unconditional BRK -- both cancel the break and the code. A conditional DEBUG() is compiled to the SKIP form. Documented behaviour, not a silicon erratum."
 related_instructions:
 - GETBRK: Get breakpoint status/code
 - COGBRK: Trigger breakpoint in another COG
@@ -51,13 +51,6 @@ notes:
 - "A condition on BRK does not make the break conditional -- see condition_behavior"
 - "Under the Spin2 debugger, BRK #0 is what a plain DEBUG compiles to: it launches the debugger or forces an update of one already open; DEBUG() commands compile to BRK #1..255, each code indexing its record in the DEBUG() database"
 - Essential for interactive debugging
-compiler_operand_format:
-  name: operand_l
-  pattern: D/#0..511
-  description: Destination or immediate value 0-511
-  valueType: 26
-compiler_encoding:
-  operandFormat: 26
 last_updated: '2025-09-19'
 brief_description: Break
 category: Interrupt
@@ -80,3 +73,4 @@ related:
   - language/pasm2/skip.yaml
   - language/pasm2/conditional-debug.yaml
   - architecture/debug_interrupt.yaml
+  - architecture/interrupts.yaml

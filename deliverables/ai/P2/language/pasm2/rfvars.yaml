@@ -10,8 +10,8 @@ timing:
   cycles: 2
   type: mode_dependent
 description: Used after RDFAST. Read one variable-length signed value (1 to 4 bytes)
-  from the FIFO into D, sign-extended. The bytes are laid out exactly as for RFVAR; only
-  the extension differs. FVARS emits this format in DAT data.
+  from the FIFO into D, sign-extended. The bytes run least-significant group
+  first, with a continuation bit in bytes 1 to 3. FVARS emits this format in DAT data.
 aliases:
 - signed variable-length integer
 - signed variable-length value from FIFO
@@ -20,23 +20,25 @@ flags_affected:
   C: Set to MSB of value, so C = 1 if the value is negative
   Z: Set if result equals zero
 value_format:
-  layout: Same bytes as RFVAR (see its value_format).
+  layout: Bytes run least-significant group first. In bytes 1 to 3, bit 7 = 1 means another byte follows and 0 ends the value; bits 6..0 carry 7 value bits. A 4th byte is always the last and carries all 8 bits.
   sign_extension: The sign bit is the top value bit of the last byte read (bit 6, 13, 20 or 28 for a 1-, 2-, 3- or 4-byte value). It is copied into every higher bit of D.
   ranges:
   - "1 byte: -64 .. 63"
   - "2 bytes: -8_192 .. 8_191"
   - "3 bytes: -1_048_576 .. 1_048_575"
   - "4 bytes: -268_435_456 .. 268_435_455 (-$1000_0000 .. $0FFF_FFFF)"
-  same_bytes_differ: "Nothing marks a stream signed or unsigned. A value whose top value bit is 1 reads differently under RFVAR and RFVARS, with no error: $40 is 64 to RFVAR and -64 to RFVARS. Pair FVAR with RFVAR and FVARS with RFVARS."
+  top_value_bit_set: "When the top value bit of the last byte is 1 the result is negative: a 1-byte value of $40 reads as -64."
   source: "XF-019; Parallax Spin2 Interpreter v55 (2026.05.07), branch (branch displacement read with RFVARS)"
 preconditions:
-- Point the FIFO with RDFAST first; see rdfast for the waiting and no-wait forms.
+- Used after RDFAST, which points the FIFO.
 - Not usable in hub execution, where the FIFO is busy fetching instructions. Inline ORG..END code runs in the cog and may use it; inline ORGH..END code runs in hub-exec and may not.
-- Reads are sequential. To jump, issue a new RDFAST. GETPTR returns the address of the next unread byte.
-interpreter_use: "The Spin2 interpreter reads branch displacements and reg[] indices with RFVARS."
+- Reads are sequential. A new RDFAST moves the read position. GETPTR returns the hub address of the next unread byte.
+interpreter_use: "Spin2 bytecode operands read with RFVARS: branch displacements and reg[] indices."
 sources:
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION, p.12, and the RFVAR and RFVARS byte table, p.64"
   - "XF-019"
+  - "GETPTR: P2 Instructions v35 - Rev B/C Silicon, row 328 (GETPTR D: get current FIFO hub pointer into D); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LUT EXECF, the bytecode-loop example ('rfbyte pa' then 'getptr pb', commented 'get next bytecode address into pb')"
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (FVAR / FVARS overrides can be read via RFVAR / RFVARS)"
   - "Parallax Spin2 Interpreter v55 (2026.05.07), branch, reg_ap"
 examples:
 - code: |
@@ -50,10 +52,10 @@ examples:
     deltas          byte    FVARS 1000, FVARS -3, FVARS 250, FVARS -70_000, FVARS 0
 
     DAT             org
-    sum_deltas      rdfast  #0, ptra                ' FIFO -> table (PTRA = @deltas from COGINIT)
+    sum_deltas      rdfast  #0, ptra                ' point the FIFO at the table (PTRA = @deltas from COGINIT)
                     mov     acc, #0
                     mov     n, #5
-    .loop           rfvars  d                       ' next signed delta, 1..4 bytes
+    .loop           rfvars  d                       ' next signed value, 1 to 4 bytes
                     add     acc, d
                     djnz    n, #.loop
                     cogid   n
@@ -62,16 +64,9 @@ examples:
     acc             res     1
     n               res     1
     d               res     1
-  description: "A cog sums a delta-encoded table"
+  description: "A cog adds five signed values read with RFVARS from FVARS data"
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.154"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_d
-  pattern: D
-  description: Destination register only
-  valueType: 24
-compiler_encoding:
-  operandFormat: 24
 syntax_variants:
 - RFVARS D
 last_updated: '2025-09-19T16:04:17.065388'

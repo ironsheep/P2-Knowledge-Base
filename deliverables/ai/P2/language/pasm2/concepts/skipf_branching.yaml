@@ -34,22 +34,10 @@ branch_timing:
   pattern_execution:
     - "Each instruction encountered uses one pattern bit"
     - "SKIPF leaps over skipped instructions in cog/LUT memory with no clock penalty"
-    - "SKIPF used in hub exec reverts to SKIP behavior: skipped instructions are canceled in the pipeline instead of stepped over"
+    - "SKIPF used in hub exec reverts to SKIP behavior: skipped instructions are canceled in the pipeline instead of stepped over. SKIPF in hub execution followed its pattern as SKIP does, in one pattern measured, with the same interval as hub SKIP over that body. Parallax's documents also give ILLEGAL for SKIPF's hub timing."
     - "Canceled instructions become 2-clock NOPs"
     - "SKIPF/EXECF must cancel (2-clock NOP) instead of stepping over when the first instruction after the SKIPF/EXECF is skipped (pattern LSB = 1), or when the 8th instruction in a row is skipped (only 7 can be stepped over at once)"
     - "Executed instructions: normal per-instruction timing"
-
-  total_clocks:
-    cog_lut_leap_case:
-      formula: "sum of executed instructions' clocks + 0 per leaped-over instruction"
-      example: |
-        ' Pattern %10101010 (4 executed, 4 skipped) in cog/LUT, 2-clock instructions
-        ' Total: 4 x 2 + 0 x 4 = 8 clocks (no cancel case in this pattern)
-    cancel_case_or_hub_exec:
-      formula: "sum of executed instructions' clocks + 2 per canceled instruction"
-      example: |
-        ' Pattern %10101010 (4 executed, 4 skipped) in hub-exec, 2-clock instructions
-        ' Total: 4 x 2 + 4 x 2 = 16 clocks
 
 advanced_patterns:
   bytecode_dispatch:
@@ -83,6 +71,7 @@ interaction_rules:
 
   with_call:
     - "A CALL/CALLPA/CALLPB that is not skipped executes all its nested subroutines normally; skipping is suspended until after the RET/_RET_"
+    - "CALLA with RETA, CALLB with RETB, and CALLD PA with JMP PA do not suspend a SKIP pattern in cog execution: the subroutine's instructions consume the pattern as inline code does. Measured with the absolute (#\\) call forms, the pattern %101 and one call per pattern. Not documented: whether they suspend a SKIPF or EXECF pattern"
     - "In SKIPF sequences, CALL/CALLPA/CALLPB immediate (#) branch addresses must be absolute when the instruction after the call might be skipped (CALL can use '#\\address'; CALLPA/CALLPB cannot, but can use registers)"
     - "For non-CALL branches, SKIPF works through all immediate-relative branches (the cog/LUT default)"
     - "With an absolute-address branch (#\\label, register, or RET), the first instruction after the branch must not be skipped"
@@ -100,7 +89,7 @@ inspecting_skip_state:
   - "GETBRK D WC returns C = LSB of the pattern; D[31:28] = CALL depth since the skip started (skipping suspended if not %0000); D[27] = 1 for SKIP mode, 0 for SKIPF/EXECF/XBYTE mode"
 
 pipeline_and_branch_facts:
-  - "Branch instructions flush the pipeline, so the first instruction following a branch takes at least four clock cycles"
+  - "Branch instructions flush the pipeline, so the first instruction following a branch takes at least four clock cycles. Parallax's documents also give at least five clock cycles."
   - "Branching to a hub address takes a minimum of 13 clock cycles (one more if the target is not long-aligned)"
 
 common_errors:
@@ -119,3 +108,7 @@ related:
 sources:
   - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION SKIPPING"
   - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT (GETBRK D WC, GETBRK D WZ)"
+  - "P2 Instructions v35 - Rev B/C Silicon, Sheet1 (SKIPF row: hub timing marked ILLEGAL; EXECF row: PC = {10'b0, D[9:0]}, SKIPF pattern D[31:10])"
+  - "P2 hardware verification, EF-109 (a SKIP pattern, SKIP #%101, across CALLA/RETA, CALLB/RETB and CALLD PA/JMP PA, absolute #\\ forms, one call per pattern: the subroutine's instructions consumed the pattern; the CALL/RET control suspended it; one board, cog execution; SKIPF not measured)"
+  - "P2 hardware verification, EF-122 (SKIPF in hub execution followed the pattern %1011_1110 like SKIP, with the GETCT-to-GETCT interval of that body equal to hub SKIP's, 22 clocks, not a per-instruction cost; cog SKIP 22, cog SKIPF 10; one board, one pattern)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COGS (first instruction after a branch: at least four clock cycles); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Execution, p.14 (at least five clock cycles); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Instruction Pipeline, p.16, and Branch (Pipeline Flush), p.20 (at least five clock cycles)"

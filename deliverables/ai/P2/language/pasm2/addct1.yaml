@@ -9,19 +9,12 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: Set the CT1 event target to D + S. The event fires once the System Counter has PASSED that target, by the MSB rule the wait uses - the flag is set whenever the MSB of (CT - CT1) is 0 - NOT only on the single cycle where CT equals it. A target already in the recent past therefore fires AT ONCE rather than waiting for the counter to come round; a target more than 2^31 clocks ahead reads as already passed and fires at once too. ADDCT1 sets the hidden CT1 event trigger register to the value of Dest + Src. The result is also written to Dest. Use the POLLCT1, WAITCT1, JCT1, and JNCT1 instructions to process CT1 time-based events.
+description: ADDCT1 sets the hidden CT1 event trigger register to the value of Dest + Src. The result is also written to Dest. The CT-passed-CT1 event flag is set whenever the MSB of (CT - CT1) is 0, and ADDCT1 clears it. Parallax's documents also give the event as triggering when System Counter (CT) = original Dest + Src. Use the POLLCT1, WAITCT1, JCT1, and JNCT1 instructions to process CT1 time-based events.
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ADDCT1/2/3, p.32"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ADDCT1/2/3, p.32; Parallax Propeller 2 Documentation v35 Rev B/C Silicon, EVENTS (POLLCT1/WAITCT1 event flag, p.46; Example ADDCT1/WAITCT1, p.48)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:
-  operandFormat: 0
 syntax_variants:
 - ADDCT1 Dest, {#}Src
 last_updated: '2025-09-19'

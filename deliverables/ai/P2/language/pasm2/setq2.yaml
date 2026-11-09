@@ -22,6 +22,7 @@ description: 'Set Q to D. Use before RDLONG/WRLONG/WMLONG to set LUT block trans
 flags_affected:
   C: No effect
   Z: No effect
+documentation_source: "P2 Instructions v35 - Rev B/C Silicon, Sheet1 (SETQ2, RDLONG, WRLONG rows); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SETQ CONSIDERATIONS; FAST BLOCK MOVES"
 documentation_level: comprehensive
 examples:
 - name: Load Waveform Table to LUT
@@ -36,7 +37,7 @@ examples:
   description: Use LUT as intermediate buffer for data processing
   code: "' Copy data block from HUB to LUT for processing\n        setq2   #128-1\
     \                   ' 128 longs\n        rdlong  0, source_addr           ' Read\
-    \ to LUT[0..127]\n        \n' Process data in LUT (faster than HUB access)\n \
+    \ to LUT[0..127]\n        \n' Process data in LUT\n \
     \       mov     index, #0\n.loop   rdlut   data, index              ' Read from\
     \ LUT\n        ' Process data...\n        wrlut   data, index              ' Write\
     \ back to LUT\n        incmod  index, #127              ' Next entry\n       \
@@ -48,15 +49,8 @@ notes:
 - SETQ2 specifically targets LUT RAM (512 longs)
 - SETQ targets COG RAM for block transfers
 - A block transfer moves one long per clock, unless the hub FIFO is accessing the same hub RAM slice on the same cycle
-- After loading, RDLUT reads a LUT long in 3 clocks and WRLUT writes one in 2
+- "Q register: SETQ2 writes Q exactly as SETQ does and is meant to precede a companion instruction; SETQ2 selects lookup RAM for a block transfer. The value persists until XORO32, RDLUT, GETXACC or CRCNIB changes Q, or COGINIT, QDIV, QFRAC or QROTATE executes without a preceding SETQ and sets it to zero (a RDLUT between the SETQ2 and its block transfer replaces Q with the data it read). SETQ2 shields the next instruction from interruption. Full account: language/pasm2/concepts/special_registers.yaml q_register."
 - "XBYTE role: besides LUT block transfers, SETQ2 also serves as the ONE-SHOT XBYTE mode control. '_RET_ SETQ2 #mode' configures the XBYTE dispatch-table base / compression threshold / flag-write for ONLY the next bytecode, after which XBYTE automatically reverts to the mode last set by SETQ (no switch-back instruction needed). SETQ sets the persistent XBYTE mode; SETQ2 sets the transient one. See architecture/xbyte_engine.yaml."
-compiler_operand_format:
-  name: operand_l
-  pattern: D/#0..511
-  description: Destination or immediate value 0-511
-  valueType: 26
-compiler_encoding:
-  operandFormat: 26
 last_updated: '2025-09-19T16:04:16.983812'
 category: Miscellaneous
 oneliner: Set Q to D
@@ -64,6 +58,7 @@ oneliner: Set Q to D
 hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 related:
   - language/pasm2/setq.yaml
+  - language/pasm2/concepts/special_registers.yaml
   - language/pasm2/rdlong.yaml
   - language/pasm2/wrlong.yaml
   - language/pasm2/rdlut.yaml

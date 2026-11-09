@@ -25,6 +25,6 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: usage
-    fp: "d7494fce7448225c"
+    fp: "4d5fea797bcf5571"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"

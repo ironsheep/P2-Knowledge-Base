@@ -41,7 +41,7 @@ errata:
       - language/pasm2/augs.yaml
       - language/pasm2/augd.yaml
     sources:
-      - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS (the SETQ/SETQ2 block-size PTRx delta entry)"
+      - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS, p.4 (the SETQ/SETQ2 block-size PTRx delta entry)"
       - "EF-067"
 
   E2:
@@ -53,13 +53,13 @@ errata:
       - language/pasm2/augs.yaml
       - language/pasm2/altd.yaml
     sources:
-      - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS (the AUGS / immediate-#S ALTx entry)"
+      - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS, p.4 (the AUGS / immediate-#S ALTx entry)"
       - "EF-066"
 
   E3:
     title: "GETCT Returns a Stale Upper Long"
     affects: "GETCT WC (the upper long of the 64-bit counter), Spin2 GETMS() and GETSEC(), and DEBUG_TIMESTAMP stamps, in a cog whose group of four (cogs 0-3 or 4-7) had no running cog at a wrap of the counter's lower long (every 2^32 clocks, 21.47 s at 200 MHz). From reset only cog 0 runs, so the first cog a program starts in 4-7 after the first wrap meets it."
-    effect: "The upper long is behind by one per missed wrap until that group runs through its next wrap. GETCT without WC, Spin2 GETCT(), and the CT waits, polls, jumps and interrupts are correct."
+    effect: "The upper long is behind by one per missed wrap until that group runs through its next wrap. GETCT without WC, Spin2 GETCT(), and the CT waits, polls, jumps and interrupts are correct. Tested in cogs of a group that had missed one wrap, at 200 MHz, inside the window and across the wrap that closes it: ADDCT1-3 with WAITCT1-3, POLLCT1-3, JCT1-3, JNCT1-3, the CT-passed-CT1-3 interrupts, SETQ timeouts (ended by WAITATN WC) and WAITX all timed exactly as in a current group; Spin2 WAITCT(), POLLCT(), WAITMS(), WAITUS() and GETCT() likewise."
     rule: "Keep a cog of each group in use running at every wrap: e.g. start a keeper cog of 4-7 (code 'keeper jmp #keeper') as the first line of main(); a cog held in WAITATN, WAITX or WAITCT1 counts as running. Or take no 64-bit time in that group until it has run through one wrap."
     related:
       - language/pasm2/getct.yaml
@@ -101,9 +101,9 @@ errata:
       - "EF-076"
 
   E6:
-    title: "In a DAC Smart-Pin Mode, OUT Needs TT Bit 0 to Run the ADC"
-    affects: "A pin in a DAC smart-pin mode (%SSSSS = %00001 to %00011) configured with TT = %00, whose ADC the program switches on with OUT."
-    effect: "Raising OUT does not start the ADC; the pin reads exactly as with OUT low."
+    title: "In the DAC-Noise Smart-Pin Mode, OUT Needs TT Bit 0 to Run the ADC"
+    affects: "A pin in the DAC-noise smart-pin mode (%SSSSS = %00001 with DAC_MODE, M[12:10] = %101) configured with TT = %00, whose ADC the program switches on with OUT. The other DAC smart-pin modes (%00010 and %00011) were not tested: Parallax's documents give them the same OUT-enables-ADC rule, and whether they behave as %00001 does is not documented."
+    effect: "Raising OUT does not start the ADC; the pin reads exactly as with OUT low. Of the TT settings, only %00 and %01 were tested; %1x was not."
     rule: "Set TT bit 0 in the WRPIN word ($40, P_TT_01). The DAC then drives the pin while the ADC runs."
     related:
       - architecture/smart_pins.yaml
@@ -113,13 +113,13 @@ errata:
       - language/spin2/methods/wrpin.yaml
     sources:
       - "EF-071"
-      - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS, %TT table (the published rule the bench contradicts)"
+      - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS, %TT table, p.75 (0x = OUT enables ADC in DAC_MODE, for %00001..%00011: the published rule the bench contradicts for %00001)"
 
   E7:
     title: "After a No-Wait RDFAST, the Next Hub Instruction Can Complete Early"
     affects: "Cog code that starts the hub FIFO with a no-wait RDFAST (D[31] = 1) and starts another hub instruction fewer than 16 clocks later: a hub read or write, a SETQ block read, or a waiting RDFAST."
-    effect: "Depending on hub alignment, that instruction can complete early: a read returns the previous hub read's data with that value's C/Z; a write is lost if a hub read follows at once; a SETQ block read writes one wrong long and can overwrite cog registers, or the cog does not finish; a waiting RDFAST does not wait and the next RFLONG returns $0000_0000. Nothing flags it."
-    rule: "Use the waiting RDFAST (D[31] = 0), or start the next hub instruction at least 16 clocks after the no-wait RDFAST starts (e.g. WAITX #12 directly after it). A no-wait WRFAST is not affected."
+    effect: "Depending on hub alignment, that instruction can complete early: a read returns the previous hub read's data with that value's C/Z; a write is lost if another hub instruction follows; a SETQ block read writes one wrong long and can overwrite cog registers, or the cog does not finish; a waiting RDFAST does not wait and the next RFLONG returns $0000_0000."
+    rule: "Use the waiting RDFAST (D[31] = 0), or start the next hub instruction at least 16 clocks after the no-wait RDFAST starts (e.g. WAITX #12 directly after it). In the tests, a no-wait WRFAST released no RDLONG or WRLONG that followed it (0 and 7 NOPs after it); other following instructions were not tested."
     related:
       - language/pasm2/rdfast.yaml
       - language/pasm2/rdlong.yaml

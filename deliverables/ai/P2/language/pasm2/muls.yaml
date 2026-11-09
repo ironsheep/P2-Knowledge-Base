@@ -4,9 +4,8 @@ brief_description: Multiply, signed
 category: Math and Logic
 description: >-
   MULS multiplies the signed lower 16-bits of each of Dest and Src together and
-  stores the 32-bit signed product result into the Dest register. This is a fast
-  (2-clock) signed 16 x 16 bit multiplication operation-- to multiply larger
-  factors, use the CORDIC Solver QMUL instruction.
+  stores the 32-bit signed product result into the Dest register. It takes 2
+  clocks.
 
   D = signed (D[15:0] * S[15:0]).
 
@@ -19,8 +18,8 @@ result: >-
 parameters:
 - Dest is a register containing the signed 16-bit value to multiply with Src,
   and is where the result is written.
-- Src is a register, 9-bit literal, or signed 16-bit augmented literal whose
-  value is multiplied into Dest.
+- Src is a register, 9-bit literal, or augmented literal whose lower 16 bits
+  (S[15:0]) are multiplied with Dest[15:0].
 - WZ is an optional effect to update the Z flag.
 flags_affected:
   C: No effect
@@ -38,13 +37,6 @@ encoding:
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, MULS, p.100"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:
-  operandFormat: 0
 last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
 oneliner: Multiply signed 16-bit x 16-bit values

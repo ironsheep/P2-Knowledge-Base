@@ -1,17 +1,19 @@
 # XBYTE - Hardware Bytecode Execution Engine
-# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BYTECODE EXECUTION (XBYTE); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01
+# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BYTECODE EXECUTION (XBYTE); Spin2 interpreter v55 source
 
 component: XBYTE_Engine
 category: bytecode_engine
 description: |
-  Hardware bytecode execution engine providing efficient interpreted language support.
-  Executes bytecode routines from LUT with 6-clock overhead per bytecode, enabling
-  high-performance virtual machines and interpreters.
+  Hardware 6-clock custom-bytecode executor.
+  Executes custom bytecodes read from hub RAM: a translation table in LUT RAM maps each
+  bytecode to a routine in cog or LUT RAM. The total overhead is 6 clocks per bytecode,
+  excluding the bytecode routine.
 
 architecture:
   overhead: "6 clocks per bytecode + routine execution time"
   bytecode_fetch: "Via FIFO from hub memory"
-  routine_storage: "LUT RAM (512 longs)"
+  table_storage: "The bytecode translation table is longs in LUT RAM (the LUT is 512 longs; the table size is set by the mode, 256 longs in the 256-entry mode)"
+  routine_storage: "Bytecode routines run from cog RAM or LUT RAM (a table entry's jump address is 10 bits)"
   hardware_acceleration: "Automatic bytecode dispatch"
 
 execution_cycle:
@@ -39,7 +41,7 @@ execution_cycle:
     clock_5:
       phase: "go"
       operation: "MOV PB,(GETPTR), MODCZ"
-      description: "Write FIFO pointer to PB, optionally set C,Z from bytecode"
+      description: "Write FIFO pointer to PB; if the F bit is set, write C,Z with bits 1 and 0 of the table index (the RDLUT address); do the EXECF branch"
       
     clock_6:
       phase: "get"
@@ -54,7 +56,7 @@ execution_cycle:
     clock_8:
       phase: "get"
       operation: "first instruction"
-      description: "First instruction of bytecode routine executes"
+      description: "First instruction of bytecode routine executes; the sequence loops to clock 1 when the routine ends with RET or _RET_"
 
 starting_xbyte:
   setup:
@@ -64,19 +66,22 @@ starting_xbyte:
     requirement: "$1FF must be on top of the hardware stack, placed there by 'PUSH #$1FF'"
 
   configuration:
-    d_parameter: "32-bit configuration value (the same mode operand for both SETQ and SETQ2)"
+    d_parameter: "The {#}D mode operand (the same mode patterns for both SETQ and SETQ2)"
     stack_requirement: "Hardware stack must contain $1FF"
     stack_note: |
-      Use 'PUSH #$1FF' to place it. A CALL will NOT do -- a CALL pushes its own
-      return address, not $1FF, so the _RET_ would simply return and XBYTE would
-      never engage. "Starting XBYTE and establishing its operating
+      Use 'PUSH #$1FF' to place it. "Starting XBYTE and establishing its operating
       mode is done all at once by a '_RET_ SETQ {#}D' instruction, with the top
       of the hardware stack holding $1FF."
 
   automatic_start:
     description: |
-      When RET executes with $1FF on stack after SETQ (or SETQ2),
-      XBYTE mode begins automatically
+      A '_RET_ SETQ {#}D' (or '_RET_ SETQ2 {#}D') executed with $1FF on top of
+      the hardware stack sets the XBYTE mode and starts XBYTE
+    no_pop: |
+      XBYTE executes on a hardware stack return (RET or _RET_) to $1FF, and only to $1FF.
+      A return to $1FF does not pop the stack, so $1FF stays on top and each
+      further RET or _RET_ causes another bytecode to be fetched and executed.
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BYTECODE EXECUTION (XBYTE) (executes on a return to $1FF; such a return does not pop the stack, so each additional RET/_RET_ fetches another bytecode); Parallax Spin2 Interpreter v55 (2026.05.07), 'pop v' comments in the hub-bytecode return paths ('pop return from bc_hub_bytecode so $1FF (xbyte) pops on next ret') refer to the next return and do not contradict this"
 
   mode_persistence:
     summary: |
@@ -98,45 +103,44 @@ starting_xbyte:
         The configuration loaded by SETQ2 applies to exactly the next bytecode,
         after which XBYTE automatically reverts to the mode last set by SETQ. No
         instruction is needed to switch back.
+      q_across_bytecodes: "The value written by a _RET_ SETQ2 at the end of a bytecode routine is left in Q for the next bytecode's routine: a MUXQ as that routine's first instruction reads it, in cog execution."
     use_case: |
       Lets one XBYTE-driven VM operate two dispatch tables: a default table
       (armed once with SETQ) and an alternate table borrowed for exactly one
       opcode at a time (via SETQ2), after which dispatch returns to the default
-      table on its own. The Spin2 interpreter uses it this way: its variable-setup
-      bytecode routines end in '_ret_ setq2 #$081', so the next bytecode (a
-      variable operator) is dispatched through the alternate table at $215.
-    mnemonic_aid: |
-      Mirrors the SETQ/SETQ2 split in block transfers: SETQ precedes COG-RAM block
-      transfers / SETQ2 precedes LUT-RAM block transfers; here SETQ sets the
-      persistent XBYTE mode / SETQ2 sets the one-shot one.
-    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BYTECODE EXECUTION (XBYTE) ('_RET_ SETQ2 {#}D' alters the XBYTE mode for the next bytecode only) and FAST BLOCK MOVES; use_case example: Parallax Spin2 Interpreter v55 (2026.05.07), 'Variable operator bytecodes at $215' table and 'Setup reg variable / Set incdec' routine ('_ret_ setq2 #$081')"
+      table on its own. A bytecode routine that ends in '_ret_ setq2 {#}D' makes
+      the next bytecode dispatch through the table and mode given by that D.
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BYTECODE EXECUTION (XBYTE) ('_RET_ SETQ2 {#}D' alters the XBYTE mode for the next bytecode only) and FAST BLOCK MOVES; example of the pattern: Parallax Spin2 Interpreter v55 (2026.05.07), 'Variable operator bytecodes at $215' table and 'Setup reg variable / Set incdec' routine, whose variable-setup routines end in '_ret_ setq2 #$081' so the next bytecode, a variable operator, uses that mode; q_across_bytecodes: P2 hardware verification, EF-111 (_RET_ SETQ2 #$A5 at the end of a bytecode routine, MUXQ first in the next routine, one part, cog execution)"
 
 configuration_patterns:
   legend: |
     %A = LUT base address bit(s).  %BBBB = compression threshold (must be > 0).
-    %F = flag-write bit (see flag_control).  %x = mode-operand bit 1 (see
-    index_form_bit): in the 256 patterns it is ignored; in the smaller tables
-    bit 1 is the index-form selector (0 = low-bits index, 1 = high-bits index).
+    %F = flag-write bit (see flag_control).  %x = a bit that is shown as x and takes
+    part in neither the LUT base address nor the index. Its position differs by row:
+    bit 1 in %A000000xF and %ABBBB00xF; bits 6:5 in %AAxx0010F and %AAxx0011F;
+    bit 5 in %AAAx1010F and %AAAx1011F; bit 4 in %AAAAx100F and %AAAAx101F. The
+    %AAAAA110F and %AAAAA111F rows have no x. In the 128, 64, 32 and 16 rows
+    bit 1 is not an x: it is the index-form selector (see index_form_bit),
+    0 = low-bits index, 1 = high-bits index.
 
   index_form_bit:
     name: "Mode-operand bit 1 -- index-form selector"
-    status: "DEFINED. Documentary (the full XBYTE mode table)."
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BYTECODE EXECUTION (XBYTE)"
     detail: |
       Bit 1 selects WHICH HALF of the bytecode indexes the dispatch table:
-        bit 1 = 0  -> index from the bytecode's LOW  bits (the 'primary' form)
-        bit 1 = 1  -> index from the bytecode's HIGH bits (the 'alternate' form),
-                      leaving the low bits free as an operand in PA.
+        bit 1 = 0  -> index from the bytecode's LOW  bits (128: I = b[6:0])
+        bit 1 = 1  -> index from the bytecode's HIGH bits (128: I = b[7:1])
       Visible straight down the full mode table: e.g. 128-entry %AAxx0010F
       (I = b[6:0]) vs %AAxx0011F (I = b[7:1]) differ only in bit 1. Each of the
-      128/64/32/16 sizes has this primary/alternate pair (see alt_pattern below).
+      128/64/32/16 sizes has two rows that differ only in bit 1, with index
+      formulas I = b[6:0] / b[7:1] (128), b[5:0] / b[7:2] (64), b[4:0] / b[7:3] (32)
+      and b[3:0] / b[7:4] (16) (see alt_pattern below).
     exception_256: |
-      In the 256-entry mode the bytecode already fills all eight index bits, so
-      there is no low/high choice to make and bit 1 is IGNORED -- a genuine
-      don't-care in that mode only. This is why the two 256 patterns print it as
-      a bare %x.
-    not_a_stack_pop_control: "Bit 1 is not a stack-pop control; the demo's 'no stack pop' comment is unrelated to it."
-    guidance: "Leave bit 1 = 0 unless you deliberately want a smaller table's high-bits index form."
+      In the 256-entry mode (%A000000xF) the bytecode already fills all eight index
+      bits (I = b[7:0]), so there is no low/high choice and bit 1 is shown as x. The
+      compressed mode (%ABBBB00xF) also shows bit 1 as x. The 256 mode is one row of
+      the mode table; the compressed mode is its own row.
+    guidance: "In the 128, 64, 32 and 16 rows, bit 1 = 0 gives the low-bits index form and bit 1 = 1 the high-bits index form."
 
   full_256_bytecodes:
     pattern: "%A000000xF"
@@ -144,17 +148,27 @@ configuration_patterns:
     index_calc: "I = bytecode[7:0]"
     bytecodes: 256
     lut_usage: "256 longs"
-    bit1_note: "256 mode fills all 8 index bits; bit 1 (the %x) is ignored -- no alternate index form (see index_form_bit)."
+    bit1_note: "256 mode fills all 8 index bits (I = b[7:0]), so it has no low-bits/high-bits choice; bit 1 is shown as x in the pattern (see legend and index_form_bit)."
 
   compressed_16_bytecodes:
     pattern: "%ABBBB00xF"
     lut_base: "%A00000000"
     threshold: "%BBBB must be > 0. %BBBB = %0001 gives the 16/240 split below."
-    operation: |
-      If bytecode[7:4] < %BBBB: Use full bytecode as index
-      If bytecode[7:4] >= %BBBB: Use compressed index
-    compression: "16 primary + 240 extended bytecodes"
-    
+    index_calc: |
+      If b[7:4] < %BBBB then I = b[7:0]
+      If b[7:4] >= %BBBB then I = b[7:4] - %BBBB
+    lut_address: |
+      b[7:4] < %BBBB:  %AIIIIIIII  (A, then the 8-bit index)
+      b[7:4] >= %BBBB: %ABBBBIIII  (A, then %BBBB, then the 4-bit index)
+    compression: "With %BBBB = %0001: bytecodes $00-$0F each have their own entry and bytecodes $10-$FF share entries in sets of 16. Sets of 16 bytecodes that would use identical LUT values are represented by a single LUT value. This is useful when the bytecode, which is always written to PA, is used as an operand within the bytecode routine."
+    worked_example:
+      operand: "$1A1 = %1_1010_00_0_1 : A = 1, %BBBB = %1010, bits 3:2 = %00, x = 0, F = 1"
+      lut_base: "%A00000000 = %100000000 = $100"
+      below_threshold: "Bytecode $5C: b[7:4] = %0101 < %1010, so I = b[7:0] = $5C and the LUT address is %1_01011100 = $15C. Each bytecode $00-$9F has its own entry at $100-$19F."
+      at_or_above_threshold: "Bytecode $F3: b[7:4] = %1111 >= %1010, so I = %1111 - %1010 = %0101 and the LUT address is %1_1010_0101 = $1A5. Bytecodes $A0-$FF share six entries: $A0-$AF use $1A0, $B0-$BF use $1A1, $C0-$CF use $1A2, $D0-$DF use $1A3, $E0-$EF use $1A4, $F0-$FF use $1A5."
+      flags: "With F = 1, C and Z receive bits 1 and 0 of the LUT address: $5C gives address $15C, so C = 0 and Z = 0; $F3 gives address $1A5, so C = 0 and Z = 1."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BYTECODE EXECUTION (XBYTE), Table 9 (%ABBBB00xF row: %BBBB > 0, the two index rules, LUT EXECF addresses %AIIIIIIII and %ABBBBIIII) and the table following it (sets of 16 bytecodes represented by a single LUT value); Table 8 clock 5 (C,Z written with bit1,bit0 of the RDLUT address, if enabled); operand $1A1: Parallax Spin2 Interpreter v55 (2026.05.07), 'bc_con_n1_14 = $A0' compressed bytecodes constant and the xbyte start '_ret_ setq #$1A1' (begin xbyte, compress Ax..Fx, write flags); every address re-derived by hand from Table 9"
+
   128_bytecodes:
     pattern: "%AAxx0010F"
     lut_base: "%AA0000000"
@@ -188,15 +202,17 @@ configuration_patterns:
     bytecodes: 16
 
 flag_control:
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BYTECODE EXECUTION (XBYTE), Table 8 clock 5 ('Write C,Z with bit1,bit0 of RDLUT address, if enabled') and Table 10 (%xxxxxxxx0 do not affect flags; %xxxxxxxx1 write the bytecode's index LSBs to C and Z)"
   f_bit: "Configuration bit 0"
   behavior:
     f_0: "Flags unaffected by bytecode"
-    f_1: "Bytecode index LSBs written to C and Z"
-    
+    f_1: "Bits 1 and 0 of the table index (the RDLUT address) written to C and Z"
+
   flag_mapping:
-    c_flag: "Bytecode index bit 1"
-    z_flag: "Bytecode index bit 0"
-    usage: "Can encode 4 states in flags for routine"
+    c_flag: "Table index bit 1"
+    z_flag: "Table index bit 0"
+    usage: "The two bits give four flag states the routine can branch on"
+    compressed_note: "In the compressed range the table index is I = b[7:4] - %BBBB, so the flags carry bits 1 and 0 of that value, not the low bits of the bytecode."
 
 lut_table_format:
   entry_format: |
@@ -216,28 +232,30 @@ special_registers:
   pa_register:
     address: "$1F6"
     contents: "Current bytecode value"
-    usage: "Available as immediate operand in routines"
+    usage: "Holds the bytecode, available as a register operand in routines"
     
   pb_register:
     address: "$1F7"
-    contents: "FIFO read pointer"
-    usage: "Hub address tracking"
+    contents: "FIFO pointer (GETPTR), written at each dispatch"
+    usage: "Holds the hub address of the next bytecode; a routine can add an offset to it and re-initialise the FIFO with RDFAST to branch"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BYTECODE EXECUTION (XBYTE), Table 8 clocks 2 and 5 and the XBYTE demo (r4: rfvars pa, add pb,pa, rdfast #0,pb)"
 
 bytecode_routines:
   constraints:
     location: "Must be in COG or LUT RAM"
-    exit: "Must end with RET or _RET_"
-    stack: "Hardware stack must not overflow"
-    
+    exit: "A routine that ends with RET or _RET_ loops to clock 1 and fetches the next bytecode"
+    stack: "The $1FF placed by PUSH stays on the hardware stack; the return that triggers each bytecode does not pop it"
+
   optimization:
-    inline_operations: "Use _RET_ prefix for single instructions"
-    skip_patterns: "Use SKIPF to create compact routines"
+    inline_operations: "A routine can be a single instruction with a _RET_ prefix"
+    skip_patterns: "The 22 MSBs of the table entry are a SKIPF pattern applied to the routine"
     shared_code: "Multiple bytecodes can jump to same routine"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BYTECODE EXECUTION (XBYTE) (a routine as short as a single 2-clock instruction with a _RET_ prefix; the 10 LSBs of the table long are the jump address and the 22 MSBs the SKIPF pattern; Table 8 clock 8, loop to clock 1 if _RET_ or RET)"
 
 programming_examples:
   simple_interpreter:
     code: |
-      ' Setup LUT with bytecode routines
+      ' Load the 256-long bytecode table into LUT $000..$0FF
       SETQ2   #256-1
       RDLONG  $000, bytecode_table
       
@@ -245,14 +263,14 @@ programming_examples:
       RDFAST  #0, bytecode_ptr
       
       ' Start XBYTE engine -- PUSH $1FF, then arm on the _RET_
-      PUSH    #$1FF                       ' XBYTE triggers on RET to $1F8..$1FF
+      PUSH    #$1FF                       ' XBYTE executes on a RET or _RET_ to $1FF; the return does not pop it
       _RET_   SETQ    #%0_0000_00_0_1     ' A=0 (table at LUT $000), F=1 (write flags)
 
   bytecode_routine_example:
     code: |
       ' A LUT entry is:  routine address in [9:0]  |  SKIPF pattern in [31:10]
-      ' Shift the PATTERN, never the address. Use the COG/LUT address (no '@',
-      ' which would yield a HUB address that EXECF cannot use).
+      ' The routine address goes in bits 9:0 and the SKIPF pattern in bits 31:10.
+      ' The label is a cog/LUT address because an entry's jump address is 10 bits.
       LONG    push_routine | (%0 << 10)   ' no instructions skipped
 
       push_routine
@@ -260,78 +278,84 @@ programming_examples:
       WRLONG  data, stack_ptr   ' Push to VM stack
       _RET_   ADD  stack_ptr, #4   ' Adjust, and return to XBYTE
 
+  relative_branch_bytecode:
+    description: "A bytecode whose routine reads an offset from the bytecode stream, adds it to the next-bytecode address in PB and restarts the FIFO there, so the bytecode program branches."
+    routine:
+      - "RFVARS PA: get the offset from the FIFO (one variable-length signed value, sign-extended, into PA)"
+      - "ADD PB,PA: add the offset to the next-bytecode address"
+      - "_RET_ RDFAST #0,PB: restart the FIFO read at the new address; the _RET_ fetches the next bytecode from there"
+    bytecode_data: "The bytecode is followed by one byte of offset; an offset of (bytecodes-$) & $7F branches back to the start of the bytecodes"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BYTECODE EXECUTION (XBYTE), XBYTE demo (r4: rfvars pa / add pb,pa / _ret_ rdfast #0,pb; 'byte 4,(bytecodes-$) & $7F' relative branch, loop to bytecodes); P2 Instructions v35 - Rev B/C Silicon, Sheet1 (RFVARS: one variable-length signed value, 1 to 4 bytes, sign-extended)"
+
   compressed_mode:
     code: |
-      ' Compression: 16 primary bytecodes + 240 extended (%ABBBB00xF).
+      ' Compression: %ABBBB00xF.
       ' Threshold %BBBB must be > 0. With %BBBB = %0001:
-      '   b[7:4] <  %0001  -> primary:  $00..$0F, 16 individual entries
-      '   b[7:4] >= %0001  -> extended: $10..$FF, 240 codes in 15 group entries
+      '   b[7:4] <  %0001  -> $00..$0F, 16 individual entries
+      '   b[7:4] >= %0001  -> $10..$FF, 240 codes in 15 group entries
       _RET_   SETQ    #%1_0001_00_0_1
       ' 1    = A, the LUT base bit -> table at LUT $100  (ONE bit, not four)
       ' 0001 = %BBBB, the compression threshold (four bits)
-      ' 1    = F, write the bytecode's index LSBs to C and Z
+      ' 1    = F, write bits 1 and 0 of the table index to C and Z
 
 performance:
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION SKIPPING (the software bytecode interpreter loop, 2+3+4 or 9 clocks; XBYTE, a total overhead of only 6 clocks); OVERVIEW (6-clock custom-bytecode executor). The 160 MHz throughput is arithmetic on the 6-clock overhead."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION SKIPPING (the software bytecode interpreter loop, 2+3+4 or 9 clocks, or 13 clocks with a 2-clock routine preceded by _RET_, reducible to 8 by XBYTE; XBYTE, a total overhead of only 6 clocks); OVERVIEW (6-clock custom-bytecode executor)."
   overhead_per_bytecode: "6 clocks"
-  throughput: "At 160MHz: 26.7M bytecodes/second (overhead only)"
   comparison:
-    software_dispatch: "9 clocks overhead per bytecode ('takes only 2+3+4, or 9, clocks to get the next bytecode, look it up, then execute that bytecode's routine')"
+    software_dispatch: "9 clocks (2+3+4) to get the next bytecode, look it up and start that bytecode's routine"
     xbyte_dispatch: "6 clocks overhead per bytecode ('6-clock custom-bytecode executor'; 'total overhead of only 6 clocks, excluding the bytecode routine')"
+    software_dispatch_minimum_loop: "13 clocks, looping, when the routine is a single 2-clock instruction preceded by _RET_ (the _RET_ makes it 4 clocks); XBYTE does the same loop in 8 clocks"
     minimum_xbyte_loop: "8 clocks ('The bytecode routine could be as short as a single 2-clock instruction with a _RET_ prefix, making the total XBYTE loop take only 8 clocks')"
-    improvement: "3-7x faster dispatch"
 
-applications:
-  virtual_machines:
-    - "Java bytecode interpreter"
-    - "Python bytecode"
-    - "Forth threaded interpreter"
-    - "Custom VM implementations"
-    
-  interpreters:
-    - "BASIC interpreter"
-    - "Scripting languages"
-    - "Command processors"
-    
-  compression:
-    - "Compressed instruction streams"
-    - "Token-based protocols"
-    - "Macro expansion"
+bytecode_fetch:
+  description: "XBYTE executes custom bytecodes read from hub RAM through the FIFO (initialised by RDFAST)."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BYTECODE EXECUTION (XBYTE), first paragraph and Table 8 clock 1"
 
 advanced_features:
-  interrupt_compatibility:
-    description: "XBYTE can be interrupted"
-    resume: "Automatically continues after interrupt"
-    
   bytecode_as_parameter:
-    pa_register: "Bytecode available as immediate value"
+    pa_register: "The bytecode is written to PA, so a routine can use it as an operand"
     inline_parameters: "Can follow bytecode with parameters"
     
   conditional_execution:
     flag_setting: "F bit enables flag control"
-    conditional_routines: "Use flags for branching"
+    conditional_routines: "With F = 1 the C and Z flags let a bytecode routine differentiate its behavior, especially in conditional looping where a SKIPF pattern alone would be insufficient"
 
 debugging:
-  trace_mode: "Can single-step bytecodes"
-  breakpoints: "Insert special bytecode for breaks"
-  state_inspection: "PA/PB readable for debugging"
+  trace_mode: "Not documented: a native XBYTE single-step mode. Single-stepping bytecode execution is done by running a small program that simulates normal XBYTE operation (single_step_emulation below)."
+  breakpoints: "Not documented"
+  state_inspection: "PA holds the current bytecode and PB the hub address of the next bytecode, both written at each dispatch, so a routine or the single-step program can read them"
+  single_step_emulation:
+    scope: "The method is given for the simplest case: the full 8-bit mode that does not write the low bits of the LUT address to C and Z (F = 0). The program must run from cog registers or LUT."
+    steps:
+      - "RDFAST #0,bytecodes: start the FIFO read at the bytecodes"
+      - "For normal XBYTE operation of the same program, the XBYTE start (PUSH #$1FF, then _RET_ SETQ #$000 for the full 8-bit lookup at LUT $000) is enabled; for single-stepping it is left out"
+      - "REP @.r,#8 around PUSH ##byteloop: fill the 8-level hardware stack with the byteloop address (the bottom stack value is copied on each RET or _RET_), so every return goes to byteloop"
+      - "byteloop: 21 NOP instructions, a landing strip for any trailing skip pattern that XBYTE would have cancelled on the RET or _RET_"
+      - "RFBYTE PA: get the next bytecode into PA"
+      - "GETPTR PB: get the next bytecode address into PB"
+      - "A DEBUG statement here can show the bytecode and the next bytecode address"
+      - "RDLUT temp,PA: look up the EXECF long from the LUT"
+      - "EXECF temp: execute the bytecode routine; its RET or _RET_ returns to byteloop"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BYTECODE EXECUTION (XBYTE), the single-step paragraph and Table 12 (Normal XBYTE or single-step bytecode executor: rdfast, rep @.r,#8 / push ##byteloop, the 21-NOP landing strip, rfbyte pa, getptr pb, rdlut temp,pa, execf temp); Table 8 clocks 2 and 5 (bytecode written to PA, FIFO pointer written to PB). Native single-step and breakpoint support: no source in the Silicon Doc, the PASM2 Manual or the instruction CSV"
 
 limitations:
-  lut_space: "Reduces available LUT for other uses"
-  stack_depth: "Hardware stack limited to 8 levels"
-  hub_execution: "Cannot execute from hub in XBYTE routines"
+  lut_space: "The bytecode table occupies LUT longs (256 in the 256-entry mode)"
+  stack_depth: "Hardware stack is 8 levels"
+  hub_execution: "A table entry's jump address is 10 bits (a cog/LUT RAM address), so an entry cannot point at hub code directly"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), OVERVIEW (8-level hardware stack) and BYTECODE EXECUTION (XBYTE) (translation table longs: 10 LSBs an address in cog/LUT RAM)"
 
 related_components:
   fifo: "Bytecode stream from hub"
-  lut: "Routine storage"
-  skipf: "Instruction skipping for compact routines"
+  lut: "Bytecode translation table (routines run from cog RAM or LUT RAM)"
+  skipf: "The 22 MSBs of a table entry are a SKIPF pattern applied to the routine"
   stack: "Hardware stack for returns"
 
 see_also:
-  - "LUT programming guide"
-  - "SKIPF instruction patterns"
-  - "Virtual machine design"
-  - "Bytecode optimization techniques"
+  - architecture/lookup_ram.yaml
+  - language/pasm2/concepts/instruction_skipping.yaml
+  - language/pasm2/concepts/skipf_branching.yaml
+  - language/pasm2/rfvars.yaml
+  - language/pasm2/rdfast.yaml
 
 related:
   - language/pasm2/setq.yaml

@@ -10,7 +10,7 @@ flags_affected:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 000 000100000 000100100
   write: —
   c: —
@@ -18,15 +18,9 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALLOWI, p.38"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pollwait
-  pattern: ''
-  description: No operands - poll/wait instruction (moves S to D, sets S to $024)
-  valueType: 28
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 28
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Allow interrupt branches
 related:
 - STALLI
+- architecture/interrupts.yaml

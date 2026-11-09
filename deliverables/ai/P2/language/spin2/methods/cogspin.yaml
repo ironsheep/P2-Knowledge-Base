@@ -8,9 +8,7 @@ type: "method"
 description: |
   Start a Spin2 method in a specified or available cog.
   Loads the Spin2 interpreter into the cog and begins executing the specified method.
-  Returns the cog number that was started, or -1 if no cog was available.
-  Essential for parallel Spin2 execution.
-documentation_level: comprehensive
+  Returns the cog number that was started; see returns for the value with no cog free.
 
 syntax: "COGSPIN(CogNum, Method({Parameters}), StackAddress) : CogID"
 
@@ -19,24 +17,18 @@ parameters:
     type: "long"
     description: |
       Cog number to start:
-      - 0-7: Start specific cog (will stop if running)
-      - NEWCOG (%01_0000): Start any available cog -- the ONLY symbol the
+      - 0-7: Start specific cog (restarts it if running)
+      - NEWCOG (%01_0000): Start any available cog; the only symbol the
         COGSPIN table defines
 
-      DO NOT pass -1. It is not a synonym for NEWCOG -- see not_an_input below.
-    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbol for COGSPIN() Usage (NEWCOG = %01_0000 is the ONLY symbol listed; -1 is NEWTASK, TASKSPIN's symbol); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS (COGINIT D operand); the emitted bytes: Parallax Spin2 Interpreter v55 (2026.05.07), bc_con_n1_14 and bc_con_rfbyte"
-    not_an_input: >-
-      -1 does NOT mean "any available cog". The interpreter's cogspin_ ORs in
-      hubexec (#%10_0000) and passes the operand to COGINIT without masking, so
-      -1 arrives as $FFFF_FFFF and the silicon decodes D[5:0] = %111111: D[4]=1
-      selects the free-cog search and D[0]=1 selects the PAIR form. cogspin(-1,
-      worker(), @stk) therefore starts TWO cogs running worker(), both handed
-      the SAME @stk -- two interpreters pushing call frames into one buffer with
-      no arbitration -- and returns the even/lower cog's ID, so a later
-      cogstop(id) stops only one of them. The -1 form emits $A0 (bc_con_n1_14),
-      the NEWCOG form emits $42 $10 (push byte 16) -- different constants,
-      different binaries.
-      -1 IS the failure RETURN value; see returns.
+      CogNum = -1: see cognum_minus_one below.
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbol for COGSPIN() Usage (NEWCOG = %01_0000 is the only symbol listed; -1 is NEWTASK, TASKSPIN's symbol); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS (COGINIT D operand); Parallax Spin2 Interpreter v55 (2026.05.07), cogspin_ (ORs in %10_0000, then the COGINIT bytecode routine: setq w, then coginit x,y wc with the popped CogNum in x)"
+    cognum_minus_one: >-
+      The interpreter ORs %10_0000 into CogNum and passes it as the D operand of the
+      COGINIT instruction with no masking, so -1 is D = $FFFF_FFFF and D[5:0] = %111111.
+      D[5] = 1 means no load, with execution beginning at the address given. D[4] = 1
+      with D[0] = 1 starts a free even/odd pair of cogs and writes the even/lower cog's
+      ID.
 
 
   - name: "Method({Parameters})"
@@ -45,37 +37,38 @@ parameters:
       Spin2 method to execute with optional parameters.
       Method name followed by parameters in parentheses.
       Can be in current object or another object.
-      
+    source: "CP-057 (pnut-ts 1.55.10 compiles COGSPIN(NEWCOG, child.method(), @stack) with a child-object method; the compile only, no run)"
+
   - name: "StackAddress"
     type: "address"
     description: |
       Hub address of stack space for the new cog.
-      Use @stack_array to get address.
-      Size it for the method's worst case; see stack_requirements below.
+      @stack_array gives the address of a stack array.
+      Stack size: see stack_requirements below.
 
 returns:
   name: "CogID"
   type: "long"
   description: |
     - 0-7: Successfully started cog number
-    - -1: Failed (no cog available when using NEWCOG)
+    - $8000_000F: no cog free, with NEWCOG used as an expression and all 8 cogs running. Bit 31 is set, so the long is negative: a test of the result with < 0 tells failure from a cog number, and a test with == -1 is false. Parallax's documents also give -1 for no cog free. Not established: whether a failed COGSPIN leaves its stack buffer unwritten.
+  source: >-
+    P2 hardware verification, EF-120 (COGSPIN(NEWCOG, ...) as an expression, all 8 cogs running; every call returned $8000_000F, with a control and a recovery start reading the cog ID).
+    Parallax Spin2 Interpreter v55 (2026.05.07), COGINIT bytecode routine (setq w, coginit x,y wc, then bitc x,#31).
+    Parallax Propeller 2 Spin2 Language Documentation v55, COGSPIN row (-1 = no cog free).
 
 stack_requirements:
   size: >-
-    No Parallax document states a stack size for COGSPIN. Size the buffer by
-    measuring the high-water mark of the method you launch: see how_to_settle_it.
+    Not documented: a stack size for COGSPIN.
   how_to_settle_it: >-
-    Fill the stack with a known pattern before COGSPIN, run the worst-case path, then
-    look for the deepest disturbed long. application-notes/p2an006-sizing-cog-task-stacks.yaml
-    gives the full procedure and a ready-made checking object.
-  p1_symbols_do_not_apply: >-
-    P1's _STACK and _FREE declarations do not exist in Spin2 and have no effect if
-    written. Sizing is the programmer's responsibility, not the compiler's.
+    application-notes/p2an006-sizing-cog-task-stacks.yaml describes a measurement of a
+    stack's high-water mark with a fill pattern, and a checking object.
   factors:
     - "Method call depth"
     - "Local variable count"
     - "Parameter count"
     - "Expression complexity"
+  source: "Not documented: a stack size, searched in Parallax Propeller 2 Spin2 Language Documentation v55 and Parallax Propeller 2 Documentation v35 (Rev B/C Silicon). The factors: Parallax Spin2 Interpreter v55 (2026.05.07), drophot (6 longs per nested call), returnh (7 longs popped on return), callgo (locals), pushv (expression pushes with PUSHA)"
 
 top_level_stack:
   summary: >-
@@ -84,9 +77,8 @@ top_level_stack:
     compiler, grows upward, and has no documented size or limit.
   placement: >-
     The compiler supplies the stack's starting hub address (the initial dbase) in the
-    program's start-up header. The interpreter's start-up block clears
-    (dbase - vbase) / 4 longs of VAR space, so the stack begins at the first long after
-    VAR space. It then writes the initial pbase and vbase at that address and restarts
+    program's start-up header. The interpreter's start-up block clears the VAR space,
+    so the stack begins at the first long after VAR space. It then writes the initial pbase and vbase at that address and restarts
     cog 0 with COGINIT, passing that address as the new cog's PTRA.
   first_frame: >-
     The interpreter's launch routine reads pbase and vbase from the first two longs of the
@@ -100,16 +92,15 @@ top_level_stack:
     and pops are rdlong with --ptra. Every nested call pushes 6 longs at its drop anchor
     (the caller's stack top, pbase with flags, vbase, dbase, mrecv, msend), plus one long
     for the return address (a return pops 7 longs), then the called method's parameters,
-    results and local longs, which the call clears to zero.
+    results and local longs. The parameters hold the passed values; the results and the
+    locals are cleared to zero.
   size_and_limit: >-
-    Not documented. Neither the Spin2 documentation nor the Spin2 interpreter listing
-    states a size for the top-level stack or an upper bound for it, and the interpreter
-    listing contains no comparison of the stack pointer against a limit, so no overflow
-    check is documented. How far the stack can grow before it reaches other hub data is
+    Not documented: a size for the top-level stack or an upper bound for it. No
+    stack-limit comparison is documented. How far the stack can grow before it reaches other hub data is
     set by what the compiler places above it, which is not documented either. A COGSPIN
     or TASKSPIN stack is a hub buffer you provide and size; see stack_requirements above
     and how to measure it in application-notes/p2an006-sizing-cog-task-stacks.yaml.
-  source: "Parallax Spin2 Interpreter v55 (2026.05.07), start-up block (dbase_init, var_longs), launch_spin / launch_method, Drop anchor (drophot), callhot, returnh, build_stack"
+  source: "Parallax Spin2 Interpreter v55 (2026.05.07), start-up block (dbase_init, var_longs), launch_spin / launch_method, Drop anchor (drophot), callhot, returnh, build_stack (parameters copied from the caller), calloffh (results cleared) and callgo (locals cleared)"
 
 stack_observability:
   description: >-
@@ -130,7 +121,7 @@ examples:
 
       PUB main()
         cog_id := COGSPIN(NEWCOG, worker(), @stack)
-        IF cog_id == -1
+        IF cog_id < 0
           ' Failed to start
           
       PRI worker()
@@ -177,25 +168,14 @@ examples:
     description: "Launch multiple parallel processors"
 
 method_execution:
-  interpreter: "Each cog gets its own Spin2 interpreter"
-  isolation: "Methods run independently"
+  interpreter: "Each started cog loads its own copy of the Spin2 interpreter code"
   variables:
-    - "VAR variables are shared between cogs"
-    - "Local variables are private to each cog"
-    - "DAT section is shared"
-  
-common_uses:
-  - "Parallel task execution"
-  - "Background monitoring"
-  - "Concurrent I/O handling"
-  - "Multi-threaded applications"
-  - "Separate UI and processing"
-  - "Real-time event handlers"
-  - "Parallel file system access"
+    - "VAR variables are in hub RAM, which every cog can access"
+    - "DAT section is in hub RAM, which every cog can access"
 
-production_patterns:
+stack_array_example:
   indexed_stack_allocation:
-    description: "Efficient stack allocation for multiple COGs"
+    description: "One stack buffer in DAT, indexed per cog"
     code: |
       DAT
         stacks LONG 0[NUM_COGS * STACK_SIZE]
@@ -203,10 +183,6 @@ production_patterns:
       PUB start_cogs() | i
         REPEAT i FROM 0 TO NUM_COGS-1
           COGSPIN(NEWCOG, worker(i), @stacks[i * STACK_SIZE])
-    benefits:
-      - "Predictable memory layout"
-      - "Easy to adjust stack sizes"
-      - "Persistent across method calls"
 
 related_methods:
   - "COGINIT"
@@ -217,32 +193,11 @@ related_methods:
   - "LOCKTRY"
   - "LOCKREL"
 
-synchronization:
-  shared_variables: "Use locks for thread-safe access"
-  communication: "Use hub RAM for data exchange"
-  coordination: "Use COGATN/POLLATN for signaling"
-  file_system_access: "The P2 FLASH Filesystem driver supports multi-cog access without consuming a cog"
-  source: "OBEX 4261 (P2 FLASH Filesystem), object description. A community object, not a Parallax publication."
-
 notes:
   - "Method runs until it returns or cog is stopped. When the top-level method returns, the effect is TASKSTOP(-1): the task ends, and with no other task remaining the cog is stopped and freed."
-  - "Each cog has independent method call stack"
-  - "Parameters are passed by value"
-  - "Cannot share local variables between cogs"
-
-best_practices:
-  - "Always check return value for -1"
-  - "Size stack appropriately for method complexity"
-  - "Use locks for shared variable access"
-  - "Initialize shared data before starting cogs"
-  - "Stop cogs cleanly when done"
-  - "Use DAT for persistent stack allocation"
-  - "Implement proper lock cleanup on errors"
-
-warnings:
-  - "Stack overflow is not detected"
-  - "VAR variables need synchronization"
-  - "No automatic resource cleanup"
+  - "Each cog has its own method call stack, a hub buffer at its StackAddress"
+  - "The return value when no cog is free is given under returns: $8000_000F with NEWCOG used as an expression, so test `< 0`, not `== -1`"
+  - "Not documented: any stack overflow check"
 
 related:
   - language/spin2/methods/taskspin.yaml

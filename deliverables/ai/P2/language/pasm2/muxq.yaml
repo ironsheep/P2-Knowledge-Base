@@ -29,15 +29,8 @@ encoding:
   c: —
   z: —
   clocks: '2'
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, MUXQ, p.101"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, MUXQ, pp.101-102; P2 Instructions v35 - Rev B/C Silicon, Sheet1 (MUXQ row); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SETQ CONSIDERATIONS (what changes Q, the readback sequence, the shield)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:
-  operandFormat: 0
 last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
 oneliner: Set discrete bits of a value to that of another
@@ -45,10 +38,10 @@ examples:
 - name: Parallel Pin Output (HUB75 driver)
   description: Write several output pins at once through a mask, leaving the other pins untouched
   code: |
-    ' write our 6 color bits
+    ' write the pins selected by Q
             SETQ    maskRgb12        ' load Q bit w/ RGB[12] mask
-            MUXQ    OUTA, reg_value  ' write contents of LS-byte anded with mask to output pins
-  source: "OBEX 2850 (ISP HUB75 Matrix Driver), isp_hub75_rgb3bit.spin2 (example code, not a Parallax document)"
+            MUXQ    OUTA, reg_value  ' copy the reg_value bits selected by the 1 bits of Q into OUTA
+  source: "OBEX 2850 (ISP HUB75 Matrix Driver), isp_hub75_rgb3bit.spin2 (example code, not a Parallax document); the MUXQ behaviour in the comment: P2 Instructions v35 - Rev B/C Silicon, MUXQ row"
 - name: Masked Bit Update
   description: Update specific bits without affecting others
   code: |
@@ -59,7 +52,14 @@ examples:
     ' Example: Update bits 4-7 only
             setq    #$F0             ' Mask for bits 4-7
             muxq    config, #$50     ' Set bits 4-7 to $5
-- name: SETQ Block Operation Modifier
+- name: Read the Q register back
+  description: Copy the current value of Q into a register. Start from zero, then MUXQ with an all-ones source; each 1 bit in Q sets the same bit in qval
+  code: |
+    ' qval = the current value of Q
+            mov     qval, #0               ' reset qval
+            muxq    qval, ##$FFFFFFFF      ' for each 1 bit in Q, set the same bit in qval
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SETQ CONSIDERATIONS (retrieving the current Q value)"
+- name: Masked merge
   description: SETQ + MUXQ for masked merge
   code: |
     ' Masked merge operation
@@ -67,9 +67,10 @@ examples:
             muxq    dest, source     ' dest = (dest & !mask) | (source & mask)
 
     ' The same result as:
-    ' andn dest, mask
-    ' and  temp, source, mask
-    ' or   dest, temp
+    '         mov  temp, source
+    '         and  temp, mask
+    '         andn dest, mask
+    '         or   dest, temp
 - name: Multi-Pin State Update
   description: Update multiple pin states simultaneously
   code: |
@@ -80,10 +81,13 @@ examples:
     led_mask   long   %00001111_00000000_00000000_00000000  ' LEDs on pins 24-27
     led_states long   %00001010_00000000_00000000_00000000  ' Pattern to display
 related:
-- SETQ
-- MUXC
-- MUXNC
-- MUXZ
-- MUXNZ
+- language/pasm2/setq.yaml
+- language/pasm2/concepts/special_registers.yaml
+- language/pasm2/muxc.yaml
+- language/pasm2/muxnc.yaml
+- language/pasm2/muxz.yaml
+- language/pasm2/muxnz.yaml
 notes:
 - Q register must be set before MUXQ
+- "MUXQ reads Q as its mask. The Q value written by SETQ persists until XORO32, RDLUT, GETXACC or CRCNIB changes it, or COGINIT, QDIV, QFRAC or QROTATE executes without a preceding SETQ and sets it to zero; MUXQ is not among them. SETQ also shields the next instruction from interruption, so a MUXQ placed directly after its SETQ cannot be interrupted between the two. Full account: language/pasm2/concepts/special_registers.yaml q_register."
+- "MUXQ with an all-ones source into a zeroed register reads Q back (see the Read the Q register back example); GETQX/GETQY return CORDIC results, not Q."

@@ -26,7 +26,7 @@ idioms:
 
   - name: wait_clock_ticks
     pattern: "waitct({target})"
-    description: Wait until the System Counter has passed target (a target already in the past returns at once)
+    description: Wait until the System Counter has passed target (MSB of (CT - target) is 0)
     usage_count: 87
     examples:
       - "waitct(t += (100 * MS_001))"

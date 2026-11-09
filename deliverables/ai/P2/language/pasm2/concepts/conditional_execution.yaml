@@ -1,6 +1,5 @@
 # PASM2 Conditional Execution System
-# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon); Parallax Propeller 2 Spin2 Language Documentation v51
-# Critical for: Efficient branchless code and conditional operations
+# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon); Parallax Propeller 2 Spin2 Language Documentation v51; Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Conditions table
 
 concept: "Conditional Execution"
 category: "pasm2_core"
@@ -9,7 +8,6 @@ importance: "fundamental"
 metadata:
   query_tags: ["conditional", "if", "flags", "predicate", "branchless", "wcz", "_RET_", "ret prefix", "ret call", "tail call"]
   complexity: "intermediate"
-  use_cases: ["branchless_code", "conditional_operations", "flag_testing"]
   common_questions:
     - "How do I make instructions conditional?"
     - "What are all the IF_ conditions?"
@@ -24,159 +22,112 @@ fundamental_concept: |
   2. Conditionally update C and Z flags (WC, WZ, WCZ suffixes), on the instructions that list a flag effect (DJNZ, RETI and NOP take none)
   These are independent features - you can use either, both, or neither.
 
-  This near-universal conditionality eliminates branch penalties and enables
-  extremely efficient, deterministic code. Unlike traditional processors
-  that require branches, P2 can conditionally execute almost any instruction in-place
+  P2 can conditionally execute almost any instruction in place
   (NOP, the all-zero word, cannot carry a condition or _RET_).
+  When an instruction's condition evaluates to false, the instruction still takes
+  2 clock cycles but affects no flags or registers.
 
 flag_system:
   c_flag:
     name: "Carry Flag"
-    set_by: "Arithmetic operations (carry/borrow), shifts, comparisons"
     meaning:
-      arithmetic: "Unsigned overflow/underflow"
-      shift: "Bit shifted out"
-      comparison: "Unsigned less than (after CMP)"
-  
+      comparison: "C = 1 when the comparison or subtraction was below (IF_B, IF_C)"
+
   z_flag:
     name: "Zero Flag"
-    set_by: "Most operations that write a result"
     meaning:
-      arithmetic: "Result is zero"
-      comparison: "Values are equal"
-      logical: "All bits are zero"
+      comparison: "Z = 1 when the comparison or subtraction was equal (IF_E, IF_Z)"
 
 condition_codes:
-  # All 16 condition codes (4-bit EEEE field) with binary values and common aliases
-  # These are the LEGAL names that can be used in PASM2
-  
+  # All 16 condition codes (4-bit EEEE field) with binary values and aliases.
+  # These are the names for the instruction prefix. The operand symbols of
+  # MODCZ, MODC and MODZ are a separate set (see modcz_operand_symbols).
+
   - value: "%0000"
     primary: "_RET_"
     aliases: []
-    condition: "Always; then return IF THE INSTRUCTION DID NOT BRANCH"
-    c_required: "X"
-    z_required: "X"
-    note: "Caution: IF_RET, IF_RETURN and IF_NEVER are NOT condition keywords -- pnut-ts assembles them as DAT labels and the instruction runs unconditionally. Special: the instruction ALWAYS executes, and a return is then performed ONLY IF that instruction did not branch. No C/Z context restore. On a BRANCHING instruction (CALL, JMP, ...) the branch stands and NO return occurs -- see ret_prefix_rule."
-    
+    condition: "Always; then return if the instruction did not branch"
+    note: "IF_RET, IF_RETURN and IF_NEVER are not condition keywords; at the start of a DAT line each defines a label, and the instruction runs unconditionally. The instruction always executes, and a return is then performed if that instruction did not branch. No C/Z context restore. When the instruction is a branch (CALL, JMP, ...) the branch stands and no return occurs -- see ret_prefix_rule."
+    source: "IF_RET, IF_RETURN and IF_NEVER defining labels: CP-044; Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Conditions table, p.68 (no such condition symbols)"
+
   - value: "%0001"
     primary: "IF_NC_AND_NZ"
     aliases: ["IF_NZ_AND_NC", "IF_A", "IF_GT", "IF_00"]
     condition: "C=0 AND Z=0"
-    c_required: "0"
-    z_required: "0"
-    use: "Unsigned above, signed greater than"
     
   - value: "%0010"
     primary: "IF_NC_AND_Z"
     aliases: ["IF_Z_AND_NC", "IF_01"]
     condition: "C=0 AND Z=1"
-    c_required: "0"
-    z_required: "1"
-    use: "Equal with no carry"
     
   - value: "%0011"
     primary: "IF_NC"
     aliases: ["IF_AE", "IF_GE", "IF_0X"]
     condition: "C=0"
-    c_required: "0"
-    z_required: "X"
-    use: "Unsigned above/equal, signed greater/equal"
     
   - value: "%0100"
     primary: "IF_C_AND_NZ"
     aliases: ["IF_NZ_AND_C", "IF_10"]
     condition: "C=1 AND Z=0"
-    c_required: "1"
-    z_required: "0"
-    use: "Below but not equal"
     
   - value: "%0101"
     primary: "IF_NZ"
     aliases: ["IF_NE", "IF_X0"]
     condition: "Z=0"
-    c_required: "X"
-    z_required: "0"
-    use: "Not equal, not zero"
     
   - value: "%0110"
     primary: "IF_C_NE_Z"
     aliases: ["IF_DIFF", "IF_Z_NE_C"]
     condition: "C≠Z"
-    c_required: "≠Z"
-    z_required: "≠C"
-    use: "C and Z differ"
     
   - value: "%0111"
     primary: "IF_NC_OR_NZ"
     aliases: ["IF_NZ_OR_NC", "IF_NOT_11"]
     condition: "C=0 OR Z=0"
-    c_required: "0 OR"
-    z_required: "0 OR"
-    use: "Not (C=1 AND Z=1)"
     
   - value: "%1000"
     primary: "IF_C_AND_Z"
     aliases: ["IF_Z_AND_C", "IF_11"]
     condition: "C=1 AND Z=1"
-    c_required: "1"
-    z_required: "1"
-    use: "Equal with carry"
     
   - value: "%1001"
     primary: "IF_C_EQ_Z"
     aliases: ["IF_SAME", "IF_Z_EQ_C"]
     condition: "C=Z"
-    c_required: "=Z"
-    z_required: "=C"
-    use: "C and Z same"
     
   - value: "%1010"
     primary: "IF_Z"
     aliases: ["IF_E", "IF_X1"]
     condition: "Z=1"
-    c_required: "X"
-    z_required: "1"
-    use: "Equal, zero"
     
   - value: "%1011"
     primary: "IF_NC_OR_Z"
     aliases: ["IF_Z_OR_NC", "IF_NOT_10"]
     condition: "C=0 OR Z=1"
-    c_required: "0 OR"
-    z_required: "1 OR"
-    use: "C clear or Z set (after a comparison the same as above-or-equal, IF_AE: Z = 1 implies C = 0)"
 
   - value: "%1100"
     primary: "IF_C"
     aliases: ["IF_B", "IF_LT", "IF_1X"]
     condition: "C=1"
-    c_required: "1"
-    z_required: "X"
-    use: "Unsigned below, signed less than"
     
   - value: "%1101"
     primary: "IF_C_OR_NZ"
     aliases: ["IF_NZ_OR_C", "IF_NOT_01"]
     condition: "C=1 OR Z=0"
-    c_required: "1 OR"
-    z_required: "0 OR"
-    use: "Not equal or carry"
     
   - value: "%1110"
     primary: "IF_C_OR_Z"
     aliases: ["IF_Z_OR_C", "IF_BE", "IF_LE", "IF_NOT_00"]
     condition: "C=1 OR Z=1"
-    c_required: "1 OR"
-    z_required: "1 OR"
-    use: "Below or equal"
     
   - value: "%1111"
     primary: "IF_ALWAYS"
     aliases: ["(no prefix)"]
     condition: "Always"
-    c_required: "X"
-    z_required: "X"
-    use: "Unconditional (default)"
+
+modcz_operand_symbols:
+  note: "MODCZ, MODC and MODZ take a different set of names for the same 4-bit codes: _CLR, _NC_AND_NZ, _GT, _NC, _GE, _NZ, _NE, _Z, _E, _C, _LT, _LE, _SET and the others listed in language/pasm2/modcz.yaml. Those names are operands, not instruction prefixes, and the IF_ names above are prefixes, not operands. The two sets differ at the ends: code %0000 is the _RET_ prefix above and the _CLR operand symbol, and code %1111 is the IF_ALWAYS prefix above and the _SET operand symbol."
+  full_table: language/pasm2/modcz.yaml
 
 syntax_rules:
   condition_prefix:
@@ -231,7 +182,7 @@ usage_patterns:
       IF_Z    ADD sum, value            ' Add if non-negative
   
   multi_way_decision:
-    description: "Multiple conditions without branches"
+    description: "Compare state to 0, 1 and 2 and jump to the matching routine"
     code: |
       CMP     state, #0 WZ
       IF_Z    JMP #state0       ' State 0
@@ -242,30 +193,27 @@ usage_patterns:
               JMP #default      ' Default case
 
 ret_prefix_rule:
-  rule: "_RET_ RETURNS ONLY IF THE INSTRUCTION DID NOT BRANCH."
+  rule: "_RET_ returns if the instruction did not branch."
   full_semantics: |
-    _RET_ is the EEEE=%0000 condition prefix. The prefixed instruction ALWAYS
-    executes. A return is then performed ONLY IF that instruction did not
-    branch: the return pops stack[19:0] into PC, with no C/Z context restore.
-    If the instruction DID branch, the branch stands and NO return happens.
+    _RET_ is the EEEE=%0000 condition prefix. The prefixed instruction always
+    executes. A return is then performed if that instruction did not branch:
+    the return pops stack[19:0] into PC, with no C/Z context restore.
+    If the instruction did branch, the branch stands and no return happens.
   on_branching_instructions: |
-    _RET_ ON A BRANCH NEVER RETURNS, AND IT ASSEMBLES CLEAN. '_RET_ CALL #target'
-    is silently just 'CALL #target': the CALL pushes the address of the NEXT
-    instruction and jumps, so when the callee returns, execution resumes at that
-    next instruction -- falling THROUGH the end of the routine instead of
-    returning from it. Whatever the assembler placed next then executes. The
-    same holds for JMP and the other branching instructions.
-  correct_form: |
-    ' WRONG -- assembles, never returns, falls into whatever follows:
+    '_RET_ CALL #target' assembles, with EEEE=%0000 in the instruction word, and
+    the CALL pushes the address of the next instruction and jumps, as a plain
+    'CALL #target' does. In a test of a bytecode handler ending in '_RET_ CALL',
+    the callee returned to the instruction after the '_RET_ CALL', and the code
+    placed there executed. Which instruction that is depends on where the
+    assembler placed it. The same applies to JMP and the other branching
+    instructions.
+  call_then_return_forms: |
+    ' _RET_ CALL: the helper returns to the next instruction
             _RET_   CALL    #helper
-    ' RIGHT -- call, then return:
+    ' CALL, then RET: the routine returns after the helper returns
             CALL    #helper
             RET
-  why_it_matters: |
-    The failure is silent and layout-dependent: no fault, no flag, and what runs
-    afterwards is whatever code happens to sit next in cog RAM. The routine's own
-    side effects all occur, so the symptom appears far from the cause.
-  works_as_expected_on: "Any NON-branching instruction. '_RET_ OR x,#0', '_RET_ CMP x,#0 WZ' and '_RET_ SETQ #mode' (the XBYTE arming form) all execute and then return."
+  non_branching_instructions: "'_RET_ OR x,#0', '_RET_ CMP x,#0 WZ' and '_RET_ SETQ #mode' (the XBYTE arming form) execute and then return."
   source:
     - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Conditions ( IF_x ), p.68: _RET_ %0000 always; execute instruction then return if no branch; no context restore"
     - "P2 Instructions v35 - Rev B/C Silicon, row 410 (encoding 0000 ------- --- --------- ---------, stack effect Pop): Execute <inst> always and return if no branch. If <inst> is not branching then return by popping stack[19:0] into PC."
@@ -273,13 +221,13 @@ ret_prefix_rule:
 
 special_patterns:
   return_conditions:
-    description: "Conditional returns using the _RET_ prefix -- valid only on NON-branching instructions (see ret_prefix_rule)"
+    description: "Returns using the _RET_ prefix and a conditional RET (see ret_prefix_rule for _RET_ on branching instructions)"
     code: |
       _RET_   CMP x, #0 WZ     ' Compare and return
-                                ' Return happens AFTER instruction
+                                ' The return happens after the instruction
                                 ' (CMP does not branch, so the return occurs)
 
-      ' Common pattern for conditional return
+      ' Conditional return
       CMP     x, limit WC
       IF_C    RET              ' Return if below limit
   
@@ -295,34 +243,29 @@ special_patterns:
       IF_NZ   ADD x, y WCZ  ' If Z=0, add and update both flags
   
   test_and_branch_alternative:
-    description: "Replace test-and-branch with conditional execution"
-    traditional: |
-      ' Traditional approach (2 instructions + pipeline flush)
+    description: "Test a flag bit, then branch to a wait routine or jump in place"
+    branch_form: |
+      ' Test a flag bit, then branch to a separate wait routine
       TESTB   flags, #READY_BIT WC    ' READY_BIT is a bit number
       IF_NC   JMP #wait_loop
       ' continue...
 
-    efficient: |
-      ' P2 approach (inline conditional)
+    conditional_form: |
+      ' Conditional JMP in place
       TESTB   flags, #READY_BIT WC    ' READY_BIT is a bit number
       IF_NC   JMP #$-1        ' Loop back to the TESTB above
       ' continue when ready
 
-performance_benefits:
-  no_pipeline_flush: "Conditional execution doesn't break pipeline"
-  constant_timing: "Same execution time regardless of condition"
-  code_density: "Fewer instructions than branch-based code"
-  predictability: "Deterministic timing for real-time code"
-  universal: "Works on all instructions except NOP, not just a subset"
+timing_rule: "An instruction whose condition is false still takes 2 clock cycles and affects no flags or registers."
 
 common_mistakes:
-  - mistake: "Using _RET_ on a CALL to 'call and return in one instruction'"
+  - mistake: "Expecting '_RET_ CALL' to call and return in one instruction"
     wrong: |
-      _RET_   CALL    #helper   ' Assembles clean. NEVER returns.
+      _RET_   CALL    #helper   ' Assembles; the helper returns to the next instruction
     right: |
       CALL    #helper
       RET
-    explanation: "_RET_ returns only if the instruction did not branch. CALL branches, so the return is suppressed and '_RET_ CALL' is silently a plain CALL -- the callee returns to the instruction AFTER the call, so execution falls out of the routine into whatever follows it in cog RAM. There is no error and no flag. See ret_prefix_rule for the sourced statement of the rule."
+    explanation: "_RET_ returns if the instruction did not branch. CALL branches, so no return is performed and '_RET_ CALL' acts as a plain CALL: the callee returns to the instruction after the call, and the code that follows it in cog RAM executes. See ret_prefix_rule."
 
   - mistake: "Assuming IF_LT/IF_LE perform signed comparisons"
     wrong: |
@@ -356,22 +299,8 @@ common_mistakes:
       ADD temp, #1     ' Don't update flags
       IF_Z  ...        ' Correct Z flag
 
-why_this_matters:
-  p2_philosophy: |
-    Universal conditional execution is fundamental to P2's architecture.
-    EVERY instruction except NOP can be conditional and can conditionally set flags (where it lists a flag effect).
-    This enables writing highly efficient, deterministic code without
-    branch prediction penalties. This is especially important for
-    real-time systems and signal processing.
-  
-  vs_traditional: |
-    Traditional: Limited conditional instructions, most require branches
-    P2: any instruction except NOP conditional, no pipeline penalties
-    
-    Traditional: CMP + Branch (2+ instructions, pipeline penalty)
-    P2: CMP + Conditional execution (2 instructions, no penalty)
-
 related_concepts:
+  - "language/pasm2/modcz.yaml"
   - "CMP"
   - "TEST"
   - "p2kbPasm2SpecialRegisters"

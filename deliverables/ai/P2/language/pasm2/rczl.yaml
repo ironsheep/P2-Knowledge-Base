@@ -21,21 +21,19 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZ0 DDDDDDDDD 001101011
   write: D
   c: D[31]
   z: D[30]
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, RCZL, p.117"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 392 (RCZL D {WC/WZ/WCZ}: rotate C,Z left through D, D = {D[29:0], C, Z}, C = D[31], Z = D[30]; 2 clocks; write D)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.37 (RCZL D {WC/WZ/WCZ}, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, RCZL, p.117 (Result line, Dest parameter, encoding row 1101011 CZ0 / 001101011, write D, C D[31], Z D[30], 2 clocks; Dest shifted left by two places with Dest[1] set to C and Dest[0] set to Z; the WC rule (original Dest[31]) and the WZ rule (original Dest[30]))"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 1101011 CZ0 DDDDDDDDD 001101011 RCZL D {WC/WZ/WCZ})"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_d
-  pattern: D
-  description: Destination register only
-  valueType: 24
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 24
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Rotate carry and zero flags left into value (2-bit rotate left)

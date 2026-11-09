@@ -9,7 +9,7 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: CMPR compares the unsigned values of Dest and Src (by subtracting Dest from Src, the reverse of CMP) and optionally setting the C and Z flags accordingly. If the WC or WCZ effect is specified, the C flag is set (1) if Src is less than Dest. If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src. To compare unsigned, multi-long values, use CMP (instead) followed by CMPX.
+description: CMPR compares the unsigned values of Dest and Src (by subtracting Dest from Src, the reverse of CMP) and optionally setting the C and Z flags accordingly. If the WC or WCZ effect is specified, the C flag is set (1) if Src is less than Dest. If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src.
 flags_affected:
   C: Set if unsigned S < D (borrow from subtraction)
   Z: Set if D == S
@@ -20,13 +20,6 @@ related:
 - CMP
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CMPR, p.60"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:
-  operandFormat: 0
 last_updated: '2025-09-19'
 brief_description: Compare reverse
 category: Math and Logic

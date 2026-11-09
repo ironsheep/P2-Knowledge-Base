@@ -7,26 +7,27 @@ aliases:
   - "what can write hub RAM"
 description: |
   Central shared memory and resource hub providing RAM storage, boot ROM, inter-COG
-  communication, and the "Egg Beater" round-robin access mechanism for deterministic
-  memory timing.
+  communication, and the "Egg Beater" round-robin access mechanism for
+  hub RAM.
 
 memory_organization:
   hub_ram:
     p2x8c4m64p: "512KB"
     p2_full: "1MB maximum"
-    width: "8 bits (byte-addressable)"
-    long_aligned: "32-bit access on 4-byte boundaries"
+    width: "32-bit-wide RAM slices, byte-addressed, with byte-level write controls"
+    alignment: "No special alignment rules for words and longs in hub RAM: cogs can read and write bytes, words, and longs at any hub address, in little-endian format"
     address_range: "$00000-$7FFFF (512KB) or $00000-$FFFFF (1MB)"
     
   boot_rom:
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), feature summary (16KB boot ROM: SPI loader for flash or SD card, serial loader, terminal monitor, TAQOZ Forth) and HUB RAM (the internal ROM is cached into the last 16KB of hub RAM on startup)"
     size: "16KB"
-    location: "Mapped at $FC000-$FFFFF on boot"
+    location: "The 16KB of internal ROM is cached into the last 16KB of hub RAM on startup; that RAM is addressable at its normal range and at $FC000..$FFFFF"
     contents:
       - "Boot loader"
       - "Serial loader protocol"
       - "SD card boot support"
       - "Flash boot support"
-      - "Debug ROM routines"
+      - "Terminal monitor (invoked with \"> \" then CTRL+D)"
       - "TAQOZ Forth interpreter"
       
   write_protection:
@@ -35,7 +36,7 @@ memory_organization:
       the Last 16KB of Hub RAM and Enabling Debug Interrupts" (the operand format and
       the L/W/D field definitions, and the three worked examples).
     last_16kb: "Can be write-protected via HUBSET"
-    debug_area: "Upper 16KB used for debug state storage"
+    debug_area: "Upper 16KB partly used for cog-register save/restore buffers during debug ISRs, and holds the initial debug ISR routines"
     hubset_operand: "%0010_xxxx_xxxx_xxLW_DDDD_DDDD_DDDD_DDDD"
     protection_bit: >-
       W = D[16]. 0 = the last 16KB can be read and written at both its normal
@@ -46,84 +47,94 @@ memory_organization:
       L = D[17]. 0 = establish the W and D settings and allow subsequent
       modification; 1 = establish them and disallow subsequent modification
       until the next reset.
-    debug_enable_bits: "D[15:0] = debug interrupt enables for cogs 15..0 respectively; 0 = disabled (default), 1 = enabled"
+    debug_enable_bits: "D[15:0] = debug interrupt enables, bit n for cog n; 0 = disabled (default), 1 = enabled. The P2 has cogs 7..0, so D[7:0] is the enable set for its cogs; what D[15:8] does is not documented."
     examples:
       - "HUBSET ##$2000_0001 -- enable the debug interrupt for cog 0"
-      - "HUBSET ##$2001_FFFF -- enable debug interrupts for cogs 15..0 and write-protect the last 16KB"
+      - "HUBSET ##$2001_FFFF -- set every debug enable bit D[15:0] and write-protect the last 16KB"
       - "HUBSET ##$2003_00FF -- enable debug interrupts for cogs 7..0, write-protect, and disallow subsequent changes"
 
 write_paths:
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), THE COG-to-HUB RAM INTERFACE; FAST SEQUENTIAL FIFO INTERFACE; DEBUG INTERRUPT (the protected last 16KB)"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), THE COG-to-HUB RAM INTERFACE; FAST SEQUENTIAL FIFO INTERFACE; DEBUG INTERRUPT (the protected last 16KB); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Hub Execution, p.21 (PC range $00400 to $7FFFF); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Hub Execution, p.15 (PC range $00400 to $7FFFF)"
   paths: |
-    A cog's write instructions (WRBYTE, WRWORD, WRLONG, WMLONG, and their block forms).
+    A cog's write instructions (for example WRBYTE, WRWORD, WRLONG, WMLONG, PUSHA and PUSHB; WRLONG and WMLONG also as block transfers).
     A cog's FIFO writes (WFBYTE, WFWORD, WFLONG after WRFAST).
     The streamer's capture modes, which write through the FIFO.
     The protected last 16KB, once write-protected, is writable only from within debug ISRs.
 
 egg_beater_architecture:
   description: |
-    Round-robin memory access system providing deterministic timing for all COGs.
-    Each COG gets a guaranteed access window every 8 clock cycles.
-    
+    Round-robin memory access system for all COGs.
+    At every clock, each cog can access the "next" RAM slice. A cog that wants hub RAM
+    waits up to #cogs-1 clocks for its initial slice, then reaches subsequent slices on
+    every clock.
+
   timing:
-    rotation_period: "8 clocks"
-    cog_window: "1 clock per COG"
-    access_order: "COG 0→1→2→3→4→5→6→7→0..."
+    rotation_period: "8 clocks: the P2 has 8 cogs and 8 slices, and each cog reaches the next slice on every clock"
+    cog_window: "Each cog can access one slice per clock; the slices a cog reaches are consecutive and ascending"
+    phase: "Not documented: which RAM slice a given cog faces on a given clock (the phase of the rotation against the cog number and the system counter)"
+    access_order: "At every clock each cog can access the 'next' RAM slice, so the slices are reached in ascending order, one per clock, by every cog at once"
     
   slicing:
-    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), THE COG -to- HUB RAM INTERFACE"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), THE COG -to- HUB RAM INTERFACE (each RAM slice holds every 8th set of 4 bytes, on 8 cogs) and HUB RAM (hub addresses are always byte-oriented); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Cog-to-Hub RAM Interface, p.16 (each RAM slice holds every 8th long); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Hub RAM, pp.24-25 (hub RAM consists of long elements; the lower 3 bits of a location's address determine its slice ID)"
     concept: |
       Hub RAM is divided into 8 slices for parallel access (one 32-bit-wide RAM per cog).
-      A slice holds LONGS, not bytes: "Each RAM slice holds every single/2nd/4th/8th/16th
-      (depending on number of cogs) set of 4 bytes in the composite hub RAM". On the 8-cog P2X8C4M64P, slice = (address >> 2) & 7,
-      i.e. hub address bits [4:2]; the four bytes of one long share one slice.
+      A slice holds longs, not bytes: each RAM slice holds every 8th long (every 8th set
+      of 4 bytes) of the composite hub RAM. Hub addresses are byte addresses, so the
+      slice is the lower 3 bits of the long address, which are byte-address bits [4:2]:
+      slice = (byte_address >> 2) & 7. The four bytes of one long share one slice, and
+      byte-address bits [1:0] select a byte within that long.
+      Parallax's documents also give the rule as "the lower 3 bits of its address
+      determine the slice ID" for a hub RAM location; that holds when the location is a
+      long, and it does not mean byte-address bits [2:0].
       All 8 slices can be accessed simultaneously by different COGs.
 
     slice_assignment:
-      slice_0: "Longs at byte addresses with bits [4:2] = 000 ($00, $20, $40, ...)"
-      slice_1: "Longs at byte addresses with bits [4:2] = 001 ($04, $24, $44, ...)"
-      slice_2: "Longs at byte addresses with bits [4:2] = 010 ($08, $28, ...)"
-      slice_3: "Longs at byte addresses with bits [4:2] = 011 ($0C, $2C, ...)"
-      slice_4: "Longs at byte addresses with bits [4:2] = 100 ($10, $30, ...)"
-      slice_5: "Longs at byte addresses with bits [4:2] = 101 ($14, $34, ...)"
-      slice_6: "Longs at byte addresses with bits [4:2] = 110 ($18, $38, ...)"
-      slice_7: "Longs at byte addresses with bits [4:2] = 111 ($1C, $3C, ...)"
-      
+      slice_0: "Longs at byte addresses with bits [4:2] = %000 ($00, $20, $40, ...)"
+      slice_1: "Longs at byte addresses with bits [4:2] = %001 ($04, $24, $44, ...)"
+      slice_2: "Longs at byte addresses with bits [4:2] = %010 ($08, $28, $48, ...)"
+      slice_3: "Longs at byte addresses with bits [4:2] = %011 ($0C, $2C, $4C, ...)"
+      slice_4: "Longs at byte addresses with bits [4:2] = %100 ($10, $30, $50, ...)"
+      slice_5: "Longs at byte addresses with bits [4:2] = %101 ($14, $34, $54, ...)"
+      slice_6: "Longs at byte addresses with bits [4:2] = %110 ($18, $38, $58, ...)"
+      slice_7: "Longs at byte addresses with bits [4:2] = %111 ($1C, $3C, $5C, ...)"
+
   synchronization:
-    automatic: "Hardware handles all synchronization"
-    deterministic: "Exact timing predictable"
-    wait_states: "0-7 clocks depending on alignment"
+    automatic: "The hub grants each cog a turn at the exclusive shared resources (hub RAM, the CORDIC solver, lock bits), one cog at a time, which makes a single operation on one such resource atomic; where an atomic operation is not intrinsically possible (for example a block of hub RAM locations), cogs share access cooperatively with lock bits"
 
 memory_instructions:
   byte_access:
     rdbyte: "Read byte from hub"
     wrbyte: "Write byte to hub"
-    timing_read: "9-16 clocks (cog) / 9-26 clocks (hub-exec) per language/pasm2/rdbyte.yaml encoding"
-    timing_write: "3-10 clocks (cog) / 3-20 clocks (hub-exec) per language/pasm2/wrbyte.yaml encoding"
+    timing_read: "9...16 clocks (cog) / 9...26 clocks (hub-exec)"
+    timing_write: "3...10 clocks (cog) / 3...20 clocks (hub-exec)"
     
   word_access:
     rdword: "Read word (16-bit) from hub"
     wrword: "Write word to hub"
-    alignment: "Must be word-aligned"
-    timing_read: "9-16 clocks (cog) / 9-26 clocks (hub-exec) per language/pasm2/rdword.yaml encoding"
-    timing_write: "3-10 clocks (cog) / 3-20 clocks (hub-exec) per language/pasm2/wrword.yaml encoding"
-    
+    alignment: "No alignment requirement; any hub address"
+    timing_read: "9...16 clocks (cog) / 9...26 clocks (hub-exec), +1 clock if the word crosses a hub long boundary"
+    timing_write: "3...10 clocks (cog) / 3...20 clocks (hub-exec), +1 clock if the word crosses a hub long boundary"
+
   long_access:
     rdlong: "Read long (32-bit) from hub"
     wrlong: "Write long to hub"
-    alignment: "Must be long-aligned"
-    timing_read: "9-16 clocks (cog) / 9-26 clocks (hub-exec) per language/pasm2/rdlong.yaml encoding"
-    timing_write: "3-10 clocks (cog) / 3-20 clocks (hub-exec) per language/pasm2/wrlong.yaml encoding"
+    alignment: "No alignment requirement; any hub address"
+    timing_read: "9...16 clocks (cog) / 9...26 clocks (hub-exec), +1 clock if the long crosses a hub long boundary"
+    timing_write: "3...10 clocks (cog) / 3...20 clocks (hub-exec), +1 clock if the long crosses a hub long boundary"
+    source: "P2 Instructions v35 Rev B/C Silicon, RDBYTE/RDWORD/RDLONG and WRBYTE/WRWORD/WRLONG rows; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, hub RAM instruction timing table, p.42"
     
   block_transfers:
     setq_rdlong: "Block read using SETQ + RDLONG"
     setq_wrlong: "Block write using SETQ + WRLONG"
-    transfer_rate: "1 long per clock after initial sync"
-    max_burst: "Up to 512 longs"
+    transfer_rate: "One long per clock, for reads and writes. For a block RDLONG, assuming the hub FIFO interface is not accessing the same hub RAM slice on the same cycle; if it is, the FIFO gets priority and the block move waits for the slice to come around again. Not documented: whether a FIFO access to the same slice delays a block write"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST BLOCK MOVES (rate and FIFO priority stated for RDLONG); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Hub RAM, Sequential Access, pp.24-25 (block moves read or write longs at one per clock cycle)"
+    block_size: "SETQ #x sets x+1 longs (x = number of longs, minus 1); the maximum block size: Not documented"
+    flags: "A block RDLONG with WC/WZ/WCZ sets the flags according to the last long read in the sequence"
+    hub_execution: "Block moves yield to the hub FIFO interface, so they can be used during hub execution"
 
 fifo_interface:
   description: |
-    19-stage FIFO buffer for streaming hub access during hub execution
+    FIFO buffer of (cogs+11) stages for streaming hub access during hub execution
     and streamer operations.
     
   instructions:
@@ -137,10 +148,12 @@ fifo_interface:
     wflong: "Write long to FIFO"
     
   features:
-    depth: "19 longs"
+    depth: "(cogs+11) stages"
     prefetch: "Automatic prefetching for hub execution"
-    block_wrap: "Can wrap on power-of-2 boundaries"
+    block_wrap: "RDFAST/WRFAST set a block count in 64-byte units (D[13:0]; 0 = no wrapping until the whole hub map is sequenced); after that many blocks the FIFO wraps to the original start address and reloads the count. A wrapping start address must be long-aligned"
     event_generation: "Event on block wrap"
+    one_use_at_a_time: "The FIFO interface is used for only one of these at a time: hub execution (PC at $00400..$FFFFF; Parallax's documents also give $7FFFF as the top of the range), streamer use (background transfers between hub RAM and pins/DACs/ADCs), or software use (RDFAST/WRFAST with RFxxxx/WFxxxx)"
+    random_access_yield: "A cog reaches hub RAM either through the sequential FIFO interface or by waiting for the RAM slices of interest while yielding to the FIFO; when the FIFO is not busy, random accesses have full opportunity to access the composite hub RAM"
 
 shared_resources:
   locks:
@@ -150,14 +163,14 @@ shared_resources:
       lockret: "Return lock to pool"
       locktry: "Try to acquire lock"
       lockrel: "Release lock"
-      lockchk: "Check lock state"
-    atomic: "Test-and-set in single operation"
+    atomic: "LOCKTRY takes an allocated lock in one instruction; the lock is not taken if another cog holds it or if it is not allocated, and with WC the C flag reports whether it was taken (1 = taken)"
     
   attention_flags:
-    per_cog: "16-bit attention mask"
+    per_cog: "COGATN D[15:0] selects the cogs whose attention is strobed (each high bit of D[15:0] strobes the matching cog). Parallax's documents also give the lower 8 bits of D."
     instruction: "COGATN"
     polling: "Via POLLATN/WAITATN"
-    
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG ATTENTION (COGATN: the D/# operand supplies a 16-bit value in which bits 0..15 represent cogs 0..15); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Cog Attention, p.22 (one or more of the D operand's lower 8 bits may be set)"
+
   system_counter:
     width: "64 bits"
     frequency: "Same as system clock"
@@ -167,38 +180,36 @@ shared_resources:
 hub_operations:
   coginit:
     description: "Start COG with hub code"
-    load_size: "504 longs ($000..$1F7) from hub to the target cog"
+    load_size: "Registers $000..$1F7 from hub to the target cog"
     parameters: "PTRA and PTRB initialized"
     
   hub_execution:
-    pc_range: "$400-$FFFFF"
+    pc_range: "$400-$FFFFF (Parallax's documents also give $7FFFF as the top of the range)"
     instruction_fetch: "Via FIFO"
-    performance: "Nearly same as COG execution"
-    
+    performance: "A branch to a hub address takes a minimum of 13 clocks (one more if the target is not long-aligned). Each instruction's clock count in hub execution is listed beside its cog-execution count in Parallax's instruction table; for example ADD takes 2 clocks in both modes, and RDLONG takes 9...16 clocks in cog or LUT execution and 9...26 in hub execution"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COGS > INSTRUCTION MODES > HUB EXECUTION (minimum 13 clocks; +1 if not long-aligned); P2 Instructions v35 Rev B/C Silicon, Clock Cycles columns (Cog Exec Mode / Hub Exec Mode), ADD and RDLONG rows"
+
   cordic_results:
-    sharing: "CORDIC results through hub interface"
+    sharing: "The CORDIC solver is in the hub; a cog waits for its hub slot to hand a command to it, and reads the results with GETQX and GETQY"
     
   smart_pin_data:
     repository_modes: "A smart pin in a long repository mode holds a long that a cog writes with WXPIN and reads with RDPIN or RQPIN"
 
 performance:
   bandwidth:
-    theoretical: "Clock_freq / 2 bytes/second per COG"
-    sustained_read: "Clock_freq / 8 bytes/second per COG"
-    sustained_write: "Clock_freq / 8 bytes/second per COG"
-    burst: "4 bytes per clock during block transfer"
+    streaming: "Continuously-ascending bidirectional streaming of 32 bits per clock between the composite hub RAM and each cog, after the initial slice wait"
+    burst: "One long per clock during a block transfer"
     
   hub_window_slot_wait:
-    description: "This is the wait for a cog's hub-rotation slot to come around — NOT the full hub-instruction time"
+    description: "This is the wait for a cog's hub-rotation slot to come around, not the full hub-instruction time"
     best_case: "0 clocks (slot is already current)"
-    worst_case: "7 clocks (just missed the slot; 8-cog rotation)"
-    average: "3.5 clocks"
-    note: "Total hub-instruction time = slot wait + hub access; see per-instruction YAMLs (rdlong/wrlong/etc.) for end-to-end ranges"
+    worst_case: "7 clocks (just missed the slot; the rotation is 8 clocks)"
+    note: "This is the slot wait only. The end-to-end hub instruction timing is 9...16 / 3...10 clocks (cog) and 9...26 / 3...20 clocks (hub) for reads / writes"
     
-  optimization:
-    block_transfers: "Use SETQ + RD/WRLONG for efficiency"
-    fifo_streaming: "Use RDFAST/WRFAST for sequential access"
-    alignment: "Align data to long boundaries"
+  sequential_access:
+    block_transfers: "SETQ before RDLONG/WRLONG invokes a cog/LUT block transfer"
+    fifo_streaming: "RDFAST/WRFAST establish the FIFO for fast sequential access"
+    alignment: "A branch to a hub address that is not long-aligned takes one additional clock (hub branches take a minimum of 13 clocks)"
 
 programming_patterns:
   hub_to_cog_transfer:
@@ -214,56 +225,58 @@ programming_patterns:
   fifo_streaming:
     code: |
       RDFAST  #0, hub_addr      ' Start FIFO read
-      REP     #2, #count
-      RFLONG  data              ' Read from FIFO
-      ' Process data
+      REP     #1, #count        ' Repeat the one instruction below, count times
+      RFLONG  data              ' Read the next long from the FIFO
       
   circular_buffer:
     code: |
-      RDFAST  mask, hub_addr    ' Mask sets wrap boundary
-      ' FIFO automatically wraps
+      RDFAST  block_count, hub_addr   ' block_count = number of 64-byte blocks before wrapping; hub_addr long-aligned
+      ' The FIFO wraps to hub_addr after block_count blocks
+      RET
+
+      block_count long 8
 
 memory_map:
   boot_time:
     $00000_$7FFFF: "Hub RAM (512KB model)"
-    $FC000_$FFFFF: "Boot ROM (16KB)"
-    
+    $FC000_$FFFFF: "Top 16KB of hub RAM, holding the 16KB of internal ROM cached on startup"
+
   runtime:
     $00000_$7FFFF: "Hub RAM"
-    $80000_$FFFFF: "Reserved/unmapped (512KB model)"
-    
+    $80000_$FBFFF: "Empty on a 512KB part: reads $00"
+    $FC000_$FFFFF: "Top 16KB of hub RAM, also addressable at its normal range ($7C000_$7FFFF on a 512KB part) unless hidden by HUBSET"
+
   debug_mode:
-    $7F000_$7FFFF: "Debug state storage (optional)"
+    $FFC00_$FFFFF: "Cog register save/restore buffers and ISR images for the debug interrupt, inside the top 16KB"
 
 special_features:
   byte_addressing: |
     All hub addresses are byte addresses.
-    Word access must be word-aligned (address & 1 = 0).
-    Long access must be long-aligned (address & 3 = 0).
+    There are no special alignment rules for words and longs in hub RAM.
     
   ptr_expressions:
-    ptra_ptrb: "Complex addressing modes"
-    auto_increment: "++/-- operators"
-    indexing: "Scaled index operations"
+    ptra_ptrb: "PTRA and PTRB as hub address pointers in RDxxxx/WRxxxx S operands"
+    auto_increment: "++/-- operators, before or after the access"
+    indexing: "PTRx[index]: the index is scaled by the access size (-16..+16 with updating, -32..+31 without)"
     
   cog_pairing:
     lut_sharing: "Adjacent COGs can share LUT"
-    event_signaling: "Fast COG-to-COG events"
+    event_signaling: "COGATN signals the cogs whose bits are set in D (an attention event for POLLATN/WAITATN and interrupt use); see architecture/cog_attention.yaml"
 
 debugging:
   source: >-
     Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT
     (the $1F8 entry sequence: save $000..$00F, load $000..$00F, JMP #$000; and the
     $1FD exit routine restores $000..$00F, then RETI0).
-  protected_area: "Last 16KB for debug state"
+  protected_area: "Last 16KB: partly a save/restore buffer for debug ISRs and the initial debug ISR routines; can be write-protected"
   write_protect: "HUBSET can protect debug area"
   state_preservation: >-
-    Cog registers $000..$00F ONLY -- and only when the ROM entry routine at $1F8
+    Cog registers $000..$00F only -- and only when the ROM entry routine at $1F8
     is used. They are saved to hub RAM at ($FF800 + !CogNumber << 7) and restored
-    from there by the $1FD exit routine. Nothing else is preserved automatically:
-    PA, PB, PTRA, PTRB and every other register are the debug ISR's own
-    responsibility. See architecture/debug_interrupt.yaml, which carries the full
-    entry/exit contract.
+    from there by the $1FD exit routine. The interrupt stores the C and Z flags and the
+    return address in IRET0, and the exit routine ends with RETI0 (CALLD IRET0,IRET0 WCZ).
+    Not documented: whether any other register is saved or restored by the debug
+    interrupt. Full entry/exit contract: architecture/debug_interrupt.yaml.
 
 related_components:
   architecture/p2-architecture-mental-model.yaml: "High-level architecture orientation for agents"
@@ -272,11 +285,11 @@ related_components:
   fifo: "Streaming interface to hub"
   locks: "Synchronization primitives"
   smart_pins: "A smart pin in a long repository mode (%00001..%00011) holds a long that a cog writes with WXPIN and reads with RDPIN or RQPIN"
-  architecture/streamer/overview.yaml: "DMA to/from hub"
+  architecture/streamer/overview.yaml: "Background transfers from hub RAM to pins/DACs, or from pins/ADCs to hub RAM"
 
 see_also:
   - "Architecture mental model: p2kbArchP2ArchitectureMentalModel"
-  - "Egg beater timing diagrams"
-  - "FIFO programming guide"
-  - "Block transfer optimization"
-  - "Memory bandwidth calculations"
+  - "Egg beater timing (hub-access clock ranges): language/pasm2/concepts/cog_hub_execution.yaml"
+  - "FIFO: architecture/fifo.yaml"
+  - "Block transfers (SETQ with RDLONG/WRLONG): language/pasm2/concepts/setq_block_ops.yaml"
+  - "Hub bandwidth ceiling and aggregate hub traffic: architecture/decomposition/resource-budget.yaml"

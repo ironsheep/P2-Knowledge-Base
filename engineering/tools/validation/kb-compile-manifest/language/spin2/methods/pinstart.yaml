@@ -34,7 +34,7 @@ blocks:
     compile: not-code
     reason: "pin-field operand expression shown standalone (operand notation); legal only as an argument, not a statement"
   - at: description
-    fp: "6321fe8903258c5e"
+    fp: "9751bb4f49e197d4"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: critical_requirement.description

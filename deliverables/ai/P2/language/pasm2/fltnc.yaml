@@ -2,10 +2,9 @@ instruction: FLTNC
 syntax: FLTNC   {#}D           {WCZ}
 category: Pin
 description: >-
-  FLTNC sets the I/O pin(s) designated by Dest to the input direction (floating)
-  and to a low/high output level according to the inverse of the C flag (!C). All
-  other pins are left unchanged. This pre-sets the output register so that when the
-  pin is later driven as output, it will immediately be at the desired level.
+  FLTNC sets the I/O pin(s) designated by Dest to the input direction and to a
+  low/high output level according to the inverse of the C flag (!C). All other
+  pins are left unchanged.
 
   Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates
   the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond
@@ -16,8 +15,16 @@ description: >-
   (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD
   instruction prior.
 
+  When Dest is a register, the register's value bits [10:0] are used as-is to form
+  the 11-bit ID range, unless a prior SETQ overrides value bits[10:6] with the low
+  five bits of the SETQ value. An ALTx between the SETQ and FLTNC keeps the
+  override, and a SETQ separated from FLTNC by other instructions is not documented.
+
   The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within
-  the same 32-pin group; it will not cross the port boundary.
+  the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port
+  boundary.
+
+  FLTNC achieves the same effect as two instructions-- DIRL followed by OUTNC.
 
   If the WCZ effect is specified, the C and Z flags are set to the original
   (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.
@@ -26,7 +33,7 @@ result: >-
   level of low/high according to !C; the rest are left as-is.
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
-  the I/O pin(s) to set to input direction and output levels of low or high.
+  the I/O pin(s) to set to input direction and output levels of !C.
 - WCZ is an optional effect to update flags.
 flags_affected:
   C: Set to the original (pre-instruction) state of the base pin's OUT bit
@@ -34,7 +41,7 @@ flags_affected:
 timing:
   cycles: 2
   type: fixed
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZL DDDDDDDDD 001010011
   write: DIRx* + OUTx
   c: Orig OUTx base bit
@@ -43,15 +50,15 @@ encoding:
 encoding_notes:
 - New DIRx state is not data-forwarded; the next pipelined instruction sees the old state.
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, FLTC / FLTNC, p.83"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 368 (FLTNC {#}D {WCZ}: OUT bits of pins D[10:6]+D[5:0]..D[5:0] = !C, DIR bits = 0; wraps within OUTA/OUTB; prior SETQ overrides D[10:6]; C,Z = OUT bit; write DIRx* + OUTx; 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, FLTC / FLTNC, p.83 (encoding table and footnote 1; Dest[5:0], Dest[10:6], the 9-bit literal range of Dest[8:6], ##Dest, the wrap within DIRA or DIRB and OUTA or OUTB, DIRL followed by OUTNC, C and Z set to the original OUTx base bit, 2 clocks)"
+  - "description (prior SETQ overrides D[10:6]): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), list of changes (DIRx/OUTx/FLTx/DRVx span of pins, +D[10:6]; prior SETQ overrides D[10:6]); the manual's FLTC / FLTNC text says a SETQ immediately preceding substitutes its Dest[4:0] in place of value bits[10:6]"
+  - "description (an ALTx between the SETQ and the instruction keeps the override): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, p.38 and ALTD, p.39 (SETQ / SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction); a SETQ separated from FLTNC by other instructions is in no source"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin instructions, p.39 (FLTNC {#}D {WCZ}, 2 clocks)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pinop
-  pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
-    flags'
-  valueType: 30
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 30
 last_updated: '2025-09-19T16:04:17.199642'
 oneliner: Set pin(s) direction to input and an output level of low/high according
-  to C
+  to !C
+related:
+  - architecture/io_pin_timing.yaml

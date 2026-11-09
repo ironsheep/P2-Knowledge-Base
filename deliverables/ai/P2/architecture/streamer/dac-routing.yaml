@@ -15,10 +15,12 @@ aliases:
 # DAC channel basics
 dac_channels:
   count: 4
-  names: ["X0 (DAC0)", "X1 (DAC1)", "X2 (DAC2)", "X3 (DAC3)"]
-  resolution: "8-bit per channel"
-  
-# Complete routing table
+  names: ["X0", "X1", "X2", "X3"]
+  description: "The streamer has four DAC output channels, X0, X1, X2 and X3, which can selectively override the four SETDACS values (the cog's 8-bit DAC channels DAC0..DAC3) on a per-DAC basis. The %dddd field in D[27:24] selects which streamer DAC channels override which SETDACS values during active streamer operation."
+  which_bits: "What each mode writes into X3..X0 is the dac_lanes column of architecture/streamer/modes-reference.yaml."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DACs (four 8-bit DAC channels per cog; SETDACS) and STREAMER (the four DAC output channels and the %dddd sentence)"
+
+# The %dddd routing table: "--" no override, "!" one's complement
 routing_table:
   - dddd: "%0000"
     symbol: X_DACS_OFF
@@ -26,7 +28,7 @@ routing_table:
     dac2: "--"
     dac1: "--"
     dac0: "--"
-    description: "No DAC output (use SETDACS values)"
+    description: "no streamer DAC output (the SETDACS values are output)"
     
   - dddd: "%0001"
     symbol: X_DACS_0_0_0_0
@@ -34,7 +36,7 @@ routing_table:
     dac2: "X0"
     dac1: "X0"
     dac0: "X0"
-    description: "X0 on all four channels (mono)"
+    description: "output X0 on all four DAC channels"
     
   - dddd: "%0010"
     symbol: X_DACS_X_X_0_0
@@ -42,7 +44,7 @@ routing_table:
     dac2: "--"
     dac1: "X0"
     dac0: "X0"
-    description: "X0 on channels 0,1 only"
+    description: "output X0 on DAC channels 1 and 0"
     
   - dddd: "%0011"
     symbol: X_DACS_0_0_X_X
@@ -50,7 +52,7 @@ routing_table:
     dac2: "X0"
     dac1: "--"
     dac0: "--"
-    description: "X0 on channels 2,3 only"
+    description: "output X0 on DAC channels 3 and 2"
     
   - dddd: "%0100"
     symbol: X_DACS_X_X_X_0
@@ -58,7 +60,7 @@ routing_table:
     dac2: "--"
     dac1: "--"
     dac0: "X0"
-    description: "X0 on channel 0 only"
+    description: "output X0 on DAC channel 0"
     
   - dddd: "%0101"
     symbol: X_DACS_X_X_0_X
@@ -66,7 +68,7 @@ routing_table:
     dac2: "--"
     dac1: "X0"
     dac0: "--"
-    description: "X0 on channel 1 only"
+    description: "output X0 on DAC channel 1"
     
   - dddd: "%0110"
     symbol: X_DACS_X_0_X_X
@@ -74,7 +76,7 @@ routing_table:
     dac2: "X0"
     dac1: "--"
     dac0: "--"
-    description: "X0 on channel 2 only"
+    description: "output X0 on DAC channel 2"
     
   - dddd: "%0111"
     symbol: X_DACS_0_X_X_X
@@ -82,7 +84,7 @@ routing_table:
     dac2: "--"
     dac1: "--"
     dac0: "--"
-    description: "X0 on channel 3 only"
+    description: "output X0 on DAC channel 3"
     
   - dddd: "%1000"
     symbol: X_DACS_0N0_0N0
@@ -90,7 +92,7 @@ routing_table:
     dac2: "X0"
     dac1: "!X0"
     dac0: "X0"
-    description: "Differential pairs (X0 and inverted)"
+    description: "output X0 diff pairs on all four DAC channels"
     
   - dddd: "%1001"
     symbol: X_DACS_X_X_0N0
@@ -98,7 +100,7 @@ routing_table:
     dac2: "--"
     dac1: "!X0"
     dac0: "X0"
-    description: "Differential pair on channels 0,1"
+    description: "output X0 diff pairs on DAC channels 1 and 0"
     
   - dddd: "%1010"
     symbol: X_DACS_0N0_X_X
@@ -106,7 +108,7 @@ routing_table:
     dac2: "X0"
     dac1: "--"
     dac0: "--"
-    description: "Differential pair on channels 2,3"
+    description: "output X0 diff pairs on DAC channels 3 and 2"
     
   - dddd: "%1011"
     symbol: X_DACS_1_0_1_0
@@ -114,7 +116,7 @@ routing_table:
     dac2: "X0"
     dac1: "X1"
     dac0: "X0"
-    description: "Stereo pairs (X0=L, X1=R)"
+    description: "output X1, X0 pairs on all four DAC channels"
     
   - dddd: "%1100"
     symbol: X_DACS_X_X_1_0
@@ -122,7 +124,7 @@ routing_table:
     dac2: "--"
     dac1: "X1"
     dac0: "X0"
-    description: "Stereo on channels 0,1"
+    description: "output X1, X0 on DAC channels 1 and 0"
     
   - dddd: "%1101"
     symbol: X_DACS_1_0_X_X
@@ -130,7 +132,7 @@ routing_table:
     dac2: "X0"
     dac1: "--"
     dac0: "--"
-    description: "Stereo on channels 2,3"
+    description: "output X1, X0 on DAC channels 3 and 2"
     
   - dddd: "%1110"
     symbol: X_DACS_1N1_0N0
@@ -138,7 +140,7 @@ routing_table:
     dac2: "X1"
     dac1: "!X0"
     dac0: "X0"
-    description: "Differential stereo"
+    description: "output X1, X0 diff pairs on all four DAC channels"
     
   - dddd: "%1111"
     symbol: X_DACS_3_2_1_0
@@ -146,51 +148,34 @@ routing_table:
     dac2: "X2"
     dac1: "X1"
     dac0: "X0"
-    description: "All four channels independent"
+    description: "output X3, X2, X1, X0 on all four DAC channels"
+
+sources:
+  - "routing_table: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (the %dddd table, 16 rows); symbol names: Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Streamer Modes"
 
 # Legend
 legend:
   "--": "No override (SETDACS value used)"
   "!": "One's complement (inverted)"
-  "X0-X3": "Streamer data channels"
+  "X0-X3": "Streamer DAC output channels"
 
-# DAC to pin mapping (hardware constraint)
+# DAC to pin mapping
 pin_mapping:
-  description: "DAC channels drive pins based on pin's two LSBs"
+  description: "Each cog outputs four 8-bit DAC channels that can directly drive the DACs within the pins; the pins of interest need to be configured for DAC-channel output."
   mapping:
     DAC0: "Pins %xxxx00 (0, 4, 8, 12, 16, 20, 24, 28...)"
     DAC1: "Pins %xxxx01 (1, 5, 9, 13, 17, 21, 25, 29...)"
     DAC2: "Pins %xxxx10 (2, 6, 10, 14, 18, 22, 26, 30...)"
     DAC3: "Pins %xxxx11 (3, 7, 11, 15, 19, 23, 27, 31...)"
-  note: "This is a silicon constraint - each DAC can only drive pins matching its channel number in the two LSBs"
+  note: "DAC0 can drive the DACs of all pins numbered %XXXX00, DAC1 those numbered %XXXX01, DAC2 %XXXX10 and DAC3 %XXXX11: the channel is the one matching the pin number's two LSBs."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DACs (the DAC0..DAC3 pin lines)"
 
 # Pin setup for a streamer-fed DAC output
 pin_setup:
-  rule: "The pin must be a COG DAC CHANNEL the streamer can override: a DAC mode with TT = %01 (P_CHANNEL, e.g. P_DAC_124R_3V | P_CHANNEL), COGID in M[3:0], and DIRH on the pin. The channel is chosen by the pin's two low bits (pin_mapping)."
-  tt_00: "At TT = %00 the pin IGNORES the streamer and holds its own M[7:0] level field: a configured, enabled pin with a constant output and no diagnostic."
-  see: "architecture/streamer/dds-goertzel.yaml dac_output_pin_setup (worked DDS-output setup); architecture/smart_pins.yaml (TT field)"
-
-# Common configurations
-common_configs:
-  mono_audio:
-    use: X_DACS_0_0_0_0
-    description: "Same signal on all DAC pins"
-    
-  stereo_audio:
-    use: X_DACS_X_X_1_0
-    description: "Left on DAC0 pins, right on DAC1 pins"
-    
-  differential_mono:
-    use: X_DACS_X_X_0N0
-    description: "Noise rejection for single channel"
-    
-  differential_stereo:
-    use: X_DACS_1N1_0N0
-    description: "Noise rejection for both channels"
-    
-  four_channel_video:
-    use: X_DACS_3_2_1_0
-    description: "R, G, B, Sync on separate channels"
+  rule: "To bring out the data as a voltage on a pin, that pin must be set to DAC mode with the COGID embedded, via WRPIN, and DIR must be set high: a DAC mode with TT = %01 (P_CHANNEL, e.g. P_DAC_124R_3V | P_CHANNEL), where M[3:0] selects the cog DAC channel, and DIRH on the pin. The channel is chosen by the pin's two low bits (pin_mapping)."
+  tt_00: "At TT = %00 in DAC mode, M[7:0] sets the DAC level and the pin holds that level; in the tested streamer-fed DAC at TT = %00, the pin output stayed flat."
+  see: "architecture/streamer/dds-goertzel.yaml dac_output_pin_setup (DDS-output setup); architecture/smart_pins.yaml (TT field)"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (DAC mode with the COGID embedded, DIR high) and PIN CONFIGURATION MODES (%TT for DAC_MODE: 00 = M[7..0] sets DAC level, 01 = M[3..0] selects cog DAC channel); EF-063 (a streamer-fed DAC at TT = %01 tracks the streamer; at TT = %00 the pin output stays flat)"
 
 see_also:
   - architecture/streamer/pin-selection.yaml

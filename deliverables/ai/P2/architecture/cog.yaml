@@ -5,38 +5,36 @@ component: COG
 category: processor
 description: |
   Symmetric 32-bit processor core with dedicated RAM, hardware stack, and full I/O access.
-  Eight identical COGs provide true parallel processing with deterministic timing.
+  Eight identical COGs run in parallel.
 
 architecture:
   data_width: 32
   address_width: 20
   pipeline_stages: 5
-  pipeline_type: "In-order scalar"
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COGS"
+  pipeline_type: "Five-stage pipelined execution"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COGS (first instruction after a branch: at least four clock cycles); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Execution, p.14 (at least five clock cycles); P2 Instructions v35 Rev B/C Silicon, JMP/CALL/RET rows (4 clocks in cog/LUT execution)"
   execution_time: "2 clocks for typical ALU ops when pipeline full ('2-clock execution for all math and logic instructions')"
-  branch_instruction_time: "4 clocks (per JMP/CALL/RET per-instruction YAMLs)"
-  post_branch_first_instruction: "At least 4 clocks ('Branch instructions cause the pipeline to be flushed, so the first instruction following the branch will take at least four clock cycles'). This is a separate fact from the branch instruction time."
+  branch_instruction_time: "4 clocks for JMP/CALL/RET in cog/LUT execution"
+  post_branch_first_instruction: "Branch instructions cause the pipeline to be flushed, so the first instruction following the branch takes at least four clock cycles; Parallax's documents also give at least five. This is a separate fact from the branch instruction time."
   conditionally_canceled_instruction: "Still 2 clocks ('Any instruction that is conditionally canceled will still move through the pipeline without stalling or executing, but taking two clock cycles')"
 
 memory:
   cog_ram:
-    size: "512 longs (2KB)"
+    size: "512 longs"
     width: "32 bits"
     addresses: "$000-$1FF"
-    access_time: "Single clock"
-    dual_use: "$1F0-$1F7 can be RAM or interrupt vectors"
+    dual_use: "$1F0-$1F7 are RAM unless their function is in use: interrupt call and return addresses (IJMP1-3, IRET1-3 at $1F0-$1F5) or PA and PB ($1F6, $1F7)"
     
   lut_ram:
-    size: "512 longs (2KB)"
+    size: "512 longs"
     width: "32 bits"
     addresses: "$000-$1FF (via RDLUT/WRLUT)"
-    access_time: "Single clock"
     special_features: "Streamer access, COG pair sharing"
     
   registers:
-    general_purpose: "$000-$1EF (496 registers)"
-    interrupt_vectors: "$1F0-$1F5 (dual-purpose)"
-    special_hardware: "$1F8-$1FF (not RAM)"
+    general_purpose: "$000-$1EF"
+    dual_purpose: "$1F0-$1F7 (RAM, or IJMP3/IRET3/IJMP2/IRET2/IJMP1/IRET1/PA/PB when the function is in use)"
+    special_hardware: "$1F8-$1FF (8 special-purpose registers mapped into the register address space; an instruction that addresses one reaches the special-purpose register, not just the underlying RAM)"
 
 special_registers:
   ptr_registers:
@@ -45,8 +43,7 @@ special_registers:
     features:
       - "20-bit hub addresses"
       - "Auto-increment/decrement"
-      - "Complex indexing expressions"
-      - "Circular buffer support"
+      - "Index expressions"
       
   io_registers:
     dira: "$1FA - Direction control 31:0"
@@ -65,21 +62,15 @@ special_registers:
     iret1: "$1F5 - INT1 return address"
     
   hidden_registers:
-    pa: "$1F6 - Parameter A (readable via MOV)"
-    pb: "$1F7 - Parameter B (readable via MOV)"
-    ptra: "$1F8 - Pointer A"
-    ptrb: "$1F9 - Pointer B"
+    pa: "$1F6 - CALLD-imm return, CALLPA parameter, or LOC address"
+    pb: "$1F7 - CALLD-imm return, CALLPB parameter, or LOC address"
 
 flags:
   c_flag:
     description: "Carry flag"
-    affected_by: "Arithmetic, shifts, tests"
-    used_by: "Conditional execution, branches"
-    
+
   z_flag:
     description: "Zero flag"
-    affected_by: "Most ALU operations"
-    used_by: "Conditional execution, branches"
     
   flag_writing:
     wc: "Write carry flag"
@@ -88,12 +79,8 @@ flags:
     
   flag_preservation:
     no_suffix: "Flags unchanged"
-    andc: "AND with carry"
-    andz: "AND with zero"
-    orc: "OR with carry"
-    orz: "OR with zero"
-    xorc: "XOR with carry"
-    xorz: "XOR with zero"
+  flag_combining_suffixes:
+    scope: "ANDC/ANDZ/ORC/ORZ/XORC/XORZ exist only on TESTB, TESTBN, TESTP and TESTPN, which combine the tested bit with C or Z (AND, OR, XOR) instead of writing it; other instructions take only WC, WZ or WCZ"
 
 stack:
   hardware_stack:
@@ -113,22 +100,22 @@ execution_modes:
     pc_range: "$000-$1FF (COG RAM)"
     instruction_fetch: "32-bit from COG RAM"
     pc_increment: 1
-    timing: "2 clocks per instruction"
+    timing: "ALU instructions such as ADD, MOV and NOP take 2 clocks; other instructions have their own figures"
     
   lut_execution:
     pc_range: "$200-$3FF (LUT RAM)"
     instruction_fetch: "32-bit from LUT"
     pc_increment: 1
-    timing: "2 clocks per instruction"
+    timing: "ALU instructions such as ADD, MOV and NOP take 2 clocks; other instructions have their own figures"
     
   hub_execution:
-    pc_range: "$400-$FFFFF"
-    instruction_fetch: "32-bit from hub via the (cogs+11)=19-stage prefetch FIFO"
+    pc_range: "$400-$FFFFF (Parallax's documents also give $7FFFF as the top of the range)"
+    instruction_fetch: "Instructions are 32-bit longs and the PC steps by 4; the memory-map tables list hub RAM width as 8 bits. The cog employs the FIFO hardware (which contains (cogs+11) stages) to spool up instructions so that a stream of instructions is available for continuous execution"
     pc_increment: 4
-    timing_sequential: "2 clocks per instruction (FIFO streaming — same as cogexec)"
-    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION (pc_range, timing_sequential, timing_branch); THE COG -to- HUB RAM INTERFACE (fifo_depth, 'The FIFO contains (cogs+11) stages')"
+    timing_sequential: "ALU instructions such as ADD, MOV and NOP take 2 clocks in hub execution, the same as in cog execution. Not documented: the clocks per sequential instruction in hub execution as a general rule; RDLONG, WRLONG and branches have their own hub execution figures."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COGS (address ranges table: hub RAM width 8 bits, PC range); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Execution, p.15 (address ranges table); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Execution (address ranges table); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION (pc_range, timing_sequential, timing_branch); THE COG -to- HUB RAM INTERFACE (fifo_depth, 'The FIFO contains (cogs+11) stages')"
     timing_branch: "Minimum 13 clocks (+1 if not long-aligned)"
-    fifo_depth: "(cogs+11) = 19 stages on 8-cog P2"
+    fifo_depth: "(cogs+11) stages"
 
 interrupts:
   levels:
@@ -138,29 +125,23 @@ interrupts:
     debug: "Highest (invisible to normal code)"
     
   sources:
-    events: "Any of 16 hardware events"
+    events: "Interrupt sources 1 to 15 (the CT1/CT2/CT3, selectable-event, pin-pattern, FIFO-block-wrap, streamer, attention and CORDIC events); source 0 is off"
     software: "TRGINTx instructions"
     
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INTERRUPTS"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INTERRUPTS (Interrupt branches are realized by inserting a CALLD IRETx,IJMPx WCZ into the instruction pipeline); P2 Instructions v35 Rev B/C Silicon, CALLD, RESIx and RETIx rows (4 cog / 13...20 hub)"
   dispatch_mechanism: |
     Interrupt dispatch mechanism: "Interrupt branches are realized, internally,
     by inserting a 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline
     while holding the program counter at its current value, so that the
     interrupt later returns to the address saved in IRETx."
   
-  entry_overhead:
-    cogexec: "4 clocks for the dispatched CALLD (per language/pasm2/calld.yaml encoding)"
-    hubexec: "13-20 clocks for the dispatched CALLD (FIFO refill on the branch; per language/pasm2/calld.yaml encoding)"
-    note: "This is the minimum entry overhead, assuming none of the deferral conditions apply. Time spent waiting for those conditions to clear is additional."
-  
-  exit_overhead:
-    reti_resi: "4 clocks (cog) / 13-20 clocks (hub) per language/pasm2/reti1.yaml (likewise reti2, reti3) and language/pasm2/resi1.yaml (likewise resi2, resi3)"
-    note: "RETI1/2/3 and RESI1/2/3 are themselves CALLD instructions (RETIx = CALLD INB,IRETx WCZ; RESIx = CALLD IJMPx,IRETx WCZ)."
-  
-  round_trip_overhead:
-    cogexec_minimum: "8 clocks (4 entry + 4 exit), excluding the ISR body"
-    hubexec_minimum: "~26 clocks (13 entry + 13 exit), excluding the ISR body"
-  
+  entry_timing:
+    calld_instruction: "Not documented: the clocks the interrupt branch takes. The CALLD instruction itself takes 4 clocks when executed from cog/LUT and 13...20 clocks when executed from hub."
+    note: "The interrupt branch is held off until the deferral conditions below are clear. Not documented: the time spent waiting for them."
+
+  exit_timing:
+    reti_resi: "RETI0/1/2/3 and RESI0/1/2/3 are aliases of CALLD (RETI1 = CALLD INB,IRET1 WCZ; RESI1 = CALLD IJMP1,IRET1 WCZ) and take the CALLD timing: 4 clocks (cog/LUT) / 13...20 clocks (hub)"
+
   deferral_conditions:
     description: "The interrupt branch is held off while any of these are in progress"
     conditions:
@@ -177,32 +158,30 @@ interrupts:
     int3_can_interrupt: ["main"]
 
 pipeline:
-  stages:
-    - "Instruction Fetch (IF)"
-    - "Instruction Decode (ID)"
-    - "Execute (EX)"
-    - "Memory Access (MA)"
-    - "Write Back (WB)"
-    
+  stage_count: 5
+  source: "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Instruction Stages, p.17 (three fetch stages, then Execute and Store); P2 Instructions v35 Rev B/C Silicon, ADD/MOV/NOP rows (same clocks in cog and hub execution); P2 Instructions v35 Rev B/C Silicon, GETQX/GETQY rows; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), CORDIC Solver (cogs can start CORDIC operations every #cogs clocks and get results 55 clocks later)"
+  stage_names: "The first three stages (Fetches) read the 32-bit PASM2 instruction opcode from RAM, latch it for decoding, and read and latch the instruction's source and destination values; the final two stages (Execute and Store) use the arithmetic logic unit and write the resulting 32-bit value and the carry and zero flags if required. Not documented: names for the five stages beyond these."
+
   hazards:
-    data_hazards: "Hardware forwarding handles most cases"
-    control_hazards: "Branch prediction not implemented"
-    structural_hazards: "Hub access conflicts possible"
-    
+    data_hazards: "After modifying a cog register (self-modifying code, SETS/SETD/SETR), two instructions must elapse before executing the modified register, due to pipelining"
+    control_hazards: "Branch instructions cause the pipeline to be flushed, so the first instruction following the branch takes at least four clock cycles; Parallax's documents also give at least five"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COGS (at least four); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Execution, p.14 (at least five); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SELF-MODIFYING CODE (two instructions must elapse after modifying a register)"
+    stalled_instruction: "If an instruction stalls for additional clock cycles, all following instructions in the pipeline are also stalled"
+
   stalls:
-    hub_window_miss: "0-7 clocks"
-    cordic_wait: "0-54 clocks"
-    instruction_modification: "ALTx instructions"
+    hub_window_miss: "up to #cogs-1 clocks"
+    cordic_wait: "GETQX/GETQY: 2-58 clocks (they wait in case the result is not ready)"
 
 starting_stopping:
   coginit:
     instruction: "COGINIT {#}D,{#}S"
     d_parameter: |
-      D[31]: Start mode (0=stop/restart, 1=start)
-      D[30]: New COG (0) or COG pair (1)
-      D[20]: Load from hub (0) or jump to address (1)
-      D[19:0]: Hub address or COG address
-    s_parameter: "Parameter passed to new COG"
+      Notation for D: %0_x_xxxx and %1_x_xxxx (D[5]), %x_0_CCCC and %x_1_xxx0 / %x_1_xxx1 (D[4] and D[3:0]), where x means "any value".
+      D[5] = 0: the target cog loads its registers $000..$1F7 from the hub starting at address S, then begins execution at register address $000. D[5] = 1: the target cog begins execution at register/LUT/hub address S, with no load.
+      D[4] = 0: the target cog's ID is %CCCC (D[3:0]). D[4] = 1: if a cog is free (stopped), start it (D[0] = 0), or if an even/odd cog pair is free, start them (D[0] = 1).
+    s_parameter: "S is the hub address to load from, or the cog/hub address to begin executing at, depending on D[5]. S goes to the target cog's PTRB (Parallax's documents differ on whether all 32 bits or S[19:0] are written). If COGINIT is preceded by SETQ, the SETQ value is written into the target cog's PTRA; otherwise the target cog's PTRA is cleared to zero."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS (COGINIT D and S operands: S, all 32 bits, is written into PTRB); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Hub Control & Cog instructions, p.41 (S[19:0] sets the hub startup address and PTRB of the cog)"
+    result_with_wc: "To learn whether a start succeeded, D must be a register and WC must be used: on success C is cleared and D is overwritten with the target cog's ID (the even/lower cog's ID for a pair); on failure C is set and D is overwritten with $F."
     
   cogstop:
     instruction: "COGSTOP {#}D"
@@ -214,66 +193,55 @@ starting_stopping:
 
 cog_communication:
   shared_resources:
-    hub_ram: "512KB-1MB shared memory"
+    hub_ram: "512KB shared memory on the P2X8C4M64P (the 20-bit address space reaches up to 1MB)"
     pins: "64 I/O pins"
-    locks: "16 hardware locks"
-    events: "Cross-COG signaling"
+    locks: "16 semaphore bits, called locks, in the hub"
     
   cogatn:
     instruction: "COGATN {#}D"
     operation: "Signal attention to COG(s)"
-    d_parameter: "16-bit mask (bit n = cog n, bits 0..15)"
+    d_parameter: "D[15:0] (bit n = cog n, bits 0..15). Parallax's documents also give the lower 8 bits."
     sources:
-      - "d_parameter: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COG ATTENTION"
+      - "d_parameter: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COG ATTENTION (D[15:0]); P2 Instructions v35 Rev B/C Silicon, COGATN row; Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Cog Attention, p.22 (D operand's lower 8 bits)"
     
   synchronization:
-    locks: "Atomic test-and-set"
-    events: "Hardware event flags"
-    polling: "Hub memory locations"
+    locks: "Locks coordinate exclusive access of a shared resource"
     attention: "COGATN signaling"
 
 performance:
-  mips: "One instruction per 2 clocks, so CLKFREQ / 2 instructions per second per cog"
-  deterministic: "Timing predictable for real-time"
-  parallel: "8 COGs run in parallel, each at that rate"
+  execution_rate: "When the execution pipeline is full, each instruction effectively takes as little as two clock cycles"
+  typical_timing: "Typical math and logic instructions take 2 clocks and a cog-execution branch instruction takes 4 clocks"
+  parallel: "8 COGs run in parallel"
   
   instruction_timing:
-    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COGS, HUB EXECUTION, and CORDIC Solver"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COGS, HUB EXECUTION, and CORDIC Solver; P2 Instructions v35 Rev B/C Silicon, ADD/MOV/NOP rows (hub execution clocks: same as cog execution)"
     alu_ops: "2 clocks (typical math/logic)"
-    cog_branches: "4 clocks for the branch instruction (JMP/CALL/RET per-instruction YAMLs); first instruction after the branch takes 4+ clocks (pipeline flush)"
-    hub_reads: "9-16 clocks (cog) / 9-26 clocks (hub-exec) for RDLONG/RDWORD/RDBYTE — hub-window dependent"
-    hub_writes: "3-10 clocks (cog) / 3-20 clocks (hub-exec) for WRLONG/WRWORD/WRBYTE — hub-window dependent"
-    hubexec_sequential: "2 clocks per instruction (FIFO streaming — same as cogexec)"
+    cog_branches: "4 clocks for the branch instruction (JMP/CALL/RET); first instruction after the branch takes at least 4 clocks (pipeline flush); Parallax's documents also give at least 5"
+    hub_reads: "9...16 clocks (cog) / 9...26 clocks (hub-exec) for RDLONG/RDWORD/RDBYTE; RDLONG and RDWORD take +1 clock if they cross a hub long boundary"
+    hub_writes: "3...10 clocks (cog) / 3...20 clocks (hub-exec) for WRLONG/WRWORD/WRBYTE; WRLONG and WRWORD take +1 clock if they cross a hub long boundary"
+    hubexec_sequential: "ALU instructions such as ADD, MOV and NOP take 2 clocks in hub execution, the same as in cog execution. Not documented: the clocks per sequential instruction in hub execution as a general rule."
     hubexec_branch: "Minimum 13 clocks (+1 if not long-aligned)"
-    cordic_result_latency: "55 clocks; 8-clock issue interval per cog"
+    cordic_result_latency: "Cogs can start CORDIC operations every #cogs clocks (8 for the P2X8C4M64P) and get results 55 clocks later"
     cordic_getqx_getqy_when_empty: "2 clocks"
 
 programming_model:
-  registers_as_memory: "All 496 registers are general purpose"
-  self_modifying_code: "Supported in COG RAM"
-  indirect_addressing: "Via ALTx instructions"
+  registers_as_memory: "Registers $000 through $1EF are general-purpose registers for code and data usage"
+  indirect_addressing: "Cog registers can be accessed indirectly by using the ALTS/ALTD/ALTR instructions"
   
   calling_conventions:
-    pa_pb_parameters: "PA/PB for first two parameters"
-    ptra_stack: "PTRA typically used for stack"
+    documented: "Not documented: a calling convention. PUSHA/POPA and PUSHB/POPB use PTRA and PTRB as stack pointers (see software_stack)"
     
-  typical_usage:
-    - "Dedicated I/O processors"
-    - "Real-time control loops"
-    - "Protocol implementations"
-    - "Signal processing"
-
 debug_features:
   hardware_debug: "Invisible debug interrupt"
   breakpoints: "BRK instruction"
   single_step: "Via debug interrupt"
-  register_inspection: "Through hub memory window"
+  register_save: "The debug-ISR-entry routine saves cog registers $000..$00F to hub RAM starting at ($FF800 + !CogNumber << 7) and loads the debugger program from hub RAM"
 
 related_components:
   architecture/p2-architecture-mental-model.yaml: "High-level architecture orientation for agents"
   hub: "Shared memory and resources"
   smart_pins: "I/O processing offload"
-  architecture/streamer/overview.yaml: "DMA for each COG"
+  architecture/streamer/overview.yaml: "Each cog's streamer: background transfers from hub RAM and/or lookup RAM to pins/DACs, or from pins/ADCs to hub RAM"
   cordic: "Shared CORDIC solver in hub"
   interrupts: "Event-driven processing"
 

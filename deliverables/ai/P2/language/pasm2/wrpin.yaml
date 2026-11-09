@@ -10,20 +10,30 @@ timing:
   cycles: 2
   type: fixed
   in_flag_reset_latency: |
-    After WRPIN executes, the Smart Pin requires 2 system-clock cycles to reset
-    the IN flag to logic-0 before a program can poll the flag again.
-    Insert a NOP (2 clocks, "or more") before testing the IN flag:
+    After WRPIN executes, it takes two clocks for the smart pin's IN signal to
+    drop before it can be polled again. A NOP between the WRPIN and the poll
+    elapses those clocks:
       WRPIN   mode, #pin
       NOP                   ' elapses the 2 clocks for IN to drop
-      TESTP   #pin WC       ' NOW safe to poll IN flag
+      TESTP   #pin WC       ' IN can now be polled again
 description: "Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart\
-  \ pins. \nWraps within A/B pins. Prior SETQ overrides S[10:6].\n\n**Configure while DIR is low**:\
+  \ pins. \nWraps within A/B pins. A prior SETQ overrides S[10:6] with the low five\
+  \ bits of the SETQ value; an ALTx between the SETQ and WRPIN keeps the override,\
+  \ and a SETQ separated from WRPIN by other instructions is not documented.\n\n**Configure while DIR is low**:\
   \ a smart pin should be configured with WRPIN while its DIR bit is low (held in\
   \ reset); a WRPIN while DIR is high changes the use of the pin's state bits and\
-  \ gives unpredictable behavior. Exception:\
-  \ WRPIN #0 resets a running smart pin without a DIR cycle.\n"
+  \ gives unpredictable behavior. To return a pin to normal mode, do WRPIN #0, pin;\
+  \ on a running smart pin it resets the pin without a DIR cycle.\n\n**Multiple\
+  \ cogs**: cogs that execute WRPIN, WXPIN, WYPIN, RDPIN or AKPIN on the same smart\
+  \ pin must do so at different times, because the pin OR's the write-data and\
+  \ acknowledgement buses of all cogs and simultaneous use clobbers the bus data.\n"
 sources:
-  - "description (configure while DIR is low): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS"
+  - "description (set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge; wraps within A/B pins; prior SETQ overrides S[10:6]; 2 clocks): P2 Instructions v35 - Rev B/C Silicon, row 217; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), list of changes (WRPIN/WXPIN/WYPIN/AKPIN can now work on a span of pins, +S[10:6] pins; prior SETQ overrides S[10:6])"
+  - "description (an ALTx between the SETQ and WRPIN keeps the override): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, pp.38-39 (SETQ / SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction); a SETQ separated by other instructions is in no source"
+  - "timing (two clocks for IN to drop; one NOP elapses them): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (after WRPIN/WXPIN/WYPIN/RDPIN/AKPIN it takes two clocks for IN to drop before it can be polled again)"
+  - "description (configure while DIR is low; WRPIN #0 returns a pin to normal mode; multi-cog bus rule): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS"
+  - "description (WRPIN #0 resets a running smart pin without a DIR cycle): EF-012"
+  - "usage_notes (a smart pin mode is selected while DIR is low; once configured, raising DIR starts operation): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS"
 flags_affected:
   C: No effect
   Z: No effect
@@ -43,18 +53,19 @@ d_operand_format:
       DIR/OUT rule that decides when a drive setting is active."
     input_selectors: "see input_selectors below -- the AAAA/BBBB encoding, in full"
 input_selectors:
-# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), PIN CONFIGURATION MODES. AAAA and BBBB share this encoding.
+# Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (the %AAAA and %BBBB selectors); the P_PLUS1_B and P_MINUS1_B labels: Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Smart Pin Configuration. AAAA and BBBB share this encoding.
   description: |
-    A smart pin's A and B inputs can be routed from a NEIGHBORING pin's read
-    state, which is how SPI-style "clock from the adjacent pin" wiring works
-    (the predefined P_PLUS1_B / P_MINUS1_B / ... routing labels).
+    A smart pin's A and B inputs can each be this pin's read state, the read
+    state of a pin at relative +1, +2, +3, -1, -2 or -3, or this pin's OUT bit
+    from cogs, true or inverted. Predefined labels such as P_PLUS1_B and
+    P_MINUS1_B select the relative pins for the B input.
   bit3_invert: "leading bit — 0xxx = true input (default), 1xxx = inverted"
   source_select:   # low 3 bits
     x000: "this pin's read state (default)"
     x001: "relative +1 pin's read state"
     x010: "relative +2 pin's read state"
     x011: "relative +3 pin's read state"
-    x100: "this pin's OUT bit (driven by cogs)"
+    x100: "this pin's OUT bit from cogs"
     x101: "relative -3 pin's read state"
     x110: "relative -2 pin's read state"
     x111: "relative -1 pin's read state"
@@ -64,21 +75,12 @@ critical_requirement:
   sequence:
   - 'DIRL pin       '' Reset smart pin (DIR=0) before configuring'
   - WRPIN mode, pin ' Configure smart pin mode
-  - WXPIN x, pin    ' Set X parameter
-  - DIRH pin       ' Enable smart pin (DIR=1)
-  - WYPIN y, pin    ' Set Y parameter (AFTER enable)
-  note: 'General init order is Reset -> Setup (WRPIN/WXPIN) -> Enable (DIRH) -> Operate
-    (WYPIN): WYPIN comes AFTER DIRH. Required for the trigger modes %00100/%00101 and
-    asynchronous serial transmit %11110 (a WYPIN issued before enable does not take
-    effect). Exception: synchronous serial transmit %11100 in continuous mode needs its
-    first word written with WYPIN during reset -- enabling first loses that word.'
   consequence_of_skipping: Selecting a new mode while DIR is high gives unpredictable, useless behavior
-  source: "description and consequence_of_skipping: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS; note: EF-011 (pulse, transition, async TX) and EF-090 (sync TX %11100 continuous), Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (prime during reset)"
+  source: "description and consequence_of_skipping: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS; WRPIN #0 on a running pin: EF-012"
 usage_notes:
-- Configure with WRPIN while DIR is low (DIRL first) when selecting or changing a mode
-- 'WRPIN #0, pin clears all smart pin configuration, and resets a running smart pin even with DIR high'
-- Smart pin begins operation when DIR is set high after configuration
-- Use AKPIN to acknowledge smart pin IN flag without reading
+- A smart pin mode is selected and configured with WRPIN while DIR is low
+- 'WRPIN #0, pin returns the pin to normal mode (the mode is written as zero), and resets a running smart pin even with DIR high'
+- Once configured, the smart pin begins operating when DIR is raised high
 examples:
 - description: Configure PWM output
   code: 'DIRL  #16                '' Reset smart pin (configure while DIR low)
@@ -89,17 +91,17 @@ examples:
 
     DIRH  #16                '' Enable smart pin
 
-    WYPIN #50, #16           '' Set duty cycle (after enable)
+    WYPIN #50, #16           '' Set the output value (after enable)
 
     '
-- description: Clear smart pin configuration
+- description: Return a smart pin to normal mode
   code: 'DIRL  #16                '' Reset smart pin
 
-    WRPIN #0, #16            '' Clear all configuration
+    WRPIN #0, #16            '' Return the pin to normal mode
 
     '
 - description: Configure multiple pins with SETQ
-  code: 'SETQ  #3                 '' Configure 4 pins (16-19)
+  code: 'SETQ  #3                 '' Span of 4 pins (16-19) for the DIRL that follows
 
     DIRL  #16                '' Reset all 4 pins
 
@@ -109,13 +111,6 @@ examples:
 
     '
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ls
-  pattern: D/#,S/#
-  description: 'Two operands: destination/immediate, source/immediate'
-  valueType: 13
-compiler_encoding:
-  operandFormat: 13
 last_updated: '2025-09-19T16:04:17.512736'
 category: Smart Pin
 oneliner: Set mode of smart pins S[10:6]+S[5:0]
@@ -142,3 +137,4 @@ related:
   - architecture/streamer/pin-capture.yaml
   - architecture/pin-drive-configuration.yaml
   - language/spin2/symbols/spin2-builtin-symbols-complete.yaml
+  - architecture/io_pin_timing.yaml

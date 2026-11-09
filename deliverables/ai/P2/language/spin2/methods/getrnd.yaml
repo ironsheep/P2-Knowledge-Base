@@ -1,15 +1,17 @@
 method: GETRND
 type: method
 description: |
-  Get 32-bit random number from P2's hardware random number generator.
-  Uses thermal noise for true entropy - suitable for cryptographic use,
-  unique ID generation, and seeding PRNGs.
+  Get a random 32-bit long from the Xoroshiro128** PRNG (a pseudo-random number
+  generator). The boot ROM seeds the PRNG at start-up with thermal noise from
+  the ADC; after that it iterates on every clock. Each cog receives its own
+  unique set of 32 bits from the PRNG.
 category: Miscellaneous
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, GETRND ('Get random long (from xoroshiro128** PRNG, seeded on boot with thermal noise from ADC)'; the +// operator); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUBSET (Seeding the Xoroshiro128** PRNG: the boot ROM seeds the PRNG fifty times with thermal noise; the PRNG iterates on every clock and each cog receives a unique set of 32 bits). The zero-state comment in the seeding example: EF-101"
 syntax: random := GETRND()
 parameters: []
 returns:
   type: long
-  description: 32-bit hardware random number (true random, not pseudo-random)
+  description: 32-bit pseudo-random long from the Xoroshiro128** PRNG
 
 examples:
   - description: "Get 32-bit random value"
@@ -30,15 +32,15 @@ examples:
     code: |
       WAITMS(GETRND() +// 1000)  ' 0-999ms random delay
 
-  - description: "Seed PRNG with hardware random"
+  - description: "Seed a PRNG from GETRND"
     code: |
       seed := GETRND()
       IF seed == 0
-        seed := 1       ' XORO32 requires non-zero
+        seed := 1       ' a zero state stays zero in ??x
 
-  - description: "Generate UUID"
+  - description: "Fill a 16-byte buffer with random longs"
     code: |
-      PUB generate_uuid(buffer_ptr) | i
+      PUB fill_buffer(buffer_ptr) | i
         REPEAT i FROM 0 TO 3
           LONG[buffer_ptr][i] := GETRND()
 
@@ -79,44 +81,28 @@ common_patterns:
         LONG[array_ptr][j] := temp
 
 anti_patterns:
-  - anti_pattern: "modulo_bias"
+  - anti_pattern: "signed_modulo"
     severity: "moderate"
-    description: "Signed modulo creates slight bias"
+    description: "// is a signed divide that returns the remainder; use +// (unsigned divide, return remainder) to get 0..n-1"
     wrong: |
-      value := GETRND() // 10    ' Slight bias toward lower values
+      value := GETRND() // 10    ' Signed divide, return remainder
     correct: |
-      value := GETRND() +// 10   ' Unsigned modulo - correct distribution
-
-  - anti_pattern: "truncating_low_bits"
-    severity: "minor"
-    description: "Masking low bits only loses some randomness"
-    wrong: |
-      value := GETRND() & $FF    ' Only uses low 8 bits
-    correct: |
-      value := GETRND() +// 256  ' Full 32-bit randomness scaled
-      value := GETRND() >> 24    ' Or high 8 bits (equally random)
+      value := GETRND() +// 10   ' Unsigned divide, return remainder: 0..9
 
 when_to_use:
   getrnd:
-    - "Cryptographic key generation"
-    - "Unique identifiers (UUIDs, session IDs)"
-    - "Security-sensitive applications"
-    - "Initial PRNG seeding"
+    - "Random values"
     - "When reproducibility is NOT wanted"
   prng_instead:
-    - "High-speed random loops (games, simulations)"
-    - "Reproducible test sequences"
-    - "Non-security random needs"
+    - "Reproducible test sequences (a generator you seed yourself, such as XORO32 or the ?? operator)"
 
 notes:
-  - "Uses P2's hardware random number generator"
-  - "True random based on thermal noise"
+  - "Returns a value from the Xoroshiro128** PRNG, which iterates on every clock"
+  - "The boot ROM seeds the PRNG at start-up with thermal noise from the ADC"
   - "Full 32-bit range"
   - "No seeding required"
-  - "Each COG has independent access"
-  - "Use +// operator for scaled ranges (unsigned modulo)"
-  - "Slower than ?? operator (2-9 vs 1 cycle)"
-  - "Suitable for cryptographic use"
+  - "Each COG receives a unique set of 32 bits from the PRNG"
+  - "Use +// operator for scaled ranges (unsigned divide, return remainder)"
 
 timing:
   execution_model: |
@@ -134,8 +120,7 @@ related:
 
 see_also:
   - "Random number generation"
-  - "Hardware RNG"
-  - "Cryptographic operations"
-  - "UUID generation"
+  - "Xoroshiro128** PRNG"
+  - "XORO32 and the ?? operator (generators you seed yourself)"
 
-oneliner: "Get 32-bit true random from hardware thermal noise generator"
+oneliner: "Get a random 32-bit long from the Xoroshiro128** PRNG"

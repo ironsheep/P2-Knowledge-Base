@@ -3,15 +3,15 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: overview
-    fp: "f9e4ac560964595f"
+    fp: "c4734f0f904b4988"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: silicon_errata.intervening_altx_augs_augd_cancels_ptrx_block_delta.description
-    fp: "76fe827e549800f3"
+    fp: "ed5e5e8c52f76d74"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: silicon_errata.intervening_altx_augs_augd_cancels_ptrx_block_delta.example
-    fp: "548f33a524adc8a1"
+    fp: "8a253eb6709b31ce"
     compile: fragment
     wrap: pasm2-dat
     assumes: [start_reg]
@@ -20,7 +20,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: setq_instructions.SETQ2.example
-    fp: "91a588ffabe45557"
+    fp: "0aac98337aab70ef"
     compile: fragment
     wrap: pasm2-dat
   - at: block_operations.hub_to_cog_transfer.syntax
@@ -49,7 +49,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [results]
   - at: block_operations.hub_to_lut_transfer.syntax
-    fp: "8d931b627bfa2d9f"
+    fp: "8f707f96b2852a68"
     compile: fragment
     wrap: pasm2-dat
     assumes: [count=con:16, hub_address]
@@ -59,7 +59,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [sine_table_hub=con, value, phase]
   - at: block_operations.lut_to_hub_transfer.syntax
-    fp: "9b35408b16bf5d64"
+    fp: "5c5a6882afe48c61"
     compile: fragment
     wrap: pasm2-dat
     assumes: [count=con:16, hub_address]
@@ -68,12 +68,12 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: production_patterns.waveform_buffer_management.code
-    fp: "eee68c2643fa1383"
+    fp: "7ae05478c99b8b8b"
     compile: fragment
     wrap: pasm2-dat
     assumes: [sample_ptr, index, sample, dc_offset, output_ptr]
   - at: special_operations.full_width_q_value.description
-    fp: "1b88a0e34968959a"
+    fp: "fd7b8b38db2a21d0"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: block_fill.hub_fill.syntax
@@ -92,7 +92,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [array_size=con:16, dest_array, source_ptr]
   - at: common_patterns.buffer_clear.code
-    fp: "aec6893db697bc9c"
+    fp: "ae4bb3bda9f07e0e"
     compile: fragment
     wrap: pasm2-dat
     assumes: [buffer_size=con:16, buffer_start=con]
@@ -107,7 +107,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [context_ptr]
   - at: common_patterns.lut_table_load.code
-    fp: "cb4fe7a238384266"
+    fp: "b1aa59d8a9d37087"
     compile: fragment
     wrap: pasm2-dat
     assumes: [sine_table=con]

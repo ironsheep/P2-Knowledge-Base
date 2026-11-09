@@ -1,41 +1,40 @@
 method: RQPIN
 type: method
 description: |
-  Read smart pin result without clearing IN flag
+  Read smart pin result without acknowledging the smart pin
 category: Smart Pin Operations
-syntax: "result := RQPIN(PinField)"
+syntax: "result := RQPIN(Pin)"
 parameters:
-  - name: "PinField"
-    type: "pin_field"
-    description: "Pin number (0-63) or pin field expression"
+  - name: "Pin"
+    type: "long"
+    description: "Pin number (0-63)"
 returns:
   type: "long"
   description: "32-bit result with bit 31 containing the pin's C flag state"
 examples:
   - code: |
-      ' Peek at smart pin value without acknowledging
-      current_count := RQPIN(24)
-    description: "Read current value without affecting measurement"
+      ' Read pin 24's result with bit 31 (the C flag) masked off, without acknowledging
+      current_count := RQPIN(24) & $7FFF_FFFF
+    description: "Read the result bits of pin 24 without acknowledging"
   - code: |
-      ' Monitor ADC without clearing ready flag
-      if PINREAD(16)  ' Check if new data ready
-        preview := RQPIN(16)  ' Preview value
-        if preview > threshold
-          actual := RDPIN(16)  ' Now acknowledge
-    description: "Preview value before deciding to acknowledge"
+      ' Read pin 16 without acknowledging, then read and acknowledge it
+      preview := RQPIN(16) & $7FFF_FFFF
+      if preview > threshold
+        actual := RDPIN(16) & $7FFF_FFFF
+    description: "Read the result bits without acknowledging, then read and acknowledge"
   - code: |
-      ' Check multiple pins without acknowledging
+      ' Read pins 8 to 15 without acknowledging, result bits only
       repeat pin from 8 to 15
-        values[pin] := RQPIN(pin)
-    description: "Read multiple smart pins without clearing flags"
+        values[pin - 8] := RQPIN(pin) & $7FFF_FFFF
+    description: "Read the result bits of pins 8 to 15 without acknowledging"
 notes:
-  - "Does NOT clear the smart pin's IN flag"
+  - "Does not acknowledge the smart pin"
   - "Bit 31 contains the pin's C flag state"
-  - "Lower 31 bits contain the smart pin measurement/result"
-  - "Useful for peeking at current value without affecting operation"
-  - "Pin continues to assert IN flag after RQPIN"
-  - "Use RDPIN to read and acknowledge"
-  - "Smart pin must be configured with WRPIN/WXPIN/WYPIN first"
+  - "The other bits contain the smart pin's result"
+  - "RDPIN reads and acknowledges"
+  - "RQPIN does not use the cog-to-smart-pin bus for acknowledgement, so any number of cogs can read a smart pin at the same time with RQPIN"
+  - "Not documented: the value RQPIN returns from a smart pin in an ADC mode or in asynchronous receive mode before that pin has completed its first sample period or received its first word"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Pin Methods (RQPIN(Pin) : Zval, read Pin smart pin without acknowledge, Zval[31] = C flag from RQPIN, other bits are RQPIN data); the notes line on the acknowledgement bus and concurrent readers: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS"
 timing:
   execution_model: |
     Spin2 methods execute via the bytecode interpreter. Method-call clock count: not documented.
@@ -49,5 +48,3 @@ related:
   - PINREAD
 see_also:
   - "Smart pin modes"
-  - "Smart pin monitoring"
-  - "Non-destructive reading"

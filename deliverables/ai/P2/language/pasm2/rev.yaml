@@ -2,18 +2,14 @@ instruction: REV
 syntax: REV Dest
 brief_description: Reverse
 category: Math and Logic
-description: 'The 32-bit pattern in Dest is reversed.
+description: >-
+  The 32-bit pattern in Dest is reversed.
 
-
-  =>
-
-
-  REV performs a bitwise reverse (bits 31:0 bits 0:31) of the value in Dest and stores
-  the result back into Dest.
-
+  REV performs a bitwise reverse (bits 31:0 become bits 0:31, D = D[0:31]) of the
+  value in Dest and stores the result back into Dest.
 
   This is useful for processing binary data in a different MSB/LSB order than it is
-  transmitted with.'
+  transmitted with.
 result: The 32-bit pattern in Dest is reversed.
 parameters:
 - Dest is the register containing the bit value to reverse.
@@ -22,26 +18,22 @@ flags_affected:
   Z: No effect
 syntax_variants:
 - REV Dest
-- REV performs a bitwise reverse (bits 31:0 bits 0:31) of the value in Dest and stores
-  the result back into Dest.
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 000 DDDDDDDDD 001101001
   write: D
   c: —
   z: —
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, REV, p.119"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 390 (REV D: reverse D bits, D = D[0:31]; 2 clocks; write D)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.37 (REV D: reverse D bits, D = D[0:31], 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, REV, p.119 (Result line, Dest parameter, encoding row 1101011 000 / 001101001, write D, C and Z none, 2 clocks, the bitwise-reverse explanation and the MSB/LSB-order sentence)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 1101011 000 DDDDDDDDD 001101001 REV D)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_d
-  pattern: D
-  description: Destination register only
-  valueType: 24
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 24
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Reverse bits of value

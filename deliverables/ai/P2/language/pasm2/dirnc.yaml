@@ -2,8 +2,9 @@ instruction: DIRNC
 syntax: DIRNC   {#}D           {WCZ}
 category: Pin
 description: >-
-  DIRC or DIRNC alters the direction register's bit(s) designated by Dest to equal
-  the state, or inverse state, of the C flag. All other bits are left unchanged.
+  DIRNC alters the direction register's bit(s) designated by Dest to equal the
+  inverse state of the C flag (!C). High (1) bits set the pin(s) to output, low (0)
+  to input. All other bits are left unchanged.
 
   Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates
   the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond
@@ -15,9 +16,9 @@ description: >-
   instruction prior.
 
   When Dest is a register, the register's value bits [10:0] are used as-is to form
-  the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRNC
-  instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for
-  DIRNC's use.
+  the 11-bit ID range. A prior SETQ overrides Dest[10:6] with the low five bits of
+  the SETQ value; an ALTx between the SETQ and DIRNC keeps the override, and a SETQ
+  separated from DIRNC by other instructions is not documented.
 
   The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within
   the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.
@@ -25,11 +26,11 @@ description: >-
   If the WCZ effect is specified, the C and Z flags are set to the original
   (pre-instruction) state of the base pin's DIR bit (DIRA / DIRB), identified by Dest.
 result: >-
-  The I/O pin direction bit(s), described by Dest, are set to output/input according
-  to C or !C; the rest are left as-is.
+  The I/O pin direction bit(s), described by Dest, are set to !C; the rest are
+  left as-is.
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
-  the I/O pin(s) to set to output or input.
+  the I/O pin(s) whose DIR bit is set to !C.
 - WCZ is an optional effect to update flags.
 flags_affected:
   C: Set to the original (pre-instruction) state of the base pin's DIR bit
@@ -37,28 +38,31 @@ flags_affected:
 timing:
   cycles: 2
   type: fixed
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZL DDDDDDDDD 001000011
   write: DIRx
   c: Orig DIRx base bit
   z: Orig DIRx base bit
   clocks: '2'
+encoding_notes:
+- "DIRNC uses the S-field code 001000011, the same code as TESTPN with ANDC or ANDZ."
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DIRC / DIRNC, p.70"
+sources:
+  - "description (a prior SETQ overrides D[10:6]): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), list of changes (DIRx/OUTx/FLTx/DRVx can now work on a span of pins, +D[10:6] pins; prior SETQ overrides D[10:6])"
+  - "description (an ALTx between the SETQ and DIRNC keeps the override): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, pp.38-39 (SETQ / SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction); a SETQ separated by other instructions is in no source"
+  - "encoding_notes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 1101011 CZL DDDDDDDDD 001000011 for both TESTPN D/# ANDC/ANDZ and DIRNC D/# {WCZ})"
+  - "P2 Instructions v35 - Rev B/C Silicon, row 352 (DIRNC {#}D {WCZ}: DIR bits of pins D[10:6]+D[5:0]..D[5:0] = !C; wraps within DIRA/DIRB; prior SETQ overrides D[10:6]; C,Z = DIR bit; write DIRx; 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DIRC / DIRNC, p.70 (encoding table; set pin to the output (1) or input (0) direction; Dest[5:0], Dest[10:6], the 9-bit literal range of Dest[8:6], ##Dest, the SETQ substitution, the wrap within DIRA or DIRB, C and Z set to the original base bit, 2 clocks)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin instructions, p.39 (DIRNC {#}D {WCZ}, 2 clocks)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pinop
-  pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
-    flags'
-  valueType: 30
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 30
 last_updated: '2025-09-19T16:04:17.257717'
-oneliner: Set pin(s) direction to input/output according to C or !C
+oneliner: Set pin(s) DIR bit to !C
 related:
+- DIRC
 - DIRZ
 - DIRNZ
 - DIRL
 - DIRH
 - DIRNOT
 - DIRRND
+- architecture/io_pin_timing.yaml

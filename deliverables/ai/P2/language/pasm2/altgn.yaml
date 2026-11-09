@@ -23,13 +23,6 @@ flags_affected:
   Z: No effect
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTGN, p.41"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_duiz
-  pattern: D{,S/#}
-  description: Destination, optional source (immediate bit set if no source)
-  valueType: 5
-compiler_encoding:
-  operandFormat: 5
 last_updated: '2025-09-19'
 brief_description: Alter get nibble
 category: Register Indirection

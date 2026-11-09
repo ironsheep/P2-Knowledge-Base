@@ -8,9 +8,11 @@ description: 'Align to long boundary (4-byte alignment)
 category: Assembly Directives
 documentation_level: complete
 syntax: ALIGNL
-usage: 'Use before data declarations or code sections that require long alignment
+usage: 'Use before data declarations or code sections that should start on a long
 
-  for efficient access or hardware requirements
+  boundary (for example, the target of a hub branch, which costs one more clock when
+
+  not long-aligned)
 
   '
 examples:
@@ -21,9 +23,8 @@ examples:
     '
   description: Ensure data starts on long boundary
 notes:
-- P2 requires long alignment for certain operations
 - Inserts 0-3 bytes of padding as needed
-- Critical for hub memory access efficiency
+- Hub RAM has no special alignment rules for words and longs; a read or write of a long that crosses a hub long boundary takes one additional clock, and a branch to a hub address that is not long-aligned takes one additional clock
 related:
 - ALIGNW
 - ORG

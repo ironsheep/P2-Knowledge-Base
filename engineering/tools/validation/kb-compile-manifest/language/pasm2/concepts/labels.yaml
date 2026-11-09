@@ -8,7 +8,7 @@ blocks:
     wrap: spin2-top
     assumes: [x]
   - at: label_types.local_labels.example
-    fp: "9b1c9f256734dcd0"
+    fp: "7a6bd9866df40e2a"
     compile: fragment
     wrap: spin2-top
     assumes: [x, ptr, tx_pin, rx_pin]
@@ -51,7 +51,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: scope_boundaries.example
-    fp: "b0dd313079ec6a80"
+    fp: "d469c420d23690f2"
     compile: fragment
     wrap: spin2-top
     assumes: [x, y]

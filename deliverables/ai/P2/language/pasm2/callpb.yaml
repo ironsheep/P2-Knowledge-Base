@@ -1,38 +1,67 @@
 instruction: CALLPB
 syntax: CALLPB  {#}D,{#}S
 category: Branch
-description: CALLPB records the current state of the C and Z flags and the address of the next instruction (PC + 1 if Cog/LUT execution; PC + 4 if Hub execution) by pushing to the stack (K), copies the value of Dest to PB, and jumps to the address specified by Src. The routine at the new address should eventually execute a RET instruction to return to the recorded address and restore the flags.
+description: >-
+  CALLPB records the current state of the C and Z flags and the address of the next
+  instruction (PC + 1 if Cog/LUT execution; PC + 4 if Hub execution) by pushing to
+  the stack (K), copies the value of Dest to PB, and jumps to the address specified
+  by Src. The routine at the new address should eventually execute a RET instruction
+  to return to the recorded address and restore the flags.
+
+  The address (Src) can be absolute or relative. To specify an absolute address,
+  Src must be a register containing a 20-bit address value. To specify a relative
+  address, use #Label for a 9-bit signed offset (a range of -256 to +255
+  instructions). Offsets are relative to the instruction following the CALLPB. The
+  signed offset value is in units of whole instructions -- it is added to PC as-is
+  when in Cog/LUT execution mode and is multiplied by 4 then added to PC when in
+  Hub execution mode.
+  ##Label (or a prior AUGS instruction) assembles as an AUGS word plus the
+  instruction, with an 18-bit offset field; the rule above is for #Label, and a
+  backward ##Label in Cog execution is covered under anti_patterns.
 parameters:
 - Dest is a register, 9-bit literal, or 32-bit augmented literal whose value is copied
   to PB.
-- 'Src is a register, 9-bit literal, or 32-bit augmented literal that contains the
+- 'Src is a register, 9-bit literal, or ## augmented literal that contains the
   relative or absolute address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
 flags_affected:
   C: No effect
   Z: No effect
+syntax_variants:
+- CALLPB {#}D,{#}S
 timing:
-  cycles: 4
+  cycles: '4 (cog/LUT) / 13...20 (hub-exec)'
   type: variable
-  range: 4 / 13...20
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1011010 1LI DDDDDDDDD SSSSSSSSS
-  write: K¹, PB and PC
+  write: K, PB and PC
   c: —
   z: —
-  clocks: 4 / 13–20
+  clocks: 4 / 13...20
 encoding_notes:
 - The current C, Z, and effective next PC values are pushed onto the stack (K) prior
   to updating PC with Src.
+- "The value pushed is {C, Z, 10'b0, PC[19:0]}."
+anti_patterns:
+- pattern: "Backward CALLPB {#}D,##Label"
+  reason: >-
+    Not documented: whether a backward CALLPB {#}D,##Label lands on its label. CALLPB
+    shares DJNZ's encoding (AUGS plus the instruction, an 18-bit field as assembled),
+    and only backward DJNZ has been run: a target 303 longs back (field -303) landed on its
+    label in Hub execution and missed it in Cog execution, going to hub at PC plus
+    the field taken as a positive offset. A near #Label (within -256 to +255
+    instructions) avoids the ##Label form. A register holding the target
+    address as Src assembles with no AUGS word (assembled for DJNZ, TJS and JINT
+    only; not run on the board).
+  source: "P2 hardware verification, EF-107 (backward DJNZ only; this instruction not run); CP-031 (the ## S-branch assembles an AUGS word plus the instruction, an 18-bit offset field; shown for DJNZ and TJZ of the family); CP-056 (a backward ##label assembles for all 47 S-branch instructions as AUGS plus the instruction with an 18-bit field that counts longs, -303 for this distance; a register Src assembles with no AUGS for DJNZ, TJS and JINT, assembled only, not run on the board)"
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLPA / CALLPB, p.59"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 167 (CALLPB {#}D,{#}S: call to S by pushing {C, Z, 10'b0, PC[19:0]} onto stack, copy D to PB; 4 cog/LUT, 13...20 hub; footnote: if #S and cogex PC += signed(S), if #S and hubex PC += signed(S*4), if S PC = register S) and the Datasheet instruction table, p.40"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLPA / CALLPB, p.59 (encoding table 4 / 13-20, write K, PB and PC, footnote 1 'The current C, Z, and effective next PC values are pushed onto the stack (K) prior to updating PC with Src'; use #Addr for calling a range of -256 to +255 instructions relative to the instruction following the CALLPB; when relative, PC is adjusted by signed(Src) in Cog/LUT execution or by signed(Src*4) in Hub execution)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BRANCH ADDRESSING (CALLPA and CALLPB are listed with the S-branch instructions that use S[19:0] as an absolute address, or sign-extend the immediate 9-bit S field as a relative address in whole instructions, shifted left two bits in hub mode, range -256 to +255 instructions relative to the instruction following the branch) and instruction encoding listing (EEEE 1011010 1LI DDDDDDDDD SSSSSSSSS CALLPB D/#,S/#rel9)"
+  - "CP-031, shown for DJNZ and TJZ of the same S-branch family (the 9-bit S field is in instructions in cog and times four in hub)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_lsj
-  pattern: D/#,S/@
-  description: 'Jump/call with immediate destination and relative source: destination/immediate,
-    relative address'
-  valueType: 14
-compiler_encoding:
-  operandFormat: 14
 last_updated: '2025-09-19T16:04:17.674467'
 oneliner: Call a subroutine; store return context on the stack and copy D into PB
+related:
+  - language/pasm2/concepts/branch_addressing.yaml

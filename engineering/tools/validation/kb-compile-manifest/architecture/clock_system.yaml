@@ -7,40 +7,35 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: programming_examples.basic_crystal_20mhz.code
-    fp: "8bf6c1bac21e02a7"
+    fp: "64c95c89c954c725"
     compile: fragment
     wrap: pasm2-dat
   - at: programming_examples.pll_160mhz_from_20mhz_crystal.code
-    fp: "94af098e81b33da3"
+    fp: "6af57acaf18c5f35"
     compile: fragment
     wrap: pasm2-dat
   - at: programming_examples.overclock_250mhz.code
-    fp: "6c4509b58f161c34"
+    fp: "a03d8e46de29a034"
     compile: fragment
     wrap: pasm2-dat
-  - at: frequency_measurement.measuring_actual_frequency.code
-    fp: "f4ee91f1fb720a59"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [start_count, measure_time=con, end_count]
   - at: clock_switching.sequence[0]
-    fp: "a12bd96280cf5224"
+    fp: "cf5f71e264433df4"
     compile: not-code
     reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
   - at: clock_switching.sequence[1]
-    fp: "711cbb1926a5af6c"
+    fp: "6ed577eb408615aa"
     compile: not-code
     reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
   - at: clock_switching.sequence[2]
-    fp: "5d4f3adc2bd21ab8"
+    fp: "b2a6dcc05a617176"
     compile: not-code
     reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
   - at: clock_switching.sequence[3]
-    fp: "db84e0ef884e64cf"
+    fp: "f83be981afaea92b"
     compile: not-code
     reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
   - at: clock_switching.sequence[4]
-    fp: "622641f106f5dee4"
+    fp: "062ce81afade4de1"
     compile: not-code
     reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
   - at: anti_patterns.conflicting_definitions.wrong
@@ -68,6 +63,14 @@ blocks:
     compile: not-code
     reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
   - at: anti_patterns.unsafe_switch_away_from_pll.correct
-    fp: "6f2d8064b1d25205"
+    fp: "0449d2fb42a78a90"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: anti_patterns.enable_pll_while_on_xi.wrong
+    fp: "da237a7481f94918"
+    compile: not-code
+    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+  - at: anti_patterns.enable_pll_while_on_xi.correct
+    fp: "00ab16cd5ec94244"
     compile: not-code
     reason: "English prose (a step, sentence or caption shown under a one-line key), not code"

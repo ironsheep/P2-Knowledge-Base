@@ -63,3 +63,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [count, x]
+  - at: idioms[3].context
+    fp: "ea5f8cb0bbed9b93"
+    compile: not-code
+    reason: "YAML description prose (English sentences on DJNZ/DJNF tests), not code"

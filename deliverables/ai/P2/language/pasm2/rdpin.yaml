@@ -16,24 +16,31 @@ timing:
     insert one NOP before testing the IN flag:
       RDPIN   result, #pin
       NOP                   ' 2 clocks: covers the IN-flag reset delay
-      TESTP   #pin WC       ' NOW safe to poll IN flag
-    Note: RQPIN (read quiet) does NOT reset the IN flag.
+      TESTP   #pin WC       ' IN can now be polled again
+    Note: RQPIN (read quiet) does not acknowledge the smart pin, so it does not reset the IN flag.
 description: 'Read smart pin S[5:0] result "Z" into D, acknowledge smart pin. C = modal
-  result.'
+  result: the smart pin''s outgoing bus carries Z and a special flag, and C is either
+  a mode-related flag or the MSB of Z.
+
+
+  Cogs that execute WRPIN, WXPIN, WYPIN, RDPIN or AKPIN on the same smart pin must do
+  so at different times: each cog has its own bus to the pin for write data and
+  acknowledgement, and the pin OR''s the cogs'' buses, so simultaneous use clobbers
+  the bus data. RQPIN does not use that bus for acknowledgement, so any number of cogs
+  can read a smart pin at the same time with RQPIN.'
+sources:
+  - "description (C is a mode-related flag or the MSB of Z; multi-cog bus rule): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS"
+notes:
+  - "Not documented: the value RDPIN returns from a smart pin in an ADC mode or in asynchronous receive mode before that pin has completed its first sample period or received its first word"
 flags_affected:
-  C: Set to modal result
+  C: Set to a mode-related flag, or to the MSB of Z (the smart pin's outgoing bus carries Z and a special flag)
   Z: No effect
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.152"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:
-  operandFormat: 0
 syntax_variants:
 - RDPIN D,{#}S
 last_updated: '2025-09-19T16:04:17.127325'
 category: Smart Pin
 oneliner: Read smart pin result and acknowledge pin
+related:
+  - architecture/io_pin_timing.yaml

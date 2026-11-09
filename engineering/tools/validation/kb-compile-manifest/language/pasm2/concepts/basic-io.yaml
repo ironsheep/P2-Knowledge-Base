@@ -61,11 +61,11 @@ blocks:
     wrap: pasm2-dat
     assumes: [mode]
   - at: internal_pull_resistors.pull_a_line_high.example
-    fp: "7958f4b72a54b799"
+    fp: "bad738443dfc5e6c"
     compile: fragment
     wrap: pasm2-dat
   - at: internal_pull_resistors.pull_a_line_low.example
-    fp: "b5b4394272fc2f3d"
+    fp: "0aa4b00b4f282b49"
     compile: fragment
     wrap: pasm2-dat
   - at: smart_pin_to_basic_io_transition.clearing_smart_pin.example
@@ -77,18 +77,6 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [pin, mode, x, y]
-  - at: safe_initialization_patterns.avoid_glitches.wrong
-    fp: "a1edfd43b9371270"
-    compile: fragment
-    wrap: pasm2-dat
-  - at: safe_initialization_patterns.avoid_glitches.correct
-    fp: "166aa00c9b37a116"
-    compile: fragment
-    wrap: pasm2-dat
-  - at: safe_initialization_patterns.use_combined_instructions.example
-    fp: "df53e0b96cc9ff3c"
-    compile: fragment
-    wrap: pasm2-dat
   - at: common_patterns.led_blink.code
     fp: "ab07d4a9d71d69de"
     compile: program
@@ -105,12 +93,8 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [data]
-  - at: multi_cog_pin_coordination.coordination_strategies.single_cog_ownership.implementation
-    fp: "0c5be21237159bbb"
-    compile: not-code
-    reason: "YAML description prose (English sentences), not code"
   - at: multi_cog_pin_coordination.lock_coordination_example.code
-    fp: "43663727fdff2b9a"
+    fp: "4c29d55733c63de5"
     compile: fragment
     wrap: pasm2-dat
     assumes: [lock_id]
@@ -118,3 +102,11 @@ blocks:
     fp: "2ab2dc6256b89b56"
     compile: not-code
     reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"
+  - at: out_and_dir_order.out_before_dir.example
+    fp: "b39daaae7a1501ac"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: out_and_dir_order.drv_instructions.example
+    fp: "9518e5261c2a88e6"
+    compile: fragment
+    wrap: pasm2-dat

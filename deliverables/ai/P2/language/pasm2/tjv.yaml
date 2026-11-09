@@ -5,50 +5,64 @@ category: Branch
 description: >-
   TJV tests the value in Dest against C and jumps to the address described by Src
   if Dest has overflowed (Dest[31] != C). This instruction requires that C be updated
-  (to the true sign) by the previous ADDS / ADDSX / SUBS / SUBSX / CMPS / CMPSX /
+  (to the correct sign) by the previous ADDS / ADDSX / SUBS / SUBSX / CMPS / CMPSX /
   SUMx instruction. The address (Src) can be absolute or relative. To specify an
   absolute address, Src must be a register containing a 20-bit address value. To
   specify a relative address, use #Label for a 9-bit signed offset (a range of -256 to
-  +255 instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit
-  signed offset. Offsets are relative to the instruction following the TJV. The signed
-  offset value is in units of whole instructions -- it is added to PC as-is when in
-  Cog/LUT execution mode and is multiplied by 4 then added to PC when in Hub execution
-  mode (long-aligned Hub code not required).
+  +255 instructions). Offsets are relative to the instruction
+  following the TJV. The signed offset value is in units of whole instructions -- it is
+  added to PC as-is when in Cog/LUT execution mode and is multiplied by 4 then added to
+  PC when in Hub execution mode (long-aligned Hub code not required).
+  ##Label (or a prior AUGS instruction) assembles as an AUGS word plus the
+  instruction, with an 18-bit offset field; the rule above is for #Label, and a
+  backward ##Label in Cog execution is covered under anti_patterns.
 result: >-
   Dest is tested against C and if it has overflowed (Dest[31] != C), PC is set to a
   new relative (#Src) or absolute (Src) address.
 parameters:
 - Dest is a register whose value is tested for overflow (Dest[31] != C).
-- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
-  absolute or relative address to set PC to. Use # for relative addressing; omit #
-  for absolute addressing.'
+- 'Src is a register, 9-bit literal, or ## augmented literal whose value is the
+  absolute or relative address to set PC to. Use # for relative addressing; omit # for
+  absolute addressing.'
 flags_affected:
   C: No effect
   Z: No effect
 syntax_variants:
 - TJV D,{#}S
 timing:
-  cycles: "2 not-taken / 4 taken (cog); 2 not-taken / 13-20 taken (hub-exec)"
+  cycles: '2 or 4 (cog/LUT) / 2 or 13...20 (hub-exec)'
   type: variable
-  source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TJV (clocks), p.138"
-  notes: "Branch when V flag set; hub-exec branch refill is minimum 13 clocks"
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1011110 00I DDDDDDDDD SSSSSSSSS
-  write: PC   1
+  write: PC
   c: —
   z: —
-  clocks: 2 or 4 / 2 or 13–20
+  clocks: 2 or 4 / 2 or 13...20
 encoding_notes:
-- PC is written only when Dest has overﬂowed.
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TJV, p.138; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION (13-clock minimum hub-exec branch)"
+- PC is written only when Dest has overflowed.
+anti_patterns:
+- pattern: "Backward TJV D,##Label"
+  reason: >-
+    Not documented: whether a backward TJV D,##Label lands on its label. TJV shares
+    DJNZ's encoding (AUGS plus the instruction, an 18-bit field as assembled), and
+    only backward DJNZ has been run: a target 303 longs back (field -303) landed on its
+    label in Hub execution and missed it in Cog execution, going to hub at PC plus
+    the field taken as a positive offset. A near #Label (within -256 to +255
+    instructions) avoids the ##Label form. A register holding the target
+    address as Src assembles with no AUGS word (assembled for DJNZ, TJS and JINT
+    only; not run on the board). Parallax's documents also give the ##Label form a 20-bit signed
+    offset (-524288 to +524287).
+  source: "P2 hardware verification, EF-107 (backward DJNZ only; this instruction not run); CP-031 (the ## S-branch assembles an AUGS word plus the instruction, an 18-bit offset field; shown for DJNZ and TJZ of the family); CP-056 (a backward ##label assembles for all 47 S-branch instructions as AUGS plus the instruction with an 18-bit field that counts longs, -303 for this distance; a register Src assembles with no AUGS for DJNZ, TJS and JINT, assembled only, not run on the board); Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TJV, p.138 (##Label given as a 20-bit signed offset, -524288 to +524287)"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TJV, p.138"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 180 (TJV D,{#}S: test D and jump to S if D overflowed (D[31] != C, C = 'correct sign' from last addition/subtraction); 2 or 4 cog/LUT, 2 or 13...20 hub; footnote: if #S and cogex PC += signed(S), if #S and hubex PC += signed(S*4), if S PC = register S)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Branch Instructions, p.41 (TJV D,{#}S, 2 or 4 / 2 or 13...20)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TJV, p.138 (Result line, Dest and Src parameters, encoding row 1011110 00I, write PC with the footnote that PC is written only when Dest has overflowed, C and Z none, clocks 2 or 4 / 2 or 13-20, the Dest[31] != C test, the requirement that C be updated to the correct sign by the previous ADDS / ADDSX / SUBS / SUBSX / CMPS / CMPSX / SUMx instruction, absolute address in a register of 20 bits, #Label 9-bit signed offset -256 to +255 instructions, offsets relative to the instruction following the TJV, in whole instructions as-is in cog/LUT mode and times 4 in hub mode; the manual's text gives the ## offset as 20-bit)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BRANCH ADDRESSING (the S-branch instructions use S[19:0] as an absolute address, or sign-extend the immediate 9-bit S field as a relative address in whole instructions, shifted left two bits in hub mode, range -256 to +255 instructions relative to the instruction following the branch) and instruction encoding listing (EEEE 1011110 00I DDDDDDDDD SSSSSSSSS TJV D,S/#rel9)"
+  - "CP-031 (the 9-bit S field of the S-branch family is in instructions in cog and times four in hub; the ## S-branch assembles an AUGS word plus the instruction, an 18-bit offset field; shown for DJNZ and TJZ of the family)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_dsj
-  pattern: D,S/@
-  description: 'Jump with destination and relative address: register, relative address'
-  valueType: 12
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 12
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Test value and jump if overflowed
+related:
+  - language/pasm2/concepts/branch_addressing.yaml

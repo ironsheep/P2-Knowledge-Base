@@ -3,32 +3,30 @@ syntax: WRNZ D
 brief_description: Write not Z
 category: Math and Logic
 description: >-
-  WRNZ writes the inverse state of Z (0 or 1) to Dest. If Z is set (1), Dest becomes 0.
-  If Z is clear (0), Dest becomes 1.
+  WRNZ writes the inverse state of Z (0 or 1) to Dest: Dest = {31'b0, !Z}. If Z is
+  set (1), Dest becomes 0. If Z is clear (0), Dest becomes 1.
 result: >-
   Dest value is replaced with the inverse state of Z (!Z).
 parameters:
-- Dest is the register whose value will be replaced with the state of Z or !Z.
+- Dest is the register whose value will be replaced with the inverse state of Z (!Z).
 flags_affected:
   C: No effect
   Z: No effect
 timing:
   cycles: 2
   type: fixed
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 000 DDDDDDDDD 001101111
   write: D
   c: —
   z: —
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, WRZ / WRNZ, p.146"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 396 (WRNZ D: write 0 or 1 to D, according to !Z, D = {31'b0, !Z}; 2 clocks; write D)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.38 (WRNZ D, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, WRZ / WRNZ, p.146 (syntax, Result line, Dest parameter, encoding row 001101111, write D, C and Z none, 2 clocks, explanation that WRZ or WRNZ writes the state or inverse state of Z (0 or 1) to Dest)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 1101011 000 DDDDDDDDD 001101111 WRNZ D)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_d
-  pattern: D
-  description: Destination register only
-  valueType: 24
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 24
 last_updated: '2025-09-19T16:04:17.099111'
-oneliner: Write Z or not Z to register
+oneliner: Write not Z to register

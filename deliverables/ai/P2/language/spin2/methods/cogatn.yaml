@@ -1,5 +1,4 @@
 # Spin2 Method: COGATN
-# Source: Spin2 documentation
 # Purpose: Signal attention to other cogs
 
 method: "COGATN"
@@ -7,9 +6,8 @@ category: "cog_management"
 type: "method"
 description: |
   Strobe the attention signal to one or more cogs.
-  Sets attention flags that can be polled or waited on by target cogs.
-  Provides fast inter-cog signaling without using hub RAM.
-  Essential for event notification and synchronization.
+  Each strobed cog sees an attention event for POLLATN/WAITATN and interrupt use.
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, Cog Methods (COGATN(CogMask): strobe ATN input(s) of cog(s) according to 16-bit CogMask); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG ATTENTION (the D operand's bits 0..15 represent cogs 0..15); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Cog Attention, p.22 (the D operand's lower 8 bits)"
 
 syntax: "COGATN(CogMask)"
 
@@ -19,9 +17,9 @@ parameters:
     description: |
       16-bit value in which bits 0..15 represent cogs 0..15:
       - Each set bit strobes the corresponding cog
-      - Can signal multiple cogs simultaneously
-      - Use (1 << cog_num) to signal specific cog
+      - More than one bit can be set
       - The issuing cog may set its own bit (see self_attention)
+      Parallax's documents also give the lower 8 bits of the value as the cog bits.
 
 returns: "none"
 
@@ -37,67 +35,59 @@ examples:
       ' Signal cog 3
       COGATN(1 << 3)
     description: "Signal single cog"
-    
+
   - code: |
       ' Signal cogs 0, 2, and 4
       COGATN(%00010101)
     description: "Signal multiple cogs"
-    
+
   - code: |
-      ' Broadcast to all other cogs
+      ' Signal cogs 0..7 except the issuing cog
       COGATN($FF ^ (1 << COGID()))
     description: "Signal all cogs except self"
-    
+
   - code: |
       VAR
         LONG worker_cogs
-        
+
       PUB signal_workers()
-        ' Signal all registered workers
+        ' Signal every cog whose bit is set in worker_cogs
         COGATN(worker_cogs)
-        
+
       PUB register_worker()
         worker_cogs |= (1 << COGID())
-    description: "Dynamic cog group signaling"
-    
+    description: "Signal the cogs recorded in a mask"
+
   - code: |
-      ' Producer-consumer pattern
+      ' One cog strobes another, which waits for the strobe
       PUB producer()
         REPEAT
           produce_data()
-          COGATN(1 << consumer_cog)  ' Data ready
-          
+          COGATN(1 << consumer_cog)
+
       PUB consumer()
         REPEAT
-          WAITATN()  ' Wait for signal
+          WAITATN()
           process_data()
-    description: "Producer-consumer synchronization"
+    description: "A strobe from one cog and a wait in another"
 
 signal_mechanism:
-  hardware: "Dedicated attention network between cogs: the 16 attention strobe outputs from all cogs are OR'd together into a composite set of 16 strobes, from which each cog receives its own"
-  persistence: "Signal is a strobe that causes an attention event, tracked until polled or waited for"
-  clearing: "The event flag is cleared when polled (POLLATN)"
+  hardware: "The 16 attention strobe outputs from all cogs are OR'd together to form a composite set of 16 strobes, from which each cog receives its particular strobe"
+  clearing: "POLLATN and WAITATN clear the attention event flag"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG ATTENTION (the OR'd strobes; the event flag is also cleared on POLLATN/WAITATN/JATN/JNATN, Events); P2 Instructions v35 Rev B/C Silicon, POLLATN row (get ATN event flag into C/Z, then clear it)"
 
 self_attention:
   behavior: "COGATN(1 << COGID()) delivers the strobe to the issuing cog: its own attention event is raised, exactly as when another cog strobes it"
-  verified_against: "EF-099"
-
-common_uses:
-  - "Event notification"
-  - "Work ready signals"
-  - "Synchronization barriers"
-  - "Interrupt simulation"
-  - "Wake sleeping cogs"
-  - "Broadcast communications"
+  source: "EF-099 (event flag only, one board, cog execution; the attention interrupt path was not tested)"
 
 receiving_methods:
   polling: |
     IF POLLATN()
       ' Attention was signaled
-      
+
   waiting: |
     WAITATN()  ' Block until signaled
-    
+
   pasm: |
     POLLATN WC  ' Check and clear
     WAITATN     ' Wait for signal
@@ -108,50 +98,8 @@ related_methods:
   - "COGID"
   - "COGCHK"
 
-synchronization_patterns:
-  - pattern: "Barrier synchronization"
-    code: |
-      VAR
-        BYTE ready_count
-        
-      PUB barrier()
-        ready_count++
-        IF ready_count == 8
-          COGATN($FF)  ' Release all
-          ready_count := 0
-        ELSE
-          WAITATN()    ' Wait for release
-  
-  - pattern: "Request-response"
-    code: |
-      PUB request_service(cog)
-        COGATN(1 << cog)
-        WAITATN()  ' Wait for completion signal
-  
-  - pattern: "Round-robin scheduling"
-    code: |
-      PUB scheduler() | cog
-        REPEAT cog FROM 0 TO 7
-          COGATN(1 << cog)  ' Give time slice
-          WAITMS(10)
-
 notes:
   - "A cog can signal itself: its own bit in the mask raises its own attention event (see self_attention)"
-  - "No payload - just a signal"
-  - "Target cog must be running to receive"
-  - "More efficient than hub RAM polling"
-
-best_practices:
-  - "Use for time-critical signaling"
-  - "Combine with hub RAM for data passing"
-  - "Clear attention before waiting again"
-  - "Document signal meanings clearly"
-  - "Use masks for group operations"
-
-limitations:
-  - "No data payload"
-  - "Single bit per cog - no message types"
-  - "No built-in acknowledgment"
 
 see_also:
   - "language/spin2/methods/pollatn.yaml"

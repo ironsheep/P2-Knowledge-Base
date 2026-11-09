@@ -8,23 +8,21 @@ brief_description: "Decodes A/B quadrature encoder signals for position and velo
 detailed_description:
   operation: |
     Tracks quadrature encoder transitions on A and B inputs to determine position and direction.
-    Counts all four transitions per encoder detent (two per signal). Maintains signed 32-bit
-    count that increments/decrements based on rotation direction. Supports both continuous
-    totalizer mode and periodic velocity measurements.
-  
+    Maintains a 32-bit quadrature step count that increments/decrements based on rotation
+    direction. Supports both continuous totalizer mode and periodic velocity measurements.  
   timing: |
     Continuous mode (X=0): Z register always holds current position count
     Periodic mode (X>0): Measures counts over X clock cycles
     IN flag raised at end of each measurement period
-    Can zero count anytime by pulsing DIR low
+    Can zero count anytime by pulsing DIR low (during reset Z is set to the adder value, 0, 1 or -1)
 
 registers:
   x_register:
     bits_31_0: "Measurement period in clocks (0=continuous totalizer)"
   y_register:  
-    function: "Not used in this mode"
+    function: "Not documented: a role for Y in this mode"
   z_register:
-    function: "Signed 32-bit count (4 counts per encoder detent)"
+    function: "32-bit quadrature step count (counts up and down with the direction of rotation)"
 
 flags:
   in_flag: "Raised at end of measurement period (periodic mode only)"
@@ -48,14 +46,20 @@ code_examples:
         pinstart(enc_b, P_QUADRATURE | P_MINUS1_A, _clkfreq/10, 0)
         
         repeat
-          position := rdpin(enc_a) sar 2         ' Divide by 4 for detents
-          velocity := rdpin(enc_b) sar 2         ' Velocity in detents/100ms
-          
+          position := read_z(enc_a)              ' Signed quadrature step count since the counter was last zeroed
+          velocity := read_z(enc_b)              ' Signed steps counted in the last 100ms period
+
           ' Reset position on button press
           if ina.[0]
             pinclear(enc_a)                      ' Zero the counter
             pinstart(enc_a, P_QUADRATURE | P_PLUS1_B, 0, 0)
-      
+
+      PRI read_z(pin) : z
+        ' PASM2 RDPIN keeps all 32 bits of Z, the sign bit included (the Spin2 RDPIN() method returns the C flag in bit 31)
+        org
+          rdpin   z, pin
+        end
+
       DAT
       ' PASM2 equivalent
         org
@@ -64,23 +68,16 @@ code_examples:
         wxpin   #0, #enc_a                       ' Continuous mode
         dirh    #enc_a                           ' Enable encoder
       .loop
-        rdpin   position_reg, #enc_a             ' Read position
-        sar     position_reg, #2                 ' Convert to detents
+        rdpin   position_reg, #enc_a             ' Read position (quadrature steps)
         jmp     #.loop
 
       position_reg    res     1
-
-common_applications:
-  - "Rotary encoder knobs for user interfaces"
-  - "Motor shaft position feedback"
-  - "Linear position sensing with optical encoders"
-  - "Closed-loop motor control systems"
 
 related_modes:
   - "Mode %01100: Count on A-rise when B-high"
   - "Mode %01101: Count up/down on A-rise based on B"
   - "Mode %01110: Count up on A-rise, down on B-rise"
-  - "Mode %01111: Count while A or B high"
+  - "Mode %01111: Count A-input highs, optionally decrementing on B-input highs"
 
 configuration_constants:
   mode_constant: "P_QUADRATURE"
@@ -88,11 +85,17 @@ configuration_constants:
   common_modifiers:
     - "P_PLUS1_B - Use next pin up for B signal"
     - "P_MINUS1_A - Use previous pin for A signal"
-    - "P_FILT1_AB - Add 2-clock filtering to reduce noise"
+    - "P_FILT1_AB - Filter the A and B inputs using the global filt1 settings"
 
 notes:
-  - "Counts all 4 transitions per detent (divide by 4 for detent count)"
-  - "Z register is signed 32-bit for bidirectional counting"
+  - "Z is a 32-bit quadrature step count"
+  - "Z counts up and down with the direction of rotation"
   - "Pulse DIR low to zero count without reconfiguration"
   - "Use two pins: one for position (X=0), one for velocity (X>0)"
-  - "No counts lost at period boundaries in periodic mode"
+  - "No counts lost at period boundaries in periodic mode: at the end of each period the accumulator is set to the 0/1/-1 value that would otherwise have been added into it"
+  - "During reset (DIR=0), IN is low and Z is set to the adder value (0/1/-1)"
+  - "The Spin2 example reads the count with inline PASM2 RDPIN, which keeps all 32 bits of Z; the Spin2 RDPIN() method returns the C flag in bit 31, which would replace the count's sign bit unless C is the MSB of Z. Not documented: the C flag of RDPIN in this mode."
+
+sources:
+  - "operation, timing, registers, notes, P_FILT1_AB (global filt1 settings): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%01011 A/B-input quadrature encoder) and SMART PINS (%FFF logic and filtering; C is either a mode-related flag or the MSB of the Z result)"
+  - "notes (Spin2 RDPIN() bit 31): Parallax Propeller 2 Spin2 Language Documentation v55, smart pin methods (RDPIN (Pin) : Zval, Zval[31] = C flag from RDPIN, other bits are RDPIN data)"

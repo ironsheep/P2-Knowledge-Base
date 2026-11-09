@@ -8,12 +8,12 @@ blocks:
     wrap: pasm2-dat
     assumes: [multiplicand, multiplier, product_lo, product_hi]
   - at: usage_patterns.pipelined_pattern.code
-    fp: "49ecc953e9d1f899"
+    fp: "213cdcefb55a5f73"
     compile: fragment
     wrap: pasm2-dat
     assumes: [a0, b0, a1, b1, a2, b2, result_lo, result_hi, a_next, b_next, count]
   - at: usage_patterns.no_result_ready_poll.code
-    fp: "5f42fe741a35fa85"
+    fp: "ff90cca4685bdb26"
     compile: fragment
     wrap: pasm2-dat
     assumes: [a, b, result_lo, result_hi]
@@ -23,11 +23,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [multiplicand, multiplier, result_lo, result_hi]
   - at: interrupt_protection.extended_protection.code
-    fp: "17729a1a0def0c8e"
+    fp: "79969c95e5aa1177"
     compile: fragment
     wrap: pasm2-dat
     assumes: [value, output, result]
-  - at: result_retrieval.blocking_behavior
-    fp: "08adff0ccfce3d1d"
-    compile: not-code
-    reason: "YAML description prose (English sentences), not code"

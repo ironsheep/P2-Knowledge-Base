@@ -7,20 +7,25 @@ description: 'Declare long data in memory
   '
 category: Assembly Directives
 documentation_level: complete
-syntax: '[label] LONG value[, value...]'
+syntax: '[label] LONG data{[count]}{, data{[count]}...}'
 examples:
+- code: 'zeros   long  0[16]           '' 16 zero longs
+
+    '
+  description: Optional repeat count after a value
 - code: 'counter long  0                  '' Single long
 
     table   long  $1234_5678         '' Hex value
 
-    ptrs    long  @start, @fin       '' Addresses: object offsets in a Spin2 object
+    ptrs    long  @counter, @table   '' Longs holding the offsets of counter and table (the true addresses in a PASM-only file)
 
     '
   description: Long data declarations
 notes:
 - Each value occupies 4 bytes
-- DAT data is packed in the order declared, so a LONG that follows BYTE or WORD data is not long-aligned unless ALIGNL precedes it
-- Full 32-bit range
+- An optional repeat count in square brackets after a value generates that value count times
+- DAT data is packed in the order declared, so a LONG that follows BYTE or WORD data may not be long-aligned unless ALIGNL precedes it
+- 'LONG @label in a Spin2 object assembles to the object offset of the label, not the label''s place in the image; in a PASM-only file it assembles to the true address'
 - FVAR or FVARS on a LONG line emits that one value in variable length (1 to 4 bytes)
 related:
 - BYTE
@@ -28,4 +33,4 @@ related:
 - ALIGNL
 - language/pasm2/fvar.yaml
 oneliner: Declare long data in memory
-source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (data is packed in memory in the order declared; ALIGNL long-aligns to hub memory by emitting 1 to 3 zero bytes, if necessary)"
+source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), assembler directives (LONG data{[count]}{,data{[count]}...}: generate long data with optional repeat count); Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (data is packed in memory in the order declared; ALIGNL long-aligns to hub memory by emitting 1 to 3 zero bytes, if necessary); LONG @label: CP-030"

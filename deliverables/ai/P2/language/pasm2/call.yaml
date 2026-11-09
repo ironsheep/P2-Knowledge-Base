@@ -54,44 +54,36 @@ timing:
   cycles: 4
   type: variable
   notes: 4 cycles for Cog/LUT, 13-20 cycles for Hub execution
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101101 RAA AAAAAAAAA AAAAAAAAA
   write: K and PC
   c: —
   z: —
   clocks: '4 / 13-20'
-  notes: Syntax 1 - relative (R=1) or absolute (R=0) address
+  notes: Syntax 1 - relative (R=1, PC += A) or absolute (R=0, PC = A) address; a backslash forces R=0
 - bits: EEEE 1101011 CZ0 DDDDDDDDD 000101101
   write: K and PC
   c: D[31]
   z: D[30]
   clocks: '4 / 13-20'
   notes: Syntax 2 - address from register
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALL, p.56; ret_prefix_caveat: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Conditions ( IF_x ), p.68, and P2 Instructions v35 - Rev B/C Silicon, row 410"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALL, pp.56-57"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 403 (CALL #{\\}A: push {C, Z, 10'b0, PC[19:0]}; R = 1 then PC += A, else PC = A; backslash forces R = 0; 4 cog/LUT, 13...20 hub), row 318 (CALL D: C = D[31], Z = D[30], PC = D[19:0]; 4, 13...20) and row 319 (RET: pop the stack, C = K[31], Z = K[30], PC = K[19:0])"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 1101101 RAA AAAAAAAAA AAAAAAAAA CALL #{\\}A; EEEE 1101011 CZ0 DDDDDDDDD 000101101 CALL D {WC/WZ/WCZ})"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALL, pp.56-57 (both encoding rows; write K and PC; 4 / 13-20; description, syntax 1 and 2, WC/WZ/WCZ effects)"
+  - "ret_prefix_caveat: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Conditions ( IF_x ), p.68 (_RET_: always; execute instruction then return if no branch; no context restore); P2 Instructions v35 - Rev B/C Silicon, row 410 (_RET_ <inst>: if <inst> is not branching then return by popping stack[19:0] into PC); hardware-verification ledger EF-058 (_RET_ CALL #target assembles, pushes the next-instruction address and does not return from the calling routine; the instruction after it runs)"
+  - "CP-036 (CALL #sub1 assembles with bit 20 = 1, R relative; CALL #\\sub1 with bit 20 = 0, R absolute)"
 documentation_level: comprehensive
-compiler_syntax: 'CALL #S | D'
-compiler_category: Control Flow
-compiler_operand_format:
-  name: operand_call
-  pattern: '#S | D'
-  description: 'Call: immediate address or register'
-  valueType: 19
-compiler_encoding:
-  bits: 32
-  opcode: 436
-  effects: 0
-  operandFormat: 19
-  rawValue: 39348
-compiler_effects: []
 last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
 ret_prefix_caveat: >-
-  '_RET_ CALL #target' DOES NOT CALL-AND-RETURN. The _RET_ prefix returns only if
-  the instruction did not branch, and CALL branches -- so the return is suppressed
-  and the line is silently just 'CALL #target'. The callee returns to the
-  instruction AFTER the call, so execution falls out of the calling routine into
-  whatever the assembler placed next. It assembles clean; there is no error and no
-  flag. To call a helper and then return, write 'CALL #target' followed by 'RET'.
+  '_RET_ CALL #target' does not call and return. The _RET_ prefix returns only if
+  the instruction did not branch, and CALL branches, so the _RET_ return does not
+  happen and the line acts as 'CALL #target'. The callee's RET returns to the
+  instruction after the '_RET_ CALL', so execution continues into whatever the
+  assembler placed next. The line assembles without error. To call a helper and
+  then return, write 'CALL #target' followed by 'RET'.
   Full rule: language/pasm2/concepts/conditional_execution.yaml (ret_prefix_rule).
 oneliner: Call a subroutine; store return context on the stack
 related:
@@ -99,3 +91,4 @@ related:
 - CALLA
 - CALLB
 - CALLD
+- language/pasm2/concepts/instruction_encoding_key.yaml

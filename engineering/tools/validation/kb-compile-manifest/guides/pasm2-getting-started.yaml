@@ -196,7 +196,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [char]
   - at: core_instructions.timing.WAITX.example
-    fp: "a182a96dc19400da"
+    fp: "8179d7cc2ca27871"
     compile: fragment
     wrap: pasm2-dat
   - at: core_instructions.timing.GETCT.example
@@ -292,7 +292,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [x, y, a, b, result]
-  - at: timing_considerations.precise_timing.example
+  - at: timing_considerations.clock_counting.example
     fp: "d178d0e6c1a277a2"
     compile: fragment
     wrap: pasm2-dat

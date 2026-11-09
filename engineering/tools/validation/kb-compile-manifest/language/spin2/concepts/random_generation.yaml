@@ -24,15 +24,13 @@ blocks:
     fp: "0f4ee8acbb312c0e"
     compile: program
   - at: common_patterns[7].code
-    fp: "0d0c896108d92116"
-    compile: fragment
-    wrap: spin2-top
-    assumes: [CATEGORY_COMMON=con, CATEGORY_UNCOMMON=con, CATEGORY_RARE=con]
+    fp: "fd80b1fda7dc5f7a"
+    compile: program
   - at: common_patterns[8].code
     fp: "0dfa91ccd0a3b66b"
     compile: program
   - at: common_patterns[9].code
-    fp: "c11e06e9b434ee86"
+    fp: "9572b59f892f08bd"
     compile: program
   - at: seeding_strategies[0].code
     fp: "922ea1e6b30ea179"
@@ -56,28 +54,18 @@ blocks:
     wrap: spin2-top
     with: ["anti_patterns[0].wrong"]
   - at: anti_patterns[2].wrong
-    fp: "0e6d873deead9a38"
+    fp: "5525aefdd8b1639c"
     compile: program
   - at: anti_patterns[2].correct
     fp: "967e0212183ad770"
     compile: program
-  - at: anti_patterns[3].wrong
-    fp: "633fd9c0f7477e84"
-    compile: fragment
-    wrap: spin2-top
-    assumes: [seed]
-  - at: anti_patterns[3].correct
-    fp: "73b4da8222e4d9d2"
-    compile: fragment
-    wrap: spin2-top
-    with: ["anti_patterns[0].wrong"]
   - at: anti_patterns[1].wrong
     fp: "c730834dcb71c332"
     compile: fragment
     wrap: spin2-method
     assumes: [value]
   - at: anti_patterns[1].correct
-    fp: "164c9a83b4a03c5a"
+    fp: "c3ef263541c8d041"
     compile: fragment
     wrap: spin2-method
     assumes: [value]

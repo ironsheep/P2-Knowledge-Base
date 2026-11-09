@@ -33,7 +33,7 @@ y_register:
   Y[31:0]: "Pulse count (decrements to 0)"
   behavior: "Non-zero starts output, decrements each cycle"
 
-z_register: "Not used"
+z_register: "Not documented: a Z (RDPIN/RQPIN) result for this mode"
 
 in_flag: "Raised when Y reaches 0 (pulses complete)"
 
@@ -51,18 +51,19 @@ spin2_complete: |
     PULSE_PIN = 48
     
   PUB main()
-    ' Single pulse example
-    single_pulse(1000, 16)         ' 1000-clock pulse, 16 times
+    ' Pulse train example
+    pulse_train(1000, 2000, 16)    ' 16 pulses, each high for 1000 clocks of a 2000-clock period
 
     ' Square wave burst
     square_wave_burst(50)          ' 50% duty, 50 cycles
-    
-  PUB single_pulse(width_clocks, count) | mode
+
+  PUB pulse_train(width_clocks, period_clocks, count) | mode, low_clocks
     mode := P_PULSE | P_OE
-    
+    low_clocks := period_clocks - width_clocks   ' X[31:16]: nonzero, so the output is high for width_clocks of each period
+
     PINCLEAR(PULSE_PIN)
     WRPIN(PULSE_PIN, mode)
-    WXPIN(PULSE_PIN, width_clocks) ' X[31:16]=0 for continuous high
+    WXPIN(PULSE_PIN, (low_clocks << 16) | period_clocks)  ' X[15:0] = period, X[31:16] = low clocks
     PINHIGH(PULSE_PIN)              ' Enable FIRST (general init order)
     WYPIN(PULSE_PIN, count)         ' THEN trigger: number of pulses
     
@@ -99,12 +100,15 @@ pasm2_complete: |
   pulse_pin     LONG  48
   pulse_mode    LONG  P_PULSE | P_OE
   
-  ' Generate N pulses of specified width
+  ' Generate N pulses of specified width within a fixed period
   gen_pulses
           MOV   pin, pulse_pin
           DIRL  pin                   ' Reset
           WRPIN pulse_mode, pin       ' Configure
-          MOV   x, width              ' X[15:0] = base period; X[31:16] = 0 (continuous high)
+          MOV   x, pulse_period       ' 2000 clocks
+          SUB   x, width              ' 2000 - 1000 = 1000 low clocks, nonzero
+          SHL   x, #16                ' X[31:16] = low clocks: output high for width clocks of each period
+          OR    x, pulse_period       ' X[15:0] = base period
           WXPIN x, pin               ' Set timing
           DIRH  pin                  ' Enable FIRST (general init order)
           WYPIN count, pin           ' THEN trigger: set count
@@ -128,11 +132,12 @@ pasm2_complete: |
           RET
   
   ' Variables
-  pin           RES   1
-  x             RES   1
   width         LONG  1000          ' 1000 clocks
+  pulse_period  LONG  2000          ' 2000 clocks
   count         LONG  16
   period        LONG  100
+  pin           RES   1
+  x             RES   1
   temp          RES   1
 
 # Inline PASM2 in Spin2
@@ -141,7 +146,7 @@ spin2_inline: |
     ORG
       DIRL  pin
       WRPIN ##P_PULSE | P_OE, pin
-      WXPIN width_clocks, pin       ' Width, X[31:16]=0
+      WXPIN width_clocks, pin       ' X[15:0] = width, X[31:16] = 0: high for the whole period while Y > 0
       DIRH  pin                     ' Enable FIRST (general init order)
       WYPIN #1, pin                 ' THEN trigger: single pulse
     END
@@ -153,15 +158,13 @@ timing_control: |
   Allows complex duty cycles and patterns
 
 special_cases: |
-  X[31:16]=0: Continuous high while Y > 0
+  X[31:16]=0: Continuous high while Y > 0 (output high for the whole time Y > 0, one long high, not separate pulses)
   X[31:16]=X[15:0]-1: Single clock high pulse (high for 1 clock of each period)
   X[31:16]=X[15:0]/2: 50% duty square wave
-
-common_uses:
-  - "Stepper motor control"
-  - "LED pulse patterns"
-  - "Timing signal generation"
-  - "Burst communications"
-  - "Gated clock outputs"
+  N separate pulses, each W clocks high: X[15:0] = period (W < period), X[31:16] = period - W (nonzero), Y = N
 
 related: ["00101 (Transition)", "00110 (NCO Freq)", "01000-01001 (PWM modes)"]
+
+sources:
+  - "operation, x_register, y_register, in_flag, pin_behavior, special_cases: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%00100 pulse/cycle output)"
+  - "examples (general init order, WYPIN after DIRH): EF-011"

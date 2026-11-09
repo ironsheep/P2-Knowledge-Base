@@ -7,31 +7,19 @@ encoding:
   z: —
   clocks: '2...9'
 timing:
-  cycles: 2
-  type: fixed
+  cycles: "2...9"
+  type: variable
 description: Convert cartesian coordinates (X, Y) to polar coordinates (length, angle).
-  Takes X coordinate in D and Y coordinate in S as 32-bit signed values. Results retrieved
-  via GETQX (length) and GETQY (angle) instructions 55 clocks later.
+  X is D and Y is S, 32-bit signed values. GETQX retrieves the length and GETQY the
+  angle 55 clocks later.
 flags_affected:
   C: No effect
   Z: No effect
-long_description: 'The QVECTOR instruction performs cartesian to polar coordinate
-  conversion using the P2''s 54-stage pipelined CORDIC solver. It converts a 32-bit
-  signed (X, Y) cartesian coordinate pair into a 32-bit (length, angle) polar coordinate
-  pair.
-
-
-  The instruction takes the X coordinate in the D operand and Y coordinate in the
-  S operand, both as 32-bit signed values. After 55 clocks, the results can be retrieved
-  using GETQX for the length and GETQY for the angle.
-
-
-  The angle result uses P2''s standard angle units where $00000000 = 0°, $40000000
-  = 90°, $80000000 = 180°, and $C0000000 = 270°.
-
-
-  This operation is commonly used in signal processing, graphics, and mathematical
-  calculations requiring coordinate system conversions.
+long_description: 'QVECTOR converts a 32-bit signed (X, Y) cartesian coordinate pair
+  into a 32-bit (length, angle) polar coordinate pair using the hub''s 54-stage pipelined
+  CORDIC solver. X is the D operand and Y is the S operand. Fifty-five clocks after
+  the cog hands the command to the CORDIC solver, the length is available through
+  GETQX and the angle through GETQY; both wait if the result has not yet arrived.
 
   '
 examples:
@@ -68,19 +56,16 @@ operand_details:
   D: X coordinate (32-bit signed)
   S: Y coordinate (32-bit signed)
 result_details:
-  GETQX: Length/magnitude (32-bit unsigned)
-  GETQY: Angle in P2 angle units (32-bit unsigned)
-timing_notes: Result available 55 clocks after instruction issue. Each cog can issue
-  one CORDIC instruction per hub window (every 8 clocks).
-documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.20, and CORDIC Solver Instructions, p.45; Parallax Propeller 2 Documentation v35 (Rev B/C silicon), CORDIC Solver (angle units); P2 Instructions v35 - Rev B/C Silicon, Sheet1"
+  GETQX: Length (32-bit)
+  GETQY: "Angle (32-bit). Not documented: the angle unit of the QVECTOR result."
+timing_notes: A cog waits for its hub slot, zero to (cogs-1) clocks away, to hand the
+  command to the CORDIC solver. Fifty-five clocks later the results are available
+  via GETQX and GETQY. With interrupts enabled while CORDIC commands overlap, an
+  interrupt service routine can steal enough clocks that one or more results are
+  overwritten before they are read; language/pasm2/concepts/cordic_solver.yaml
+  (interrupt_protection) shows how to shield such a sequence from interrupts.
+documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.20, and CORDIC Solver Instructions, p.45; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), CORDIC SOLVER ((X,Y) VECTORING) and OVERLAPPING CORDIC COMMANDS (interrupts during overlapped commands); P2 Instructions v35 - Rev B/C Silicon, Sheet1; the angle unit of the QVECTOR result is not stated in the Silicon Doc, the Datasheet, the Hardware Manual, the PASM2 Manual or the instruction CSV (the Silicon Doc gives an angle unit only for the QROTATE input)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ls
-  pattern: D/#,S/#
-  description: 'Two operands: destination/immediate, source/immediate'
-  valueType: 13
-compiler_encoding:
-  operandFormat: 13
 last_updated: '2025-09-19T16:04:17.069601'
 category: CORDIC Solver
 oneliner: Convert cartesian coordinates (X, Y) to polar coordinates (length, angle)

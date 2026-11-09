@@ -7,18 +7,25 @@ description: 'Declare byte data in memory
   '
 category: Assembly Directives
 documentation_level: complete
-syntax: '[label] BYTE value[, value...]'
+syntax: '[label] BYTE data{[count]}{, data{[count]}...}'
 examples:
+- code: 'zeros   byte  0[100]          '' 100 zero bytes
+
+            byte  $FF[4], 0        '' four $FF bytes, then a zero
+
+    '
+  description: Optional repeat count after a value
 - code: 'text    byte  "Hello P2", 0    '' String with terminator
 
-    data    byte  $FF, $00, $55    '' Hex values
+            byte  $FF, $00, $55    '' Hex values
 
-    nums    byte  1, 2, 3, 4, 5    '' Decimal values
+            byte  1, 2, 3, 4, 5    '' Decimal values
 
     '
   description: Various byte data declarations
 notes:
 - Each value occupies exactly 1 byte
+- An optional repeat count in square brackets after a value generates that value count times
 - Strings are stored as individual bytes
 - No automatic alignment
 - FVAR or FVARS on a BYTE line emits that one value in variable length (1 to 4 bytes)
@@ -28,3 +35,4 @@ related:
 - RES
 - language/pasm2/fvar.yaml
 oneliner: Declare byte data in memory
+source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), assembler directives (BYTE data{[count]}{,data{[count]}...}: generate byte data with optional repeat count); Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (data is packed in memory in the order declared)"

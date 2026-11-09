@@ -9,19 +9,12 @@ encoding:
 timing:
   cycles: 2
   type: variable
-description: Buffer new streamer command to execute on final NCO rollover, continuing phase.
+description: Buffer new streamer command to be issued on final NCO rollover of current command, continuing phase.
 flags_affected:
   C: No effect
   Z: No effect
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.158"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_ls
-  pattern: D/#,S/#
-  description: 'Two operands: destination/immediate, source/immediate'
-  valueType: 13
-compiler_encoding:
-  operandFormat: 13
 syntax_variants:
 - XCONT {#}D,{#}S
 last_updated: '2025-09-19T16:04:17.289286'
@@ -29,46 +22,28 @@ category: Streamer
 oneliner: Buffer new streamer command, continuing phase
 
 examples:
-- context: Seamless video line chaining
+- context: Visible lines of a 640x480 digital video driver
   code: |
-    ' Chain video segments without gaps
-    xinit   m_visible, #0     ' Start 640 visible pixels
-    xcont   m_front, sync0    ' Queue 16 front porch
-    xcont   m_sync, sync1     ' Queue 96 sync pulse  
-    xcont   m_back, sync0     ' Queue 48 back porch
-    waitxfi
-  source: VGA driver pattern
-
-- context: Continuous audio streaming
-  code: |
-    ' Seamless DAC output - phase continuity prevents pops
-    rdfast  #0, ##audio_buffer
-    xinit   audio_mode, #0     ' Start first buffer
-    xcont   audio_mode, #0     ' Chain next seamlessly
-  source: Audio streaming pattern
-
-patterns:
-- name: Command Chaining
-  description: |
-    XCONT buffers a command that executes when the current command's
-    count expires. Phase continuity prevents audio pops and timing glitches.
-    Unlike XZERO, the NCO phase continues without reset.
+    line            call    #hsync                  'do horizontal sync
+                    xcont   m_rf,#0                 'do visible line
+                    djnz    x,#line                 'another line?
+  notes: Each line's commands are queued with XCONT behind the sync commands, so the NCO phase runs on from command to command. The whole driver is in architecture/streamer/colorspace-and-dvi.yaml (dvi.example).
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER, Digital Video Output (DVI/HDMI), Table 22 (the visible-line loop)"
 
 notes:
-- Phase continues from previous command (no reset)
-- Use for seamless streaming where timing continuity matters
-- Waits for the prior command's last clock cycle; if the streamer count has already run down to 0 there is no waiting. If the prior command used count $FFFF (perpetual), it waits only for the next NCO rollover
-- XINIT starts the streamer from any state (XCONT does not need an active command to be legal)
-- Stalls until command buffer is empty if buffer is full
+- XCONT continues the NCO phase accumulator. XCONT is useful in cases where NCO phase and frequency should be strictly maintained and streamer activity should ride along with it.
+- XCONT is used to maintain seamless streamer I/O from command to command.
+- Waits for the prior command's last clock cycle; if the streamer count has already run down to 0 it proceeds at once. If the prior command used count $FFFF (perpetual), it waits only for the next NCO rollover, at which point the streamer begins executing the new command.
+- XCONT places its command in the streamer's single-level command buffer; the buffer is described in architecture/streamer/overview.yaml (resources_per_cog.command_buffer).
 sources:
-  - "notes (waits for the prior command's last clock cycle): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER"
+  - "notes (phase accumulator, seamless I/O, waits for the prior command's last clock cycle): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (the XZERO/XCONT waiting paragraph and the XCONT paragraph)"
+  - "related_instructions (WAITXFI, WAITXMT): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (the streamer-finished and streamer-empty event flags)"
 
-hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 related_instructions:
-- XINIT: Start immediately with zero phase
-- XZERO: Buffer command with phase zero
-- WAITXFI: Wait for streamer to finish
-- WAITXMT: Wait for command buffer empty
+- XINIT: Issue streamer command immediately, zeroing phase
+- XZERO: Buffer new streamer command to be issued on final NCO rollover of current command, zeroing phase
+- WAITXFI: Wait for the streamer-finished event (set whenever the streamer runs out of commands)
+- WAITXMT: Wait for the streamer-empty event (set whenever the streamer is ready for a new command)
 
 see_also:
   - architecture/streamer/overview.yaml

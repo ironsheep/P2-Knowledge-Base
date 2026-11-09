@@ -7,9 +7,11 @@ description: >-
   and then clears the flag (unless it's being set again by the event sensor).
   If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to
   the state of the pin-pattern-detected event flag prior to clearing it.
-  The pin-pattern-detected event flag is set whenever the masked input pins match
-  or don't match the pattern described by a previous SETPAT instruction. The flag is
-  cleared upon execution of SETPAT, POLLPAT, WAITPAT, JPAT, or JNPAT instructions.
+  After a SETPAT D,S the pin-pattern-detected event flag is set whenever the condition
+  selected by the C and Z flag values when SETPAT executed holds: (INA & D) != S with C=0 and Z=0;
+  (INA & D) == S with C=0 and Z=1; (INB & D) != S with C=1 and Z=0; (INB & D) == S
+  with C=1 and Z=1. The flag is cleared upon execution of SETPAT, POLLPAT, WAITPAT,
+  JPAT, or JNPAT instructions.
 result: Pin-pattern-detected event flag is optionally copied into C and/or Z, then
   it is cleared.
 flags_affected:
@@ -22,21 +24,19 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZ0 000001000 000100100
   write: —
   c: PAT Event
   z: PAT Event
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLPAT, p.113"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 279 (POLLPAT {WC/WZ/WCZ}: get PAT event flag into C/Z, then clear it; 2 clocks)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Event instructions, p.43 (POLLPAT {WC/WZ/WCZ}, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLPAT, p.113 (Result line, WC / WZ / WCZ parameter, encoding row 000001000 / 000100100, write none, C and Z PAT Event, 2 clocks, Related list; the flag is set whenever the masked input pins match or don't match the pattern described by a previous SETPAT; cleared upon SETPAT, POLLPAT, WAITPAT, JPAT or JNPAT)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (the POLLxxx instructions simultaneously return their event-occurred flag into C and/or Z and clear it unless it is set again by the event sensor; POLLPAT event flag: cleared on SETPAT, set by the SETPAT match or mismatch condition on INA or INB, also cleared on POLLPAT / WAITPAT / JPAT / JNPAT), instruction encoding listing (EEEE 1101011 CZ0 000001000 000100100 POLLPAT {WC/WZ/WCZ})"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pollwait
-  pattern: ''
-  description: No operands - poll/wait instruction (moves S to D, sets S to $024)
-  valueType: 28
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 28
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Retrieve and clear pin-pattern-detected event flag
@@ -45,3 +45,4 @@ related:
 - WAITPAT
 - JPAT
 - JNPAT
+- architecture/event_system.yaml

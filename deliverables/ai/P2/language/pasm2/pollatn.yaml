@@ -7,9 +7,10 @@ description: >-
   the flag (unless it's being set again by the event sensor).
   If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to
   the state of the attention event flag prior to clearing it.
-  The attention event flag is set whenever another cog issues an attention request
-  for this cog. The attention event flag is cleared upon cog start, or execution of
-  POLLATN, WAITATN, JATN, or JNATN instructions.
+  The attention event flag is set whenever a cog issues an attention request for
+  this cog; a COGATN that names this cog's own bit also sets it. The attention event
+  flag is cleared upon cog start, or execution of POLLATN, WAITATN, JATN, or JNATN
+  instructions.
 result: Attention event flag is optionally copied into C and/or Z, then it is cleared.
 flags_affected:
   C: Set to ATN event flag state
@@ -21,21 +22,20 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZ0 000001110 000100100
   write: —
   c: ATN Event
   z: ATN Event
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLATN, p.111"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 285 (POLLATN {WC/WZ/WCZ}: get ATN event flag into C/Z, then clear it; 2 clocks)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Event instructions, p.43 (POLLATN {WC/WZ/WCZ}, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLATN, p.111 (Result line, WC / WZ / WCZ parameter, encoding row 000001110 / 000100100, write none, C and Z ATN Event, 2 clocks, Related list; the flag is copied into C and/or Z and then cleared unless set again by the event sensor; cleared upon cog start, POLLATN, WAITATN, JATN or JNATN)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG ATTENTION (COGATN strobes cause an attention event for POLLATN / WAITATN and interrupt use), EVENTS (the POLLxxx instructions simultaneously return their event-occurred flag into C and/or Z and clear it unless it is set again by the event sensor; POLLATN event flag: cleared on cog start, set whenever any cogs request attention, also cleared on POLLATN / WAITATN / JATN / JNATN), instruction encoding listing (EEEE 1101011 CZ0 000001110 000100100 POLLATN {WC/WZ/WCZ})"
+  - "EF-099 (COGATN with the issuing cog's own bit raises that cog's attention event; detectors POLLATN WC, JATN, SETQ plus WAITATN WC, Spin2 POLLATN())"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pollwait
-  pattern: ''
-  description: No operands - poll/wait instruction (moves S to D, sets S to $024)
-  valueType: 28
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 28
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Retrieve and clear attention flag
@@ -44,3 +44,4 @@ related:
 - WAITATN
 - JATN
 - JNATN
+- architecture/event_system.yaml

@@ -2,27 +2,31 @@ instruction: RETI0
 syntax: RETI0
 encoding:
 - bits: EEEE 1011001 110 111111111 111111111
-  write: D
-  c: —
-  z: —
-  clocks: '4'
+  write: D (IRET0) and PC
+  c: IRET0[31]
+  z: IRET0[30]
+  clocks: '4 / 13...20'
 timing:
   cycles: 4
   type: variable
   range: 4 / 13...20
-description: Return from INT0. (CALLD $1FF,$1FF WCZ).
+description: >-
+  Return from INT0, the debug interrupt. (CALLD $1FF,$1FF WCZ). During a debug
+  ISR, INB ($1FF) is the readable/writable IRET0 register, so RETI0 is
+  CALLD IRET0,IRET0 WCZ: it jumps to the return address held in IRET0 and sets
+  C and Z from IRET0[31] and IRET0[30]. A CALLD with S = IRET0 and WCZ ends the debug interrupt. RETI0 is the last
+  instruction, at $1FF, of the debug-ISR-exit routine in the cog's execute-only
+  ROM. If the debug ISR set BRK's %L bit to 1, it must reset %L to 0 before
+  RETI0, so that RETI0 sees IJMP0 and IRET0.
 flags_affected:
-  C: No effect
-  Z: No effect
+  C: Set to IRET0[31]
+  Z: Set to IRET0[30]
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153"
+sources:
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153 (RETI0: Return from INT0. (CALLD $1FF,$1FF WCZ), 4 / 13...20; CALLD D,{#}S: write {C, Z, 10'b0, PC[19:0]} to D, C = S[31], Z = S[30])"
+  - "P2 Instructions v35 - Rev B/C Silicon, row 165 (RETI0, EEEE 1011001 110 111111111 111111111, alias, 4 / 13...20, register write D) and row 157 (CALLD D,{#}S: C = S[31], Z = S[30])"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT (table 24: $1FF - RETI0 'CALLD IRET0,IRET0 WCZ, the last word of the debug-ISR-exit routine; during a debug ISR INA and INB become the readable/writable IJMP0 and IRET0; RETI0 (CALLD INB,INB WCZ) and any CALLD anyreg,INB WCZ terminate a debug interrupt; %L must be reset to 0 before exiting so that RETI0 sees IJMP0 and IRET0)"
 documentation_level: structured
-compiler_operand_format:
-  name: operand_xlat
-  pattern: ''
-  description: No operands - translated instruction (RET*/RESI*/XSTOP)
-  valueType: 33
-compiler_encoding:
-  operandFormat: 33
 syntax_variants:
 - RETI0 Return
 last_updated: '2025-09-19T16:04:17.418941'
@@ -39,3 +43,8 @@ specifics:
 has_group_documentation: true
 category: Branch
 oneliner: Return from interrupt 0
+related:
+  - language/pasm2/calld.yaml
+  - language/pasm2/resi0.yaml
+  - architecture/debug_interrupt.yaml
+  - architecture/interrupts.yaml

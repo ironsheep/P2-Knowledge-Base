@@ -1,37 +1,41 @@
 instruction: CALLA
 syntax: 'CALLA #{\}Addr | CALLA Dest {WC|WZ|WCZ}'
 brief_description: Call subroutine via PTRA
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZ0 DDDDDDDDD 000101110
-  write: —
+  write: Hub and PC
   c: D[31]
   z: D[30]
-  clocks: '5...12 * (cog/LUT) / 14...32 * (hub-exec)'
+  clocks: '5...12 / 14...32'
+  notes: Syntax 2 - address from register
 - bits: EEEE 1101110 RAA AAAAAAAAA AAAAAAAAA
-  write: —
+  write: Hub and PC
   c: —
   z: —
-  clocks: '5...12 * (cog/LUT) / 14...32 * (hub-exec)'
+  clocks: '5...12 / 14...32'
+  notes: Syntax 1 - relative (R=1) or absolute (R=0) address
+encoding_notes:
+- The current C, Z and effective next PC values are written to the Hub RAM long at PTRA, then PTRA is incremented (PTRA++), before PC is replaced with that of Addr or Dest
 timing:
   cycles: '5-12 (cog/LUT) / 14-32 (hub-exec)'
   type: variable
-  notes: "5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec. +1 clock if the long crosses a hub long boundary."
-description: Write current C and Z flags and address of the next instruction into
-  the 4-byte Hub RAM location at PTRA, increment PTRA by 4, set PC to new relative
-  or absolute address, and optionally update C and/or Z to new state. R = 1 then PC
-  += A, else PC = A.
+  notes: "5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec. Each count is 1 clock more if it crosses a hub long. Parallax's documents also give +1 clock if the target address isn't long-aligned in Hub RAM."
+description: >-
+  Write current C and Z flags and address of the next instruction into
+  the 4-byte Hub RAM location at PTRA, increment PTRA, set PC to new relative
+  or absolute address, and optionally update C and/or Z to new state. In syntax 1,
+  #Addr and #\Addr encode relative and absolute addressing, respectively. In the
+  encoding R = 1 gives PC += A, else PC = A; the backslash forces R = 0. The return
+  context is read back by RETA.
 flags_affected:
   C: Set to D[31] if WC/WCZ specified
   Z: Set to D[30] if WZ/WCZ specified
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLA / CALLB, p.57, and its instruction table footnote '+1 if crosses hub long'; P2 Instructions CSV v35, CALLA hub-exec clocks '14...32 *'"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLA / CALLB, p.57"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 320 (CALLA D: write {C, Z, 10'b0, PC[19:0]} to hub long at PTRA++; C = D[31], Z = D[30], PC = D[19:0]; 5...12 * cog/LUT, 14...32 * hub, the hub-exec column's footnote '* +1 if crosses hub long'; hub write) and row 404 (CALLA #{\\}A: R = 1 then PC += A, else PC = A; backslash forces R = 0)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 1101011 CZ0 DDDDDDDDD 000101110 CALLA D; EEEE 1101110 RAA AAAAAAAAA AAAAAAAAA CALLA #{\\}A)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLA / CALLB, p.57 (both encoding rows; write Hub and PC; 5-12 / 14-32; footnote 2 '+1 clock cycle if target address isn't long-aligned in Hub RAM'; explanation, increments PTRA, WC/WZ/WCZ effects, RETA returns to the recorded address); PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153 (CALLA 5...12 / 14...32 with the footnote '+1 if crosses hub long' on both counts)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_call
-  pattern: '#S | D'
-  description: 'Call: immediate address or register'
-  valueType: 19
-compiler_encoding:
-  operandFormat: 19
 syntax_variants:
 - 'CALLA #Addr'
 - 'CALLA #\Addr'
@@ -45,3 +49,9 @@ parameters:
 - WC, WZ, or WCZ are optional effects to update the flags from Dest's upper bit states.
 category: Branch
 oneliner: Call a subroutine; store return context in the Hub long at PTRA++
+related:
+- language/pasm2/reta.yaml
+- language/pasm2/callb.yaml
+- language/pasm2/call.yaml
+- language/pasm2/calld.yaml
+- language/pasm2/concepts/instruction_encoding_key.yaml

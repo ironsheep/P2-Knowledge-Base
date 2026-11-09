@@ -2,7 +2,11 @@
 # ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
-  - at: examples[0].code
-    fp: "368e430dec5e4052"
+  - at: examples[1].code
+    fp: "e596f2af70b9fda2"
     compile: fragment
     wrap: pasm2-hub
+  - at: examples[0].code
+    fp: "aa35abf66934e56c"
+    compile: fragment
+    wrap: pasm2-dat

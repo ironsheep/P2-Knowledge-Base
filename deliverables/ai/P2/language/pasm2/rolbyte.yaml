@@ -8,7 +8,9 @@ description: >-
   achieves the same effect as two instructions: an 8-bit SHL followed by SETBYTE into
   byte 0. Num (0-3) identifies a value's individual bytes, by position, in least-significant
   byte order. Syntax 2 is intended for use after an ALTGB instruction, i.e. in a loop to
-  iteratively read a series of byte values within contiguous long registers.
+  iteratively read a series of byte values within contiguous long registers. ROLBYTE
+  Dest is the same as ROLBYTE Dest,0,#0, with the S field and the N field filled in
+  by the prior ALTGB.
 result: >-
   Byte Num (0-3) of Src, or a byte from a source described by prior ALTGB instruction,
   is rotated left into Dest.
@@ -26,7 +28,7 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1001000 NNI DDDDDDDDD SSSSSSSSS
   write: D
   c: —
@@ -37,25 +39,23 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   c: —
   z: —
   clocks: '2'
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ROLBYTE, p.119"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ROLBYTE, pp.119-120"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, rows 94-95 (ROLBYTE D,{#}S,#N: rotate-left byte N of S into D, D = {D[23:0], S.BYTE[N]}; ROLBYTE D: rotate-left byte established by prior ALTGB instruction into D; 2 clocks; write D) and row 108-109 (ALTGB: next S field and N field = D[1:0] for the subsequent GETBYTE/ROLBYTE)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.37 (ROLBYTE D and ROLBYTE D,{#}S,#N, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ROLBYTE, pp.119-120 (Result line, Dest, Src and Num parameters, both encoding rows 1001000 NNI / 1001000 000, write D, C and Z none, 2 clocks, Related list, the SHL-then-SETBYTE equivalence, Num 0-3 in least-significant byte order, syntax 2 after ALTGB)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), REGISTER INDIRECTION (ALTGB sets the next S field to base+index[10:2] and the next N to index[1:0]; 'ROLBYTE D' = 'ROLBYTE D,0,#0'; two of the three fields of the associated instruction are filled in by the ALTxx instruction), and instruction encoding listing (EEEE 1001000 NNI DDDDDDDDD SSSSSSSSS ROLBYTE D,S/#,#N)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds2get
-  pattern: D{,S/#,#0..3}
-  description: 'Get byte: destination, optional source and byte index 0-3'
-  valueType: 9
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 9
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Rotate a byte left into a value
 related:
-- ALTGB
-- ROLNIB
-- ROLWORD
-- GETNIB
-- GETBYTE
-- GETWORD
-- SETNIB
-- SETBYTE
-- SETWORD
+- language/pasm2/altgb.yaml
+- language/pasm2/rolnib.yaml
+- language/pasm2/rolword.yaml
+- language/pasm2/getnib.yaml
+- language/pasm2/getbyte.yaml
+- language/pasm2/getword.yaml
+- language/pasm2/setnib.yaml
+- language/pasm2/setbyte.yaml
+- language/pasm2/setword.yaml

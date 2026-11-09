@@ -7,36 +7,50 @@ brief_description: "Asynchronous serial reception at programmable baud rate (1-3
 
 detailed_description:
   operation: |
-    Receives serial data asynchronously with automatic start bit detection and stop bit validation.
-    Supports 1-32 data bits per frame at programmable baud rates. Hardware handles timing, framing,
-    and synchronization automatically. Monitors input for start bit (high-to-low transition), samples
-    data bits at mid-bit timing, and validates stop bit. IN flag raised when complete frame received.
+    Receives serial data asynchronously with automatic start bit detection.
+    Supports 1-32 data bits per frame at programmable baud rates. The receiver waits for the
+    A input to go high (idle) and then low (start bit edge), delays half a bit period and
+    loops back to the low wait if the input is no longer low, then delays one bit period and
+    right-shifts the A input into the shifter, one bit period per data bit. The sequence has no
+    stop-bit step: after the last data bit the shifter is captured into Z and IN is raised, and
+    the receiver returns to waiting for the A input to go high.
   
+  state_sequence: |
+    1. Wait for the A input to go high (idle state).
+    2. Wait for the A input to go low (start bit edge).
+    3. Delay for half of a bit period.
+    4. If the A input is no longer low, loop to 2.
+    5. Delay for one bit period.
+    6. Right-shift the A input into the shifter and delay for one bit period; repeat until all data bits are received.
+    7. Capture the shifter into the Z register and raise IN.
+    8. Loop to 1.
+
   timing: |
     Baud rate set by X register (system clocks per bit period)
     Start bit (0) detected automatically (high-to-low transition)
-    Data bits sampled at mid-bit timing (LSB first)
-    Stop bit (1) validated automatically
-    IN flag raised when frame received and data ready
+    Half a bit period after the start edge the input is checked, one more bit period passes, then the input is shifted in once per bit period
+    No stop-bit step: the shifter is captured into Z after the last data bit's period
+    IN flag raised when the data bits have been received and data is ready
 
 registers:
   x_register:
     bits_31_16: "System clock periods per bit period (integer part)"
-    bits_15_10: "Fractional clock periods (base-2 fraction for precise timing)"
-    bits_9_5: "Reserved"
+    bits_15_10: "Fractional clocks in a bit period, when X[31:26] is zero"
+    bits_9_5: "Not documented: X[9:5]."
     bits_4_0: "Word-size field, encoded as N-1 (write 0..31 to select 1..32 data bits; e.g. write 7 for an 8-bit word)"
   y_register:
-    function: "Not used in receive mode"
+    function: "Not documented: a role for Y in this mode"
   z_register:
-    bits_31_0: "Received word, MSB-justified at Z[31:32-N]. RDPIN/RQPIN return data with the last (highest-numbered) received bit at Z[31] and the LSB at Z[32-N]; right-shift by 32-N to LSB-justify (e.g. SHR D,#24 for an 8-bit word)."
+    bits_31_0: "The received word, read with RDPIN/RQPIN MSB-justified; it must be shifted right by 32 minus the word size to LSB-justify (e.g. SHR D,#32-8 for an 8-bit word)."
+    before_first_word: "Not documented: the value RDPIN/RQPIN returns before the first word has been received."
 
 flags:
-  in_flag: "Raised when frame received, data ready to read"
+  in_flag: "Raised when the data bits have been received, data ready to read"
   a_input: "Serial data input (monitors for start bit)"
 
 code_examples:
   - title: "Basic 8-bit UART Receive"
-    description: "Standard 115200 baud 8N1 serial input"
+    description: "115200 baud serial input, 8 data bits"
     code: |
       CON
         _clkfreq = 200_000_000
@@ -59,9 +73,12 @@ code_examples:
         ' Wait for character received
         repeat until pinread(rx_pin)
 
-        ' Read received byte: data is MSB-justified at Z[31], shift right by 32-8 = 24
-        value := rdpin(rx_pin) >> 24
-      
+        ' Read the received word with PASM2 RDPIN and shift right by 32-8 = 24 (the MSB-justified word)
+        org
+          rdpin   value, #rx_pin
+          shr     value, #24
+        end
+
       DAT
       ' PASM2 example - buffered serial receive, started by
       ' COGINIT(COGEXEC_NEW, @entry, @buffer), which puts @buffer in PTRA
@@ -127,15 +144,21 @@ code_examples:
 
         repeat
           if pinread(rx_pin)
-            return rdpin(rx_pin) >> 24           ' Data received (LSB-justify 8-bit)
+            return read_rx_byte()                ' Data received (LSB-justify 8-bit)
 
           if getms() >= deadline
             return -1                            ' Timeout
 
       PUB receive_blocking() : value
-        ' Simple blocking receive
+        ' Blocking receive
         repeat until pinread(rx_pin)
-        return rdpin(rx_pin) >> 24               ' LSB-justify 8-bit byte
+        return read_rx_byte()
+
+      PRI read_rx_byte() : value
+        org
+          rdpin   value, #rx_pin                 ' MSB-justified word
+          shr     value, #24                     ' LSB-justify 8-bit byte
+        end
 
   - title: "Full Duplex Serial Communication"
     description: "Simultaneous transmit and receive"
@@ -153,30 +176,38 @@ code_examples:
         pinstart(tx_pin, P_ASYNC_TX | P_OE, (bit_period | 7), 0)
         pinstart(rx_pin, P_ASYNC_RX, (bit_period | 7), 0)
 
-        ' Echo received characters back (loopback test)
+        ' Echo received characters back
         repeat
           if pinread(rx_pin)
-            echo_char(rdpin(rx_pin) >> 24)       ' LSB-justify before resending
+            echo_char(read_rx_byte())            ' LSB-justify before resending
 
-      PUB echo_char(char)
-        repeat until pinread(tx_pin)             ' Wait TX ready
-        wypin(tx_pin, char)                      ' Send character
+      PRI read_rx_byte() : value
+        org
+          rdpin   value, #rx_pin                 ' MSB-justified word
+          shr     value, #24                     ' LSB-justify 8-bit byte
+        end
 
-      PUB send_and_receive(tx_byte) : rx_byte
+      PUB echo_char(char) | busy
+        org
+          wypin   char, #tx_pin                  ' Load the output word
+          waitx   #1                             ' 2+1 clocks before polling busy
+      .wait
+          rdpin   busy, #tx_pin wc               ' Busy flag into C
+          if_c    jmp #.wait                     ' Loop until C = 0
+        end
+
+      PUB send_and_receive(tx_byte) : rx_byte | busy
         ' Send a byte and wait for response
-        repeat until pinread(tx_pin)
-        wypin(tx_pin, tx_byte)
+        org
+          wypin   tx_byte, #tx_pin               ' Load the output word
+          waitx   #1                             ' 2+1 clocks before polling busy
+      .wait
+          rdpin   busy, #tx_pin wc               ' Busy flag into C
+          if_c    jmp #.wait                     ' Loop until C = 0
+        end
 
         repeat until pinread(rx_pin)
-        rx_byte := rdpin(rx_pin) >> 24           ' LSB-justify 8-bit byte
-
-common_applications:
-  - "UART serial communication"
-  - "Debug console input"
-  - "Serial terminal communication"
-  - "GPS and sensor module data reception"
-  - "Multi-drop serial networks (RS-485)"
-  - "Serial command interfaces"
+        rx_byte := read_rx_byte()                ' LSB-justify 8-bit byte
 
 related_modes:
   - "Mode %11110: Async serial TX - asynchronous transmit"
@@ -187,39 +218,40 @@ configuration_constants:
   mode_constant: "P_ASYNC_RX"
   binary_value: "%11111"
   
-  common_baud_rates:
-    - "300, 1200, 2400, 4800, 9600 baud"
-    - "19200, 38400, 57600, 115200 baud"
-    - "230400, 460800, 921600 baud (high speed)"
-  
   bit_period_calculation:
-    formula: "bit_period = (clkfreq / baud) << 16"
-    fractional: "(clkfreq * 65536 / baud) & $FFFFFC00"
+    formula: "(clocks * $1_0000) & $FFFFFC00, for the clocks per bit"
+    fractional: "(clocks * $1_0000) & $FFFFFC00; 7.5 clocks is $00078000 and 33.33 clocks is $00215400; the fractional part applies when X[31:26] is zero"
     bits_31_16: "Integer system clocks per bit"
-    bits_15_10: "Fractional base-2 value (1/64th increments)"
+    bits_15_10: "Establishes the number of fractional clocks in a bit period, when X[31:26] is zero"
   
   data_bits_field:
     location: "X[4:0]"
     encoding: "Field value = N - 1 (write 0..31 to select 1..32 data bits)"
     range: "1-32 bits supported"
-    typical_values:
-      - "X[4:0] = 6 → 7-bit word (7-bit ASCII)"
-      - "X[4:0] = 7 → 8-bit word (standard 8-bit data)"
-      - "X[4:0] = 8 → 9-bit word (8 data + parity)"
+    example_values:
+      - "X[4:0] = 6 → 7-bit word"
+      - "X[4:0] = 7 → 8-bit word"
+      - "X[4:0] = 8 → 9-bit word"
+
+max_baud_rate:
+  statement: "Asynchronous serial transmit and receive, 1 to 32 bits, up to clock/3 baud rate"
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, smart I/O pin features, p.3; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), OVERVIEW (smart I/O pin features)"
 
 notes:
   - "Automatically detects start bit (high-to-low transition)"
-  - "Samples data bits at mid-bit timing for noise immunity"
-  - "Validates stop bit (expects logic-1)"
-  - "Data received LSB first on the wire (standard UART format)"
+  - "The receive state sequence has no stop-bit step"
+  - "Each data bit is right-shifted into the shifter as it is received"
+  - "The full-duplex example's transmit side writes a word with WYPIN and then polls the busy flag with RDPIN WC starting three clocks later"
+  - "The receiver waits for the A input to go high (idle state) before it looks for a start-bit edge, so a start edge is only seen after the line has been high"
   - "IN flag indicates received data ready to read"
-  - "Supports up to 32 data bits per frame (including optional parity)"
+  - "Supports 1 to 32 data bits per frame"
   - "Word-size field X[4:0] is encoded as N-1: write 7 for an 8-bit word, 6 for 7-bit, 8 for 9-bit"
-  - "RDPIN/RQPIN return the received word MSB-justified at Z[31]: shift right by 32-N to LSB-justify (e.g. SHR D,#24 for 8-bit, >> 24 in Spin2)"
-  - "Fractional timing in X[15:10] enables precise baud rate matching"
-  - "Can receive very high baud rates limited only by system clock"
-  - "No hardware parity checking - extract and validate in software if needed"
-  - "Compatible with standard UART devices"
-  - "Pair with mode %11110 (TX) for full-duplex communication"
+  - "RDPIN/RQPIN return the received word MSB-justified at Z[31]: shift right by 32-N to LSB-justify (e.g. SHR D,#24 for 8-bit). The examples read the word with inline PASM2 RDPIN. Not documented: the C flag of RDPIN in this mode, which RDPIN() returns in bit 31."
+  - "X[15:10] establishes the number of fractional clocks in a bit period when X[31:26] is zero"
+  - "Not documented: parity."
   - "RDPIN reads received data and clears IN flag"
   - "RQPIN reads data without clearing IN flag (for multi-cog access)"
+
+sources:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %11111 = asynchronous serial receive (X[31:16], X[15:10] and X[4:0], the receive state sequence, the SHR #32-N read); Propeller 2 P2X8C4M64P Hardware Manual, Nov 1, 2022 Release, Asynchronous Serial Receive (%11111), p.60"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %11110 = asynchronous serial transmit (the busy flag and the WAITX #1 poll used in the full-duplex example); SMART PINS (RDPIN acknowledges and RQPIN does not)"

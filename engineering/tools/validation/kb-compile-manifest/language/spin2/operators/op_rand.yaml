@@ -21,7 +21,7 @@ blocks:
     wrap: spin2-top
     assumes: [seed]
   - at: examples[3].code
-    fp: "d42b91c9e1a1c9d7"
+    fp: "d7274761f8fdcce7"
     compile: fragment
     wrap: spin2-top
     assumes: [noise_state]
@@ -52,7 +52,7 @@ blocks:
     fp: "d1fe6a6c774c2e99"
     compile: program
   - at: anti_patterns[2].wrong
-    fp: "21bd3b963b433a8d"
+    fp: "2e73aa020341811a"
     compile: never
     wrap: spin2-method
     assumes: [value]
@@ -63,3 +63,7 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [value, seed]
+  - at: description
+    fp: "f9c0317a427e2eec"
+    compile: not-code
+    reason: "English prose description, not code"

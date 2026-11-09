@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: registers.interrupt_vectors[3].usage
-    fp: "8084c43ed79d6caf"
+    fp: "2199a868c2611da2"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: access_patterns.explicit_access[1].examples[0]
@@ -44,7 +44,7 @@ blocks:
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: access_patterns.implicit_access[1].examples[3]
-    fp: "02a6ddbcd065c5ba"
+    fp: "e962fe1aa26e00e3"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: access_patterns.block_operations[1].examples[0]

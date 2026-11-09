@@ -11,27 +11,20 @@ timing:
   type: fixed
 description: >-
   MUXZ alters the Dest bit(s) designated by Src (high bits) to equal the state of
-  the Z flag. Dest bit(s) described by Src are set to Z; the rest are left as-is.
-  Flags are optionally updated with parity and zero status of the result.
+  the Z flag. All Dest bits corresponding to high (1) bits in Src are modified; all
+  other Dest bits are left unchanged. D = (!S & D) | (S & {32{Z}}).
 flags_affected:
-  C: Set to parity of result
-  Z: Set if result equals zero
+  C: With WC or WCZ, set if the number of high bits in the result is odd, cleared if even
+  Z: With WZ or WCZ, set if the result is zero, cleared if not
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, MUXZ / MUXNZ, p.102"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:
-  operandFormat: 0
 syntax_variants:
 - MUXZ D,{#}S
 last_updated: '2025-09-19T16:04:17.350263'
 parameters:
-- Dest is the register whose value will have one or more bits set to Z or !Z.
+- Dest is the register whose value will have one or more bits set to Z.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value identifies
   the bit(s) to modify.
 - WC, WZ, or WCZ are optional effects to update flags.
 category: Math and Logic
-oneliner: Set discrete bits to Z or !Z
+oneliner: Set discrete bits to Z

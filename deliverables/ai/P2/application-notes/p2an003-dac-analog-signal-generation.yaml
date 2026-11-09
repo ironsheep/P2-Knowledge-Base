@@ -34,14 +34,15 @@ categories:
   - smart-pins
 capability_domain: "Analog output / DAC / audio"
 summary: |
-  Turn one P2 pin into a 16-bit audio-quality analog output with no external converter: the
+  Turn one P2 pin into a 16-bit analog output with no external converter: the
   smart pin's dithered DAC takes a 16-bit number once per sample period, and a continuous signal
   is just the right sequence of numbers delivered on time. One shared output stage (dither mode +
   output config + P_OE, paced by the pin's IN flag) underlies five recipes chosen among by task:
   sample playback and waveform synthesis via a DDS phase accumulator, deliberate dither-mode +
   RC-filter choice for effective resolution, a real-time ADC->DAC passthrough, and software mixing
-  with stereo panning. The DDS phase increment inc = f * 2^32 / sample_rate (Spin2 `frac`)
-  decouples pitch from the sample rate; CORDIC QROTATE turns the phase into a sine in one op.
+  with stereo panning. The DDS phase increment, computed with the Spin2 `frac` operator
+  ((x << 32) / y, here f frac sample_rate), decouples pitch from the sample rate; CORDIC
+  QROTATE turns the phase into a sine in one op.
 audience: [human, agent]
 
 # ---- CONSUMPTION TIER: the composition recipe (LINKS to existing KB primitives) ----
@@ -81,7 +82,7 @@ runnable_code:
   recipes:
     - {id: sample-playback,     file: dac-sample-playback.spin2,     note: "Recipe 1 — DDS phase-accumulator playback of a stored buffer at any pitch"}
     - {id: waveform-synthesis,  file: dac-waveform-synthesis.spin2,  note: "Recipe 2 — computed sine (CORDIC QROTATE), sawtooth, triangle from the DDS phase"}
-    - {id: dithering,           file: dac-dithering.spin2,           note: "Recipe 3 — PRNG-vs-PWM dither choice swept across the full 16-bit code range"}
+    - {id: dithering,           file: dac-dithering.spin2,           note: "Recipe 3 — PRNG-vs-PWM dither choice swept across the valid code range, 0 to $FF00"}
     - {id: adc-dac-passthrough, file: dac-adc-passthrough.spin2,     note: "Recipe 4 — real-time sample pump: SINC2-filtering ADC read -> DAC write, period-matched"}
     - {id: mixing-panning,      file: dac-mixing-panning.spin2,      note: "Recipe 5 — three voices summed and panned to a stereo pair of DAC pins"}
   ceiling_reference:
@@ -95,17 +96,19 @@ prerequisites:
 
 gotchas:
   - flag: pitfall
-    text: "Configure the smart pin while DIR is low: write the mode (WRPIN/WXPIN) BEFORE raising DIR. In the two 16-bit dither DAC modes, Y is captured during reset (DIR=0)."
+    text: "Configure the smart pin while DIR is low: write the mode (WRPIN/WXPIN) before raising DIR. In the two 16-bit dither DAC modes, Y is captured during reset (DIR=0)."
   - flag: pitfall
-    text: "PWM dither (P_DAC_DITHER_PWM) requires its X period to be a multiple of 256 clocks (256 minimum). If you need a different period, use PRNG dither instead."
+    text: "PWM dither (P_DAC_DITHER_PWM) requires its X period to be a multiple of 256 clocks (X[7:0]=0). Pseudo-random dither does not require a fixed period."
   - flag: pitfall
-    text: "FGES/FLES are INTEGER signed-limit instructions (Force >=/<= Signed), NOT floating-point — the R5 mix clamp to +/-$7FFF is correct integer saturation. Do not 're-fix' it into a bug."
+    text: "In both 16-bit dither modes, Y[15:0] values larger than $FF00 are invalid and are clipped down to $FF00, so codes between $FF01 and $FFFF all output the $FF00 level."
   - flag: pitfall
-    text: "Recipe 4: a 256-clock SINC2 FILTERING differential is already ~16-bit full scale, so it feeds the DAC directly — do NOT up-scale it (a left shift overflows and rails the DAC). SINC2 differences are valid only from the 2nd period, so prime/discard the first read."
+    text: "FGES/FLES are integer signed-limit instructions (Force >=/<= Signed), not floating-point; the R5 mix clamp to +/-$7FFF is integer saturation."
+  - flag: pitfall
+    text: "Recipe 4: the SINC2 filtering sample is the difference between successive accumulator reads, and the filter becomes accurate starting on the third sample (Parallax's documents also give the second period); reads before that are not accurate. The documents state that the computed sample is shifted right by LOG2(clocks per period)-1 to leave the effective bits intact. Not documented: the range of a 256-clock SINC2 filtering differential against the DAC's valid Y range."
   - flag: hardware
-    text: "Always filter the output: the DAC's analog value only emerges after the dither is averaged. Put an RC low-pass corner above your highest signal frequency and below the dither frequency (Fclock/256 for PWM dither)."
+    text: "The 16-bit DAC value is the dithered 8-bit DAC output averaged over time, and in PWM dither mode a frequency of Fclock/256 is present in the output at -48dB. Not documented: a recommended filter corner."
   - flag: tip
-    text: "Signed sample -> DAC offset-binary is a single `add $8000`; the sawtooth/triangle are already unipolar 0..$FFFF so they skip it. Volume and pan are the same op — a multiply by a weight."
+    text: "Signed sample -> DAC offset-binary is a single `add $8000`, which puts codes up to $FFFF into a DAC whose valid range ends at $FF00. The sawtooth and triangle are unipolar and skip it. Volume and pan are the same op — a multiply by a weight."
   - flag: verify
     text: "Tier-0 known answer: a fixed code produces V=(code/65536)*Vfs; jumper the DAC pin to a P2AN001 ADC pin and it reads that voltage back — exercises the whole path with no external instruments. reSound (OBEX #2861) is a described reference ceiling, not a starting point."
 
@@ -122,8 +125,10 @@ key_parameters:
     - mode: "%00001 with DAC_MODE -- plain 8-bit DAC"
   low_level_pin_requirement: "For every DAC smart-pin mode, M[12:10] must be set to %101 to configure the low-level pin for DAC output."
   output_configs: "P_DAC_990R_3V / P_DAC_600R_2V / P_DAC_124R_3V / P_DAC_75R_2V -- the four DAC output configurations, trading drive impedance against peak voltage. Per-constant definitions live in language/spin2/symbols/spin2-builtin-symbols-complete.yaml."
+  y_limit: "In both 16-bit dither modes (%00010 and %00011), Y[15:0] values larger than $FF00 are invalid and are clipped down to $FF00."
   sample_clock: "The period is set by WXPIN; on completion of each sample period Y[15:0] is captured for the next output value and IN is raised, so an update is coordinated with IN going high."
-  adc_passthrough_config: "SINC2 filtering is X[5:4]=%01; the period is POWER(2, X[3:0]), so X[3:0]=8 gives 256 clocks, matching the PWM-dither DAC's 256-clock minimum. In filtering mode WYPIN after WXPIN can replace that period with any value in Y[13:0] up to 11,585 clocks."
+  sinc2_differential: "The SINC2 filtering sample is the difference between the new and previous second-accumulator values; the filter becomes accurate starting on the third sample; Parallax's documents also give the second period. For SINC2 filtering the computed sample is shifted right by LOG2(clocks per period)-1 to leave the effective bits intact. Not documented: the range of a 256-clock SINC2 filtering differential against the DAC's valid Y range."
+  adc_passthrough_config: "SINC2 filtering is X[5:4]=%01; the period is POWER(2, X[3:0]), so X[3:0]=8 gives 256 clocks, a multiple of 256 as the PWM-dither DAC's sample period requires. In filtering mode WYPIN after WXPIN can replace that period with any value in Y[13:0] up to 11,585 clocks."
   formulas_note: "The V = code/65536 * Vfs conversion and the DDS phase-increment inc = f * 2^32 / sample_rate are the arithmetic of a 16-bit code and a 32-bit phase accumulator, not statements taken from a Parallax source. They are kept out of this block; the streamer NCO's own source-stated scaling rule is in language/pasm2/setxfrq.yaml frequency_formula."
 
 hardware_status: |
@@ -135,6 +140,8 @@ hardware_status: |
 
 
 sources:
+  - "key_parameters.sinc2_differential and the Recipe 4 gotcha: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES (About SINC2 and SINC3 filtering and the SINC2 filtering mode example); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, About SINC2 and SINC3 filtering, p.52"
+  - "key_parameters.y_limit and the Y[15:0] gotchas: Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, DAC 16-Bit With Noise Dither (%00010 and DAC_MODE) and DAC 16-Bit With PWM dither (%00011 and DAC_MODE), p.46"
   - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %00001/%00010/%00011 DAC modes: the 8-bit DAC and its dithering, the four output configs, the sample-period and IN-flag behavior (incl. the Fclock/256 @ -48 dB PWM-dither line)"
   - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Modes (DAC 990 ohm / 600 ohm / 123.75 ohm / 75 ohm output configurations), p.24"
   - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (WRPIN/WXPIN/WYPIN, QSIN/QROTATE, MULDIV64, and the `frac` operator)"

@@ -2,76 +2,65 @@ pattern_id: "cog_management"
 category: "multi_cog_programming"
 description: "Patterns for managing COG lifecycle and inter-COG coordination"
 
-when_use:
-  - "Multi-COG coordination"
-  - "Parallel processing"
-  - "Background task execution"
-  - "Hardware driver isolation"
-  - "Real-time event handling"
-
 coginit_modes:
-  description: "COGINIT execution modes for PASM code"
+  description: "COGINIT CogNum symbols for PASM code"
   modes:
     - mode: "COGEXEC"
       value: "%000000"
-      description: "Execute in current COG (replaces Spin2)"
+      description: "COGEXEC + cog number starts that cog in cogexec mode (the default)"
     - mode: "HUBEXEC"
       value: "%100000"
-      description: "Execute from HUB in current COG"
+      description: "HUBEXEC + cog number starts that cog in hubexec mode"
     - mode: "COGEXEC_NEW"
       value: "%010000"
-      description: "Start new COG, load code to COG RAM"
+      description: "Starts an available cog in cogexec mode"
     - mode: "HUBEXEC_NEW"
       value: "%110000"
-      description: "Start new COG, execute from HUB RAM"
+      description: "Starts an available cog in hubexec mode"
     - mode: "COGEXEC_NEW_PAIR"
       value: "%010001"
-      description: "Start pair of adjacent COGs"
+      description: "Starts an available even/odd pair of cogs in cogexec mode"
     - mode: "HUBEXEC_NEW_PAIR"
       value: "%110001"
-      description: "Start COG pair from HUB RAM"
+      description: "Starts an available even/odd pair of cogs in hubexec mode"
 
 patterns:
   - pattern: "basic_cog_lifecycle"
-    description: "Standard COG start/stop with ID tracking"
+    description: "Cog start and stop with the ID kept as ID + 1, so a VAR that starts at zero means no cog"
     code: |
-      CON
-        NO_COG = -1
-
       VAR
-        long cog_id
+        long cog_id_plus_1      ' 0 = no cog started
         long stack[64]
 
-      PUB start() : success
+      PUB start() : success | id
         stop()  ' Stop if already running
-        cog_id := COGSPIN(NEWCOG, worker(), @stack)
-        return cog_id <> NO_COG
+        id := COGSPIN(NEWCOG, worker(), @stack)
+        if id >= 0
+          cog_id_plus_1 := id + 1
+        return id >= 0
 
       PUB stop()
-        if cog_id <> NO_COG
-          COGSTOP(cog_id)
-          cog_id := NO_COG
+        if cog_id_plus_1
+          COGSTOP(cog_id_plus_1 - 1)
+          cog_id_plus_1 := 0
 
       PRI worker()
         REPEAT
           ' Do work in parallel
 
   - pattern: "driver_object"
-    description: "Complete driver object with start/stop and buffer management"
+    description: "Driver object with start, stop and ring buffers"
     code: |
       ' serial_driver.spin2
-      CON
-        NO_COG = -1
-
       VAR
-        long cog_id
+        long cog_id_plus_1      ' 0 = no cog started
         long rx_head, rx_tail
         long tx_head, tx_tail
         byte rx_buffer[256]
         byte tx_buffer[256]
         long stack[100]
 
-      PUB start(rx_pin, tx_pin, baud) : ok
+      PUB start(rx_pin, tx_pin, baud) : ok | id
         stop()  ' Stop if already running
 
         ' Initialize state
@@ -79,13 +68,15 @@ patterns:
         tx_head := tx_tail := 0
 
         ' Start driver COG
-        cog_id := COGSPIN(NEWCOG, driver_loop(rx_pin, tx_pin, baud), @stack)
-        ok := (cog_id >= 0)
+        id := COGSPIN(NEWCOG, driver_loop(rx_pin, tx_pin, baud), @stack)
+        if id >= 0
+          cog_id_plus_1 := id + 1
+        ok := id >= 0
 
       PUB stop()
-        if cog_id >= 0
-          COGSTOP(cog_id)
-          cog_id := NO_COG
+        if cog_id_plus_1
+          COGSTOP(cog_id_plus_1 - 1)
+          cog_id_plus_1 := 0
 
       PUB tx(char)
         ' Add to TX buffer with flow control
@@ -131,10 +122,11 @@ patterns:
         long worker_stack[200]
         long worker_cog
 
-      PUB start()
+      PUB start() : ok
         cmd_block[CMD_COMMAND] := CMD_IDLE
         cmd_block[CMD_STATUS] := STAT_IDLE
         worker_cog := COGSPIN(NEWCOG, worker_main(@cmd_block), @worker_stack)
+        ok := worker_cog >= 0
 
       PUB send_command(cmd, p1, p2) : result
         ' Wait for worker to be idle
@@ -173,7 +165,7 @@ patterns:
               RETURN
 
   - pattern: "producer_consumer"
-    description: "Producer-consumer with lock-free circular buffer"
+    description: "Producer and consumer cogs sharing a circular buffer through head and tail indexes, with no lock"
     code: |
       CON
         BUFFER_SIZE = 256
@@ -185,10 +177,11 @@ patterns:
         long producer_cog, consumer_cog
         long prod_stack[100], cons_stack[100]
 
-      PUB start()
+      PUB start() : ok
         head := tail := 0
         producer_cog := COGSPIN(NEWCOG, producer(), @prod_stack)
         consumer_cog := COGSPIN(NEWCOG, consumer(), @cons_stack)
+        ok := producer_cog >= 0 and consumer_cog >= 0
 
       PRI producer() | item
         REPEAT
@@ -217,8 +210,9 @@ patterns:
         long data_lock
         long shared_data[100]
 
-      PUB init()
+      PUB init() : ok
         data_lock := LOCKNEW()
+        ok := data_lock >= 0      ' a negative value: no lock was available
 
       PUB read_data(index) : value
         REPEAT UNTIL LOCKTRY(data_lock)
@@ -238,21 +232,21 @@ patterns:
 
 anti_patterns:
   - anti_pattern: "insufficient_stack"
-    severity: "overflow_not_detected"
-    description: "A COGSPIN stack is a hub buffer you provide and size; a stack overflow is not detected (language/spin2/methods/cogspin.yaml)"
+    severity: "overflow_check_not_documented"
+    description: "A COGSPIN stack is a hub buffer you provide and size; no stack overflow check is documented (language/spin2/methods/cogspin.yaml)"
     wrong: |
       VAR
-        long tiny_stack[10]   ' TOO SMALL!
+        long tiny_stack[10]   ' size not derived from the method
 
       PUB start()
-        COGSPIN(NEWCOG, complex_method(), @tiny_stack)  ' Stack overflow!
+        COGSPIN(NEWCOG, complex_method(), @tiny_stack)
     correct: |
       VAR
-        long adequate_stack[200]   ' Size based on method needs
+        long sized_stack[200]   ' size chosen for this method
 
       PUB start()
-        COGSPIN(NEWCOG, complex_method(), @adequate_stack)
-    sizing_guidance: "Measure the method's high-water mark; no Parallax document states a stack size. Procedure: application-notes/p2an006-sizing-cog-task-stacks.yaml"
+        COGSPIN(NEWCOG, complex_method(), @sized_stack)
+    sizing_guidance: "No Parallax document states a stack size. application-notes/p2an006-sizing-cog-task-stacks.yaml describes a high-water-mark measurement"
 
   - anti_pattern: "lost_cog_id"
     severity: "resource_leak"
@@ -265,37 +259,40 @@ anti_patterns:
         ' Can't stop - don't know which COG!
     correct: |
       VAR
-        long worker_cog
+        long worker_cog_plus_1      ' 0 = no cog started
 
-      PUB start()
-        worker_cog := COGSPIN(NEWCOG, worker(), @stack)
+      PUB start() | id
+        id := COGSPIN(NEWCOG, worker(), @stack)
+        if id >= 0
+          worker_cog_plus_1 := id + 1
 
       PUB stop()
-        if worker_cog >= 0
-          COGSTOP(worker_cog)
-          worker_cog := -1
+        if worker_cog_plus_1
+          COGSTOP(worker_cog_plus_1 - 1)
+          worker_cog_plus_1 := 0
 
-  - anti_pattern: "race_condition"
-    severity: "data_corruption"
-    description: "Unprotected shared variable access causes race conditions"
+  - anti_pattern: "shared_variable_without_a_lock"
+    severity: "no_exclusive_access"
+    description: "Locks can be used by cogs to coordinate exclusive access of a shared resource; two cogs updating one hub variable with no lock have no such coordination"
     wrong: |
       VAR
         long counter
 
       PRI worker1()
         REPEAT
-          counter++   ' Race condition!
+          counter++   ' No lock around the update
 
       PRI worker2()
         REPEAT
-          counter++   ' Both COGs modify simultaneously
+          counter++   ' No lock around the update
     correct: |
       VAR
         long counter
         long counter_lock
 
-      PUB init()
+      PUB init() : ok
         counter_lock := LOCKNEW()
+        ok := counter_lock >= 0   ' a negative value: no lock was available
 
       PRI worker1()
         REPEAT
@@ -303,38 +300,9 @@ anti_patterns:
           counter++
           LOCKREL(counter_lock)
 
-  - anti_pattern: "deadlock_wrong_order"
-    severity: "system_hang"
-    description: "Acquiring locks in different orders causes deadlock"
-    wrong: |
-      PRI cog1()
-        REPEAT UNTIL LOCKTRY(lock_a)
-        REPEAT UNTIL LOCKTRY(lock_b)   ' COG2 may hold lock_b waiting for lock_a
-        ' ...
-        LOCKREL(lock_b)
-        LOCKREL(lock_a)
-
-      PRI cog2()
-        REPEAT UNTIL LOCKTRY(lock_b)
-        REPEAT UNTIL LOCKTRY(lock_a)   ' DEADLOCK!
-        ' ...
-    correct: |
-      ' Always acquire locks in the SAME ORDER (e.g., ascending)
-      PRI cog1()
-        REPEAT UNTIL LOCKTRY(lock_a)   ' Always A first
-        REPEAT UNTIL LOCKTRY(lock_b)
-        ' ...
-        LOCKREL(lock_b)
-        LOCKREL(lock_a)
-
-      PRI cog2()
-        REPEAT UNTIL LOCKTRY(lock_a)   ' Same order as cog1
-        REPEAT UNTIL LOCKTRY(lock_b)
-        ' ...
-
   - anti_pattern: "lock_leak"
     severity: "resource_exhaustion"
-    description: "Not returning locks exhausts the 16 available locks"
+    description: "Not returning locks exhausts the 16 available locks. The correct form keeps the lock as its number + 1: VAR variables start at zero and 0 is a valid lock number, so a stop() that tested a raw number with >= 0 would run LOCKRET(0) when called before any start()"
     wrong: |
       PUB start()
         my_lock := LOCKNEW()
@@ -342,30 +310,45 @@ anti_patterns:
       PUB stop()
         ' Forgot to return lock - now unavailable!
     correct: |
+      VAR
+        long lock_plus_1        ' lock number + 1; 0 = no lock
+
+      PUB start() : ok | id
+        id := LOCKNEW()
+        if id >= 0
+          lock_plus_1 := id + 1
+        ok := id >= 0
+
       PUB stop()
-        if my_lock >= 0
-          LOCKRET(my_lock)
-          my_lock := -1
+        if lock_plus_1
+          LOCKRET(lock_plus_1 - 1)
+          lock_plus_1 := 0
 
   - anti_pattern: "polling_vs_waiting"
-    severity: "power_waste"
-    description: "Busy-polling wastes power vs. using WAITATN"
+    severity: "busy_loop"
+    description: "POLLATN checks for an ATN strobe and returns; WAITATN waits for one. Not documented: the difference in power."
     wrong: |
       PRI worker()
         REPEAT
           if POLLATN()
             process_command()
-          ' Constantly checking - wastes power
+          ' The loop keeps running while no strobe has arrived
     correct: |
       PRI worker()
         REPEAT
-          WAITATN()           ' COG sleeps until signaled
+          WAITATN()           ' Waits for this cog to receive an ATN strobe
           process_command()
 
 resources:
   cogs: "1+ (max 8 total)"
-  stack: "one hub buffer per COGSPIN cog, sized by measuring the method's high-water mark (application-notes/p2an006-sizing-cog-task-stacks.yaml)"
-  locks: "0-16 (shared across all COGs)"
+  stack: "one hub buffer per COGSPIN cog; no Parallax document states its size (application-notes/p2an006-sizing-cog-task-stacks.yaml describes a high-water-mark measurement)"
+  locks: "16 hardware locks, numbered 0 to 15, shared across all cogs"
+
+sources:
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (COGSPIN, COGSTOP, COGATN, POLLATN, WAITATN, LOCKNEW, LOCKRET, LOCKTRY, LOCKREL); Built-In Symbols for COGINIT() Usage (the six symbols and their values), for COGSPIN() Usage (NEWCOG); variables are initialized to zero at run time"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LOCKS (a pool of 16 semaphore bits; exclusive access of a shared resource; all locks already allocated)"
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (LOCKNEW() : LockNum, 0..15 if successful or < 0 if no LOCK available); VAR (variables are initialized to zero at run time), the ground for keeping a lock as its number + 1"
+  - "P2 hardware verification, EF-120 (COGSPIN(NEWCOG, ...) as an expression returned $8000_000F with all 8 cogs running, so the start patterns test the result with >= 0)"
 
 combines_with:
   - language/spin2/methods/cogspin.yaml

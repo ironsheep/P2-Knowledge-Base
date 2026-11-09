@@ -14,7 +14,7 @@ blocks:
     fp: "ba18964de1260366"
     compile: program
   - at: pasm2_complete
-    fp: "a120f184f7a98144"
+    fp: "401721728556b5e8"
     compile: program
   - at: spin2_inline
     fp: "4b397f554feb084b"

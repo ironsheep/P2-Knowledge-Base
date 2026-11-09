@@ -27,18 +27,11 @@ parameters:
 - Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the S field
   of Dest.
 related:
-- SETD
-- SETR
-- ALTI
+- language/pasm2/setd.yaml
+- language/pasm2/setr.yaml
+- language/pasm2/alti.yaml
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SETS, p.126"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:
-  operandFormat: 0
 last_updated: '2025-09-19'
 brief_description: Set source
 category: Math and Logic

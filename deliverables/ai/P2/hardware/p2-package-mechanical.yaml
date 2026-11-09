@@ -1,7 +1,6 @@
 component: P2X8C4M64P Package and Mechanical
 part_number: "P2X8C4M64P"
 manufacturer: "Parallax Inc."
-status: "active_production"
 p2kb_key: "p2kbHwPackageMechanical"
 category: hardware
 aliases:
@@ -34,9 +33,6 @@ package:
   controlling_dimension: "millimetres"
   tolerancing_standard: "ASME Y14.5M, 1994"
 
-# Read off the rendered drawing TWICE -- whole sheet, then the dimension table at 3.5x --
-# with both reads agreeing. Deliberately NOT OCR'd: tesseract misreads digits on these
-# sheets (@/Q for 0, 4 for 1), and these are precision values.
 dimensions_mm:
   source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PACKAGING (CASE 932BR ISSUE O dimension table), p.49"
   table:
@@ -74,14 +70,16 @@ pin_numbering:
     signal-level pin assignments.
 
 board_design_guidance:
-  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet, Release November 1, 2022, Minimal Propeller 2 Connections, p.7"
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet, Release November 1, 2022, Minimal Propeller 2 Connections, p.7; Pin Descriptions, p.6 (TEST, XI, XO and RESn rows)"
   bypass_capacitors: "All VDD and all Vxxyy pins must have closely-located bypass caps to GND."
   ground_pad: >-
     The common GND (EP) pad under the chip is also used for thermal dissipation. The
     datasheet recommends connecting the GND pad to a solid ground plane with multiple vias.
   supplies: "All VDD pins must be connected to a single 1.8 V supply. All Vxxyy pins must be connected to 3.3 V; they can share a common 3.3 V supply or be split across multiple supplies, typically with the pins powering analog and digital functions on different supplies."
-  test_pin: "The TEST pin must always be connected to GND."
+  test_pin: "The TEST pin is tied to ground, and must always be connected to GND."
   reset_pin: "The RESN (reset) pin must always have a pullup resistor to 3.3 V (typically 10 KΩ)."
+  xi_xo_pins: "XI is the crystal input: it can be connected to the output of a crystal/oscillator pack (with XO left disconnected), or to one leg of a crystal (with XO connected to the other leg of the crystal or resonator), depending on CLK register settings. XO is the crystal output: it provides feedback for an external crystal, or may be left disconnected, depending on CLK register settings. No external resistors or capacitors are required on XI or XO."
+  reset_behavior: "When RESn is low the Propeller is reset: all cogs are disabled and the I/O pins are floating. The Propeller restarts 3 ms after RESn transitions from low to high."
 
 thermal_note:
   status: >-

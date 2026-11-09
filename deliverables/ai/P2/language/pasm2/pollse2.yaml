@@ -1,6 +1,6 @@
 instruction: POLLSE2
 syntax: POLLSE2 {WC|WZ|WCZ}
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZ0 000000101 000100100
   write: —
   c: SE2 Event
@@ -14,21 +14,19 @@ description: >-
   clears the flag (unless it's being set again by the event sensor).
   If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to
   the state of the selectable event 2 flag prior to clearing it.
-  The selectable event 2 flag is set whenever the corresponding configured event
-  occurs. The flag is cleared upon execution of SETSE2, POLLSE2, WAITSE2, JSE2, or
-  JNSE2 instructions.
+  The selectable event 2 flag is set whenever the event configured by SETSE2 occurs.
+  The flag is cleared upon execution of SETSE2, POLLSE2, WAITSE2, JSE2, or JNSE2
+  instructions.
 flags_affected:
   C: Set to SE2 event flag state
   Z: Set to SE2 event flag state
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLSE1/2/3/4, p.114"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 276 (POLLSE2 {WC/WZ/WCZ}: get SE2 event flag into C/Z, then clear it; 2 clocks)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Event instructions, p.43 (POLLSE2 {WC/WZ/WCZ}, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLSE1/2/3/4, p.114 (Result line, WC / WZ / WCZ parameter, encoding row 000000101 / 000100100, write none, C and Z SE2 Event, 2 clocks, Related list; the flag is set whenever the corresponding configured event occurs; cleared upon SETSEx, POLLSEx, WAITSEx, JSEx or JNSEx)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (the POLLxxx instructions simultaneously return their event-occurred flag into C and/or Z and clear it unless it is set again by the event sensor), Selectable Events (SEn is set whenever the configured event occurs; cleared on matched POLLSEn / WAITSEn / JSEn / JNSEn and when the matched SETSEn is called), instruction encoding listing (EEEE 1101011 CZ0 000000101 000100100 POLLSE2 {WC/WZ/WCZ})"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pollwait
-  pattern: ''
-  description: No operands - poll/wait instruction (moves S to D, sets S to $024)
-  valueType: 28
-compiler_encoding:
-  operandFormat: 28
 syntax_variants:
 - POLLSE2 {WC|WZ|WCZ}
 last_updated: '2025-09-19'
@@ -42,5 +40,6 @@ related:
 - WAITSEx
 - JSEx
 - JNSEx
+- architecture/event_system.yaml
 manual_extraction_date: '2025-01-19'
 oneliner: Retrieve and clear SE2 event flag

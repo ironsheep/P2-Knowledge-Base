@@ -2,27 +2,30 @@ instruction: COGSTOP
 syntax: COGSTOP {#}Dest
 brief_description: Cog stop
 category: Hub Control
-description: 'COGSTOP terminates the cog identified by Dest[3:0] (the 4 LSBs of the D/# operand supply the target cog ID). In this dormant
-  state, the cog ceases to execute code and
-
-  power consumption is greatly reduced.
-
-  '
+description: >-
+  COGSTOP terminates the cog identified by the low bits of Dest (cog IDs are 0-7).
+  Parallax's documents give this field as Dest[3:0], the 4 LSBs of the D/# operand,
+  and also as Dest[2:0]. In this dormant
+  state, the cog ceases to execute code and power consumption is greatly reduced.
 sources:
-  - "COGSTOP target cog ID in Dest[3:0]: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS"
+  - "P2 Instructions v35 - Rev B/C Silicon, row 243 (COGSTOP {#}D: stop cog D[3:0]; 2...9 clocks)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS (each of the eight cogs has a unique three-bit ID; the 4 LSBs of the D/# operand supply the target cog ID); instruction encoding listing (EEEE 1101011 00L DDDDDDDDD 000000011 COGSTOP D/#)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST SEQUENTIAL FIFO INTERFACE (WAITX #20 before a cog that has been writing to the hub via WRFAST stops itself)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGSTOP, p.67 (Dest in the lowest 3 bits indicates which cog to stop; Dest[2:0]; the dormant state and reduced power consumption; encoding table, 2-9 clocks); PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.154 (stop cog D[3:0])"
+  - "Field width: Dest[3:0] in P2 Instructions v35 - Rev B/C Silicon (COGSTOP), in Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS, and in Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.154; Dest[2:0] in Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGSTOP, p.67; no measurement settles it"
 result: Cog indicated by Dest is terminated (stopped).
 flags_affected:
   C: No effect
   Z: No effect
 parameters:
-- Dest is the register or 9-bit literal whose 4 LSBs (Dest[3:0]) indicate which cog to
-  stop (0-7 on the P2X8C4M64P).
+- Dest is the register or 9-bit literal whose low bits indicate which cog to stop (cog
+  IDs are 0-7).
 syntax_variants:
 - COGSTOP {#}Dest
 timing:
-  cycles: 2
-  type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+  cycles: 2–9
+  type: variable
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 00L DDDDDDDDD 000000011
   write: —
   c: —
@@ -30,16 +33,11 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   clocks: 2–9
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGSTOP, p.67"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_l
-  pattern: D/#0..511
-  description: Destination or immediate value 0-511
-  valueType: 26
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 26
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Stop a cog by ID
+notes:
+- "A cog that has been writing to the hub via WRFAST and wants to COGSTOP itself executes WAITX #20 first, to allow time for any lingering FIFO data to be written to the hub."
 related:
-- COGINIT
-- COGID
+- language/pasm2/coginit.yaml
+- language/pasm2/cogid.yaml

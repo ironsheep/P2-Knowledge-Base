@@ -15,7 +15,7 @@ blocks:
     compile: not-code
     reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
   - at: instructions[2].usage_example
-    fp: "7b2dfcf53b0e205e"
+    fp: "309d3b83e48b13bc"
     compile: fragment
     wrap: pasm2-dat
     assumes: [status]
@@ -24,7 +24,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: debug_modes[0].handler
-    fp: "e35b08a8e05749be"
+    fp: "36d5d6324a4625d3"
     compile: fragment
     wrap: pasm2-dat
     assumes: [trace_ptr]
@@ -34,7 +34,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [break_addr=con]
   - at: debug_modes[1].handler
-    fp: "fd1f97ad414bd629"
+    fp: "152d04afd037b83f"
     compile: fragment
     wrap: pasm2-dat
     assumes: [break_log, value, watch_addr, break_addr=con]
@@ -48,22 +48,22 @@ blocks:
     wrap: pasm2-dat
     assumes: [status]
   - at: programming_patterns[0].code
-    fp: "81cf7ad234883d5e"
+    fp: "a2a2af816b296f22"
     compile: fragment
     wrap: pasm2-dat
     assumes: [trace_ptr, TRACE_BUFFER=con, TRACE_END=con]
   - at: programming_patterns[1].code
-    fp: "9537a6a2d8bf99a6"
+    fp: "60305f63b23fd9e5"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [value, watch_var, break_value, debug_cog, debug_value]
+    assumes: [value, watch_var, break_value, debug_cog, debug_value, cog_id, break_addr=con]
   - at: programming_patterns[2].code
-    fp: "94b8e77f72804f94"
+    fp: "68da38b1dc76f68a"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [current_time, last_time, total_time, instruction_count]
+    assumes: [current_time, last_time, total_time, instruction_count, delta]
   - at: programming_patterns[3].code
-    fp: "2f18e5c5e423e512"
+    fp: "55474e4770e8480a"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [target_cog=con, target_pc, debug_data, some_var]
+    assumes: [target_cog=con, target_pc, debug_data, some_var, hub_ptr]

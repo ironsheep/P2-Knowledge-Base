@@ -2,8 +2,8 @@ instruction: INCMOD
 syntax: INCMOD Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Increment with modulus
 category: Math and Logic
-description: 'Increment with modulus. If Dest equals Src, Dest is set to 0 and C is set;
-  otherwise Dest is incremented by 1 and C is cleared.
+description: 'Increment with modulus. If Dest equals Src, Dest is set to 0 and, with WC/WCZ,
+  C is set; otherwise Dest is incremented by 1 and, with WC/WCZ, C is cleared.
 
   INCMOD compares Dest with Src - if not equal, it increments Dest; otherwise it sets
   Dest equal to 0. If Dest begins in the range 0 to Src, iterations of INCMOD will
@@ -42,44 +42,41 @@ encoding:
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, INCMOD, p.89"
 documentation_level: comprehensive
 examples:
-- name: Round-Robin Counter
-  description: Circular counter for resource scheduling
-  code: "' Round-robin through 8 ports (0-7)\nmain_loop\n        ' Service current\
-    \ port\n        ' ... port service code ...\n        \n        ' Move to next\
-    \ port\n        incmod  portctr, portnum    wc\nif_nc   jmp     #main_loop   \
-    \       ' Continue if not wrapped\n        \n        ' We've serviced all ports,\
-    \ restart\n        jmp     #main_loop\n        \nportctr res     1           \
-    \        ' Current port (0-7)\nportnum long    7                   ' Maximum port\
-    \ number\n"
+- name: Wrapping Counter
+  description: Count a register from 0 up to the value in portnum (7), then wrap it to 0
+  code: |
+    mov     portctr, #0
+    main_loop
+    incmod  portctr, portnum    wc      ' C = 1 when portctr was equal to portnum, portctr is then 0
+    if_nc   jmp     #main_loop          ' repeat until portctr wraps to 0
+    done    jmp     #done
+
+    portnum long    7
+    portctr res     1
 - name: Circular Buffer Index
-  description: Increment buffer index with wrap-around
-  code: "' Increment tail index with modulo for circular buffer\n'' Note: buffer size\
-    \ must be (modulus + 1)\nincmod  tail_idx, #BUF_SIZE-1\n\n'' Check if buffer is\
-    \ full (tail caught up to head)\ncmp     tail_idx, head_idx      wz\nif_z    jmp\
-    \     #buffer_full\n\n'' Safe to add data at tail\nadd     buffer_ptr, tail_idx\n\
-    wrbyte  new_data, buffer_ptr\n"
-- name: Multi-Resource Iterator
-  description: Iterate through active resources only
-  code: "' Service only active ports\n.next_port\n        alts    portctr, #port_active\n\
-    \        mov     is_active, 0-0      ' Get active flag\n        \n        tjz\
-    \     is_active, #.skip   ' Skip if inactive\n        call    #service_port  \
-    \     ' Service this port\n        \n.skip   incmod  portctr, #7         wc\n\
-    if_nc   jmp     #.next_port         ' Continue loop\n        \n        ' All ports\
-    \ checked\n        ret\n"
+  description: Advance an index that wraps after BUF_SIZE-1, then compare it with a second index
+  code: |
+    incmod  tail_idx, #BUF_SIZE-1       ' tail_idx counts 0 to BUF_SIZE-1, then wraps to 0
+    cmp     tail_idx, head_idx      wz  ' Z = 1 when tail_idx equals head_idx
+    if_z    jmp     #buffer_full
+- name: Indexed Table Walk
+  description: Call service_port for each of entries 0 to 7 whose flag is non-zero
+  code: |
+    .next_port
+            alts    portctr, #port_active
+            mov     is_active, 0-0      ' flag of entry portctr
+
+            tjz     is_active, #.skip   ' skip the call if the flag is zero
+            call    #service_port
+
+    .skip   incmod  portctr, #7         wc
+    if_nc   jmp     #.next_port         ' repeat until portctr wraps to 0
+
+            ret
 notes:
 - C flag indicates wrap-around (modulus reached)
-- Perfect for round-robin scheduling
-- Essential for circular buffer management
-- More efficient than manual compare and reset
 related:
 - DECMOD
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:
-  operandFormat: 0
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Increment with modulus

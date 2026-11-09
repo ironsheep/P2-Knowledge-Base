@@ -21,9 +21,9 @@ detailed_description:
 
 registers:
   x_register:
-    function: "Not used in this mode"
-  y_register:  
-    function: "Not used in this mode"
+    function: "Not documented: a role for X in this mode"
+  y_register:
+    function: "Not documented: a role for Y in this mode"
   z_register:
     function: "Duration of previous high state in clocks (max $80000000)"
     reset_value: "$00000001 during reset (DIR=0); IN is low"
@@ -66,7 +66,7 @@ code_examples:
         rdpin   width_reg, #pulse_pin            ' Read high duration
 
         ' Store in array or process (pulse_count runs 10..1, so index from pulse_array-1)
-        alts    pulse_count, #pulse_array-1
+        altd    pulse_count, #pulse_array-1      ' next instruction's D = pulse_array-1 + pulse_count
         mov     0-0, width_reg
 
         djnz    pulse_count, #.loop
@@ -101,3 +101,8 @@ notes:
   - "No data available during low periods"
   - "For both high and low timing, use mode %10000"
   - "Z register limited to $80000000 (2.14 billion clocks)"
+  - "The Spin2 RDPIN() method returns the C flag in bit 31, so the Spin2 example masks the result with $7FFFFFFF; a duration at the $80000000 limit then reads as 0. Inline PASM2 RDPIN keeps all 32 bits of Z"
+
+sources:
+  - "operation, timing, registers, flags, notes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%10001 time A-input high states: on each high-to-low transition the high duration is placed in Z and IN is raised; Z limited to $80000000; during reset IN is low and Z is set to $00000001)"
+  - "notes (Spin2 RDPIN() bit 31): Parallax Propeller 2 Spin2 Language Documentation v55, smart pin methods (RDPIN (Pin) : Zval, Zval[31] = C flag from RDPIN, other bits are RDPIN data)"

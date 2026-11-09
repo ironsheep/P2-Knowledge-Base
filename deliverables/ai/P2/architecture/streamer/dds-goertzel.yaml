@@ -11,8 +11,6 @@ aliases:
   - "frequency detection"
   - "tone detection"
   - "waveform synthesis"
-  - "synchronous detection"
-  - "lock-in amplifier"
   - "SINC1"
   - "SINC2"
 
@@ -20,104 +18,111 @@ aliases:
 modes:
   sinc1:
     symbol: X_DDS_GOERTZEL_SINC1
-    encoding: "%1111_0ppp_p111"
-    filter: "SINC1 (direct accumulation)"
-    q_factor: "Lower"
-    max_amplitude: "±127"
-    
+    encoding: "D[31:16] = %1111_dddd_0ppp_p111"
+    filter: "SINC1 (D[23] = 0)"
+    q_factor: "Lower than SINC2"
+    example_table_amplitude: "±127"
+
   sinc2:
     symbol: X_DDS_GOERTZEL_SINC2
-    encoding: "%1111_1ppp_p111"
-    filter: "SINC2 (double integration)"
-    q_factor: "Higher (sharper selectivity)"
-    max_amplitude: "±10 (to prevent overflow)"
+    encoding: "D[31:16] = %1111_dddd_1ppp_p111"
+    filter: "SINC2 (D[23] = 1), double-integrating accumulators"
+    q_factor: "Higher than SINC1"
+    example_table_amplitude: "±10, reduced to avoid (X,Y) accumulator overflow"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER (the DDS/Goertzel mode table rows; D[23] selects SINC1 or SINC2; the paragraph after the Goertzel program: SINC2 has a higher Q, and the table amplitude reduced from ±127 to ±10; NOTE ABOUT GOERTZEL SINC2 MODE: double-integrating accumulators)"
 
-# ADC input pins — RAW, not smart pins
+# ADC input pins
 adc_input_pins:
   rule: |
-    The ADC pins feeding Goertzel are RAW delta-sigma bit streams: configure them for ADC
-    mode (a P_ADC_* constant) with smart-pin mode field %00000, and DO NOT set DIR.
-    A smart pin left enabled on these pins produces no Goertzel accumulation.
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel (states: pins 'should be configured for ADC mode, so that their IN signals are raw delta-sigma bit streams, with no smart pin mode selected'); source_tension: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER (introduction); bitstream_summation: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel"
-  source_tension: |
-    The STREAMER introduction says Goertzel works "from smart
-    pins configured as ADC's". That wording is loose and MISLEADS: the DDS/Goertzel section
-    above is the specific, authoritative statement, and the worked example
-    follows it — `wrpin adcmode,#adcpin` with mode field %00000 and no DIR on the ADC pin
-    (only the DAC pin gets `dirh`). Configure raw.
+    One to four of the block's pins should be configured for ADC mode, so that their IN
+    signals are raw delta-sigma bit streams, with no smart pin mode selected (mode field
+    %00000). A Goertzel setup initialises its ADC pin with `wrpin adcmode,#adcpin`
+    and enables its DAC pin with `dirh #dacpin`.
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel (the %pppp paragraph, and the Goertzel program's setup lines and adcmode long); cross_source_conflict: STREAMER (introduction) and DDS/Goertzel; bitstream_summation: STREAMER, DDS/Goertzel"
+  cross_source_conflict: |
+    Parallax's documents also give the Goertzel input pins two ways: as "smart pins
+    configured as ADC's", and as pins configured for ADC mode "with no smart pin mode
+    selected".
 
   pin_block_selection:
-    field: "D[22:19] = %pppp selects a FOUR-PIN BLOCK; %pppp * 4 is the BASE pin"
+    field: "D[22:19] = %pppp selects a four-pin block; %pppp * 4 is the base pin"
     note: "This selects a block, not a pin. Which of the four are summed/inverted is chosen in S (below)."
-    caution: "`base_pin<<17` is a valid idiom ONLY when base_pin is a multiple of 4, since (base>>2)<<19 == base<<17 exactly then."
   s_operand:
-    field_19_16: "which of the four pins are INVERTED (allows subtraction of a channel)"
-    field_15_12: "which of the four pins are SUMMED — MANDATORY; S[15:12] = 0 sums nothing and the analyzer accumulates zero"
+    field_19_16: "which of the four pins are inverted (allows subtraction of a channel)"
+    field_15_12: "which of the four pins are summed; a 0 bit leaves its pin ignored, so S[15:12] = 0 sums no pin"
     field_11_9: >-
-      LOOP-SIZE SELECTOR. Chooses how many LUT entries one NCO cycle walks, and
+      Loop-size selector. Chooses how many LUT entries one NCO cycle walks, and
       therefore which NCO bits index the LUT. See lut_setup.lut_window for the
-      eight settings. %000 (512 entries) is only the default, not a requirement.
+      eight settings; %000 is the 512-entry setting.
     field_8_0: >-
       Split by the loop-size selector into %A region-bound bits and %T phase-offset
-      bits -- "%001_ATTTTTTTT", "%010_AATTTTTTT" and so on. The %A bits BOUND the
+      bits -- "%001_ATTTTTTTT", "%010_AATTTTTTT" and so on. The %A bits bound the
       read to a sub-region of the LUT, so more than one waveform can be resident at
-      once; the %T bits are ADDED to the topmost NCO bits, which shifts or modulates
+      once; the %T bits are added to the topmost NCO bits, which shifts or modulates
       the phase of playback:
       "On each clock, the lookup RAM is read at the 9-bit location bound by the %A
       bits, with the lower bits being the sum of the %T bits and the topmost NCO
       bits. This allows you to set bounded areas within the LUT and to shift or
       modulate the phase of playback."
     field_11_0_note: >-
-      RF modulation -- named in this mode's own applications list -- is done with the
-      %T bits. Nothing downstream can do it while S[11:0] is described only as a
-      label.
+      The %T bits shift or modulate the phase of playback.
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel
       (the S[19:0] configuration paragraph, and the S[11:0] table and the %A/%T rule: 'the
       lower bits being the sum of the %T bits and the topmost NCO bits ... to shift or
       modulate the phase of playback'). field_8_0: Parallax Propeller 2 Documentation v35
       (Rev B/C silicon), STREAMER, DDS/Goertzel."
   bitstream_summation: "IN '0' counts as -1, '1' as +1. For two or four summed channels the sum is always even and is shifted right one bit."
-  gain_choice: "Gain is a property of the COUPLING, not of this mode. A high-gain constant such as P_ADC_100X saturates on a directly-coupled (wired) signal and reads a constant; the documentation's demo can use high gain because it couples capacitively through a touch pad."
 
 # Operation (every clock cycle)
 operation:
   description: |
-    Unlike other modes, DDS/Goertzel operates on EVERY system clock,
-    not just NCO rollovers. This enables high-frequency synthesis
-    and analysis.
-    
-  steps:
-    1: >-
-      Read the LUT entry indexed by the NCO bits the LOOP-SIZE selector chooses --
-      NCO[30:22] for the %000 (512-entry) default, NCO[30:29] at the other extreme.
+    This mode outputs and inputs on every clock in which the command is active, not
+    only on NCO rollovers.
+
+  actions:
+    lut_read: >-
+      Read the LUT entry indexed by the NCO bits the loop-size selector chooses --
+      NCO[30:22] for the %000 (512-entry) setting, NCO[30:29] at the other extreme.
       See lut_setup.lut_window. The read is bounded by the %A bits and offset by the
       %T bits of S[11:0].
-    2: "Advance NCO phase: NCO += frequency"
-    3: "Output LUT bytes to DACs (XOR $80 for unsigned)"
-    4: "Multiply ADC input by sine/cosine"
-    5: "Accumulate products in sine/cosine registers"
-    
+    nco_advance: "phase = (phase & $7FFF_FFFF) + frequency"
+    dac_output: "The four LUT bytes are output to X3, X2, X1 and X0 with their MSBs inverted, so that they may drive the unsigned DACs"
+    multiply: "The sine (byte 3) and cosine (byte 2) values are multiplied by the bitstream sum"
+    accumulate: "The products are added into their respective 32-bit accumulators"
+    order: "Not documented: the order of the LUT read and the NCO advance within a clock"
+
   dac_output:
-    dac3: "LUT.byte[3] ^ $80"
-    dac2: "LUT.byte[2] ^ $80"
-    dac1: "LUT.byte[1] ^ $80"
-    dac0: "LUT.byte[0] ^ $80"
-    
-  goertzel_calculation: |
-    sin := LUT.byte[3] (sign-extended)
-    cos := LUT.byte[2] (sign-extended)
-    m := bitstream sum, -3..+3 (±1 per selected ADC pin)
-    
-    sin_acc += sin * m
-    cos_acc += cos * m
+    x3: "LUT.byte[3] with its MSB inverted (^ $80)"
+    x2: "LUT.byte[2] with its MSB inverted (^ $80)"
+    x1: "LUT.byte[1] with its MSB inverted (^ $80)"
+    x0: "LUT.byte[0] with its MSB inverted (^ $80)"
+    dac_channel_selection: "The %dddd field in D[27:24] selects which streamer DAC channels override which SETDACS values: architecture/streamer/dac-routing.yaml"
+
+  goertzel_calculation:
+    inputs: |
+      lookup_sin = LUT.byte[3] (signed)
+      lookup_cos = LUT.byte[2] (signed)
+      bitstream_sum = an integer from -3 to +3
+    accumulators: "SIN_ACC and COS_ACC are 32 bits each; GETXACC reads them (language/pasm2/getxacc.yaml)."
+    sinc1: |
+      D[23] = %0, SINC1:
+      SIN_MUL = bitstream_sum * lookup_sin
+      COS_MUL = bitstream_sum * lookup_cos
+      SIN_ACC += SIN_MUL
+      COS_ACC += COS_MUL
+    sinc2: |
+      D[23] = %1, SINC2:
+      SIN_MUL += bitstream_sum * lookup_sin
+      COS_MUL += bitstream_sum * lookup_cos
+      SIN_ACC += SIN_MUL
+      COS_ACC += COS_MUL
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel (the mode paragraph, the LUT-output paragraph, the bitstream-sum and 32-bit accumulator sentence, and the D[23] SINC1/SINC2 accumulation table); NCO: STREAMER (the phase formula)"
 
 # LUT setup requirements
 lut_setup:
-  entries_default: 512
   entries_note: >-
-    512 is the %000 case of the loop-size selector, NOT a hardware requirement. The
-    table below is the full set. A 512-long table needs `orgh`: 512 longs overflows
-    cog RAM (compiler m113).
+    512 is the %000 case of the loop-size selector. The table below gives all eight
+    settings.
   lut_window:
     description: >-
       S[11:9] selects the loop size; the remaining S[8:0] bits split into %A region
@@ -138,15 +143,15 @@ lut_setup:
   format: "32-bit long per entry"
   
   byte_layout:
-    byte_3: "Sine value (signed, for Goertzel)"
-    byte_2: "Cosine value (signed, for Goertzel)"
-    byte_1: "Optional (can be second waveform)"
-    byte_0: "Optional (can be output waveform)"
-    
+    byte_3: "Sine value (signed): to the Goertzel analyzer, and to X3 with its MSB inverted"
+    byte_2: "Cosine value (signed): to the Goertzel analyzer, and to X2 with its MSB inverted"
+    byte_1: "To X1 with its MSB inverted"
+    byte_0: "To X0 with its MSB inverted"
+
   example: |
     ' Make sine and cosine tables in LUT bytes 3 and 2: a 512-sample table, matching the
-    ' %000 loop size (S[11:9] = %000). A different loop size needs a table of that many
-    ' entries, not 512. Run as PASM2 in a cog (Spin2 has no LUT write); ampl = 127 for SINC1.
+    ' %000 loop size (S[11:9] = %000). A different loop size walks a different number of
+    ' entries. PASM2 in a cog; ampl = 127 for SINC1.
             mov     z, #$1FF            ' 512 samples, counting down to 0
     sincos  shl     z, #32-9            ' get angle into top 9 bits of z
             qrotate #ampl, z            ' rotate (ampl, 0) by z
@@ -159,43 +164,26 @@ lut_setup:
             djnf    z, #sincos          ' loop until 512 samples
 
   sinc2_amplitude: |
-    ' For SINC2 mode, reduce amplitude to prevent overflow (512-entry / %000 loop size):
-    ' the same table builder with ampl = 10 (+/-10 max) instead of 127.
+    ' For SINC2 mode, the table amplitude reduced to avoid accumulator overflow
+    ' (512-entry / %000 loop size): the same table builder with ampl = 10 instead of 127.
             qrotate #10, z              ' rotate (10, 0) by z
 
 # Reading results
 reading_results:
   instruction: "GETXACC D"
-  
+
   operation: |
     1. The cosine accumulation → D register
     2. The sine accumulation → next instruction's S operand
-    3. The accumulators are cleared ONLY while a DDS/Goertzel command is running.
-       With the streamer idle, or running any other mode, GETXACC returns the
-       running total and clears nothing; a new streamer command does not reset it.
-    4. Each Goertzel burst's last term is added on the first clock of the NEXT
-       Goertzel burst, so a reading after a burst of N clocks holds N-1 terms.
-    (The documentation describes capture-and-clear into holding registers on every
-    GETXACC; Rev C silicon clears only during a Goertzel burst -- P2 errata E4 and
-    E5, in language/pasm2/getxacc.yaml silicon_errata.)
-
-  reading_protocol: |
-    READ BEFORE AND AFTER, TAKE THE DIFFERENCE. With a discrete XINIT / WAITXFI /
-    GETXACC sequence the read after the burst holds every earlier burst too: a
-    large, stable, plausible-looking number that is not a per-burst measurement.
-    Read idle before the burst and after it and subtract; deliver the held last
-    term first with a zero-term burst (the helper routine in
-    language/pasm2/getxacc.yaml, SINC1). Inside a running Goertzel burst a read does clear, so the XCONT-loop
-    form in the documentation's demo reads once per command and subtracts a baseline
-    established on the first pass.
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel (documented behaviour); Rev C behaviour: EF-069 (item 3), EF-070 (item 4), EF-076 (the helper routine)"
+  clearing_and_lag: "When GETXACC clears the accumulators, and the one-clock lag of each burst's last term, are in language/pasm2/getxacc.yaml (silicon_errata, reading_protocol)."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel (the GETXACC paragraph)"
 
   example: |
     getxacc cos_result       ' Cosine → D
-    mov     sin_result, 0-0  ' Sine → next S (trick)
-    
+    mov     sin_result, 0-0  ' Sine → the S field of this instruction
+
   magnitude_calculation: |
-    ' Convert to magnitude/phase using CORDIC
+    ' Convert to length and angle using CORDIC
     qvector cos_result, sin_result
     getqx   magnitude
     getqy   phase
@@ -206,59 +194,59 @@ frequency:
   formula: "frequency = $8000_0000 * target_freq / clock_freq"
 
   note: |
-    Set via SETXFRQ — the streamer NCO masks its MSB before each add, so the
-    multiplier is $8000_0000 (2^31), not 2^32. Sub-Hz resolution at typical
-    system clocks. (See language/pasm2/setxfrq.yaml and architecture/streamer/nco-timing.yaml.)
+    Set via SETXFRQ, where D/# expresses a fractional 0-to-1 multiplier for the
+    system clock, which value must be multiplied by $8000_0000. (See language/pasm2/setxfrq.yaml and
+    architecture/streamer/nco-timing.yaml.)
 
   example: |
-    ' Detect 40 kHz at 200 MHz clock:
-    ' frequency = $8000_0000 * 40000 / 200000000
-    rdlong  clkf, #$44         ' clkfreq lives at hub long $44
+    ' NCO value for a 40 kHz target at the current clock:
+    ' frequency = $8000_0000 * 40000 / clkfreq
+    rdlong  clkf, #$44         ' clkfreq is at hub long $44
     qfrac   ##40000, clkf      ' QFRAC = 2^32 * 40000/clkfreq
     getqx   xfrq
     shr     xfrq, #1           ' halve to 2^31 scaling for the NCO
     setxfrq xfrq
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER (the SETXFRQ multiplier sentence and the phase formula); clkfreq at LONG[$44]: Parallax Propeller 2 Spin2 Language Documentation v55, the clkfreq variable row"
 
 # SINC1 vs SINC2 comparison
 filter_comparison:
   sinc1:
-    accumulation: "Direct"
-    selectivity: "Broader bandwidth"
-    amplitude: "Full range (±127)"
-    use_case: "General tone detection"
-    
+    accumulation: "goertzel_calculation.sinc1"
+    selectivity: "Lower Q than SINC2"
+    amplitude: "±127"
+
   sinc2:
-    accumulation: "Double integration"
-    selectivity: "Sharper, narrower bandwidth"
-    amplitude: "Reduced (±10 max)"
-    use_case: "Precise frequency discrimination"
-    
-  pitfall: |
-    SINC2 mode REQUIRES reduced waveform amplitude.
-    Full-scale values cause accumulator overflow and
-    incorrect results.
+    accumulation: "goertzel_calculation.sinc2"
+    selectivity: "Higher Q than SINC1"
+    amplitude: "±10"
+
+  sinc2_amplitude_reduction: |
+    Due to rapid (X,Y) accumulator growth, SINC2 may require the sine/cosine table
+    to be reduced in amplitude to avoid (X,Y) accumulator overflow.
+
+  sinc2_varying_iterations: >-
+    The Goertzel SINC2 mode generates periodic problematic GETXACC readings when the
+    number of iterations in a Goertzel cycle varies, because SETXFRQ's D is a
+    non-power-of-two value. When every Goertzel cycle takes the same number of
+    clocks, the double-integrating accumulators in SINC2 mode always have the same
+    number of iterations before a GETXACC instruction executes and captures the
+    double accumulations. Being off by a single clock cycle corrupts the current and
+    next samples.
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel (the paragraph after the Goertzel program; sinc2_varying_iterations: the NOTE ABOUT GOERTZEL SINC2 MODE)"
 
 # Applications
 applications:
-  ultrasonic_ranging:
-    description: "Distance measurement via sound reflection"
-    pattern: "Transmit burst, analyze echo frequency"
-    
-  dtmf_decoding:
-    description: "Detect dual-tone telephone signals"
-    pattern: "Analyze two frequencies simultaneously"
-    
-  tone_detection:
-    description: "Detect specific frequency presence"
-    pattern: "Compare magnitude to threshold"
-    
+  measurements: "By incorporating DDS output with simultaneous Goertzel input, many interactive real-world measurements can be made to determine things like time-of-flight and resonance."
+  energy_at_one_frequency: "Goertzel analysis measures the energy of a single frequency amid potential noise for some number of NCO cycles, and returns sine and cosine accumulations that QVECTOR converts into polar coordinates, yielding power and phase information."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel (the Goertzel and DDS paragraphs)"
+
   function_generator:
-    description: "Synthesize arbitrary waveforms"
-    pattern: "Load waveform to LUT, set output frequency, ROUTE THE DACS in %dddd"
+    description: "DDS on up to four DAC channels"
+    pattern: "On each clock the upper bits of the NCO index a LUT long whose four bytes are output to X3, X2, X1 and X0 with their MSBs inverted. The %dddd field in D[27:24] selects which streamer DAC channels override which SETDACS values; a pin that brings out the data as a voltage is set to DAC mode with the COGID embedded, via WRPIN, and DIR is high."
     note: >-
-      This is the DDS-OUTPUT direction. usage_pattern below is a DETECTOR and does
-      not enable it — its %dddd is X_DACS_OFF. See usage_pattern.dac_output_pin_setup
-      for what the output arrangement additionally needs.
+      function_generator is the DDS-output direction. usage_pattern below is a
+      detector with %dddd = X_DACS_OFF; usage_pattern.dac_output_pin_setup gives the
+      output arrangement.
 
 # Typical usage
 usage_pattern:
@@ -267,23 +255,24 @@ usage_pattern:
     setq2   #$200-1
     rdlong  0, ##sine_table
     
-    ' 2. Configure ADC pin — RAW: ADC mode, smart-pin mode %00000, NO DIR.
-    '    Match the gain to the coupling; a directly-wired signal wants low gain.
+    ' 2. Configure ADC pin: ADC mode, smart-pin mode %00000
     wrpin   ##P_ADC_1X, #adc_pin
 
     ' 3. Set the streamer NCO frequency (2^31 scaling — see `frequency:` above)
-    rdlong  clkf, #$44             ' clkfreq lives at hub long $44
+    rdlong  clkf, #$44             ' clkfreq is at hub long $44
     qfrac   target_freq, clkf      ' 2^32 * target/clkfreq
     getqx   xfrq
     shr     xfrq, #1               ' halve to the NCO's 2^31 scaling
     setxfrq xfrq
 
-    ' 4. Start DDS/Goertzel. S IS MANDATORY: S[15:12] selects which of the four
-    '    block pins are summed. S = 0 sums nothing and accumulates zero.
+    ' 4. Start DDS/Goertzel. S[15:12] selects which of the four block pins
+    '    are summed; S = 0 sums no pin.
     setword dds_cmd, cycles, #0
     xcont   dds_cmd, dds_s
 
-    ' 5. Read once per command, while the next runs: the sums since the last read
+    ' 5. GETXACC reads X, and Y goes into the next instruction's S field.
+    '    A burst's last term is added on the first clock of the next burst:
+    '    language/pasm2/getxacc.yaml reading_protocol.
     getxacc cos_acc
     mov     sin_acc, 0-0
     qvector cos_acc, sin_acc
@@ -297,22 +286,20 @@ usage_pattern:
     dds_s       long    %0000_0001_000_000000000
 
   what_this_example_is: >-
-    A GOERTZEL DETECTOR, and only that. Its own dds_cmd sets %dddd = %0000
-    (X_DACS_OFF), so no streamer DAC channel is routed anywhere, and it reads the
-    result back with GETXACC/QVECTOR. It therefore configures NO DAC output pin.
-    If you want the DDS OUTPUT half instead, that is a
-    different arrangement, not a line to add here: route the DACs in %dddd and set
-    the pin up as a streamer-fed DAC -- see dac_output_pin_setup below.
+    A Goertzel detector. Its dds_cmd sets %dddd = %0000 (X_DACS_OFF), which routes
+    no streamer DAC channel, and it reads the result back with GETXACC/QVECTOR.
+    The DDS output arrangement routes the DACs in %dddd and sets the pin up as a
+    streamer-fed DAC; see dac_output_pin_setup below.
   dac_output_pin_setup: >-
-    For the DDS-output direction the pin must be a COG DAC CHANNEL the streamer can
-    override: P_DAC_124R_3V | P_CHANNEL, with COGID in M[3:0] and DIRH on the pin,
-    the channel chosen by the pin's own two low bits. Sweeping %TT on a jumpered
-    cog-DAC pin gives (%00 = 1,408, no drive; %01 = 6,737)
-    and the spread collapses from 1,305/2,000 samples to 25 once
-    P_CHANNEL is added. See language/pasm2/wrpin.yaml.
-  source: "The %TT sweep on a jumpered cog-DAC pin was run on real P2 (measured, not reasoned). Shape and constants follow the worked DDS/Goertzel program in Parallax Propeller 2
+    For the DDS-output direction the pin is a DAC mode with the COGID embedded and
+    DIR high: TT = %01 (P_CHANNEL, e.g. P_DAC_124R_3V | P_CHANNEL), M[3:0] selecting
+    the cog DAC channel, the channel chosen by the pin's own two low bits. The rule
+    and the TT = %00 case are in architecture/streamer/dac-routing.yaml (pin_setup).
+  source: "Shape and constants follow the worked DDS/Goertzel program in Parallax Propeller 2
       Documentation v35 (Rev B/C silicon), STREAMER, DDS/Goertzel (the program's description
-      and setup, and the dds_d / dds_s mode and data longs)."
+      and setup, and the dds_d / dds_s mode and data longs); dac_output_pin_setup: STREAMER
+      (DAC mode with the COGID embedded, DIR high), PIN CONFIGURATION MODES (%TT 01 = M[3..0]
+      selects cog DAC channel), EF-063."
 
 see_also:
   - architecture/streamer/modes-reference.yaml

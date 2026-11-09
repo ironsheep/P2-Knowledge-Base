@@ -3,9 +3,9 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: code_examples[0].code
-    fp: "ba3bef136703c5e5"
+    fp: "ba8fa30719cc08d5"
     compile: program
   - at: code_examples[1].code
-    fp: "569d0aafd55140f2"
+    fp: "3b885965e3b62f0f"
     compile: fragment
     wrap: spin2-top

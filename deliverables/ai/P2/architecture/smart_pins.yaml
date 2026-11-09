@@ -3,7 +3,6 @@
 
 component: Smart_Pins
 category: io_system
-version: "1.2"
 last_updated: "2026-02-16"
 aliases:
   - P_OE
@@ -24,20 +23,19 @@ aliases:
   - "IN signal semantics"
   - "smart pin handshake"
   - "SSSSS field"
-  - "erratum E6"
-  - "P2 erratum E6"
-  - "E6 erratum"
-  - "In a DAC Smart-Pin Mode, OUT Needs TT Bit 0 to Run the ADC"
+  - "In the DAC-Noise Smart-Pin Mode, OUT Needs TT Bit 0 to Run the ADC"
   - "DAC mode OUT does not start ADC"
 description: |
-  64 identical smart I/O pins, each with autonomous processing capabilities for
-  timing, counting, serial protocols, ADC/DAC operations, and more. Offloads
-  I/O processing from COGs for deterministic, high-performance operation.
-  
+  64 smart I/O pins. Each has a smart pin circuit with 32 modes (%SSSSS) for
+  pulse, NCO and PWM output, counting and timing measurements, ADC sampling,
+  DAC noise and dither, USB, and synchronous and asynchronous serial, which runs
+  once configured and raises its IN signal to the cogs when it has new data, can
+  take new data, or has finished.
+
   **Configure while DIR is low**: a smart pin should be configured (WRPIN/WXPIN/WYPIN)
   while its DIR bit is low, holding it in reset. A WRPIN while DIR is high gives
-  unpredictable behavior. Exception: WRPIN #0 resets a
-  running smart pin without a DIR cycle.
+  unpredictable behavior. Exception: WRPIN #0, which returns a pin to normal mode,
+  resets a running smart pin without a DIR cycle.
 
 architecture:
   pin_count: 64
@@ -49,8 +47,11 @@ capabilities:
   operating_modes: 32
   input_routing: "±3 pins from any pin"
   output_override: "Smart pin can control output"
-  adc_per_pin: "Delta-sigma ADC with 5 ranges, 2 sources and VIO/GIO calibration; results are SINC2/SINC3-filtered bitstream sums"
-  dac_per_pin: "8-bit DAC (16-bit with dithering)"
+  adc_per_pin: "Delta-sigma ADC with 5 ranges, 2 sources and VIO/GIO calibration; the WXPIN mode X[5:4] selects SINC2 sampling (%00), SINC2 filtering (%01), SINC3 filtering (%10) or bitstream capturing (%11)"
+  dac_per_pin: "120-ohm (3ns) and 1k-ohm 8-bit DACs, with 16-bit oversampling, noise, and high/low digital modes"
+  serial_max_baud_rate: "Synchronous serial transmit and receive, 1 to 32 bits, up to clock/2 baud rate; asynchronous serial transmit and receive, 1 to 32 bits, up to clock/3 baud rate"
+  cog_analog_channels: "Each cog has access to all I/O pins, plus four fast DAC output channels and four fast ADC input channels. The four ADC channels are 8-bit, sample once per clock, and are fed from the smart pin scope modes."
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, cog and smart I/O pin features, pp.1-3; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), OVERVIEW (smart I/O pin features)"
 
 operating_modes:
   repository_modes:
@@ -74,13 +75,13 @@ operating_modes:
     01011: "A/B quadrature encoder"
     01100: "Count A-rise when B-high"
     01101: "Count A-rise, inc/dec by B"
-    01110: "Count A-edges with optional B-dec"
-    01111: "Count A-high or A&B-high"
+    01110: "Y[0]=0: count A-input positive edges; Y[0]=1: increment on A-input positive edge and decrement on B-input positive edge"
+    01111: "Y[0]=0: count A-input highs; Y[0]=1: increment on A-input high and decrement on B-input high"
     
   timing_modes:
     10000: "Time A-states"
     10001: "Time A-high states"
-    10010: "Time X A-highs/rises/edges"
+    10010: "Y[2]=0: time X A-input highs/rises/edges; Y[2]=1: timeout on X clocks of missing A-input high/rise/edge"
     10011: "For X periods, count time"
     10100: "For X periods, count states"
     10101: "For periods in X+ clocks, count time"
@@ -101,43 +102,42 @@ operating_modes:
 
 critical_requirements:
   reset_before_configure:
-    mandatory: false
-    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (configure while DIR is low); consequences_of_skipping: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS; correct_sequence order: bench-measured, EF-011 (pulse, transition, async TX required; NCO, DAC-noise safe), EF-097 (counter and timing modes %01110, %01111, %10010-%10111 and ADC %11001 order-safe; bench-measured on one board, one Y value per mode; async TX effect measured on the bench) and EF-090 (sync TX %11100 continuous primes in reset), with the Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %11100 text; Y zeroed in reset for pulse and transition: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %00100 and %00101"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (configure while DIR is low); consequences_of_skipping: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS; correct_sequence order: bench-measured, EF-011 (pulse, transition, async TX required; NCO, DAC-noise safe), EF-097 (counter and timing modes %01110, %01111, %10010-%10111 and ADC %11001 order-safe; bench-measured on one board, one Y value per mode; async TX effect measured on the bench) and EF-090 (sync TX %11100 continuous primes in reset), with the Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %11100 text; Y zeroed in reset for pulse and transition: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %00100 and %00101; WRPIN #0 resets a running smart pin without a DIR cycle: EF-012 (bench-measured)"
     description: |
       **Configure while DIR is low**: a smart pin should be configured while its DIR
       bit is low, holding it in reset. A WRPIN while DIR
       is high changes the use of the pin's state bits and gives unpredictable
-      behavior. Exception: WRPIN #0 resets a running
-      smart pin without a DIR cycle.
+      behavior. Exception: WRPIN #0, which returns a pin to normal mode, resets a
+      running smart pin without a DIR cycle.
     correct_sequence:
       note: |
         Order is Reset -> Setup (WRPIN/WXPIN) -> Enable (DIRH) -> Operate (WYPIN).
-        Write Y with WYPIN AFTER raising DIR for the trigger modes (pulse %00100,
+        Write Y with WYPIN after raising DIR for the trigger modes (pulse %00100,
         transition %00101) and asynchronous serial transmit (%11110): a WYPIN issued
-        before DIRH does not take effect. For the trigger modes the reason is
-        documented -- Y is set to zero during reset; for asynchronous serial transmit
-        no reason is documented. The value modes NCO %00110 and
+        before DIRH does not take effect. For the trigger modes, Y is set to zero
+        during reset. Not documented: why a WYPIN before DIRH has no effect in
+        asynchronous serial transmit. The value modes NCO %00110 and
         DAC-noise %00001 work in either order, and so do the counter and timing
         modes %01110, %01111, %10010-%10111 and the external-clock ADC mode %11001: a Y
         written while DIR is low is in force after DIRH.
-        EXCEPTION -- synchronous serial transmit (%11100) in continuous mode needs its
-        FIRST word written with WYPIN DURING reset: that write primes the shifter,
+        Exception -- synchronous serial transmit (%11100) in continuous mode needs its
+        first word written with WYPIN during reset: that write primes the shifter,
         and enabling first loses the word.
-        PINSTART()/pinstart() writes Y before raising DIR, so it is NOT safe for
-        the trigger modes or asynchronous serial transmit -- use the explicit
-        sequence below for those.
+        PINSTART()/pinstart() writes Y before it raises DIR, so in the trigger
+        modes and asynchronous serial transmit its Y value does not take effect;
+        the sequence below writes Y after DIR rises.
       pasm2:
         - "DIRL  pin         ' Hold smart pin in reset (DIR=0) while configuring"
         - "WRPIN mode, pin   ' Configure smart pin mode"
         - "WXPIN x, pin      ' Set X parameter (setup)"
         - "DIRH  pin         ' Enable smart pin (DIR=1)"
-        - "WYPIN y, pin      ' Operate: write Y AFTER enable"
+        - "WYPIN y, pin      ' Operate: write Y after enable"
       spin2:
         - "PINCLEAR(pin)        ' Reset pin (DIR=0, WRPIN=0)"
         - "WRPIN(pin, mode)     ' Configure smart pin mode"
         - "WXPIN(pin, x)        ' Set X parameter (setup)"
         - "PINHIGH(pin)         ' Enable smart pin (raises DIR)"
-        - "WYPIN(pin, y)        ' Operate: write Y AFTER enable"
+        - "WYPIN(pin, y)        ' Operate: write Y after enable"
     consequences_of_skipping:
       - "Selecting a new mode while DIR is high gives unpredictable, quite certainly useless behavior in the newly-selected mode"
     why_this_is_the_rule:
@@ -145,34 +145,35 @@ critical_requirements:
         Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS.
       mechanism: >-
         Each smart pin carries 126 bits of state data, separate from its WRPIN
-        configuration. WRPIN does not merely select a mode: it MULTIPLEXES those 126 bits
-        to the subcircuit chosen by the five %SSSSS mode bits. Issuing WRPIN while DIR is
-        high changes that mapping underneath live state, which the source calls
-        "unpredictable and quite certainly useless behavior in the newly-selected smart
-        pin mode". The rule above is a consequence of that multiplexing, not a convention.
+        configuration. WRPIN's configuration multiplexes those 126 bits to the
+        subcircuit selected by the five %SSSSS mode bits. Issuing WRPIN while DIR is
+        high changes that mapping underneath live state, which gives unpredictable and quite
+        certainly useless behavior in the newly-selected smart pin mode. The rule above
+        is a consequence of that multiplexing.
 
   reset_without_reconfiguring:
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS.
     behavior: >-
-      A configured, running smart pin can be RESET AT ANY TIME by taking its DIR bit low,
-      and it does NOT lose the configuration set by the last WRPIN. Some mode-related
+      A configured, running smart pin can be reset at any time by taking its DIR bit low,
+      and it does not lose the configuration set by the last WRPIN. Some mode-related
       state bits are cleared while DIR is low; when DIR returns high the pin resumes in
       the same mode, with some state data reset.
     why_it_matters: >-
-      A driver can restart a smart pin mid-flight with DIRL/DIRH alone -- no WRPIN, WXPIN
-      or re-setup required. Re-issuing WRPIN while DIR is high is the thing that must NOT
-      be done. Useful for clearing a stuck serial or counter mode without a full rebuild.
+      A smart pin can be reset with DIRL/DIRH without reconfiguring its WRPIN mode;
+      some state is reset (Y must be rewritten after DIRH in the pulse, transition and
+      asynchronous serial transmit modes). A WRPIN while DIR is high changes the use of the 126 state bits
+      and causes unpredictable behavior in the newly-selected mode.
 
 pin_control_instructions:
   configuration:
-    wrpin: "Configure smart pin mode and routing (configure while DIR is low -- DIRL first)"
+    wrpin: "Configure smart pin mode and routing (a smart pin is configured while its DIR bit is low)"
     wxpin: "Write X parameter (mode-specific)"
     wypin: "Write Y parameter (mode-specific)"
     
   operation:
-    dirh: "Enable smart pin (DIR high) - do this AFTER configuration"
-    dirl: "Disable/reset smart pin (DIR low) - configure while DIR is low"
+    dirh: "Enables the configured smart pin (DIR high)"
+    dirl: "Holds the smart pin in reset (DIR low); configuration is done while DIR is low"
     
   data_transfer:
     rdpin: "Read smart pin result (clears IN)"
@@ -184,7 +185,7 @@ pin_control_instructions:
     testpn: "Test smart pin IN flag (not)"
 
 input_routing:
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (the %AAAA / %BBBB / %FFF selectors); the %FFF rows appear identically in the Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Modes, p.23, and in the Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Pin Modes, p.32. Filter defaults from Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Configuring the Digital Filters for Smart Pins."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (the %AAAA / %BBBB / %FFF selectors); the %FFF rows appear identically in the Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Modes, p.23, and in the Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Pin Modes, p.32. Filter settings, unanimity rule, output routing and defaults from Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Configuring the Digital Filters for Smart Pins (the flipflops must be unanimously high or low to change the filter output; table 30) and OVERVIEW (2/3/5/8-bit-unanimous input filtering with selectable sample rate)."
   a_input:
     field: "%AAAA (D[31:28] of the WRPIN operand)"
     polarity: {"0xxx": "true (default)", "1xxx": "inverted"}
@@ -214,6 +215,8 @@ input_routing:
     non_smart_pin_note: "The resultant 'A' will drive the IN signal in non-smart-pin modes."
   global_digital_filters:
     what_they_are: "There are four global digital filter settings which can be used by each smart pin to low-pass filter its incoming pin states. Each filter setting includes a filter length and a timing tap. The filter length is 2, 3, 5, or 8 flipflops, selected by values 0..3. The timing tap is one of the lower 32 bits of CT, selected by values 0..31."
+    unanimity: "The flipflops shift pin state data at the timing tap rate and must be unanimously high or low to change the filter output to high or low. Each time the selected tap transitions, the current pin state is shifted into the flipflops, and if the flipflops are all in agreement, the filter output goes to that state."
+    where_the_output_goes: "The filter is reflected in the INA/INB bits if no smart pin mode is selected, or its states are used by the smart pin mode as its inputs."
     configured_by:
       - "HUBSET ##$4000_0000 + Length<<5 + Tap    'set filt0"
       - "HUBSET ##$4000_0080 + Length<<5 + Tap    'set filt1"
@@ -222,14 +225,15 @@ input_routing:
     length_encoding: "\"Length\" is 0..3 for 2, 3, 5, or 8 flipflops."
     tap_encoding: "\"Tap\" is 0..31 for every single clock, every 2nd clock, every 4th clock,... every 2,147,483,648th clock."
     reset_defaults:
-      note: "The filters are set to the following defaults on reset. The low-pass times below are the source's own, quoted at 6.25ns/clock -- they scale with the system clock."
+      source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Configuring the Digital Filters for Smart Pins (table 30, low-pass time at 6.25ns/clock)"
+      note: "The filters are set to the following defaults on reset. The low-pass times below are quoted at 6.25ns/clock and scale with the system clock."
       filt0: {length: "0 (2 flipflops)", tap: "0 (1:1)", low_pass_time: "12.5ns (6.25ns * 2 * 1)"}
       filt1: {length: "1 (3 flipflops)", tap: "5 (32:1)", low_pass_time: "600ns (6.25ns * 3 * 32)"}
       filt2: {length: "2 (5 flipflops)", tap: "19 (512K:1)", low_pass_time: "16.4ms (6.25ns * 5 * 512K)"}
       filt3: {length: "3 (8 flipflops)", tap: "22 (4M:1)", low_pass_time: "210ms (6.25ns * 8 * 4M)"}
     filter_delay:
-      fact: "With the timing tap at 0 (every clock), a filter of N flipflops delays the filtered input by N + 1 clocks: 2, 3, 5 and 8 flipflops give 3, 4, 6 and 9 clocks, rising and falling edges alike, against 0 clocks unfiltered. With 5 flipflops at tap 3 (every 8th clock) the delay is 37 clocks. The delays at other taps are not stated."
-      source: "EF-095 (measured through the streamer's pin capture on one board; the tap-0 lengths and one tap-3 point were measured, other taps were not)"
+      fact: "In streamer pin capture, an input taking filt0 at tap 0 (every clock) lags an unfiltered input by 3, 4, 6 and 9 clocks for filters of 2, 3, 5 and 8 flipflops, rising and falling edges alike; an unfiltered input lags by 0 clocks; filt0 with 5 flipflops at tap 3 (every 8th clock) lags by 37 clocks. Not documented: the lag for filt1, filt2 and filt3, for any other tap, and as a general rule."
+      source: "EF-095 (filt0 only: lengths 2, 3, 5 and 8 at tap 0, and 5 flipflops at tap 3)"
 
 in_signal_semantics:
   # ONE HOME for what a pin's IN signal MEANS. The %FFF discussion above states
@@ -238,13 +242,14 @@ in_signal_semantics:
   # TESTP, WAITSE, or the streamer's pin-capture path -- is reading traffic or a
   # handshake.
   source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (the IN-signal
-    handshake, and the non-smart-pin case). consequence_source: Parallax Propeller 2 Spin2
+    handshake, and the non-smart-pin case); streamer capture of the smart pin's IN signal: Parallax Propeller 2 Spin2
     Language Documentation v55, Graphical DEBUG Displays (the LOGIC display); Parallax
-    Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, Pins => DACs/WRFAST."
+    Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, Pins => DACs/WRFAST; EF-095 (streamer capture, TRANSITION-mode pin and a routed neighbour)."
 
   rule: |
-    A pin's IN signal does not mean one thing. What it carries depends entirely on
-    whether that pin is running a smart-pin mode -- that is, on its %SSSSS field.
+    In smart pin modes the IN bit serves as a flag that the smart pin has completed some
+    function or an event has occurred. In non-smart-pin modes the resultant 'A' drives
+    the IN signal. Which applies depends on the pin's %SSSSS field.
 
   when_smart_pin_mode_is_ON:
     condition: "%SSSSS > %00000 -- the pin is running one of the smart-pin modes"
@@ -268,25 +273,23 @@ in_signal_semantics:
     what_in_carries: "the pin's logic level, after the %AAAA input selector and the
       %FFF input logic/filtering have been applied. \"The resultant 'A' will
       drive the IN signal in non-smart-pin modes.\""
-    which_pin_that_level_came_from: "NOT necessarily this pin. %AAAA can route 'A'
+    which_pin_that_level_came_from: "Not necessarily this pin. %AAAA can route 'A'
       from a neighbour at +-1, +-2 or +-3, or from this pin's own OUT bit. The
       encoding is in input_routing.a_input above and in language/pasm2/wrpin.yaml
       input_selectors."
 
   consequence_for_anything_that_samples_in: |
-    Everything that reads INA/INB reads the signal described above and cannot tell
-    which of the two it got: TESTP, the IN-rise/fall/change event sources, and the
-    streamer's pin-capture path, which "reads pins from {INB, INA}".
+    A read of INA/INB returns the IN signal described above: the smart pin's flag when
+    the pin runs a smart-pin mode, the resultant 'A' when its %SSSSS is %00000. The
+    readers are TESTP, the IN-rise/fall/change event sources, and the streamer's
+    pin-capture modes, which read {INB, INA}.
 
-    So sampling a pin that is RUNNING a smart-pin mode yields that smart pin's
-    event flag -- the ready/done pulses -- and never the waveform on the wire. To
-    observe the wire, sample a pin whose %SSSSS is %00000 and whose %AAAA routes
-    'A' from the pin you want to watch. That composition is written up in
-    architecture/streamer/pin-capture.yaml.
-  consequence_source: "The streamer half is stated by Parallax for the LOGIC debug
-    display: \"On every clock, the streamer will record the smart pin's IN
-    signal and its output state, as read from an adjacent pin\". The pin-capture
-    read source is the streamer's Pins => DACs/WRFAST path."
+    In a streamer capture of a pin in TRANSITION mode, that pin's lane carries one
+    edge, its completion flag, while a neighbouring pin routed to the waveform through
+    its %AAAA selector carries the waveform.
+  consequence: "For the LOGIC debug display, on every clock the streamer records the smart pin's IN
+    signal and its output state, as read from an adjacent pin. Not documented: which
+    streamer mode the LOGIC display capture uses."
 
   related:
     - architecture/streamer/pin-capture.yaml
@@ -297,25 +300,17 @@ configuration_format:
   wrpin_d_parameter: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
 
   composition_rule:
-    rule: "COMBINE PIN-MODE CONSTANTS WITH `|`, NEVER `+`."
+    rule: "`|` of two constants from one field leaves the field value; `+` of them adds the values."
     why: |
-      The P_* constants are BIT FIELDS positioned inside the WRPIN mode word, not
-      additive flags. Names drawn from the same "pick one" group occupy the SAME bits,
-      so `+` carries out of the field and silently lands in a neighbouring mode, while
-      `|` is idempotent and harmless. There is no error and no warning — the pin simply
-      does something else.
+      P_TT_01, P_OE and P_CHANNEL each have the value %01 in the TT field; P_TT_10 and
+      P_BITDAC each have %10. `+` adds the field values: %01 + %01 = %10, a different TT value.
     worked_example: |
-      P_TT_01, P_OE and P_CHANNEL are ONE bit-field value ($40, %01) under three
-      context names — they are not three features. So:
-        P_CHANNEL | P_OE  ->  %01  (P_TT_01, unchanged — correct)
-        P_CHANNEL + P_OE  ->  %10  (P_BITDAC — a DIFFERENT MODE)
-      The `|` form drives a cog DAC (6,737 ADC counts);
-      the `+` form is dead (1,407, indistinguishable from no drive at all).
-    reading_the_symbol_list: |
-      Three names for one bit is deliberate — each name reads correctly in its own
-      context (P_OE for smart-pin output enable, P_CHANNEL for the non-smart-pin DAC's
-      source select, P_TT_01 for the raw field value). A reader who meets all three in
-      the symbol list will assume three independent features. They are one.
+      P_TT_01, P_OE and P_CHANNEL are one bit-field value ($40, %01) under three
+      context names:
+        P_CHANNEL | P_OE  ->  %01  (P_TT_01)
+        P_CHANNEL + P_OE  ->  %10  (P_BITDAC)
+      With a cog DAC, TT=%01 drives the pin; P_CHANNEL + P_OE gives TT=%10 and does
+      not drive it.
     source: "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Smart Pin Configuration (group 'DIR/OUT Control (pick one)'); measured EF-054"
 
 
@@ -369,8 +364,8 @@ configuration_format:
       purpose: "Pin DIR/OUT control"
       source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (%TT: pin DIR/OUT control)"
       bit_functions:
-        bit_7_high: "Output SOURCE: 0=OUT, 1=OTHER"
-        bit_6_low: "Output ENABLE (smart pin on): 0=disabled, 1=enabled"
+        bit_7_high: "Output source: 0=OUT, 1=OTHER"
+        bit_6_low: "Output enable (smart pin on): 0=disabled, 1=enabled"
       other_definition:
         odd_pins: "OTHER = even pin's NOT output state (differential source)"
         even_pins: "OTHER = unique pseudo-random bit (noise source)"
@@ -379,21 +374,21 @@ configuration_format:
         P_TT_00:
           value: "$00"
           binary: "%00"
-          description: "Default - output controlled by DIR/OUT"
+          description: "Default. With a non-DAC smart pin mode (%00100..%11111) active: output disabled regardless of DIR, SMART/OUT selected. With a DAC smart pin mode (%00001..%00011) active: output disabled regardless of DIR, OUT enables the ADC in DAC_MODE. With the smart pin off (%00000): DIR enables the output and OUT drives it (non-DAC_MODE). On silicon, in DAC-noise mode (%00001) with TT = %00, raising OUT runs nothing; OUT runs the ADC with TT = %01 (see silicon_errata; the other DAC smart pin modes are not documented). Other contexts: see behavior_by_context"
         P_TT_01:
           value: "$40"
           binary: "%01"
           aliases: ["P_OE", "P_CHANNEL"]
-          description: "Output enabled regardless of DIR, SMART/OUT drives"
+          description: "With a non-DAC smart pin mode (%00100..%11111) active: output enabled regardless of DIR, SMART/OUT drives. Other contexts: see behavior_by_context"
         P_TT_10:
           value: "$80"
           binary: "%10"
           aliases: ["P_BITDAC"]
-          description: "Output disabled, OTHER source selected"
+          description: "With a non-DAC smart pin mode (%00100..%11111) active: output disabled regardless of DIR, SMART/OTHER selected. With the smart pin off (%00000) in DAC_MODE (the P_BITDAC context): OUT drives BIT_DAC. Other contexts: see behavior_by_context"
         P_TT_11:
           value: "$C0"
           binary: "%11"
-          description: "Output enabled regardless of DIR, SMART/OTHER drives"
+          description: "With a non-DAC smart pin mode (%00100..%11111) active: output enabled regardless of DIR, SMART/OTHER drives. Other contexts: see behavior_by_context"
       behavior_by_context:
         smart_pin_off:
           condition: "%SSSSS = %00000"
@@ -406,7 +401,7 @@ configuration_format:
             "%01": "OUT enables ADC, M[3:0] selects cog DAC channel"
             "%10": "OUT drives BIT_DAC"
             "%11": "OTHER drives BIT_DAC"
-          source: "%00 row: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, DAC with Optional ADC pin schematic, p.31 (the DAC output enable is DIR, the ADC enable is OUT) and Pin DIR/OUT Control table (DIR enables DAC); Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Smart Pins, Pin DIR/OUT Control (OUT enables ADC); EF-055 (a P_DAC_124R_3V pin at TT=%00 started with WRPIN and DIRH, no OUT write, drove)"
+          source: "%00 row: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, DAC with Optional ADC pin schematic, p.31 (the DAC output enable is DIR, the ADC enable is OUT) and Pin DIR/OUT Control table (DIR enables DAC); Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Smart Pins, Pin DIR/OUT Control (OUT enables ADC); EF-055 (a P_DAC_124R_3V pin driven from its level field, before adding P_CHANNEL, drove)"
         non_dac_smart_pin_modes:
           condition: "%SSSSS = %00100..%11111"
           enable_bit: "x0=disabled regardless of DIR, x1=enabled regardless of DIR"
@@ -415,50 +410,101 @@ configuration_format:
         dac_smart_pin_modes:
           condition: "%SSSSS = %00001..%00011"
           enable_bit: "x0=disabled regardless of DIR, x1=enabled regardless of DIR"
-          adc_control: "0x=OUT enables ADC, 1x=OTHER enables ADC (M[7:0] overridden)"
+          adc_control: "0x=OUT enables ADC, 1x=OTHER enables ADC (M[7:0] overridden). Parallax's documents also give OUT and OTHER as enabling the DAC in these modes."
           silicon_errata:
-            erratum: "E6"
-            out_needs_tt_bit0_to_run_adc: "The two published rules do not combine as written: with TT = %00, raising OUT runs NOTHING -- the ADC stays off and the pin reads exactly as with OUT low. With TT = %01 (output enabled), OUT runs the ADC, and the fast DAC drives the pin while it does. Workaround (rule at each use): set TT bit 0 in the WRPIN word ($40, P_TT_01) and accept the DAC driving the pin. Only TT = %00/%01 tested; the OTHER forms (TT = %1x) not. Contradicts the published %TT table."
-            source: "Hardware-verified on Rev C silicon (EF-071), both runs; the published rules: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS, %TT table (x0 = output disabled, regardless of DIR; 0x = OUT enables ADC in DAC_MODE)"
+            out_needs_tt_bit0_to_run_adc: "%TT rules: x0 = output disabled, regardless of DIR; 0x = OUT enables ADC in DAC_MODE. In DAC-noise mode %00001 with TT = %00, the pin's read state with OUT high is the same as with OUT low. With TT = %01 (WRPIN word bit $40, P_TT_01), OUT high runs the ADC and the fast DAC drives the pin while it runs. Not documented: the behavior in modes %00010 and %00011, and for the other forms (TT = %1x)."
+            source: "Hardware-verified on Rev C silicon (EF-071), both runs; the %TT rules: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS, %TT table (x0 = output disabled, regardless of DIR; 0x = OUT enables ADC in DAC_MODE)"
       which_modes_need_p_oe:
-        required: "All output modes: NCO (%00110-%00111), PWM (%01000-%01010), Pulse/Transition (%00100-%00101), Serial TX (%11100, %11110), DAC (%00001-%00011), USB (%11011)"
-        not_needed: "Input-only modes: Timing (%10000-%10010), Counters (%01011-%01111), Period/Freq (%10011-%10111), ADC (%11000-%11010), Serial RX (%11101, %11111)"
+        source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS, %TT table (for all smart pin modes, %SSSSS > %00000)"
+        required: "For all smart pin modes (%SSSSS > %00000): x0 = output disabled, regardless of DIR; x1 = output enabled, regardless of DIR"
+        not_needed: "Not documented: a list of smart pin modes that need no output enable"
       differential_pair_usage:
-        description: "TT=%11 on odd pin creates hardware differential pair"
-        even_pin: "P_OE (TT=%01) - SMART drives main signal"
-        odd_pin: "TT=%11 - OTHER auto-provides complement of even pin's output"
-        use_case: "USB D+/D- differential signaling"
+        description: "For odd pins, OTHER is the even pin's NOT output state (diff source); in non-DAC smart pin modes TT=1x makes SMART/OTHER drive the output"
+        even_pin: "P_OE (TT=%01) - 0x: SMART/OUT drives the output"
+        odd_pin: "TT=%11 - 1x: SMART/OTHER drives the output, OTHER being the even pin's NOT output state"
     sssss:
       bits: "5:1"
       width: 5
       purpose: "Smart pin mode selector (32 modes)"
-      bit_0: "Always 0"
+      bit_0: "0 in this format"
 
 x_y_z_registers:
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (the four 32-bit smart pin registers; the 2-clock WRPIN, WXPIN, WYPIN, RDPIN, RQPIN and AKPIN instructions; the outgoing 33-bit bus; the 34-bit cog buses)"
+  summary: "A smart pin has four 32-bit registers: mode, X, Y and Z. Mode, X and Y are write-only; Z is read-only. They are written and read by the 2-clock instructions WRPIN (mode), WXPIN (X), WYPIN (Y), RDPIN and RQPIN (Z), in which S selects the pin (0..63) and D carries the 32-bit data."
+  mode_register:
+    width: "32 bits"
+    access: "write-only"
+    usage: "Smart pin mode and low-level I/O pin mode, written by WRPIN"
   x_register:
     width: "32 bits"
+    access: "write-only"
     usage: "Mode-specific configuration"
     examples:
-      - "NCO frequency"
-      - "PWM period"
-      - "Measurement period"
-      
+      - "NCO base period and initial phase"
+      - "PWM base period and frame period"
+      - "Measurement period; serial baud rate (bit period) and word length"
+
   y_register:
     width: "32 bits"
+    access: "write-only"
     usage: "Mode-specific parameter"
     examples:
-      - "PWM duty cycle"
-      - "Serial baud rate"
-      - "Count threshold"
+      - "PWM output value"
+      - "NCO value added into Z at each base period"
+      - "Serial data to transmit"
+      - "Counting variant select (Y[0] in %01110 and %01111)"
       
   z_register:
     width: "32 bits"
+    access: "read-only"
     usage: "Result/accumulator"
     read_via: "RDPIN/RQPIN instructions"
-    reset_preload: "Z is preloaded during reset (DIR=0); the value is mode-specific — e.g. $00000001 for the state/timing measurement modes (%10000/%10001/%10010) and $00000000 for period-counting (%10011). See the per-mode pages."
+    c_flag: "Each smart pin has an outgoing 33-bit bus that carries its Z result and a special flag. RDPIN and RQPIN multiplex these buses: Z is read into D and the special flag into C. C is either a mode-related flag or the MSB of the Z result."
+    spin2_rdpin_bit31: "The Spin2 RDPIN() and RQPIN() methods return C in bit 31 of their result; the other bits are Z. Where C is the MSB of Z the result equals Z. Where C is a mode-related flag, bit 31 carries that flag: the 'armed' state in the ADC scope mode (%11010), the receiver error flag in USB (%11011), the busy flag in asynchronous serial transmit (%11110). Not documented: which of the two C is in most other modes. Inline PASM2 RDPIN or RQPIN reads all 32 bits of Z into D."
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, smart pin methods (RDPIN (Pin) : Zval, Zval[31] = C flag from RDPIN, other bits are RDPIN data; RQPIN the same); Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES (%11010 armed state in C; %11011 error flag into C; %11110 busy flag into C)"
+    reset_preload:
+      summary: "While DIR is low (reset), each mode that states its reset condition holds its output and its registers as listed in during_reset_dir_low; the Z preload differs by mode."
+      source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, the 'During reset (DIR=0)' line of each mode %00001 to %10111, the %00110 WXPIN text, and the %11100 and %11110 texts; the ADC, USB, synchronous serial receive and asynchronous serial receive mode texts state no reset condition"
+      during_reset_dir_low:
+        "%00001..%00011, not DAC_MODE (long repository)": "IN low. WXPIN instructions are ignored."
+        "%00001, DAC_MODE (DAC noise)": "IN low."
+        "%00010, DAC_MODE (16-bit DAC, pseudo-random dither)": "IN low. Y[15:0] is captured."
+        "%00011, DAC_MODE (16-bit DAC, PWM dither)": "IN low. Y[15:0] is captured."
+        "%00100 (pulse/cycle output)": "IN low. Output low. Y set to zero."
+        "%00101 (transition output)": "IN low. Output low. Y set to zero."
+        "%00110 (NCO frequency)": "IN low. Output low. Z[15:0] set to zero. WXPIN writes X[31:16] to Z[31:16] even during reset. Parallax's documents also give Z (all of it) as set to zero during reset."
+        "%00111 (NCO duty)": "IN low. Output low. Z set to zero. Not documented: whether a phase written with WXPIN during reset is kept."
+        "%01000 (PWM triangle)": "IN low. Output low. Y[15:0] is captured."
+        "%01001 (PWM sawtooth)": "IN low. Output low. Y[15:0] is captured."
+        "%01010 (PWM switch-mode power supply)": "IN low. Output low. Y[15:0] is captured."
+        "%01011 (A/B-input quadrature encoder)": "IN low. Z set to the adder value (0, 1 or -1)."
+        "%01100 (count A-input positive edges when B-input is high)": "IN low. Z set to the adder value (0 or 1)."
+        "%01101 (accumulate A-input positive edges, B-input supplying increment or decrement)": "IN low. Z set to the adder value (0, 1 or -1)."
+        "%01110 (count A-input positive edges; Y[0] adds decrement on B-input positive edge)": "IN low. Z set to the adder value (0, 1 or -1)."
+        "%01111 (count A-input highs; Y[0] adds decrement on B-input high)": "IN low. Z set to the adder value (0, 1 or -1)."
+        "%10000 (time A-input states)": "IN low. Z set to $00000001."
+        "%10001 (time A-input high states)": "IN low. Z set to $00000001."
+        "%10010, Y[2]=0 (time X A-input highs/rises/edges)": "IN low. Z set to $00000001."
+        "%10010, Y[2]=1 (timeout on X clocks of missing A-input high/rise/edge)": "IN low. Z set to $00000001."
+        "%10011 (for X periods, count time)": "IN low. Z set to $00000000."
+        "%10100 (for X periods, count states)": "IN low. Z set to $00000000."
+        "%10101, %10110, %10111 (for periods in X+ clock cycles)": "IN low. Z set to $00000000."
+        "%11000, %11001 (ADC sample/filter/capture)": "Not documented: the state during reset."
+        "%11010 (ADC scope with trigger)": "Not documented: the state during reset."
+        "%11011 (USB)": "Not documented: the state during reset."
+        "%11100 (synchronous serial transmit)": "Output held low. In continuous mode (X[5]=0), a first word written with WYPIN during reset primes the shifter; during reset the buffer flows straight into the shifter. On release of reset the output reflects the LSB of the word written by any WYPIN during reset. Not documented: IN during reset."
+        "%11101 (synchronous serial receive)": "Not documented: the state during reset."
+        "%11110 (asynchronous serial transmit)": "Output held high. Not documented: IN during reset."
+        "%11111 (asynchronous serial receive)": "Not documented: the state during reset."
+
+cog_bus_access:
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (each cog's 34-bit bus to each smart pin)"
+  bus: "Each cog has a 34-bit bus to each smart pin for write data and acknowledgment signaling. Parallax's documents give each smart pin as OR'ing all incoming 34-bit buses from the cogs in the same way DIR and OUT bits are OR'd before going to the pins. For what a pin with no smart pin mode does with DIR and OUT bits from two cogs, see pin_output_hierarchy."
+  rule: "Cogs that execute WRPIN, WXPIN, WYPIN, RDPIN or AKPIN on the same smart pin must do so at different times, to avoid clobbering each other's bus data."
+  concurrent_reads: "Any number of cogs can read a smart pin at the same time with RQPIN (read quiet), which does not use the 34-bit cog-to-smart-pin bus for acknowledgement signaling, as RDPIN does."
 
 in_flag:
-  purpose: "Signals operation complete"
+  purpose: "Raised when a mode-related event occurs: new data is ready, new data can be loaded, or some process has finished"
   setting: "Mode-specific conditions"
   what_it_is: "the IN signal of a pin whose %SSSSS is greater than %00000. What IN
     carries on a pin with smart pin mode OFF is a different thing entirely -- see
@@ -471,24 +517,24 @@ in_flag:
     - "AKPIN instruction"
     - "Smart pin reset"
   not_clearing:
-    - "RQPIN (read quiet) -- it does NOT acknowledge, which is what lets any number
+    - "RQPIN (read quiet) -- it does not acknowledge, which is what lets any number
       of cogs read the pin concurrently without bus conflict"
   source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS --
     \"A cog acknowledges a smart pin whenever it does a WRPIN, WXPIN, WYPIN, RDPIN or AKPIN
     on it. This causes the smart pin to lower its IN signal...\" and the RQPIN exception."
 
   event_driven_waiting:
-    description: "Use events instead of polling for efficient waiting"
+    description: "A selectable event (SETSEn) on a pin's INA/INB bit lets WAITSEn wait for the smart pin's IN signal"
     event_sources:
-      "%001": "IN rises (data ready)"
+      "%001": "IN rises"
       "%010": "IN falls"
       "%011": "IN changes"
     format: "setse1 #%MMM<<6 + pin"
     example: |
       setse1  #%001<<6 + pin   ' Event on IN rise
-      waitse1                   ' Sleep until ready
+      waitse1                   ' Wait for the IN rise
       rdpin   result, #pin      ' Read result
-    vs_polling: "Eliminates busy-wait loops, COG sleeps during wait"
+    vs_polling: "The matched WAITSEn instruction will block until the event occurs; the matched POLLSEn instruction will check for the event without blocking"
     see_also: "architecture/event_system.yaml"
 
 adc_capabilities:
@@ -507,75 +553,47 @@ dac_capabilities:
   dithered_resolution: "16 bits"
   output_modes:
     - "Direct 8-bit"
-    - "PWM dithered"
-    - "Pseudo-random dithered"
-    - "PDM (Pulse Density Modulation)"
-
-common_applications:
-  serial_communication:
-    - "UART (async serial)"
-    - "SPI (sync serial)"
-    - "I2C (with bit-banging)"
-    - "USB 1.1 low/full speed"
-    
-  motor_control:
-    - "Quadrature encoder input"
-    - "PWM motor drive"
-    - "Servo pulse generation"
-    - "Stepper motor control"
-    
-  measurement:
-    - "Frequency counting"
-    - "Pulse width measurement"
-    - "Period measurement"
-    - "Event counting"
-    
-  analog:
-    - "ADC sampling"
-    - "DAC output"
-    - "Analog comparator (via ADC)"
-    - "Sigma-delta modulation"
+    - "PWM dithered (mode %00011)"
+    - "Pseudo-random dithered (mode %00010)"
+    - "Noise (mode %00001)"
 
 performance:
-  adc_sample_period: "POWER(2, X[3:0]) clocks (SINC2 sampling); any period up to the 27-bit accumulator limits via WYPIN in the other modes"
-  pwm_resolution: "Up to 16 bits at lower frequencies"
+  adc_sample_period: "POWER(2, X[3:0]) clocks (X[5:4] = %00, SINC2 sampling); when X[5:4] > %00, WYPIN after WXPIN replaces the period with Y[13:0]. The accumulators are 27 bits wide, allowing up to 512 clocks per decimation in SINC3 filtering and up to 11,585 clocks in SINC2 filtering"
+  pwm_resolution: "Triangle/sawtooth/SMPS PWM output: base period X[15:0] in clocks, frame period X[31:16] in base periods, output value Y[15:0]"
 
 pin_pairing:
+  pin_circuit:
+    description: "Each I/O pin circuit is powered from its local 3.3V supply pin and connects to its own pin and to its odd/even adjacent pin: P0 and P1 see each other's pins as adjacent pins, as do P2 and P3, and so on."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), PIN CONFIGURATION MODES (diagram of a single I/O pin circuit)"
   usb_mode: "Even/odd pins for D-/D+"
-  differential: "Adjacent pins for differential signals"
-  quadrature: "Two pins for A/B encoder"
+  differential: "For an odd pin, OTHER is the even pin's NOT output state (diff source)"
+  quadrature: "Takes its A and B inputs through the %AAAA and %BBBB input selectors"
 
 # Cross-reference index (apparatus) -- navigation edges out of this file, not claims.
 related_components:
   cogs: "Configure and control smart pins via WRPIN/WXPIN/WYPIN/RDPIN/RQPIN/AKPIN"
-  architecture/streamer/overview.yaml: "Can bypass smart pins"
+  architecture/streamer/overview.yaml: "Streamer pin output combined with smart pin output: see pin_output_hierarchy"
   events: "Smart pin IN flags trigger events"
   interrupts: "Can trigger COG interrupts"
-  language/spin2/concepts/timing_operations.yaml: "Timing-method selection for client-code protocol timeouts -- use GETMS for multi-second timeouts; the GETCT safe-window ceiling is in that file's method_selection decision table"
+  language/spin2/concepts/timing_operations.yaml: "Timing-method selection for client-code protocol timeouts; the GETCT safe-window ceiling is in that file's method_selection decision table"
 
 pin_output_hierarchy:
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (DIR and OUT bits from all cogs are OR'd before going to the pins; a smart pin's output overrides OUT/OTHER) and STREAMER (modes that output to pins OR the streamer pin-output bus with {OUTB, OUTA}; %e in D[23] enables pin output); initialization_order: Parallax SPI Flash Programmer and Boot Loader v51, Programmer, Get ready to program flash"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (DIR and OUT bits from all cogs are OR'd before going to the pins; a smart pin's output overrides OUT/OTHER) and STREAMER (modes that output to pins OR the streamer pin-output bus with {OUTB, OUTA}; %e in D[23] enables pin output); 3_multi_cog gating: P2 hardware verification, EF-114 (one board, P0 with no smart pin mode, cog 0 and one worker cog: cog 0 DIR 1 OUT 0 with the worker DIR 0 OUT 1 reads 0, and cog 0 DIR 0 OUT 1 with the worker DIR 1 OUT 0 reads 0); two cogs at DIR high with different OUT bits: P2 hardware verification, EF-105 (one board, plain pin at P_LOW_15K, cog 0 DIR 1 OUT 0 and a worker cog DIR 1 OUT 1 reads 1); initialization_order: Parallax SPI Flash Programmer and Boot Loader v51, Programmer, Get ready to program flash"
   description: "How cog OUT, streamer, and smart pin outputs combine at each pin"
   layers:
     1_cog_out: "Each cog has OUTA/OUTB registers controlling pin output state"
     2_streamer: "Streamer P[31:0] data OR'd into cog's OUTA/OUTB (requires X_PINS_ON)"
-    3_multi_cog: "All 8 cogs' DIR and OUT bits OR'd together at pin level"
+    3_multi_cog: "On a pin with no smart pin mode, a cog's OUT bit reaches the pin only through that cog's own DIR bit: with one cog at DIR high, OUT low and another at DIR low, OUT high, the pin reads low, whichever cog is which. With two cogs both at DIR high and different OUT bits on a pin whose low side drives through 15 kOhm and whose high side is fast, the pin reads high. Parallax's documents also give: DIR and OUT bits from all cogs are OR'd before going to the pins. Not documented: the level when two cogs both hold DIR high with different OUT bits at any other drive setting."
     4_smart_pin: "When smart pin active with TT=%x1, SMART output overrides OUT/OTHER"
   implication:
-    streamer_vs_smart_pin: |
-      Cannot share output on same pin. Smart pin with P_OE overrides the OUT bit path
-      that streamer writes through. They operate on different pins simultaneously.
-    cooperation_patterns:
-      - "Streamer drives one pin group, smart pins handle protocol pins separately"
-      - "Streamer captures smart pin ADC data (different function, same pin OK)"
-      - "Streamer DAC channels (X0-X3) independent of smart pin digital output"
-    initialization_order: "The flash loader configures and enables its SPI clock smart pin during setup, before XINIT starts the streamer (see language/pasm2/concepts/streamer_smartpin_control.yaml)"
-    x_pins_on_off: "X_PINS_ON (D[23]=1) enables streamer pin output; X_PINS_OFF for DAC-only"
+    streamer_vs_smart_pin: "A smart pin's output overrides the OUT/OTHER path; Not documented: how a streamer sharing the same pin as an active smart pin output behaves."
+    initialization_order: "The SPI clock smart pin is configured and enabled before XINIT starts the streamer (see language/pasm2/concepts/streamer_smartpin_control.yaml)"
+    x_pins_on_off: "X_PINS_ON (D[23]=1) enables streamer pin output; X_PINS_OFF (D[23]=0) is the default"
 
 live_update_behavior:
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS and SMART PIN MODES"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS and SMART PIN MODES; WRPIN #0 resets a running smart pin without a DIR cycle: EF-012 (bench-measured)"
   principle: |
-    WRPIN should be issued while DIR=0 (reset); WRPIN #0 is the exception. WXPIN/WYPIN work freely while smart pin is running (DIR=1).
+    WRPIN should be issued while DIR=0 (reset); WRPIN #0 (return a pin to normal mode) is the exception. After DIR is raised high, depending on the mode, new data may be fed via WXPIN/WYPIN.
     "Once configured, DIR can be raised high and the smart pin will begin operating.
     After that, depending on the mode, you may feed it new data via WXPIN/WYPIN or
     retrieve results using RDPIN/RQPIN."
@@ -583,11 +601,11 @@ live_update_behavior:
     wrpin_changes: "Mode (%SSSSS), input routing (AAAA/BBBB), filtering (FFF), TT bits, M bits"
     procedure: "DIRL pin → WRPIN/WXPIN → DIRH pin → WYPIN pin (write Y after enable; required for pulse, transition and asynchronous serial transmit). Exception: synchronous serial transmit (%11100) in continuous mode needs its first WYPIN during reset -- see critical_requirements.reset_before_configure"
   what_works_while_running:
-    wypin: "Primary runtime interaction — load data, trigger operations, update parameters"
-    wxpin: "Changes timing/configuration for next cycle (mode-specific side effects)"
+    wypin: "Once DIR is high, new data may be fed via WYPIN, depending on the mode"
+    wxpin: "Once DIR is high, new data may be fed via WXPIN, depending on the mode"
   acknowledge_side_effect: |
-    ALL of WRPIN, WXPIN, WYPIN, RDPIN, AKPIN acknowledge the smart pin (clear IN flag).
-    Writing WXPIN to change timing also clears any pending IN. Coordinate with IN state.
+    Each of WRPIN, WXPIN, WYPIN, RDPIN and AKPIN acknowledges the smart pin (clear IN flag).
+    Writing WXPIN to change timing also clears any pending IN.
     After acknowledge, IN needs 2 clocks before it can be polled again.
   per_mode_runtime_updates:
     pulse_00100:
@@ -612,41 +630,41 @@ live_update_behavior:
       wypin: "Updates duty (may set once and let repeat)"
       wxpin: "Changes base period and frame period"
     quadrature_01011:
-      wypin: "Not used (zero by pulsing DIR low instead)"
+      wypin: "Not documented: a WYPIN parameter for this mode. The quadrature encoder can be zeroed by pulsing DIR low at any time."
       wxpin: "Changes measurement period"
     counters_01100_01111:
       wypin: "Y[0] selects mode variant in %01110/%01111"
       wxpin: "Changes measurement period"
     timing_10000_10010:
       wypin: "Y[1:0] sets sensitivity (high/rise/edge) in %10010"
-      wxpin: "Changes measurement window / event count"
+      wxpin: "In %10010, X is the number of A-input highs/rises/edges to accumulate (Y[2]=0) or the number of clocks before a timeout (Y[2]=1). Not documented: an X role for %10000 and %10001."
     period_freq_10011_10111:
       wypin: "Y[1:0] sets A/B rise/edge sensitivity"
       wxpin: "Changes period count or minimum clock window"
     adc_11000_11001:
-      wypin: "Not typically used"
+      wypin: "For modes other than SINC2 sampling (X[5:4] > %00), WYPIN after WXPIN overrides the initial period set by X[3:0] with the value in Y[13:0]"
       wxpin: "Changes sample mode X[5:4] and period X[3:0]"
     sync_tx_11100:
       wypin: "Loads next word to transmit (buffered → shifter → IN raised)"
-      wxpin: "Changes update mode X[5] and bit count X[4:0] — avoid mid-transfer"
+      wxpin: "Changes update mode X[5] and bit count X[4:0]"
     sync_rx_11101:
-      wypin: "Not used"
-      wxpin: "Changes sample position X[5] and bit count X[4:0] — avoid mid-transfer"
+      wypin: "Not documented: a WYPIN parameter for this mode"
+      wxpin: "Changes sample position X[5] and bit count X[4:0]"
     async_tx_11110:
       wypin: "Loads next word to transmit (buffered → shifter → IN raised)"
-      wxpin: "Changes baud rate X[31:16]/X[15:10] and bit count X[4:0] — avoid mid-transfer"
+      wxpin: "Changes baud rate X[31:16]/X[15:10] and bit count X[4:0]"
     async_rx_11111:
-      wypin: "Not used"
-      wxpin: "Changes baud rate and bit count — avoid mid-transfer"
-  caution: "Changing WXPIN on serial modes mid-transfer corrupts in-progress data. Change between transactions after IN signals completion."
+      wypin: "Not documented: a WYPIN parameter for this mode"
+      wxpin: "Changes baud rate and bit count"
+  mid_transfer_wxpin: "Not documented: the effect of a WXPIN issued while a serial transfer is in progress."
 
 electrical_limits:
   source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Absolute Maximum Electrical Ratings, p.47; DC Characteristics (VIO supply voltage), p.47"
-  io_voltage: "Vxxyy (VIO Supply Voltage) min 3.15 V / typ 3.3 V / max 3.45 V. The P2 is a 3.3 V I/O device and is NOT natively 5 V-tolerant."
+  io_voltage: "Vxxyy (VIO Supply Voltage) min 3.15 V / typ 3.3 V / max 3.45 V. Voltage on all other pins with respect to GND is rated -0.3 V to (Vxxyy + 0.3 V)."
   pin_voltage_limit: "Voltage on all other pins with respect to GND: -0.3 V to (Vxxyy + 0.3 V). Note: I/O pin voltages in respect to GND may be exceeded if the internal protection diode forward bias current is not exceeded."
   protection_diode_limit: "Max DC current into an input pin with internal protection diode forward biased: ±10 mA"
   per_pin_current: "Max. allowable current per I/O pin: ±30 mA"
-  full_ratings: "architecture/io_pin_timing.yaml absolute_maximum_ratings and input_voltage_and_protection carry the complete table and the series-resistor technique for 5 V signals."
+  full_ratings: "architecture/io_pin_timing.yaml absolute_maximum_ratings and input_voltage_and_protection carry the I/O-pin limits and the protection diode current limit. Not documented: 5 V signals on an I/O pin."
   related:
     - architecture/io_pin_timing.yaml
 
@@ -658,7 +676,7 @@ related:
   - architecture/silicon_errata.yaml
 
 see_also:
-  - "Smart pin mode reference (modes/ directory)"
+  - "Smart pin mode reference: architecture/smart-pins/ (one YAML file per mode)"
   - "Serial protocol implementations"
   - "PWM generation guide"
   - "ADC/DAC applications"

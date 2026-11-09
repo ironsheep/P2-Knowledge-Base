@@ -85,7 +85,7 @@
   "architecture": {
     "core": {
       "description": "Core processor and memory systems",
-      "files": ["cog", "hub", "lookup_ram", "cog_attention", "fifo"]
+      "files": ["cog", "hub", "lookup_ram", "cog_attention", "fifo", "cog_state"]
     },
     "math": {
       "description": "Math acceleration hardware",

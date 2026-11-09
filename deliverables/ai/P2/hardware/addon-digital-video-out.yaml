@@ -2,7 +2,6 @@ component: P2 Eval Digital Video Out Add-on Board
 part_number: "64006D"
 series: "P2 Eval Add-on Boards (#64006)"
 manufacturer: "Parallax Inc."
-status: "active_production"
 p2kb_key: "p2kbHwAddonDigitalVideoOut"
 category: addon
 aliases:
@@ -14,89 +13,74 @@ aliases:
   - "#64006 add-on board"
 
 description: >-
-  HDMI-type connector for experimenting with digital video standards. The eight
-  signal pins carry the TMDS clock plus three data lanes as differential pairs,
-  driven by the P2 streamer. Unused connector signals (CEC, RSVD, SCL, SDA, 5V,
-  HPD) sit on an unpopulated 0.1 inch pad row; an adjacent ACC 5V pad lets the
-  5V line be bridged when a monitor needs 5V.
-# Source: P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Digital Video Out Add-on Board (#64006D), p.5
+  An HDMI-type connector which can be used for experimenting with various video
+  standards. The eight signal pins connected to the P2-EVAL header are labelled
+  CLK-, CLK+, D0-, D0+, D1-, D1+, D2-, D2+. The unused connector signals are in
+  unused_connector_signals below. The streamer's digital video
+  (DVI/HDMI) output, its pin order and its clock rule are in
+  architecture/streamer/colorspace-and-dvi.yaml.
+source: "P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Digital Video Out Add-on Board (#64006D), p.5 (the description paragraph, the I/O Pin / Function table for signal_map, and the unused-pad paragraph)"
 
 # --- Eval-header board model (uniform across all #64006 / eval-header occupants) ---
 eval_header_occupant: true
 pin_group:
   size: 8
   addressing: >-
-    actual_P2_pin = base_pin + offset. The board defines its functions by OFFSET
+    actual_P2_pin = base_pin + offset. The board defines its functions by offset
     within an 8-pin eval-header group; the user chooses which header (base_pin)
     it plugs into. base_pin is the first pin of that group.
   base_pin_options: [0, 8, 16, 24, 32, 40, 48, 56]
   source: "Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, 11. I/O Pin Breakout Edge Headers, p.9 (each edge header carries one group of eight pins); board photograph, p.1 (edge-header silkscreen P0-P7 ... P56-P63); I/O Pin Assignments (P0-P55 fully free; Alternative functions for P56-P63), p.15"
-  p56_p63_caution: 'base_pin 56 is the Eval Board''s dedicated group P56-P63, which the Eval Board routes to its own circuits: P58-P61 are the boot flash and microSD SPI lines, P62/P63 the PC-USB serial link (P2 TXD/RXD), every pin P56-P63 drives an on-board buffered LED, and P57 can be routed to the common LDO enable (a user option, not connected by default). A board fitted there shares those pins with those circuits. P0-P55 are the fully free pins.'
-  base_pin_caution: >-
-    Group 56-63 (Header H): P58-P63 are shared with the host's Flash SPI and
-    serial pins - not recommended.
+  p56_p63_group: 'base_pin 56 is the Eval Board''s dedicated group P56-P63, which the Eval Board routes to its own circuits: P58-P61 are the boot flash and microSD SPI lines, P62/P63 the PC-USB serial link (P2 TXD/RXD), every pin P56-P63 drives an on-board buffered LED, and P57 can be routed to the common LDO enable (a user option, not connected by default). P0-P55 are the fully free pins; Parallax''s documents also give 58 fully free pins.'
 
 signal_map:
   - offset: 0
-    signal: "TMDS clock - (CLK-)"
-    direction: out
-    notes: "Differential pair with offset 1; driven by the P2 streamer."
+    signal: "CLK-"
+    notes: "Pair with offset 1 (CLK+)."
   - offset: 1
-    signal: "TMDS clock + (CLK+)"
-    direction: out
-    notes: "Differential pair with offset 0."
+    signal: "CLK+"
+    notes: "Pair with offset 0 (CLK-)."
   - offset: 2
-    signal: "TMDS data lane 0 - (D0-)"
-    direction: out
-    notes: "Differential pair with offset 3."
+    signal: "D0-"
+    notes: "Pair with offset 3 (D0+)."
   - offset: 3
-    signal: "TMDS data lane 0 + (D0+)"
-    direction: out
-    notes: "Differential pair with offset 2."
+    signal: "D0+"
+    notes: "Pair with offset 2 (D0-)."
   - offset: 4
-    signal: "TMDS data lane 1 - (D1-)"
-    direction: out
-    notes: "Differential pair with offset 5."
+    signal: "D1-"
+    notes: "Pair with offset 5 (D1+)."
   - offset: 5
-    signal: "TMDS data lane 1 + (D1+)"
-    direction: out
-    notes: "Differential pair with offset 4."
+    signal: "D1+"
+    notes: "Pair with offset 4 (D1-)."
   - offset: 6
-    signal: "TMDS data lane 2 - (D2-)"
-    direction: out
-    notes: "Differential pair with offset 7."
+    signal: "D2-"
+    notes: "Pair with offset 7 (D2+)."
   - offset: 7
-    signal: "TMDS data lane 2 + (D2+)"
-    direction: out
-    notes: "Differential pair with offset 6."
+    signal: "D2+"
+    notes: "Pair with offset 6 (D2-)."
+streamer_pin_order: "architecture/streamer/colorspace-and-dvi.yaml (dvi.pin_order)"
 
-# Connector signals brought out to an unpopulated 0.1 inch pad row but NOT wired
-# to any P2 pin. These are board detail, not part of the 8-pin signal_map.
+# Unused signal pins from the video connector, next to an unpopulated 0.1 inch pad
+# row; the 8-pin signal_map above lists the signals connected to the P2-EVAL header.
 unused_connector_signals:
   source: "P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Digital Video Out Add-on Board (#64006D) (unused-signal note), p.5"
-  description: "Additional HDMI connector signals available on an unpopulated 0.1 inch pad row, not connected to P2 pins."
+  description: "Unused signal pins from the video connector, labelled on the PCB next to an unpopulated 0.1 inch pitch row of 6 pads."
   pads:
     - name: "CEC"
-      description: "Consumer Electronics Control"
     - name: "RSVD"
-      description: "Reserved signal"
     - name: "SCL"
-      description: "I2C clock for DDC"
     - name: "SDA"
-      description: "I2C data for DDC"
     - name: "5V (5V-arrow)"
-      description: "5V output toward the monitor"
-      note: "Adjacent ACC 5V pad sits 0.1 inch away; bridge the two pads to drive 5V on this line."
+      description: "5V output pad"
+      note: "The ACC 5V pad sits beside it, 0.1 inch away."
     - name: "HPD"
-      description: "Hot Plug Detect"
   acc_5v_bridge:
-    description: "Optional 5V supply to the connected monitor."
+    description: "The ACC 5V pad is the 5V supply from the accessory socket. Some video monitors require a 5V signal connecting to the 5V-arrow pin."
     implementation: "Two 0.1 inch-spaced pads: the 5V-arrow pad and the ACC 5V pad."
-    usage: "Solder a header and fit a shunt jumper (or bridge the pads) when a monitor requires 5V on the 5V line."
-    note: "Some monitors require 5V on the 5V line for proper operation."
+    usage: "For example, a 0.1 inch pitch header can be soldered here, and a shunt plug used when 5V is required to the monitor."
 
 specifications:
-  source: "P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Digital Video Out Add-on Board (#64006D), p.5, and the shared connector / compatibility / mounting facts, p.1. Host VIO rail: Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, Key Specifications (\"VIO power supplies: 3.3 V up to 300 mA per 8 I/O pins\"), p.2"
+  source: "P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Digital Video Out Add-on Board (#64006D), p.5, the shared connector / compatibility / mounting facts, p.1, and PCB Dimensions (\"There are three sizes for the accessory set boards\"; drawings headed A/V module, Goertzel module and Small modules), pp.11-12. Host VIO rail: Propeller 2 Eval Board Rev C (64000) v2.0 29/6/2020, Key Specifications (\"VIO power supplies: 3.3 V up to 300 mA per 8 I/O pins\"), p.2"
   requires_host: true
   io_pins_used: 8
   compatible_hosts:
@@ -104,87 +88,38 @@ specifications:
     - "P2 Edge Module Breadboard (64020)"
     - "P2 Edge Mini Breakout Board (64019) with P2 Edge Module"
   electrical:
-    supply_voltage: "3.3V from host"
+    supply_voltage: "Not documented: the board's own supply voltage"
   physical:
-    size: "Small module"
+    size: "Small module (of the three PCB sizes, the A/V module and the Goertzel module are drawn separately; the remaining boards are small modules)"
     connector: "2x6 pass-through socket"
     mounting: "Single M3 mounting hole connected to GND"
     mounting_hardware: "M3 or UNC 4-40"
     hole_diameter: "3.2mm (126 mil)"
     pad_ring: "5mm (200 mil)"
-    standoff_recommendation: "9.5mm long standoff for support"
+    standoff: "The hole can be used to fit a 9.5mm long standoff to act as a leg and provide support when connected to the P2-EVAL board."
 
 video_interface:
   connector:
     type: "HDMI-type connector"
-    purpose: "Digital video signal experimentation"
-    standards: "Various video standards supported via software"
-  signaling: >-
-    Eight P2 pins drive the TMDS clock pair plus three TMDS data lanes as
-    differential pairs. The P2 streamer generates the serialized differential
-    output; complementary signals are produced on each +/- pair.
-
-protocol_constraints:
-  differential_signaling:
-    requirement: "Must generate complementary signals on each +/- pair."
-    timing: "Critical timing relationships between clock and data lanes."
-    voltage_levels: "Proper differential voltage levels required."
-  p2_capabilities:
-    streamer: "The P2 streamer drives the serialized TMDS differential output."
-    smart_pins: "Smart pin modes can provide precise timing."
-    cogs: "Complex video generation may need multiple cogs."
-
-use_cases:
-  primary:
-    - "Digital video standard experimentation"
-    - "Custom video protocol development"
-    - "HDMI signal generation learning"
-    - "Differential signaling education"
-  secondary:
-    - "Video output for embedded systems"
-    - "Custom resolution and timing experiments"
-
-advantages:
-  - "True HDMI-type connector for standard compatibility"
-  - "Differential pair signal lines"
-  - "All TMDS clock and data lanes brought out to P2 pins"
-  - "Optional monitor power supply via the ACC bridge (see `unused_connector_signals`)"
-  - "Educational value for digital video concepts"
-
-limitations:
-  - "Requires complex video protocol implementation in software"
-  - "Only 3 data lanes + clock (limited compared to full HDMI)"
-  - "Additional HDMI features (DDC, CEC) not directly accessible"
-  - "High-frequency signal integrity depends on PCB layout quality"
-  - "Monitor compatibility depends on supported video standards"
+    purpose: "Experimenting with various video standards"
+  signaling: "architecture/streamer/colorspace-and-dvi.yaml"
+  source: "P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Digital Video Out Add-on Board (#64006D), p.5: \"The Digital Video Out Accessory Board provides an HDMI-type connector which can be used for experimenting with various video standards.\""
 
 compatibility:
   stacking:
-    position: "Any 2x6 header position on the host board"
-    conflicts: "Uses all 8 pins - check with other add-ons"
-
-educational:
-  complexity_level: "advanced"
-  concepts_taught:
-    - "Differential signaling principles"
-    - "Video timing generation and synchronization"
-    - "Digital video standards and protocols"
-    - "Signal integrity in high-frequency applications"
-    - "HDMI connector pinouts and functions"
-    - "Clock and data relationship in video systems"
-  advanced_topics:
-    - "Video protocol implementation"
-    - "Custom resolution and refresh rate generation"
-    - "Signal integrity analysis and optimization"
-    - "Video compression and encoding concepts"
+    position: "Any 2x6 accessory header on a compatible host board"
+    conflicts: "Uses all 8 pins of the header group it plugs into"
 
 documentation:
   primary: "P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Digital Video Out Add-on Board (#64006D), p.5"
 
 availability:
   vendor: "Parallax Inc."
-  part_lookup: "Search for 64006D or Digital Video Out Add-on"
-  bundle_option: "Part of the complete accessory set (64006-ES)"
+  bundle_option: "Sold separately or as part of the Complete Accessory Set (#64006-ES)"
+  source: "P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, cover and introduction, p.1"
+
+related:
+  - architecture/streamer/colorspace-and-dvi.yaml
 
 ecosystem_position: "digital_video_interface"
 hardware_family: "p2_eval_addons"

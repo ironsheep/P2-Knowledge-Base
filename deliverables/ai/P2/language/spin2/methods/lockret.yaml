@@ -17,12 +17,12 @@ examples:
       LOCKRET(lock_id)
     description: "Free a lock"
   - code: |
-      ' Cleanup in stop method
+      ' Cleanup in stop method; the lock is kept as its number + 1, 0 = no lock
       PUB stop()
-        if lock_id >= 0
-          LOCKRET(lock_id)
-          lock_id := -1
-    description: "Clean shutdown with lock release"
+        if lock_plus_1
+          LOCKRET(lock_plus_1 - 1)
+          lock_plus_1 := 0
+    description: "Clean shutdown with lock release. VAR variables start at zero and 0 is a valid lock number, so the lock is kept as its number + 1: a stop() before any LOCKNEW then returns nothing, where a raw number tested with >= 0 would run LOCKRET(0)"
   - code: |
       ' Return multiple locks
       repeat i from 0 to num_locks-1
@@ -30,22 +30,28 @@ examples:
     description: "Free multiple locks"
 notes:
   - "Returns lock to available pool"
-  - "Lock must have been allocated with LOCKNEW"
-  - "Automatically releases lock if captured"
-  - "Safe to call even if lock not captured"
+  - "Returns a lock allocated with LOCKNEW; any cog can return an allocated lock, even if it was not the cog that allocated it"
+  - "A held lock is released when LOCKRET is executed for it"
   - "Important to return locks to prevent exhaustion"
-  - "No error if invalid lock ID"
+  - "The value is passed to the PASM2 LOCKRET, which returns lock D[3:0]: only the low 4 bits are used, so a value outside 0..15 names a lock (-1 names lock 15)"
 timing:
   execution_model: |
-    Spin2 methods execute via the bytecode interpreter. Method-call clock count: not documented.
+    Spin2 methods execute via the bytecode interpreter. Not documented: the method-call clock count.
   underlying_pasm: "LOCKRET"
-  underlying_pasm_timing: "2 clocks (range 2...9; per language/spin2/methods/lockret.yaml encoding)"
+  underlying_pasm_timing: "2...9 clocks in cog or LUT execution (language/pasm2/lockret.yaml)"
+sources:
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (LOCKRET(LockNum): return a certain LOCK to inventory); VAR (variables are initialized to zero at run time)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LOCKS (LOCKRET returns an allocated lock to the lock pool; any cog can return an allocated lock, even if it wasn't the cog that allocated it; a lock is also implicitly released if LOCKRET is executed for that lock)"
+  - "P2 Instructions v35 - Rev B/C Silicon, row 245 (LOCKRET {#}D: return LOCK D[3:0] for reallocation; 2...9 cog/LUT, 2...17 hub)"
+  - "Parallax Spin2 interpreter v55 (Spin2_interpreter.spin2, the LOCKRET(lock) bytecode runs the PASM2 instruction lockret x on the popped value)"
 
 related:
-  - LOCKNEW
-  - LOCKTRY
-  - LOCKREL
-  - LOCKCHK
+  - language/spin2/methods/locknew.yaml
+  - language/spin2/methods/locktry.yaml
+  - language/spin2/methods/lockrel.yaml
+  - language/spin2/methods/lockchk.yaml
+  - language/pasm2/lockret.yaml
+  - architecture/locks.yaml
 see_also:
   - "Hardware locks"
   - "Resource cleanup"

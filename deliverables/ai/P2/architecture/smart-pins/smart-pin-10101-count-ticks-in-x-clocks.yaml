@@ -3,31 +3,33 @@ subtitle: "Smart Pin Mode %10101 (P_COUNTER_TICKS)"
 language_reference: "combined"
 compatible_languages: ["Spin2", "PASM2"]
 
-brief_description: "Returns actual elapsed clock count for a window of at least X clocks, extended to complete the in-progress A-period"
+brief_description: "Returns the time, in clocks, accumulated within the periods of a measurement that runs until X clocks elapse and the period in progress completes"
 
 detailed_description:
   operation: |
-    Period-aligned time window. Establishes a measurement window of AT LEAST X clock cycles
-    that extends to complete the in-progress A-period (set by Y[1:0] trigger). Z returns the
-    actual elapsed tick count (always >= X), giving the exact duration of a window that
-    contains a whole number of A-periods.
-    
-    Designed to be run CONCURRENTLY with mode %10110 (P_COUNTER_HIGHS) and/or %10111
-    (P_COUNTER_PERIODS) on the same signal, with the same X window. Because all concurrent
-    measurements span the same period-aligned window, downstream math is exact:
-      duty cycle = highs / ticks       (pair with %10110)
-      frequency  = MULDIV64(periods, clkfreq, ticks)   (pair with %10111; 64-bit, no overflow)
-  
+    X establishes the minimum number of clock cycles to track periods for. Periods are
+    A-input rise/edge to B-input rise/edge (set by Y[1:0]). A measurement is taken across
+    some number of periods, until X clock cycles elapse and then any period in progress
+    completes. If the A-input rise/edge is ever coincident with the B-input rise/edge at the
+    end of the period, the start of the next period is registered. Upon completion, the
+    measurement is placed in Z, IN is raised, and a new measurement begins.
+
+    This mode accumulates time within each period, for an oversampled period measurement.
+    Knowing how many clock cycles some number of complete periods took, and what the duty
+    was, affords determining frequency and duty cycle. At least two of these measurements
+    must be made concurrently to get useful results; mode %10110 over the same X window
+    supplies the duty and mode %10111 the period count.
+
   timing: |
-    Window length is AT LEAST X clock cycles, extending to complete the in-progress A-period
+    Window length is at least X clock cycles, extending to complete the in-progress period
     Period boundaries defined by Y[1:0] trigger combination
-    Z records actual elapsed tick count (always >= X)
+    Z records the time (clocks) accumulated within the measurement's periods, limited to $80000000
     IN flag raised when measurement completes
-    New measurement begins automatically
+    A new measurement begins when the measurement completes
 
 registers:
   x_register:
-    bits_31_0: "Minimum window duration in clock cycles (window extends to complete current period; actual elapsed >= X)"
+    bits_31_0: "Minimum number of clock cycles to track periods for: the measurement runs until X clocks elapse and then the period in progress completes"
   y_register:
     bits_1_0: |
       Event trigger sensitivity:
@@ -36,34 +38,38 @@ registers:
       %10 = A-input edge to B-input rise
       %11 = A-input edge to B-input edge
   z_register:
-    function: "Actual elapsed clock count for the period-aligned window (always >= X)"
+    function: "Time (clocks) accumulated within the measurement's periods, limited to $80000000. Not documented: whether Z can be less than X when the first period starts after the measurement begins"
+    reset_value: "$00000000 during reset (DIR=0); IN is low"
 
 flags:
-  in_flag: "Raised when measurement completes (>= X clocks AND current A-period completed)"
+  in_flag: "Raised when the measurement completes (X clocks elapsed and the period in progress completed)"
   a_input: "Signal whose period boundaries define when the window can close"
   b_input: "Period boundary marker (same as A-input by default on a single pin - no routing constant needed)"
 
 code_examples:
-  - title: "Exact Duty Cycle (paired with %10110 P_COUNTER_HIGHS)"
-    description: "Two pins, same period-aligned window: this mode gives elapsed ticks, %10110 gives high-time; duty = highs / ticks"
+  - title: "Duty Cycle (paired with %10110 P_COUNTER_HIGHS)"
+    description: "Two pins, same X window: this mode gives elapsed ticks, %10110 gives the clocks A was high"
     code: |
       CON
         _clkfreq = 200_000_000
-        base_pin = 20                            ' Both pins observe the same signal
+        base_pin = 20                            ' Signal on base_pin+0; cell +1 routes to it
         window_ms = 50
-      
+
       PUB main() | ticks, highs, duty_pct, window_clks
         window_clks := (_clkfreq / 1000) * window_ms
-      
-        ' Start both pins on the same window; matched timing is essential
+
+        ' Start both cells together with the same X window.
+        ' Cell +1 watches the signal on base_pin+0 via P_MINUS1_A | P_MINUS1_B
+        ' (route BOTH inputs -- the window closes on a B-rise, so routing A alone
+        ' leaves B on the cell's own pin and IN never rises).
         pinstart(base_pin+0, P_COUNTER_TICKS, window_clks, %00)
-        pinstart(base_pin+1, P_COUNTER_HIGHS, window_clks, %00)
+        pinstart(base_pin+1, P_COUNTER_HIGHS | P_MINUS1_A | P_MINUS1_B, window_clks, %00)
       
         repeat
           repeat until pinread(base_pin+0) and pinread(base_pin+1)
-          ticks    := rdpin(base_pin+0)          ' Actual elapsed clocks (>= window_clks)
-          highs    := rdpin(base_pin+1)          ' Clocks A was high during window
-          duty_pct := MULDIV64(highs, 100, ticks) ' Exact duty cycle (64-bit; avoids overflow)
+          ticks    := rdpin(base_pin+0) & $7FFF_FFFF   ' Clocks accumulated within the measurement's periods; clear bit 31, where RDPIN() puts C
+          highs    := rdpin(base_pin+1) & $7FFF_FFFF   ' Clocks A was high during window; clear bit 31
+          duty_pct := MULDIV64(highs, 100, ticks) ' Duty cycle in percent
           debug("Duty: ", udec(duty_pct), "%")
       
       DAT
@@ -80,21 +86,15 @@ code_examples:
       .loop
         testp   #signal_pin wc                   ' Check IN flag
         if_nc   jmp #.loop                       ' Wait for completion
-        rdpin   elapsed_ticks, #signal_pin       ' Actual elapsed clocks
+        rdpin   elapsed_ticks, #signal_pin       ' Clocks accumulated within the measurement's periods
         ' Pair with P_COUNTER_HIGHS on adjacent pin for duty calc
         jmp     #.loop                           ' Next window starts auto
 
-common_applications:
-  - "Exact duty-cycle measurement (concurrent with %10110)"
-  - "Exact frequency measurement (concurrent with %10111)"
-  - "Period-aligned timing reference for multi-pin signal characterization"
-  - "Establishing matched-window timing for concurrent measurements"
-
 related_modes:
-  - "Mode %10110 (P_COUNTER_HIGHS): same period-aligned window; Z = high-time (pair to compute exact duty cycle)"
-  - "Mode %10111 (P_COUNTER_PERIODS): same period-aligned window; Z = period count (pair to compute exact frequency)"
-  - "Mode %10100 (P_PERIODS_HIGHS): X complete A-periods window; Z = high-time"
-  - "Mode %10011 (P_PERIODS_TICKS): X complete A-periods window; Z = elapsed ticks"
+  - "Mode %10110 (P_COUNTER_HIGHS): same X window; Z = A-input trigger states"
+  - "Mode %10111 (P_COUNTER_PERIODS): same X window; Z = period count"
+  - "Mode %10100 (P_PERIODS_HIGHS): X periods; Z = A-input trigger states"
+  - "Mode %10011 (P_PERIODS_TICKS): X periods; Z = time"
 
 configuration_constants:
   mode_constant: "P_COUNTER_TICKS"
@@ -103,22 +103,26 @@ configuration_constants:
     - "(single-pin) no routing constant needed - A and B inputs both default to this pin"
     - "P_PLUS1_B - Use next pin as B-input"
     - "P_MINUS1_B - Use previous pin as B-input"
-    - "P_FILT1_AB - Add filtering for noise immunity"
+    - "P_FILT1_AB - Filter the A and B inputs using the global filt1 settings"
   
   y_register_values:
-    - "%00 - A-rise to B-rise (typical for same-frequency signals)"
-    - "%01 - A-rise to B-edge (any B transition ends period)"
-    - "%10 - A-edge to B-rise (any A transition starts period)"
-    - "%11 - A-edge to B-edge (maximum sensitivity)"
+    - "%00 - A-rise to B-rise"
+    - "%01 - A-rise to B-edge"
+    - "%10 - A-edge to B-rise"
+    - "%11 - A-edge to B-edge"
 
 notes:
-  - "Z register contains actual elapsed ticks (NOT high-time and NOT period count)"
-  - "Window length is at least X ticks AND extends to complete the in-progress A-period (Z always >= X)"
-  - "Designed for concurrent use with %10110 (high-time) and/or %10111 (period count) on the same signal"
-  - "All concurrent measurements must be started together with the same X window for matched timing"
+  - "Z contains the time accumulated within the measurement's periods (not high-time and not a period count)"
+  - "The measurement runs until X clocks elapse and then the period in progress completes"
+  - "At least two of these measurements must be made concurrently to get useful results; start them together with the same X window"
+  - "A cell that watches the signal on another pin routes both inputs (P_MINUS1_A | P_MINUS1_B for the pin below); routing only A leaves B on the cell's own pin, so the window never closes and IN never rises"
   - "B-input defaults to the same pin as A-input for single-pin period detection - no routing constant needed"
-  - "Measurement restarts automatically after each window completes"
+  - "A new measurement begins when each measurement completes"
   - "A Y written while DIR is low (before DIRH, as pinstart() and the WYPIN-before-DIRH line in the PASM2 example do) is in force after DIRH: this mode is order-safe"
 
 sources:
+  - "code_examples (clkfreq as a hub long): Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup (the clkfreq hub variable at LONG[$44], read from PASM as RDLONG x,#@clkfreq)"
+  - "configuration_constants.common_modifiers (P_FILT1_AB): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (%FFF = 101 uses the global filt1 settings)"
+  - "operation, timing, registers, flags, notes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%10101, %10110, %10111: periods in X+ clock cycles; At least two of these measurements must be made concurrently to get useful results; Z limited to $80000000; During reset (DIR=0), IN is low and Z is set to $00000000)"
+  - "notes (route both inputs when a cell watches another pin): EF-017 (concurrent single-signal counter cells need both A and B routed; A-only routing leaves IN low)"
   - "EF-097 (Y-before-DIRH order-safety bench-measured on one board, one Y value for this mode)"

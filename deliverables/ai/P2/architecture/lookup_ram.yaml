@@ -21,12 +21,11 @@ aliases:
   - "RAM sharing between paired cogs"
 
 description: |
-  Each COG contains a secondary 512 x 32-bit dual-port Lookup RAM (LUT) that serves as
-  fast local storage and enables special operations like streaming waveform data to DACs,
-  write-sharing between adjacent COG pairs, and execution of code. RDLUT takes 3 clocks
-  and WRLUT takes 2. Its documented uses are scratch space, streamer access, a bytecode
-  execution lookup table, a smart pin data source, paired-cog communication, and code
-  execution.
+  Each COG contains a secondary 512 x 32-bit dual-port Lookup RAM (LUT), read and
+  written as longs. RDLUT takes 3 clocks
+  and WRLUT takes 2. It is useful for scratch space, streamer access, a bytecode
+  execution lookup table, a smart pin data source, a paired-cog communication mechanism,
+  and code execution.
 
 architecture:
   size: "512 longs (2048 bytes)"
@@ -44,29 +43,28 @@ architecture:
         Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (RDLUT, 3 clocks; WRLUT, 2 clocks), p.45.
     
     - mode: "pointer"
-      description: "RDLUT/WRLUT accept a PTRx pointer expression in place of S"
+      description: "RDLUT/WRLUT accept a PTRx pointer expression in place of S. PTRA indexes and updates count LUT longs: with PTRA = 8, RDLUT D,PTRA[2] reads LUT[10], RDLUT D,PTRA++ reads LUT[8] and adds 1 to PTRA, and WRLUT D,PTRA++ writes LUT[8] and adds 1 to PTRA. Not documented: the PTRB, pre-increment and -- forms, other index values, and WRLUT with an index on PTRx."
       timing: "Same as direct -- 3 clocks for RDLUT, 2 for WRLUT"
       source: >-
         Syntax `RDLUT D,{#}S/PTRx` / `WRLUT {#}D,{#}S/PTRx` -- Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.45.
+        P2 hardware verification, EF-118 (one board, cog execution; LUT[i] = $C0DE_0000 + i, PTRA = 8; RDLUT PTRA[2] read index 10; RDLUT PTRA++ read index 8 with delta 1; WRLUT PTRA++ wrote index 8 with delta 1).
     
     - mode: "shared"
       description: >-
         A cog may allow the adjacent cog of its even/odd pair to WRITE into its lookup
-        RAM. Sharing is a write path, not a read path -- there is no instruction that
-        reads another cog's LUT.
+        RAM. Not documented: reading another cog's LUT.
       source: >-
         Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOOKUP RAM, RAM SHARING BETWEEN PAIRED COGS.
 
     - mode: "streamer"
-      description: "The streamer can use the LUT as a source or destination"
-      timing: "Uses the LUT's 2nd port, which adjacent-cog writes also use"
+      description: "In DDS/LUT modes the streamer uses the LUT's 2nd port"
+      timing: "The 2nd port also carries adjacent-cog writes; an external write on the same clock as a streamer read gets priority"
       source: >-
         Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOOKUP RAM.
   
   special_features:
     - feature: "LUT_to_DAC_streaming"
-      description: "Streamer can read LUT contents and output to DACs"
-      use_case: "Arbitrary waveform generation using streamer with LUT as source"
+      description: "Ability to stream hub RAM and/or lookup RAM to DACs and pins or HDMI modulator"
       source: >-
         Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (feature list: "Ability to stream hub RAM and/or lookup RAM to DACs and pins or HDMI modulator").
     
@@ -81,16 +79,16 @@ architecture:
       source: >-
         Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOOKUP RAM, RAM SHARING BETWEEN PAIRED COGS.
         Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Lookup RAM (Paired-Cog Communication Mechanism), p.14.
-        The behaviour block: EF-096 (measured one pair at a time, in cog execution).
+        The behaviour block: EF-096 (measured one pair at a time, in cog execution; block loads of 128 and 64 longs arrived in full; the start-up image matched at all 512 longs).
       behaviour: >-
-        Block loads count as writes: a SETQ2 + RDLONG block load into the sending cog's LUT
-        arrives in the enabled partner (128 of 128 and 64 of 64 longs). A Spin2 cog's start-up
+        Block loads count as writes: a SETQ2 + RDLONG block load of 128 or 64 longs into the
+        sending cog's LUT arrives in the enabled partner. Not documented: other block sizes. A Spin2 cog's start-up
         image reaches a partner that enabled receiving BEFORE the Spin2 sender was launched (the
-        partner's LUT then equals the sender's at all 512 longs); enabling after the launch
+        partner's LUT then equals the sender's); enabling after the launch
         brings nothing that was written earlier. The Spin2 sender's inline WRLUT also arrives.
         A COGINIT of the receiving cog resets its receive enable (writes no longer arrive and
         GETBRK D[26] reads 0); a COGINIT of the sending cog leaves the receiver's enable in
-        force. The timing of a write against a concurrent enable is not stated.
+        force. Not documented: the timing of a write against a concurrent enable.
 
     - feature: "LUT_events"
       description: >-
@@ -122,10 +120,17 @@ instructions:
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language (instruction encodings).
       Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.45.
+      CP-037 (a plain literal above #255 refused for RDLUT).
+      P2 hardware verification, EF-118 (RDLUT PTRA[2] and PTRA++: index read and PTRA delta in LUT longs).
+      P2 Instructions v35 - Rev B/C Silicon, row 151 (Read data from LUT address {#}S/PTRx into D) with LOOKUP RAM, LOAD/STORE ACCESS ($000 to $1FF with RDLUT): the register form.
     operation: |
-      D := LUT[S[8:0]]
-      A literal S reaches only #0..#255; use a register or a PTRx expression to reach
-      any of the 512 longs.
+      D := LUT[S]
+      The 32-bit words are addressable from $000 to $1FF. A plain literal S above #255
+      is refused; an address held in a register used as S (RDLUT D,S) reaches
+      $100-$1FF. Not documented: which bits of the register form the address.
+      PTRA indexes and updates count LUT longs: with PTRA = 8, RDLUT D,PTRA[2] reads
+      LUT[10] and RDLUT D,PTRA++ reads LUT[8] and adds 1 to PTRA.
+      Not documented: the PTRB, pre-increment and -- forms, and other index values.
     timing: "3 clocks"
     flags_affected: "C = MSB of data, Z = (result == 0)"
     usage_example: |
@@ -138,11 +143,19 @@ instructions:
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language (instruction encodings).
       Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.45.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOOKUP RAM (the 32-bit words are addressible from $000 to $1FF).
+      CP-042 (a plain literal above #255 refused for WRLUT).
+      P2 hardware verification, EF-118 (WRLUT PTRA++: index written and PTRA delta in LUT longs).
+      P2 Instructions v35 - Rev B/C Silicon, row 220 (Write D to LUT address {#}S/PTRx): the register form.
     operation: |
-      LUT[S[8:0]] := D
+      LUT[S] := D
       D carries the DATA, S carries the ADDRESS -- syntax is `WRLUT {#}D,{#}S/PTRx`.
-      A literal S reaches only #0..#255; use a register or a PTRx expression to reach
-      any of the 512 longs.
+      The 32-bit words are addressable from $000 to $1FF. A plain literal S above #255
+      is refused; an address held in a register used as S (WRLUT D,S) reaches
+      $100-$1FF. Not documented: which bits of the register form the address.
+      PTRA updates count LUT longs: with PTRA = 8, WRLUT D,PTRA++ writes LUT[8] and
+      adds 1 to PTRA.
+      Not documented: the PTRB, pre-increment and -- forms, and WRLUT with an index on PTRx.
     timing: "2 clocks"
     usage_example: |
       WRLUT   value, #100     ' Write value to LUT[100]
@@ -171,22 +184,6 @@ memory_map:
     start: "$200"
     end: "$3FF"
     size: "512 longs"
-    
-  special_regions:
-    note: >-
-      The LUT has NO hardware-defined regions -- all 512 longs are equivalent, and no
-      Parallax source assigns any part of it a purpose. The partitioning below is an
-      example convention a program may adopt, not a property of the silicon.
-    example_partitioning:
-      - region: "$200-$27F"
-        description: "Example: sine/cosine table"
-        size: "128 longs"
-      - region: "$280-$2FF"
-        description: "Example: FIFO buffer"
-        size: "128 longs"
-      - region: "$300-$3FF"
-        description: "Example: general data storage"
-        size: "256 longs"
 
 programming_patterns:
   - pattern: "lookup_table"
@@ -194,7 +191,7 @@ programming_patterns:
     code: |
       ' Load 128 longs from hub into LUT[0..127]
               SETQ2   #128-1            ' number of longs, minus 1
-              RDLONG  0, sine_table_ptr ' first LUT long is 0, not $200
+              RDLONG  0, sine_table_ptr ' D = LUT address of the first long
 
       ' Use sine lookup
       get_sine
@@ -233,7 +230,7 @@ uses:
     - use: "Bytecode execution lookup table"
       see: "architecture/xbyte_engine.yaml"
     - use: "Smart pin data source"
-      see: "listed by the source; its mechanism is not described"
+      see: "Not documented: the smart pin data source mechanism."
     - use: "Paired-Cog communication mechanism"
       see: "this file -- special_features LUT_sharing, LUT_events, pair_start"
     - use: "Code execution"
@@ -243,37 +240,33 @@ performance_characteristics:
   access_timing:
     read: "3 clock cycles"
     write: "2 clock cycles"
-    block_transfer: "one long per clock via SETQ2 + RDLONG/WRLONG/WMLONG, unless the hub FIFO is accessing the same hub RAM slice on the same cycle"
+    block_transfer: "SETQ2 + RDLONG reads one long per clock, unless the hub FIFO is accessing the same hub RAM slice on the same cycle, in which case the FIFO gets priority and the block move waits for the slice to come around again. Not documented: the rate of SETQ2 + WRLONG/WMLONG."
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), FAST BLOCK MOVES.
   
   comparison_to_hub:
     lut_read: "3 clocks fixed (RDLUT)"
     hub_read: "9...16 clocks in cogexec, 9...26 in hubexec (RDLONG), varying with hub alignment"
-    advantage: "LUT read is fixed-latency; a hub long read is not"
     source: >-
       Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (RDLUT, 3 clocks), p.45.
       Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (RDLONG, `9...16 / 9...26`), p.42.
 
 limitations:
   - limitation: "size"
-    description: "Limited to 512 longs per COG"
-    workaround: "Use hub memory for larger tables"
-  
+    description: "512 longs per COG"
+
   - limitation: "sharing_pairs"
-    description: "Only adjacent even/odd COGs can share"
-    workaround: "Use hub memory for broader sharing"
-  
-  - limitation: "no_byte_access"
-    description: "Long-only access (32-bit)"
-    workaround: "Pack bytes/words, use shift/mask"
+    description: "Adjacent cogs whose ID numbers differ by only the LSB can share"
+
+  - limitation: "access_unit"
+    description: "RDLUT and WRLUT address the 32-bit words $000 to $1FF"
 
 debugging_considerations:
   - tip: "lut_dump"
     description: "Dump LUT contents to hub for examination"
     code: |
       SETQ2   #511            ' Dump all 512 longs
-      WRLONG  0, dump_ptr     ' LUT[0..511] to hub (first LUT long is 0)
+      WRLONG  0, dump_ptr     ' LUT[0..511] to hub, starting at LUT address 0
   
   - tip: "verify_sharing"
     description: "Test LUT write-sharing between paired COGs"

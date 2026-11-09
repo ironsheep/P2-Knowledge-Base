@@ -18,9 +18,11 @@ examples:
 notes:
 - RES only reserves space in cog RAM
 - No hub memory is allocated
-- Useful for variables and buffers
+- RES generates no data
+- RES must be in cog mode, not hub mode
 related:
-- LONG
-- ORG
-- FIT
+- language/pasm2/long.yaml
+- language/pasm2/org.yaml
+- language/pasm2/fit.yaml
 oneliner: Reserve space in cog RAM without initializing
+source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), assembler directives (RES cog_registers: reserve cog registers; doesn't generate any data; must be in cog mode)"

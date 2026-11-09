@@ -11,7 +11,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: usage_patterns.pin_manipulation.code
-    fp: "a1d732be803daa47"
+    fp: "99bf17fdad1e1c05"
     compile: fragment
     wrap: pasm2-dat
   - at: bit_operations.set_multiple_outputs.code
@@ -31,6 +31,6 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: examples.serial_communication.code
-    fp: "1e1e753488750ad4"
+    fp: "5278b66563970034"
     compile: fragment
     wrap: pasm2-dat

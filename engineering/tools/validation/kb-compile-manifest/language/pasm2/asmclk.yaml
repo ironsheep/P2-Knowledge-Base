@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "3643fc42c0a2a0e3"
+    fp: "5d3f8291cdd9c7e8"
     compile: program
   - at: examples[1].code
     fp: "3ad10bd69e8663d4"
@@ -16,11 +16,11 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: expansion_details.external_clock.expands_to[1]
-    fp: "9aa6e3ebfab63950"
+    fp: "114d39ae9157a0c0"
     compile: fragment
     wrap: pasm2-dat
   - at: expansion_details.external_clock.expands_to[2]
-    fp: "b92c8dedca73b8ae"
+    fp: "a7c418ba1818a386"
     compile: fragment
     wrap: pasm2-dat
   - at: expansion_details.rcslow.expands_to[0]
@@ -28,6 +28,6 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: expansion_details.rcfast.expands_to[0]
-    fp: "d30f034d04581467"
+    fp: "8562398ab86e50c9"
     compile: fragment
     wrap: pasm2-dat

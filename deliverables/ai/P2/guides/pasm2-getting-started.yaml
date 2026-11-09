@@ -2,7 +2,7 @@ title: PASM2 Getting Started - Core Assembly Essentials
 id: pasm2-getting-started
 version: 1.2.0
 content_base: "language/pasm2"
-# content_base names where this guide's subject content lives; it is NOT a resolution
+# content_base names where this guide's subject content lives; it is not a resolution
 # base. Every path in this file is repo-absolute and resolves on its own. Do not write a
 # path relative to content_base: entries here point outside it (architecture/), so a
 # reader cannot tell which base a bare path meant.
@@ -11,48 +11,41 @@ purpose: Minimal viable knowledge for writing functional PASM2 code
 target_audience: AI code generators and developers new to PASM2 assembly
 
 summary: |
-  Essential PASM2 assembly mechanics needed to start writing functional code immediately. Covers instruction
-  format, register model, core instructions, addressing modes, and common idioms. Foundation knowledge for
-  productive P2 assembly programming.
+  PASM2 assembly mechanics: instruction format, register model, core instructions, addressing modes, and
+  common idioms.
 
 description: |
-  This is the foundation layer for PASM2 knowledge - pure instruction mechanics and register model. After
-  reading this, you can write syntactically correct PASM2 code using common instructions and patterns.
-  Reference detailed instruction documentation for advanced features.
+  Instruction mechanics and register model: instruction format, common instructions and patterns.
 
 knowledge_progression:
   you_are_here: "Layer 1 - Essential Assembly Mechanics"
   
   pre_requisite:
-    ESSENTIAL:
+    entries:
       - name: "P2 Architecture Mental Model"
         content: "architecture/p2-architecture-mental-model.yaml"
         key: p2kbArchP2ArchitectureMentalModel
-        why: "Understand COG independence, execution models (cogexec vs hubexec), Egg Beater timing, shared resources, and smart pin offloading. Must read BEFORE writing code."
-        when: "Read first, before this guide"
+        why: "Covers COG independence, execution models (cogexec vs hubexec), Egg Beater timing, shared resources, and smart pin offloading."
 
   immediate_next_steps:
-    REQUIRED:
+    next_entries:
       - name: "Basic I/O Concepts"
         content: "language/pasm2/concepts/basic-io.yaml"
-        why: "Essential for any pin I/O - covers multi-pin operations, ADDPINS, and drive strength"
-        when: "Read immediately after Getting Started, before writing I/O code"
-        
-    THEN_CHOOSE:
+        why: "Covers multi-pin operations, ADDPINS, and drive strength"
+
+    other_entries:
       - name: "Smart Pin Modes"
         content: "architecture/smart_pins.yaml"
-        when: "Need autonomous hardware (PWM, UART, ADC, counters, etc.)"
+        when: "Smart pin modes (PWM, UART, ADC, counters, etc.)"
       - name: "CORDIC Operations"
         content: "architecture/cordic.yaml"
-        when: "Need math coprocessor (trig, logs, rotation)"
+        when: "CORDIC solver (trig, logs, rotation)"
       - name: "Streamer"
         content: "architecture/streamer/overview.yaml"
-        when: "Need high-speed pin sequencing (video, audio)"
-  
-  note: "Basic I/O concepts are NOT optional - they're foundational for all pin operations"
+        when: "Streamer pin sequencing (video, audio)"
 
 file_structure:
-  source: "Parallax Propeller 2 Spin2 Language Documentation v55, Minimal PASM Program; DAT; Clock Setup; Parallax Propeller 2 (P2X8C4M64P) Datasheet, Release November 1, 2022, register map, p.13-14"
+  source: "CP-054 (bare ORG: 504 longs from $000 assemble, the 505th is refused, so the default limit is $1F8); Parallax Propeller 2 Spin2 Language Documentation v55, Minimal PASM Program; DAT; Clock Setup; Parallax Propeller 2 (P2X8C4M64P) Datasheet, Release November 1, 2022, register map, p.13-14"
 
   overview: |
     PASM2 code lives in a DAT block of a Spin2 source file; there is no separate
@@ -60,20 +53,20 @@ file_structure:
     with ORG (cog-exec) or ORGH (hub-exec) and which has no PUB method.
 
   minimal_program:
-    description: "The Parallax minimal PASM-only program from the Parallax Spin2 documentation, reproduced here in its own line layout."
+    description: "A minimal PASM-only program."
     source: "Parallax Propeller 2 Spin2 Language Documentation v55, Spin2 Program Structure (Minimal PASM Program)"
     example: |
       DAT             ORG                      'start PASM at hub $00000 for cog $000
       loop            DRVRND  #0 ADDPINS 7     'write a random pattern to P7..P0
                       WAITX   ##clkfreq_/10    'wait 100ms (## for >9 bits), loop
                       JMP     #loop
-    why_waitx_not_waitms: "WAITMS and WAITUS are Spin2 METHODS, not PASM2 instructions. In a PASM-only program the delay is WAITX, whose operand is a clock count -- which is why the source's own example computes it from the compiler-defined constant clkfreq_."
+    why_waitx_not_waitms: "WAITMS and WAITUS are Spin2 methods, not PASM2 instructions. In a PASM-only program the delay is WAITX, whose operand is a clock count; the example computes it from the compiler-defined constant clkfreq_."
 
   clock_setup:
     source: "Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup; Parallax Propeller 2 (P2X8C4M64P) Datasheet, Release November 1, 2022, AC Characteristics, p.48 (frequency limits); CP-029"
-    default: "With no clock-setup symbol declared and not in DEBUG mode, the compiler selects internal RCFAST, which runs at 20 MHz+. No clock symbol is required: _clkfreq is OPTIONAL, and a PASM-only program that declares none compiles and runs at RCFAST. With no symbol but DEBUG mode active, the compiler instead selects XI/XO-crystal mode at 20 MHz to facilitate DEBUG."
-    why_the_default_bites: "The default is silent. A PASM-only program whose WAITX operands were computed for 200 MHz, but which declares no clock symbol, runs at RCFAST (20 MHz+, datasheet typical 24 MHz) and every delay is wrong by an order of magnitude with no diagnostic. Either declare the mode you intend (below), or compute delays from the compiler constant clkfreq_, which always tracks the mode actually compiled."
-    how_to_declare: "The clock is selected at COMPILE time by declaring CON symbols. The Spin2 documentation lists the following combinations, and the effect and %CC_SS columns are its statements; a compile shows only that a form is accepted. Declaring _xtlfreq with _xinfreq is rejected. The HUBSET %CC_SS column is the clock-mode value the compiler derives, which is what the compiler constant clkmode_ carries and what HUBSET is invoked with."
+    default: "With no clock-setup symbol declared and not in DEBUG mode, the compiler selects internal RCFAST, which runs at 20 MHz+. No clock symbol is required: _clkfreq is optional, and a PASM-only program that declares none compiles and runs at RCFAST. With no symbol but DEBUG mode active, the compiler instead selects XI/XO-crystal mode at 20 MHz to facilitate DEBUG."
+    default_clock_example: "A PASM-only program whose WAITX operands were computed for 200 MHz, but which declares no clock symbol, runs at RCFAST (20 MHz+, typical 24 MHz). The compiler constant clkfreq_ is the compiled clock frequency."
+    how_to_declare: "The clock is selected at compile time by declaring CON symbols in the following combinations. Declaring _xtlfreq with _xinfreq is rejected. The %CC_SS value is the clock-mode value the compiler derives, which is what the compiler constant clkmode_ carries and what HUBSET is invoked with."
     declaration_combinations:
       - con_symbols: "CON _clkfreq = 250_000_000, _errfreq = 0"
         effect: "Selects XI/XO-crystal-plus-PLL mode, assumes 20 MHz crystal. The optimal PLL setting will be computed to achieve _clkfreq. Compilation fails if _clkfreq +/- _errfreq is unachievable."
@@ -106,14 +99,14 @@ file_structure:
     the_x_bit: "In the %1x_ CC values, x is the crystal-loading bit: if _xtlfreq >= 16_000_000 then x=0, for 15 pF per XI/XO; otherwise x=1, for 30 pF per XI/XO."
     when_declared: "PASM-only programs which use any non-RCFAST clock mode get a 16-long clock-setter program automatically prepended, which sets the clock mode, moves your PASM program down by 16 longs, then executes it by doing a COGINIT #0,#0, to effect a normal start. This is why ASMCLK is not needed at the start of a PASM-only program."
     inhibiting_it: "Declare _AUTOCLK = 0 to stop the clock-setter program from being prepended; your code then begins executing with the default RCFAST mode. If you then want another clock mode you must configure the clock yourself, perhaps using ASMCLK."
-    asmclk: "ASMCLK is a PASM-only pseudo-instruction that sets the clock mode named by the clock-setup symbols. It has no operands but may take a conditional prefix, and assembles to one or six PASM instructions depending on the mode: HUBSET #0 for _rcfast, HUBSET #1 for _rcslow, and the six-long crystal/PLL start sequence shown under manual_switch_example for every external-clock form. With _AUTOCLK = 0 and an external-clock declaration, adding ASMCLK grows a pnut-ts build by exactly 6 longs; with _rcfast it grows it by 1."
-    manual_switch: "Without the prepended clock-setter (or with _AUTOCLK = 0), a pure PASM program moves off its initial RCFAST setting to the compiled crystal/PLL setting with the sequence the Spin2 documentation gives for clkmode_."
+    asmclk: "ASMCLK is a PASM-only pseudo-instruction that sets the clock mode named by the clock-setup symbols. It has no operands but may take a conditional prefix, and assembles to one or six PASM instructions depending on the clock mode: HUBSET #0 for _rcfast, HUBSET #1 for _rcslow, and the crystal/PLL start sequence shown under manual_switch_example for every external-clock form."
+    manual_switch: "Without the prepended clock-setter (or with _AUTOCLK = 0), a pure PASM program moves off its initial RCFAST setting to the compiled crystal/PLL setting with this sequence using clkmode_."
     manual_switch_example: |
       HUBSET  ##clkmode_ & !%11   'start crystal/PLL, stay in RCFAST mode
       WAITX   ##20_000_000/100    'allow 10ms for the external clock to stabilise
       HUBSET  ##clkmode_          'switch to crystal/PLL
     compiler_constants: "clkfreq_ (compiled clock frequency) and clkmode_ (compiled clock mode) are defined by the compiler and may be referenced as constants in PASM-only programs. Both may differ per file in the application hierarchy; files below the top-level file do not inherit the top-level value."
-    what_value_is_legal: "The P2 Datasheet AC Characteristics give the PLL absolute maximum as 320 MHz (typical 180 MHz), so a _clkfreq above 320 MHz is outside the datasheet's limits even where the compiler accepts it. The full min/typ/max table for every oscillator source is under timing_considerations.clock_frequency in this file."
+    what_value_is_legal: "PLL oscillator frequency: 3.33 MHz minimum, 180 MHz typical, 320 MHz maximum. The min/typ/max values for every oscillator source are under timing_considerations.clock_frequency in this file."
     see_also:
       asmclk_instruction:
         key: p2kbPasm2Asmclk
@@ -135,9 +128,9 @@ file_structure:
   cog_vs_hub_execution:
     cog_exec:
       directive: "ORG"
-      v55_statement: "ORG -- set cog-exec mode, cog address = $000, cog limit = $1F8 (reg, both defaults)"
+      bare_form: "ORG -- set cog-exec mode, cog address = $000, cog limit = $1F8 (reg, both defaults)"
       variants:
-        - "ORG $100 -- cog address = $100, cog limit = $1F8 (reg, default limit)"
+        - "ORG $100 -- cog address = $100, with no limit operand. The default limit applied is $200: 256 longs assemble from $100 and the 257th is refused. Parallax's documents also give $1F8 for this form."
         - "ORG $100,$120 -- cog address = $100, cog limit = $120 (reg)"
         - "ORG $200 -- cog address = $200, cog limit = $400 (LUT, default limit)"
         - "ORG $300,$380 -- cog address = $300, cog limit = $380 (LUT)"
@@ -146,17 +139,17 @@ file_structure:
       alignment: "In cog-exec mode, instructions force alignment to cog/LUT registers."
     hub_exec:
       directive: "ORGH"
-      v55_statement: "ORGH -- set hub-exec mode, hub origin = $00400, origin limit = $100000 (both defaults)"
+      bare_form: "ORGH -- set hub-exec mode, hub origin = $00400, origin limit = $100000 (both defaults)"
       variants:
         - "ORGH $1000 -- hub origin = $01000, origin limit = $100000 (default limit)"
-        - "ORGH $FC000,$FC800 -- hub origin = $FC000, origin limit = $FC800 (a syntax illustration: it assembles in a Spin2+PASM program; in a PASM-only program ORGH fills the hub image with zeros up to the address)"
+        - "ORGH $FC000,$FC800 -- hub origin = $FC000, origin limit = $FC800 (it assembles in a Spin2+PASM program; in a PASM-only program ORGH fills the hub image with zeros up to the address, and this form is refused because the program then exceeds the 512KB of hub RAM)"
       no_symbol_before: "No symbol allowed before ORGH."
       origin_step: "$ is the current origin, which steps by 4 with each hub-exec instruction."
 
   size_checking:
     fit: "FIT $020 -- test to make sure cog address has not exceeded $020. FIT $2000 -- test to make sure hub address has not exceeded $2000."
-    matching_the_default: "ORG's default cog limit is $1F8, so FIT $1F8 is the check that matches an unqualified ORG."
-    why_1F8: "Registers $1F8 through $1FF give mapped access to eight special-purpose functions (PTRA, PTRB, DIRA, DIRB, OUTA, OUTB, INA, INB) -- when specifying an address between $1F8 and $1FF, the PASM instruction accesses a special-purpose register, not just the underlying RAM. Registers $1F0 through $1F7 may either be used as general-purpose registers, or may be used as special-purpose registers (IJMP3/IRET3/IJMP2/IRET2/IJMP1/IRET1/PA/PB) if their associated functions are enabled -- so code that uses no interrupts and no PA/PB may run up to $1F8."
+    matching_the_default: "A bare ORG has default cog limit $1F8: 504 longs from $000 assemble and the 505th is refused with 'Cog address exceeds limit'. FIT $1F8 is the check that matches a bare ORG."
+    why_1F8: "Registers $1F8 through $1FF give mapped access to eight special-purpose functions (PTRA, PTRB, DIRA, DIRB, OUTA, OUTB, INA, INB) -- when specifying an address between $1F8 and $1FF, the PASM instruction accesses a special-purpose register, not just the underlying RAM. Registers $1F0 through $1F7 may either be used as general-purpose registers, or may be used as special-purpose registers (IJMP3/IRET3/IJMP2/IRET2/IJMP1/IRET1/PA/PB) if their associated functions are enabled."
     orgf: "ORGF $040 -- fill to cog address $040 with zeros (no symbol allowed before ORGF)."
     res: "x RES 1 -- reserve 1 register, advance cog address by 1, don't advance hub address."
 
@@ -239,11 +232,11 @@ core_instructions:
       example: "MOV  result, input"
     SETS:
       syntax: "SETS  D,{#}S"
-      description: "Set S field of D to S[8:0]. D = {D[31:9], S[8:0]}. Used to patch an instruction's S field."
+      description: "Set S field of D to S[8:0]. D = {D[31:9], S[8:0]}."
       example: "SETS  patch, #target"
     SETD:
       syntax: "SETD  D,{#}S"
-      description: "Set D field of D to S[8:0]. D = {D[31:18], S[8:0], D[8:0]}. Used to patch an instruction's D field."
+      description: "Set D field of D to S[8:0]. D = {D[31:18], S[8:0], D[8:0]}."
       example: "SETD  patch, #target"
 
   arithmetic:
@@ -257,7 +250,7 @@ core_instructions:
       example: "SUB  count, #1  WZ"
     MUL:
       syntax: "MUL  D,{#}S  {WZ}"
-      description: "D = unsigned (D[15:0] * S[15:0]) -- a 16 x 16 multiply with a 32-bit result. Z = (S == 0) | (D == 0)."
+      description: "D = unsigned (D[15:0] * S[15:0]). Z = (S == 0) | (D == 0)."
       example: "MUL  product, factor"
     NEG:
       syntax: "NEG  D,{#}S  {WC/WZ/WCZ}"
@@ -307,7 +300,7 @@ core_instructions:
       example: "RET"
     DJNZ:
       syntax: "DJNZ  D,{#}S"
-      description: "Decrement D and jump to S if the result is not zero -- the loop-counting branch."
+      description: "Decrement D and jump to S if the result is not zero."
       example: "DJNZ  counter, #start"
     TJZ:
       syntax: "TJZ  D,{#}S"
@@ -346,7 +339,7 @@ core_instructions:
     WAITX:
       syntax: "WAITX  {#}D  {WC/WZ/WCZ}"
       description: "Wait 2 + D clocks. With WC/WZ/WCZ, wait 2 + (D & RND) clocks. C/Z = 0."
-      example: "WAITX  ##1000      ' waits 1002 clocks"
+      example: "WAITX  ##1000      ' waits 2 + D clocks"
     GETCT:
       syntax: "GETCT  D  {WC}"
       description: "Get CT[31:0], or CT[63:32] with WC, into D. GETCT WC followed by GETCT gets the full 64-bit CT. CT = 0 on reset and increments on every clock. Cogs 0-3 and 4-7 each keep their own upper long, which advances only while a cog of that group is running when the lower long wraps; a cog started later in a group that missed wraps reads an upper long that is behind until its group runs through the next wrap."
@@ -486,17 +479,17 @@ labels_and_symbols:
   detailed_reference: "language/pasm2/concepts/labels.yaml"
 
 assembler_directives:
-  source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (DAT symbols and data; ORG; FIT, cog; ORGH, FIT, hub; ORGH in Spin2+PASM vs PASM-only programs)"
+  source: "CP-045 (ORG $100 with no limit takes default limit $200); CP-054 (bare ORG: 504 longs from $000 assemble, the 505th is refused, so the default limit is $1F8); Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (DAT symbols and data; ORG; FIT, cog; ORGH, FIT, hub; ORGH in Spin2+PASM vs PASM-only programs)"
   ORG:
     syntax: "ORG  {address{,limit}}"
-    description: "Set cog-exec mode. Bare ORG: cog address $000, cog limit $1F8 (both defaults); ORG $100: address $100, limit $1F8; ORG $100,$120: address $100, limit $120."
+    description: "Set cog-exec mode. Bare ORG: cog address $000, cog limit $1F8 (both defaults); ORG $100: address $100, default limit $200; ORG $100,$120: address $100, limit $120."
     example: "ORG"
   ORGH:
     syntax: "ORGH  {origin{,limit}}"
     description: "Set hub-exec mode. In a Spin2+PASM program, bare ORGH sets hub origin $00400, origin limit $100000 (both defaults), and the code must use relative addressing. In a PASM-only program, bare ORGH sets hub-exec mode at the current hub address, and ORGH with an address fills hub memory with zeros up to it."
   FIT:
     syntax: "FIT  limit"
-    description: "Test that the cog (after ORG) or hub (after ORGH) address has not exceeded limit. FIT $1F8 matches an unqualified ORG -- see file_structure.size_checking."
+    description: "Test that the cog (after ORG) or hub (after ORGH) address has not exceeded limit. FIT $1F8 matches a bare ORG -- see file_structure.size_checking."
     example: "FIT  $1F8"
   BYTE_WORD_LONG:
     syntax: "symbol  BYTE|WORD|LONG  value{, value...}"
@@ -505,13 +498,12 @@ assembler_directives:
 
 string_handling:
   overview: |
-    Strings in PASM2 are defined as BYTE data in the DAT block. They are typically
-    null-terminated (ending with 0) for compatibility with string processing routines.
+    Strings in PASM2 are defined as BYTE data in the DAT block.
 
   defining_strings:
     syntax: 'label  BYTE  "text", 0'
-    location: "DAT block, typically after code or in separate data section"
-    termination: "Add 0 (null) for null-terminated strings"
+    location: "DAT block"
+    termination: "A trailing 0 (null) makes a null-terminated string"
     examples:
       - description: "One string"
         code: |
@@ -540,10 +532,6 @@ string_handling:
       char    LONG    0
       message BYTE    "Hello", 0
 
-  common_patterns:
-    send_string: "Loop reading bytes until null, send each to output"
-    compare_strings: "Compare byte-by-byte until mismatch or both null"
-    string_length: "Count bytes until null terminator"
 
 debugging_support:
   overview: "DEBUG statements output runtime data to terminal during development"
@@ -563,7 +551,7 @@ critical_gotchas:
     - "Every instruction is one 32-bit long."
     - "An immediate #S or #D is 9 bits (0-511); ## instead of # makes the assembler insert an AUGS or AUGD that supplies the upper 23 bits, making it 32 bits."
     - "Hub access costs more than cog/LUT access: RDLONG 9...16 clocks (cog exec) / 9...26 (hub exec); WRLONG 3...10 / 3...20; +1 if the long crosses a hub long boundary; figures for an 8-cog P2."
-    - "PTRA++ uses PTRA and then adds; ++PTRA adds first and uses the new value. Pick the form deliberately."
+    - "PTRA++ uses PTRA and then adds; ++PTRA adds first and uses the new value."
     - "CALL pushes its return address onto the hardware stack and RET pops it. PA and PB are not CALL's return registers -- they serve CALLD-imm, CALLPA/CALLPB and LOC."
     - "CMP sets C on borrow: C = 1 means D < S, unsigned."
     - "DJNZ decrements, then jumps if the result is not zero; TJZ and TJNZ only test."
@@ -592,25 +580,26 @@ flag_behavior:
 
 timing_considerations:
   instruction_timing:
+    source: "P2 Instructions v35 Rev B/C Silicon, ADD/MOV/NOP rows (hub execution clocks: same as cog execution) and DJNZ/TJZ/TJNZ rows (2 or 4 in cog execution); Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, instruction-table Clocks column (a value shown as 'x or y' is x if not branching and y if branching); Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COGS (as little as two clock cycles when the pipeline is full; first instruction after a branch at least four clock cycles) and HUB EXECUTION; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Execution, p.14 (at least five clock cycles)"
     most_instructions: "2 clock cycles (typical ALU ops, fixed)"
     cog_branches: "4 clocks for a taken JMP/CALL/RET in cog or LUT execution; DJNZ and the TJ/IJ family take 2 when not taken, 4 when taken"
     hub_access_reads: "9-16 clocks (cog) / 9-26 clocks (hub-exec) for RDLONG/RDWORD/RDBYTE"
     hub_access_writes: "3-10 clocks (cog) / 3-20 clocks (hub-exec) for WRLONG/WRWORD/WRBYTE"
-    hubexec_sequential: "2 clocks/instruction (same as cogexec via the (cogs+11)=19-stage prefetch FIFO)"
-    hubexec_branch: "13...20 clocks for a taken JMP/CALL/RET (2, or 13...20, for DJNZ and the TJ/IJ family); +1 clock when the target is not long-aligned (P2 Documentation, Hub Execution)"
+    after_branch: "Branch instructions cause the pipeline to be flushed, so the first instruction following the branch takes at least four clock cycles. Parallax's documents also give at least five clock cycles."
+    hubexec_sequential: "ALU instructions such as ADD, MOV and NOP take 2 clocks in hub execution, the same as in cog execution; the cog employs the FIFO hardware (which contains (cogs+11) stages) to spool up instructions for continuous execution. Not documented: the clocks per sequential instruction in hub execution as a general rule; RDLONG, WRLONG and branches have their own hub execution figures."
+    hubexec_branch: "13...20 clocks for a taken JMP/CALL/RET (2, or 13...20, for DJNZ and the TJ/IJ family); +1 clock when the target is not long-aligned"
     multiply: "MUL 2 clocks; QMUL via the CORDIC: 2...9 clocks to issue, the result about 55 clocks later (a 54-stage pipeline), read with GETQX/GETQY, which wait for it"
     
   clock_frequency:
     source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet, Release November 1, 2022, AC Characteristics, p.48; the compiler default is from Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup"
-    framing: "These are the DATASHEET's absolute limits, not the Hardware Manual's recommended-use range. The two documents differ in framing, not in fact."
-    compiler_default: "RCFAST -- selected whenever no clock-setup symbol is declared and DEBUG mode is off. It is NOT a crystal-plus-PLL default. Its frequency is the rcfast row below: 20 MHz min, 24 MHz typical, 30 MHz max. See file_structure.clock_setup above for how to declare something else."
+    compiler_default: "RCFAST is selected whenever no clock-setup symbol is declared and DEBUG mode is off. Its frequency is the rcfast value below: 20 MHz min, 24 MHz typical, 30 MHz max. See file_structure.clock_setup for the declaration forms."
     rcfast: "20 MHz min, 24 MHz typical, 30 MHz max (internal)."
     rcslow: "12 kHz min, 20 kHz typical, 30 kHz max (internal)."
     crystal_input: "1 MHz to 50 MHz between XI and XO."
     direct_drive_input: "DC to 200 MHz into XI."
     pll_system_clock: "3.33 MHz min, 180 MHz typical, 320 MHz max. Nominal PLL frequency (system clock speed) is 180 MHz at up to 105 degC."
-  precise_timing:
-    WAITX: "Accurate delay in clock cycles"
+  clock_counting:
+    WAITX: "Waits 2 + D clocks"
     GETCT: "Read 32-bit system counter"
     example: |
       GETCT    start_time
@@ -620,7 +609,7 @@ timing_considerations:
 
 next_steps:
   essential_reading:
-    - "language/pasm2/concepts/basic-io.yaml - REQUIRED before any I/O work"
+    - "language/pasm2/concepts/basic-io.yaml - multi-pin operations, ADDPINS, drive strength"
     - "language/pasm2/concepts/labels.yaml - Label scoping rules and reference operators"
     - "language/pasm2/groups/ - the categorised PASM2 instruction inventory, for detailed documentation"
 

@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: code_examples[0].code
-    fp: "af8885c9b8064538"
+    fp: "95630eb8de6dd714"
     compile: fragment
     wrap: spin2-top
     assumes: [signal_pin=con, clkf, window, high_clocks]

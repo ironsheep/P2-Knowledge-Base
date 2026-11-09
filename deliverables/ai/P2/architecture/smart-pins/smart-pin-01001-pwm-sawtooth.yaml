@@ -7,7 +7,7 @@ brief_description: "Generates sawtooth-wave PWM with configurable base period an
 
 detailed_description:
   operation: |
-    Uses up-only counter to create asymmetrical sawtooth PWM waveform. Counter counts from 1 up 
+    Uses an up-only counter. Counter counts from 1 up
     to frame period, then resets to 1. Output high when counter ≤ duty value, low when counter
     exceeds duty value. PWM period equals frame period (not doubled like triangle mode). Mode
     overrides OUT signal for direct pin control.
@@ -16,7 +16,6 @@ detailed_description:
     Base period = X[15:0] system clocks
     Frame period = X[31:16] × base period = PWM period
     IN flag raised when Y captured at frame start (counter reset)
-    Fast rise, slow fall characteristic creates sawtooth pattern
 
 registers:
   x_register:
@@ -24,10 +23,10 @@ registers:
     bits_31_16: "Frame period in base periods (a zero acts as 65,536)"
     source: "EF-100"
   y_register:  
-    bits_15_0: "PWM duty value (0 to frame period value)"
-    bits_31_16: "Unused"
+    bits_15_0: "PWM output value, captured at each frame start; it should range from zero to the frame period"
+    bits_31_16: "Not documented: a role for Y[31:16]"
   z_register:
-    function: "Not used in this mode"
+    function: "Not documented: a Z (RDPIN/RQPIN) result for this mode"
 
 flags:
   in_flag: "Raised when Y[15:0] captured at counter reset"
@@ -61,14 +60,8 @@ code_examples:
       .loop
         jmp     #.loop                           ' PWM runs independently
 
-common_applications:
-  - "Switch-mode power supplies (asymmetric drive)"
-  - "Motor control with fast turn-on characteristics"
-  - "LED drivers with linear current ramps"
-  - "Analog waveform generation via filtering"
-
 related_modes:
-  - "Mode %01000: PWM Triangle (symmetric waveform)"
+  - "Mode %01000: PWM Triangle (counter counts down then up)"
   - "Mode %01010: PWM SMPS (voltage/current feedback)"
   - "Mode %00111: NCO Duty (variable duty square wave)"
 
@@ -78,11 +71,12 @@ configuration_constants:
   common_modifiers:
     - "P_OE - Enable output drive"
     - "P_INVERT_OUTPUT - Invert PWM signal"
-    - "P_HIGH_1K5 / P_LOW_1K5 - Reduce drive for analog filtering"
 
 notes:
   - "Output always starts low during reset (DIR=0)"
   - "Y=0 produces constant low output"  
   - "Y=frame period value produces constant high"
-  - "Asymmetrical rise/fall creates sawtooth characteristic"
   - "PWM period half that of triangle mode at same settings"
+
+sources:
+  - "operation, timing, registers, notes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%01001 PWM sawtooth)"

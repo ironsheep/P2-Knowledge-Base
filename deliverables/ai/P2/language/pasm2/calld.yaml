@@ -17,8 +17,8 @@ description: >-
   In syntax 1, #Addr and #\Addr encodes the instruction with relative and
   absolute addressing, respectively. The relative form (the default) is vital
   for creating relocatable code. In either case, use symbolic references for
-  Addr and the assembler will encode it properly. Examples: CALLD PA, #SendBit
-  or CALLD PB, #\DebugStatus
+  Addr and the assembler encodes the relative or absolute form. Examples:
+  CALLD PA, #SendBit or CALLD PB, #\DebugStatus
 
   In syntax 2, the format of the value at Src is
   CZxxxxxx_xxxxAAAA_AAAAAAAA_AAAAAAAA. C is the new C flag state, Z is the new
@@ -34,6 +34,15 @@ description: >-
 
   If the WZ or WCZ effect is specified, the Z flag is updated to match S[30],
   after its original state is recorded.
+
+  A CALLD with S = IRETx (IRET1, IRET2 or IRET3) and the WCZ effect, whatever
+  register D is, signals the cog that interrupt x is complete: the cog clears
+  its internal interrupt-busy flag for that interrupt, so that another one can
+  occur. RETIx is this CALLD with D = INB, which is read-only outside a debug
+  ISR, making it a jump back to the interrupted code; RESIx is this CALLD with D = IJMPx. Inside a
+  debug ISR, where INA and INB are the IJMP0 and IRET0 registers, any
+  CALLD anyreg,INB WCZ ends the debug interrupt: RETI0 is CALLD INB,INB WCZ and
+  RESI0 is CALLD INA,INB WCZ.
 result: >-
   Write current C and Z flags and address of the next instruction into either
   PA, PB, PTRA, PTRB, or Dest, set PC to new relative or absolute address (in
@@ -64,37 +73,55 @@ timing:
   cycles: 4
   type: variable
   notes: 4 cycles for Cog/LUT, 13-20 cycles for Hub execution
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 11100WW RAA AAAAAAAAA AAAAAAAAA
   write: Pxxx and PC
   c: —
   z: —
   clocks: '4 / 13-20'
-  notes: Syntax 1 - WW selects PA/PB/PTRA/PTRB
+  notes: Syntax 1 - WW selects PA (00), PB (01), PTRA (10) or PTRB (11); R = 1 gives PC += A, R = 0 gives PC = A, and a backslash forces R = 0
 - bits: EEEE 1011001 CZI DDDDDDDDD SSSSSSSSS
   write: D and PC
   c: S[31]
   z: S[30]
   clocks: '4 / 13-20'
   notes: Syntax 2 - address from register/immediate
+encoding_notes:
+- "CALLD PA, #label without a backslash, to a label within the 9-bit S range (-256 to +255 instructions), assembles to the syntax 2 form (EEEE 1011001 CZI ...). To a label beyond that range, in hub code, it assembles to the syntax 1 form (EEEE 11100WW RAA ...) with R = 1 and a 20-bit relative field. Not documented: the form assembled for a label beyond the 9-bit range in cog code. CALLD PA, PB, PTRA or PTRB with #\\label assembles to the syntax 1 form (EEEE 11100WW RAA ...) with R = 0."
+anti_patterns:
+- pattern: "CALLD PA,#label with no backslash to a label beyond the 9-bit S range, in hub code"
+  reason: >-
+    In hub execution the 20-bit CALLD PA field is a byte offset. pnut-ts encodes this
+    far relative form with the distance in instructions, so the word does not land
+    on its label: for a target 1006 instructions back (field $FFFF_FC12) execution
+    goes 1006 bytes back. A hand-encoded long holding the byte distance lands on its
+    label: long $FE10_0000 | ((label - ($ + 4)) & $F_FFFF). That is the only
+    write-around shown to land. Not documented: the unit of this field in cog
+    execution, and for CALLD PB, PTRA and PTRB.
+  source: "P2 hardware verification, EF-106 (far CALL control landed; compiler CALLD PA word $FE1F_FC12, field the label's distance in instructions, landed 1006 bytes back; hand-encoded CALLD PA word $FE1F_FFC0 landed on its label)"
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLD, p.58"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 406 (CALLD PA/PB/PTRA/PTRB,#{\\}A: write {C, Z, 10'b0, PC[19:0]} to the register per W; R = 1 then PC += A, else PC = A; backslash forces R = 0; 4 cog/LUT, 13...20 hub) and row 157 (CALLD D,{#}S {WC/WZ/WCZ}: C = S[31], Z = S[30]; if #S and cogex PC += signed(S), if #S and hubex PC += signed(S*4); 4, 13...20)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 11100WW RAA AAAAAAAAA AAAAAAAAA CALLD register,#{\\}A; EEEE 1011001 CZI DDDDDDDDD SSSSSSSSS CALLD D,{#}S)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLD, p.58 (both encoding rows, 4 / 13-20, description, syntax 1 and 2 explanations, WC/WZ/WCZ effects)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INTERRUPTS (RETIx = CALLD INB,IRETx WCZ; RESIx = CALLD IJMPx,IRETx WCZ; the CALLD with D = <any register>, S = IRETx, and WCZ signals the cog that the interrupt is complete and clears its internal interrupt-busy flag for that interrupt; INB, read-only, makes the CALLD a JMP back) and DEBUG INTERRUPT (INA and INB become IJMP0 and IRET0 during a debug ISR; not only RETI0 (CALLD INB,INB WCZ) but any CALLD anyreg,INB WCZ terminates a debug interrupt; RESI0 is CALLD INA,INB WCZ)"
+  - "CP-036 (CALLD pa/pb/ptra/ptrb,#\\label assembles with bits 22:21 = 00/01/10/11 and R = 0; CALLD pa,#label without a backslash to a near label assembles to the D,S form, not the WW form)"
+  - "CP-056 (in hub code, calld pa,#htop to a label 304 longs back assembles to one long $FE1F_FED0, the syntax 1 form with R = 1 and a 20-bit field; calld pa,#\\htop assembles with R = 0)"
+  - "P2 hardware verification, EF-106 (calld pa,#a_land_d without a backslash to a far hub label assembled to the 20-bit relative word $FE1F_FC12)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_calld
-  pattern: D,#S/{@}S | D,S/#
-  description: 'Call with return register: destination, address/relative/immediate'
-  valueType: 20
-compiler_encoding:
-  operandFormat: 20
 last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
 oneliner: Call a subroutine; store return context in PA/PB/PTRA/PTRB/D
 related:
-- CALL
-- CALLPA
-- CALLPB
-- RET
-- PA
-- PB
-- PTRA
-- PTRB
+- language/pasm2/call.yaml
+- language/pasm2/callpa.yaml
+- language/pasm2/callpb.yaml
+- language/pasm2/ret.yaml
+- language/spin2/registers/pa.yaml
+- language/spin2/registers/pb.yaml
+- language/spin2/registers/ptra.yaml
+- language/spin2/registers/ptrb.yaml
+- language/pasm2/concepts/instruction_encoding_key.yaml
+- language/pasm2/reti1.yaml
+- language/pasm2/resi1.yaml
+- architecture/interrupts.yaml

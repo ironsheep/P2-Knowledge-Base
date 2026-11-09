@@ -19,17 +19,11 @@ description: >-
   C=1,Z=0: (INB & D) != S; C=1,Z=1: (INB & D) == S
 sources:
   - "description (PAT event four cases): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (POLLPAT/WAITPAT event flag)"
+  - "description (no WC/WZ/WCZ effect): CP-040, pnut-ts refuses SETPAT D,S WC and accepts plain SETPAT"
 flags_affected:
   C: No effect (read as input)
   Z: No effect (read as input)
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_ls
-  pattern: D/#,S/#
-  description: 'Two operands: destination/immediate, source/immediate'
-  valueType: 13
-compiler_encoding:
-  operandFormat: 13
 last_updated: '2025-09-19T16:04:17.278366'
 category: Event
 oneliner: Set pin pattern for PAT event detection

@@ -1,0 +1,8 @@
+# engineering/tools/validation/kb-compile-manifest/language/pasm2/rqpin.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: description
+    fp: "82de2d4cc796a8c5"
+    compile: not-code
+    reason: "prose description, not code"

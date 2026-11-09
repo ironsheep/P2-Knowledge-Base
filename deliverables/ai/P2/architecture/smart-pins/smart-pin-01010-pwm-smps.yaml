@@ -24,9 +24,9 @@ registers:
     bits_31_16: "PWM frame period in base periods"
   y_register:  
     bits_15_0: "PWM duty value (0 to frame period)"
-    bits_31_16: "Unused"
+    bits_31_16: "Not documented: a role for Y[31:16]"
   z_register:
-    function: "Not used in this mode"
+    function: "Not documented: a Z (RDPIN/RQPIN) result for this mode"
 
 flags:
   in_flag: "Raised when Y[15:0] captured after A-input goes low"
@@ -67,10 +67,7 @@ code_examples:
         wypin   #$80, #smps_out                  ' Set duty cycle once
 
 common_applications:
-  - "Buck/boost DC-DC converters"
-  - "Battery chargers with current limiting"
-  - "LED drivers with brightness and current control"
-  - "Motor drivers with voltage/current regulation"
+  - "Switch-mode power supply: the output drives the gate of the switcher FET; when the FET turns off, the inductor on its drain shoots high and the power pulse is captured by a diode into a capacitor, which is the SMPS final output"
 
 related_modes:
   - "Mode %01000/%01001: Basic PWM modes without feedback"
@@ -91,3 +88,6 @@ notes:
   - "Can set Y once and run indefinitely with feedback control"
   - "The A and B inputs can be adjacent pins in the internal-DAC-comparison (level-comparison) mode"
   - "Output starts low during reset (DIR=0)"
+
+sources:
+  - "operation, timing, registers, flags, common_applications, notes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%01010 PWM switch-mode power supply with voltage and current feedback, with its WXPIN, WYPIN, 'A' input and 'B' input paragraphs)"

@@ -13,25 +13,42 @@ description: >-
   DIRH sets the direction register's bit(s) designated by Dest to high (1), making
   the pin(s) outputs. All other direction bits are left unchanged. With WCZ, C and Z
   are set to the original (pre-instruction) state of the base pin's DIR bit.
+
+  Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates
+  the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond
+  the base should be affected (1-31).
+
+  A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of
+  up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature
+  (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD
+  instruction prior.
+
+  When Dest is a register, the register's value bits [10:0] are used as-is to form
+  the 11-bit ID range. A prior SETQ overrides Dest[10:6] with the low five bits of
+  the SETQ value; an ALTx between the SETQ and DIRH keeps the override, and a SETQ
+  separated from DIRH by other instructions is not documented.
+
+  The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) wraps within
+  the same 32-pin group (DIRA or DIRB); it does not cross the port boundary.
 flags_affected:
   C: Set to the original (pre-instruction) state of the base pin's DIR bit
   Z: Set to the original (pre-instruction) state of the base pin's DIR bit
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DIRH / DIRL, p.71"
+encoding_notes:
+- "DIRH uses the S-field code 001000001, the same code as TESTPN with WC or WZ."
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DIRH / DIRL, p.71 (the wrap within DIRA or DIRB); P2 Instructions v35 - Rev B/C Silicon, row 350 (DIRH: wraps within DIRA/DIRB); encoding_notes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 1101011 CZL DDDDDDDDD 001000001 for both TESTPN D/# WC/WZ and DIRH D/# {WCZ})"
+sources:
+  - "description (DIR bits of pins D[10:6]+D[5:0]..D[5:0] = 1; wraps within DIRA/DIRB; prior SETQ overrides D[10:6]; C,Z = DIR bit; write DIRx; 2 clocks): P2 Instructions v35 - Rev B/C Silicon, row 350; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), list of changes (DIRx/OUTx/FLTx/DRVx can now work on a span of pins, +D[10:6] pins; prior SETQ overrides D[10:6])"
+  - "description (Dest[5:0], Dest[10:6], the 9-bit literal range of Dest[8:6], ##Dest and AUGD, the register value bits [10:0], the wrap within DIRA or DIRB, set to the output direction): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DIRH / DIRL, p.71"
+  - "description (an ALTx between the SETQ and DIRH keeps the override): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, pp.38-39 (SETQ / SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction); a SETQ separated by other instructions is in no source"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pinop
-  pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
-    flags'
-  valueType: 30
-compiler_encoding:
-  operandFormat: 30
 syntax_variants:
 - DIRH {#}D
 last_updated: '2025-09-19T16:04:17.117106'
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
-  the I/O pin(s) to set to output or input.
+  the I/O pin(s) to set to output.
 - WCZ is an optional effect to update flags.
 category: Pin
-oneliner: Set pin(s) direction to output (high; 1) or input (low; 0)
+oneliner: Set pin(s) direction to output (high; 1)
+related:
+  - architecture/io_pin_timing.yaml

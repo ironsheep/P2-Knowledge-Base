@@ -2,16 +2,14 @@ concept: multi_cog_synchronization
 title: Multi-COG Synchronization and Coordination
 category: parallel_processing
 description: Hardware and software mechanisms for coordinating multiple COGs in P2
-documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LOCKS; COG ATTENTION; SMART PINS (long repository mode)"
+documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LOCKS; COG ATTENTION; SMART PINS (long repository mode); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, HUB, p.24 (atomic operations in a hub access window); EF-037 (one-long record publication: staged + one-store publish 0 torn in 200,000; field-by-field into the shared long 116,452 torn in 200,000; 1 µs between field writes)"
 documentation_level: comprehensive
 created: 2025-09-09
 
 overview: |
-  P2 provides 8 independent COGs that can run in parallel. Effective multi-COG
-  programming requires understanding synchronization primitives: hardware locks,
-  attention signals, shared memory, and Smart Pin repositories. Production code
-  shows sophisticated patterns for resource protection, debug monitoring, and
-  parallel processing.
+  P2 provides 8 independent COGs that can run in parallel. The synchronization
+  primitives are hardware locks, attention signals, shared hub memory, and Smart Pin
+  repositories.
 
 hardware_primitives:
   locks:
@@ -63,22 +61,24 @@ hardware_primitives:
           cogatn  #%0000_1111     ' COGs 0-3
       
       POLLATN:
-        syntax: "POLLATN {WC}"
-        operation: "Check and clear attention"
-        returns: "C=1 if attention was set"
+        syntax: "POLLATN {WC|WZ|WCZ}"
+        operation: "Get the ATN event flag into C/Z, then clear it"
+        returns: "C (with WC) or Z (with WZ) = 1 if attention was set"
         
       WAITATN:
-        syntax: "WAITATN"
-        operation: "Wait for attention signal"
-        use: "Block until signaled"
+        syntax: "WAITATN {WC|WZ|WCZ}"
+        operation: "Wait for the ATN event flag, then clear it"
+        use: "Block until signaled. A prior SETQ sets an optional CT timeout; with WC, WZ or WCZ, C/Z = 1 on timeout"
     
   shared_memory:
     hub_ram: "512KB shared by all COGs"
-    atomic_ops: "Single hub operations are atomic"
+    source: "P2 hardware verification, EF-037 (the 200,000-read counts and the 1 µs window between field writes); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, HUB, p.24 (single atomic operation in a hub access window)"
+    atomic_ops: "In any given hub access window a cog can perform a single atomic operation on a single entity, such as writing a value to one hub RAM location. In Spin2, a record kept as a struct with member bitfields packed into one long, staged in a private local, published with one whole-struct store and read with one whole-struct load, read no torn snapshot in 200,000 reads; the same fields written one at a time straight into the shared long (each bitfield write is a read-modify-write of the backing long), 1 µs apart, read torn in 116,452 of 200,000. Measured with that 1 µs window between field writes only."
+    last_16kb: "The last 16KB of hub RAM ($7C000..$7FFFF, also at $FC000..$FFFFF) holds the 16KB of internal ROM cached into it on startup, supplies the cog-register save buffers of the debug interrupt (from $FFC00), and can be write-protected with HUBSET."
     coordination_pattern: |
       ' Mailbox pattern
       CON
-        mailbox_base    = $7F000
+        mailbox_base    = $72000     ' below the last 16KB ($7C000..$7FFFF)
 
       DAT
               org 0
@@ -128,9 +128,9 @@ resource_protection_patterns:
               ret
     
   multi_resource:
-    description: "Acquire multiple resources (avoid deadlock)"
+    description: "Acquire multiple locks in a fixed order, releasing those held when a later one is busy"
     code: |
-      ' Always acquire in same order!
+      ' Acquire A, then B, then C; on a failure release what is held and retry
       acquire_all
               locktry #LOCK_A        wc
       if_nc   jmp     #acquire_all         ' Wait for A
@@ -148,7 +148,7 @@ resource_protection_patterns:
               ret
     
   scoped_lock:
-    description: "RAII-style automatic release"
+    description: "Release a held lock on every exit, tracked by a flag bit"
     code: |
       protected_operation
               locktry lock_num       wc
@@ -167,7 +167,7 @@ resource_protection_patterns:
 
 producer_consumer_patterns:
   ring_buffer:
-    description: "Lock-free ring buffer"
+    description: "Ring buffer with a producer head index and a consumer tail index in hub RAM"
     code: |
       ' Hub memory layout
       CON
@@ -223,13 +223,15 @@ producer_consumer_patterns:
       ' Each COG has mailbox
       CON
         mailbox_size    = 16         ' Bytes per mailbox
-        mailbox_base    = $7F000
+        mailbox_base    = $72000     ' below the last 16KB ($7C000..$7FFFF)
 
       DAT
               org 0
       ' Send message to COG
       send_to_cog
               ' PA = target COG, PB = message
+              mov     mask, #1
+              shl     mask, pa        ' mask bit = target COG
               shl     pa, #4          ' *16 for mailbox offset
               add     pa, ##mailbox_base
               wrlong  pb, pa          ' Write message
@@ -237,8 +239,6 @@ producer_consumer_patterns:
               wrlong  #1, pa          ' Set flag
               
               ' Signal target COG
-              mov     mask, #1
-              shl     mask, target_cog
               cogatn  mask
               ret
       
@@ -263,7 +263,7 @@ producer_consumer_patterns:
 
 smart_pin_repository:
   description: "Use Smart Pins for inter-COG data exchange"
-  benefits: "No hub access needed, very fast"
+  benefits: "A smart pin in a long repository mode holds a long that is written with WXPIN and read with RDPIN or RQPIN"
   pattern: |
     ' Configure repository pin
     setup_repository
@@ -273,18 +273,13 @@ smart_pin_repository:
     
     ' COG A writes
     write_shared_data
-            wypin   data_value, #REPO_PIN
+            wxpin   data_value, #REPO_PIN         ' WXPIN writes the long (smart pin active: DIR = 1)
             ret
     
     ' COG B reads
     read_shared_data
             rdpin   data_value, #REPO_PIN
             ret
-  use_cases:
-    - "Real-time data sharing"
-    - "Status flags"
-    - "Small mailboxes"
-    - "Semaphores"
 
 parallel_processing_patterns:
   work_distribution:
@@ -313,11 +308,11 @@ parallel_processing_patterns:
               ' Check completion status...
     
   barrier_synchronization:
-    description: "All COGs wait at a one-shot barrier (the arrival counter is guarded by a lock: P2 has no atomic add on hub RAM)"
+    description: "All COGs wait at a one-shot barrier (the arrival counter is guarded by a lock)"
     code: |
       ' Shared barrier counter, guarded by a lock
       CON
-        barrier_count   = $7FFF0
+        barrier_count   = $73000     ' below the last 16KB ($7C000..$7FFFF)
         barrier_target  = 8
         barrier_lock    = 3
 
@@ -350,56 +345,31 @@ parallel_processing_patterns:
 synchronization_hazards:
   race_conditions:
     problem: "Multiple COGs accessing shared resource"
-    solution: "Always use locks for shared access"
-    
+    mechanism: "Locks give one cog at a time the exclusive status of owner; all participant cogs must agree on a lock's number and its purpose"
+
   deadlock:
     problem: "Circular lock dependencies"
-    solution: "Always acquire locks in same order"
+    mechanism: "Cog A takes LOCK_1 and then tries LOCK_2 while cog B takes LOCK_2 and then tries LOCK_1; each retries the lock the other holds"
     example: |
-      ' WRONG - can deadlock
-      cog_a   locktry #LOCK_1
-              locktry #LOCK_2
-      
-      cog_b   locktry #LOCK_2    ' Different order!
-              locktry #LOCK_1
-      
-      ' RIGHT - consistent order
-      both    locktry #LOCK_1
-              locktry #LOCK_2
-    
-  priority_inversion:
-    problem: "Low-priority COG holds lock needed by high-priority"
-    solution: "Keep critical sections short"
-    
-  memory_consistency:
-    problem: "Hub access not instantaneous"
-    solution: "Use locks or atomic operations"
+      ' Can deadlock: each cog holds one lock and spins for the other
+      cog_a   locktry #LOCK_1 wc
+      if_nc   jmp     #cog_a
+      .a2     locktry #LOCK_2 wc
+      if_nc   jmp     #.a2
 
-best_practices:
-  lock_usage:
-    - "Document lock assignments clearly"
-    - "Keep critical sections minimal"
-    - "Always release locks on all exit paths"
-    - "Use timeout to prevent infinite wait"
-    - "LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts (architecture/locks.yaml)"
+      cog_b   locktry #LOCK_2 wc     ' Different order
+      if_nc   jmp     #cog_b
+      .b2     locktry #LOCK_1 wc
+      if_nc   jmp     #.b2
+
+      ' Consistent order: both cogs take LOCK_1 first, then LOCK_2
+      both    locktry #LOCK_1 wc
+      if_nc   jmp     #both
+      .both2  locktry #LOCK_2 wc
+      if_nc   jmp     #.both2
     
-  communication:
-    - "Use mailboxes for complex messages"
-    - "Use attention for signaling"
-    - "Use repository pins for fast sharing"
-    - "Design lock-free algorithms when possible"
-    
-  debugging:
-    - "Add lock ownership tracking"
-    - "Log lock acquire/release"
-    - "Detect deadlocks with timeouts"
-    - "Use debug monitor for inspection"
-    
-  performance:
-    - "Minimize lock contention"
-    - "Use lock-free algorithms"
-    - "Batch operations under single lock"
-    - "Consider COG affinity for data"
+lock_15:
+  - "LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts (architecture/locks.yaml)"
 
 sources:
   - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LOCKS"

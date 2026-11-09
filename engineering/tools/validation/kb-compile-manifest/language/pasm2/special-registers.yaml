@@ -45,7 +45,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [subroutine, param, handler, label]
   - at: fixed_special_registers.PTRA.usage
-    fp: "f2b31d20676bcbab"
+    fp: "2154d9c1eb2f52ac"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: fixed_special_registers.PTRA.examples[0].code
@@ -54,7 +54,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [data, hub_addr]
   - at: fixed_special_registers.PTRB.usage
-    fp: "fed20e9f5691dca3"
+    fp: "27429929a3f25e2a"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: fixed_special_registers.PTRB.examples[0].code
@@ -63,7 +63,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [data, hub_addr]
   - at: fixed_special_registers.DIRA.usage
-    fp: "ea2a005a463895dd"
+    fp: "9900f0f546127325"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: fixed_special_registers.DIRA.examples[0].code
@@ -71,7 +71,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: fixed_special_registers.DIRB.usage
-    fp: "8be293501ee79458"
+    fp: "99d0d811a38706b8"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: fixed_special_registers.DIRB.examples[0].code
@@ -79,7 +79,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: fixed_special_registers.OUTA.usage
-    fp: "fe942c251a40d202"
+    fp: "671625dc1fa99640"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: fixed_special_registers.OUTA.examples[0].code
@@ -87,7 +87,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: fixed_special_registers.OUTB.usage
-    fp: "66798d3f38d7b801"
+    fp: "cf50e7cb2041b13b"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: fixed_special_registers.OUTB.examples[0].code
@@ -96,7 +96,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [pattern, mask]
   - at: fixed_special_registers.INA.usage
-    fp: "6d85f92ae3b7a26c"
+    fp: "ca24d3979a79c50b"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: fixed_special_registers.INA.examples[0].code
@@ -105,7 +105,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [state, inputs]
   - at: fixed_special_registers.INB.usage
-    fp: "1c6482bd6515a9f7"
+    fp: "0684943a868cbdbd"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: fixed_special_registers.INB.examples[0].code

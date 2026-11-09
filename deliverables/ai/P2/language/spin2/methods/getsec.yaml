@@ -29,15 +29,13 @@ examples:
           next_run += 10
     description: "Schedule periodic tasks"
 notes:
-  - "Based on system counter divided by clkfreq"
+  - "Uses the 64-bit system counter and CLKFREQ"
   - "32-bit value wraps after ~136 years"
   - "1-second resolution"
   - "Good for long-duration timing -- in a cog whose four-cog group was kept running (see silicon_errata)"
   - "More convenient than GETMS for human-readable times"
-  - "Handles clock frequency changes automatically"
 silicon_errata:
   stale_upper_long_after_missed_wrap:
-    erratum: "E3"
     effect: "GETSEC() is computed from the calling cog's 64-bit counter (GETCT WC + GETCT, divided by clkfreq), so it reads short in a cog whose group of four (cogs 0-3 or 4-7) had no running cog at a wrap of the lower long, until that group runs through its next wrap: 2^32 clocks = 21.47 s at 200 MHz per missed wrap. Workaround: keep a cog of the group running at every wrap (a keeper cog started first), or take no time in that group until it has run through one wrap. Full account: language/pasm2/getct.yaml silicon_errata."
     verified_against: "EF-068, EF-082"
 timing:
@@ -45,10 +43,6 @@ timing:
     Spin2 methods execute via the bytecode interpreter. Clock count: not documented.
 
 aliases:
-  - "GETSEC erratum E3"
-  - "erratum E3"
-  - "P2 erratum E3"
-  - "E3 erratum"
   - "GETSEC reads short in cogs 4-7"
 
 related:
@@ -64,3 +58,5 @@ see_also:
   - "language/spin2/concepts/timing_operations.yaml"
   - "language/spin2/methods/getct.yaml"
   - "language/spin2/methods/getms.yaml"
+sources:
+  - "description, returns and notes (64-bit system counter and CLKFREQ; rolls over every 136 years): Parallax Propeller 2 Spin2 Language Documentation v55, GETSEC() : Seconds"

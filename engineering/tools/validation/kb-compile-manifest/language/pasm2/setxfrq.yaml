@@ -3,19 +3,10 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "dd2d6b95720b1301"
+    fp: "25c0be9a4fb03d8c"
     compile: fragment
     wrap: pasm2-dat
-  - at: examples[1].code
-    fp: "c231935213bdbb36"
-    compile: fragment
-    wrap: pasm2-dat
-  - at: examples[2].code
-    fp: "f240de33d3a2f843"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [streamer_mode=con]
   - at: frequency_formula.formula
-    fp: "670e43b25b5afbbc"
+    fp: "43b4d355c127ec72"
     compile: not-code
     reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"

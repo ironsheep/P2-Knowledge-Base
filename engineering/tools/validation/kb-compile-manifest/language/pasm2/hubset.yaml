@@ -3,29 +3,45 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: safe_clock_switching.sequence.step_1.code
-    fp: "99ae2ac683d207b0"
+    fp: "22a3242ae348a489"
     compile: fragment
     wrap: pasm2-dat
     assumes: [pll_config_mode=con]
   - at: safe_clock_switching.sequence.step_2.code
-    fp: "09d1105e8820fd21"
+    fp: "c2eb4eedb844ea04"
     compile: fragment
     wrap: pasm2-dat
     assumes: [clkf, pll_wait]
   - at: safe_clock_switching.sequence.step_3.code
-    fp: "b7debfe69372c97f"
+    fp: "007334dc3c3970ad"
     compile: fragment
     wrap: pasm2-dat
     assumes: [pll_active_mode]
   - at: examples.enable_crystal.code
-    fp: "a420fed2ee6adc9b"
+    fp: "9da22f4c8549a79e"
     compile: fragment
     wrap: pasm2-dat
   - at: examples.pll_200mhz.code
-    fp: "36451d6307143fb0"
+    fp: "e6098d2bfe4513e3"
     compile: fragment
     wrap: pasm2-dat
   - at: examples.chip_reset.code
     fp: "437ab0d2e2b0205e"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: prng_seeding.description
+    fp: "b697401eccb9c3c0"
+    compile: not-code
+    reason: "YAML description prose (English sentences on PRNG seeding), not code"
+  - at: examples.seed_prng.code
+    fp: "98c8d7039e617c39"
+    compile: fragment
+    wrap: pasm2-dat
+  - at: safe_clock_switching.description
+    fp: "29237451c9303f97"
+    compile: not-code
+    reason: "YAML description prose (English sentences on the clock-switch order), not code"
+  - at: safe_clock_switching.sequence.step_4.code
+    fp: "04e452ff2b320a18"
     compile: fragment
     wrap: pasm2-dat

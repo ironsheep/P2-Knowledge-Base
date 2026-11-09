@@ -12,21 +12,21 @@ blocks:
     wrap: spin2-top
     assumes: [index, pin_array, current_pin, service_resource, max_index]
   - at: implementation_patterns.hub_cog_transfer.code
-    fp: "cc2aac8d599d58d1"
+    fp: "d51b47a35bec9111"
     compile: fragment
     wrap: spin2-top
     assumes: [activeCount, count, CONFIG_LONGS=con:16, config_start]
-  - at: common_applications.serial_port_multiplexer.example
+  - at: examples.serial_port_multiplexer.example
     fp: "6a64e9f45533c7a6"
     compile: fragment
     wrap: spin2-top
     assumes: [RX1=con, TX1=con, RX2=con, TX2=con, serial.addPort(5), serial.start(0), serial.txStr(2)]
-  - at: common_applications.multi_spi_manager.example
+  - at: examples.multi_spi_manager.example
     fp: "64f915c58dc74420"
     compile: fragment
     wrap: spin2-method
     assumes: [device, MAX_DEVICES=con, deviceActive, chipSelect, sendSPI()->1/1, deviceData]
-  - at: common_applications.pwm_channel_controller.example
+  - at: examples.pwm_channel_controller.example
     fp: "f20867dd0ef90e75"
     compile: fragment
     wrap: spin2-method

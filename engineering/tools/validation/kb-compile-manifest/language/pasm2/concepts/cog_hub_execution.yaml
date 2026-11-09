@@ -18,22 +18,22 @@ blocks:
     wrap: pasm2-dat
     assumes: [load_cog_code]
   - at: performance_comparison.timing_critical.cogexec
-    fp: "5227f9871de55c88"
+    fp: "7bf7195e964edf59"
     compile: fragment
     wrap: pasm2-dat
     assumes: [a, b, c, d, e]
   - at: performance_comparison.timing_critical.hubexec
-    fp: "e3114cc4eeb40ab6"
+    fp: "aa7c64c89950851c"
     compile: fragment
     wrap: pasm2-dat
     assumes: [count, a, b, c, d, e]
   - at: performance_comparison.memory_intensive.cogexec
-    fp: "4ab94a68c954dbe3"
+    fp: "c956573166137879"
     compile: fragment
     wrap: pasm2-dat
     assumes: [value, ptr]
   - at: performance_comparison.memory_intensive.hubexec
-    fp: "fd909a0ac78de143"
+    fp: "8941e3ce30e8afa7"
     compile: fragment
     wrap: pasm2-dat
     assumes: [value, ptr]
@@ -63,11 +63,11 @@ blocks:
     wrap: pasm2-dat
     assumes: [loaded_func, requested_func, load_function, function_base]
   - at: common_mistakes[0].wrong
-    fp: "6f730c7e6ae3cc83"
+    fp: "cb34b913c525a25c"
     compile: fragment
     wrap: pasm2-dat
   - at: common_mistakes[0].right
-    fp: "5d0168a0a5a41169"
+    fp: "ff955f37b85db788"
     compile: fragment
     wrap: pasm2-dat
   - at: common_mistakes[1].right
@@ -75,29 +75,19 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [load_cog_code]
-  - at: common_mistakes[5].wrong
-    fp: "e3d11aea99b85e29"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [overlay_base]
-  - at: common_mistakes[5].right
-    fp: "6dcb4ee23e20863f"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [overlay_base]
   - at: common_mistakes[1].wrong
     fp: "11b4b99b968d8b24"
     compile: fragment
     wrap: pasm2-dat
   - at: common_mistakes[2].wrong
-    fp: "428755ac053cc9b6"
+    fp: "f5afbc08a293e37f"
     compile: not-code
     reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
   - at: common_mistakes[3].wrong
-    fp: "9e58416465fe15fb"
+    fp: "066c7d4163c1dab9"
     compile: not-code
     reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
-  - at: common_mistakes[4].wrong
-    fp: "8d38582ca321e3f7"
+  - at: fifo_behavior.summary
+    fp: "a5eaa3aa09a60047"
     compile: not-code
-    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
+    reason: "English prose description, not code"

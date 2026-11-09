@@ -1,19 +1,20 @@
 concept: resource_ownership
 title: "Force 1 — Resource Ownership and Timing Domains"
 category: decomposition_reasoning
-source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (cog buses OR'd 'in the same way DIR and OUT bits are OR'd before going to the pins')"
+source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (cog buses OR'd 'in the same way DIR and OUT bits are OR'd before going to the pins') and LOCKS; P2 hardware verification, EF-114 (one board, P0 with no smart pin mode, cog 0 and one worker cog: cog 0 DIR 1 OUT 0 with the worker DIR 0 OUT 1 reads 0, and cog 0 DIR 0 OUT 1 with the worker DIR 1 OUT 0 reads 0); P2 hardware verification, EF-105 (one board, plain pin at P_LOW_15K, cog 0 DIR 1 OUT 0 and a worker cog DIR 1 OUT 1 reads 1); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, HUB (atomic operation per Hub Access Window, writing a value to one Hub RAM location), p.24; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES (16 semaphore bits with atomic read-modify-write operations), p.2; CP-019 (a child object's VAR is per instance and its DAT is shared; the map shows one DAT entry for the one shared image). Authority-tier PRINCIPLE, HEURISTIC and EXAMPLE text carries the layer's design guidance, grounded in the reference canon of the decomposition glossary (listed under related); it states no P2 fact beyond those cited here."
 
 summary: |
-  The primary decomposition force, and the only one that is a CORRECTNESS rule rather
+  The primary decomposition force, and the only one that is a correctness rule rather
   than a quality preference. Every serialized, stateful hardware resource — an I2C bus,
   a one-wire WS2812 chain, a smart pin mid-transaction — is a single thing that can be
-  in exactly one state at a time. The object set must mirror that: ONE owner per
+  in exactly one state at a time. The object set must mirror that: one owner per
   resource, and the object boundary traces the wire. This force makes the primary cut
   (usually a cog boundary) and decides singleton-vs-instance from sharing topology.
 
   This entry carries the five force-fields (what_it_is, why_on_p2, how_it_cuts, example,
-  failure_if_ignored). Its spine is PHYSICS: P2 pin outputs are wire-OR'd with no
-  hardware bus mutex, so singular ownership is non-negotiable, not stylistic.
+  failure_if_ignored). Its spine is PHYSICS: a cog's OUT bit reaches a pin only through
+  that cog's own DIR bit, and no hardware arbiter for a pin or bus shared by several
+  cogs is documented, so single ownership is a correctness constraint.
 
 # ----- the five required force-fields -----
 
@@ -29,47 +30,55 @@ what_it_is:
 
 why_on_p2:
   authority_tier: PHYSICS  # the spine is silicon; the conclusion drawn from it is PRINCIPLE (inline-tagged)
+  source: "P2 hardware verification, EF-114 and EF-105 (one board; EF-114: P0 with no smart pin mode, cog 0 DIR 1 OUT 0 with a worker cog DIR 0 OUT 1 reads 0, and cog 0 DIR 0 OUT 1 with the worker DIR 1 OUT 0 reads 0; EF-105: plain pin at P_LOW_15K, cog 0 DIR 1 OUT 0 and a worker cog DIR 1 OUT 1 reads 1)"
   body: |
     This is not a style preference; it is a correctness constraint that comes straight
     out of the silicon.
 
-    [PHYSICS] P2 pin outputs are OR'd together — there is NO hardware mutex on pin
-    access. Two cogs driving the same pin both contribute to the OR'd result; two cogs
-    interleaving on the same SDA/SCL is not "a race you might lose," it is guaranteed
-    protocol corruption, because a bus transaction is a multi-step sequence that assumes
-    a single agent.
+    [PHYSICS] On a pin with no smart pin mode, a cog's OUT bit reaches the pin only
+    through that cog's own DIR bit: with one cog at DIR high, OUT low and another at
+    DIR low, OUT high, the pin reads low, whichever cog is which. With two cogs both at
+    DIR high and different OUT bits on a pin whose low side drives through 15 kOhm and
+    whose high side is fast, the pin reads high. Parallax's documents also give: DIR and
+    OUT bits from all cogs are OR'd before going to the pins. Not documented: the level
+    when two cogs both hold DIR high with different OUT bits at any other drive setting,
+    and a hardware arbiter for a pin or bus shared by several cogs.
 
-    [PHYSICS] Each cog's DIR and OUT bits for a pin are OR'd with every other cog's
-    before they reach the pin.
+    [PRINCIPLE] A bus transaction is a multi-step sequence that assumes a single agent,
+    so two cogs interleaving on the same SDA/SCL corrupt the protocol unless their
+    turns are coordinated.
 
-    [PHYSICS] A single-long hub read or write is atomic, and the P2 provides 16 locks
-    and cog-attention signalling to coordinate explicitly — but these protect a shared
-    datum, they do not arbitrate a multi-step bus protocol.
+    [PHYSICS] A single atomic operation is performed in a cog's hub access window, such
+    as writing a value to one hub RAM location, and the P2 provides 16 locks and
+    cog-attention signalling to coordinate explicitly.
 
-    [PRINCIPLE] Therefore the cleanest coordination is STRUCTURAL: make the resource
+    [PRINCIPLE] Those coordinate cooperating cogs; they do not arbitrate a multi-step
+    bus protocol.
+
+    [PRINCIPLE] Therefore the cleanest coordination is structural: make the resource
     un-shareable by giving it a single owning object in a single cog. The hardware's
-    lack of arbitration is precisely WHY ownership must be explicit and singular in
+    lack of a documented arbiter is why ownership must be explicit and singular in
     software. An agent that knows this why will generalize it to any serialized
     resource; one that memorizes "use a lock" will eventually interleave a protocol.
   grounding:
-    - "OR'd pins / no bus mutex — architecture/p2-architecture-mental-model.yaml (pin_io); architecture/smart_pins.yaml (pin_output_hierarchy)"
-    - "Single-long hub R/W atomic — architecture/p2-architecture-mental-model.yaml (hub_ram)"
+    - "A cog's OUT gated by its own DIR, and the documents' OR statement — architecture/io_pin_timing.yaml (cog_out_gated_by_own_dir); architecture/smart_pins.yaml (pin_output_hierarchy); architecture/p2-architecture-mental-model.yaml (pin_io)"
+    - "Atomic hub access window operation — architecture/hub.yaml"
     - "16 locks + cog-attention coordination — architecture/locks.yaml (total_locks); architecture/cog_attention.yaml"
     - "8 independent cogs (one can own a resource with deterministic timing) — architecture/cog.yaml (cog_independence)"
 
 how_it_cuts:
   authority_tier: PRINCIPLE
   body: |
-    This is the PRIMARY cut, and it is usually a COG boundary, not merely an object
+    This is the primary cut, and it is usually a cog boundary, not merely an object
     boundary. Group devices by which wire they sit on and what timing budget that wire
     must meet, then give each group one owning cog and one transport object.
   singleton_vs_instance:
     authority_tier: HEURISTIC
     rule: |
       The sharing topology — not the protocol — decides the transport's state model:
-      - Several devices sharing one bus in one cog -> a DAT-state SINGLETON transport
+      - Several devices sharing one bus in one cog -> a DAT-state singleton transport
         (one configuration, many register-level callers).
-      - One device alone on its own bus -> a VAR-state INSTANCE transport
+      - One device alone on its own bus -> a VAR-state instance transport
         (self-contained, no contention to mediate).
     escape_condition: |
       Break the singleton default when two "shared-bus" devices actually demand
@@ -78,22 +87,23 @@ how_it_cuts:
       re-cuts them onto separate owners. Break the instance default when a "sole" device
       will foreseeably gain bus-mates; provision the singleton early to avoid a re-cut.
     n_identical_buses: |
-      Both branches above assume each such bus is UNIQUE in the program. When N IDENTICAL
+      Both branches above assume each such bus is unique in the program. When N identical
       shared buses exist (e.g. two PCA9685 servo trees on two I2C buses), "one owner per
-      bus" still holds, but the DAT-singleton ENCODING does not generalize — DAT is keyed
+      bus" still holds, but the DAT-singleton encoding does not generalize — DAT is keyed
       per compiled image, so one driver file yields one shared region. Re-encode the
       transport (see p2kbArchSharedBusReplication): (a) indexed broker — one image, state
-      arrays keyed by bus-id (recommended); (b) externalized ^struct context — re-entrant,
+      arrays keyed by bus-id; (b) externalized ^struct context — re-entrant,
       caller owns N state blocks; (c) compile-time image fork via image-changing CON
-      overrides (compiler-coupled). The rule is one OWNER per bus; the DAT singleton is
+      overrides (compiler-coupled). The rule is one owner per bus; the DAT singleton is
       just the cheapest encoding when bus-count = 1.
     many_cogs_one_bus: |
-      The singleton above assumes the many callers live in ONE cog. When a single
-      serialized bus must be reached from MULTIPLE COGS (e.g. a PSRAM framebuffer written
+      The singleton above assumes the many callers live in one cog. When a single
+      serialized bus must be reached from multiple cogs (e.g. a PSRAM framebuffer written
       by a renderer cog and read by a signal-generator cog), neither a DAT singleton nor a
-      VAR instance fits: the P2 has no cog-independent DMA to arbitrate them, so the bus
-      needs an always-resident BROKER cog with a private per-cog mailbox slot (see
-      p2kbArchSharedBusBroker). One OWNER still holds — the broker is the one owner.
+      VAR instance fits. Not documented: a cog-independent hardware path that arbitrates
+      such access, so the bus goes behind an always-resident broker cog with a private
+      per-cog mailbox slot (see
+      p2kbArchSharedBusBroker). One owner still holds — the broker is the one owner.
 
 example:
   authority_tier: EXAMPLE
@@ -106,15 +116,15 @@ example:
     out almost mechanically from the sharing topology:
 
     - Bus 1 carries the servo PWM chip, the IMU, and the battery ADC — all behind a hard
-      ~50 Hz motion deadline. -> ONE cog owns bus 1, and a DAT SINGLETON transport is
+      ~50 Hz motion deadline. -> one cog owns bus 1, and a DAT singleton transport is
       shared by the three register-level chip drivers.
     - Bus 2 carries one device, a voice recognizer that clock-stretches and is polled
-      slowly. -> a DIFFERENT cog owns bus 2, and a VAR INSTANCE transport lives inside
+      slowly. -> a different cog owns bus 2, and a VAR instance transport lives inside
       that one driver. No singleton, because there is nothing to share.
     - Three discrete signals (buzzer, ultrasonic, LED chain) are independent -> separate
       smart-pin objects, owned by whichever cog already owns that timing domain.
 
-    The two transport objects are the SAME protocol implemented twice with different
+    The two transport objects are the same protocol implemented twice with different
     state models — and that is correct, because the sharing topology, not the protocol,
     decided the shape.
 
@@ -125,12 +135,13 @@ failure_if_ignored:
     main(). It compiles, and it even runs in single-cog bring-up. Then the moment two
     cogs touch one bus you get silent corruption that looks like flaky hardware —
     intermittent, timing-dependent, and nearly impossible to debug from the symptom.
-    A count-based "several objects" template, taken literally, IS this failure mode:
+    A count-based "several objects" template, taken literally, is this failure mode:
     it predicts shape from how many devices exist rather than from who shares a wire.
 
 related:
   - architecture/p2-architecture-mental-model.yaml
   - architecture/smart_pins.yaml
+  - architecture/io_pin_timing.yaml
   - architecture/locks.yaml
   - architecture/cog_attention.yaml
   - architecture/cog.yaml
@@ -138,6 +149,7 @@ related:
   - language/spin2/patterns/implementation/spin2_cog_management.yaml
   - architecture/decomposition/shared-bus-replication.yaml
   - architecture/decomposition/shared-bus-broker.yaml
+  - architecture/decomposition/decomposition-glossary.yaml
 
 see_also:
   - "The shared vocabulary and tier legend: p2kbArchDecompositionGlossary"
@@ -151,4 +163,4 @@ see_also:
   - "N identical shared buses — when the DAT-singleton encoding stops generalizing: p2kbArchSharedBusReplication"
   - "One bus shared by many COGS — the resident broker + per-cog mailbox resolution: p2kbArchSharedBusBroker"
 
-oneliner: "Force 1 (correctness rule): one owning cog per serialized hardware resource because P2 pins are OR'd with no bus mutex; sharing topology decides DAT-singleton vs VAR-instance transport."
+oneliner: "Force 1 (correctness rule): one owning cog per serialized hardware resource because a cog's OUT reaches a pin only through its own DIR and no hardware arbiter for a shared bus is documented; sharing topology decides DAT-singleton vs VAR-instance transport."

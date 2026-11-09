@@ -61,7 +61,7 @@ archetypes:
       and often buffered I/O. Callers don't need hardware details.
     characteristics:
       - "start() / stop() lifecycle methods"
-      - "Tracks COG ID for cleanup"
+      - "Tracks COG ID for cleanup, kept as ID + 1: VAR variables start at zero, so a stored 0 means no cog and stop() before any start() stops nothing"
       - "Buffered I/O for non-blocking operation"
       - "Hardware abstraction"
     lifecycle:
@@ -69,24 +69,25 @@ archetypes:
       stop: "Release resources, stop COG, reset state"
     template: |
       CON
-        NO_COG = -1
         BUFFER_SIZE = 256
 
       VAR
-        LONG cog_id
+        LONG cog_id_plus_1      ' 0 = no cog started
         LONG stack[100]
         BYTE rx_buffer[BUFFER_SIZE]
 
-      PUB start(pin, rate) : ok
+      PUB start(pin, rate) : ok | id
         stop()    ' Stop if already running
         ' Initialize and start COG
-        cog_id := COGSPIN(NEWCOG, driver_loop(), @stack)
-        ok := (cog_id >= 0)
+        id := COGSPIN(NEWCOG, driver_loop(), @stack)
+        IF id >= 0
+          cog_id_plus_1 := id + 1
+        ok := (id >= 0)
 
       PUB stop()
-        IF cog_id >= 0
-          COGSTOP(cog_id)
-          cog_id := NO_COG
+        IF cog_id_plus_1
+          COGSTOP(cog_id_plus_1 - 1)
+          cog_id_plus_1 := 0
 
       PRI driver_loop()
         ' Background processing
@@ -287,24 +288,26 @@ archetypes:
       - "Can update parameters while running"
     template: |
       VAR
-        LONG cog_id
+        LONG cog_id_plus_1      ' 0 = no cog started
         LONG params[4]    ' Parameter block for PASM COG
 
-      PUB start(pin, frequency) : ok
+      PUB start(pin, frequency) : ok | id
         stop()
         params[0] := pin
         params[1] := CLKFREQ / frequency
         params[2] := params[1] / 2    ' 50% duty
         params[3] := TRUE             ' Running flag
-        cog_id := COGINIT(COGEXEC_NEW, @pasm_driver, @params)
-        ok := (cog_id >= 0)
+        id := COGINIT(COGEXEC_NEW, @pasm_driver, @params)
+        IF id >= 0
+          cog_id_plus_1 := id + 1
+        ok := (id >= 0)
 
       PUB stop()
-        IF cog_id >= 0
+        IF cog_id_plus_1
           params[3] := FALSE   ' Signal PASM to stop
           WAITMS(1)
-          COGSTOP(cog_id)
-          cog_id := -1
+          COGSTOP(cog_id_plus_1 - 1)
+          cog_id_plus_1 := 0
 
       PUB set_duty(percent)
         percent := percent #> 0 <# 100
@@ -430,12 +433,12 @@ anti_patterns:
         ' Forgot to stop COG and release lock!
     correct: |
       PUB stop()
-        IF cog >= 0
-          COGSTOP(cog)
-          cog := -1
-        IF lock >= 0
-          LOCKRET(lock)
-          lock := -1
+        IF cog_plus_1                 ' cog ID + 1; 0 = no cog
+          COGSTOP(cog_plus_1 - 1)
+          cog_plus_1 := 0
+        IF lock_plus_1                ' lock number + 1; 0 = no lock
+          LOCKRET(lock_plus_1 - 1)
+          lock_plus_1 := 0
 
   - anti_pattern: "oversized_public_interface"
     severity: "design"
@@ -473,9 +476,11 @@ anti_patterns:
       PUB start()
         COGSPIN(NEWCOG, worker(), @stack)    ' What if no COG?
     correct: |
-      PUB start() : ok
-        cog := COGSPIN(NEWCOG, worker(), @stack)
-        ok := (cog >= 0)
+      PUB start() : ok | id
+        id := COGSPIN(NEWCOG, worker(), @stack)
+        IF id >= 0
+          cog_plus_1 := id + 1      ' cog ID + 1; 0 = no cog
+        ok := (id >= 0)
 
   - anti_pattern: "uncontrolled_state_access"
     severity: "integrity"
@@ -491,6 +496,38 @@ anti_patterns:
             ok := TRUE
           OTHER:
             ok := FALSE
+
+  - anti_pattern: "zero_cog_id_stops_cog_0"
+    severity: "stops_wrong_cog"
+    description: "VAR variables start at zero, and 0 is a valid cog ID and lock number. A stop() that tests a raw ID with >= 0 runs COGSTOP(0) (or LOCKRET(0)) when it is called before start() has stored anything, and a start() that begins by calling stop() does exactly that. Keep the ID as ID + 1 so a stored 0 means none"
+    wrong: |
+      VAR
+        LONG cog_id
+
+      PUB start() : ok
+        stop()                    ' cog_id is still 0 here
+        cog_id := COGSPIN(NEWCOG, worker(), @stack)
+        ok := (cog_id >= 0)
+
+      PUB stop()
+        IF cog_id >= 0
+          COGSTOP(cog_id)         ' first call stops cog 0
+          cog_id := -1
+    correct: |
+      VAR
+        LONG cog_id_plus_1        ' 0 = no cog started
+
+      PUB start() : ok | id
+        stop()
+        id := COGSPIN(NEWCOG, worker(), @stack)
+        IF id >= 0
+          cog_id_plus_1 := id + 1
+        ok := (id >= 0)
+
+      PUB stop()
+        IF cog_id_plus_1
+          COGSTOP(cog_id_plus_1 - 1)
+          cog_id_plus_1 := 0
 
 notes:
   - "Objects should have single, clear responsibility"
@@ -516,6 +553,10 @@ related:
   - language/spin2/keywords/VAR.yaml
   - language/spin2/keywords/OBJ.yaml
   - language/spin2/concepts/object-image-dedup.yaml
+
+sources:
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, VAR (variables are initialized to zero at run time); Built-In Methods (COGSPIN and COGINIT return the cog's ID, -1 = no cog free; LOCKNEW returns 0..15, or < 0 if no lock is available); FLOW CONTROL (the 'IF cog / COGSTOP(cog-1)' example keeps a cog as ID + 1)"
+  - "P2 hardware verification, EF-120 (COGSPIN(NEWCOG, ...) as an expression returned a negative value with all 8 cogs running, so the start patterns test the result with >= 0)"
 
 see_also:
   - "Object composition"

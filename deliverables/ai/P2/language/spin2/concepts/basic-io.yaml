@@ -11,15 +11,15 @@ summary: |
   between pin configuration (electrical characteristics) and pin operation (read/write).
 
 description: |
-  P2 provides 64 general-purpose I/O pins (P0-P63) that can be controlled individually
+  P2 provides 64 Smart I/O pins (P0-P63) that can be controlled individually
   or in groups. Each pin can be configured for drive strength, then
-  operated as simple digital I/O. This is distinct from autonomous smart pin modes where
-  the pin operates independently.
+  operated as simple digital I/O. This is distinct from smart pin modes, where the
+  smart pin circuit performs an autonomous function on the pin.
 
 core_concept_configuration_vs_operation:
   critical_distinction: |
-    Pin electrical characteristics such as drive strength are CONFIGURATION
-    that persists while you perform normal I/O operations. These are not autonomous modes.
+    Pin electrical characteristics such as drive strength are configuration
+    that persists while you perform normal I/O operations. These are not smart pin modes.
     
   configuration_layer:
     purpose: "Set electrical characteristics"
@@ -39,7 +39,7 @@ pin_architecture:
   source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES (features summary), p.2; Special-purpose Registers (table), p.14; Smart I/O Pins, Direction and State (I/O Pin Registers table), p.21"
   pin_count: 64
   pin_range: "P0 to P63"
-  datasheet_statement: "64 Smart I/O pins, each with: ... Separate drive modes for high and low output: logic / 1.5 k / 15 k / 150 k / 1 mA / 100 µA / 10 µA / float"
+  pin_features: "64 Smart I/O pins, each with: ... Separate drive modes for high and low output: logic / 1.5 k / 15 k / 150 k / 1 mA / 100 µA / 10 µA / float"
   register_split:
     dira_outa_ina: "P0-P31"
     dirb_outb_inb: "P32-P63"
@@ -49,7 +49,7 @@ pin_architecture:
     drive_modes: "Separate drive modes for high and low output: logic / 1.5 k / 15 k / 150 k / 1 mA / 100 µA / 10 µA / float. The eight rungs, their %HHH/%LLL encodings and their P_* constant names are defined once in architecture/pin-drive-configuration.yaml."
     input_modes: "Logic, Schmitt, pin-to-pin-comparator, and 8-bit-level-comparator input modes"
     power_grouping: "Externally powered in blocks of 4 for clean analog Vdd reference"
-  no_milliamp_ladder: "The datasheet's drive list is the whole list. No per-pin milliamp drive ladder and no programmable slew rate exists; see architecture/pin-drive-configuration.yaml no_other_rungs."
+  no_milliamp_ladder: "Not documented: a drive rung beyond these eight, and a slew-rate setting. See architecture/pin-drive-configuration.yaml no_other_rungs."
 
 control_registers:
   source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Special-purpose Registers, p.14; Smart I/O Pins, Direction and State (I/O Pin Registers), p.21; debug_overlap: the same datasheet, cog RAM register map (INA / INB also debug interrupt call and return addresses), p.13"
@@ -130,7 +130,7 @@ multi_pin_operations:
       PINFLOAT(16 ADDPINS 7)  ' Pins 16-23 float
       
   register_access:
-    description: "Direct register manipulation for advanced control"
+    description: "Direct access to the DIRx, OUTx and INx registers"
     example: |
       DIRA := %11110000        ' P7-P4 outputs, P3-P0 inputs
       OUTA := %10100000        ' P7=1, P5=1, others=0
@@ -158,10 +158,9 @@ pin_field_encoding:
     syntax: "top_pin..bottom_pin"
     example: "15..8 = pins 8 through 15 (same pin field as 8 ADDPINS 7)"
     wrapping_note: "Wraps within the 32-pin block if top_pin < bottom_pin"
-    use_case: "Primarily for constants and readability"
 
   wrapping_behavior:
-    critical_rule: "Pin fields wrap WITHIN 32-pin blocks only"
+    critical_rule: "Pin fields wrap within 32-pin blocks only"
     p0_p31_block: "Pins 0-31 wrap within themselves"
     p32_p63_block: "Pins 32-63 wrap within themselves"
     example_no_wrap: "8 ADDPINS 7 = pins 8-15 (no wrapping)"
@@ -172,32 +171,24 @@ internal_pull_resistors:
   source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Mode Legend, p.24; FEATURES, p.2. THAT IS THE AUTHORITY HERE -- documentary, not empirical. EF-063 and EF-064 (real P2, 2026-08-20) corroborate that the mechanism behaves as described -- a 15 kOhm drive with DIR high holds a net, and anything stronger overpowers it -- but they establish it INCIDENTALLY, as the rig apparatus certifying other measurements: EF-063 is a streamer-fed DAC %TT finding and EF-064 a streamer pin-placement finding. Neither is a pull-up/drive-strength finding, and the ledger contains none. yes_you_can_pull_a_line_high_or_low (USB mode quote): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES. the_dir_rule (Pin Mode Legend DIR quote): the same datasheet, Pin Mode Legend, p.24"
   yes_you_can_pull_a_line_high_or_low: |
     Yes -- the P2 can hold a line weakly high or weakly low, and the constants that
-    do it are P_HIGH_15K and P_LOW_15K (the whole ladder is below). In your circuit
+    do it are P_HIGH_15K and P_LOW_15K (the drive-mode list is below). In your circuit
     this behaves as a pull-up or pull-down behaves: it holds the net, and a stronger
     external driver overpowers it. The same vocabulary is used for these same
     ladder rungs -- USB mode is described as "two 15k pull-downs for 'host' or a
     1.5k pull-up and a float for 'device'".
 
-    ONE THING DIFFERS FROM THE PULL-UP YOU ARE USED TO, and it is the thing that
-    breaks code: see the_dir_rule below. The pull is a property of DRIVING, so the
-    pin must stay an output. Drop DIR and the pull is gone.
+    One thing differs from a dedicated pull-up: see the_dir_rule below. The drive
+    applies only while the pin is an output, so dropping DIR removes it.
   how_the_p2_does_it: |
-    The P2 has no dedicated bias-resistor network to switch on -- the Pin Mode
-    Legend enumerates the whole %M..M field (C, I, O, HHH, LLL) and there is no
-    bias-resistor selector among them. What it has instead is per-side DRIVE
-    STRENGTH: the high side and the low side each pick one rung of the same
+    The %M..M field holds C, I, O, HHH and LLL, with no pull-resistor selector
+    among them. The high side and the low side each pick one rung of the same
     eight-rung ladder (logic / 1.5 k / 15 k / 150 k / 1 mA / 100 uA / 10 uA /
-    float). Choosing a resistive rung and driving to a rail is how you get the
-    effect; that is why the DIR rule applies and why a dedicated pull-up bit is
-    not what you are looking for.
+    float). A resistive rung driving to a rail gives the effect of a pull-up or
+    pull-down, which is why the DIR rule applies.
   the_dir_rule: |
-    A drive selection is a property of DRIVING, so it is live only while the pin
-    drives. Configuring a weak drive and then dropping DIR gives a plain
-    high-impedance input with the selection INACTIVE. The authority for that is
-    the Datasheet Pin Mode Legend -- "DIR = direction bit; 0: input (float),
-    1: output (drive)"
-    -- It is the reason the older form of this
-    block -- weak drive followed by a float -- does not work.
+    A drive selection applies only while the pin drives: DIR is the direction
+    bit, 0 for input (float) and 1 for output (drive). With DIR low, the pin is
+    a plain high-impedance input and the selected drive is inactive.
   ladder_definition_home: architecture/pin-drive-configuration.yaml
   pull_a_line_high:
     intent: "hold a line high weakly, so a stronger external drive can overpower it"
@@ -206,23 +197,19 @@ internal_pull_resistors:
     example: |
       pinclear(16)                 ' clear any previous smart-pin configuration
       wrpin(16, P_HIGH_15K)        ' high side drives through 15 kOhm
-      pinhigh(16)                  ' DIR = 1, OUT = 1 -- REQUIRED; pinfloat() here floats the pin
+      pinhigh(16)                  ' DIR = 1, OUT = 1; pinfloat() here floats the pin
       waitms(1)                    ' settle: a weak drive into pin and wire capacitance
       level := pinread(16)         ' reads 1 unless something stronger holds the line low
   pull_a_line_low:
-    intent: "hold a line low weakly, so an undriven pin reads 0 for a stated reason"
+    intent: "hold a line low weakly, so a stronger external drive can overpower it"
     mode_word: "P_LOW_15K"
     required_pin_state: "DIR = 1, OUT = 0"
     example: |
       pinclear(16)
       wrpin(16, P_LOW_15K)         ' low side drives through 15 kOhm
-      pinlow(16)                   ' DIR = 1, OUT = 0 -- REQUIRED
+      pinlow(16)                   ' DIR = 1, OUT = 0
       waitms(1)
       level := pinread(16)         ' reads 0 unless something stronger holds the line high
-  use_cases:
-    - "Button inputs without external resistors -- weak high drive, DIR high, button pulls to ground"
-    - "Holding an unused or undriven line at a known level for a stated reason"
-    - "Weak side of a bidirectional line, so an external driver can overpower it"
 
 smart_pin_to_basic_io_transition:
   clearing_smart_pin:
@@ -239,27 +226,26 @@ smart_pin_to_basic_io_transition:
       PINSTART(16, mode, x, y)        ' Set new mode
       
     manual_sequence: |
-      PINFLOAT(16)                    ' DIR=0 (REQUIRED)
+      PINFLOAT(16)                    ' DIR=0
       WRPIN(16, mode)                 ' Configure mode
       WXPIN(16, x)                    ' Set X parameter
       WYPIN(16, y)                    ' Set Y parameter
       PINHIGH(16)                     ' Enable (DIR=1)
+    y_order_note: "In the pulse, transition and asynchronous serial transmit modes, write Y with WYPIN after raising DIR: a WYPIN issued before DIR rises does not take effect. See architecture/smart_pins.yaml reset_before_configure."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS ('A smart pin should be configured while its DIR bit is low, holding it in reset'); P2 hardware verification, EF-011 (a WYPIN before DIR rises does not take effect in the pulse, transition and asynchronous serial transmit modes)"
 
-safe_initialization_patterns:
-  method_calls_are_safe:
-    note: "PINHIGH/PINLOW set DIR and OUT atomically"
+out_and_dir_order:
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, pin methods (PINHIGH, PINLOW: drive PinField pin(s) high or low); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Smart I/O Pins, Direction and State (I/O Pin Registers table, OUTA/OUTB: corresponding DIR bit must be high to enable output), p.21"
+  methods:
+    fact: "PINHIGH and PINLOW drive a pin high or low: one call sets DIR and OUT. Not documented: any ordering of the DIR and OUT changes inside the method."
     example: |
-      PINHIGH(16)  ' No glitch - DIR and OUT set together
-      
-  register_access_caution:
-    wrong: |
-      OUTA |= (1 << 16)  ' Glitch: OUT changes while floating
-      DIRA |= (1 << 16)
-    correct: |
-      OUTA &= !(1 << 16) ' Set desired state first
-      DIRA |= (1 << 16)  ' Then enable output
-      ' OR just use:
-      PINLOW(16)         ' Atomic, no glitch
+      PINHIGH(16)  ' DIR = 1, OUT = 1
+
+  registers:
+    fact: "The OUT bit can be written while DIR is low; the pin drives the OUT value once DIR is high"
+    example: |
+      OUTA &= !(1 << 16) ' OUT = 0 while DIR is low
+      DIRA |= (1 << 16)  ' DIR = 1, the pin drives low
 
 common_patterns:
   led_blink:
@@ -305,25 +291,11 @@ common_patterns:
         DIRA &= !mask             ' Set as inputs
         result := (INA >> 16) & $FF
 
-method_vs_register_tradeoffs:
-  methods:
-    advantages:
-      - "Clean, readable code"
-      - "Atomic operations (no glitches)"
-      - "Works with pin fields (ADDPINS)"
-      - "Recommended for most applications"
-    performance: "Slightly slower (method call overhead)"
-    
-  direct_registers:
-    advantages:
-      - "Faster execution (no method call)"
-      - "Operate on arbitrary bit patterns"
-      - "Powerful bit manipulation"
-    disadvantages:
-      - "Must manage DIR/OUT carefully"
-      - "Risk of glitches if done wrong"
-      - "Less readable"
-    use_when: "Performance critical or complex bit patterns needed"
+method_and_register_access:
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, pin methods (PinField arguments) and Pinfields"
+  methods: "PINHIGH, PINLOW, PINTOGGLE, PINFLOAT, PINREAD, PINWRITE, PINSTART and PINCLEAR take a pinfield: a base pin number plus additional pins."
+  direct_registers: "DIRA, DIRB, OUTA, OUTB, INA and INB take arbitrary 32-bit patterns."
+  timing: "Not documented: the execution time of a pin method compared with a register write."
 
 application_examples:
   seven_segment_display:
@@ -355,36 +327,25 @@ application_examples:
           IF col <> $0F               ' Key pressed?
             RETURN decodeKey(row, col)
             
-  ws2812: "Spin2 WAITUS takes whole microseconds and cannot make sub-microsecond pulses; use a WS2812 driver object (see the WS2811/WS2812 NeoPixel object page under community/quick-bytes and OBEX objects 2857 and 2852)"
+  ws2812: "WAITUS waits a number of microseconds. The OBEX object 2857 is a driver for single-wire smart pixels (e.g., WS2812b); the WS2811/WS2812/WS2812B/WS2813/SK6812X NeoPixel object YAML file is at community/quick-bytes/ws2811-ws2812-ws2812b-ws2813-sk6812x-neopixel-object.yaml. OBEX object 2852 drives the APA102C two-wire smart pixel."
+  source: "ws2812: Parallax Propeller 2 Spin2 Language Documentation v55, WAITUS(Microseconds); OBEX objects 2857 and 2852, descriptions"
 
 multi_cog_pin_coordination:
+  source: "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, COGS (PROCESSORS) (each cog contains an I/O Output Register and an I/O Direction Register), p.14; HUB (common shared resources such as I/O pins are simultaneously accessible by every cog), p.24. Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Cog RAM and Special-purpose Registers, pp.13-14. Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (each smart pin OR's all incoming 34-bit buses from the cogs 'in the same way DIR and OUT bits are OR'd before going to the pins'; the different-times rule and RQPIN) and LOCKS. P2 hardware verification, EF-114 (one board, P0 with no smart pin mode, cog 0 and one worker cog: cog 0 DIR 1 OUT 0 with the worker DIR 0 OUT 1 reads 0, and cog 0 DIR 0 OUT 1 with the worker DIR 1 OUT 0 reads 0). P2 hardware verification, EF-105 (one board, plain pin at P_LOW_15K, cog 0 DIR 1 OUT 0 and a worker cog DIR 1 OUT 1 reads 1)"
   architecture:
-    per_cog_registers: "DIR/OUT/IN registers at $1FA-$1FF exist in each COG's private register RAM"
-    independence: "Each COG controls only its own pin drivers via its DIR bits"
-    shared_access: "All cogs can access all 64 pins; a pin is driven when any cog's DIR bit for it is 1"
+    per_cog_registers: "Each cog has its own DIR and OUT registers, at cog register addresses $1FA-$1FD; INA and INB are at $1FE-$1FF"
+    shared_access: "Each cog has access to all 64 I/O pins"
 
-  coordination_strategies:
-    single_cog_ownership:
-      approach: "Assign each pin to one COG (simplest, recommended for most applications)"
-      implementation: "Only one COG sets DIR=1 for any given pin"
-      advantage: "No coordination overhead, inherently safe"
+  locks:
+    fact: "Locks can be used by cogs to coordinate exclusive access of a shared resource. What a lock represents is up to the application using it, and all participant cogs must agree on a lock's number and its purpose."
 
-    shared_access_with_coordination:
-      approach: "Multiple COGs can share pin access with careful management"
-      requirements:
-        - "Use locks for exclusive access during drive operations"
-        - "COGs must tri-state (DIR=0) before releasing pin to another COG"
-        - "Protocol-based handoff between COGs"
-      use_cases: "Bidirectional protocols, time-multiplexed pin usage, COG handoff"
-
-  critical_rule:
-    avoid: "Multiple cogs simultaneously setting DIR=1 for the same pin unless their combined result is what you want"
-    consequence: "The DIR and OUT bits of all cogs are OR'd before they reach the pins: the pin's output enable is the OR of every cog's DIR bit and its output level is the OR of every cog's OUT bit, so a cog cannot pull low a pin that another cog sets high"
-    hardware_note: "Smart-pin write buses (WRPIN/WXPIN/WYPIN/RDPIN/AKPIN) are OR'd the same way; use RQPIN to read a smart pin from several cogs without bus conflict"
+  cog_outputs_on_one_pin:
+    consequence: "On a pin with no smart pin mode, a cog's OUT bit reaches the pin only through that cog's own DIR bit: with one cog at DIR high, OUT low and another at DIR low, OUT high, the pin reads low, whichever cog is which. With two cogs both at DIR high and different OUT bits on a pin whose low side drives through 15 kOhm and whose high side is fast, the pin reads high. Parallax's documents also give: DIR and OUT bits from all cogs are OR'd before going to the pins. Not documented: the level when two cogs both hold DIR high with different OUT bits at any other drive setting."
+    hardware_note: "Each smart pin OR's the 34-bit buses from all cogs. Cogs that execute WRPIN, WXPIN, WYPIN, RDPIN or AKPIN on the same smart pin must do so at different times; any number of cogs can read a smart pin simultaneously with RQPIN, without bus conflict"
 
   safe_operations:
-    reading: "All COGs can read any pin (INA/INB) simultaneously without coordination"
-    smart_pins: "Smart pin state (RQPIN) can be read by multiple COGs safely"
+    reading: "I/O pins are simultaneously accessible by every cog; each cog reads them through its INA and INB registers"
+    smart_pins: "Any number of cogs can read a smart pin simultaneously with RQPIN, without bus conflict"
 
 anti_patterns:
   - anti_pattern: "missing_output_enable"
@@ -400,17 +361,18 @@ anti_patterns:
       PINSTART(PWM_PIN, P_PWM_TRIANGLE | P_OE, period, duty)
 
   - anti_pattern: "smart_pin_not_cleared"
-    severity: "power_waste"
-    description: "Smart pin keeps running after use, wasting power"
+    severity: "keeps_running"
+    description: "A started smart pin continues while its DIR bit is high; PINCLEAR stops it"
     wrong: |
       PINSTART(ADC_PIN, P_ADC, 0, 0)
       value := RDPIN(ADC_PIN)
-      ' ADC keeps running, consuming power
+      ' the ADC keeps running while DIR is high
     correct: |
       PINSTART(ADC_PIN, P_ADC, 0, 0)
       value := RDPIN(ADC_PIN)
       PINCLEAR(ADC_PIN)            ' Stop smart pin
       PINFLOAT(ADC_PIN)            ' Return to input mode
+    source: "Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Shutdown (Smart I/O continues while its associated DIR bit is high), p.12; Parallax Propeller 2 Spin2 Language Documentation v55, PINCLEAR (DIR=0, then WRPIN=0)"
 
   - anti_pattern: "rdpin_without_data_ready_check"
     severity: "wrong_value"

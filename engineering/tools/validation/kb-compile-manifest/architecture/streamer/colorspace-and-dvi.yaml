@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/architecture/streamer/colorspace-and-dvi.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: dvi.example.code
+    fp: "5cd16d87e2d533a6"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [file:birds_16bpp.bmp]

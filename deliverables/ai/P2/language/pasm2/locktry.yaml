@@ -9,24 +9,25 @@ encoding:
 timing:
   cycles: '2...9, +2 if result'
   type: variable
-description: 'Try to acquire lock D[3:0]. C = 1 if got LOCK.
+description: 'Try to acquire lock D[3:0]. With WC, C = 1 if got LOCK. C is written
+  only when WC is given.
 
 
   P2 provides 16 hardware locks (0-15) for inter-COG synchronization:
 
-  - Atomic test-and-set operation
-
   - Non-blocking (returns immediately)
 
-  - Perfect for resource protection
+  - Locks are semaphore bits with atomic read-modify-write operations
 
-  - Essential for multi-COG coordination
+  - Lock arbitration is performed by the hub in a round-robin fashion, so any cog
+  waiting in a loop to capture a lock gets its fair turn
 
   '
 flags_affected:
   C: Set if LOCK acquired
   Z: No effect
 documentation_level: comprehensive
+documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), OVERVIEW (semaphore bits with atomic read-modify-write operations); LOCKS, Using Locks (WC result, round-robin arbitration, the ways a held lock is released); P2 Instructions v35 - Rev B/C Silicon, LOCKTRY row"
 examples:
 - name: Resource Protection
   description: Protect shared resource access
@@ -79,15 +80,8 @@ related_instructions:
 notes:
 - 16 locks available (0-15)
 - LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts (architecture/locks.yaml)
-- Non-blocking - check C flag for success
-- Always release locks when done
-compiler_operand_format:
-  name: operand_l
-  pattern: D/#0..511
-  description: Destination or immediate value 0-511
-  valueType: 26
-compiler_encoding:
-  operandFormat: 26
+- Non-blocking - with WC, C reports whether the lock was taken (1 = taken); C = 0 means another cog is holding the lock or the lock is not allocated
+- A held lock is released by the holding cog's LOCKREL, and also when the holding cog is stopped by COGSTOP or restarted by COGINIT, or when LOCKRET is executed for the lock
 last_updated: '2025-09-19T16:04:17.561046'
 category: Hub Control
 oneliner: Try to acquire lock

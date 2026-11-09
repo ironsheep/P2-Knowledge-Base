@@ -3,9 +3,10 @@ syntax: COGATN {#}Dest
 brief_description: Cog attention
 category: Event
 description: >-
-  COGATN strobes the attention signal for one or more cogs. Dest supplies a 16-bit
-  value in which bits 0..15 represent cogs 0..15 (the 8-cog part has cogs 0..7); high
-  (1) bits indicate the cog(s) to signal. The receiving
+  COGATN strobes the attention signal for one or more cogs. Dest supplies a bit
+  pattern in which bit n represents cog n (cog 0 is bit 0); high
+  (1) bits indicate the cog(s) to signal. Parallax's documents give the pattern field
+  as Dest[7:0] and as Dest[15:0]. The receiving
   cog(s) then latch the signal, setting an internal flag, and can use any of the
   attention monitor instructions (JATN, JNATN, POLLATN, WAITATN) or interrupts to
   respond and clear the flag. In the intended use case, the cog receiving an attention
@@ -17,36 +18,35 @@ flags_affected:
   C: No effect
   Z: No effect
 parameters:
-- Dest is the register or 9-bit literal whose value (16-bit pattern, bit n = cog n) indicates
+- Dest is the register or 9-bit literal whose value (bit n = cog n) indicates
   which cogs to signal.
 syntax_variants:
 - COGATN {#}D
 self_attention:
-  behavior: "COGATN with the issuing cog's own bit set delivers the strobe to the issuing cog: its own attention event flag is raised, exactly as when another cog strobes it (POLLATN, JATN and WAITATN with a timeout all saw it; the attention interrupt path was not tested)"
-  verified_against: "EF-099"
+  behavior: "COGATN with the issuing cog's own bit set delivers the strobe to the issuing cog: its own attention event flag is raised, as when another cog strobes it, and POLLATN, JATN and WAITATN with a timeout detect it. Not documented: whether a self strobe also triggers an attention interrupt."
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 00L DDDDDDDDD 000111111
   write: —
   c: —
   z: —
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGATN, p.63"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 340 (COGATN: strobe attention of all cogs whose corresponding bits are high in D[15:0]; 2 clocks)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG ATTENTION (the D/# operand supplies a 16-bit value in which bits 0..15 represent cogs 0..15; for each set bit the corresponding cog is strobed, causing an attention event for POLLATN/WAITATN and interrupt use), instruction encoding listing (EEEE 1101011 00L DDDDDDDDD 000111111 COGATN D/#)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, instruction groups list, p.23 (COGATN: Strobe the attention signal of one or more cogs)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGATN, p.63 (Dest is the register or 9-bit literal whose value (lower 8-bit pattern) indicates which cogs to signal; Dest bit positions 7:0 represent cogs 7 through 0; encoding table, 2 clocks; the messaging note)"
+  - "self_attention: hardware-verification ledger EF-099 (a COGATN with the issuing cog's own bit set raised that cog's attention event flag, seen by POLLATN, JATN and WAITATN with a timeout; the attention interrupt path was not tested)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_l
-  pattern: D/#0..511
-  description: Destination or immediate value 0-511
-  valueType: 26
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 26
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
-oneliner: Get the attention of one or more other cogs
+oneliner: Strobe the attention signal of one or more cogs
 related:
-- POLLATN
-- WAITATN
-- JATN
-- JNATN
+- language/pasm2/pollatn.yaml
+- language/pasm2/waitatn.yaml
+- language/pasm2/jatn.yaml
+- language/pasm2/jnatn.yaml
+- architecture/cog_attention.yaml

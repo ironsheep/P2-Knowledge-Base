@@ -1,10 +1,11 @@
 concept: decomposition_glossary
 title: "Decomposition Reasoning Layer — Glossary, Authority-Tier Legend, and Reference Canon"
 category: decomposition_reasoning
+source: "PHYSICS-grounded statements: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Register RAM (General Purpose Registers, $000 through $1EF), p.13, FEATURES (eight cogs, 16 semaphore bits with atomic read-modify-write operations), pp.1-2, and Cogs (all active cogs share the same System Clock), p.13; Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, HUB (a single atomic operation per Hub Access Window, writing a value to one Hub RAM location), p.24; Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS ('in the same way DIR and OUT bits are OR'd before going to the pins'); P2 hardware verification, EF-114 (one board, P0 with no smart pin mode, cog 0 and one worker cog: cog 0 DIR 1 OUT 0 with the worker DIR 0 OUT 1 reads 0, and cog 0 DIR 0 OUT 1 with the worker DIR 1 OUT 0 reads 0). PRINCIPLE, HEURISTIC, PATTERN and EXAMPLE tiers carry the layer's design guidance, grounded in the reference_canon block."
 
 summary: |
   The shared vocabulary for the P2 functional-decomposition reasoning layer. This
-  layer teaches a consuming agent HOW to derive an object/cog decomposition for an
+  layer teaches a consuming agent how to derive an object/cog decomposition for an
   unfamiliar P2 hardware mix; this entry fixes the canonical names every other entry
   in the layer reconciles against, so the same underlying force is never described
   under two labels.
@@ -41,11 +42,11 @@ authority_tier_legend:
       agent_freedom: "None — design within it."
       grounding: "Cites an internal P2KB key/path (the architectural fact)."
     - tier: PRINCIPLE
-      meaning: "A force or trade-off, and WHY it exists."
+      meaning: "A force or trade-off, and why it exists."
       agent_freedom: "Applies it with judgment."
       grounding: "Cites the durable reference canon (author / title / year)."
     - tier: HEURISTIC
-      meaning: "A default WITH an explicit escape condition."
+      meaning: "A default with an explicit escape condition."
       agent_freedom: "Overrides it for a stated reason."
       grounding: "Cites the durable reference canon, plus the escape condition."
     - tier: PATTERN
@@ -81,12 +82,15 @@ decomposition_forces:
         timing-critical pin group) by exactly one cog, and the singleton-vs-instance
         choice for the transport driver, derived from how many devices share the wire.
       p2_mechanism: |
-        Eight independent cogs; pin outputs are wire-OR'd with no hardware bus mutex;
-        a single-long hub read/write is atomic.
+        Eight independent cogs; a cog's OUT bit reaches a pin only through that cog's own
+        DIR bit, and Parallax's documents also give that DIR and OUT bits from all cogs
+        are OR'd before going to the pins; a hub access window carries one atomic operation,
+        such as writing a value to one hub RAM location. Not documented: a hardware arbiter
+        for a pin or bus shared by several cogs.
       physics_grounding:  # inline PHYSICS the PRINCIPLE rests on
         - "8 cogs / cog independence — architecture/cog.yaml (cog_independence); architecture/p2-architecture-mental-model.yaml"
-        - "OR'd pins / no bus mutex — architecture/p2-architecture-mental-model.yaml (pin_io); architecture/smart_pins.yaml (pin_output_hierarchy)"
-        - "single-long hub R/W atomic — architecture/p2-architecture-mental-model.yaml (hub_ram)"
+        - "A cog's OUT gated by its own DIR, and the documents' OR statement — architecture/io_pin_timing.yaml (cog_out_gated_by_own_dir); architecture/smart_pins.yaml (pin_output_hierarchy); architecture/p2-architecture-mental-model.yaml (pin_io)"
+        - "Atomic hub access window operation — architecture/hub.yaml"
       entry: "see_also: resourceOwnership"
     - id: force_2
       canonical_name: "data-flow contract"
@@ -108,10 +112,10 @@ decomposition_forces:
       canonical_name: "rate adaptation"
       also_known_as: ["rate-domain crossing", "clock-domain crossing", "event debounce", "slew / easing"]
       governs: |
-        The objects inserted BETWEEN ownership layers wherever two cadences meet: a
+        The objects inserted between ownership layers wherever two cadences meet: a
         sampler/buffer at each rate-domain boundary, and a slew/easing engine wherever
         a discrete intent must become a continuous device stream. When several devices
-        on ONE bus run at different cadences, the resolution is cooperative
+        on one bus run at different cadences, the resolution is cooperative
         tasks-within-a-cog, not a bus split.
       p2_mechanism: |
         Smart-pin autonomous timing modes, the hub FIFO/streamer for elastic buffering,
@@ -130,9 +134,9 @@ decomposition_forces:
         → policy (behavior). Layer by unit conversion and axis of change, never by line
         or component count.
       p2_mechanism: |
-        Cog RAM is small (512 longs / 496 usable PASM registers), so deep layering
-        trades against per-call cost and cog-local memory — altitude sometimes yields
-        to pragmatism.
+        Cog register RAM is 512 longs, of which $000-$1EF are general-purpose registers,
+        so deep layering trades against per-call cost and cog-local memory — altitude
+        sometimes yields to pragmatism.
       physics_grounding:
         - "Cog-local RAM size bound — architecture/cog.yaml; architecture/p2-architecture-mental-model.yaml (cog_independence)"
       entry: "see_also: altitudeLayering"
@@ -201,7 +205,7 @@ the_three_planes:
       concerns: "Commands and state — low-rate but correctness-critical: atomicity, ordering, ownership of who-may-write-what."
       p2_mechanisms: "Hub mailboxes / parameter blocks, locks, shared state."
       physics_grounding:
-        - "Single-long hub R/W atomic — architecture/p2-architecture-mental-model.yaml (hub_ram)"
+        - "Atomic hub access window operation — architecture/hub.yaml"
         - "16 locks — architecture/locks.yaml (total_locks)"
       relevant_theory: ["CSP rendezvous", "domain-driven aggregates (a lock is a consistency boundary)", "connascence-of-meaning"]
     - id: event_plane
@@ -236,7 +240,7 @@ reference_canon:
     - group: "Concurrent processes"
       works:
         - cite: "Hoare, C.A.R. — \"Communicating Sequential Processes\" — Prentice-Hall, 1985 (orig. CACM, 1978); occam / Transputer lineage — INMOS, occam Programming Manual, 1984."
-          informs: "Cogs are CSP processes, mailboxes are channels. The P2 is very nearly a Transputer reborn — independent processors, a message-passing fabric, no shared OS — inheriting decades of correctness reasoning. Grounds the control plane and data-flow contracts."
+          informs: "Cogs read as CSP processes and mailboxes as channels, an analogy that borrows that literature's correctness reasoning. Grounds the control plane and data-flow contracts."
         - cite: "Kahn, G. — \"The Semantics of a Simple Language for Parallel Programming\" — IFIP Congress, 1974."
           informs: "Kahn process networks: processes communicating only by blocking reads on FIFO channels are determinate regardless of timing — the rule for inter-cog dataflow that survives hub jitter. Grounds the data plane."
     - group: "Dataflow and hardware"
@@ -246,7 +250,7 @@ reference_canon:
         - cite: "Carloni, L.P., McMillan, K.L. & Sangiovanni-Vincentelli, A.L. — \"Theory of Latency-Insensitive Design\" — IEEE TCAD, 2001."
           informs: "Correctness by order, not time — the bridge to the FPGA/spatial domain; jitter tolerance on the data plane."
         - cite: "Chapiro, D.M. — \"Globally-Asynchronous Locally-Synchronous Systems\" — PhD thesis, Stanford University, 1984."
-          informs: "GALS is the exact characterization of the P2 — locally synchronous cogs, an asynchronous hub fabric — importing the whole clock-domain-crossing discipline. Grounds rate adaptation across cogs."
+          informs: "Clock-domain-crossing discipline, an analogy for the rate-domain boundaries between cogs; all active cogs share one system clock. Grounds rate adaptation across cogs."
         - cite: "Kung, H.T. & Leiserson, C.E. — \"Systolic Arrays (for VLSI)\" — in Mead & Conway, Introduction to VLSI Systems, 1980."
           informs: "Rhythmic data through a regular array of processing elements — the spatial-compute mental model for using cogs as pipeline stages."
     - group: "Boundaries and generativity"
@@ -263,6 +267,8 @@ related:
   - language/spin2/concepts/object_archetypes.yaml
   - architecture/cog.yaml
   - architecture/smart_pins.yaml
+  - architecture/io_pin_timing.yaml
+  - architecture/hub.yaml
   - architecture/locks.yaml
   - architecture/fifo.yaml
   - architecture/streamer/overview.yaml

@@ -6,52 +6,64 @@ encoding:
   c: —
   z: —
   clocks: '2'
+encoding_notes:
+- "GETBRK uses the S-field code 000110101, the same code as COGBRK. They are separate instructions that differ in the C Z L bits of the encoding: GETBRK is written CZ0 and takes WC, WZ or WCZ, and COGBRK is written 00L and takes no effect. A GETBRK with no effect (C = 0, Z = 0) would be bit-identical to COGBRK D with a register D (L = 0), so GETBRK has no form without an effect."
 timing:
   cycles: 2
   type: fixed
 description: 'Get cog status / debug-break information into D according to the flag
-  effect. GETBRK REQUIRES a flag effect (WC, WZ, or WCZ); the no-flag form does not
-  assemble.
+  effect. GETBRK takes WC, WZ or WCZ; it has no form without an effect.
 
 
   The flag effect selects which information is retrieved:
 
 
   - WCZ (normal execution): C = 1 if STALLI mode / 0 if ALLOWI mode; Z = 1 if cog
-  started in hubexec / 0 if cogexec. D holds cog internal status: D[22] colorspace
-  converter active, D[21] streamer active, D[20] WRFAST(1)/RDFAST(0), D[19:16] INT3
-  selector, D[15:12] INT2 selector, D[11:08] INT1 selector, D[07:06]/D[05:04]/D[03:02]
-  INT3/INT2/INT1 state (idle/pending/executing), D[01] STALLI mode, D[00] started
-  in hubexec.
+  started in hubexec / 0 if cogexec. D holds cog internal status: D[31:23] = 0,
+  D[22] = 1 if the colorspace converter is active, D[21] = 1 if the streamer is
+  active, D[20] = 1 if WRFAST mode / 0 if RDFAST mode, D[19:16] INT3 selector
+  (set by SETINT3), D[15:12] INT2 selector (set by SETINT2), D[11:08] INT1
+  selector (set by SETINT1), D[07:06] INT3 state, D[05:04] INT2 state, D[03:02]
+  INT1 state (each state: %0x = idle, %10 = interrupt pending, %11 = ISR
+  executing), D[01] = 1 if STALLI mode / 0 if ALLOWI mode, D[00] = 1 if the cog
+  started in hubexec / 0 if cogexec.
 
   - WCZ (during a debug ISR): additionally D[31:24] = 8-bit break code from the last
   ''BRK #/D'' executed during normal execution, and C (also reflected in D[23]) =
   1 if the debug interrupt was from a COGINIT, indicating the cog was (re)started.
 
   - WC: C = LSB of the SKIP/SKIPF/EXECF/XBYTE pattern. D[31:28] = 4-bit CALL depth
-  since the pattern (skipping suspended if not %0000), D[27] = 1 SKIP / 0 SKIPF/EXECF/XBYTE
-  mode, D[26] = LUT sharing enabled, D[25] = XBYTE pending on next _RET_/RET, D[24:16]
-  = 9-bit XBYTE mode, D[15:00] = 16 event-trap flags.
+  since the pattern (skipping suspended if not %0000), D[27] = 1 if SKIP mode / 0 if
+  SKIPF/EXECF/XBYTE mode, D[26] = 1 if LUT sharing is enabled (set by SETLUTS),
+  D[25] = 1 if the top of the stack = $001FF, so XBYTE will execute on the next
+  _RET_ or RET, D[24:16] = 9-bit XBYTE mode (set by ''_RET_ SETQ/SETQ2'' when the
+  top of the stack = $001FF), D[15:00] = 16 event-trap flags: D[15] GETQX/GETQY
+  executed without a prior CORDIC command, D[14] attention requested by cog(s),
+  D[13] streamer read location $1FF of lookup RAM, D[12] streamer NCO rolled over,
+  D[11] streamer finished and now idle, D[10] streamer ready to accept a new
+  command, D[09] hub RAM FIFO interface loaded block count and start address,
+  D[08] pin pattern match occurred, D[07] SE4 event occurred, D[06] SE3 event
+  occurred, D[05] SE2 event occurred, D[04] SE1 event occurred, D[03] CT passed
+  CT1, D[02] CT passed CT2, D[01] CT passed CT3, D[00] INT1, INT2 or INT3 occurred.
 
   - WZ: Z = 1 if no SKIP/SKIPF/EXECF/XBYTE pattern is queued (D = 0), or 0 if a pattern
-  IS queued (D <> 0). D = the full 32-bit SKIP/SKIPF/EXECF/XBYTE pattern, used LSB-first.
-
-
-  Essential for debug infrastructure and for inspecting skip/XBYTE state.
+  IS queued (D <> 0). D = the full 32-bit SKIP/SKIPF/EXECF/XBYTE pattern, used LSB-first
+  to skip instructions in main code.
 
   '
 flags_affected:
   note: >-
-    GETBRK REQUIRES a flag effect -- WC, WZ or WCZ -- and each selects a DIFFERENT
-    result, so "no effect" is never the whole answer for this instruction. The rows
-    below describe the flag when its effect is specified.
+    GETBRK takes WC, WZ or WCZ; it has no form without an effect. Each effect selects
+    a different result. The rows below describe the flag when its effect is specified.
   C: >-
-    With WC: set from the break/status word GETBRK returns. GETBRK has no no-effect
-    form, so C is only meaningful when WC or WCZ is written.
+    With WC: C = LSB of the SKIP/SKIPF/EXECF/XBYTE pattern. With WCZ: C = 1 if STALLI
+    mode / 0 if ALLOWI mode; during a debug ISR, C = 1 if the debug interrupt was from
+    a COGINIT. C is set only when WC or WCZ is written.
   Z: >-
     With WZ: Z = 1 when NO SKIP/SKIPF/EXECF/XBYTE pattern is queued (D = 0), and
-    Z = 0 when a pattern IS queued (D <> 0).
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), GETBRK D WZ: Z = 1 if no SKIP/SKIPF/EXECF/XBYTE pattern queued (D = 0) or 0 if pattern queued (D <> 0)"
+    Z = 0 when a pattern IS queued (D <> 0). With WCZ: Z = 1 if the cog started in
+    hubexec, 0 if it started in cogexec.
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 1101011 CZ0 DDDDDDDDD 000110101 GETBRK D WC/WZ/WCZ and EEEE 1101011 00L DDDDDDDDD 000110101 COGBRK D/#, used by encoding_notes); GETBRK D WCZ (C, Z), GETBRK D WC (C), GETBRK D WZ: Z = 1 if no SKIP/SKIPF/EXECF/XBYTE pattern queued (D = 0) or 0 if pattern queued (D <> 0). No form without an effect: P2 Instructions v35 - Rev B/C Silicon, rows 329 (GETBRK D WC/WZ/WCZ, EEEE 1101011 CZ0 DDDDDDDDD 000110101) and 330 (COGBRK {#}D, EEEE 1101011 00L DDDDDDDDD 000110101): with C = Z = 0 and L = 0 the two encodings are the same word; CP-041 (pnut-ts refuses getbrk x with no effect, Expected WC, WZ, or WCZ; the WC, WZ and WCZ forms are accepted)"
 documentation_level: comprehensive
 examples:
 - name: Read Cog Internal Status
@@ -89,17 +101,11 @@ related_instructions:
 - COGBRK: Trigger breakpoint in another COG
 - NIXINT1/2/3: Cancel a triggered interrupt that is waiting to branch
 notes:
-- Critical for debugger implementation
 - Different flag combinations return different data
-- Used in debug ISR to identify context
-- Works with BRK instruction for debugging
-compiler_operand_format:
-  name: operand_getbrk
-  pattern: D/# WC/WZ/WCZ
-  description: 'Get break address: destination/immediate, REQUIRES effect flags'
-  valueType: 29
-compiler_encoding:
-  operandFormat: 29
+- Within a debug ISR, WCZ returns the break code of the last BRK executed during normal execution
 last_updated: '2025-09-19T16:04:16.902400'
 category: Interrupt
 oneliner: Get breakpoint/cog status into D according to WC/WZ/WCZ
+related:
+  - architecture/interrupts.yaml
+  - architecture/debug_interrupt.yaml

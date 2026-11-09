@@ -6,22 +6,17 @@ blocks:
     fp: "210f4497779fd2ae"
     compile: not-code
     reason: "YAML timing prose (English sentences about pin-sampling latency), not code"
-  - at: description
-    fp: "4f20c9a2078a7de4"
-    compile: not-code
-    reason: "YAML description prose (English sentences), not code"
   - at: examples[0].code
-    fp: "2d033ff7b8837876"
+    fp: "9b312757b9cd5740"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [pin_hall_w, hall_, pin_hall_v, pin_hall_u]
   - at: examples[1].code
-    fp: "c5594331b05245e3"
+    fp: "9107055778026979"
     compile: fragment
     wrap: pasm2-dat
     assumes: [input_pin, last_state]
   - at: examples[2].code
-    fp: "84eaf0b12d63262e"
+    fp: "d5ad99a14b11d266"
     compile: fragment
     wrap: pasm2-dat
     assumes: [status, FLAG_BIT=con, sensor_pin]

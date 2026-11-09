@@ -9,21 +9,25 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: Trigger INT2, regardless of STALLI mode.
+description: >-
+  Trigger INT2. Parallax's documents give Trigger INT2, regardless of STALLI mode, and
+  also that an interrupt branch waits while STALLI is executing or active. TRGINT2 under
+  STALLI has not been measured. TRGINT1 has: in cog execution with STALLI active, the
+  INT1 branch did not occur in the 16 instructions measured after the trigger, and
+  occurred once ALLOWI executed (see language/pasm2/trgint1.yaml).
 flags_affected:
   C: No effect
   Z: No effect
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.157"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 305 (Trigger INT2, regardless of STALLI mode)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INTERRUPTS (STALLI must not be executing or active before an interrupt branch can happen)"
+  - "P2 hardware verification, EF-112 (TRGINT1 only, one board, cog execution: after STALLI then TRGINT1 no branch during the 16 NOPs that followed, and the branch occurred after ALLOWI; INT2 was not run)"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_pollwait
-  pattern: ''
-  description: No operands - poll/wait instruction (moves S to D, sets S to $024)
-  valueType: 28
-compiler_encoding:
-  operandFormat: 28
 syntax_variants:
-- TRGINT2 Trigger
+- TRGINT2
 last_updated: '2025-09-19T16:04:17.492800'
 category: Interrupt
-oneliner: Trigger INT2, regardless of STALLI mode
+oneliner: Trigger INT2
+related:
+  - architecture/interrupts.yaml

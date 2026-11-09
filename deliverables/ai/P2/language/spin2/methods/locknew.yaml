@@ -10,6 +10,11 @@ returns:
   type: "integer"
   description: "Lock ID (0..15) if successful; a negative value (< 0) if no lock is available"
 source: "Spin2 v55 documentation (LOCKNEW: < 0 if no LOCK available; LOCK[15] is allocated by the debugger); Parallax Spin2 interpreter v55 (LOCKNEW)"
+sources:
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (LOCKNEW() : LockNum, 0..15 if successful or < 0 if no LOCK available); VAR (variables are initialized to zero at run time); DEBUG (LOCK[15] is allocated by the debugger)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LOCKS (pool of 16 locks in the hub; LOCKNEW stores an unallocated lock's number; LOCKTRY/LOCKREL take and release an allocated lock; lock arbitration is round-robin, so a cog waiting in a loop gets its fair turn)"
+  - "P2 Instructions v35 - Rev B/C Silicon, row 244 (LOCKNEW D {WC}: 4...11 cog/LUT, 4...19 hub)"
+  - "Parallax Spin2 interpreter v55 (Spin2_interpreter.spin2: LOCKNEW() runs locknew x wc then bitc x,#31, so a failed allocation returns a negative value)"
 
 examples:
   - description: "Allocate lock with error checking"
@@ -24,23 +29,23 @@ examples:
           ABORT
         ok := TRUE
 
-  - description: "Complete lock lifecycle"
+  - description: "Complete lock lifecycle. The lock is kept as its number + 1: VAR variables start at zero and 0 is a valid lock number, so a cleanup() before any init() returns nothing, where a raw number tested with >= 0 would run LOCKRET(0)"
     code: |
-      CON
-        NO_LOCK = -1
-
       VAR
-        long counter_lock
+        long counter_lock_plus_1      ' lock number + 1; 0 = no lock
         long shared_counter
 
-      PUB init()
-        counter_lock := LOCKNEW()
+      PUB init() : ok | id
+        id := LOCKNEW()
+        if id >= 0
+          counter_lock_plus_1 := id + 1
         shared_counter := 0
+        ok := id >= 0
 
       PUB cleanup()
-        if counter_lock >= 0
-          LOCKRET(counter_lock)
-          counter_lock := NO_LOCK
+        if counter_lock_plus_1
+          LOCKRET(counter_lock_plus_1 - 1)
+          counter_lock_plus_1 := 0
 
   - description: "Multiple locks for different resources"
     code: |
@@ -58,7 +63,7 @@ examples:
 anti_patterns:
   - anti_pattern: "lock_leak"
     severity: "resource_exhaustion"
-    description: "Not returning locks when done exhausts the 16 available locks"
+    description: "Not returning locks when done exhausts the 16 available locks. The correct form keeps the lock as its number + 1, so a stop() before any start() returns nothing"
     wrong: |
       PUB start()
         my_lock := LOCKNEW()
@@ -67,13 +72,19 @@ anti_patterns:
       PUB stop()
         ' Forgot to return lock - it's now permanently unavailable!
     correct: |
-      PUB start()
-        my_lock := LOCKNEW()
+      VAR
+        long lock_plus_1        ' lock number + 1; 0 = no lock
+
+      PUB start() : ok | id
+        id := LOCKNEW()
+        if id >= 0
+          lock_plus_1 := id + 1
+        ok := id >= 0
 
       PUB stop()
-        if my_lock >= 0
-          LOCKRET(my_lock)
-          my_lock := -1
+        if lock_plus_1
+          LOCKRET(lock_plus_1 - 1)
+          lock_plus_1 := 0
 
   - anti_pattern: "unchecked_allocation"
     severity: "runtime_error"
@@ -81,7 +92,7 @@ anti_patterns:
     wrong: |
       lock := LOCKNEW()
       ' Assume lock is valid - may be negative!
-      REPEAT UNTIL LOCKTRY(lock)  ' Undefined behavior with a negative lock
+      REPEAT UNTIL LOCKTRY(lock)  ' a negative value is not a lock this code allocated
     correct: |
       lock := LOCKNEW()
       if lock < 0
@@ -91,24 +102,24 @@ best_practices:
   - "Check the return value with < 0 (a negative value means no lock is available)"
   - "Store lock ID in VAR or DAT for later LOCKRET"
   - "Return locks in cleanup/stop methods"
-  - "Document which lock protects which resource"
   - "Document which lock number protects which resource; use the number LOCKNEW returned"
+  - "Keep the lock as its number + 1 in a VAR, so the VAR's starting zero means no lock"
 
 notes:
   - "P2 has 16 hardware locks (0-15)"
-  - "Returns next available lock ID"
+  - "Returns the number of an unallocated lock when one is available"
   - "Returns a negative value (< 0) if no lock is available"
   - "A -d build allocates lock 15 for the debugger before the program runs, so LOCKNEW has one fewer lock available there"
   - "Lock is allocated but NOT captured (call LOCKTRY to acquire)"
   - "Must call LOCKRET when done to free lock for reuse"
   - "Locks are shared across all 8 COGs"
-  - "Hardware ensures atomic operations - no race conditions"
+  - "Lock arbitration is performed by the hub in a round-robin fashion, so a cog waiting in a loop to capture a lock gets its fair turn"
 
 timing:
   execution_model: |
-    Spin2 methods execute via the bytecode interpreter. Method-call clock count: not documented.
+    Spin2 methods execute via the bytecode interpreter. Not documented: the method-call clock count.
   underlying_pasm: "LOCKNEW"
-  underlying_pasm_timing: "4 clocks (range 4...11 hub-window dependent; per language/spin2/methods/locknew.yaml encoding)"
+  underlying_pasm_timing: "4...11 clocks in cog or LUT execution (language/pasm2/locknew.yaml)"
 
 
 related:

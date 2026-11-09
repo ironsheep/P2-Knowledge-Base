@@ -2,11 +2,6 @@
 # Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG RAM, GENERAL PURPOSE REGISTERS
 
 
-# Findability index. This file named itself in no
-# top-level field, so neither it nor anything it documents was reachable by
-# name through the published index -- only by guessing its camelCase key.
-# An alias is a lookup key, never a definition; every name below is defined
-# in this file.
 aliases:
   - "DIRA"
   - "DIRB"
@@ -39,8 +34,9 @@ functionality:
     dirb_bits: "Each bit controls one pin: bit 0 = P32, bit 1 = P33, ..., bit 31 = P63"
     
   bit_states:
-    high_state: "1 = Output enabled (pin can drive)"
-    low_state: "0 = Input mode (pin in high impedance)"
+    high_state: "DIR = 1: output (drive)"
+    low_state: "DIR = 0: input (float)"
+    dac_exception: "DAC modes use DIR as 0: disable, 1: enable"
     
   pin_control:
     output_enable: "Set corresponding DIR bit to 1"
@@ -50,7 +46,7 @@ functionality:
 smart_pin_interaction:
   normal_pins: "DIR bit controls output enable normally" 
   smart_pins: "Smart pin %TT bits can override DIR control"
-  smart_pin_modes: "Some smart pin modes ignore DIR state"
+  smart_pin_modes: "In smart pin modes the DIR bit is used as an active-low reset signal to the smart pin circuitry, while the output enable state is controlled by a configuration bit (the %TT bits govern the pin's output enable regardless of the DIR state)"
   reset_requirement: "Smart pins should be configured while DIR=0"
 
 instruction_access:
@@ -58,7 +54,7 @@ instruction_access:
     set_output: "DRVH #pin_num (sets DIR bit and drives high)"
     drive_low: "DRVL #pin_num (sets DIR bit and drives low)"
     set_input: "DIRL #pin_num (clears DIR bit: pin becomes an input)"
-    float_pin: "FLTL #pin_num (clears DIR bit, high impedance)"
+    float_pin: "FLTL #pin_num (OUT bit = 0 and DIR bit = 0: the pin floats)"
     
   register_ops:
     read_dira: "MOV result, DIRA"
@@ -82,7 +78,7 @@ usage_patterns:
     code: |
       DRVH    #5                    ' Set P5 as output, drive high
       DRVL    #10                   ' Set P10 as output, drive low  
-      FLTL    #15                   ' Set P15 as input (high-Z)
+      FLTL    #15                   ' Float P15 (OUT and DIR bits cleared)
     description: "Individual pin direction control"
 
 bit_operations:
@@ -102,25 +98,19 @@ bit_operations:
     description: "Toggle pin direction"
 
 power_considerations:
-  input_mode: "High impedance, minimal power consumption"
-  output_mode: "Current consumption depends on load"
-  floating_inputs: "May consume power due to intermediate voltages"
-  pullup_pulldown: "Consider external resistors for unused inputs"
+  input_mode: "DIR = 0: input (float)"
+  pin_current: "Max. allowable current per I/O pin: +/-30 mA. Vol (VDD = 3.3 V): 15 mV sinking 1 mA, 160 mV sinking 10 mA, 510 mV sinking 30 mA. Voh relative to Vxxyy: -6 mV sourcing 1 mA, -170 mV sourcing 10 mA, -580 mV sourcing 30 mA"
+  input_leakage: "Iil, IO pin Vin = GND or Vio: +/-0.1 uA typical, +/-10 uA maximum"
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Mode table (DIR), p.24; DC Characteristics, pp.47-48"
 
 initialization:
-  power_on_reset: "All DIR bits cleared (all pins inputs)"
-  cog_start: "DIR registers cleared on COGINIT"
-  recommended_practice: "Initialize DIR registers before use"
-
-debugging_tips:
-  read_back_verification: "Read DIRA/DIRB to verify configuration"
-  pin_conflict_detection: "Multiple cogs can conflict on same pins"
-  smart_pin_coordination: "Coordinate DIR with smart pin configuration"
+  power_on_reset: "While RESn is low, all cogs are disabled and the I/O pins are floating. Not documented: the state of the DIR bits after reset"
+  all_cogs_terminated: "With all the cogs terminated, all I/O pin DIR bits are naturally low (input)"
+  cog_start: "After a COGINIT with D[5] = 0 of a running cog, a stopped cog or the cog itself, the new program reads DIRA = 0, with DIRA bits set on P0..P2 beforehand. Not documented: DIRB after COGINIT, and DIRA or DIRB after a COGINIT with D[5] = 1. What COGINIT does to cog state, piece by piece, is in architecture/cog_state.yaml"
 
 safety_considerations:
-  short_circuit_protection: "Avoid driving conflicting outputs"
-  power_supply_limits: "Consider total current when many outputs active"
-  esd_protection: "Floating inputs may be susceptible to ESD"
+  electrical_limits: "Absolute maximum ratings: voltage on Vxxyy -0.3 V to +4.0 V; voltage on all other pins -0.3 V to (Vxxyy + 0.3 V); max. allowable current per I/O pin +/-30 mA; max DC current into an input pin with its internal protection diode forward biased +/-10 mA; total power dissipation 2.5 W; ESD Human Body Model 4 kV, Charged Device Model 1 kV. VIO supply voltage Vxxyy 3.15 V min, 3.3 V typ, 3.45 V max"
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Absolute Maximum Ratings, p.47; DC Characteristics, p.47"
 
 examples:
   led_control:
@@ -131,9 +121,9 @@ examples:
     
   serial_communication:
     code: |
-      OR      DIRA, ##%00000010     ' P1 (TX) as output
-      ANDN    DIRA, ##%00000001     ' P0 (RX) as input
-    description: "UART pin configuration"
+      OR      DIRA, ##%00000010     ' P1 as output
+      ANDN    DIRA, ##%00000001     ' P0 as input
+    description: "One pin as an output and one as an input"
 
 related_registers:
   outa_outb: "Output state registers (what gets driven when DIR=1)"
@@ -145,5 +135,6 @@ see_also:
   - "INA/INB Input State Registers"
   - "Smart Pin Configuration"
   - "Pin driving instructions (DRVH/DRVL/FLTL)"
+  - "architecture/cog_state.yaml"
 
-source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COGS, COG RAM (Special-Purpose Registers)"
+source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), COGS, COG RAM (Special-Purpose Registers); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Shutdown, p.12 (DIR bits with all the cogs terminated); P2 hardware verification, EF-113 (DIR %011 on P0..P2, COGINIT with D[5] = 0 of a running cog, a stopped cog and itself, one part)"

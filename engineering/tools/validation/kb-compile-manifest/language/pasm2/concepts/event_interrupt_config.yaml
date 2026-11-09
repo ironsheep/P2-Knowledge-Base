@@ -2,10 +2,6 @@
 # ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
-  - at: overview
-    fp: "c180024b80870f40"
-    compile: not-code
-    reason: "YAML description prose (English sentences), not code"
   - at: interrupt_system.interrupt_operations.SETINT1.example
     fp: "66d1ccc72e5fa8ad"
     compile: fragment
@@ -30,7 +26,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [pin]
   - at: common_patterns.attention_handler.code
-    fp: "e7b735ee87994351"
+    fp: "00a9a6acea17eeae"
     compile: fragment
     wrap: pasm2-dat
   - at: common_patterns.critical_section.code

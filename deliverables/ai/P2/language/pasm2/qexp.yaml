@@ -7,34 +7,20 @@ encoding:
   z: —
   clocks: '2...9'
 timing:
-  cycles: 2
-  type: fixed
-description: Compute 2 to the power of a 5:27-bit logarithm, as a 32-bit unsigned integer. Takes logarithm
-  in 5:27 format (5-bit whole exponent, 27-bit fractional exponent) in D operand.
-  Result retrieved via GETQX instruction 55 clocks later.
+  cycles: "2...9"
+  type: variable
+description: Compute 2 to the power of D, a 5:27-bit logarithm (top 5 bits the whole
+  part of the power-of-2 exponent, bottom 27 bits the fractional part), as a 32-bit
+  unsigned integer. GETQX retrieves the result 55 clocks later.
 flags_affected:
   C: No effect
   Z: No effect
-long_description: 'The QEXP instruction performs logarithm to integer conversion using
-  the P2''s 54-stage pipelined CORDIC solver. It converts a 5:27-bit logarithm format
-  into a 32-bit unsigned integer, effectively computing the exponential (antilog)
-  of the input.
-
-
-  The instruction takes the logarithm value in the D operand, which must be in P2''s
-  5:27 format where bits [31:27] contain the 5-bit whole exponent and bits [26:0]
-  contain the 27-bit fractional exponent. After 55 clocks, the integer result can
-  be retrieved using the GETQX instruction.
-
-
-  This instruction is the complement of QLOG and is commonly used together with QLOG
-  to perform power calculations, exponential functions, and other mathematical operations
-  requiring logarithmic scaling.
-
-
-  The high precision of the 5:27 format allows for accurate exponential calculations
-  across a wide range of input values, making it suitable for signal processing, mathematical
-  modeling, and scientific computations.
+long_description: 'QEXP converts a 5:27-bit logarithm into a 32-bit unsigned integer
+  using the hub''s 54-stage pipelined CORDIC solver. The logarithm is in the D operand:
+  bits [31:27] hold the whole part of the power-of-2 exponent and bits [26:0] hold
+  the fractional part. Fifty-five clocks after the cog hands the command to the CORDIC
+  solver, the integer result is available through GETQX, which waits if the result
+  has not yet arrived.
 
   '
 examples:
@@ -48,28 +34,6 @@ examples:
 
     '
   description: Basic logarithm to integer conversion
-- code: ''' Calculate power using log/exp: result = base^exponent
-
-    QLOG    base          '' Convert base to log
-
-    '' ... wait 55 clocks ...
-
-    GETQX   log_base
-
-    QMUL    log_base, exponent  '' Multiply log by exponent
-
-    '' ... wait 55 clocks ...
-
-    GETQX   log_result
-
-    QEXP    log_result    '' Convert back to integer
-
-    '' ... wait 55 clocks ...
-
-    GETQX   power_result
-
-    '
-  description: Power calculation using logarithmic scaling
 - code: ''' Process variable logarithm
 
     QEXP    logarithm
@@ -87,20 +51,12 @@ related_instructions:
 operand_details:
   D: 5:27-bit logarithm (5-bit exponent in [31:27], 27-bit fractional in [26:0])
 result_details:
-  GETQX: 32-bit unsigned integer (exponential result)
-timing_notes: Result available 55 clocks after instruction issue. Each cog can issue
-  one CORDIC instruction per hub window (every 8 clocks).
-format_notes: Input must be in 5:27 logarithmic format as produced by QLOG. Complementary
-  operation to QLOG.
-documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.21, and CORDIC Solver Instructions, p.44; P2 Instructions v35 - Rev B/C Silicon, Sheet1"
+  GETQX: 32-bit unsigned integer
+timing_notes: A cog waits for its hub slot, zero to (cogs-1) clocks away, to hand the
+  command to the CORDIC solver. Fifty-five clocks later the result is available via
+  GETQX.
+documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.21, and CORDIC Solver Instructions, p.44; P2 Instructions v35 - Rev B/C Silicon, Sheet1; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), CORDIC SOLVER (EXPONENT)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_l
-  pattern: D/#0..511
-  description: Destination or immediate value 0-511
-  valueType: 26
-compiler_encoding:
-  operandFormat: 26
 last_updated: '2025-09-19T16:04:17.411047'
 category: CORDIC Solver
 oneliner: Compute 2 to the power of a 5:27-bit logarithm, as a 32-bit unsigned integer

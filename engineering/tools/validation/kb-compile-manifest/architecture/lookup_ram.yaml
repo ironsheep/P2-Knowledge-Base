@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: instructions[0].operation
-    fp: "75c178f8d51fdd79"
+    fp: "12a67b0f0c0186cb"
     compile: not-code
     reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
   - at: instructions[0].usage_example
@@ -12,7 +12,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [data, value, index]
   - at: instructions[1].operation
-    fp: "e2bcdcb6eedba406"
+    fp: "78ab1d8d7c574fd4"
     compile: not-code
     reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
   - at: instructions[1].usage_example
@@ -29,7 +29,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: programming_patterns[0].code
-    fp: "2c2d58a56d3a5d9d"
+    fp: "83d4b37407ec8e3c"
     compile: fragment
     wrap: pasm2-dat
     assumes: [sine_table_ptr, angle, sine_val]
@@ -39,7 +39,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [flag, data, message]
   - at: debugging_considerations[0].code
-    fp: "62c234b25cbb93c0"
+    fp: "b4413722927fcfc2"
     compile: fragment
     wrap: pasm2-dat
     assumes: [dump_ptr]

@@ -15,29 +15,29 @@ blocks:
     fp: "642c19355c557244"
     compile: program
   - at: spin2_pasm2_integration.integration_patterns[4].syntax_examples[0].spin2_code
-    fp: "02308382712255a6"
+    fp: "a4413999d989e015"
     compile: program
   - at: spin2_pasm2_integration.integration_patterns[5].syntax_examples[0].spin2_code
-    fp: "e2f3e0150b04ae71"
+    fp: "41417b7e7ae01a4e"
     compile: program
   - at: spin2_pasm2_integration.integration_patterns[6].syntax_examples[0].spin2_code
-    fp: "1712c481eabfc96f"
+    fp: "87275c57a4e1b3f0"
     compile: program
   - at: spin2_pasm2_integration.integration_patterns[7].syntax_examples[0].spin2_code
-    fp: "57246cec8cf124d4"
+    fp: "a21175b92d3e504b"
     compile: program
   - at: spin2_pasm2_integration.integration_patterns[8].syntax_examples[0].spin2_code
-    fp: "fca0e74057378941"
+    fp: "1061274a639f9dc7"
     compile: program
   - at: spin2_pasm2_integration.integration_patterns[9].syntax_examples[0].spin2_code
-    fp: "53bec92340aaedd1"
+    fp: "743a61034a812950"
     compile: program
   - at: spin2_pasm2_integration.integration_patterns[10].syntax_examples[0].spin2_code
     fp: "f8773c21e6215634"
     compile: program
   - at: spin2_pasm2_integration.integration_patterns[11].syntax_examples[0].spin2_code
-    fp: "7d17b8daa6a8fa3c"
+    fp: "2ab5f9a6affaed5d"
     compile: program
   - at: spin2_pasm2_integration.integration_patterns[12].syntax_examples[0].spin2_code
-    fp: "dc203f880b720d56"
+    fp: "7ba818954d4fc15a"
     compile: program

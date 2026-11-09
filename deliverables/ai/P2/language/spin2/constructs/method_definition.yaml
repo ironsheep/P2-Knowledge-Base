@@ -9,7 +9,6 @@ type: "method_declaration"
 metadata:
   query_tags: ["pub", "pri", "method", "function", "procedure", "subroutine", "parameters", "return"]
   complexity: "beginner"
-  use_cases: ["code_organization", "modularity", "reusability", "encapsulation"]
   common_questions:
     - "How do I define a method in Spin2?"
     - "What's the difference between PUB and PRI?"
@@ -18,9 +17,9 @@ metadata:
 
 fundamental_concepts: |
   Methods are the primary code organization unit in Spin2:
-  - PUB (public) methods are visible to other objects
-  - PRI (private) methods are only visible within the object
-  - First PUB method is the entry point when object runs standalone
+  - PUB (public) methods are available to the parent object and to the object they are defined in
+  - PRI (private) methods are available only to the object they are defined in
+  - The first PUB method in an object is what executes when that object is run as the top-level object
   - Methods can have parameters, return values, and local variables
 
 syntax:
@@ -65,11 +64,9 @@ special_behaviors:
         REPEAT
           loop()
     
-  - behavior: "null_method"
-    description: "Empty PUB prevents object from being main"
-    example: |
-      PUB null()    ' Prevents library from running standalone
-      
+  - behavior: "object_needs_a_public_method"
+    description: "An object is a file that contains at least one public method"
+
   - behavior: "default_return"
     description: "A method with no declared results returns nothing and cannot be used in an expression"
 
@@ -82,21 +79,13 @@ special_behaviors:
 
 method_visibility:
   pub_methods:
-    visibility: "Public - accessible from other objects"
-    use_for:
-      - "Object's public interface"
-      - "Entry points"
-      - "API methods"
+    visibility: "Available to the parent object and to the object it is defined in"
     example: |
       PUB start(pin, baud)    ' Public initialization
         initialize(pin, baud)
   
   pri_methods:
-    visibility: "Private - only accessible within object"
-    use_for:
-      - "Internal helpers"
-      - "Implementation details"
-      - "Code organization"
+    visibility: "Available only to the object it is defined in"
     example: |
       PRI initialize(pin, baud)    ' Private helper
         configure_pin(pin)
@@ -112,13 +101,13 @@ parameter_handling:
         array += 4
   
   default_values: |
-    ' Spin2 doesn't support default parameters directly
-    ' Use method overloading pattern:
+    ' A call must supply every parameter. A second method with its own name
+    ' can pass fixed values for the ones its callers leave out:
     PUB configure(pin, mode, pull)
       ' Full configuration
-    
+
     PUB configure_simple(pin)
-      configure(pin, OUTPUT, NO_PULL)    ' Call with defaults
+      configure(pin, OUTPUT, NO_PULL)    ' Fixed mode and pull
 
 return_values:
   single_return: |
@@ -158,7 +147,7 @@ method_limits:
   symbol_names:
     maximum: 30
     description: "Maximum 30 characters for method and parameter names"
-    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Spin2 Overview (states symbolic names up to 32 characters; the compiler enforces 30 -- see the identifier rules page)"
+    source: "CP-001 (the compiler refuses a symbol of 31 characters); Parallax Propeller 2 Spin2 Language Documentation v55, Spin2 Overview (states symbolic names up to 32 characters)"
 
   parameters:
     maximum: 127
@@ -166,7 +155,7 @@ method_limits:
     source: "Parallax Propeller 2 Spin2 Language Documentation v55, PUB and PRI Blocks (0 to 127 input parameter longs)"
     default_type: "LONG (32-bit)"
     type_overrides:
-      pointers: "^BYTE, ^WORD, ^LONG, ^STRUCT"
+      pointers: "^BYTE, ^WORD, ^LONG, ^StructName"
       description: "Parameters can be pointers to different-sized types"
       example: "PUB process(^BYTE strPtr, ^LONG dataPtr)"
 
@@ -176,7 +165,7 @@ method_limits:
     source: "Parallax Propeller 2 Spin2 Language Documentation v55, PUB and PRI Blocks (0 to 15 output result longs)"
     default_type: "LONG (32-bit)"
     type_overrides:
-      pointers: "^BYTE, ^WORD, ^LONG, ^STRUCT"
+      pointers: "^BYTE, ^WORD, ^LONG, ^StructName"
       description: "Returns can be pointers to different-sized types"
       example: "PUB getBuffer() : ^BYTE result"
 
@@ -186,8 +175,8 @@ method_limits:
     source: "Parallax Propeller 2 Spin2 Language Documentation v55, PUB and PRI Blocks (up to 64KB of local variables; BYTE, WORD, LONG, and StructName overrides)"
     default_type: "LONG (32-bit)"
     type_overrides:
-      basic_types: "BYTE, WORD, LONG, STRUCT"
-      pointers: "^BYTE, ^WORD, ^LONG, ^STRUCT"
+      basic_types: "BYTE, WORD, LONG, StructName"
+      pointers: "^BYTE, ^WORD, ^LONG, ^StructName"
       arrays: "Supported with [size] syntax"
       alignment: "ALIGNW, ALIGNL for word/long alignment"
       description: "Locals can be sized types, arrays, pointers, and aligned"
@@ -217,11 +206,13 @@ common_patterns:
       VAR
         LONG cog
       
-      PUB start() : success
+      PUB start() : success | id
         stop()
-        cog := COGINIT(COGEXEC_NEW, @pasm_code, @params) + 1
+        id := COGINIT(COGEXEC_NEW, @pasm_code, @params)
+        IF id >= 0
+          cog := id + 1
         success := cog
-      
+
       PUB stop()
         IF cog
           COGSTOP(cog - 1)
@@ -240,7 +231,7 @@ common_patterns:
         v := _value
   
   - pattern: "setter_calls"
-    description: "Spin2 has no method chaining and no self reference: call each method as its own statement"
+    description: "Each setter is called as its own statement"
     code: |
       VAR
         LONG x, y
@@ -283,11 +274,7 @@ pitfalls:
         count := cnt2
 
 performance:
-  stack_operations: "Hub RAM access for parameters/locals"
-  optimization_tips:
-    - "Inline small, frequently-called methods manually"
-    - "Minimize parameter count for hot paths"
-    - "Use registers in PASM2 for performance-critical code"
+  stack_operations: "Parameters, return values and local variables are in hub RAM"
 
 pasm_integration: |
   PUB methods can contain inline PASM2:
@@ -312,3 +299,9 @@ related_concepts:
   - "Encapsulation"
   - "Method signatures"
   - "Stack frame management"
+
+sources:
+  - "Parallax Propeller 2 Spin2 Language Documentation v55, PUB and PRI Blocks (availability, the first PUB, limits, overrides, packing order, results and locals initialized to zero, syntax); Spin2 Overview (objects contain at least one public method); PUB/PRI variables (hub); In-line PASM (the first 16 long variables copied to $1E0..$1EF and restored at the end); Built-In Methods (COGINIT, COGSTOP)"
+  - "Parallax Spin2 Interpreter v55 (2026.05.07), drophot, callhot, returnh, callgo (the stack frame, the return address, locals cleared)"
+  - "P2 hardware verification, EF-120 (the start pattern: COGINIT(COGEXEC_NEW, ...) returned $8000_000F with all 8 cogs running)"
+  - "CP-057 (pnut-ts 1.55.10 refuses: an expression using a method with no results; RETURN with a value and no declared result; a call missing a parameter; a local, parameter or result named as a VAR, DAT or CON symbol)"

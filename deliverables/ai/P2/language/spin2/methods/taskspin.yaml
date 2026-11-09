@@ -1,7 +1,7 @@
 method: TASKSPIN
 type: method
 category: Task Operations
-source: "taskptr_table_location: Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: task pointers build downward in the last 32 free cog registers, from $11F..$100); IN-LINE PASM CODE (free cog registers $000..$11F)"
+source: "taskptr_table_location: Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: task pointers build downward in the last 32 free cog registers, from $11F..$100; TASKSPIN task = 0..31 for a fixed task or -1 for the first free task); IN-LINE PASM CODE (free cog registers $000..$11F); Parallax Spin2 Interpreter v55 (2026.05.07), taskptr (res $20 at org $100), tasknum (initial internal number $1F), taskspin_ (fixed task: internal number = NOT task AND $1F; new task: not y,taskena then encod y), taskid_ (TASKID returns NOT tasknum AND $1F): task n's pointer is at $100+(31-n). notes (TASKNEXT): the same Document Status row (TASKNEXT switches to the next unhalted task)"
 
 requires_version: "Spin2_v47"
 version_directive: "{Spin2_v47}"
@@ -63,15 +63,18 @@ notes:
   - "Up to 32 tasks per cog (IDs 0-31)"
   - "Tasks share cog but have separate stacks"
   - "Cooperative multitasking within cog"
-  - "NEWTASK (-1) auto-assigns next available ID"
-  - "Stack size depends on task complexity"
-  - "Tasks run in round-robin fashion"
+  - "NEWTASK (-1) assigns the first free task ID"
+  - "TASKNEXT() switches to the next unhalted task; every task must execute TASKNEXT() periodically"
 
 taskptr_table_location: |
   Each task's pointer (taskptr) is stored in cog registers $100..$11F, with
-  the table building DOWNWARD from $11F (taskptr for task 31 occupies $11F,
-  task 30 at $11E, etc.). Programs using fewer than 32 tasks leave the
-  LOWER portion of $100..$11F free for user code as well. This range
+  the table building DOWNWARD from $11F: the pointer of task n (the number
+  TASKSPIN and TASKID use) is at $11F-n, so task 0, the initial task, occupies
+  $11F, task 1 $11E, and task 31 $100. NEWTASK takes the lowest free task
+  number, so a program that starts its tasks with NEWTASK and uses fewer than
+  32 of them leaves the LOWER portion of $100..$11F free for user code as well;
+  a task started with a fixed number uses its own register wherever that
+  falls. This range
   overlaps the ORG..END inline-PASM code area ($000..$11F), so multitasking
   and large inline-PASM blocks compete for the same space.
 timing:

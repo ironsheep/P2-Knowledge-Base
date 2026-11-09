@@ -3,11 +3,11 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: silicon_errata.setq_ptrx_block_size_delta_cancelled.description
-    fp: "14f170e717386c47"
+    fp: "76e817c61af058de"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: silicon_errata.intervening_altx_immediate_s_consumes_augs.description
-    fp: "3a3bf1e3214bf4dd"
+    fp: "7a54d7c9b02727f2"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: silicon_errata.intervening_altx_immediate_s_consumes_augs.example

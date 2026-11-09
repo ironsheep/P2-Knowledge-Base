@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "f9d774dfce659c38"
+    fp: "841f175128f696ed"
     compile: program
   - at: examples[1].code
     fp: "5f31fb057c339b66"

@@ -1,0 +1,454 @@
+# Cog State - what a cog holds between instructions
+# Sources:
+#   Parallax Propeller 2 Documentation v35 (Rev B/C silicon), by section, on each state below
+#   Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGINIT, pp.64-66; Effects, p.80
+#   P2 Instructions v35 - Rev B/C Silicon, Sheet1
+#   Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Hub Control instructions, p.41
+#   Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Shutdown, p.12
+#   EF-033, EF-056, EF-066, EF-091, EF-094, EF-096, EF-105, EF-108, EF-109, EF-110, EF-111, EF-113, EF-123
+
+aliases:
+  - "cog state"
+  - "cog reset state"
+  - "cog restart state"
+  - "cog start state"
+  - "state after COGINIT"
+  - "what survives COGINIT"
+  - "what does COGINIT reset"
+  - "what does COGINIT clear"
+  - "does COGINIT clear registers"
+  - "does COGINIT clear DIR and OUT"
+  - "does COGINIT clear the hardware stack"
+  - "does COGINIT reset LUT sharing"
+  - "does COGINIT reset the flags"
+  - "what does a cog hold between instructions"
+  - "pending SETQ"
+  - "pending AUGS"
+  - "pending AUGD"
+  - "pending ALT"
+  - "what clears a pending SETQ"
+  - "does SKIP cancel a pending SETQ"
+  - "what is reset on cog start"
+
+component_name: "Cog State"
+
+component_type: "cog_state_reference"
+
+description: |
+  What a cog holds between instructions, one entry per piece of state: what sets it,
+  what consumes it, what ends it, and what a COGINIT does to it.
+
+reading_the_cells:
+  set_by: "What writes the state."
+  consumed_by: "What reads the state or acts on it."
+  ended_by: "What retires the state or replaces its value."
+  coginit:
+    running_cog: "A COGINIT of a cog that is running, including a cog restarting itself."
+    free_cog: "A COGINIT of a free cog: stopped, or never started."
+  not_documented: >-
+    A cell that reads "Not documented" means no source states it. It does not say the state
+    is kept and it does not say the state is cleared.
+
+states:
+  c_and_z_flags:
+    name: "C and Z flags"
+    set_by: "An instruction with WC, WZ or WCZ writes C, Z or both at the end of its execution; what it writes is given per instruction. Among them, RET takes C from K[31] and Z from K[30] of the popped stack value, POP takes C from K[31], and CALLD takes C from S[31] and Z from S[30]. XBYTE with the %F bit of its SETQ/SETQ2 mode value set gives C and Z bits 1 and 0 of the bytecode's index field."
+    consumed_by: "Instruction conditions (IF_C, IF_Z and the other prefixes) test them. CALL, CALLPA and CALLPB push C and Z onto the hardware stack. An interrupt branch stores C and Z into the IRET register."
+    ended_by: "Each write replaces the value. When the effect is omitted the flags are left as-is."
+    coginit:
+      running_cog: "A COGINIT with D[5] = 0 of a running cog, including a cog restarting itself, with C and Z both 1 beforehand: C = 0 and Z = 0 in the new program. Not documented: C and Z after a COGINIT with D[5] = 1."
+      free_cog: "A COGINIT with D[5] = 0 of a cog stopped with COGSTOP, with C and Z both 1 beforehand: C = 0 and Z = 0 in the new program, as in a cog never used since boot. Not documented: C and Z after a COGINIT with D[5] = 1."
+      source: >-
+        P2 hardware verification, EF-113 (COGINIT with D[5] = 0 of a running cog, a stopped cog and itself, against a never-used baseline).
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STARTING AND STOPPING COGS (no statement on the target's flags).
+    source: >-
+      Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Effects, p.80.
+      P2 Instructions v35 - Rev B/C Silicon, Sheet1 (the Instruction Prefix rows and the CALL, RET and POP rows).
+      Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, CALLD row, p.40; POP row, p.45.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS; BYTECODE EXECUTION (XBYTE) (the %F bit of the SETQ/SETQ2 mode value).
+
+  q_register:
+    name: "Q"
+    set_by: "SETQ and SETQ2 write Q. XORO32 sets it to the XORO32 result, RDLUT to the data read from the lookup RAM, GETXACC to the Goertzel sine accumulator value, and CRCNIB shifts it left by four bits."
+    consumed_by: "The companion instruction that follows SETQ or SETQ2. An AUGS or AUGD between them leaves Q in place: the Q value passes through to the next instruction. Between SETQ or SETQ2 and a RDLONG, WRLONG or WMLONG with a PTRx expression, an intervening ALTx, AUGS or AUGD leaves the number of longs transferred unchanged and cancels the block-size PTRx delta. The instructions that take Q are listed in language/pasm2/concepts/special_registers.yaml q_register."
+    ended_by: "Persists until XORO32, RDLUT, GETXACC or CRCNIB executes, or until COGINIT, QDIV, QFRAC or QROTATE executes without a preceding SETQ, which sets Q to zero."
+    interrupt_shield: "SETQ and SETQ2 shield the next instruction from interruption. An interrupt branch cannot happen while SETQ or SETQ2 is executing."
+    across_cancelled_instruction: "A pending SETQ is taken by the instruction directly after it even when that instruction is cancelled by a false condition or by SKIP, in cog execution: with SETQ #3, a MOV cancelled either way and then a RDLONG, the RDLONG transfers one long, not four."
+    across_ret_into_next_bytecode: "Q written by a _RET_ SETQ2 at the end of an XBYTE routine is left for the next bytecode's routine: a MUXQ as that routine's first instruction reads the SETQ2 value, in cog execution."
+    coginit:
+      running_cog: "After a COGINIT with D[5] = 0 that follows a SETQ, of a running cog, including a cog restarting itself, the new program reads Q = $1F7. Not documented: Q after a COGINIT with D[5] = 1 or with no SETQ before it."
+      free_cog: "After a COGINIT with D[5] = 0 that follows a SETQ, of a cog stopped with COGSTOP or never used since boot, the new program reads Q = $1F7. Not documented: Q after a COGINIT with D[5] = 1 or with no SETQ before it."
+      source: >-
+        P2 hardware verification, EF-113 (COGINIT with D[5] = 0 of a running cog, a stopped cog, itself and a never-used cog; each COGINIT follows a SETQ, the COGINIT bytecode's for the Spin2 calls and the rig's own for the self-restart; Q read with MUXQ as the program's first instructions).
+        Parallax Spin2 Interpreter v55 (2026.05.07), COGINIT bytecode routine (setq w, then coginit x,y wc).
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SETQ CONSIDERATIONS (COGINIT without a preceding SETQ sets Q to zero, without naming which cog's Q; not exercised by EF-113, where every COGINIT follows a SETQ).
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SETQ CONSIDERATIONS; KNOWN SILICON BUGS (intervening ALTx/AUGS/AUGD and the PTRx delta); INTERRUPTS (conditions for an interrupt branch).
+      Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, AUGD, p.50; AUGS, p.51 (the Q value passes through).
+      P2 hardware verification, EF-108 (SETQ #3, then a MOV cancelled by a false condition or by SKIP, then RDLONG, one part, cog execution); EF-111 (_RET_ SETQ2 #$A5 at the end of an XBYTE routine, MUXQ first in the next routine, one part, cog execution). P2 Instructions v35 - Rev B/C Silicon, Sheet1 (SETQ row) is silent on both.
+
+  hardware_stack:
+    name: "Hardware stack (8 levels)"
+    set_by: "CALL, CALLPA and CALLPB push {C, Z, 10'b0, PC[19:0]}. PUSH pushes D. Each of the eight levels holds 32 bits."
+    consumed_by: "RET and _RET_ pop the top entry to return. POP pops the top entry into D. A RET or _RET_ to $1FF, used by XBYTE, executes the next bytecode and does not pop the stack."
+    ended_by: "Popping removes the top entry; popping past the bottom returns the bottom value again. A ninth push discards the oldest entry (PUSH, POP, CALL and RET in cog execution)."
+    coginit:
+      running_cog: "A COGINIT with D[5] = 0 of a running cog, including a cog restarting itself, does not clear the hardware stack. With eight values pushed before the restart, eight POPs in the new program read most of the pushed values, displaced by one entry the program did not push. Not established: the cause. Not documented: the stack after a COGINIT with D[5] = 1."
+      free_cog: "A COGINIT with D[5] = 0 of a cog stopped with COGSTOP does not clear the hardware stack. With eight values pushed before the COGSTOP, eight POPs in the new program read most of the pushed values, displaced by two entries the program did not push. In a cog never used since boot the eight POPs read 0. Not established: the cause. Not documented: the stack after a COGINIT with D[5] = 1."
+      source: >-
+        P2 hardware verification, EF-113 (eight PUSHed values; COGINIT with D[5] = 0 of a running cog, a stopped cog and itself; eight POPs as the program's first stack operations). The image contains no CALL, CALLPA or CALLPB, and no instruction executes a PUSH between the eight dirty PUSHes and the reader's eight POPs, so the extra entries come from no instruction of the program. Raw entries read by the eight POPs, in pop order: running $C000_0059, $5A00_0008 down to $5A00_0002; itself $C000_005F, $5A00_0008 down to $5A00_0002; stopped 0, $C000_0059, $5A00_0008 down to $5A00_0003; never-used baseline all 0; dirty control $5A00_0008 down to $5A00_0001. What pushed $C000_0059, $C000_005F and the 0 was not traced.
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STARTING AND STOPPING COGS (no statement).
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (8-level hardware stack); BYTECODE EXECUTION (XBYTE) (a return to $1FF does not pop the stack).
+      P2 Instructions v35 - Rev B/C Silicon, Sheet1 (the CALL, PUSH, POP, RET and _RET_ rows).
+      EF-094 (the bottom value on underrun, the oldest entry dropped on a ninth push, 32-bit entries; PUSH/POP and CALL/RET in cog execution).
+
+  pending_alt:
+    name: "Pending ALT"
+    set_by: "ALTS, ALTD and ALTR compute an address that is substituted into the next instruction's S field, D field or result register address. ALTI substitutes the next instruction's I, R, D and S fields with fields from D, per S."
+    consumed_by: "The next instruction."
+    ended_by: "The next instruction."
+    interrupt_shield: "An interrupt branch cannot happen while an ALTxx instruction is executing."
+    across_skipped_instruction: "ALTD, ALTS and ALTR do not apply past an instruction SKIP cancels, in cog execution: with the ALT executed, the next instruction cancelled by SKIP and the one after it the intended target, the target runs with its own unaltered fields. An executed instruction between the ALT and the target takes the ALT."
+    coginit:
+      running_cog: "Not documented."
+      free_cog: "Not documented."
+      source: >-
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), REGISTER INDIRECTION (no statement on COGINIT).
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), REGISTER INDIRECTION; INTERRUPTS (conditions for an interrupt branch).
+      P2 Instructions v35 - Rev B/C Silicon, Sheet1 (the ALTS, ALTD, ALTR and ALTI rows).
+      P2 hardware verification, EF-110 (ALTD, ALTS, ALTR with a SKIP-cancelled ADD between the ALT and its target, with no-skip and executed-ADD controls, one part, cog execution).
+
+  pending_augs:
+    name: "Pending AUGS"
+    set_by: "AUGS queues #n to be used as the upper 23 bits of the next #S occurrence."
+    consumed_by: "The next #S occurrence, whose 9-bit #S is augmented to 32 bits. An ALTx with an immediate #S between the AUGS and its intended target also uses the AUGS value but does not cancel it."
+    ended_by: "The next #S occurrence uses and cancels it. Intervening instructions that have no #S operand (a NOP, two NOPs or a register ROR) do not cancel it. SETQ and SETQ2 do not affect it, and the Q value passes through to the next instruction. A skipped instruction under SKIP or SKIPF, in cog execution, leaves a preceding AUGS pending for the next immediate."
+    interrupt_shield: "All instructions following AUGS are shielded from interrupt until after the instruction with the augmented #S is executed. An interrupt branch cannot happen while AUGS is executing or waiting for a #S instruction."
+    across_cancelled_instruction: "A pending AUGS survives an instruction cancelled by a false condition or by SKIP, in cog execution: with AUGS, then a MOV with an immediate #S cancelled either way, then a MOV with an immediate #S, the second MOV receives the augmented value and the cancelled MOV does not write."
+    coginit:
+      running_cog: "Not documented."
+      free_cog: "Not documented."
+      source: >-
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STARTING AND STOPPING COGS (no statement on COGINIT).
+    source: >-
+      P2 Instructions v35 - Rev B/C Silicon, Sheet1 (AUGS row).
+      Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, AUGS, p.51.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), KNOWN SILICON BUGS; INTERRUPTS (conditions for an interrupt branch).
+      EF-033 (AUGS, intervening NOP, ROR, two NOPs, ADD as a different #S user); EF-066; EF-091 (AUGS, skipped instruction under SKIP and SKIPF in cog execution).
+      P2 hardware verification, EF-123 (AUGS, then a MOV with immediate #S cancelled by a false condition or by SKIP, then MOV y,#$1FF: y read the augmented value in both cases, against controls augmented and not augmented; the cancelled MOV's footprint stayed 0; two runs, one part, cog execution).
+
+  pending_augd:
+    name: "Pending AUGD"
+    set_by: "AUGD queues #n to be used as the upper 23 bits of the next #D occurrence."
+    consumed_by: "The next #D occurrence, whose 9-bit #D is augmented to 32 bits."
+    ended_by: "The next #D occurrence. An ALTS with an immediate #S between the AUGD and its #D user leaves the AUGD for that user, in cog execution. SETQ and SETQ2 do not affect it, and the Q value passes through to the next instruction."
+    interrupt_shield: "All instructions following AUGD are shielded from interrupt until after the instruction with the augmented #D is executed. An interrupt branch cannot happen while AUGD is executing or waiting for a #D instruction."
+    across_cancelled_instruction: "A pending AUGD survives an instruction cancelled by a false condition or by SKIP, in cog execution: with AUGD, then a WRLUT with an immediate #D cancelled either way, then a WRLUT with an immediate #D, the second WRLUT writes the augmented value and the cancelled WRLUT does not write."
+    coginit:
+      running_cog: "Not documented."
+      free_cog: "Not documented."
+      source: >-
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STARTING AND STOPPING COGS (no statement on COGINIT).
+    source: >-
+      P2 Instructions v35 - Rev B/C Silicon, Sheet1 (AUGD row).
+      Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, AUGD, p.50.
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS (conditions for an interrupt branch).
+      EF-066 (an intervening immediate-S ALTS leaves the AUGD for its target).
+      P2 hardware verification, EF-123 (AUGD, then a WRLUT with immediate #D cancelled by a false condition or by SKIP, then WRLUT #$1FF: the LUT long read the augmented value in both cases, against controls augmented and not augmented; the cancelled WRLUT's footprint stayed 0; two runs, one part, cog execution).
+
+  skip_pattern:
+    name: "Skip pattern (SKIP, SKIPF, EXECF, XBYTE)"
+    set_by: "SKIP, SKIPF and EXECF capture a D bit pattern, used LSB-first; EXECF takes it from D[31:10]. An XBYTE bytecode's EXECF long in the lookup RAM supplies the pattern in its upper 22 bits."
+    consumed_by: "Each instruction encountered: a 1 bit cancels the instruction (SKIP) or leaps over it (SKIPF) and the pattern is shifted right by one bit. An AUGS emitted by a ## operand takes its own bit of the pattern (SKIP and SKIPF, cog execution)."
+    ended_by: "The pattern is exhausted when no bits remain (GETBRK WZ gives Z = 1 when no pattern is queued, D = 0). Skipping is suspended inside a subroutine called with CALL, CALLPA or CALLPB that is not skipped, and resumes after the returning RET or _RET_. CALLA with RETA, CALLB with RETB, and CALLD PA with JMP PA do not suspend a SKIP pattern in cog execution (measured with the absolute #\\ call forms, the pattern %101 and one call per pattern; not documented for SKIPF or EXECF); an interrupt service routine executes normally and the sequence resumes on its completion. XBYTE cancels any pattern in progress from the prior bytecode."
+    coginit:
+      running_cog: "A COGINIT with D[5] = 0 of a running cog, including a cog restarting itself, leaves no skip pattern: with a SKIP pattern holding pending 1 bits at the restart of a running cog, nothing in the new program is skipped. For a cog restarting itself, the pattern was seen cancelling instructions before the COGINIT and nothing in the new program was skipped; that its later 1 bits were still pending at the COGINIT was not measured. Not documented: the skip pattern after a COGINIT with D[5] = 1."
+      free_cog: "A COGINIT with D[5] = 0 of a cog stopped with COGSTOP leaves no skip pattern: with a SKIP pattern holding pending 1 bits when the cog stopped, nothing in the new program is skipped. Not documented: the skip pattern after a COGINIT with D[5] = 1."
+      source: >-
+        P2 hardware verification, EF-113 (a SKIP pattern with pending 1 bits at the restart; a skip detector of eight ADDs as the new program's first instructions).
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INSTRUCTION SKIPPING (no statement on COGINIT).
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INSTRUCTION SKIPPING; GETBRK D WZ; BYTECODE EXECUTION (XBYTE) (the bytecode translation table and "Cancel any SKIPF pattern in progress").
+      EF-091 (an AUGS counts in the pattern under SKIP and SKIPF in cog execution).
+      P2 hardware verification, EF-109 (a SKIP pattern, SKIP #%101, across CALLA/RETA, CALLB/RETB and CALLD PA/JMP PA, absolute #\ forms, one call per pattern: the subroutine's instructions consumed the pattern, as inline code does; the CALL/RET control suspended it; one part, cog execution; SKIPF not measured).
+
+  rep:
+    name: "REP (active instruction repeat)"
+    set_by: "REP D, S: execute D[8:0] instructions S[31:0] times. D[8:0] = 0 repeats nothing. D[8:0] > 0 with S[31:0] = 0 repeats the block indefinitely."
+    consumed_by: "The repeating block. Interrupts are ignored during REP looping."
+    ended_by: "Completing the count, or any branch within the repeating block, which cancels REP activity."
+    coginit:
+      running_cog: "A COGINIT with D[5] = 0 of a running cog, including a cog restarting itself, ends REP activity: code at the addresses of the old REP block runs once in the new program. Not documented: REP activity after a COGINIT with D[5] = 1."
+      free_cog: "A COGINIT with D[5] = 0 of a cog stopped with COGSTOP while inside a REP ends REP activity: code at the addresses of the old REP block runs once in the new program. Not documented: REP activity after a COGINIT with D[5] = 1."
+      source: >-
+        P2 hardware verification, EF-113 (a REP in force at the restart, shown by a moving count; a detector at the block's address in the new program ran once).
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INSTRUCTION REPEATING (no statement on COGINIT).
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INSTRUCTION REPEATING.
+
+  event_flags:
+    name: "Event flags (16)"
+    set_by: "Each flag's own event sensor. The per-event rows are in architecture/event_system.yaml event_clearing."
+    consumed_by: "POLLxxx, WAITxxx and Jxxx/JNxxx read them. A set event can also serve as an interrupt source, except the interrupt-occurred flag."
+    ended_by: "An event's own POLLxxx, WAITxxx or Jxxx/JNxxx clears its flag; ADDCT1-3, SETPAT, RDFAST, WRFAST, FBLOCK, XINIT, XZERO, XCONT or SETSE1-4 clear the flags they establish, per event as listed in architecture/event_system.yaml event_clearing."
+    coginit:
+      running_cog: "Cog start clears the INT, XRL, ATN and QMT flags. Not documented: whether a COGINIT of a running cog counts as cog start for these flags, and the state of the other twelve flags."
+      free_cog: "Cog start clears the INT, XRL, ATN and QMT flags. Not documented: the state of the other twelve flags."
+      source: >-
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS (the POLLINT, POLLXRL, POLLATN and POLLQMT flag descriptions each say "Cleared on cog start"; the others do not).
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS.
+
+  interrupt_event_selectors:
+    name: "INT1, INT2 and INT3 event sources"
+    set_by: "SETINT1, SETINT2 and SETINT3 select one of 16 sources, D[3:0]."
+    consumed_by: "The selected event triggers its interrupt. GETBRK with WCZ returns the three selectors."
+    ended_by: "SETINTx selecting another source; source 0 is off."
+    coginit:
+      running_cog: "The INT1, INT2 and INT3 event sources default to off (source 0) on cog start. Not documented: whether a COGINIT of a running cog counts as cog start for this default."
+      free_cog: "The INT1, INT2 and INT3 event sources default to off (source 0) on cog start."
+      source: >-
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS (event source 0 is "default on cog start for INT1/INT2/INT3 event sources").
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS; GETBRK D WCZ.
+      P2 Instructions v35 - Rev B/C Silicon, Sheet1 (SETINT1, SETINT2 rows).
+
+  interrupt_mode:
+    name: "Interrupt allow or stall mode"
+    set_by: "ALLOWI and STALLI establish it."
+    consumed_by: "Interrupt branches: STALLI holds them off, ALLOWI allows any stalled and future interrupt branches."
+    ended_by: "ALLOWI ends STALLI mode; STALLI ends ALLOWI mode."
+    coginit:
+      running_cog: "ALLOWI is the default mode on cog start. Not documented: whether a COGINIT of a running cog counts as cog start for this default."
+      free_cog: "ALLOWI is the default mode on cog start."
+      source: >-
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS (ALLOWI, "default mode on cog start").
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS; GETBRK D WCZ.
+      P2 Instructions v35 - Rev B/C Silicon, Sheet1 (ALLOWI, STALLI rows).
+
+  held_lock:
+    name: "Lock held by the cog"
+    set_by: "LOCKTRY that returns C = 1: the lock is held by this cog."
+    consumed_by: "While held, no other cog can take the lock."
+    ended_by: "LOCKREL by the holding cog, the holding cog stopped (COGSTOP) or restarted (COGINIT), or LOCKRET for that lock."
+    coginit:
+      running_cog: "A lock held by the target cog is released."
+      free_cog: "A held lock is released when its holding cog stops or is restarted by COGINIT."
+      source: >-
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOCKS.
+        Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Locks, p.20.
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOCKS.
+      P2 Instructions v35 - Rev B/C Silicon, Sheet1 (LOCKTRY row).
+
+  debug_interrupt_vectors:
+    name: "Debug interrupt vectors (IJMP0, IRET0)"
+    set_by: "During a debug ISR, INA and INB become the readable and writable RAM registers IJMP0 and IRET0; IJMP0 can be redirected during any debug ISR for subsequent debug interrupts."
+    consumed_by: "The debug interrupt: IJMP0 is the jump address and IRET0 the return address."
+    ended_by: "A write during a debug ISR replaces the value. A COGINIT sets IJMP0 to $1F8, the debug-ISR-entry routine."
+    coginit:
+      running_cog: "IJMP0 is initialized to $1F8. Not documented: IRET0."
+      free_cog: "IJMP0 is initialized to $1F8. Not documented: IRET0."
+      source: >-
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT (On COGINIT, IJMP0 is initialized to $1F8; the first debug interrupt on cog (re)start uses the routine at $1F8).
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DEBUG INTERRUPT.
+
+  lut_sharing_enable:
+    name: "LUT sharing enable"
+    set_by: "SETLUTS #1 allows writes from the adjacent cog; SETLUTS #0 disallows them. GETBRK WC returns the enable in D[26]."
+    consumed_by: "Writes from the adjacent odd/even cog arrive in this cog's lookup RAM. SETQ2 block loads of 128 and 64 longs and a Spin2 cog's start-up image reach an already-enabled receiver (one pair at a time, in cog execution)."
+    ended_by: "SETLUTS #0, or a COGINIT of this cog."
+    coginit:
+      running_cog: "A COGINIT of the receiving cog resets its enable: GETBRK D[26] reads 0 and adjacent writes no longer arrive. A COGINIT of the sending cog leaves the receiver's enable in force."
+      free_cog: "Not documented: the enable's state in a stopped or never-started cog. SETLUTS #0 (do not allow writes) is named the default."
+      source: >-
+        EF-096 (a COGINIT of the receiver resets its enable, of the sender does not; one pair at a time, in cog execution).
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOOKUP RAM, RAM SHARING BETWEEN PAIRED COGS (SETLUTS #0 named the default).
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOOKUP RAM, RAM SHARING BETWEEN PAIRED COGS; GETBRK D WC.
+      EF-096 (block loads and the Spin2 start-up image arriving in an enabled partner).
+
+  ptra:
+    name: "PTRA"
+    set_by: "COGINIT in the target cog; a write to $1F8, including LOC and CALLD to PTRA; a PTRA expression updates it."
+    consumed_by: "RDxxxx and WRxxxx PTRA expressions, PUSHA, POPA, CALLA and RETA."
+    ended_by: "Each write or PTRA expression update replaces the value."
+    coginit:
+      running_cog: "The SETQ value if COGINIT is preceded by SETQ, otherwise cleared to zero."
+      free_cog: "The SETQ value if COGINIT is preceded by SETQ, otherwise cleared to zero."
+      source: >-
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STARTING AND STOPPING COGS.
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STARTING AND STOPPING COGS; RANDOM ACCESS INTERFACE (PTRx expressions).
+      P2 Instructions v35 - Rev B/C Silicon, Sheet1 (the PUSHA, POPA, CALLA and RETA rows, and LOC).
+
+  ptrb:
+    name: "PTRB"
+    set_by: "COGINIT in the target cog; a write to $1F9, including LOC and CALLD to PTRB; a PTRB expression updates it."
+    consumed_by: "RDxxxx and WRxxxx PTRB expressions, PUSHB, POPB, CALLB and RETB."
+    ended_by: "Each write or PTRB expression update replaces the value."
+    coginit:
+      running_cog: "The value of S, all 32 bits. Parallax's documents also give S[19:0]."
+      free_cog: "The value of S, all 32 bits. Parallax's documents also give S[19:0]."
+      source: >-
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STARTING AND STOPPING COGS (all 32 bits).
+        Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Hub Control instructions, p.41 (S[19:0]).
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STARTING AND STOPPING COGS; RANDOM ACCESS INTERFACE (PTRx expressions).
+      P2 Instructions v35 - Rev B/C Silicon, Sheet1 (the PUSHB, POPB, CALLB and RETB rows, and LOC).
+
+  pa_and_pb:
+    name: "PA and PB"
+    set_by: "A write to $1F6 or $1F7. CALLD with an immediate writes the return address, CALLPA and CALLPB copy D to PA or PB, LOC writes an address. XBYTE writes the bytecode to PA."
+    consumed_by: "As a register operand; the routine called by CALLPA or CALLPB reads the parameter from it."
+    ended_by: "Each write replaces the value."
+    coginit:
+      running_cog: "A COGINIT with D[5] = 0 of a running cog, including a cog restarting itself, loads PA and PB with the image's longs at $1F6 and $1F7, in the load of $000..$1F7. Not documented: PA and PB after a COGINIT with D[5] = 1."
+      free_cog: "A COGINIT with D[5] = 0 of a cog stopped with COGSTOP or never used since boot loads PA and PB with the image's longs at $1F6 and $1F7, in the load of $000..$1F7. Not documented: PA and PB after a COGINIT with D[5] = 1."
+      source: >-
+        P2 hardware verification, EF-113 (the image's longs at $1F6 and $1F7 read back as PA and PB, in place of the previous program's values, for a running cog, a stopped cog, itself and a never-used cog).
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STARTING AND STOPPING COGS (the target loads $000..$1F7, with no statement naming PA or PB); DUAL-PURPOSE REGISTERS ($1F6, $1F7).
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), DUAL-PURPOSE REGISTERS; BYTECODE EXECUTION (XBYTE) (the bytecode is always written to PA).
+      P2 Instructions v35 - Rev B/C Silicon, Sheet1 (the CALLD, LOC, CALLPA and CALLPB rows).
+
+  registers:
+    name: "Registers $000..$1F7"
+    set_by: "Any instruction writing a register; a COGINIT with D[5] = 0 loads them from hub."
+    consumed_by: "Instructions reading them."
+    ended_by: "Each write replaces the value."
+    coginit:
+      running_cog: "With D[5] = 0 the target cog loads registers $000..$1F7 from hub, starting at S, then begins execution at $000. With D[5] = 1 nothing is loaded; the cog can start at any place in its existing register or LUT RAM, whether or not it was stopped first. Not documented: any COGINIT clearing a register."
+      free_cog: "With D[5] = 0 the target cog loads registers $000..$1F7 from hub, starting at S, then begins execution at $000. With D[5] = 1 nothing is loaded. Cog RAM is retained while a cog is stopped. Not documented: any COGINIT clearing a register."
+      source: >-
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STARTING AND STOPPING COGS.
+        Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGINIT, pp.64-66 (a restart with E = 1 executes from existing Reg/LUT RAM; Cog RAM is retained during the terminated state).
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STARTING AND STOPPING COGS; COG RAM.
+
+  lut_ram:
+    name: "Lookup RAM contents"
+    set_by: "WRLUT, a SETQ2 block load, and writes from the adjacent cog with sharing enabled."
+    consumed_by: "RDLUT, the streamer's LUT modes, and execution from lookup RAM."
+    ended_by: "Each write replaces the value."
+    coginit:
+      running_cog: "A COGINIT with D[5] = 1 can start at any place in the cog's existing lookup RAM. A COGINIT with D[5] = 0 of a running cog, including a cog restarting itself, keeps a lookup RAM long written before the restart: the new program reads the same value."
+      free_cog: "A COGINIT with D[5] = 1 can start at any place in the cog's existing lookup RAM; cog RAM, register and lookup, is retained while a cog is stopped. A COGINIT with D[5] = 0 of a cog stopped with COGSTOP keeps a lookup RAM long written before the stop: the new program reads the same value."
+      source: >-
+        Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGINIT, pp.64-66 (Execution Modes).
+        P2 hardware verification, EF-113 (one lookup RAM long, $0F0, across COGINIT with D[5] = 0 of a running cog, a stopped cog and itself).
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOOKUP RAM.
+      Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGINIT, pp.64-66 (Execution Modes).
+
+  dir_and_out_bits:
+    name: "DIR and OUT bits"
+    set_by: "The DIRA, DIRB, OUTA and OUTB registers, and the DIRx, OUTx, FLTx and DRVx pin instructions."
+    consumed_by: "The pins. On a pin with no smart pin mode, a cog's OUT bit reaches the pin only through that cog's own DIR bit. Parallax's documents also give: DIR and OUT bits from all cogs are OR'd before going to the pins."
+    ended_by: "Each write replaces the bits. After a COGSTOP the stopped cog's OUT and DIR no longer reach a pin. With all the cogs terminated, all I/O pin DIR bits are naturally low (set to input), which puts every smart pin into its reset state. A smart pin the stopped cog configured, in NCO frequency mode with P_OE, keeps its mode, X and Y, and its output toggles while any cog holds its DIR high."
+    coginit:
+      running_cog: "A COGINIT with D[5] = 0 of a running cog, including a cog restarting itself, with DIRA and OUTA bits set on P0..P2 beforehand: the new program reads DIRA = 0 and OUTA = 0. Not documented: DIRB and OUTB after COGINIT, and DIR and OUT after a COGINIT with D[5] = 1."
+      free_cog: "A COGINIT with D[5] = 0 of a cog stopped with COGSTOP, with DIRA and OUTA bits set on P0..P2 before the stop: the new program reads DIRA = 0 and OUTA = 0, as in a cog never used since boot. Not documented: DIRB and OUTB after COGINIT, and DIR and OUT after a COGINIT with D[5] = 1."
+      source: >-
+        P2 hardware verification, EF-113 (DIR %011 and OUT %101 on P0..P2; COGINIT with D[5] = 0 of a running cog, a stopped cog and itself, against a never-used baseline).
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STARTING AND STOPPING COGS (no statement on DIR or OUT).
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (DIR and OUT bits are OR'd before going to the pins).
+      Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Shutdown, p.12 (with all the cogs terminated, all I/O pin DIR bits are naturally low).
+      EF-105 (a stopped cog's OUT and DIR no longer reach a pin; an NCO smart pin with P_OE keeps its mode, X and Y).
+      P2 hardware verification, EF-114 (a cog's OUT does not reach the pin without its own DIR, in both directions).
+
+  ct_targets:
+    name: "CT1, CT2 and CT3 targets"
+    set_by: "ADDCT1, ADDCT2 and ADDCT3 copy their result into a dedicated target register for that event."
+    consumed_by: "The target is compared to CT on every clock; when CT passes it the event flag is set."
+    ended_by: "The next ADDCT1, ADDCT2 or ADDCT3 replaces the target."
+    coginit:
+      running_cog: "A COGINIT with D[5] = 0 of a running cog, including a cog restarting itself, keeps the CT1 target: the CT1 event occurs in the new program within 200 clocks of the target set before the restart (read 8 to 16 clocks after it). Not documented: the CT2 and CT3 targets after COGINIT, and the CT1 target after a COGINIT with D[5] = 1."
+      free_cog: "A COGINIT with D[5] = 0 of a cog stopped with COGSTOP keeps the CT1 target: the CT1 event occurs in the new program within 200 clocks of the target set before the stop (read 8 to 16 clocks after it). Not documented: the CT2 and CT3 targets after COGINIT, and the CT1 target after a COGINIT with D[5] = 1."
+      source: >-
+        P2 hardware verification, EF-113 (a CT1 target set 2 ms ahead with ADDCT1; the event fired in the new program 8 to 16 clocks after that target as read, the rig's test being a fire within 200 clocks of the target; COGINIT with D[5] = 0 of a running cog, a stopped cog and itself).
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS (no statement on COGINIT; the CT event flags are not among those cleared on cog start).
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS (the ADDCT1/WAITCT1 example).
+
+  streamer_nco_frequency:
+    name: "Streamer NCO frequency"
+    set_by: "SETXFRQ."
+    consumed_by: "The streamer NCO, on every clock while the streamer is active."
+    ended_by: "The next SETXFRQ replaces it."
+    coginit:
+      running_cog: "$8000_0000 is the default on cog start. Not documented: whether a COGINIT of a running cog counts as cog start for this default."
+      free_cog: "$8000_0000 is the default on cog start."
+      source: >-
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER ("default value on cog start").
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER.
+      P2 Instructions v35 - Rev B/C Silicon, Sheet1 (SETXFRQ row).
+
+  goertzel_accumulators:
+    name: "Streamer Goertzel accumulators"
+    set_by: "In the streamer's DDS/Goertzel mode, sine and cosine inputs are each multiplied by the sum of up to four ADC bitstreams and separately accumulated."
+    consumed_by: "GETXACC gets X into D and Y into the next S."
+    ended_by: "GETXACC clears X and Y. With a discrete XINIT, WAITXFI, GETXACC sequence the reads are running totals: two identical commands return exactly twice one command's total. Not established: that the accumulators are never zeroed."
+    coginit:
+      running_cog: "Not documented."
+      free_cog: "With a discrete XINIT, WAITXFI, GETXACC sequence, a fresh cog's first GETXACC read equals the previous cog's last read across COGINIT. Not established: the cause."
+      source: >-
+        EF-056 (a fresh cog's first read equalled the previous cog's last read across COGINIT; which of XINIT versus XCONT, the wait, or the cog lifecycle accounts for it is unknown).
+        Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER (no statement on COGINIT).
+    source: >-
+      Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER (DDS/Goertzel; GETXACC).
+      EF-056 (the running totals with this sequence, and what it does not establish).
+
+related:
+  - language/pasm2/getxacc.yaml
+  - language/pasm2/calld.yaml
+  - architecture/streamer/dds-goertzel.yaml
+  - architecture/cog.yaml
+  - architecture/event_system.yaml
+  - architecture/interrupts.yaml
+  - architecture/debug_interrupt.yaml
+  - architecture/locks.yaml
+  - architecture/lookup_ram.yaml
+  - architecture/system-registers/complete-system-registers-index.yaml
+  - architecture/system-registers/dira-dirb-registers.yaml
+  - architecture/system-registers/ptra-register.yaml
+  - language/pasm2/coginit.yaml
+  - language/pasm2/cogstop.yaml
+  - language/pasm2/setq.yaml
+  - language/pasm2/setq2.yaml
+  - language/pasm2/augs.yaml
+  - language/pasm2/augd.yaml
+  - language/pasm2/alts.yaml
+  - language/pasm2/altd.yaml
+  - language/pasm2/altr.yaml
+  - language/pasm2/alti.yaml
+  - language/pasm2/skip.yaml
+  - language/pasm2/skipf.yaml
+  - language/pasm2/execf.yaml
+  - language/pasm2/rep.yaml
+  - language/pasm2/push.yaml
+  - language/pasm2/pop.yaml
+  - language/pasm2/call.yaml
+  - language/pasm2/ret.yaml
+  - language/pasm2/locktry.yaml
+  - language/pasm2/lockrel.yaml
+  - language/pasm2/lockret.yaml
+  - language/pasm2/setint1.yaml
+  - language/pasm2/allowi.yaml
+  - language/pasm2/stalli.yaml
+  - language/pasm2/setluts.yaml
+  - language/pasm2/addct1.yaml
+  - language/pasm2/getbrk.yaml
+  - language/pasm2/setxfrq.yaml
+  - language/pasm2/concepts/special_registers.yaml
+  - language/pasm2/concepts/instruction_skipping.yaml
+  - language/pasm2/concepts/stack_operations.yaml
+  - language/pasm2/concepts/setq_block_ops.yaml
+  - language/spin2/methods/coginit.yaml
+  - language/spin2/methods/cogstop.yaml

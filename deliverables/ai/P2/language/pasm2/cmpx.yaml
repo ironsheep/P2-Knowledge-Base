@@ -15,21 +15,17 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 0010001 CZI DDDDDDDDD SSSSSSSSS
   write: —
   c: borrow of (D - (S + C))
   z: Z AND (D == S + C)
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CMPX, p.62"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 19 (CMPX: C = borrow of (D - (S + C)); Z = Z AND (D == S + C); 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CMPX, p.62 (encoding table: C Unsigned (D < S+C), Z Z AND (D = S+C), 2 clocks; description; WC/WZ/WCZ effects; multi-long note)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 0
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Compare two unsigned values plus carry flag

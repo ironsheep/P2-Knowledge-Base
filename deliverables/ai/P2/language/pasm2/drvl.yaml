@@ -5,8 +5,7 @@ timing:
   cycles: 2
   type: fixed
   pin_output_latency: |
-    After instruction completes, the pin starts to transition 3 system-clock cycles later.
-    Total from instruction start: 2 (execution) + 3 (propagation) = 5 clocks to pin change.
+    After the instruction, it takes three additional clocks before the pin starts transitioning to the new state.
   source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), I/O PIN TIMING: \"When a DIRx/OUTx bit is changed by any instruction, it takes THREE additional clocks after the instruction before the pin starts transitioning to the new state.\" Corroborated by Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, I/O Pin Timing, p.42"
 description: >-
   DRVL sets the I/O pin(s) designated by Dest to the output direction and to a
@@ -21,8 +20,16 @@ description: >-
   (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD
   instruction prior.
 
+  When Dest is a register, the register's value bits [10:0] are used as-is to form
+  the 11-bit ID range. A prior SETQ overrides Dest[10:6] with the low five bits of
+  the SETQ value; an ALTx between the SETQ and DRVL keeps the override, and a SETQ
+  separated from DRVL by other instructions is not documented.
+
   The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within
-  the same 32-pin group; it will not cross the port boundary.
+  the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port
+  boundary.
+
+  DRVL achieves the same effect as two instructions-- OUTL followed by DIRH.
 
   If the WCZ effect is specified, the C and Z flags are set to the original
   (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.
@@ -31,12 +38,12 @@ result: >-
   level of low; the rest are left as-is.
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
-  the I/O pin(s) to set to output direction and output levels of high or low.
+  the I/O pin(s) to set to output direction and an output level of low.
 - WCZ is an optional effect to update flags.
 flags_affected:
   C: Set to the original (pre-instruction) state of the base pin's OUT bit
   Z: Set to the original (pre-instruction) state of the base pin's OUT bit
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZL DDDDDDDDD 001011000
   write: DIRx* + OUTx
   c: Orig OUTx base bit
@@ -46,14 +53,14 @@ encoding_notes:
 - New DIRx state is not data-forwarded; the next pipelined instruction sees the old
   state.
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DRVH / DRVL, p.76"
+sources:
+  - "description (a prior SETQ overrides D[10:6]): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), list of changes (DIRx/OUTx/FLTx/DRVx can now work on a span of pins, +D[10:6] pins; prior SETQ overrides D[10:6])"
+  - "description (an ALTx between the SETQ and DRVL keeps the override): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, pp.38-39 (SETQ / SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction); a SETQ separated by other instructions is in no source"
+  - "P2 Instructions v35 - Rev B/C Silicon, row 373 (DRVL {#}D {WCZ}: OUT bits of pins D[10:6]+D[5:0]..D[5:0] = 0, DIR bits = 1; wraps within OUTA/OUTB; prior SETQ overrides D[10:6]; C,Z = OUT bit; write DIRx* + OUTx; 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DRVH / DRVL, p.76 (encoding table and footnote 1; Dest[5:0], Dest[10:6], the 9-bit literal range of Dest[8:6], ##Dest, the SETQ substitution, the wrap within DIRA or DIRB and OUTA or OUTB, C and Z set to the original OUTx base bit, OUTL followed by DIRH, 2 clocks)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin instructions, p.39 (DRVL {#}D {WCZ}, 2 clocks)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pinop
-  pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
-    flags'
-  valueType: 30
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 30
 last_updated: '2025-09-19T16:04:17.136539'
-oneliner: Set pin(s) direction to output and output level high (1) or low (0)
+oneliner: Set pin(s) direction to output and output level low (0)
+related:
+  - architecture/io_pin_timing.yaml

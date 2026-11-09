@@ -3,27 +3,33 @@ subtitle: "Smart Pin Mode %10111 (P_COUNTER_PERIODS)"
 language_reference: "combined"
 compatible_languages: ["Spin2", "PASM2"]
 
-brief_description: "Counts complete signal periods that occur within a minimum X-clock time window"
+brief_description: "Counts the periods completed until X clocks elapse and the period in progress completes"
 
 detailed_description:
   operation: |
-    Time-windowed period counter. Counts the number of complete A/B periods that occur within at
-    least X clock cycles. Measurement continues until X clocks elapse AND the current period
-    completes. Returns period count along with actual elapsed time. When combined with modes
-    %10101 (time) and %10110 (states) running concurrently, enables precise frequency and duty
-    cycle calculation.
-  
+    X establishes the minimum number of clock cycles to track periods for. Periods are
+    A-input rise/edge to B-input rise/edge (set by Y[1:0]). A measurement is taken across
+    some number of periods, until X clock cycles elapse and then any period in progress
+    completes. If the A-input rise/edge is ever coincident with the B-input rise/edge at the
+    end of the period, the start of the next period is registered. Upon completion, the
+    measurement is placed in Z, IN is raised, and a new measurement begins. This mode counts
+    the periods.
+
+    Knowing how many clock cycles some number of complete periods took, and what the duty
+    was, affords determining frequency and duty cycle. At least two of these measurements
+    must be made concurrently to get useful results: mode %10101 over the same X window
+    supplies the clocks, and mode %10110 the duty.
+
   timing: |
     Minimum measurement window is X clock cycles
-    Measurement extends to complete the period in progress when X clocks elapse
+    The measurement extends to complete the period in progress when X clocks elapse
     Period boundaries defined by Y[1:0] trigger combination
     IN flag raised when measurement completes
-    Z register contains period count
-    Actual elapsed time longer than X due to period completion
+    Z register contains the period count, limited to $80000000
 
 registers:
   x_register:
-    bits_31_0: "Minimum time window duration in clock cycles (X+ clocks)"
+    bits_31_0: "Minimum number of clock cycles to track periods for (X+ clocks)"
   y_register:
     bits_1_0: |
       Event trigger sensitivity:
@@ -32,103 +38,96 @@ registers:
       %10 = A-input edge to B-input rise
       %11 = A-input edge to B-input edge
   z_register:
-    function: "Count of complete periods within X+ clock window (max $80000000)"
+    function: "Count of periods completed within the X+ clock window (limited to $80000000)"
+    reset_value: "$00000000 during reset (DIR=0); IN is low"
 
 flags:
-  in_flag: "Raised when measurement completes (X clocks + period completion)"
-  a_input: "Signal to monitor (period start marker)"
-  b_input: "Period end marker (can be same as A-input)"
+  in_flag: "Raised when the measurement completes (X clocks elapsed and the period in progress completed)"
+  a_input: "Signal to monitor (period start)"
+  b_input: "Period end (the B input can be set to the same pin as the A input)"
 
 code_examples:
-  - title: "Frequency Measurement"
-    description: "Measure frequency by counting periods in time window"
+  - title: "Period Count"
+    description: "Count the periods completed in a window of at least X clocks"
     code: |
       CON
         _clkfreq = 200_000_000
         signal_pin = 20
-        window_ms = 100                          ' 100ms measurement window
-      
+        window_ms = 100                          ' 100ms minimum window
+
       PUB main() | period_count, window_clks, frequency
         window_clks := (_clkfreq / 1000) * window_ms
-        
-        ' Count periods in ~100ms windows
+
         pinstart(signal_pin, P_COUNTER_PERIODS, window_clks, %00)
-        
+
         repeat
           repeat until pinread(signal_pin)       ' Wait for measurement complete
-          
-          period_count := rdpin(signal_pin)      ' Get period count
-          
-          ' Frequency = periods / time
-          ' Approximate: period_count * 10 (since ~100ms window)
+
+          period_count := rdpin(signal_pin) & $7FFF_FFFF   ' Periods completed in the window; clear bit 31, where RDPIN() puts C
+
+          ' period_count * 10 scales a 100 ms count to one second
           frequency := period_count * 10
-          debug("Frequency: ~", udec(frequency), " Hz (", udec(period_count), " periods)")
-      
+          debug("Periods x10: ", udec(frequency), " (", udec(period_count), " periods)")
+
       DAT
-      ' PASM2 example - precise frequency measurement
+      ' PASM2 example - period count over a window of at least clkfreq clocks
         org
         dirl    #signal_pin                      ' Reset smart pin
         wrpin   ##P_COUNTER_PERIODS, #signal_pin
         rdlong  clkf, #$44                       ' clkfreq lives at hub long $44
-        wxpin   clkf, #signal_pin                ' 1-second minimum window
+        wxpin   clkf, #signal_pin                ' Window of at least clkfreq clocks
         wypin   #%00, #signal_pin                ' Rise to rise
         dirh    #signal_pin                      ' Start measurement
       .loop
         testp   #signal_pin wc                   ' Check IN flag
         if_nc   jmp #.loop                       ' Wait for complete
-        rdpin   periods, #signal_pin             ' Period count = frequency
-        ' periods now contains Hz (cycles per second)
-        jmp     #.loop                           ' Next measurement starts auto
+        rdpin   periods, #signal_pin             ' Whole periods in the window
+        jmp     #.loop                           ' Next measurement begins
 
-  - title: "Exact Frequency and Duty Measurement (3-pin canonical idiom)"
-    description: "Concurrent %10111 + %10101 + %10110 measurement for exact frequency and duty cycle"
+  - title: "Frequency and Duty Measurement (3-pin idiom)"
+    description: "Concurrent %10111 + %10101 + %10110 measurement over one X window"
     code: |
       CON
         _clkfreq = 200_000_000
-        pin_base = 20                            ' All three pins observe the same signal
+        pin_base = 20                            ' Signal on pin_base+0; cells +1 and +2 route to it
         window_ms = 100
-      
+
       PUB main() | periods, ticks, highs, freq, duty, window_clks
         window_clks := (_clkfreq / 1000) * window_ms
-        
-        ' Three cells, same period-aligned window, started together for matched timing.
+
+        ' Three cells, same X window, started together.
         ' The signal is on pin_base+0 only; the other two cells watch it via A+B input
         ' routing (P_MINUS1_A | P_MINUS1_B / P_MINUS2_A | P_MINUS2_B), so no extra wiring
-        ' and the pins stay free. Route BOTH inputs: the period-aligned window closes on a
+        ' is needed. Route BOTH inputs: the window closes on a
         ' B-rise (Y=%00 = A-rise to B-rise), so routing A alone leaves B on the cell's idle
         ' own-pin -- IN never rises and the REPEAT UNTIL below hangs.
         ' Pin 20: count complete A-periods within the window
         pinstart(pin_base+0, P_COUNTER_PERIODS, window_clks, %00)
-        ' Pin 21: measure actual elapsed ticks (>= window_clks, period-extended)
+        ' Pin 21: clocks accumulated within the measurement's periods
         pinstart(pin_base+1, P_COUNTER_TICKS | P_MINUS1_A | P_MINUS1_B, window_clks, %00)
-        ' Pin 22: measure total clocks A was high during the same window
+        ' Pin 22: clocks A was high during the same window
         pinstart(pin_base+2, P_COUNTER_HIGHS | P_MINUS2_A | P_MINUS2_B, window_clks, %00)
-        
+
         repeat
           ' Wait for all three measurements to complete
           repeat until pinread(pin_base+0) and pinread(pin_base+1) and pinread(pin_base+2)
-          
-          periods := rdpin(pin_base+0)           ' Complete A-periods in window
-          ticks   := rdpin(pin_base+1)           ' Actual elapsed clocks (>= window_clks)
-          highs   := rdpin(pin_base+2)           ' Clocks A was high during window
-          
-          ' Exact results - all three measurements span the SAME period-aligned window
-          freq := MULDIV64(periods, _clkfreq, ticks)  ' 64-bit product avoids overflow
-          duty := MULDIV64(highs, 100, ticks)         ' high-time / elapsed-time (percent)
-          
+
+          ' Each read clears bit 31, where RDPIN() puts C; Z is limited to $8000_0000
+          periods := rdpin(pin_base+0) & $7FFF_FFFF   ' Complete A-periods in window
+          ticks   := rdpin(pin_base+1) & $7FFF_FFFF   ' Clocks accumulated within the measurement's periods
+          highs   := rdpin(pin_base+2) & $7FFF_FFFF   ' Clocks A was high during window
+
+          ' All three measurements span the same window
+          freq := MULDIV64(periods, _clkfreq, ticks)  ' periods * clkfreq / ticks
+          duty := MULDIV64(highs, 100, ticks)         ' highs * 100 / ticks (percent)
+
           debug("Freq: ", udec(freq), "Hz, Duty: ", udec(duty), "%")
 
-common_applications:
-  - "Precise frequency measurement"
-  - "Variable frequency monitoring"
-  - "Combined with duty cycle measurement for full signal characterization"
-  - "Event rate counting in time windows"
-
 related_modes:
-  - "Mode %10101 (P_COUNTER_TICKS): same period-aligned window; Z = elapsed ticks (pair to compute exact frequency)"
-  - "Mode %10110 (P_COUNTER_HIGHS): same period-aligned window; Z = high-time (pair to compute exact duty cycle)"
-  - "Mode %10100 (P_PERIODS_HIGHS): X complete A-periods window; Z = high-time"
-  - "Mode %10011 (P_PERIODS_TICKS): X complete A-periods window; Z = elapsed ticks"
+  - "Mode %10101 (P_COUNTER_TICKS): same X window; Z = time (pair for frequency)"
+  - "Mode %10110 (P_COUNTER_HIGHS): same X window; Z = A-input trigger states (pair for duty)"
+  - "Mode %10100 (P_PERIODS_HIGHS): X periods; Z = A-input trigger states"
+  - "Mode %10011 (P_PERIODS_TICKS): X periods; Z = time"
 
 configuration_constants:
   mode_constant: "P_COUNTER_PERIODS"
@@ -137,22 +136,27 @@ configuration_constants:
     - "(single-pin) no routing constant needed - A and B inputs both default to this pin"
     - "P_PLUS1_B - Use next pin as B-input"
     - "P_MINUS1_B - Use previous pin as B-input"
-    - "P_FILT1_AB - Add filtering for noise immunity"
-  
+    - "P_FILT1_AB - Filter the A and B inputs using the global filt1 settings"
+
   y_register_values:
-    - "%00 - A-rise to B-rise (typical for frequency measurement)"
-    - "%01 - A-rise to B-edge (any B transition ends period)"
-    - "%10 - A-edge to B-rise (any A transition starts period)"
-    - "%11 - A-edge to B-edge (maximum sensitivity)"
+    - "%00 - A-rise to B-rise"
+    - "%01 - A-rise to B-edge"
+    - "%10 - A-edge to B-rise"
+    - "%11 - A-edge to B-edge"
 
 notes:
-  - "Measurement extends beyond X clocks to complete the final period"
-  - "Period count with time window enables frequency calculation: freq = periods / time"
-  - "Best used with concurrent measurements on multiple pins for complete signal analysis"
-  - "Combines with mode %10101 (time) and %10110 (states) for full characterization"
+  - "The measurement extends beyond X clocks to complete the period in progress"
+  - "At least two of these measurements must be made concurrently to get useful results."
+  - "A cell that watches the signal on another pin routes both inputs (P_MINUS1_A | P_MINUS1_B for the pin below); routing only A leaves B on the cell's own pin, so the window never closes and IN never rises"
+  - "Combines with mode %10101 (time) and %10110 (states)"
   - "B-input can be same as A-input for single-pin period counting"
-  - "Documentation states: 'At least two measurements must be made concurrently for useful results'"
+  - "The Spin2 examples read Z with RDPIN() & $7FFF_FFFF: the Spin2 RDPIN() method returns the C flag in bit 31, and Z in these modes is limited to $80000000, so the mask keeps every value below $8000_0000; a Z of exactly $80000000 (the limit) reads as 0. Inline PASM2 RDPIN reads all 32 bits of Z. Not documented: the C flag of RDPIN in these modes."
   - "A Y written while DIR is low (before DIRH, as pinstart() and the WYPIN-before-DIRH line in the PASM2 example do) is in force after DIRH: this mode is order-safe"
 
 sources:
+  - "operation, timing, registers, flags, notes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%10101, %10110, %10111: periods in X+ clock cycles; At least two of these measurements must be made concurrently to get useful results; Z limited to $80000000; During reset (DIR=0), IN is low and Z is set to $00000000)"
+  - "configuration_constants.common_modifiers (P_FILT1_AB): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (%FFF = 101 uses the global filt1 settings)"
+  - "notes (Spin2 RDPIN() bit 31): Parallax Propeller 2 Spin2 Language Documentation v55, smart pin methods (RDPIN (Pin) : Zval, Zval[31] = C flag from RDPIN, other bits are RDPIN data); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (C is either a mode-related flag or the MSB of the Z result)"
+  - "code_examples (route both inputs of a cell watching another pin): EF-017"
+  - "code_examples (clkfreq as a hub long): Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup (the clkfreq hub variable at LONG[$44], read from PASM as RDLONG x,#@clkfreq)"
   - "EF-097 (Y-before-DIRH order-safety bench-measured on one board, one Y value for this mode)"

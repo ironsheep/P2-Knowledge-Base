@@ -9,34 +9,45 @@ detailed_description:
   operation: |
     Transmits serial data asynchronously with automatic start bit (logic-0) and stop bit (logic-1)
     generation. Supports 1-32 data bits per frame at programmable baud rates. Hardware handles
-    timing and framing automatically. OUT signal is overridden for serial output control. Can
-    optionally include parity bit in data (calculated by software). Ideal for UART communication.
+    timing and framing automatically. OUT signal is overridden for serial output control.
   
   timing: |
     Baud rate set by X register (system clocks per bit period)
     Start bit (0) transmitted automatically
     Data bits transmitted LSB first
     Stop bit (1) transmitted automatically
-    IN flag raised when transmission complete and ready for next byte
+    IN is raised each time a word advances from the single-stage buffer to the shifter, meaning a new word can be loaded
+    The busy flag (returned into C by RDPIN/RQPIN with WC) is what shows a transmission has completed
+
+buffering:
+  words_enter: "a single-stage buffer ahead of the shifter"
+  purpose: "Keeps the shifter busy for gapless transmission"
+  in_rise: "IN rises as each word advances from the buffer to the shifter, meaning a new word can be loaded"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %11110 = asynchronous serial transmit (WYPIN buffering and the internal state sequence)"
 
 registers:
   x_register:
     bits_31_16: "System clock periods per bit period (integer part)"
-    bits_15_10: "Fractional clock periods (base-2 fraction for precise timing)"
-    bits_9_5: "Reserved"
+    bits_15_10: "Fractional clocks in a bit period, when X[31:26] is zero"
+    bits_9_5: "Not documented: X[9:5]."
     bits_4_0: "Word-size field, encoded as N-1 (write 0..31 to select 1..32 data bits; e.g. write 7 for an 8-bit word)"
   y_register:
     bits_31_0: "Data to transmit (LSB transmitted first)"
   z_register:
-    function: "Not used in transmit mode"
+    function: "Not documented: the Z register in this mode."
 
 flags:
-  in_flag: "Raised when transmission complete, ready for next byte"
+  in_flag: "Raised when a written word moves from the buffer to the shifter, meaning a new word can be loaded; it does not mean the transmission is complete"
+  in_drop_latency: "After WRPIN/WXPIN/WYPIN/RDPIN/AKPIN, it takes two clocks for IN to drop before it can be polled again"
+  in_before_first_write: "Not documented: the state of IN before the first WYPIN."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (IN acknowledge and the two-clock drop) and SMART PIN MODES, %11110 = asynchronous serial transmit; EF-016 (first word written after enabling, wired loopback)"
+  busy_flag: "RDPIN/RQPIN with WC returns the busy flag into C; C = 0 means the transmission has completed. It can be polled starting three clocks after the WYPIN"
   out_override: "OUT signal overridden for serial transmission"
+  reset_state: "During reset (DIR=0) the output is held high. Not documented: IN during reset."
 
 code_examples:
   - title: "Basic 8-bit UART Transmit"
-    description: "Standard 115200 baud 8N1 serial output"
+    description: "115200 baud, 8 data bits; each byte is written with WYPIN and the busy flag is polled until the transmission completes"
     code: |
       CON
         _clkfreq = 200_000_000
@@ -60,13 +71,15 @@ code_examples:
             quit
           send_byte(char)
       
-      PUB send_byte(value)
-        ' Wait for transmitter ready
-        repeat until pinread(tx_pin)
-        
-        ' Send byte
-        wypin(tx_pin, value)
-      
+      PUB send_byte(value) | busy
+        org
+          wypin   value, #tx_pin                 ' Load the output word
+          waitx   #1                             ' 2+1 clocks before polling busy
+      .wait
+          rdpin   busy, #tx_pin wc               ' Busy flag into C
+          if_c    jmp #.wait                     ' Loop until C = 0
+        end
+
       DAT
       ' PASM2 example - high-speed serial output, started by
       ' COGINIT(COGEXEC_NEW, @entry, @message), which puts @message in PTRA
@@ -91,11 +104,13 @@ code_examples:
         jmp     #.done                           ' Message sent: nothing to return to
 
       transmit
-        testp   #tx_pin wc                       ' Wait for ready
-        if_nc   jmp #transmit
-        wypin   data, #tx_pin                    ' Send byte
+        wypin   data, #tx_pin                    ' Load the output word
+        waitx   #1                               ' 2+1 clocks before polling busy
+      .busy
+        rdpin   scratch, #tx_pin wc              ' Busy flag into C
+        if_c    jmp #.busy                       ' Loop until C = 0
         ret
-      
+
       tx_mode
         long    P_ASYNC_TX | P_OE
       message
@@ -103,30 +118,34 @@ code_examples:
         alignl
       data    long    0
       bit_clks res    1
+      scratch res     1
 
-  - title: "Precise Baud Rate with Fractional Timing"
-    description: "Use fractional bits for exact baud rates"
+  - title: "Bit Period with Fractional Clocks"
+    description: "X[15:10] sets the fractional clocks in a bit period when X[31:26] is zero; the bit period value is (clocks * $1_0000) & $FFFFFC00, so 33.33 clocks is $00215400"
     code: |
       CON
-        _clkfreq = 200_000_000
+        _clkfreq = 10_000_000
         tx_pin = 20
-        baud = 115_200
-      
-      PUB main() | bit_period, frac_period
-        ' Calculate precise bit period with fractional part
-        ' bit_period = (clkfreq / baud) * 65536
-        bit_period := (_clkfreq * 65536) / baud
 
-        ' Mask to X[31:10] and add 8 data bits (X[4:0] = N-1 = 7)
-        frac_period := (bit_period & $FFFFFC00) | 7
+      PUB main() | frac_period
+        ' Bit period of 33.33 clocks = $00215400; X[4:0] = N-1 = 7 selects 8 data bits
+        frac_period := $0021_5400 | 7
 
         pinstart(tx_pin, P_ASYNC_TX | P_OE, frac_period, 0)
-        
-        ' Now transmissions will have precise timing
+
         send_byte($55)                           ' Send test pattern
 
+      PUB send_byte(value) | busy
+        org
+          wypin   value, #tx_pin                 ' Load the output word
+          waitx   #1                             ' 2+1 clocks before polling busy
+      .wait
+          rdpin   busy, #tx_pin wc               ' Busy flag into C
+          if_c    jmp #.wait                     ' Loop until C = 0
+        end
+
   - title: "Variable Data Width Transmission"
-    description: "Transmit different bit widths (7, 8, 9 bits)"
+    description: "Transmit a 9-bit word, then reconfigure and transmit a 7-bit word"
     code: |
       CON
         _clkfreq = 200_000_000
@@ -136,30 +155,35 @@ code_examples:
       PUB main() | bit_period
         bit_period := (_clkfreq / baud) << 16
 
-        ' Configure for 9-bit mode (e.g., with parity); X[4:0] = N-1 = 8
+        ' Configure for 9-bit mode; X[4:0] = N-1 = 8
         pinstart(tx_pin, P_ASYNC_TX | P_OE, (bit_period | 8), 0)
 
-        ' Send 9-bit value (8 data + 1 parity)
-        send_9bit($01FF)                         ' 8 data bits + parity
+        ' Send a 9-bit value
+        send_9bit($01FF)                         ' 9 data bits
+        send_7bit($41)                           ' 7 data bits
 
-      PUB send_9bit(value)
-        repeat until pinread(tx_pin)
-        wypin(tx_pin, value)
+      PUB send_9bit(value) | busy
+        org
+          wypin   value, #tx_pin                 ' Load the output word
+          waitx   #1                             ' 2+1 clocks before polling busy
+      .wait
+          rdpin   busy, #tx_pin wc               ' Busy flag into C
+          if_c    jmp #.wait                     ' Loop until C = 0
+        end
 
-      PUB send_7bit(value) | bit_period
+      PUB send_7bit(value) | bit_period, busy
         ' Reconfigure for 7-bit ASCII; X[4:0] = N-1 = 6
         bit_period := (_clkfreq / baud) << 16
         pinstart(tx_pin, P_ASYNC_TX | P_OE, (bit_period | 6), 0)
 
-        repeat until pinread(tx_pin)
-        wypin(tx_pin, value & $7F)
-
-common_applications:
-  - "UART serial communication"
-  - "Debug console output"
-  - "Serial terminal communication"
-  - "Multi-drop serial networks (RS-485)"
-  - "GPS and sensor module communication"
+        value &= $7F
+        org
+          wypin   value, #tx_pin                 ' Load the output word
+          waitx   #1                             ' 2+1 clocks before polling busy
+      .wait
+          rdpin   busy, #tx_pin wc               ' Busy flag into C
+          if_c    jmp #.wait                     ' Loop until C = 0
+        end
 
 related_modes:
   - "Mode %11111: Async serial RX - asynchronous receive"
@@ -171,43 +195,33 @@ configuration_constants:
   binary_value: "%11110"
   required_modifiers: "P_OE (P_TT_01) to enable output"
   out_override: "true"
-  
-  common_baud_rates:
-    - "300, 1200, 2400, 4800, 9600 baud"
-    - "19200, 38400, 57600, 115200 baud"
-    - "230400, 460800, 921600 baud (high speed)"
-  
+
   bit_period_calculation:
-    formula: "bit_period = (clkfreq / baud) << 16"
-    fractional: "(clkfreq * 65536 / baud) & $FFFFFC00"
+    formula: "bit_period = (clkfreq / baud) << 16, clocks per bit times $1_0000 for a whole number of clocks"
+    fractional: "(clocks * $1_0000) & $FFFFFC00; 7.5 clocks is $00078000 and 33.33 clocks is $00215400; the fractional part applies when X[31:26] is zero"
     bits_31_16: "Integer system clocks per bit"
-    bits_15_10: "Fractional base-2 value (1/64th increments)"
+    bits_15_10: "Establishes the number of fractional clocks in a bit period, when X[31:26] is zero"
   
   data_bits_field:
     location: "X[4:0]"
     encoding: "Field value = N - 1 (write 0..31 to select 1..32 data bits)"
     range: "1-32 bits supported"
     typical_values:
-      - "X[4:0] = 6 → 7-bit word (7-bit ASCII)"
-      - "X[4:0] = 7 → 8-bit word (standard 8-bit data)"
-      - "X[4:0] = 8 → 9-bit word (8 data + parity)"
+      - "X[4:0] = 6 → 7-bit word"
+      - "X[4:0] = 7 → 8-bit word"
+      - "X[4:0] = 8 → 9-bit word"
 
-gotchas:
-  first_byte_low_glitch:
-    symptom: "Community lore holds that the first byte after enabling may briefly glitch the line low before the start bit. NOT reproduced on P2 silicon: over a real wired loopback the cold first byte arrived clean, with no settling frame, for multiple values (a faint sub-bit line-settle showed in the raw word but did not corrupt the decoded byte)."
-    workaround: "The reported harmless WYPIN $FF (all-ones) pre-clear is optional belt-and-suspenders — it is not required for correct first-byte transmission on real hardware."
-    attribution: "Community-reported (credited to Ray Rodrick)."
-    status: "HW-CONFIRMED NOT-OBSERVED (2026-06-17, test51b-asynctx-firstbyte-glitch-wired, RA-19). Do not assert as a rule."
+max_baud_rate:
+  statement: "Asynchronous serial transmit and receive, 1 to 32 bits, up to clock/3 baud rate"
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, smart I/O pin features, p.3; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), OVERVIEW (smart I/O pin features)"
 
 notes:
   - "OUT signal automatically overridden in this mode"
   - "Start bit (0) and stop bit (1) added automatically by hardware"
-  - "Data transmitted LSB first (standard UART format)"
-  - "Use P_OE modifier to enable output"
-  - "IN flag indicates transmitter ready for next byte"
-  - "Supports up to 32 data bits per frame (including optional parity)"
+  - "Data transmitted LSB first"
+  - "P_OE (P_TT_01) enables the output"
+  - "IN is raised when a word moves from the buffer to the shifter, indicating a new word can be loaded; it does not indicate that the transmission has completed (use the busy flag from RDPIN/RQPIN with WC for that)"
+  - "Supports 1 to 32 data bits per frame"
   - "Word-size field X[4:0] is encoded as N-1: write 7 for an 8-bit word, 6 for 7-bit, 8 for 9-bit"
-  - "Fractional timing in X[15:10] enables precise baud rate control"
-  - "Can achieve very high baud rates limited only by system clock"
-  - "No hardware parity generation - calculate and insert in data if needed"
-  - "Compatible with standard UART devices"
+  - "X[15:10] establishes the number of fractional clocks in a bit period when X[31:26] is zero"
+  - "Not documented: parity."

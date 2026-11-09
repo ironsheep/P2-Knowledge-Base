@@ -2,14 +2,15 @@ instruction: COGINIT
 syntax: COGINIT {#}Dest, {#}Src {WC}
 brief_description: Cog initialize
 category: Hub Control
-description: COGINIT starts a new (unused) cog, a new pair of cogs (that may share LUT memory), or a specific cog by ID, to load code from Hub RAM to be executed within Reg/LUT RAM or to be executed right from Hub RAM. The format of Dest is %E_N_xVVV where E controls loading (0=load from Hub, 1=no load), N controls target selection (0=specific cog ID, 1=free cog), and V is the cog ID or mode. The lower 20 bits of Src is the code address; the entire 32-bit Src is written to the target cog's PTRB. If COGINIT is preceded by SETQ, that value is written to the target cog's PTRA. If the WC effect is specified, C is set on failure or cleared on success, and if Dest is a register, it receives the launched cog's ID (or $F on failure).
+description: COGINIT starts a new (unused) cog, a new pair of cogs (that may share LUT memory), or a specific cog by ID. The format of Dest is %E_N_xVVV where E controls loading (0=load from Hub, 1=no load), N controls target selection (0=specific cog ID, 1=free cog), and V is the cog ID or mode. With E=0 the target cog loads its registers $000..$1F7 from hub RAM, starting at the address in Src, then begins execution at register address $000. With E=1 nothing is loaded and the target cog begins execution at the register, LUT or hub address in Src. Src is the code address and is written to the target cog's PTRB (Parallax's documents differ on whether all 32 bits or Src[19:0] are written). If COGINIT is preceded by SETQ, that value is written to the target cog's PTRA; with no SETQ, the target cog's PTRA is cleared to zero. A COGINIT that executes without a preceding SETQ also sets Q to zero (see language/pasm2/concepts/special_registers.yaml q_register). If the WC effect is specified, C is set on failure or cleared on success, and if Dest is a register, it receives the launched cog's ID (the even/lower cog's ID when a pair is started), or $F on failure.
 result: Target cog is started according to Dest to execute code from Src. The code pointer (Src) is written to the target cog's PTRB, and optionally a data pointer is written to its PTRA if SETQ preceded COGINIT.
 parameters:
 - Dest is the register or 9-bit literal describing the type of launch and possibly
   the ID of the desired cog to launch. If Dest is a register and WC is given, Dest
   is also where the ID of the launched cog will be written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value (lower
-  20 bits) is the target RAM address (for code) and the new cog's PTRB value.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is the
+  target address (for code) and the new cog's PTRB value (Parallax's documents differ
+  on whether all 32 bits or Src[19:0] are written).
 - WC is an optional effect to update the C flag with the success (0) or fail (1) status
   and triggers Dest to be overwritten with new cog's ID.
 flags_affected:
@@ -18,29 +19,26 @@ flags_affected:
 syntax_variants:
 - COGINIT {#}Dest, {#}Src {WC}
 timing:
-  cycles: 2
-  type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+  cycles: "2...9, +2 if result"
+  type: variable
+  target_start_time: "Not documented: a clock count for the time from COGINIT to the target cog's first instruction."
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1100111 CLI DDDDDDDDD SSSSSSSSS
   write: D if reg and WC
   c: No cog available
   z: —
-  clocks: 2–9, +2 if result
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGINIT, p.64"
+  clocks: 2...9, +2 if result
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGINIT, pp.64-65; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS (S, all 32 bits, is written into PTRB); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Hub Control instructions, p.41 (S[19:0] sets the hub startup address and PTRB of the cog); SETQ CONSIDERATIONS (COGINIT without a preceding SETQ sets Q to zero)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ls
-  pattern: D/#,S/#
-  description: 'Two operands: destination/immediate, source/immediate'
-  valueType: 13
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 13
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Start an available cog, or restart a cog by ID
 related:
-- COGID
-- COGSTOP
+- architecture/cog_state.yaml
+- language/pasm2/cogid.yaml
+- language/pasm2/cogstop.yaml
+- language/pasm2/concepts/special_registers.yaml
+- language/pasm2/setq.yaml
 # Full-path cross-references (Sacred Rule #7)
 - architecture/boot-rom/_index.yaml
 - architecture/boot-rom/spi-flash-boot.yaml

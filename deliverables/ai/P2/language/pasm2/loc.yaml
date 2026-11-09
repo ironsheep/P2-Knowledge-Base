@@ -11,20 +11,13 @@ timing:
   type: fixed
 description: >-
   Load address into PA, PB, PTRA, or PTRB. If the R bit is 1 (default for relative
-  addressing), address = PC + A. If R = 0 (forced with \ prefix), address = A.
+  addressing), address = PC + A, where A counts longs in cog and bytes in hub. If R = 0
+  (forced with \ prefix), address = A.
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release (2022/11/01), Propeller 2 Assembly Language (PASM2) in Brief, p.149; P2 Instructions v35 - Rev B/C Silicon, Sheet1"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release (2022/11/01), Propeller 2 Assembly Language (PASM2) in Brief, p.149; P2 Instructions v35 - Rev B/C Silicon, Sheet1; the unit of the relative A (longs in cog, bytes in hub) is read from the assembler's output, CP-031 (pnut-ts v1.55.10)"
 documentation_level: minimal
-compiler_operand_format:
-  name: operand_loc
-  pattern: D,#S{\}
-  description: 'Load address: destination register, immediate address (optional \
-    for absolute)'
-  valueType: 22
-compiler_encoding:
-  operandFormat: 22
 last_updated: '2025-09-19T16:04:17.549095'
 category: Branch
 related:

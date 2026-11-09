@@ -3,12 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "238e69727069c9a8"
+    fp: "b012d3d125cb0e09"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [m_sync, sync_val, m_back, m_visible]
-  - at: examples[1].code
-    fp: "e9c98895a3bec550"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [m_audio, samples]
+    assumes: [m_bs, hsync0, m_sn, hsync1, m_bv]

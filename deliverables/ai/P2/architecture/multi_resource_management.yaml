@@ -1,15 +1,14 @@
 concept: multi_resource_management
 title: Single COG Managing Multiple Resources
 category: architectural_pattern
-description: Design pattern for a single COG efficiently managing multiple instances of the same resource type
+description: Design pattern for a single COG managing multiple instances of the same resource type
 documentation_level: comprehensive
-source: "OBEX 4257 (ISP high-speed 8-port serial subsystem): one cog services 1 to 8 Tx/Rx pin pairs"
+source: "OBEX 4257 (ISP high-speed 8-port serial subsystem), as a worked design: one cog services 1 to 8 Tx/Rx smart-pin pairs, a pasm2 backend with spin2 interface routines, and its addPort, start and txStr interface (isp_octoport_serial.spin2: addPort(rxp, txp, mode, baudrate, txPullup), MODE_NONE = 0, pull-up options numbered PU_NONE, PU_1K5, PU_3K3, PU_15K from 0). P2 hardware verification, EF-120 (COGINIT(COGEXEC_NEW, ...) as an expression with all 8 cogs running returned $8000_000F, so the start test is < 0 or >= 0)"
 
 overview: |
-  A powerful P2 architectural pattern where a single COG manages multiple instances of
-  the same resource type (e.g., 8 serial ports, multiple SPI devices, multiple PWM channels).
-  This pattern maximizes COG efficiency by amortizing overhead across multiple resources
-  and is commonly used in production P2 applications.
+  A single COG manages multiple instances of the same resource type (for example, serial
+  ports, SPI devices or PWM channels), holding per-resource configuration and state in hub
+  arrays that its service loop walks.
 
 architecture:
   key_components:
@@ -77,11 +76,11 @@ implementation_patterns:
               jmp     #main_loop
     
   hub_cog_transfer:
-    description: "Efficient block copy of configuration to COG"
+    description: "Start the driver cog with the hub address of the configuration in PTRA; the driver block-copies the configuration into cog RAM"
     code: |
       PUB start() : ok
-        ' Copy configuration to COG RAM
-        ok := coginit(COGEXEC_NEW, @driver, @activeCount)
+        ' Start the driver cog; ok is true when a cog was started
+        ok := coginit(COGEXEC_NEW, @driver, @activeCount) >= 0
       
       DAT
               org
@@ -91,9 +90,9 @@ implementation_patterns:
               setq    #CONFIG_LONGS-1
               rdlong  config_start, ptra
 
-common_applications:
+examples:
   serial_port_multiplexer:
-    description: "8 UART ports managed by single COG"
+    description: "8 serial ports managed by a single cog, through the object's interface"
     example: |
       OBJ
         serial : "isp_octoport_serial"
@@ -119,63 +118,16 @@ common_applications:
           pinhigh(chipSelect[device])
     
   pwm_channel_controller:
-    description: "Multiple PWM channels with synchronized updates"
+    description: "Multiple PWM channels, each duty updated in a loop"
     example: |
       ' Update all PWM channels
       repeat channel from 0 to MAX_CHANNELS-1
         wypin(pwmPin[channel], dutyCycle[channel])
 
-best_practices:
-  initialization:
-    - Validate all resource configurations before starting COG
-    - Pre-calculate buffer addresses and store pointers
-    - Clear all buffers and indexes before operation
-    - Use block copy for efficient configuration transfer
-    
-  resource_scheduling:
-    - Use round-robin for fair resource allocation
-    - Implement priority levels if needed
-    - Skip inactive resources quickly
-    - Batch operations when possible
-    
-  error_handling:
-    - Track errors per resource, not globally
-    - Provide per-resource error clearing
-    - Continue operation of working resources
-    - Report errors through status arrays
-    
-  memory_management:
-    - Align buffers to long boundaries
-    - Pre-calculate all addresses during init
-    - Use pointer arrays for indirect access
-    - Minimize hub access in service loop
-
-performance_considerations:
-  advantages:
-    - Single COG overhead for multiple resources
-    - Efficient resource utilization
-    - Predictable timing behavior
-    - Scalable architecture
-    
-  limitations:
-    - Round-robin adds latency
-    - Shared COG limits individual throughput
-    - Fixed maximum resource count
-    - Memory usage scales with resource count
-    
-  optimization_tips:
-    - Use smart pins to offload timing
-    - Cache frequently accessed data in COG
-    - Batch hub operations when possible
-    - Skip inactive resources quickly
+not_documented:
+  - "Not documented: scheduling, timing, throughput or memory-cost figures for one cog servicing several resources, and any recommended structure beyond the examples above"
 
 debugging_techniques:
-  monitoring:
-    - Add per-resource activity counters
-    - Track service loop timing
-    - Monitor buffer fill levels
-    - Log error occurrences
-    
   visualization: |
     ' Debug output showing resource activity
     PUB showStatus() | i

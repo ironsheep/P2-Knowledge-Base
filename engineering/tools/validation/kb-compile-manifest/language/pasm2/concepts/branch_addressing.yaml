@@ -41,10 +41,6 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [routine_ptr]
-  - at: addressing_modes.register_indirect.examples[2]
-    fp: "107aecdf140f8897"
-    compile: fragment
-    wrap: pasm2-dat
   - at: "branch_types[\"CALLA/CALLB\"].examples[0]"
     fp: "9c5ef5203913cda5"
     compile: fragment
@@ -105,7 +101,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: common_patterns.tail_call.code
-    fp: "53283adf155a6b9a"
+    fp: "e8c0d8bd9428e608"
     compile: fragment
     wrap: pasm2-dat
     assumes: [other_function]

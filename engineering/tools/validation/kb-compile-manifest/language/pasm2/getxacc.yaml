@@ -3,15 +3,10 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "b6103018252cfe92"
+    fp: "8fff124993066269"
     compile: fragment
     wrap: pasm2-dat
     assumes: [x_val, y_val, magnitude, phase]
-  - at: examples[1].code
-    fp: "88ca0f1d082a8882"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [x_val, threshold]
   - at: goertzel_usage.setup
     fp: "90fc9bdf8cf9a18e"
     compile: not-code

@@ -23,43 +23,19 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 0110000 CZI DDDDDDDDD SSSSSSSSS
   write: D
   c: S[31]
   z: Result == 0
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, MOV, p.99"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 58 (MOV D,{#}S {WC/WZ/WCZ}: move S into D, D = S, C = S[31]; footnote * Z = (result == 0); 2 clocks; write D)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.37 (MOV D,{#}S {WC/WZ/WCZ}, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, MOV, p.99 (Result line, Dest and Src parameters with the 32-bit augmented literal, encoding row 0110000 CZI, write D, C flag S[31], Z flag Result = 0, 2 clocks; C updated to Src[31] with WC or WCZ; Z set if the Dest result equals zero with WZ or WCZ)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 0110000 CZI DDDDDDDDD SSSSSSSSS MOV D,S/# {WC/WZ/WCZ})"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  bits: 32
-  opcode: 192
-  effects: 3
-  operandFormat: 0
-  rawValue: 1728
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Set a value into a register
-compiler_syntax: MOV D,S/#
-compiler_category: Data Movement
-compiler_effects:
-- name: wc
-  symbol: WC
-  value: 1
-  description: Write Carry flag
-  bitPattern: '01'
-- name: wz
-  symbol: WZ
-  value: 2
-  description: Write Zero flag
-  bitPattern: '10'
-- name: wcz
-  symbol: WCZ
-  value: 3
-  description: Write Carry and Zero flags
-  bitPattern: '11'

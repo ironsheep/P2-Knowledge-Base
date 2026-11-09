@@ -10,3 +10,6 @@ blocks:
     fp: "722e7d843e69d643"
     compile: not-code
     reason: "serial-loader protocol command line (`Prop_Clk ...`, `Prop_Hex ... ~`): a host-to-chip text protocol transcript, neither Spin2 nor PASM2"
+  - at: protocol_commands.prop_hex.example_program
+    fp: "07d59f235ebe60d6"
+    compile: program

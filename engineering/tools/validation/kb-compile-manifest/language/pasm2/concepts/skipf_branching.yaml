@@ -16,14 +16,6 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [addr, pat]
-  - at: branch_timing.total_clocks.cog_lut_leap_case.example
-    fp: "56d1865d427e29e8"
-    compile: not-code
-    reason: "comment-only block (two `'` lines of timing arithmetic); there is no statement to compile"
-  - at: branch_timing.total_clocks.cancel_case_or_hub_exec.example
-    fp: "deaf4e9d92058b89"
-    compile: not-code
-    reason: "comment-only block (two `'` lines of timing arithmetic); there is no statement to compile"
   - at: advanced_patterns.bytecode_dispatch.code
     fp: "1269b4c760f40c56"
     compile: fragment
@@ -34,11 +26,3 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [pat, m, pbase, vbase, dbase, i]
-  - at: branch_timing.total_clocks.cog_lut_leap_case.formula
-    fp: "625bb602da698182"
-    compile: not-code
-    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"
-  - at: branch_timing.total_clocks.cancel_case_or_hub_exec.formula
-    fp: "bd3cad2571c0cd21"
-    compile: not-code
-    reason: "English prose (a step, sentence or caption shown under a one-line key), not code"

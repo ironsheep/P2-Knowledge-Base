@@ -26,29 +26,26 @@ usage_notes: 'The instruction following ALTGW is shielded from interrupt
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1001011 11I DDDDDDDDD SSSSSSSSS
-  write: D 1
+  write: D
   c: —
   z: —
   clocks: '2'
 - bits: EEEE 1001011 111 DDDDDDDDD 000000000
-  write: D 1
+  write: D
   c: —
   z: —
   clocks: '2'
 encoding_notes:
 - Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In
   syntax 2, the auto-indexer value is 0.
+- Src[17:9] is sign-extended before it is added into Dest.
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTGW, p.42"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, rows 112-113 (ALTGW: next S field = (D[9:1] + S) & $1FF, or D[9:1], and N field = D[0]; D += sign-extended S[17:9]; next instruction shielded from interrupt; 2 clocks)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), REGISTER INDIRECTION (S[17:9] is always sign-extended and added to D for index updating; ALTGW sets the next S field to base+index[9:1] and the next N to index[0])"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_duiz
-  pattern: D{,S/#}
-  description: Destination, optional source (immediate bit set if no source)
-  valueType: 5
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 5
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Alter subsequent GETWORD / ROLWORD instruction

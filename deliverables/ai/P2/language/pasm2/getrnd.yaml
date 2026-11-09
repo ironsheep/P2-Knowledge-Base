@@ -14,21 +14,19 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: Get RND into C/Z. C = RND[31], Z = RND[30], unique per cog.
+description: >-
+  Get RND into D, C and Z. RND is the PRNG that updates on every clock. With a D
+  operand, D = RND[31:0], C = RND[31] and Z = RND[30], unique per cog. Without a D
+  operand (GETRND WC/WZ/WCZ), no register is written and only C = RND[31] and
+  Z = RND[30], unique per cog, are produced.
 flags_affected:
   C: Set to RND[31]
   Z: Set to RND[30] (unique per cog)
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.159"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.159 (GETRND D {WC/WZ/WCZ}: D = RND[31:0], C = RND[31], Z = RND[30]; GETRND WC/WZ/WCZ: C and Z only); P2 Instructions v35 - Rev B/C Silicon, rows 261 and 262 (GETRND D {WC/WZ/WCZ} and GETRND WC/WZ/WCZ)"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_de
-  pattern: D | {WC/WZ/WCZ}
-  description: Destination register or effect flags only (GETRND)
-  valueType: 25
-compiler_encoding:
-  operandFormat: 25
 syntax_variants:
+- GETRND D {WC/WZ/WCZ}
 - GETRND WC/WZ/WCZ
 last_updated: '2025-09-19T16:04:17.572226'
 category: Miscellaneous
-oneliner: Get RND into C/Z
+oneliner: Get RND into D, C and Z, or into C and Z alone

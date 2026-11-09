@@ -23,26 +23,26 @@ examples:
   description: Start Cog 5 with hub execution at label
 notes:
 - Executes instructions directly from hub RAM (no cog RAM load)
-- Hub execution allows unlimited code size (not limited to 512 longs)
-- Sequential code matches cog-execution speed (2 clocks/instruction — the FIFO streams instructions to the pipeline)
-- Branches cost minimum 13 clocks for FIFO refill (+1 if target is not long-aligned)
-- Instruction prefetch FIFO is (cogs+11) = 19 stages deep on a P2 with 8 cogs
-- FIFO/streamer instructions are FORBIDDEN in hubexec (not slow): RDFAST, WRFAST, FBLOCK, RFBYTE, RFWORD, RFLONG, RFVAR, RFVARS, WFBYTE, WFWORD, WFLONG, XINIT, XZERO, XCONT (when streamer engages FIFO)
-- REP works in hubexec but slower per iteration - it executes a hidden jump to get back to the top of the repeated instructions, and that hidden jump pays the 13+ clock hub-branch cost on each iteration
-- None of the ALTx instructions (ALTI/ALTS/ALTD/ALTR/ALTB/ALTSN/ALTSB/ALTSW/ALTGN/ALTGB/ALTGW) is in the hub-execution forbidden list, so they are not excluded from hubexec.
-- RDLONG/WRLONG and other hub I/O work normally in hubexec (RDLONG 9...26 / WRLONG 3...20 clocks in hubexec, egg-beater dependent; per language/pasm2/rdlong.yaml / language/pasm2/wrlong.yaml)
+- Hub execution is not limited to the 512 longs of cog RAM; the PC range for hub execution is $00400..$FFFFF (Parallax's documents also give $7FFFF as the top of the range)
+- ALU instructions such as ADD, MOV and NOP take 2 clocks in hub execution, the same as in cog execution. Not documented - the clocks per sequential instruction in hub execution as a general rule.
+- A branch to a hub address takes a minimum of 13 clocks (+1 if target is not long-aligned)
+- The FIFO contains (cogs+11) stages
+- These instructions cannot be used in hubexec: RDFAST, WRFAST, FBLOCK, RFBYTE, RFWORD, RFLONG, RFVAR, RFVARS, WFBYTE, WFWORD, WFLONG, and XINIT / XZERO / XCONT (when the streamer mode engages the FIFO)
+- REP works in hubexec, but it executes a hidden jump to get back to the top of the repeated instructions. Not documented: the cost of the hidden jump.
+- RDLONG/WRLONG and other hub I/O work normally in hubexec (RDLONG 9...26 / WRLONG 3...20 clocks in hubexec, egg-beater dependent)
+- Fast block moves (SETQ/SETQ2 with RDLONG/WRLONG/WMLONG) yield to the hub FIFO interface, so they can be used during hub execution
 - Must specify target cog ID (0-7)
-- Use HUBEXEC_NEW to auto-select available cog
+- HUBEXEC_NEW chooses an available (non-running) cog automatically; no ID is specified
 - See also HUBEXEC_NEW and HUBEXEC_NEW_PAIR variants
 hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 related:
-- COGEXEC
-- ORGH
-- HUBEXEC_NEW
-- HUBEXEC_NEW_PAIR
+- language/pasm2/cogexec.yaml
+- language/pasm2/orgh.yaml
+- language/pasm2/coginit.yaml
+- language/spin2/symbols/spin2-builtin-symbols-complete.yaml
 - language/pasm2/concepts/cog_hub_execution.yaml
 - language/pasm2/concepts/execution_modes.yaml
 - architecture/fifo.yaml
 - language/spin2/integration/spin2-pasm2-integration.yaml
 oneliner: Predefined constant for COGINIT instruction
-source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION (13-clock minimum branch, forbidden-instruction list); THE COG -to- HUB RAM INTERFACE ((cogs+11) FIFO stages); INSTRUCTION REPEATING (REP hidden jump in hub memory)"
+source: "P2 Instructions v35 Rev B/C Silicon, ADD/MOV/NOP rows (hub execution mode: same as cog execution); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), MEMORIES (the memory table: hub RAM execution range $00400..$FFFFF), INSTRUCTION MODES (the mode table: $00400..$FFFFF hub RAM) and HUB RAM (hub execution when the PC is $00400..$FFFFF); HUB EXECUTION ('When the PC is in the range of $00400 and $FFFFF, the cog is fetching instructions from hub RAM'; 13-clock minimum branch, forbidden-instruction list); THE COG -to- HUB RAM INTERFACE ((cogs+11) FIFO stages); INSTRUCTION REPEATING (REP hidden jump in hub memory); FAST BLOCK MOVES (block moves yield to the hub FIFO interface, so they can be used during hub execution); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, Hub Execution, p.21 (PC range $00400 to $7FFFF); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Hub Execution, p.15 (PC range $00400 to $7FFFF)"

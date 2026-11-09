@@ -1,16 +1,16 @@
 group_id: selector_event_jumps
-title: Selector Event Jump Instructions
+title: Selectable Event Jump Instructions
 members:
-  JSE1: Jump if selector 1 event flag is set
-  JSE2: Jump if selector 2 event flag is set
-  JSE3: Jump if selector 3 event flag is set
-  JSE4: Jump if selector 4 event flag is set
-  JNSE1: Jump if selector 1 event flag is NOT set
-  JNSE2: Jump if selector 2 event flag is NOT set
-  JNSE3: Jump if selector 3 event flag is NOT set
-  JNSE4: Jump if selector 4 event flag is NOT set
+  JSE1: Jump if selectable event 1 flag set
+  JSE2: Jump if selectable event 2 flag set
+  JSE3: Jump if selectable event 3 flag set
+  JSE4: Jump if selectable event 4 flag set
+  JNSE1: Jump if selectable event 1 flag clear
+  JNSE2: Jump if selectable event 2 flag clear
+  JNSE3: Jump if selectable event 3 flag clear
+  JNSE4: Jump if selectable event 4 flag clear
 shared_documentation:
-  explanation: These instructions are part of the Selector Event Jump Instructions
+  explanation: These instructions are part of the Selectable Event Jump Instructions
     family.
   timing_details: See individual instructions for specific timing.
   addressing: null
@@ -25,4 +25,4 @@ related_instructions:
 - POLLSE4
 examples: []
 created: '2025-09-19T15:11:04.921616'
-source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, JSE1/2/3/4 / JNSE1/2/3/4, p.94"
+source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, JSE1/2/3/4 / JNSE1/2/3/4, p.94; the member wording from the same manual's instruction list (Jump if selectable event 1..4 flag set / clear)"

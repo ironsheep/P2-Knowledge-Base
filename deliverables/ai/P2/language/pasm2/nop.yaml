@@ -20,13 +20,6 @@ encoding:
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, NOP, p.105"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_nop
-  pattern: ''
-  description: No operation - no operands
-  valueType: 36
-compiler_encoding:
-  operandFormat: 36
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: No operation, just elapse two cycles

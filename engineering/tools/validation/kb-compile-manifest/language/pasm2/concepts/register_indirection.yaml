@@ -28,7 +28,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [bit_num, flags]
   - at: advanced_features.increment_modes.examples[0]
-    fp: "92ee73b62f0ab654"
+    fp: "b5c81dcede7a84bb"
     compile: fragment
     wrap: pasm2-dat
     assumes: [index, sum, total, table]
@@ -37,18 +37,13 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [ptrs, dst_reg=con, src_reg=con, count]
-  - at: advanced_features.conditional_execution.examples[0]
-    fp: "5446a2eda3a84f50"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [mode, INDEXED=con, index, table, result, default_source]
   - at: common_patterns.table_lookup.code
     fp: "3341e6a26c444e3c"
     compile: fragment
     wrap: pasm2-dat
     assumes: [index, lookup_table, result]
   - at: common_patterns.array_copy.code
-    fp: "949add0769683c7e"
+    fp: "995e404475df497c"
     compile: fragment
     wrap: pasm2-dat
     assumes: [count, src_ptr, dst_ptr, tmp]

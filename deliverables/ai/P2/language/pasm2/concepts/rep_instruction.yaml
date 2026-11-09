@@ -1,34 +1,37 @@
 concept: rep_instruction
-title: REP - Zero-Overhead Hardware Loops
+title: REP - Hardware Instruction Repeating
 category: control_flow
-description: Hardware-accelerated looping without branch penalties or overhead
+description: Repeats one or more instructions without branching delays in cog/LUT memory
 
 overview: |
-  REP is P2's zero-overhead looping mechanism that executes a block of instructions multiple times
-  without branch penalties, counter management, or instruction overhead. The hardware automatically
-  handles loop counting and block repetition, making it ideal for DSP, data processing, and timing-critical code.
+  REP repeats a single instruction or a block of instructions without branching delays in
+  cog/LUT memory: REP {#}D,{#}S executes the next D[8:0] instructions S[31:0] times. REP also
+  works in hub memory, but executes a hidden jump to get back to the top of the repeated
+  instructions. Any branch within the repeating instruction block cancels REP activity, and
+  interrupts are ignored during REP looping.
 
 syntax:
   basic_form:
     - instruction: "REP #block_size, #count"
     - parameters:
-      - block_size: 'Number of instructions to repeat (0-511: only D[8:0] is used, with # or from a register)'
-      - count: 'Number of iterations (0-511 with #, 0-2^32-1 with ## or a register; 0 repeats forever)'
+      - block_size: 'Number of instructions to repeat (D[8:0]; D is an immediate with # or a register). If D[8:0] = 0, nothing is repeated'
+      - count: 'Number of iterations (S[31:0]; a constant larger than 9 bits uses ## instead of #; S = 0 repeats indefinitely when D[8:0] > 0)'
     - example: "REP #4, #10  ' Repeat next 4 instructions 10 times"
 
   extended_form:
     - instruction: "REP #block_size, ##count"
     - parameters:
-      - block_size: Number of instructions to repeat (0-511; only D[8:0] is used)
-      - count: Extended via AUGS prefix (0 to 2^32-1)
+      - block_size: Number of instructions to repeat (D[8:0])
+      - count: Extended via AUGS prefix (S[31:0])
     - example: "REP @.end, ##1000  ' 1000 iterations using AUGS prefix"
-    - note: "Compiler automatically emits an AUGS prefix for a count > 511"
+    - note: "## before the count makes the assembler insert an AUGS prefix (a constant larger than 9 bits uses ## instead of #)"
+    - block_count_with_augs: "Inside the block, an instruction with a ## operand is two instruction words (the inserted AUGS and the instruction). REP @label counts both in the block size it assembles."
 
   register_count:
     - instruction: "REP #block_size, register"
     - parameters:
       - block_size: Immediate instruction count
-      - register: Contains iteration count (32-bit value at runtime)
+      - register: Contains the iteration count (S[31:0])
     - example: "REP #3, loop_count  ' Repeat 3 instructions loop_count times"
 
   label_form:
@@ -44,66 +47,46 @@ syntax:
     - note: "Label must be within same local scope. See language/pasm2/concepts/labels.yaml for scoping rules."
 
   memory_mode_constraints:
-    - cog_only: "@label must be within $000-$1FF (512 longs) AND 511 instructions"
-    - cog_lut: "@label can span into LUT ($000-$3FF), limited to 511 instructions"
-    - lut_only: "@label must be within $200-$3FF AND 511 instructions"
-    - hub: "@label limited to 511 instructions (encoding constraint)"
+    - label_form: "With @label the assembler keeps track of the number of instructions in the block; the block length is D[8:0]"
 
 key_features:
-  zero_overhead:
-    - No branch instructions needed
-    - No counter decrements
-    - No condition checks
-    - Full pipeline efficiency maintained
+  repeating:
+    - Instructions are repeated without branching delays in cog/LUT memory
+    - In hub memory REP works, but executes a hidden jump to get back to the top of the repeated instructions
 
-  hardware_managed:
-    - Dedicated loop counter (hidden)
-    - Automatic PC control
-    - No register usage for counting
-    - Automatically shielded from interrupts
+  interrupts:
+    - Interrupts are ignored during REP looping
 
   constraints:
-    - Maximum 511 instructions per block (9-bit D field)
-    - 'Maximum 511 iterations with a # immediate; up to 2^32-1 with ## or a register; a count of 0 repeats forever'
-    - No branches within REP block (branches cancel REP)
-    - No REP nesting allowed (single hardware counter)
+    - The block length is D[8:0] instructions and the count is S[31:0]
+    - 'A count of 0 repeats indefinitely when the block size D[8:0] is above 0, and a block size of 0 repeats nothing'
+    - 'REP with a WC, WZ or WCZ effect is refused by the compiler ("This effect is not allowed for this instruction"); REP with no effect assembles'
+    - "In cog RAM a REP executed inside a running REP block replaces it: under REP #5,#5, an inner REP #2,#3 placed at the second instruction of the block runs its two instructions three times, the instructions before and after it run once, and the outer block does not repeat. Not documented: a nested REP in hub or LUT execution, one that ends on the outer block's last instruction, one of a single instruction, and a count of 0"
+    - Any branch within the REP block cancels REP activity
     - Interrupts are ignored during REP looping. A REP block is automatically shielded from interrupts, including non-stallable debug interrupts
     - When an interrupt event occurs, REP must not be executing or active before the interrupt branch can happen. Once this and the other branch conditions are met, any pending interrupt is allowed to branch
-    - Cannot use WC, WZ, or WCZ effects
 
 operational_details:
   execution_flow:
-    - REP instruction sets up hardware loop
-    - Next N instructions form loop block
-    - Hardware repeats block automatically
-    - Execution continues after block when done
+    - REP {#}D,{#}S executes the next D[8:0] instructions S[31:0] times
+    - The next D[8:0] instructions form the block
+    - The block repeats without branching delays in cog/LUT memory; in hub memory a hidden jump returns to the top of the block
+    - Execution continues after the block when the repeats are done
 
   timing:
-    - First iteration: Normal timing
-    - Subsequent iterations: Zero overhead
-    - Total cycles: (block_cycles × count) + 2
-    - Completely deterministic
-
-  pipeline_behavior:
-    - No pipeline stalls
-    - No branch prediction needed
-    - Instructions fetched continuously
-    - Maximum throughput maintained
+    - Repeated without branching delays in cog/LUT memory; in hub memory each repeat includes a hidden jump
+    - "Not documented: the total cycles for a REP loop"
 
 restrictions:
   cannot_contain:
-    - Branch instructions are allowed but any branch taken inside the block cancels the REP
-    - Another REP instruction
-    - Instructions that modify PC
-    - AUGS/AUGD (would affect wrong instruction)
+    - Branch instructions are allowed, but any branch within the repeating instruction block cancels REP activity
 
   special_cases:
-    - DJNZ in REP block: Works but exits REP early
-    - Interrupts: Ignored during REP looping
-    - S = 0 repeats the block indefinitely
+    - "DJNZ in REP block: Works, but DJNZ is a branch and any branch within the REP block cancels REP activity"
+    - "Interrupts: Ignored during REP looping"
+    - S = 0 repeats the block indefinitely (when D[8:0] > 0)
     - A REP block is automatically shielded from interrupts, including non-stallable debug interrupts
-    - Debug: Cannot single-step through REP
-    - Hub execution: REP works in hubexec mode
+    - "Hub execution: REP works in hubexec mode"
 
 common_patterns:
   array_sum:
@@ -125,7 +108,7 @@ common_patterns:
     code: |
       REP #1, ##1000
         NOP
-    description: Precise delay cycles
+    description: Repeat NOP 1000 times
 
   block_fill:
     code: |
@@ -139,14 +122,14 @@ common_patterns:
         RDLONG multiplicand, PTRA++
         MUL multiplicand, coefficient
         ADD accumulator, multiplicand
-    description: DSP MAC operation
+    description: Multiply and accumulate in a REP block
 
   interrupt_protection:
     code: |
       REP @.protect, #1
         QMUL y, x          ' CORDIC multiply
-        GETQX x            ' Get result
-        GETQY y            ' Get overflow
+        GETQX x            ' Get the lower 32 bits of the product
+        GETQY y            ' Get the upper 32 bits of the product
       .protect
     description: A REP block is automatically shielded from interrupts, so this critical CORDIC sequence is protected
 
@@ -160,7 +143,7 @@ common_patterns:
       _ret_ MOV result, x  ' REP exits at _ret_
     description: Shielded from interrupts until a branch, such as _ret_, cancels REP
 
-  i2c_bitbang:
+  bitbang_msb_first:
     code: |
       REP #8, #8           ' 8 instructions, 8 iterations
         SHL data, #1 WC
@@ -171,23 +154,14 @@ common_patterns:
         WAITX delay
         NOP
         NOP
-    description: Output 8 bits MSB-first on I2C bus
+    description: Output 8 bits MSB-first on two pins (the data pin is driven with DRVC, the clock pin with DRVH and DRVL)
 
 optimization_tips:
-  block_size:
-    - Keep blocks small for flexibility
-    - Align to instruction cache boundaries
-    - Consider unrolling vs REP trade-off
-
   iteration_count:
-    - Use immediate for compile-time counts
-    - Use register for runtime counts
-    - Consider partial unrolling for large counts
+    - "The count S[31:0] can be an immediate (# or ##) or a register"
 
   performance:
-    - REP fastest for 2+ iterations
-    - Single iteration: Consider straight-line
-    - Saves 2 cycles per iteration vs DJNZ
+    - "Not documented: the timing of REP against DJNZ and straight-line code"
 
 advanced_usage:
   conditional_rep:
@@ -213,34 +187,31 @@ advanced_usage:
 
   computed_blocks:
     code: |
-      ' Cannot compute block size, but can compute count
+      ' The count can be computed at run time
       MOV iterations, array_size
       SHR iterations, #2        ' Divide by 4
-      REP #4, iterations        ' Process 4 at a time
+      REP #4, iterations        ' repeat the next 4 instructions `iterations` times
+        ' (the four body instructions are omitted from this fragment)
     description: Runtime-computed iterations
 
 debugging:
   limitations:
-    - Cannot single-step interior
-    - Breakpoints inside ignored
-    - Watch variables update in bursts
-
-  techniques:
-    - Add markers before/after REP
-    - Use straight-line code for debug
-    - Monitor results after completion
+    - Interrupts, including non-stallable debug interrupts, are ignored during REP looping
 
 comparison:
   vs_djnz:
-    - REP: Zero overhead, fixed block
-    - DJNZ: 2-cycle overhead, flexible code
-
-  vs_unrolled:
-    - REP: Compact code, fixed overhead
-    - Unrolled: Larger code, fully flexible
+    - REP: fixed block of instructions repeated by hardware
+    - DJNZ: a branch instruction
 
 sources:
   - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION REPEATING, SETQ CONSIDERATIONS and INTERRUPTS"
+  - "block_count_with_augs: CP-038 (REP @label over a body of ALTS with ##, MOV, ADD assembles as REP #4)"
+  - "REP {#}D,{#}S, D[8:0] and S[31:0], D[8:0] = 0 and S = 0 cases, @label, hub memory, branch cancel, interrupts ignored: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION REPEATING (REP {#}D,{#}S 'execute {#}D[8:0] instructions {#}S[31:0] times'); P2 Instructions v35 - Rev B/C Silicon, Sheet1, REP row (Execute next D[8:0] instructions S times)"
+  - "A constant larger than 9 bits uses ##: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Assembly Language notes (If a constant larger than 9 bits is desired in an instruction, use ## instead of # to invoke AUGS/AUGD); CP-048 (#511 accepted)"
+  - "REP with WC, WZ or WCZ refused: CP-055 (pnut-ts refuses REP #1,#1 WC, WZ and WCZ; a plain REP and ADD WC assemble; JMP WC is refused)"
+  - "REP inside a running REP block: P2 hardware verification, EF-121 (one board, block in cog RAM, three repeats; site words patched in cog RAM and read back; outer-only control counted 5 of each, inner-only control 1, 3, 3, 1; with both REPs pre 1, in1 3, in2 3, post 1); nested in hub or LUT execution, ending on the outer block's last instruction, of a single instruction, or with a count of 0: not measured"
+  - "For the interrupt-protection examples (the REP #99,#1 sequence ended by _ret_): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION REPEATING (any branch within the repeating instruction block cancels REP activity; interrupts are ignored during REP looping); Parallax Spin2 Interpreter v55 (2026.05.07), op_quna and mul_mod (REP #99,#1 protects a CORDIC sequence until the ret/_ret_ ends it). No bench run."
 
 related:
   - language/pasm2/concepts/labels.yaml
+  - language/pasm2/concepts/cog_hub_execution.yaml

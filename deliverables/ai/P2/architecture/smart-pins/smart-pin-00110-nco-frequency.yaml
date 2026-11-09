@@ -13,23 +13,22 @@ constants:
 
 # Operation
 operation: |
-  Generates precise frequency using phase accumulation.
-  Z accumulator adds Y value every X[15:0] clocks.
-  Output follows Z[31] bit state.
-  Overflow at 2^32 raises IN flag.
+  This mode overrides OUT to control the pin output state.
+  Y[31:0] is added into Z[31:0] at each base period (X[15:0] clocks).
+  The pin output reflects Z[31].
+  IN is raised whenever Z overflows.
+  Not documented: a stated output-frequency formula.
 
 # Parameters
 x_register:
   function: "Base period and initial phase"
   X[15:0]: "Base period in clocks"
-  X[31:16]: "Initial phase load to Z[31:16] on WXPIN"
-  phase: "Use X[31:16] for phase offset between pins"
+  X[31:16]: "Upon WXPIN, written to Z[31:16] to allow phase setting, even during reset"
 
 y_register:
-  function: "Frequency control value"
-  Y[31:0]: "Added to Z accumulator each base period"
-  formula: "Y = 2^32 × (Fout × X[15:0]) / Fclk"
-  zero: "Y = 0 produces NO output: the accumulator never carries and the pin stays static."
+  function: "Value added into Z"
+  Y[31:0]: "Added into Z[31:0] at each base period"
+  zero: "Y = 0 gives no output and the pin stays static."
   source: "EF-013 and EF-098"
 
 z_register:
@@ -38,9 +37,13 @@ z_register:
   Z[31:0]: "Accumulates Y each base period"
   overflow: "Raises IN when Z wraps"
 
-in_flag: "Raised on Z overflow (frequency cycle complete)"
+in_flag: "Raised whenever Z overflows"
 
 out_signal: "Overridden by Z[31]"
+
+pin_behavior:
+  reset_state: "During reset (DIR=0), IN is low, the output is low, and Z[15:0] is set to zero; Z[31:16] takes X[31:16] on a WXPIN, even during reset. Parallax's documents also give Z (all of it) as set to zero during reset."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%00110: during reset Z[15:0] is set to zero; upon WXPIN X[31:16] is written to Z[31:16], even during reset); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, NCO Frequency (%00110), p.47 (during reset Z is set to zero)"
 
 # Complete Spin2 Example
 spin2_complete: |
@@ -49,58 +52,43 @@ spin2_complete: |
     _clkfreq = 200_000_000      ' 200 MHz system
     
   PUB main()
-    ' Generate 1 MHz square wave
+    ' NCO output with Y computed from 1_000_000
     generate_frequency(NCO_PIN, 1_000_000)
-    
-    ' Generate audio tone
-    audio_tone(440)             ' 440 Hz A note
-    
+
   PUB generate_frequency(pin, freq_hz) | mode, y_value
     mode := P_NCO_FREQ | P_OE
-    
-    ' Calculate Y for desired frequency
-    ' Y = 2^32 * freq / clkfreq (with X=1)
+
+    ' Y computed from freq_hz with calc_nco_value (base period 1)
     y_value := calc_nco_value(freq_hz, 1)
-    
+
     PINCLEAR(pin)
     WRPIN(pin, mode)
-    WXPIN(pin, 1)               ' Base period = 1 (max resolution)
-    PINHIGH(pin)                ' Enable FIRST (general init order)
-    WYPIN(pin, y_value)         ' THEN set frequency
+    WXPIN(pin, 1)               ' Base period = 1 clock
+    PINHIGH(pin)                ' Enable first (general init order)
+    WYPIN(pin, y_value)         ' Then write Y: added into Z at each base period
     
   PRI calc_nco_value(freq_hz, x_div) : y_value
-    ' FRAC divides {numerator, 32'b0} by the denominator: (freq * x_div << 32) / clkfreq
+    ' (freq_hz * x_div) FRAC _clkfreq
     y_value := (freq_hz * x_div) FRAC _clkfreq
-    
-  PUB audio_tone(freq_hz) | mode, y_value
-    mode := P_NCO_FREQ | P_OE | P_DAC_124R_3V
-    
-    y_value := calc_nco_value(freq_hz, 1)
-    
-    PINCLEAR(NCO_PIN)
-    WRPIN(NCO_PIN, mode)        ' NCO + DAC output
-    WXPIN(NCO_PIN, 1)           ' Base = 1
-    PINHIGH(NCO_PIN)            ' Enable FIRST (general init order)
-    WYPIN(NCO_PIN, y_value)     ' THEN set frequency
-    
-  PUB phase_locked_outputs() | mode, y_val
-    ' Two NCOs with 90° phase offset
+
+  PUB two_outputs_different_phase() | mode, y_val
+    ' Two NCOs with different X[31:16] (written to Z[31:16] upon WXPIN)
     mode := P_NCO_FREQ | P_OE
     y_val := calc_nco_value(1000, 1)
-    
-    ' First pin - 0° phase
+
+    ' First pin - X[31:16] = 0
     PINCLEAR(48)
     WRPIN(48, mode)
-    WXPIN(48, $0000_0001)       ' Phase = 0
+    WXPIN(48, $0000_0001)
 
-    ' Second pin - 90° phase
+    ' Second pin - X[31:16] = $4000
     PINCLEAR(49)
     WRPIN(49, mode)
-    WXPIN(49, $4000_0001)       ' Phase = 90° (0x4000 = 1/4)
+    WXPIN(49, $4000_0001)
 
     PINHIGH(48)                 ' Enable both pins...
     PINHIGH(49)                 ' ...together (general order: enable before WYPIN)
-    WYPIN(48, y_val)            ' THEN set frequency on both (phase set by WXPIN above)
+    WYPIN(48, y_val)            ' Then write the same Y on both
     WYPIN(49, y_val)
 
 # Complete PASM2 Example
@@ -111,86 +99,78 @@ pasm2_complete: |
   ' Pin and mode configuration
   nco_pin       LONG  48
   nco_mode      LONG  P_NCO_FREQ | P_OE
-  clkf          LONG  200_000_000  ' `clkfreq` is RESERVED and cannot name a symbol;
-                                   ' keep this equal to _clkfreq, or RDLONG hub $44
-  
-  ' Generate specific frequency
+  clkf          LONG  200_000_000  ' the compiled clock frequency (_clkfreq)
+
+  ' Compute Y from freq_hz and clkf
   gen_frequency
           MOV   pin, nco_pin
           DIRL  pin                   ' Reset
           WRPIN nco_mode, pin         ' Configure
-          
+
           ' Calculate Y value
-          QFRAC freq_hz, clkf         ' freq/clkfreq
-          GETQX y_value               ' Get fraction
-          
+          QFRAC freq_hz, clkf         ' {freq_hz, 32'b0} / clkf
+          GETQX y_value               ' Quotient
+
           WXPIN #1, pin               ' Base period = 1
-          DIRH  pin                   ' Enable FIRST (general init order)
-          WYPIN y_value, pin          ' THEN set frequency
+          DIRH  pin                   ' Enable first (general init order)
+          WYPIN y_value, pin          ' Then write Y
           RET
   
-  ' Sweep frequency
+  ' Step Y upward
   freq_sweep
           MOV   pin, nco_pin
           DIRL  pin
           WRPIN nco_mode, pin
           WXPIN #1, pin
-          DIRH  pin                   ' Enable ONCE before the loop (general init order)
+          DIRH  pin                   ' Enable once before the loop (general init order)
 
           MOV   y_value, start_freq
-  .loop   WYPIN y_value, pin          ' update frequency each step (operate)
-          WAITX ##10_000_000          ' 50ms @ 200MHz
+  .loop   WYPIN y_value, pin          ' write Y each step (operate)
+          WAITX ##10_000_000          ' wait 10_000_002 clocks
           ADD   y_value, step_size
           CMP   y_value, end_freq WC
     IF_C  JMP   #.loop
           RET
   
-  ' Phase modulation
+  ' Write X[31:16] from a smart pin reading
   phase_mod
           QFRAC carrier, clkf
           GETQX carrier_y
-          
-  .loop   RDPIN phase, mod_pin        ' Read modulation
+
+  .loop   RDPIN phase, mod_pin        ' Read the other smart pin
           SHL   phase, #16            ' To X[31:16]
           OR    phase, #1             ' X[15:0] = 1
-          WXPIN phase, pin            ' Update phase
+          WXPIN phase, pin            ' X[31:16] is written to Z[31:16]
           WYPIN carrier_y, pin
           JMP   #.loop
-  
+
   ' Variables
-  pin           RES   1
-  y_value       RES   1
-  freq_hz       LONG  1_000_000      ' 1 MHz
+  freq_hz       LONG  1_000_000
   start_freq    LONG  $0010_0000
   end_freq      LONG  $1000_0000
   step_size     LONG  $0001_0000
   carrier       LONG  10_000
+  mod_pin       LONG  47
+  pin           RES   1
+  y_value       RES   1
   carrier_y     RES   1
   phase         RES   1
-  mod_pin       LONG  47
 
 # Key Points
-frequency_formula: |
-  Y = (2^32 × Fout × X[15:0]) / Fclk
-  For X=1: Y = 2^32 × Fout / Fclk
-  Use QFRAC for accurate calculation
+accumulator: |
+  Y[31:0] is added into Z[31:0] at each base period
+  The pin output reflects Z[31]
+  IN is raised whenever Z overflows
+  Not documented: a stated output-frequency formula
 
 phase_control: |
-  X[31:16] sets initial phase (0-65535 = 0-360°)
-  Multiple NCOs can be phase-locked
-  Phase updated via WXPIN
+  Upon WXPIN, X[31:16] is written to Z[31:16] to allow phase setting, even during reset
 
-resolution: |
-  Frequency resolution = Fclk / (X[15:0] × 2^32)
-  Best resolution with X=1
-  Trade resolution for update rate with larger X
-
-common_uses:
-  - "Clock generation"
-  - "Audio tone synthesis"  
-  - "Local oscillators"
-  - "Frequency sweeps"
-  - "Phase-locked signals"
+sources:
+  - "operation, x_register, y_register, z_register, in_flag, accumulator, phase_control: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%00110 NCO frequency); Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, NCO Frequency (%00110), p.47"
+  - "y_register.zero: EF-013 and EF-098 (Y = 0 gives no output)"
+  - "examples (init order, WYPIN after DIRH): EF-011 and EF-097; FRAC and QFRAC forms: Parallax Propeller 2 Spin2 Language Documentation v55, FRAC; P2 Instructions v35 - Rev B/C Silicon, QFRAC"
+  - "pasm2_complete (clkf holds the compiled clock frequency as a cog register constant): Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup (clkfreq_ is the compiled clock frequency)"
 
 related:
   - architecture/smart-pins/smart-pin-00111-nco-duty.yaml

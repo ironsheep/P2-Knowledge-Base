@@ -2,12 +2,12 @@
 # ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
-  - at: long_description
-    fp: "7db508bcc63cab07"
-    compile: not-code
-    reason: "YAML description prose (English sentences), not code"
   - at: quick_example
-    fp: "871733f8af1b502b"
+    fp: "f572d6cb9fdb6dc8"
     compile: fragment
     wrap: pasm2-dat
     assumes: [handler=con]
+  - at: description
+    fp: "eb3c339759c59943"
+    compile: not-code
+    reason: "YAML description prose (English sentences), not code"

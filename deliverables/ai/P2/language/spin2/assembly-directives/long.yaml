@@ -2,7 +2,7 @@ directive: LONG
 name: Insert Long Data
 description: Insert long (32-bit) data into the assembly image at the current origin
   at assembly time
-syntax: LONG value1 {, value2, ...}
+syntax: LONG data{[count]}{, data{[count]}...}
 examples:
 - LONG  $12345678        ' Single long value
 - LONG  -1, 0, 1         ' Multiple long values
@@ -15,16 +15,10 @@ usage: 'LONG is used in DAT sections to define long-sized (32-bit) data values. 
 
   depending on the active ORG/ORGH mode. Multiple values can be specified separated
 
-  by commas. This is the native data size for P2 operations. Longs are stored
-
-  in little-endian format.
+  by commas. Longs in hub RAM are stored in little-endian format.
 
   '
-alignment: 'Longs may not be aligned unless preceded by ALIGNL. Using ALIGNL before
-
-  LONG data ensures proper long alignment for efficient access and is
-
-  especially important for data that will be accessed as longs.
+alignment: 'Longs may not be aligned unless preceded by ALIGNL.
 
   '
 see_also:
@@ -33,7 +27,7 @@ see_also:
 - ALIGNL
 - RES
 - language/pasm2/fvar.yaml
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Categorical Listing Of Propeller 2 Assembly Language (Directives), p.15; Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (DAT Symbols and Data)"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Categorical Listing Of Propeller 2 Assembly Language (Directives), p.15; Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (DAT Symbols and Data); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), assembler directives (LONG data{[count]}{,data{[count]}...}); LONG @label in a Spin2 object: CP-030; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB RAM (bytes, words and longs are read and written in little-endian format)"
 created_date: '2025-09-19'
 group: Data Declaration
 last_updated: '2025-09-19T16:04:17.656499'

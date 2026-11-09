@@ -8,18 +8,18 @@ encoding:
   clocks: '2'
 - bits: EEEE 1101011 CZL DDDDDDDDD 001000010
   write: —
-  c: C/Z AND  IN[D[5:0]]
-  z: C/Z AND  IN[D[5:0]]
+  c: C AND IN[D[5:0]]
+  z: Z AND IN[D[5:0]]
   clocks: '2'
 - bits: EEEE 1101011 CZL DDDDDDDDD 001000100
   write: —
-  c: C/Z OR   IN[D[5:0]]
-  z: C/Z OR   IN[D[5:0]]
+  c: C OR IN[D[5:0]]
+  z: Z OR IN[D[5:0]]
   clocks: '2'
 - bits: EEEE 1101011 CZL DDDDDDDDD 001000110
   write: —
-  c: C/Z XOR  IN[D[5:0]]
-  z: C/Z XOR  IN[D[5:0]]
+  c: C XOR IN[D[5:0]]
+  z: Z XOR IN[D[5:0]]
   clocks: '2'
 timing:
   cycles: 2
@@ -27,41 +27,27 @@ timing:
   pin_sampling_latency: |
     TESTP reads pin state from 2 system-clock cycles BEFORE the instruction starts.
     This is "fresher" data than reading INx registers (which are 3 clocks old).
-description: 'Test the state of pin D[5:0] and write it to C or Z (WC/WZ), or combine it with the existing C or Z flag by AND, OR or XOR (ANDC/ANDZ, ORC/ORZ, XORC/XORZ).
-
-
-  Common uses:
-
-  - Test pin state and set flags
-
-  - Hall sensor reading for motor control
-
-  - Digital input edge detection
-
-  - Pin state monitoring with conditional logic
-
-  '
+description: 'Test the state of pin D[5:0] and write it to C or Z (WC/WZ), or combine it with the existing C or Z flag by AND, OR or XOR (ANDC/ANDZ, ORC/ORZ, XORC/XORZ).'
 flags_affected:
   C: Set to IN[D[5:0]] (pin state), or AND/OR/XOR with C
   Z: Set to IN[D[5:0]] (pin state), or AND/OR/XOR with Z
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TESTP / TESTPN, p.136; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), I/O PIN TIMING (TESTP/TESTPN read the state of the pin registered two clocks before the start of the instruction); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (in smart pin modes the IN bit serves as a flag)"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TESTP / TESTPN, p.136; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), I/O PIN TIMING (TESTP/TESTPN read the state of the pin registered two clocks before the start of the instruction); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (in smart pin modes the IN bit serves as a flag); encoding_notes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 1101011 CZL DDDDDDDDD 001000000, 001000010, 001000100 and 001000110 for TESTP D/# WC/WZ, ANDC/ANDZ, ORC/ORZ and XORC/XORZ, and for DIRL, DIRC, DIRZ and DIRRND D/# {WCZ})"
 documentation_level: comprehensive
 examples:
-- name: Hall Sensor Reading
-  description: Read three Hall-effect sensors and build a 3-bit commutation state
-  code: "' Read hall effect sensors and build state value\n        testp   pin_hall_w\
-    \                  wc  ' read hall effect sensor\n        rcl     hall_, #1\n\
-    \        testp   pin_hall_v                  wc\n        rcl     hall_, #1\n\
-    \        testp   pin_hall_u                  wc\n        rcl     hall_, #1\n\
-    \        and     hall_, #%111_111                ' (old << 3 | new) [_x_:ooo:nnn]\n"
-  source: "OBEX 2874 (ISP BLDC Motor Control), isp_bldc_motor.spin2 (example code, not a Parallax document)"
+- name: Pin State Into Flags
+  description: Read pin 5 into C, then combine pin 6 into C with AND
+  code: |
+    ' Read pins into the C flag
+            testp   #5      wc      ' C = state of pin 5
+            testp   #6      andc    ' C = C AND state of pin 6
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), I/O PIN TIMING (TESTP {#}D WC/WZ/ANDC/ANDZ/ORC/ORZ/XORC/XORZ: read pin D bit in INx and affect C or Z)"
 - name: Edge Detection
   description: Detect a rising edge (0 -> 1 transition) on an input pin
   code: |
     ' last_state bit 0 holds the pin state from the previous pass
-            testp   input_pin       wc      ' C = current pin state
+            testp   #input_pin      wc      ' C = current pin state
             testbn  last_state, #0  andc    ' C = high now AND low before = rising edge
-            testp   input_pin       wz      ' Z = current pin state
+            testp   #input_pin      wz      ' Z = current pin state
             muxz    last_state, #1          ' remember it for the next pass (MUXZ leaves C alone)
     if_c    jmp     #edge_detected
     ' no edge: continue here
@@ -72,11 +58,10 @@ examples:
   code: |
     ' Test pin with XOR based on previous condition
     testb   status, #FLAG_BIT   wz   ' Z = condition flag
-    testp   sensor_pin          xorz ' Z = condition flag XOR pin state
-    ' Z now indicates: pin state XOR condition
-    ' Useful for conditional inversion
+    testp   #sensor_pin         xorz ' Z = condition flag XOR pin state
+    ' Z now holds: pin state XOR condition
 - name: Multi-Pin State Check
-  description: Check multiple pin states efficiently
+  description: Check several pin states in turn
   code: "' Check if all required pins are high\ntestp   #PIN_A              wc\nif_nc\
     \   jmp #not_ready\ntestp   #PIN_B              wc  \nif_nc   jmp #not_ready\n\
     testp   #PIN_C              wc\nif_nc   jmp #not_ready\n\n' All pins are high,\
@@ -89,19 +74,14 @@ related_instructions:
 - FLTL: Float pin low
 - FLTH: Float pin high
 notes:
-- TESTP reads actual pin state, not output register
+- TESTP returns the pin state registered two clocks before the instruction starts.
 - On a pin in a smart-pin mode the IN bit that TESTP returns serves as a flag. See architecture/smart_pins.yaml
 - XORC/XORZ combine the pin with the existing flag (C or Z, matching the suffix)
-- Efficient for building multi-bit values from pins
-- Critical for real-time sensor reading like Hall sensors
-compiler_operand_format:
-  name: operand_testp
-  pattern: D/#0..511 WC/ANDC/ORC/XORC | WZ/ANDZ/ORZ/XORZ
-  description: 'Test pin: destination/immediate pin number 0-511 with REQUIRED logic
-    function'
-  valueType: 31
-compiler_encoding:
-  operandFormat: 31
+encoding_notes:
+- "TESTP uses the S-field codes 001000000 (WC or WZ), 001000010 (ANDC or ANDZ), 001000100 (ORC or ORZ) and 001000110 (XORC or XORZ), the same codes as DIRL, DIRC, DIRZ and DIRRND. They are separate instructions that take different effects: TESTP requires one of the eight effects, and the DIRx instructions take no effect or WCZ."
 last_updated: '2025-09-19T16:04:17.623961'
 category: Pin
 oneliner: Test pin state into C or Z, optionally ANDed, ORed or XORed with the existing flag
+related:
+  - architecture/io_pin_timing.yaml
+  - language/pasm2/testpn.yaml

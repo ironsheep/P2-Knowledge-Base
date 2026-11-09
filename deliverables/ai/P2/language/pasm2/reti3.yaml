@@ -2,27 +2,32 @@ instruction: RETI3
 syntax: RETI3
 encoding:
 - bits: EEEE 1011001 110 111111111 111110001
-  write: D
-  c: —
-  z: —
-  clocks: '4'
+  write: PC
+  c: IRET3[31]
+  z: IRET3[30]
+  clocks: '4 / 13...20'
+  notes: D is INB ($1FF), which is read-only outside a debug ISR, so nothing is written to D (Parallax's documents also give D in the write column). During a debug ISR INB is the writable register IRET0; the effect of RETI3 executed there is not documented
 timing:
   cycles: 4
   type: variable
   range: 4 / 13...20
-description: Return from INT3. (CALLD $1FF,$1F1 WCZ).
+description: >-
+  Return from INT3. (CALLD $1FF,$1F1 WCZ). RETI3 is CALLD INB,IRET3 WCZ: it
+  jumps to the return address held in IRET3 ($1F1) and sets C and Z from
+  IRET3[31] and IRET3[30], restoring the flags the INT3 interrupt stored there.
+  A CALLD with S = IRET3 and WCZ signals the cog that the interrupt is complete:
+  the cog clears its interrupt-busy flag for INT3, so that another INT3
+  interrupt can occur. D is INB, which is read-only outside a debug ISR, so the
+  CALLD acts as a jump back to the interrupted code.
 flags_affected:
-  C: No effect
-  Z: No effect
+  C: Set to IRET3[31], where the INT3 interrupt stored C
+  Z: Set to IRET3[30], where the INT3 interrupt stored Z
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153"
+sources:
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153 (RETI3: Return from INT3. (CALLD $1FF,$1F1 WCZ), 4 / 13...20; CALLD D,{#}S: write {C, Z, 10'b0, PC[19:0]} to D, C = S[31], Z = S[30])"
+  - "P2 Instructions v35 - Rev B/C Silicon, row 162 (RETI3, EEEE 1011001 110 111111111 111110001, alias, 4 / 13...20) and row 157 (CALLD D,{#}S: C = S[31], Z = S[30])"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INTERRUPTS (the interrupt stores the C/Z flags and return address in IRETx; RETI3 = CALLD INB,IRET3 WCZ; a CALLD with D = any register, S = IRETx and WCZ clears the cog's interrupt-busy flag for that interrupt, so another interrupt can occur; INB, read-only, makes the CALLD a JMP back to the interrupted code; the interrupt branch is an inserted CALLD IRETx,IJMPx WCZ); DEBUG INTERRUPT (during a debug ISR, INA and INB become readable/writable RAM registers named IJMP0 and IRET0)"
 documentation_level: structured
-compiler_operand_format:
-  name: operand_xlat
-  pattern: ''
-  description: No operands - translated instruction (RET*/RESI*/XSTOP)
-  valueType: 33
-compiler_encoding:
-  operandFormat: 33
 syntax_variants:
 - RETI3 Return
 last_updated: '2025-09-19T16:04:17.157552'
@@ -39,3 +44,7 @@ specifics:
 has_group_documentation: true
 category: Branch
 oneliner: Return from interrupt 3
+related:
+  - language/pasm2/calld.yaml
+  - language/pasm2/resi3.yaml
+  - architecture/interrupts.yaml

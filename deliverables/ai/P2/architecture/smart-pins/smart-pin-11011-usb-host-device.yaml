@@ -10,11 +10,12 @@ detailed_description:
     - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), %11011 = USB host or device, full-speed (12Mbps) or low-speed (1.5Mbps): pairing, WRPIN and WXPIN data, the WXPIN on-the-fly sentence, start sequence, WYPIN values, receiver status bits"
     - "Propeller 2 P2X8C4M64P Hardware Manual, Nov 1, 2022 Release, USB Host/Device (%11011), p.57: the sentence 'A new WRPIN can be done to effect such a change without resetting the smart pin'"
     - "EF-093 (live WRPIN drive/sniffer switch: one pair, full-speed host, nothing attached, receiver sensing the pair's own output, 5 of 5 rounds; only the %TT drive/sniffer change run)"
-    - "EF-102 (live WXPIN baud change: 5 of 5 rounds, shortest WXPIN-to-packet gap run about 119 clocks; host mode, one pair sensing its own output, nothing attached; D[14] not observable on the rig)"
+    - "EF-102 (live WXPIN baud change: 5 of 5 rounds, shortest WXPIN-to-packet gap run about 119 clocks; host mode, one pair sensing its own output, nothing attached, 200 MHz system clock; D[14] not observable on the rig; each arm: documented start, J written and settled 4,000 clocks, AKPIN on both pins, then the packet SOP, $A5, $5A, $3C, $C3 at fixed deadlines with no IN test, deadlines 67 and then every 133 clocks at full speed; also the upper pin's IN after a fresh DIRH: not risen within 10,000 clocks in 70 of 75 arms, risen in 8 clocks in the 5 arms after a packet)"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (a smart pin is configured while DIR is low; a WRPIN while DIR is high gives unpredictable behavior in the newly selected mode)"
   pin_pairing: "This mode requires that two adjacent pins be configured together to form a USB pair, whose OUTs and %HHH_LLL drive modes will be overridden to control their output states. These pins must be an even/odd pair, having only the LSB of their pin numbers different. For example: pins 0 and 1, pins 2 and 3, and pins 4 and 5 can form USB pairs."
   which_pin_is_which:
-    upper_odd_pin: "The upper (odd) pin is the DP pin. This pin's IN is raised whenever the output buffer empties, signalling that a new output byte can be written via WYPIN to the lower (even) pin. No WXPIN/WYPIN instructions are used for this pin."
-    lower_even_pin: "The lower (even) pin is the DM pin. This pin's IN is raised whenever a change of status occurs in the receiver, at which point a RDPIN/RQPIN can be used on this pin to read the 16-bit status word. WXPIN is used on this pin to set the NCO baud rate."
+    upper_odd_pin: "The upper (odd) pin is the DP pin. No WXPIN/WYPIN instructions are used by this pin, but if executed, they acknowledge the pin, as if an AKPIN was executed. This pin's IN goes high whenever the two-level FIFO output buffer in the USB smart pin has room for another byte, signalling that a new output byte can be written via WYPIN to the lower (even) pin. An AKPIN on the upper pin is needed to return its IN to a low state, in order to detect the next FIFO-not-full signal. Parallax's documents also give: this pin's IN is raised whenever the output buffer empties."
+    lower_even_pin: "The lower (even) pin is the DM pin. This pin's IN is raised whenever a change of status occurs in the receiver, at which point a RDPIN/RQPIN can be used on this pin to read the 16-bit status word. WXPIN is used on this pin to set the NCO baud rate and WYPIN is used to write to the output buffer."
     caveat: "These DP/DM electrical designations can actually be switched by swapping low-speed and full-speed modes, due to USB's complementary line signalling."
   configuration:
     wrpin_data: "They can be configured via WRPIN with identical D data of %1_11011_0. Using D data of %0_11011_0 will disable output drive and effectively create a USB 'sniffer'. A new WRPIN can be done to effect such a change without resetting the smart pin."
@@ -26,7 +27,9 @@ detailed_description:
       after a live WRPIN to the sniffer word matches the status after the same change made
       through a DIR cycle, the status after a live WRPIN back to the drive word shows the
       driven K state, and a packet written afterwards arrives intact.
-    wxpin_data: "WXPIN is used on the lower pin to establish the specific USB mode and set the baud rate. D[15] must be 1 for 'host' or 0 for 'device'. D[14] must be 1 for 'full-speed' or 0 for 'low-speed'. D[13:0] sets the baud rate, which is a 16-bit fraction of the system clock, whose two MSBs must be 0, necessitating that the baud rate be less than 1/4th of the system clock frequency."
+    wxpin_data: "WXPIN is used on the lower pin to establish the specific USB mode and set the baud rate. D[15] must be 1 for 'host' or 0 for 'device'. D[14] must be 1 for 'full-speed' or 0 for 'low-speed'. D[13:0] sets the baud rate, which is a 16-bit fraction of the system clock, ((12_000_000 FRAC clkfreq) >> 16) for 12 MHz, whose two MSBs must be 0, necessitating that the baud rate be less than 1/4th of the system clock frequency."
+    host_device_idle: "D[15] only affects the IDLE drive states. In 'host' mode, both pins are pulled low via 15k resistors during IDLE. In 'device' mode, one pin is pulled high via a 1.5k resistor while the other pin is floated during IDLE; D[14] controls which pin gets pulled high and which gets floated."
+    speed_idle_levels: "In 'full-speed' mode (D[14] = 1) the IDLE state is DM low and DP high, with DP pulled high in 'device' mode. In 'low-speed' mode (D[14] = 0) the IDLE state is DP low and DM high, with DM pulled high in 'device' mode (the exact opposite of 'full-speed')."
     wxpin_on_the_fly: >-
       Once established, these settings can be changed on-the-fly without resetting the USB
       smart pins; this is necessary when talking to both 'full-speed' and 'low-speed'
@@ -34,10 +37,12 @@ detailed_description:
       word with a different baud (the full-speed baud to the low-speed baud and back) -- sets
       the baud (D[13:0]) in force for the next packet, which arrives intact.
       A packet written about 119 clocks after the WXPIN arrives intact; shorter gaps are not stated.
-      This holds for the baud only: the effect of changing the full-speed/low-speed
-      signalling bit D[14] on a running pair is not stated.
+      Not documented: the effect of D[14] alone. Tested in host mode, one pair, nothing
+      attached; the words changed D[14] and the baud together.
     worked_example: "For example, if the main clock is 80MHz and you want a 12MHz baud rate (full-speed), use 12,000,000 / 80,000,000 * $10000 = 9830, or $2666. To use this baud rate and select 'host' mode and 'full-speed', you could do 'WXPIN ##$E666,lowerpin'."
-  start_sequence: "To start USB, clear the DIR bits of the intended two pins and configure them each via WRPIN. Use WXPIN on the lower pin to set the mode and baud rate. Then, set the pins' DIR bits. You are now ready to read the receiver status via RDPIN/RQPIN and set output states and send packets via WYPIN, both on the lower pin."
+  start_sequence: "To start USB, clear the DIR bits of the intended two pins and configure them both using WRPIN #%1_11011_0,bothpins (one WRPIN covering both pins). Use WXPIN on the lower pin to set the mode and baud rate. Then, set the pins' DIR bits to enable them. You are now ready to read the receiver status via RDPIN/RQPIN and set output states and send packets via WYPIN. Parallax's documents also give the configuration as a WRPIN on each pin."
+  send_sequence: "To affect the line states or send a packet, wait for the upper pin's IN to be high, indicating that the two-level FIFO buffer has room for another byte. Then use WYPIN bytevalue,bothpins to write a byte value to the lower pin and, incidentally, acknowledge the upper pin to lower its IN signal. Both pins are the pin operand of the lower pin with an additional-pin count of 1 in bits 10..6. The PASM2 example writes J, SOP and each data byte at fixed clock deadlines without testing IN; see upper_pin_in_after_dirh."
+  upper_pin_in_after_dirh: "In every fresh start tried, the upper pin's IN was not high in the 10,000 clocks that began 20,000 clocks after DIRH; after a packet it was high within 8 clocks. A J written by WYPIN without waiting for IN was output. A packet written at fixed clock deadlines without testing IN (SOP at once, the first data byte 4 bit periods after the SOP write, then a data byte every 8 bit periods) arrived intact. Not documented: whether the upper pin's IN rises after a J written first after DIRH, and whether a SOP written before IN rises is accepted. The wait rule in send_sequence is Parallax's published rule; the PASM2 example writes J, SOP and each data byte at fixed clock deadlines without testing IN, in the sequence above."
   state_machines: "There are separate state machines for transmitting and receiving. Only the baud generator is common between them. Note that the receiver receives not just input from another host/device, but all local output, as well."
   fpga_note: "In Propeller 2 emulation on an FPGA, there are no built-in 1.5k and 15k resistors, like the ASIC smart pins have, so it is up to you to install these yourself on the DP and DM lines."
 
@@ -53,13 +58,16 @@ registers:
   y_register:
     function: "Line-state / packet command, set via WYPIN on the lower (even) pin"
     D_values:
-      - "0   = output IDLE (float pins)"
+      - "0   = output IDLE (default state: two 15k pull-downs for 'host' or a 1.5k pull-up and a float for 'device'; Parallax's documents also give 'float pins, except possible resistor(s) to 3.3V or GND')"
       - "1   = output SE0 (drive both DP and DM low)"
-      - "2   = output K"
-      - "3   = output J (driven, like IDLE but driven)"
+      - "2   = output K (drive K state onto DP and DM, opposite)"
+      - "3   = output J (drive J state onto DP and DM, opposite; like IDLE, but driven)"
       - "4   = output EOP (SE0, SE0, J, then IDLE)"
-      - "$80 = SOP (start-of-packet; then buffer bytes, automatic EOP when the buffer empties)"
-    packet_send: "WYPIN #$80, then after each IN rise on the upper (odd) pin do WYPIN byte; always confirm the upper pin's IN rose before issuing the next WYPIN"
+      - "$80 = SOP (start-of-packet: KJKJKJKK, then bytes, automatic EOP when buffers empty)"
+      - "$00..$FF = data (after $80 (SOP), contiguous data bytes can be sent)"
+    packet_send: "To send a packet, first WYPIN #$80,bothpins. Then WYPIN byte,bothpins to buffer each next byte. The transmitter sends an EOP automatically when it is given no more bytes. Wait for the upper pin's IN to be high before doing each WYPIN (the PASM2 example writes J, SOP and each data byte at fixed clock deadlines without testing IN: see upper_pin_in_after_dirh)."
+    output_timing: "All output activity is synchronized to the NCO baud generator: simple states (J, K, IDLE) do not take effect until the next bit period, and each lasts one bit period if immediately followed by another state; otherwise the last-set state remains."
+    packet_complete: "To know when a transmitted packet completes, repeat RDPIN status,lowerpin and wait for bit 2 (SE0 in) of status to go high. Once that bit is high, the transmitter FIFO has run out of data and is signalling the EOP sequence; the next WYPIN then starts another packet instead of being interpreted as a data byte of the prior packet."
   z_register:
     function: "16-bit receiver status word, read via RDPIN/RQPIN on the lower (even) pin (error flag -> C)"
     bits:
@@ -73,94 +81,99 @@ registers:
       - "[2] SE0 in — high when DP/DM state is SE0"
       - "[1] K in — high when DP/DM state is K"
       - "[0] J in — high when DP/DM state is J"
+    status_word_variant: "Parallax's documents also give: [6] error set on bit-unstuff error, EOP SE0 > 3 bits, or SE1; [3] SE1 in (illegal), cleared on !SE1, set on 1+ bits of SE1; [2] SE0 in (RESET), cleared on !SE0, set on 1+ bits of SE0; [1] K in (RESUME), cleared on !K, set on 7+ bits of K; [0] J in (IDLE), cleared on !J, set on 7+ bits of J."
+    new_byte_detection: "The RDPIN/RQPIN result can be bit-tested for events of interest. It can also be shifted right by 8 bits (SHR D,#8 WC) to LSB-justify the last byte received and get the byte toggle bit into C, to determine whether a new byte arrived. With the flags register initially zero, the toggle bit is rotated into it (RCL flags,#1), and TEST flags,#%11 WC sets C when the new and old toggle bits differ, meaning a new byte. Parallax's documents also give a CMPX flag,#1 WZ followed by IF_Z XOR flag,#1 form of the same check."
 
 flags:
-  in_flag_odd_dp: "Upper (odd / DP) pin: IN raised when the output buffer empties (a new TX byte can be written via WYPIN to the lower pin). No WXPIN/WYPIN are used on this pin."
+  in_flag_odd_dp: "Upper (odd / DP) pin: IN goes high whenever the two-level FIFO output buffer has room for another byte (a new TX byte can be written via WYPIN to the lower pin). WXPIN/WYPIN on this pin act as an AKPIN; an AKPIN on this pin returns IN low so the next not-full signal can be detected. WYPIN byte,bothpins writes the byte to the lower pin and acknowledges the upper pin."
   in_flag_even_dm: "Lower (even / DM) pin: IN raised on any change in receiver status; a WRPIN/WXPIN/WYPIN/RDPIN/AKPIN is required before IN can re-raise for the next change."
-  c_flag: "On RDPIN/RQPIN of the lower pin, C = receiver error flag"
+  c_flag: "On RDPIN/RQPIN of the lower pin, C = receiver error flag. The Spin2 RDPIN() method returns the C flag in bit 31, so a status word read with it carries the error flag in bit 31 as well as in bit 6."
   out_override: "OUT signals overridden for USB differential control"
 
 electrical_characteristics: >-
-  NOT DOCUMENTED. The receiver front-end thresholds for the
-  J / K / SE0 / SE1 line-state detectors are not in the P2 datasheet -- the datasheet
-  names USB only twice, as a capability, and contains no line-state or SE0 material --
-  nor in the Propeller 2 Documentation. Do not point a reader at the datasheet for them.
-  The programming interface (baud, host/device, FS/LS, line-state sends, 16-bit status
-  word) IS complete above; it is only the analog thresholds that are undocumented.
-  The thresholds are unknown.
+  Not documented: the receiver front-end thresholds for the J / K / SE0 / SE1 line-state
+  detectors. The Parallax Datasheet names USB only as a capability and has no line-state
+  material, and the Propeller 2 Documentation gives none. The baud, host/device,
+  full-speed/low-speed, line-state sends and the 16-bit status word are described above.
 
 code_examples:
   - title: "USB Pin Pair Configuration"
-    description: "Configure even/odd pin pair for USB"
+    description: "Configure an even/odd pin pair as a full-speed USB host (DIR low on both pins, one WRPIN for both pins, WXPIN on the lower pin, DIR high on both pins), then read the receiver status each time the lower pin's IN is raised"
     code: |
       CON
-        _clkfreq = 200_000_000
-        usb_dm_pin = 56                          ' Even pin (D-)
-        usb_dp_pin = 57                          ' Odd pin (D+), must be dm_pin+1
-      
-      PUB main()
-        ' Configure USB pin pair
-        ' Even pin must be configured first
-        pinstart(usb_dm_pin, P_USB_PAIR | P_OE, x_config, y_config)
-        
-        ' USB communication implemented in software driver
-        ' Smart pins handle low-level differential signaling
-        usb_protocol_handler()
-      
-      PRI usb_protocol_handler()
-        ' USB protocol implementation would go here
-        ' Smart pins handle the physical layer
-        repeat
-          ' Monitor USB events via IN flag
-          if pinread(usb_dm_pin)
-            ' Handle USB event...
-      
-      DAT
-      ' PASM2 USB initialization
+        _clkfreq = 80_000_000
+        usb_dm_pin = 56                          ' Even pin (DM)
+        usb_dp_pin = 57                          ' Odd pin (DP)
+
+      PUB main() | both_pins, usb_status
+        both_pins := usb_dm_pin | (1 << 6)       ' Lower pin plus one more pin
         org
-        ' USB requires precise timing and protocol handling
-        ' Smart pins provide differential signaling
-        dirl    #usb_dm_pin                      ' Reset DM pin
-        dirl    #usb_dp_pin                      ' Reset DP pin
-        wrpin   usb_mode, #usb_dm_pin            ' Configure USB mode
-        wxpin   usb_config, #usb_dm_pin          ' Set parameters
-        dirh    #usb_dm_pin                      ' Enable USB pair
-        dirh    #usb_dp_pin
-        wypin   usb_ctrl, #usb_dm_pin            ' Control settings (after DIR is set, per the start sequence)
-      
-      usb_mode
-        long    P_USB_PAIR | P_OE               ' USB pair, output enabled (active port)
-      usb_config
-        long    0
-      usb_ctrl
-        long    0
+          dirl    both_pins                      ' DIR low on both pins
+          wrpin   ##P_USB_PAIR | P_OE, both_pins ' %1_11011_0 on both pins
+          wxpin   ##$C000 | $2666, #usb_dm_pin   ' Host, full-speed, 12 MHz baud at an 80 MHz system clock
+          dirh    both_pins                      ' DIR high on both pins
+        end
 
-  - title: "USB Event Monitoring"
-    description: "Monitor USB events and status"
+        repeat
+          ' IN of the lower pin is raised on a receiver status change
+          if pinread(usb_dm_pin)
+            usb_status := rdpin(usb_dm_pin)      ' Read the 16-bit status word
+            debug("USB status: ", uhex(usb_status))
+
+  - title: "USB Packet Send and New Byte Detection"
+    description: "PASM2 full-speed host at a 200 MHz system clock: configure both pins, drive J and let it settle, acknowledge both pins, write SOP and four data bytes at fixed clock deadlines without testing IN, then keep each new received byte using the byte toggle bit"
     code: |
       CON
         _clkfreq = 200_000_000
-        usb_dm = 56
-        usb_dp = 57
-      
-      PUB main() | usb_status
-        pinstart(usb_dm, P_USB_PAIR | P_OE, 0, 0)
-        
-        repeat
-          ' Check for USB events
-          if pinread(usb_dm)
-            usb_status := rdpin(usb_dm)          ' Read USB status/data
-            handle_usb_event(usb_status)
-      
-      PRI handle_usb_event(status)
-        ' Process USB events based on status
-        debug("USB Event: ", uhex(status))
+        usb_dm_pin = 56                          ' Even pin (DM)
+        usb_both = usb_dm_pin | (1 << 6)         ' Lower pin plus one more pin
+        first_gap = 67                           ' Clocks from the SOP write to the first data byte
+        byte_gap = 133                           ' Clocks between data bytes
 
-common_applications:
-  - "USB device implementation"
-  - "USB host controller"
-  - "USB debugging and protocol analysis"
-  - "Custom USB peripherals"
+      DAT
+              org
+      entry
+              dirl    #usb_both                      ' DIR low on both pins
+              wrpin   ##P_USB_PAIR | P_OE, #usb_both ' %1_11011_0 on both pins
+              wxpin   ##$CF5C, #usb_dm_pin           ' Host, full-speed, 12 MHz baud at a 200 MHz system clock
+              dirh    #usb_both                      ' DIR high on both pins
+              waitx   ##20_000                       ' Let the pair start
+
+              wypin   #3, #usb_both                  ' J, written without waiting on IN
+              waitx   ##4_000                        ' Let J settle
+              akpin   #usb_both                      ' Acknowledge both pins
+
+              getct   deadline
+              wypin   #$80, #usb_both                ' SOP
+              add     deadline, #first_gap
+              addct1  deadline, #0
+              waitct1                                ' First data byte due
+              wypin   #$A5, #usb_both
+              add     deadline, #byte_gap
+              addct1  deadline, #0
+              waitct1
+              wypin   #$5A, #usb_both
+              add     deadline, #byte_gap
+              addct1  deadline, #0
+              waitct1
+              wypin   #$3C, #usb_both
+              add     deadline, #byte_gap
+              addct1  deadline, #0
+              waitct1
+              wypin   #$C3, #usb_both
+
+      .listen
+              rdpin   status, #usb_dm_pin            ' Receiver status of the lower pin
+              shr     status, #8 wc                  ' Last byte into status, byte toggle bit into C
+              rcl     flags, #1                      ' Rotate the toggle bit into flags
+              test    flags, #%11 wc                 ' C = 1 if the new and old toggle bits differ
+        if_c  mov     last_byte, status              ' New byte: keep it
+              jmp     #.listen
+
+      flags   long    0
+      deadline res    1
+      status  res     1
+      last_byte res   1
 
 related_modes:
   - "Mode %11110: Async serial TX - single-ended serial output"
@@ -174,11 +187,12 @@ configuration_constants:
   out_override: "true"
 
 notes:
-  - "⚠️ Specialized mode - requires USB protocol implementation in software"
-  - "MUST use even/odd consecutive pin pair (e.g., pins 56/57)"
-  - "Even pin = DM (D-), odd pin = DP (D+)"
-  - "OUT signals overridden for differential signaling control"
-  - "Smart pins handle physical layer, software handles protocol"
-  - "Supports USB 1.1 Full Speed and Low Speed"
-  - "Requires careful timing and USB protocol knowledge"
-  - "Consult USB specification and Parallax USB examples for complete implementation"
+  - "The two pins must be an even/odd pair (only the LSB of the pin numbers differs), e.g. pins 56 and 57"
+  - "Even pin = DM, odd pin = DP"
+  - "OUT and the %HHH_LLL drive modes of both pins are overridden to control their output states"
+  - "Both pins are configured with one WRPIN #%1_11011_0,bothpins; WXPIN on the lower pin sets the mode and baud rate and can be changed on the fly"
+  - "The upper pin's IN signals room in the two-level output FIFO; WYPIN byte,bothpins writes the byte and acknowledges the upper pin"
+  - "Full-speed and low-speed signalling are selected by WXPIN D[14]"
+
+sources:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %11011 = USB host or device: the WXPIN D[15], D[14] and D[13:0] fields, the upper and lower pin IN rules, start-up, the WYPIN values, output synchronization to the baud NCO, packet completion, the receiver status bits and the byte-toggle check; Propeller 2 P2X8C4M64P Hardware Manual, Nov 1, 2022 Release, USB Host/Device (%11011), p.57; P2 Instructions v35 - Rev B/C Silicon, row 219 (WYPIN acknowledges smart pins S[10:6]+S[5:0]..S[5:0])"

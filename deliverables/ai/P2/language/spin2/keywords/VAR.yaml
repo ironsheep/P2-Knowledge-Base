@@ -47,8 +47,9 @@ examples:
 notes:
   - "Variables default to LONG if no type specified"
   - "Type is sticky across comma-separated names on the same line"
-  - "Variables are automatically aligned to natural boundaries within the object"
-  - "Use ALIGNW/ALIGNL to force alignment between declarations"
+  - "Variables are packed in memory in the order they are declared, beginning at a long-aligned address"
+  - "ALIGNW and ALIGNL word-align or long-align to hub memory, advancing the variable pointer as necessary"
+  - "Variables are initialized to zero at run time"
 
 related:
   - language/spin2/keywords/BYTE.yaml
@@ -59,5 +60,7 @@ related:
   - language/spin2/keywords/DAT.yaml
   - language/spin2/concepts/object-image-dedup.yaml
   - language/fundamentals/variable-scoping-best-practices.yaml
+
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, VAR Variable Declarations (variables are packed in the order declared, beginning at a long-aligned address; initialized to zero at run time; ALIGNW and ALIGNL; the default variable size is LONG); Structure variables in VAR: v45 revision note; CP-034 (a type specifier applies to the later names on its own line only; a line with no specifier is LONG; no alignment between variables)"
 
 oneliner: "Variables section — declares instance variables with sticky type propagation"

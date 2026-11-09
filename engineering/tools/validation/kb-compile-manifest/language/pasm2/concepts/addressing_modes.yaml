@@ -108,17 +108,17 @@ blocks:
     wrap: pasm2-dat
     assumes: [flags]
   - at: special_cases.altx_modified.examples[0]
-    fp: "407434258c10d8a0"
+    fp: "a6ccf56cb85b156b"
     compile: fragment
     wrap: pasm2-dat
     assumes: [index]
   - at: special_cases.altx_modified.examples[1]
-    fp: "ba478c9c6d95ef65"
+    fp: "886d8ac62950290e"
     compile: fragment
     wrap: pasm2-dat
     assumes: [index]
   - at: special_cases.altx_modified.examples[2]
-    fp: "65a7606c42f01619"
+    fp: "3e9dec4449fda277"
     compile: fragment
     wrap: pasm2-dat
     assumes: [index]

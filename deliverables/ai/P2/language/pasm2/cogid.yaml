@@ -2,15 +2,18 @@ instruction: COGID
 syntax: COGID {#}Dest {WC}
 brief_description: Cog identification
 category: Hub Control
-description: 'COGID writes the current cog''s ID into Dest (if Dest is a register and WC is omitted) or sets/clears the C flag according to the running/stopped state of cog D/# (0-7 on the P2X8C4M64P; the cog is indicated by Dest[2:0], per Parallax''s PASM2 Manual, COGID Explanation) (if WC is given). Without WC the current cog''s ID is returned in D[3:0] with upper bits cleared. If the WC effect is specified, the C flag is set (1) if cog D/# is busy (running), or is cleared (0) if free (stopped or never started).'
+description: 'COGID writes the current cog''s ID into Dest (if Dest is a register and WC is omitted) or sets/clears the C flag according to the running/stopped state of the cog indicated by the low bits of Dest (if WC is given; cog IDs are 0-7). Parallax''s documents give this field as Dest[3:0] and also as Dest[2:0]. Without WC the current cog''s ID is returned in D[3:0] with upper bits cleared. If the WC effect is specified, the C flag is set (1) if the cog is busy (running), or is cleared (0) if free (stopped or never started).'
 sources:
-  - "COGID current-cog ID in D[3:0]: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS"
+  - "P2 Instructions v35 - Rev B/C Silicon, row 242 (COGID {#}D {WC}: if D is register and no WC, get cog ID into D; if WC, check status of cog D[3:0], C = 1 if on; 2...9, +2 if result; write D if reg and !WC)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS (each of the eight cogs has a unique three-bit ID; COGID returns the ID into D[3:0] with upper bits cleared; with WC it does not overwrite D, C = 0 free (stopped or never started), C = 1 busy (started)); instruction encoding listing (EEEE 1101011 C0L DDDDDDDDD 000000001 COGID D/# {WC})"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGID, p.64 (Dest[2:0] indicates the cog; C set (1) if running, cleared (0) if stopped; encoding table: write D if reg and !WC, C = Cog Running, 2-9, +2 if result); PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.154 (if WC, check status of cog D[3:0])"
+  - "Field width with WC: Dest[3:0] in P2 Instructions v35 - Rev B/C Silicon (COGID) and in Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.154; Dest[2:0] in Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGID, p.64; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS says 'the status of cog D/#' without a width; no measurement settles it"
 result: Current cog's ID is written to Dest or C is set (1) or cleared (0) if the
   Dest cog is running or stopped.
 parameters:
 - Dest is the register where the current cog's ID will be written, or is the register
   or 9-bit literal whose value indicates which cog to get the status
-  for (0-7 on the P2X8C4M64P).
+  for (cog IDs are 0-7).
 - WC is an optional effect to update the C flag with the Dest cog's running status.
 flags_affected:
   C: Set to 1 if specified cog is running, 0 if stopped (when WC specified)
@@ -18,9 +21,9 @@ flags_affected:
 syntax_variants:
 - COGID {#}Dest {WC}
 timing:
-  cycles: 2
-  type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+  cycles: 2–9, +2 if result
+  type: variable
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 C0L DDDDDDDDD 000000001
   write: D if reg and !WC
   c: Cog Running
@@ -28,16 +31,9 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   clocks: 2–9, +2 if result
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGID, p.64"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_l
-  pattern: D/#0..511
-  description: Destination or immediate value 0-511
-  valueType: 26
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 26
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Get current cog's ID or any cog's status by ID
 related:
-- COGINIT
-- COGSTOP
+- language/pasm2/coginit.yaml
+- language/pasm2/cogstop.yaml

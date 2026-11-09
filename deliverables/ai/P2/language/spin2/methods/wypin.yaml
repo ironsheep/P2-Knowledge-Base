@@ -36,9 +36,8 @@ returns: "none"
 y_register_usage_by_mode:
   serial_modes: |
     Data to transmit:
-    Y[7:0] = byte to send (UART)
-    Y[15:0] = word to send (sync serial)
-    Y[31:0] = long to send (32-bit modes)
+    Y = word to send (async serial; word size set by X[4:0], 1 to 32 bits)
+    Y = word to send (sync serial; word size set by X[4:0], 1 to 32 bits)
     
   pwm_modes: |
     Duty cycle value:
@@ -49,8 +48,8 @@ y_register_usage_by_mode:
     Y = pulse count
     
   dac_modes: |
-    Output level:
-    Y[15:0] = 16-bit DAC value
+    Output level (the 16-bit dither modes P_DAC_DITHER_RND and P_DAC_DITHER_PWM):
+    Y[15:0] = 16-bit DAC value; values larger than $FF00 are invalid and are clipped down to $FF00
 
 examples:
   - code: |
@@ -81,16 +80,17 @@ examples:
     description: "SPI data transmission"
 
 mode_specific_y_values:
-  P_ASYNC_TX: "Byte to transmit (bits 7:0)"
-  P_ASYNC_RX: "Not used for receive"
+  P_ASYNC_TX: "Word to transmit, 1 to 32 bits (word size set by X[4:0])"
+  P_ASYNC_RX: "Not documented: a WYPIN parameter for this mode"
   P_PULSE: "Number of pulses"
   P_TRANSITION: "Number of transitions"
-  P_NCO_FREQ: "Frequency increment, added into the NCO accumulator at each base period (base period 1: Y = freq FRAC CLKFREQ)"
+  P_NCO_FREQ: "Frequency increment, added into the NCO accumulator at each base period"
   P_NCO_DUTY: "Duty increment, added into the NCO accumulator at each base period"
   P_PWM_TRIANGLE: "Output value, 0 to the frame period X[31:16]"
   P_PWM_SAWTOOTH: "Output value, 0 to the frame period X[31:16]"
-  P_DAC_DITHER_PWM: "16-bit DAC value"
-  P_REPOSITORY: "32-bit value to store"
+  P_DAC_DITHER_RND: "16-bit DAC value (Y[15:0]; values above $FF00 are invalid and clip to $FF00)"
+  P_DAC_DITHER_PWM: "16-bit DAC value (Y[15:0]; values above $FF00 are invalid and clip to $FF00)"
+  P_REPOSITORY: "Not a Y mode: the repository long is written with WXPIN"
 
 data_transmission:
   uart_send: |
@@ -111,13 +111,6 @@ data_transmission:
       WYPIN(pin, count)
       ' Pin outputs 'count' pulses
 
-common_uses:
-  - "Transmitting serial data"
-  - "Setting PWM duty cycles"
-  - "Controlling DAC output"
-  - "Generating pulse counts"
-  - "Updating output values"
-
 smart_pin_data_flow:
   write: "WYPIN writes to Y register"
   process: "Smart pin uses Y based on mode"
@@ -133,25 +126,28 @@ related_methods:
 
 notes:
   - "Y register is mode-dependent"
-  - "Usually represents data or count"
-  - "Writing Y often triggers operation"
-  - "Can be updated during operation"
-  - "Some modes auto-reload from Y"
 
 timing_notes:
   - "Write takes effect based on mode"
-  - "Serial modes: starts transmission"
-  - "PWM modes: updates on next cycle"
-  - "Pulse modes: starts immediately"
+  - "Async serial transmit: the word goes into a one-stage buffer and is sent once it advances into the shifter; sync serial transmit: the word is shifted out by clocks on the B input"
+  - "PWM modes: Y is captured at the start of each PWM frame"
+  - "Pulse and transition modes: a non-zero Y starts the output at the next base period"
+
+multi_cog_access:
+  - "Cogs that execute WRPIN, WXPIN, WYPIN, RDPIN or AKPIN on the same smart pin must do so at different times; their buses to the pin are OR'd and simultaneous writes clobber each other"
+  - "Any number of cogs can read a smart pin at the same time with RQPIN, which does not use the cog-to-smart-pin bus"
 
 warnings:
   - "Must set correct mode first with WRPIN"
-  - "Writing Y may trigger immediate action"
-  - "Check if previous operation complete"
-  - "Some modes have Y value limits"
 
 see_also:
   - "language/spin2/methods/wrpin.yaml"
   - "language/spin2/methods/wxpin.yaml"
   - "language/spin2/methods/rdpin.yaml"
   - "architecture/smart_pins.yaml"
+
+sources:
+  - "multi_cog_access, mode_specific_y_values (P_REPOSITORY): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (cog-to-smart-pin buses) and SMART PIN MODES (%00001..%00011 long repository)"
+  - "y_register_usage_by_mode.dac_modes and mode_specific_y_values (P_DAC_DITHER_RND, P_DAC_DITHER_PWM limit): Propeller 2 P2X8C4M64P Hardware Manual Nov 1, 2022 Release, DAC 16-Bit With Noise Dither (%00010 and DAC_MODE) and DAC 16-Bit With PWM dither (%00011 and DAC_MODE), p.46"
+  - "timing_notes (pulse and transition start at the next base period; PWM Y captured at frame start): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%00100, %00101, %01000)"
+  - "y_register_usage_by_mode.serial_modes, mode_specific_y_values (P_ASYNC_TX) and timing_notes (serial transmit): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%11100 synchronous serial transmit, %11110 asynchronous serial transmit: words of 1 to 32 bits, X.[4..0] = bits minus 1, WYPIN loads a single-stage buffer)"

@@ -1,36 +1,64 @@
 instruction: TJNZ
-syntax: TJNZ    D,{#}S
+syntax: TJNZ D,{#}S
+brief_description: Test, jump if not zero
 category: Branch
-description: Dest is tested and if it's NOT zero, PC is set
-  to a new relative (#Src) or absolute (Src) address.
+description: >-
+  TJNZ tests the value in Dest and jumps to the address described by Src if the
+  value is not zero. The address (Src) can be absolute or relative. To specify an
+  absolute address, Src must be a register containing a 20-bit address value. To
+  specify a relative address, use #Label for a 9-bit signed offset (a range of -256
+  to +255 instructions). Offsets are relative to the
+  instruction following the TJNZ. The signed offset value is in units of whole
+  instructions -- it is added to PC as-is when in Cog/LUT execution mode and is
+  multiplied by 4 then added to PC when in Hub execution mode (long-aligned Hub code
+  not required).
+  ##Label (or a prior AUGS instruction) assembles as an AUGS word plus the
+  instruction, with an 18-bit offset field; the rule above is for #Label, and a
+  backward ##Label in Cog execution is covered under anti_patterns.
+result: >-
+  Dest is tested and if it's not zero, PC is set to a new relative (#Src) or absolute
+  (Src) address.
 flags_affected:
   C: No effect
   Z: No effect
 parameters:
-- Dest is a register whose value is tested for zero or not zero.
-- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
+- Dest is a register whose value is tested for not zero.
+- 'Src is a register, 9-bit literal, or ## augmented literal whose value is the
   absolute or relative address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
 timing:
-  cycles: 2
+  cycles: '2 or 4 (cog/LUT) / 2 or 13...20 (hub-exec)'
   type: variable
-  range: 13...20
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1011100 11I DDDDDDDDD SSSSSSSSS
-  write: —
+  write: PC
   c: —
   z: —
-  clocks: '2 or 4 / 2 or 13-20'
+  clocks: 2 or 4 / 2 or 13...20
 encoding_notes:
 - PC is written only when Dest is NOT zero.
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TJZ / TJNZ, p.138"
+anti_patterns:
+- pattern: "Backward TJNZ D,##Label"
+  reason: >-
+    Not documented: whether a backward TJNZ D,##Label lands on its label. TJNZ shares
+    DJNZ's encoding (AUGS plus the instruction, an 18-bit field as assembled), and
+    only backward DJNZ has been run: a target 303 longs back (field -303) landed on its
+    label in Hub execution and missed it in Cog execution, going to hub at PC plus
+    the field taken as a positive offset. A near #Label (within -256 to +255
+    instructions) avoids the ##Label form. A register holding the target
+    address as Src assembles with no AUGS word (assembled for DJNZ, TJS and JINT
+    only; not run on the board). Parallax's documents also give the ##Label form a 20-bit signed
+    offset (-524288 to +524287).
+  source: "P2 hardware verification, EF-107 (backward DJNZ only; this instruction not run); CP-031 (the ## S-branch assembles an AUGS word plus the instruction, an 18-bit offset field; shown for DJNZ and TJZ of the family); CP-056 (a backward ##label assembles for all 47 S-branch instructions as AUGS plus the instruction with an 18-bit field that counts longs, -303 for this distance; a register Src assembles with no AUGS for DJNZ, TJS and JINT, assembled only, not run on the board); Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TJZ / TJNZ, pp.138-139 (##Label given as a 20-bit signed offset, -524288 to +524287)"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TJZ / TJNZ, pp.138-139"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 175 (TJNZ D,{#}S: test D and jump to S if D is not zero; 2 or 4 cog/LUT, 2 or 13...20 hub; footnote: if #S and cogex PC += signed(S), if #S and hubex PC += signed(S*4), if S PC = register S)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Branch Instructions, p.41 (TJNZ D,{#}S, 2 or 4 / 2 or 13...20)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TJZ / TJNZ, pp.138-139 (Result line, Dest and Src parameters, encoding row 1011100 11I, write PC with the footnote that PC is written only when Dest is zero (or not zero in syntax 2), C and Z none, clocks 2 or 4 / 2 or 13-20, absolute address in a register of 20 bits, #Label 9-bit signed offset -256 to +255 instructions, offsets relative to the instruction following the jump, in whole instructions as-is in cog/LUT mode and times 4 in hub mode; the manual's text gives the ## offset as 20-bit)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BRANCH ADDRESSING (the S-branch instructions use S[19:0] as an absolute address, or sign-extend the immediate 9-bit S field as a relative address in whole instructions, shifted left two bits in hub mode, range -256 to +255 instructions relative to the instruction following the branch) and instruction encoding listing (EEEE 1011100 11I DDDDDDDDD SSSSSSSSS TJNZ D,S/#rel9)"
+  - "CP-031, shown for DJNZ and TJZ of the same S-branch family (the 9-bit S field is in instructions in cog and times four in hub; the ## S-branch assembles an AUGS word plus the instruction, an 18-bit offset field)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_dsj
-  pattern: D,S/@
-  description: 'Jump with destination and relative address: register, relative address'
-  valueType: 12
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 12
 last_updated: '2025-09-19T16:04:16.894690'
-oneliner: Test value and jump if zero or not zero
+oneliner: Test value and jump if not zero
+related:
+  - language/pasm2/concepts/branch_addressing.yaml

@@ -3,8 +3,7 @@ type: keyword
 category: "Data Types"
 
 description: |
-  8-bit data type. Unsigned range: 0 to 255. Signed range: -128 to 127.
-  Used in multiple contexts: variable declarations (VAR), local variables,
+  8-bit data type. Used in multiple contexts: variable declarations (VAR), local variables,
   DAT data, memory access operators, type override (.BYTE[n]), typed pointers
   (^BYTE, including pointer parameters and results), and data constructors (BYTE(...)).
   PUB/PRI parameters and results are always longs (or pointers); there are no BYTE
@@ -26,7 +25,7 @@ usage_contexts:
     syntax: "PUB method() : ^BYTE result"
     example: "PUB getBuffer() : ^BYTE pBuf"
   - context: "DAT data"
-    syntax: "label BYTE value1, value2, ..."
+    syntax: "label BYTE data{[count]}{, data{[count]}...}"
     example: 'myStr BYTE "Hello", 0'
   - context: "Memory access"
     syntax: "BYTE[address] or BYTE[base][index]"
@@ -57,8 +56,6 @@ examples:
 
 notes:
   - "Size: 8 bits (1 byte)"
-  - "Unsigned range: 0 to 255"
-  - "Signed range: -128 to 127"
   - "Default type is LONG if no type specifier given"
   - "V54+: BYTE struct members may carry named bitfields (bits 0..7), and a STRUCT may contain a single nameless BYTE member. See language/spin2/concepts/struct-bitfields.yaml"
 
@@ -74,3 +71,4 @@ related:
   - language/spin2/concepts/struct-bitfields.yaml
 
 oneliner: "8-bit data type used for declarations, memory access, pointers, and data constructors"
+source: "Parallax Propeller 2 Spin2 Language Documentation v55, DAT Blocks (BYTE data in DAT; BYTE 100[64] repeat form); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), assembler directives (BYTE data{[count]}{,data{[count]}...})"

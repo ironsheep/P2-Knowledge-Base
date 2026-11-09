@@ -2,10 +2,13 @@ instruction: CALLB
 syntax: 'CALLB #{\}Addr | CALLB Dest {WC|WZ|WCZ}'
 brief_description: Call subroutine via PTRB
 category: Branch
-description: Write current C and Z flags and address of the next instruction into
-  the 4-byte Hub RAM location at PTRB, increment PTRB by 4, set PC to new relative
-  or absolute address, and optionally update C and/or Z to new state. R = 1 then PC
-  += A, else PC = A.
+description: >-
+  Write current C and Z flags and address of the next instruction into
+  the 4-byte Hub RAM location at PTRB, increment PTRB, set PC to new relative
+  or absolute address, and optionally update C and/or Z to new state. In syntax 1,
+  #Addr and #\Addr encode relative and absolute addressing, respectively. In the
+  encoding R = 1 gives PC += A, else PC = A; the backslash forces R = 0. The return
+  context is read back by RETB.
 parameters:
 - Addr is a symbolic reference to the target subroutine; the location to set PC to.
   Relative addressing is the default; use '\' to force absolute addressing.
@@ -18,32 +21,38 @@ flags_affected:
 timing:
   cycles: '5-12 (cog/LUT) / 14-32 (hub-exec)'
   type: variable
-  notes: "5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec. +1 clock if the long crosses a hub long boundary."
-encoding:
+  notes: "5-12 clocks for cog/LUT execution; 14-32 clocks for hub-exec. Each count is 1 clock more if it crosses a hub long. Parallax's documents also give +1 clock if the target address isn't long-aligned in Hub RAM."
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZ0 DDDDDDDDD 000101111
-  write: —
+  write: Hub and PC
   c: D[31]
   z: D[30]
-  clocks: '5...12 * (cog/LUT) / 14...32 * (hub-exec)'
+  clocks: '5...12 / 14...32'
+  notes: Syntax 2 - address from register
 - bits: EEEE 1101111 RAA AAAAAAAAA AAAAAAAAA
-  write: —
+  write: Hub and PC
   c: —
   z: —
-  clocks: '5...12 * (cog/LUT) / 14...32 * (hub-exec)'
+  clocks: '5...12 / 14...32'
+  notes: Syntax 1 - relative (R=1) or absolute (R=0) address
 encoding_notes:
-- Stores return context at PTRB address then increments PTRB by 4
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLA / CALLB, p.57, and its instruction table footnote '+1 if crosses hub long'; P2 Instructions CSV v35, CALLB hub-exec clocks '14...32 *'"
+- The current C, Z and effective next PC values are written to the Hub RAM long at PTRB, then PTRB is incremented (PTRB++), before PC is replaced with that of Addr or Dest
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLA / CALLB, p.57"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 322 (CALLB D: write {C, Z, 10'b0, PC[19:0]} to hub long at PTRB++; C = D[31], Z = D[30], PC = D[19:0]; 5...12 * cog/LUT, 14...32 * hub, the hub-exec column's footnote '* +1 if crosses hub long'; hub write) and row 405 (CALLB #{\\}A: R = 1 then PC += A, else PC = A; backslash forces R = 0)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 1101011 CZ0 DDDDDDDDD 000101111 CALLB D {WC/WZ/WCZ}; EEEE 1101111 RAA AAAAAAAAA AAAAAAAAA CALLB #{\\}A)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CALLA / CALLB, p.57 (both encoding rows; write Hub and PC; 5-12 / 14-32; footnote 2 '+1 clock cycle if target address isn't long-aligned in Hub RAM'; explanation, WC/WZ/WCZ effects); PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153 (CALLB 5...12 / 14...32 with the footnote '+1 if crosses hub long' on both counts)"
+  - "CP-036 (CALLB #sub1 assembles with bit 20 = 1, R relative)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_call
-  pattern: '#S | D'
-  description: 'Call: immediate address or register'
-  valueType: 19
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 19
 last_updated: '2025-09-19T16:04:17.705736'
 oneliner: Call a subroutine; store return context in the Hub long at PTRB++
 syntax_variants:
 - 'CALLB #Addr'
 - 'CALLB #\Addr'
 - 'CALLB Dest {WC|WZ|WCZ}'
+related:
+- language/pasm2/retb.yaml
+- language/pasm2/calla.yaml
+- language/pasm2/call.yaml
+- language/pasm2/calld.yaml
+- language/pasm2/concepts/instruction_encoding_key.yaml

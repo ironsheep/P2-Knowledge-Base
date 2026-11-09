@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: overview
-    fp: "bc1be22bfded26e4"
+    fp: "bc9edd1310de9caf"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: syntax.basic_form[2].example
@@ -50,7 +50,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [multiplicand, coefficient, accumulator]
   - at: common_patterns.interrupt_protection.code
-    fp: "fbe649e54a38bdbb"
+    fp: "3ee638116ed7833a"
     compile: fragment
     wrap: pasm2-dat
     assumes: [y, x]
@@ -59,7 +59,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [x, result]
-  - at: common_patterns.i2c_bitbang.code
+  - at: common_patterns.bitbang_msb_first.code
     fp: "61caf2a7127616e3"
     compile: fragment
     wrap: pasm2-dat
@@ -75,7 +75,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [value, target, found]
   - at: advanced_usage.computed_blocks.code
-    fp: "4d57c561fc0613a4"
+    fp: "94f73c8ef7c5ddf5"
     compile: fragment
     wrap: pasm2-dat
     assumes: [iterations, array_size]

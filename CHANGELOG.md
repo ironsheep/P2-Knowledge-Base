@@ -20,6 +20,42 @@ published; per-document release history lives in the changelogs it links.
 
 ---
 
+## [1.26.0] - 2026-11-09
+
+**Cog, hub and instruction behaviour measured on silicon, with four new reference pages and a key to the PASM2 encoding fields.**
+
+### Added
+
+- **Cog state**: `cog_state` lists each piece of cog state with what sets it, consumes it and ends it, and what COGINIT leaves
+- **Instruction encoding key**: `instruction_encoding_key` explains each letter in a `bits:` field; 183 PASM2 instruction pages point to it from their `encoding:` row
+- **Pixel mixer**: `pixel_mixer` covers ADDPIX, MULPIX, BLNPIX, MIXPIX, SETPIV and SETPIX, with the DMIX and SMIX choice per instruction
+- **Colorspace converter and DVI**: `colorspace-and-dvi` gives the `SETCMOD` bit map, the converter matrix and modulator, and DVI/HDMI output
+- **COGINIT / COGSPIN**: with no cog free, `COGEXEC_NEW` and `NEWCOG` as expressions return `$8000_000F`; test with `< 0`, not `== -1`
+- **COGINIT**: a loading COGINIT loads $000..$1F7, writes the SETQ value to PTRA and S to PTRB, sets IJMP0 to $1F8, and releases a held lock
+- **Pin OUT and DIR**: on a pin with no smart pin mode, a cog's OUT reaches the pin only while that cog's own DIR is high
+- **TRGINT1 and STALLI**: in cog execution a TRGINT1 under STALLI is held; the INT1 branch occurs when ALLOWI executes
+- **Far CALLD PA**: in hub code the 20-bit field is a byte offset; a hand-encoded long that lands on the label is given
+- **Backward ## branches**: DJNZ with ##label 303 longs back lands in hub execution and misses in cog execution; a near #label avoids it
+- **SETQ**: the instruction directly after SETQ takes it even when SKIP or a false condition cancels that instruction
+- **AUGS, AUGD, ALTx**: an instruction cancelled by SKIP or a false condition leaves AUGS and AUGD pending; ALTD, ALTS and ALTR do not apply past a SKIP-cancelled one
+- **Skip patterns**: CALLA/RETA, CALLB/RETB and CALLD PA/JMP PA do not suspend a SKIP pattern; SKIPF in hub execution follows the pattern like SKIP
+- **REP inside REP**: in cog RAM an inner REP replaces the running one; under `REP #5,#5`, `REP #2,#3` repeats its two instructions three times
+- **CORDIC reads**: the order for reading two queued QMUL results, what an empty GETQX returns, and QDIV results when the quotient exceeds 32 bits
+- **LUT pointers**: RDLUT and WRLUT with `PTRA[2]` or `PTRA++` index and step PTRA in LUT longs
+- **CRCNIB**: takes Q[31:28] first, feeding bits Q[31] down to Q[28] as four CRCBITs would
+- **Hub RAM**: words and longs need no alignment; in cog execution reads take 9...16 clocks and writes 3...10, one more across a long boundary
+- **Hub execution**: a branch to a hub address takes at least 13 clocks, one more if the target is not long-aligned
+- **FIFO wrap**: RDFAST and WRFAST take a block count in 64-byte units; the FIFO wraps to its start after that many blocks
+- **HUBSET**: five operand modes selected by the top bits: clock, reset, write-protect and debug enables, digital filter, PRNG seed; 2...9 clocks
+- **BRK and GETBRK**: the debug-ISR BRK Dest bits L to A and the GETBRK status and event-trap bits are each named
+- **Events**: each event flag is cleared by its POLLxxx, WAITxxx, Jxxx or JNxxx instruction; the page lists the other clearing instructions
+- **Smart pin reset**: `smart_pins` states each mode's output and registers while DIR is low, for modes %00001 to %10111
+- **XBYTE**: a return to $1FF does not pop the stack; the compressed `%ABBBB00xF` mode, relative branches and single-stepping have worked examples
+- **Serial loader**: the Prop_Txt alphabet, a 20-byte example program, `~` to run and `?` to verify; a chip not matching INA/INB waits
+- **PTRx expressions**: `ptra[3]` assembles S = $103, `ptra[-20]` $12C and `ptrb[31]` $19F; the index scales by access size
+- **Branch offsets**: 9-bit S branch offsets count whole instructions, times four in hub execution
+- **Search terms**: `aliases` on `interrupts`, `io_pin_timing` and the four new pages answer questions such as "does COGINIT clear DIR and OUT"
+
 ## [1.25.5] - 2026-11-06
 
 **Hub addresses are stated for a Spin2 object and for a PASM-only file.**

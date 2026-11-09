@@ -12,16 +12,19 @@ timing:
 description: Execute next D[8:0] instructions S times. If S = 0, repeat instructions
   infinitely. If D[8:0] = 0, nothing repeats.
 constraints:
-  - "Instruction count is D[8:0] only (maximum 511 instructions, whether D is #immediate or a register); it does not extend beyond 9 bits"
-  - "Maximum 511 iterations with #immediate; use ## or register for S up to 2^32-1"
-  - REP cannot be nested (single hardware counter)
+  - "The instruction count is D[8:0]; it does not extend beyond 9 bits"
+  - "The repeat count is S[31:0]. A #immediate S fills the 9-bit S field; ##value or a register supplies the wider count"
+  - "In cog RAM a REP executed inside a running REP block replaces it: under REP #5,#5, an inner REP #2,#3 placed at the second instruction of the block runs its two instructions three times, the instructions before and after it run once, and the outer block does not repeat. Not documented: a nested REP in hub or LUT execution, one that ends on the outer block's last instruction, one of a single instruction, and a count of 0"
+  - "REP with a WC, WZ or WCZ effect is refused by the compiler (\"This effect is not allowed for this instruction\")"
   - Interrupts are ignored during REP looping. A REP block is automatically shielded from interrupts, including non-stallable debug interrupts
   - When an interrupt event occurs, REP must not be executing or active before the interrupt branch can happen. Once this and the other branch conditions are met, any pending interrupt is allowed to branch
-  - Cannot use WC, WZ, or WCZ effects
-  - Branches within block cancel REP immediately
+  - Any branch within the repeating instruction block cancels REP activity
 sources:
-  - "constraints (instruction count is D[8:0] only): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION REPEATING"
-  - "constraints (interrupts): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION REPEATING, SETQ CONSIDERATIONS and INTERRUPTS"
+  - "constraints (instruction count, repeat count, branch cancel): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION REPEATING, p.20"
+  - "constraints (interrupts): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION REPEATING, p.20, SETQ CONSIDERATIONS, p.27, and INTERRUPTS, p.51"
+  - "extended_counts (##reps emits an AUGS word before the REP word): Parallax Propeller 2 ROM Booter v33_01j, the hub ROM copy loop (rep #2,##$1000 assembles to the AUGS word $FF000008 followed by the REP word $FCDC0400)"
+  - "constraints (WC, WZ, WCZ refused): CP-055"
+  - "constraints (REP inside REP): P2 hardware verification, EF-121 (one board, block in cog RAM, three repeats; site words patched in cog RAM and read back; outer-only control counted 5 of each, inner-only control 1, 3, 3, 1; with both REPs pre 1, in1 3, in2 3, post 1; REP in hub or LUT execution not measured)"
 extended_counts:
   - "##reps (the S operand) emits an AUGS prefix for a 32-bit iteration count; S[31:0] may also come from a register"
   - "The D instruction count stays 9 bits (D[8:0]); only the S repeat count extends to 32 bits"
@@ -30,13 +33,6 @@ flags_affected:
   Z: No effect
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_rep
-  pattern: '@,S/# | D/#,S/#'
-  description: 'Repeat block: (@,count) for block end or (count,repetitions)'
-  valueType: 17
-compiler_encoding:
-  operandFormat: 17
 syntax_variants:
 - REP {#}D,{#}S
 last_updated: '2025-09-19T16:04:16.997031'

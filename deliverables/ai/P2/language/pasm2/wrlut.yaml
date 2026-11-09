@@ -15,13 +15,6 @@ flags_affected:
   Z: No effect
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.158"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_lsp
-  pattern: D/#,S/#/PTRA/PTRB
-  description: 'Memory operation: destination/immediate, source/immediate/pointer'
-  valueType: 16
-compiler_encoding:
-  operandFormat: 16
 syntax_variants:
 - WRLUT {#}D,{#}S/P
 last_updated: '2025-09-19T16:04:16.990804'
@@ -33,37 +26,20 @@ aliases:
 - WRLUT 256 compile error
 immediate_address_limit:
   rule: >-
-    A plain immediate LUT address (WRLUT D,#S) is limited to #0-#255, the lower
-    half of the 512-long LUT. #256 and above are a hard compile error
-    ("Constant must be from 0 to 255") - not a wrap, not a silent runtime trap,
-    not a wrong-long write.
+    A plain immediate S is #0 to #255: WRLUT D,#256 is refused with "Constant
+    must be from 0 to 255". WRLUT D,##256 assembles.
   full_range_access: >-
-    To reach any LUT long (0-511), use a register operand holding the address
-    (WRLUT D, addrReg) or a PTRA/PTRB pointer, optionally indexed
-    (WRLUT D, PTRB[4]).
-  encoding_reason: >-
-    The 9-bit S address field's top bit (bit 8) is the pointer/expression
-    selector, not address bit 8. A literal cannot set it, so a literal spans
-    only bits 7:0 (0-255); a PTRx expression sets bit 8 to take the pointer
-    path, and a register operand carries the full 9-bit address.
+    The 32-bit words are addressible from $000 to $1FF. S gives the LUT address, so
+    an address held in a register used as S (WRLUT D,S) reaches $100-$1FF, which a
+    plain immediate cannot. Not documented: which bits of the register form the
+    address.
+  ptrx_expression: >-
+    WRLUT accepts a PTRx expression for S. PTRA updates count LUT longs: with PTRA = 8,
+    WRLUT D,PTRA++ writes LUT[8] and adds 1 to PTRA. Not documented: the PTRB,
+    pre-increment and -- forms, and WRLUT with an index on PTRx.
   augmented_form_warning: >-
-    Do NOT use the ## augmented form (WRLUT D,##500) to reach the upper half: it
-    compiles, but its low 9 bits set bit 8 and land on the pointer-decode path -
-    the AUGS high bits are meaningless for a 9-bit LUT address. Use a register or
-    PTRA/PTRB instead.
-  scope: >-
-    All 512 LUT longs are reachable; only the plain-literal addressing mode is
-    capped at the lower 256. The limit is on the immediate operand, not the
-    memory.
-  applies_to_family: >-
-    The 0-255 plain-immediate cap is shared by the whole hub-memory operand
-    family (RDLONG WRLONG RDBYTE WRBYTE RDWORD WRWORD WMLONG); it bites for LUT
-    specifically because LUT addresses are small numbers authors write as bare
-    literals.
-  compiler_behavior: >-
-    The compiler enforces the limit; the over-range case was
-    verified by compiling it.
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, RANDOM ACCESS INTERFACE (the S/#/PTRx operand: #%0AAAAAAAA 8-bit immediate address versus #%1SUPNNNNN PTR expression)"
+    Not documented: what WRLUT does with an augmented S value (WRLUT D,##...).
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LOOKUP RAM (the 32-bit words are addressible from $000 to $1FF); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (WRLUT D/#,S/#/PTRx), list of changes (RDLUT/WRLUT can now handle PTRx expressions); CP-042 (WRLUT D,#256 refused; #255 and ##256 accepted); ptrx_expression: P2 hardware verification, EF-118 (one board, cog execution; PTRA = 8, WRLUT PTRA++ wrote index 8 with PTRA delta 1); full_range_access (register S): P2 Instructions v35 - Rev B/C Silicon, row 220 (Write D to LUT address {#}S/PTRx)"
 related:
 - architecture/lookup_ram.yaml
 - language/pasm2/rdlut.yaml

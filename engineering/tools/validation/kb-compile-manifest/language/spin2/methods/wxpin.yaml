@@ -12,7 +12,7 @@ blocks:
     compile: fragment
     wrap: spin2-method
   - at: examples[2].code
-    fp: "9ce3c073945c899b"
+    fp: "3ec2f6b91e80d8bb"
     compile: fragment
     wrap: spin2-method
     assumes: [freq, pin]
@@ -30,7 +30,7 @@ blocks:
     fp: "b8e3c4ada4695506"
     compile: program
   - at: calculation_examples.pwm_frequency
-    fp: "8d128bcaeb8f3aac"
+    fp: "d0a03df0af9f035d"
     compile: program
   - at: calculation_examples.measurement_time
     fp: "d23feb703e25d406"

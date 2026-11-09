@@ -11,7 +11,7 @@ blocks:
     compile: not-code
     reason: "constant-name listing: the `constants:` entry names the smart-pin mode constant for each language (a bare symbol, no statement); a lone word compiles as a PASM label or fails as Spin2, so the block carries no code to compile"
   - at: dac_requirement
-    fp: "4cce7aadb9f74037"
+    fp: "c6c927808acc1ea8"
     compile: not-code
     reason: "mixed note: a field requirement (`M[12:10] MUST be %101`) plus a `Use:` line and a list of option names; notation and prose, not a statement (the DAC option names are real P_ constants, the field rule matches silicon-doc-text.txt:3779)"
   - at: x_register.example
@@ -19,18 +19,18 @@ blocks:
     compile: not-code
     reason: "list of example X values with their decimal gloss (`$100 (256), $200 (512), $400 (1024)`), not a statement"
   - at: z_register.usage
-    fp: "eb32b0bfe2bffc39"
+    fp: "4cd72009f370c680"
     compile: not-code
     reason: "short usage phrase (English, e.g. \"Mode-specific configuration\"), not code"
   - at: spin2_complete
-    fp: "164dd59db6a22f76"
+    fp: "c93bc4c7af947abe"
     compile: fragment
     wrap: spin2-top
   - at: pasm2_complete
-    fp: "5481950d0beea979"
+    fp: "95f400f68eb11cea"
     compile: program
   - at: spin2_inline
-    fp: "9816612668570bad"
+    fp: "430eaa8a5eee9208"
     compile: program
   - at: y_register.update
     fp: "3a3f4dee474ec366"

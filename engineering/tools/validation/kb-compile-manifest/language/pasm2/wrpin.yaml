@@ -3,19 +3,19 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: timing.in_flag_reset_latency
-    fp: "e2e513b54ffaefb6"
+    fp: "1dea86de4f83f092"
     compile: not-code
     reason: "YAML timing prose with an embedded WRPIN/NOP/TESTP excerpt after an English lead-in (the same three lines are in the silicon doc); the string as a whole is a sentence"
   - at: examples[0].code
-    fp: "086e93e2e4067f21"
+    fp: "53d7bf2fbc56acc2"
     compile: fragment
     wrap: pasm2-dat
   - at: examples[1].code
-    fp: "9f1bdb437c4d4782"
+    fp: "d17ace163a588cbf"
     compile: fragment
     wrap: pasm2-dat
   - at: examples[2].code
-    fp: "374c3bca72ca1175"
+    fp: "f10594af924996b2"
     compile: fragment
     wrap: pasm2-dat
     assumes: [mode]
@@ -29,18 +29,3 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [mode, pin]
-  - at: critical_requirement.sequence[2]
-    fp: "7fcf673fd117405a"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [x, pin]
-  - at: critical_requirement.sequence[3]
-    fp: "5cb8fa1a9aebdeba"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [pin]
-  - at: critical_requirement.sequence[4]
-    fp: "a4a94fa1f513c63c"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [y, pin]

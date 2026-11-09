@@ -2,7 +2,7 @@ instruction: COGBRK
 syntax: COGBRK {#}Dest
 brief_description: Cog break
 category: Interrupt
-description: 'COGBRK triggers an asynchronous breakpoint in a designated cog. The COGBRK instruction must be executed from within a Debug ISR (interrupt service routine) and the designated cog must already have its asynchronous breakpoint interrupt enabled. Dest indicates the ID of the desired cog (0-7 on the P2X8C4M64P; the cog is indicated by Dest[2:0], per Parallax''s PASM2 Manual, COGBRK Explanation).'
+description: 'COGBRK triggers an asynchronous breakpoint in a designated cog. The COGBRK instruction must be executed from within a Debug ISR (interrupt service routine) and the designated cog must already have its asynchronous breakpoint interrupt enabled. Dest indicates the ID of the desired cog (cog IDs are 0-7): Parallax''s documents also give the cog field as Dest[2:0], Dest[3:0] and %CCCC.'
 result: If in the Debug ISR, trigger an asynchronous breakpoint in cog identified
   by Dest.
 flags_affected:
@@ -10,27 +10,30 @@ flags_affected:
   Z: No effect
 parameters:
 - Dest is the register or 9-bit literal whose value indicates which
-  cog to trigger (0-7 on the P2X8C4M64P).
+  cog to trigger (cog IDs are 0-7).
 syntax_variants:
 - COGBRK {#}Dest
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 00L DDDDDDDDD 000110101
   write: —
   c: —
   z: —
   clocks: '2'
+encoding_notes:
+- "COGBRK uses the S-field code 000110101, the same code as GETBRK. They are separate instructions that differ in the C Z L bits of the encoding: COGBRK is written 00L and takes no effect, and GETBRK is written CZ0 and takes WC, WZ or WCZ."
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGBRK, p.64"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 330 (COGBRK: if in debug ISR, trigger asynchronous breakpoint in cog D[3:0]; cog D[3:0] must have asynchronous breakpoint enabled; 2 clocks)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COGBRK D/# (the executing cog must be in its own debug ISR and the other cog must have its asynchronous breakpoint interrupt enabled; D/# = %CCCC, the cog in which to trigger an asynchronous breakpoint); instruction encoding listing (EEEE 1101011 00L DDDDDDDDD 000110101 COGBRK D/#)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, COGBRK, p.64 (Dest value lower 3 bits; Dest[2:0] indicates the ID of the desired cog; encoding table, 2 clocks)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS (each of the eight cogs has a unique three-bit ID)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_l
-  pattern: D/#0..511
-  description: Destination or immediate value 0-511
-  valueType: 26
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 26
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Trigger breakpoint in specified cog
+related:
+  - architecture/interrupts.yaml
+  - architecture/debug_interrupt.yaml

@@ -9,8 +9,8 @@ detailed_description:
   operation: |
     Accumulates total time that A-input spends in logic-1 state across X measurement periods.
     Each period is defined by trigger events on A and B inputs (rise/edge combinations). Counts
-    clock cycles when A is high within each period, summing across all X periods. Useful for
-    oversampling period measurements and duty cycle analysis.
+    clock cycles when A is high within each period, summing across all X periods. It is
+    intended as the duty measurement complementary to mode %10011's period measurement.
   
   timing: |
     Period defined by Y[1:0] trigger combination (A-rise/edge to B-rise/edge)
@@ -38,26 +38,25 @@ flags:
   b_input: "Period boundary marker (can be same as A-input)"
 
 code_examples:
-  - title: "PWM Duty Cycle Measurement"
-    description: "Measure average duty cycle over 100 periods"
+  - title: "PWM High-Time Measurement"
+    description: "Measure the total high time over 100 periods; the duty cycle is this total over the time of the same 100 periods (mode %10011 on the same signal)"
     code: |
       CON
         _clkfreq = 200_000_000
         pwm_pin = 20                             ' PWM signal input
-      
-      PUB main() | total_high, periods, duty_percent
-        ' Measure duty cycle over 100 periods
+
+      PUB main() | total_high
+        ' Measure the high time over 100 periods
         ' Use A-rise to A-rise (single pin, %00 mode)
         pinstart(pwm_pin, P_PERIODS_HIGHS, 100, %00)
-        
+
         repeat
           ' Wait for measurement complete
           repeat until pinread(pwm_pin)
-          
-          total_high := rdpin(pwm_pin)           ' Total clocks A was high
-          
-          ' Calculate duty cycle percentage
-          ' (This measures cumulative high time, not period time)
+
+          total_high := rdpin(pwm_pin) & $7FFF_FFFF   ' Total clocks A was high; clear bit 31, where RDPIN() puts C
+
+          ' Cumulative high time, not period time
           debug("Total high time: ", udec(total_high), " clocks")
       
       DAT
@@ -91,20 +90,14 @@ code_examples:
         repeat
           repeat until pinread(sig_a_pin)        ' Wait for measurement
           
-          overlap_time := rdpin(sig_a_pin)       ' Get accumulated time
+          overlap_time := rdpin(sig_a_pin) & $7FFF_FFFF   ' Accumulated time; clear bit 31, where RDPIN() puts C
           debug("A-high time in 50 B-periods: ", udec(overlap_time))
 
-common_applications:
-  - "PWM duty cycle measurement (oversampled)"
-  - "Phase overlap detection between two signals"
-  - "Average high-time measurement"
-  - "Signal quality analysis (cumulative on-time)"
-
 related_modes:
-  - "Mode %10011 (P_PERIODS_TICKS): X complete A-periods window; Z = elapsed ticks"
-  - "Mode %10101 (P_COUNTER_TICKS): >=X-tick period-aligned window; Z = elapsed ticks"
-  - "Mode %10110 (P_COUNTER_HIGHS): >=X-tick period-aligned window; Z = high-time (time-windowed variant of this mode)"
-  - "Mode %01111 (P_COUNT_HIGHS): continuous high-state tick accumulator (no measurement window)"
+  - "Mode %10011 (P_PERIODS_TICKS): X periods; Z = time"
+  - "Mode %10101 (P_COUNTER_TICKS): periods in X+ clock cycles; Z = time"
+  - "Mode %10110 (P_COUNTER_HIGHS): periods in X+ clock cycles; Z = A-input trigger states"
+  - "Mode %01111 (P_COUNT_HIGHS): count A-input highs, continuous or periodic"
 
 configuration_constants:
   mode_constant: "P_PERIODS_HIGHS"
@@ -113,22 +106,27 @@ configuration_constants:
     - "(single-pin) no routing constant needed - A and B inputs both default to this pin"
     - "P_PLUS1_B - Use next pin as B-input"
     - "P_MINUS1_B - Use previous pin as B-input"
-    - "P_FILT1_AB - Add filtering for noise immunity"
-  
+    - "P_FILT1_AB - Filter the A and B inputs using the global filt1 settings"
+
   y_register_values:
-    - "%00 - A-rise to B-rise (typical for same-frequency signals)"
-    - "%01 - A-rise to B-edge (any B transition ends period)"
-    - "%10 - A-edge to B-rise (any A transition starts period)"
-    - "%11 - A-edge to B-edge (maximum sensitivity)"
+    - "%00 - A-rise to B-rise"
+    - "%01 - A-rise to B-edge"
+    - "%10 - A-edge to B-rise"
+    - "%11 - A-edge to B-edge"
 
 notes:
   - "Accumulates A-high time, not period time (use mode %10011 for periods)"
   - "Z register limited to $80000000 clock cycles maximum"
   - "If A-rise/edge coincides with B-rise/edge at period end, next period registered"
-  - "Measurement restarts automatically after X periods complete"
+  - "A new measurement begins when X periods complete"
   - "B-input can be same as A-input for single-pin period measurement"
-  - "Useful for averaging out noise by measuring over multiple cycles"
+  - "Mode %10011 is intended as an oversampling period measurement and this mode as its complementary duty measurement"
+  - "During reset (DIR=0), IN is low and Z is set to $00000000"
+  - "The Spin2 examples read Z with RDPIN() & $7FFF_FFFF: the Spin2 RDPIN() method returns the C flag in bit 31, and Z in this mode is limited to $80000000, so the mask keeps every total below $8000_0000; a Z of exactly $80000000 (the limit) reads as 0. Inline PASM2 RDPIN reads all 32 bits of Z. Not documented: the C flag of RDPIN in this mode."
   - "A Y written while DIR is low (before DIRH, as pinstart() and the WYPIN-before-DIRH line in the PASM2 example do) is in force after DIRH: this mode is order-safe"
 
 sources:
+  - "operation, timing, registers, notes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%10100 = For X periods, count states: X periods of A-input rise/edge to B-input rise/edge; Y[1:0] sensitivity; the B-input can be set to the same pin as the A-input; coincident edges register the next period; upon completion a new measurement begins; Z limited to $80000000; the first mode an oversampling period measurement, the second a complementary duty measurement; reset Z = $00000000) and SMART PINS (C is either a mode-related flag or the MSB of the Z result; %FFF = 101 uses the global filt1 settings)"
+  - "operation (the sum of the A-input logic-1 times): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%10100 = For X periods, count states: clock cycles or A-input trigger states are counted from each A-input rise/edge to each B-input rise/edge for X periods)"
+  - "notes (Spin2 RDPIN() bit 31): Parallax Propeller 2 Spin2 Language Documentation v55, smart pin methods (RDPIN (Pin) : Zval, Zval[31] = C flag from RDPIN, other bits are RDPIN data)"
   - "EF-097 (Y-before-DIRH order-safety bench-measured on one board, one Y value for this mode)"

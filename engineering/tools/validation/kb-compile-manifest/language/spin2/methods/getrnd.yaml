@@ -20,12 +20,12 @@ blocks:
     compile: fragment
     wrap: spin2-method
   - at: examples[4].code
-    fp: "e2cb9519dc2e744d"
+    fp: "e70e4b44cc7e6a02"
     compile: fragment
     wrap: spin2-method
     assumes: [seed]
   - at: examples[5].code
-    fp: "55c816e36910f325"
+    fp: "20dd584452faa54e"
     compile: program
   - at: examples[6].code
     fp: "82a4ce2f19ca08af"
@@ -50,23 +50,13 @@ blocks:
     compile: fragment
     wrap: spin2-method
     assumes: [i, count, j, temp, array_ptr]
-  - at: anti_patterns[1].correct
-    fp: "3201a5502ab9a3d7"
-    compile: fragment
-    wrap: spin2-method
-    assumes: [value]
   - at: anti_patterns[0].wrong
-    fp: "9ec33e1cd00dc569"
+    fp: "59036e65a8216824"
     compile: fragment
     wrap: spin2-method
     assumes: [value]
   - at: anti_patterns[0].correct
-    fp: "6665471d999626a9"
-    compile: fragment
-    wrap: spin2-method
-    assumes: [value]
-  - at: anti_patterns[1].wrong
-    fp: "a4aa2c73f67621d6"
+    fp: "41815bb418c8d1be"
     compile: fragment
     wrap: spin2-method
     assumes: [value]

@@ -1,9 +1,14 @@
 instruction: WRNC
-syntax: WRNC    D
+syntax: WRNC D
+brief_description: Write not C
 category: Math and Logic
-description: Write 0 or 1 to D, according to !C. D = {31'b0, !C).
+description: >-
+  WRNC writes the inverse state of C (0 or 1) to Dest: Dest = {31'b0, !C}. If C is
+  set (1), Dest becomes 0. If C is clear (0), Dest becomes 1.
+result: >-
+  Dest value is replaced with the inverse state of C (!C).
 parameters:
-- Dest is the register whose value will be replaced with the state of C or !C.
+- Dest is the register whose value will be replaced with the inverse state of C (!C).
 flags_affected:
   C: No effect
   Z: No effect
@@ -12,21 +17,19 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 000 DDDDDDDDD 001101101
   write: D
   c: —
   z: —
   clocks: '2'
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, WRC / WRNC, p.145"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, WRC / WRNC, pp.145-146"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 394 (WRNC D: write 0 or 1 to D, according to !C, D = {31'b0, !C}; 2 clocks; write D)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.38 (WRNC D, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, WRC / WRNC, pp.145-146 (syntax, Result line, Dest parameter, encoding row 001101101, write D, C and Z none, 2 clocks, explanation that WRC or WRNC writes the state or inverse state of C (0 or 1) to Dest)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 1101011 000 DDDDDDDDD 001101101 WRNC D)"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_d
-  pattern: D
-  description: Destination register only
-  valueType: 24
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 24
 last_updated: '2025-09-19T16:04:17.145138'
-oneliner: Write C or not C to register
-long_description: Dest value is replaced with state of C or !C.
+oneliner: Write not C to register
+long_description: Dest value is replaced with the inverse state of C (!C).

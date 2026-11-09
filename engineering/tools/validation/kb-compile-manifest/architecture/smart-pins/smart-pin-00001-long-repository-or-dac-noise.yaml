@@ -11,7 +11,7 @@ blocks:
     compile: not-code
     reason: "constant-name listing: the `constants:` entry names the smart-pin mode constant for each language (a bare symbol, no statement); a lone word compiles as a PASM label or fails as Spin2, so the block carries no code to compile"
   - at: spin2_complete
-    fp: "cfb46d69b66dc1bd"
+    fp: "3b21f994c65bec3f"
     compile: program
   - at: pasm2_complete
     fp: "f1065465453d3870"
@@ -19,3 +19,7 @@ blocks:
   - at: spin2_inline
     fp: "9e8b4abd904a04d9"
     compile: program
+  - at: repository_use
+    fp: "ba97159f84f93c73"
+    compile: not-code
+    reason: "English prose (key points about the repository mode and how to read its long), not code"

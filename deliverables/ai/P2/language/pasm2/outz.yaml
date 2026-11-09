@@ -12,28 +12,43 @@ timing:
 description: >-
   OUTZ alters the output level register's bit(s) designated by Dest to equal the
   state of the Z flag. All other bits are left as-is.
+
+  Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates
+  the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond
+  the base should be affected (1-31).
+
+  A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of
+  up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature
+  (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD
+  instruction prior.
+
+  When Dest is a register, the register's value bits [10:0] are used as-is to form
+  the 11-bit ID range, unless a prior SETQ overrides value bits[10:6] with the low
+  five bits of the SETQ value. An ALTx between the SETQ and OUTZ keeps the
+  override, and a SETQ separated from OUTZ by other instructions is not documented.
+
+  The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) wraps within
+  the same 32-pin group (OUTA or OUTB); it does not cross the port boundary.
 result: >-
-  The I/O pin output level bit(s), described by Dest, are set to low/high according
-  to Z; the rest are left as-is. With WCZ, C and Z = original (pre-instruction) state of the base pin's OUT bit.
+  The I/O pin output level bit(s), described by Dest, are set to Z;
+  the rest are left as-is. With WCZ, C and Z = original (pre-instruction) state of the base pin's OUT bit.
 flags_affected:
   C: Set to the original (pre-instruction) state of the base pin's OUT bit
   Z: Set to the original (pre-instruction) state of the base pin's OUT bit
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, OUTZ / OUTNZ, p.110"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, OUTZ / OUTNZ, p.110 (the wrap within OUTA or OUTB); P2 Instructions v35 - Rev B/C Silicon, row 361 (OUTZ: wraps within OUTA/OUTB)"
+sources:
+  - "description (prior SETQ overrides D[10:6]): P2 Instructions v35 - Rev B/C Silicon, row 361 (OUTZ: OUT bits of pins D[10:6]+D[5:0]..D[5:0] = Z; wraps within OUTA/OUTB; prior SETQ overrides D[10:6]; C,Z = OUT bit; write OUTx; 2 clocks); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), list of changes (DIRx/OUTx/FLTx/DRVx span of pins, +D[10:6]; prior SETQ overrides D[10:6])"
+  - "description (an ALTx between the SETQ and the instruction keeps the override): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, p.38 and ALTD, p.39 (SETQ / SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction); a SETQ separated from OUTZ by other instructions is in no source"
+  - "description (Dest[5:0], Dest[10:6], the 9-bit literal range of Dest[8:6], ##Dest, the SETQ substitution, the wrap, C and Z set to the original base bit): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, OUTZ / OUTNZ, p.110 (encoding row 001001100, write OUTx, C and Z Orig OUTx base bit, 2 clocks)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pinop
-  pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
-    flags'
-  valueType: 30
-compiler_encoding:
-  operandFormat: 30
 syntax_variants:
 - OUTZ {#}D
 last_updated: '2025-09-19T16:04:16.865598'
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
-  the I/O pin(s) for which output levels are to be set low or high.
+  the I/O pin(s) whose output levels are set to Z.
 - WCZ is an optional effect to update flags.
 category: Pin
-oneliner: Set pin(s) output level to low/high according to Z or !Z
+oneliner: Set pin(s) output level to Z
+related:
+  - architecture/io_pin_timing.yaml

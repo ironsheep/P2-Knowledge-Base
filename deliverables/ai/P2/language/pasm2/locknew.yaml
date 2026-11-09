@@ -11,19 +11,13 @@ timing:
   type: variable
 description: >-
   Request a LOCK. D will be written with the LOCK number (0 to 15). If the WC
-  effect is specified, C = 1 if no LOCK is available.
+  effect is specified, C = 1 if no LOCK is available, and C = 0 if a lock was
+  allocated. A cog may allocate more than one lock.
 flags_affected:
   C: Set if no LOCK available
   Z: No effect
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.154"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.154; Parallax Propeller 2 Documentation v35 Rev B/C Silicon, Locks (Allocating Locks)"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_d
-  pattern: D
-  description: Destination register only
-  valueType: 24
-compiler_encoding:
-  operandFormat: 24
 last_updated: '2025-09-19T16:04:17.645994'
 category: Hub Control
 oneliner: Request a new LOCK

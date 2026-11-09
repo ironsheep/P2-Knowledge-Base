@@ -12,7 +12,7 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
   - at: hardware_primitives.shared_memory.coordination_pattern
-    fp: "7bb755c059c1f64c"
+    fp: "56d44fb3c0f4091b"
     compile: fragment
     wrap: pasm2-dat
     assumes: [request, flag]
@@ -27,7 +27,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [timeout, RESOURCE_LOCK=con, result]
   - at: resource_protection_patterns.multi_resource.code
-    fp: "a43002091d16c73d"
+    fp: "f5892c8746754250"
     compile: fragment
     wrap: pasm2-dat
     assumes: [LOCK_A=con, LOCK_B=con, LOCK_C=con]
@@ -42,12 +42,12 @@ blocks:
     wrap: pasm2-dat
     assumes: [head, next_head, tail, data, addr]
   - at: producer_consumer_patterns.mailbox_system.code
-    fp: "c2ced7e5e443b2f3"
+    fp: "15fd07726b687979"
     compile: fragment
     wrap: pasm2-dat
     assumes: [mask, target_cog, flag, message, handle_message]
   - at: smart_pin_repository.pattern
-    fp: "dd312f29a121332b"
+    fp: "f0be3f45f4596ab8"
     compile: fragment
     wrap: pasm2-dat
     assumes: [REPO_PIN=con, data_value]
@@ -57,12 +57,12 @@ blocks:
     wrap: pasm2-dat
     assumes: [work_index, cog_num, param, worker_code, WORK_CHUNK=con, mask]
   - at: parallel_processing_patterns.barrier_synchronization.code
-    fp: "1d9b3c8234b6468e"
+    fp: "d5b1cb6c7059736d"
     compile: fragment
     wrap: pasm2-dat
     assumes: [count]
   - at: synchronization_hazards.deadlock.example
-    fp: "ed452f8b8c013c2f"
+    fp: "a97314fa91dc70df"
     compile: fragment
     wrap: pasm2-dat
     assumes: [LOCK_1=con, LOCK_2=con]

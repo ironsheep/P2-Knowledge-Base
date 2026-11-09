@@ -8,9 +8,9 @@ description: 'Align to word boundary (2-byte alignment)
 category: Assembly Directives
 documentation_level: complete
 syntax: ALIGNW
-usage: 'Use before data declarations that require word alignment
+usage: 'Use before data declarations that should start on a word boundary
 
-  for efficient 16-bit access
+  (a read or write of a word that crosses a hub long boundary takes one more clock)
 
   '
 examples:
@@ -22,7 +22,7 @@ examples:
   description: Ensure data starts on word boundary
 notes:
 - Inserts 0-1 bytes of padding as needed
-- Important for 16-bit data access efficiency
+- Hub RAM has no special alignment rules for words and longs; a word that crosses a hub long boundary takes one additional clock to read or write
 related:
 - ALIGNL
 - ORG

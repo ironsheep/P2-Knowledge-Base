@@ -1,0 +1,106 @@
+concept: pixel_mixer
+title: Pixel Mixer - ADDPIX, MULPIX, BLNPIX, MIXPIX, SETPIV, SETPIX
+category: pixel
+aliases:
+  - "pixel mixer"
+  - "pixel operations"
+  - "pixel instructions"
+  - "ADDPIX MULPIX BLNPIX MIXPIX"
+  - "blend factor"
+  - "alpha blend"
+  - "DMIX SMIX"
+  - "MIXPIX mode"
+  - "MIXPIX codes"
+  - "pixel byte fields"
+  - "sum of products with saturation"
+  - "add bytes with saturation"
+  - "multiply bytes $FF is 1.0"
+description: Each cog has a pixel mixer that combines one pixel with another pixel in many different ways. A pixel is four byte fields within a 32-bit cog register, and the operation runs between each pair of D and S bytes.
+
+overview: |
+  A pixel consists of four byte fields within a 32-bit cog register. Pixel
+  operations occur between each pair of D and S bytes, and the four pixel
+  instructions (ADDPIX, MULPIX, BLNPIX, MIXPIX) take seven clock cycles to
+  complete. Two setup instructions load the mixer: SETPIV sets the blend factor
+  V[7:0] from D[7:0], and SETPIX sets the MIXPIX mode M[5:0] from D[5:0].
+
+pixel_format:
+  container: "a 32-bit cog register"
+  byte_fields: "four: [31:24], [23:16], [15:8] and [7:0]"
+  pairing: "each D byte is combined with the S byte in the same position"
+
+setup_instructions:
+  SETPIV:
+    sets: "the blend factor V[7:0], from D[7:0]"
+    used_by: "BLNPIX and MIXPIX"
+    see: "language/pasm2/setpiv.yaml"
+  SETPIX:
+    sets: "the MIXPIX mode M[5:0], from D[5:0]"
+    used_by: "MIXPIX"
+    see: "language/pasm2/setpix.yaml"
+
+computation:
+  rule: "A sum-of-products-with-saturation computation is performed on each D and S byte pair."
+  per_byte: "D[byte] = ((D[byte] * DMIX + S[byte] * SMIX + $FF) >> 8) max $FF"
+  bytes:
+    - "D[31:24] = ((D[31:24] * DMIX + S[31:24] * SMIX + $FF) >> 8) max $FF"
+    - "D[23:16] = ((D[23:16] * DMIX + S[23:16] * SMIX + $FF) >> 8) max $FF"
+    - "D[15:8] = ((D[15:8] * DMIX + S[15:8] * SMIX + $FF) >> 8) max $FF"
+    - "D[7:0] = ((D[7:0] * DMIX + S[7:0] * SMIX + $FF) >> 8) max $FF"
+  saturation: "A byte result is capped at $FF."
+  scale: "$FF is 1.0 in the multiplication."
+  clocks: 7
+
+dmix_smix_by_instruction:
+  ADDPIX:
+    DMIX: "$FF"
+    SMIX: "$FF"
+    summary: "add bytes with saturation"
+    see: "language/pasm2/addpix.yaml"
+  MULPIX:
+    DMIX: "S[byte]"
+    SMIX: "$00"
+    summary: "multiply bytes ($FF = 1.0)"
+    see: "language/pasm2/mulpix.yaml"
+  BLNPIX:
+    DMIX: "!V"
+    SMIX: "V"
+    summary: "alpha-blend bytes according to the SETPIV value"
+    see: "language/pasm2/blnpix.yaml"
+  MIXPIX:
+    DMIX: "selected by M[5:3] from the code table below"
+    SMIX: "selected by M[2:0] from the code table below"
+    summary: "mix bytes according to the SETPIX and SETPIV values"
+    see: "language/pasm2/mixpix.yaml"
+
+mixpix_codes:
+  note: "The same eight codes apply to M[5:3] (giving DMIX) and to M[2:0] (giving SMIX)."
+  "%000": "$00"
+  "%001": "$FF"
+  "%010": "V"
+  "%011": "!V"
+  "%100": "S[byte]"
+  "%101": "!S[byte]"
+  "%110": "D[byte]"
+  "%111": "!D[byte]"
+
+worked_from_the_formula:
+  - "ADDPIX with D byte $01 and S byte $01: ($01*$FF + $01*$FF + $FF) >> 8 = 765 >> 8 = 2."
+  - "ADDPIX with D byte $80 and S byte $80: ($80*$FF + $80*$FF + $FF) >> 8 = 65535 >> 8 = $FF."
+  - "MULPIX with S byte $FF (DMIX = $FF, SMIX = $00): (D*$FF + $FF) >> 8 = (255*D + 255) >> 8 = D for every D byte from $00 to $FF, so the D byte is unchanged."
+
+anti_patterns:
+  - pattern: "Taking $100 as 1.0 for a MULPIX S byte"
+    reason: "In MULPIX $FF = 1.0: with an S byte of $FF the D byte is unchanged, ((D*$FF + $FF) >> 8 = D)."
+
+related:
+  - language/pasm2/addpix.yaml
+  - language/pasm2/mulpix.yaml
+  - language/pasm2/blnpix.yaml
+  - language/pasm2/mixpix.yaml
+  - language/pasm2/setpix.yaml
+  - language/pasm2/setpiv.yaml
+
+sources:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), PIXEL OPERATIONS (a pixel is four byte fields in a 32-bit cog register; the four pixel instructions take seven clock cycles; SETPIV sets V[7:0] from D[7:0]; SETPIX sets M[5:0] from D[5:0]; the sum-of-products-with-saturation formula; Table 13 DMIX and SMIX by instruction and the MIXPIX M[5:3] and M[2:0] codes; MULPIX $FF = 1.0)"
+  - "P2 Instructions v35 - Rev B/C Silicon, rows for ADDPIX, MULPIX, BLNPIX, MIXPIX, SETPIV and SETPIX"

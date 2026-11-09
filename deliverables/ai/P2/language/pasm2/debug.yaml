@@ -1,20 +1,12 @@
 instruction: DEBUG
 syntax: DEBUG | DEBUG(...)
-compiler_syntax: DEBUG
 encoding: "BRK #code (language/pasm2/brk.yaml): EEEE 1101011 00L DDDDDDDDD 000110110; code 0 for a plain DEBUG, 1..255 for DEBUG(...)"
-compiler_encoding:
-  bits: 32
-  opcode: 54
-  effects: 0
-  operandFormat: 37
-  rawValue: 75830
 timing:
   cycles: 2
   type: fixed
 description: |
-  DEBUG is a compiler directive that places one BRK instruction at that point when the program is compiled with DEBUG enabled; without DEBUG enabled it generates no code.
-  A plain DEBUG becomes BRK #0 and launches (or updates) the PASM debugger; DEBUG(...) with output commands becomes BRK #1..255, the code indexing that statement's record in the DEBUG database. If the cog's debug interrupt is disabled the BRK does nothing and takes two clocks. A condition prefix (IF_xx DEBUG(...), v50+) is implemented by an opposite-condition SKIP #1 placed before the BRK.
-compiler_category: Miscellaneous
+  In PASM, each DEBUG statement adds one instruction (long): a BRK #code instruction is inserted where the DEBUG command was placed. DEBUG statements are ignored by the compiler when not compiling for DEBUG mode.
+  A plain DEBUG becomes BRK #0 and launches (or updates) the PASM debugger; DEBUG(...) with output commands becomes BRK #1..255, the code indexing that statement's record in the DEBUG database. If the cog's debug interrupt is disabled the BRK does nothing and takes two clocks. A PASM DEBUG can be preceded by a condition (IF_C DEBUG(...)) as well as by _RET_. The BRK is handled early in the pipeline, so a condition on the BRK itself does not make the break conditional (see language/pasm2/brk.yaml condition_behavior), though an _RET_ executes normally. For a conditional DEBUG the compiler places an opposite-condition SKIP #1 before the BRK (IF_C DEBUG(...) generates IF_NC SKIP #1 and then the BRK), so the BRK executes on the desired condition. This adds 1 instruction.
 examples:
 - code: |
     DEBUG                   ' plain DEBUG: BRK #0, opens or updates the PASM debugger
@@ -23,15 +15,9 @@ examples:
     DEBUG("x = ", sdec(x))
   description: DEBUG with output commands
 operand_details:
-  none: No operands required
-compiler_operand_format:
-  name: operand_debug
-  pattern: ''
-  description: Debug instruction - no operands
-  valueType: 37
-compiler_effects: []
-documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (plain DEBUG resolves to BRK #0, DEBUG() to BRK #1..255; PASM DEBUG instructions)"
+  none: Plain DEBUG has no operands
+documentation_source: "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (plain DEBUG resolves to BRK #0, DEBUG() to BRK #1..255; PASM DEBUG instructions; conditional PASM DEBUG: 'PASM DEBUG instructions can be now preceded by a condition, not just a _RET_', the BRK handled early in the pipeline, '_RET_ will execute normally', 'IF_C DEBUG' generating 'IF_NC SKIP #1' before the BRK, adding 1 instruction); a condition on BRK still breaks and gates only the code: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT, and hardware-verified EF-085; Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BRK, p.55"
 documentation_level: comprehensive
 last_updated: '2025-09-19T16:04:17.215079'
 category: Debug Directives
-oneliner: Place a BRK that triggers a DEBUG statement (when DEBUG is enabled)
+oneliner: Insert a BRK instruction that triggers a DEBUG statement

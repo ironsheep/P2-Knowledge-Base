@@ -6,10 +6,6 @@ method: "WRPIN"
 category: "smart_pin_operations"
 type: "method"
 aliases:
-  - "WRPIN erratum E6"
-  - "erratum E6"
-  - "P2 erratum E6"
-  - "E6 erratum"
   - "DAC smart pin OUT does not start the ADC"
 description: |
   Write the mode configuration register of one or more smart pins.
@@ -122,15 +118,6 @@ smart_pin_workflow:
   4_enable: "Set DIR high to enable the smart pin. PINSTART(PinField, Mode, Xval, Yval) does the whole sequence: DIR=0, then WRPIN, WXPIN and WYPIN, then DIR=1"
   5_operate: "Use RDPIN/RQPIN to read results"
 
-common_uses:
-  - "UART serial communication"
-  - "PWM generation"
-  - "Frequency synthesis"
-  - "Quadrature encoder reading"
-  - "ADC/DAC operations"
-  - "Pulse measurement"
-  - "Protocol generation"
-
 related_methods:
   - "WXPIN"
   - "WYPIN"
@@ -142,7 +129,7 @@ related_methods:
 
 notes:
   - "Pin direction must be set after WRPIN"
-  - "Mode change takes effect immediately"
+  - "A WRPIN while DIR is high gives unpredictable behavior in the newly selected mode; select and configure a mode while DIR is low"
   - "Mode 0 returns pin to normal I/O"
   - "Some modes require X and Y configuration"
   - "Smart pins operate independently of cog"
@@ -155,13 +142,9 @@ mode_persistence:
 
 warnings:
   - "Configure mode before setting DIR"
-  - "Some modes conflict with normal I/O"
-  - "Mode bits must be valid for hardware"
-  - "Incorrect mode can damage external circuits"
 
 silicon_errata:
   dac_smart_pin_mode_out_needs_tt_bit_0:
-    erratum: "E6"
     condition: "A pin in a DAC smart-pin mode (%SSSSS = %00001 to %00011) configured with TT = %00, whose ADC the program switches on with OUT."
     effect: "Raising OUT does not start the ADC; the pin reads exactly as with OUT low."
     workaround: "Set TT bit 0 in the WRPIN word ($40, P_TT_01). The DAC then drives the pin while the ADC runs."
@@ -178,3 +161,6 @@ see_also:
   - "language/spin2/methods/wypin.yaml"
   - "language/spin2/methods/pinstart.yaml"
   - "architecture/smart_pins.yaml"
+
+sources:
+  - "notes and mode_persistence (configure while DIR is low; a WRPIN while DIR is high gives unpredictable behavior; DIR low resets the pin without losing its WRPIN configuration; WRPIN #0 returns a pin to normal mode): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS"

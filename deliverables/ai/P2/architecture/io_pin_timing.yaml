@@ -2,7 +2,7 @@
 # Sources:
 #   Parallax Propeller 2 Documentation v35 (Rev B/C silicon), I/O PIN TIMING
 #     (DIRx/OUTx write latency, INx read latency, TESTP/TESTPN read latency),
-#     SMART PINS (smart-pin IN flag reset), Design Status (VIO latch-up onset)
+#     SMART PINS (smart-pin IN flag reset and the IN bit's read state)
 #   Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES (drive modes),
 #     SYSTEM CHARACTERISTICS (Absolute Maximum Electrical Ratings)
 
@@ -10,28 +10,53 @@ component_name: "I/O Pin Timing"
 
 component_type: "pin_timing_specifications"
 
+aliases:
+  - "pin timing"
+  - "latency"
+  - "OUT to pin"
+  - "output latency"
+  - "how long from OUT to the pin changing"
+  - "DIR change delay"
+  - "pin read delay"
+  - "input delay"
+  - "input latency"
+  - "INx read latency"
+  - "TESTP latency"
+  - "reading a driven pin"
+  - "pin read state"
+  - "smart pin IN flag reset"
+  - "absolute maximum ratings"
+  - "DC characteristics"
+  - "input logic threshold"
+  - "input leakage current"
+  - "Vol Voh"
+  - "max current per I/O pin"
+  - "protection diode"
+  - "slew rate"
+  - "pin propagation delay"
+  - "rise time fall time"
+  - "cog OUT gated by its own DIR"
+  - "two cogs driving the same pin"
+
 description: |
   What this file carries: the clock-cycle latency between an instruction writing DIRx/OUTx
-  and the pin actually moving, the P2 Datasheet's absolute maximum electrical ratings for
-  an I/O pin, what those ratings imply for driving a 3.3 V pin from a 5 V signal, and
-  the datasheet's DC Characteristics: the input logic threshold, input
-  leakage, and the Vol/Voh output voltages at 1, 10 and 30 mA.
+  and the pin actually moving, what an INx read or a TESTP/TESTPN read returns for a pin,
+  the absolute maximum electrical ratings for an I/O pin, the protection-diode
+  forward-current statements, the DC characteristics: the
+  input logic threshold, input leakage, and the Vol/Voh output voltages at three
+  load currents, and how a cog's OUT bit combines with its own DIR bit when two cogs
+  address one pin.
 
-  Two electrical tables sit here and they answer different questions. ABSOLUTE MAXIMUM
-  RATINGS are stress limits -- exceed them and the part is damaged. DC CHARACTERISTICS are
-  operating specifications -- what you design to. "Will this input read as a 1?" is a DC
-  Characteristics question; "will this voltage destroy the pin?" is an absolute-maximum one.
+  Two electrical tables sit here. ABSOLUTE MAXIMUM RATINGS are stress ratings: stresses
+  in excess of them can cause permanent damage to the device. DC CHARACTERISTICS are
+  given over the operating temperature range.
 
-  What it deliberately does NOT carry, and where those live instead:
-    - Drive strength. The datasheet states it as a set of DRIVE MODES, not a current
-      ladder: "Separate drive modes for high and low output: logic / 1.5 k / 15 k / 150 k /
-      1 mA / 100 µA / 10 µA / float". The eight
-      rungs, their %HHH/%LLL encodings and their P_* constant names are defined once, in
+  Carried elsewhere or not documented:
+    - Drive strength. It is a set of DRIVE MODES. The eight
+      modes, their %HHH/%LLL encodings and their P_* constant names are defined once, in
       architecture/pin-drive-configuration.yaml.
-    - Slew rate. No Parallax document (the Propeller 2 Documentation, Spin2, the smart-pins
-      documentation, the P2 Datasheet, the P2 Hardware Manual) describes a slew-rate
-      setting.
-    - Propagation, rise and fall figures per drive setting. No Parallax source states them.
+    - Slew rate. Not documented: a slew-rate setting.
+    - Not documented: propagation, rise and fall figures per drive setting.
 source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES (Smart I/O pins; drive modes), p.2, and SYSTEM CHARACTERISTICS (Absolute Maximum Electrical Ratings, DC Characteristics), pp.47-48"
 
 instruction_to_pin_timing:
@@ -41,8 +66,8 @@ instruction_to_pin_timing:
 
   output_latency:
     description: |
-      When an instruction changes a DIRx or OUTx bit, the processor needs THREE (3)
-      additional system-clock cycles AFTER the instruction before the pin starts to
+      When an instruction changes a DIRx or OUTx bit, the processor needs three (3)
+      additional system-clock cycles after the instruction before the pin starts to
       transition to its new state.
     clock_cycles: 3
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), I/O PIN TIMING -- \"When a DIRx/OUTx bit is changed by any instruction, it takes THREE additional clocks after the instruction before the pin starts transitioning to the new state.\""
@@ -52,17 +77,15 @@ instruction_to_pin_timing:
       - "DIRH, DIRL, DIRC, DIRNC, DIRZ, DIRNZ"
       - "Any instruction writing to OUTx or DIRx"
     example: |
-      DRVH    #8              ' Instruction completes (2 clocks)
-      NOP                     ' A NOP is 2 clocks, so these 3 clocks
-      NOP                     '   are covered by about 1.5 NOPs; the pin
-                              '   starts to transition 3 clocks after DRVH
-    total_latency: "5 clocks from instruction start to pin transition start -- this is the sum of a 2-clock DRVH and the source's THREE additional clocks, not a figure the source states. The source states only the THREE."
+      DRVH    #8              ' Changes the DIRx and OUTx bits for pin 8
+      NOP
+      NOP                     ' The pin starts transitioning three clocks after the DRVH instruction
 
   input_latency_inx_register:
     description: |
       When an instruction reads the contents of the IN register associated with a pin,
-      the processor receives the state of the pins as they existed THREE (3) system-clock
-      cycles BEFORE the start of the instruction.
+      the processor receives the state of the pins as they existed three (3) system-clock
+      cycles before the start of the instruction.
     clock_cycles: 3
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), I/O PIN TIMING -- \"When an INx register is read by an instruction, it will reflect the state of the pins registered THREE clocks before the start of the instruction.\""
     data_age: "3 clocks old"
@@ -70,13 +93,13 @@ instruction_to_pin_timing:
       - "TESTB INA/INB, #pin"
       - "MOV dest, INA/INB"
       - "Any instruction reading INx registers"
-    note: "This is OLDER data than TESTP provides"
+    note: "This is older data than TESTP provides"
 
   input_latency_testp:
     description: |
       When a program uses a TESTP or TESTPN instruction to read the state of a pin,
-      the processor receives the state of the pins as they existed TWO (2) system-clock
-      cycles BEFORE the start of the instruction. TESTP/TESTPN gather "fresher" INx
+      the processor receives the state of the pins as they existed two (2) system-clock
+      cycles before the start of the instruction. TESTP/TESTPN gather "fresher" INx
       data than is available via the INx registers.
     clock_cycles: 2
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), I/O PIN TIMING -- \"When a TESTP/TESTPN instruction is used to read a pin, the value read will reflect the state of the pin registered TWO clocks before the start of the instruction. So, TESTP/TESTPN get fresher INx data than is available via the INx registers.\""
@@ -84,12 +107,28 @@ instruction_to_pin_timing:
     applies_to:
       - "TESTP pin WC/WZ"
       - "TESTPN pin WC/WZ"
-    advantage: "1 clock fresher than reading INx register directly"
+    advantage: "Fresher INx data than is available via the INx registers"
+
+  reading_a_driven_pin:
+    description: |
+      For a pin the cog drives, IN returns the pin's read state, not the OUT bit.
+      Read through an INx register, the value is the pin as registered three clocks
+      before the start of the instruction; read with TESTP/TESTPN, it is the pin as
+      registered two clocks before the start of the instruction. A smart pin's input
+      selectors name the two apart: x000 selects this pin's read state and x100
+      selects this pin's OUT bit from the cogs.
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (\"the IN bit returns the pin's read state\"); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, I/O PIN TIMING (INx register registered three clocks before the instruction; TESTP/TESTPN two clocks before), p.22; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin Modes (%AAAA and %BBBB selectors: x000 this pin's read state, x100 this pin's OUT bit from cogs), p.23"
+    outcome_of_the_two_reads:
+      via_inx: "the pin as registered 3 clocks before the instruction"
+      via_testp_testpn: "the pin as registered 2 clocks before the instruction"
+    smart_pin_selectors:
+      read_state: "x000 this pin's read state (default)"
+      out_bit: "x100 this pin's OUT bit from cogs"
 
   smart_pin_in_flag_reset:
     description: |
       After a cog executes a WRPIN, WXPIN, WYPIN, RDPIN, or AKPIN instruction, the
-      Smart Pin requires TWO (2) system-clock cycles to reset the IN flag to logic-0
+      Smart Pin requires two (2) system-clock cycles to reset the IN flag to logic-0
       before a program can poll the flag again.
     clock_cycles: 2
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS -- \"After WRPIN/WXPIN/WYPIN/RDPIN/AKPIN, it will take two clocks for IN to drop, before it can be polled again.\""
@@ -102,8 +141,8 @@ instruction_to_pin_timing:
     required_pattern: |
       WRPIN   mode, #pin      ' Write to Smart Pin
       NOP                     ' NOP is 2 clocks: elapses the 2 clocks (or more)
-      TESTP   #pin WC         ' NOW safe to poll IN flag
-    note: "RQPIN does NOT reset the IN flag (read quiet)"
+      TESTP   #pin WC         ' IN can now be polled again
+    note: "RQPIN does not acknowledge the smart pin, so it does not lower IN (read quiet)"
 
   timing_summary_table:
     output_dir_out_change: "3 clocks after instruction"
@@ -111,14 +150,24 @@ instruction_to_pin_timing:
     input_via_testp: "2 clocks before instruction (fresher)"
     smart_pin_flag_reset: "2 clocks after WRPIN/WXPIN/WYPIN/RDPIN/AKPIN"
 
+cog_out_gated_by_own_dir:
+  description: |
+    On a pin with no smart pin mode, a cog's OUT bit is gated by that cog's own DIR
+    bit. With one cog holding the pin's DIR high and OUT low, and another cog holding
+    the pin's DIR low and OUT high, the pin reads low, whichever cog is which.
+    Parallax's documents also give: DIR and OUT bits from all cogs are OR'd before
+    going to the pins.
+  source: "P2 hardware verification, EF-114 (one board, P0 with no smart pin mode, cog 0 and one worker cog, three PINREADs 100 us apart; cog 0 DIR 1 OUT 0 with the worker DIR 0 OUT 1 reads 0, and cog 0 DIR 0 OUT 1 with the worker DIR 1 OUT 0 reads 0; controls cog 0 alone and the worker alone each read their driven level; each cog's DIR and OUT bits read back as set). Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PINS (each smart pin OR's all incoming 34-bit buses from the cogs 'in the same way DIR and OUT bits are OR'd before going to the pins')"
+
 absolute_maximum_ratings:
   description: |
-    Stress ratings from the P2 datasheet. Stresses beyond these can cause permanent
-    damage; they are absolute stress limits, NOT operating conditions.
-  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Absolute Maximum Electrical Ratings (table and footnote 1), p.47. Every figure below matches that table. The table states four further limits this file does not carry (total power dissipation 2.5 W, max current out of GND 4 A, max current into VDD pins and into Vxxyy pins 120 mA per pin) -- they are package/supply limits rather than I/O pin limits, which is this file's subject."
+    Stresses in excess of the absolute maximum ratings can cause permanent damage to the
+    device. Functional operation of the device is not implied at these or any other
+    conditions in excess of those given.
+  source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Absolute Maximum Electrical Ratings (table and footnote 1), p.47. Every figure below matches that table. The table also states limits this file does not carry (ambient temperature under bias, storage temperature, total power dissipation 2.5 W, max current out of GND 4 A, max current into VDD pins and into Vxxyy pins 120 mA per pin); this file carries the I/O pin figures."
   voltage_on_VDD_vs_GND: "-0.3 V to +2.2 V"
   voltage_on_VIO_Vxxyy_vs_GND: "-0.3 V to +4.0 V"
-  voltage_on_any_IO_pin_vs_GND: "-0.3 V to (Vxxyy + 0.3 V) -- about 3.6 V at the nominal 3.3 V I/O supply"
+  voltage_on_any_IO_pin_vs_GND: "-0.3 V to (Vxxyy + 0.3 V)"
   max_DC_current_into_input_pin_protection_diode_forward_biased: "+/-10 mA"
   max_current_per_IO_pin: "+/-30 mA"
   esd_HBM: "4 kV (JS-001)"
@@ -126,16 +175,12 @@ absolute_maximum_ratings:
 
 dc_characteristics:
   description: |
-    OPERATING specifications -- what you design to. Distinct from
-    absolute_maximum_ratings above, which are stress limits: what destroys the chip.
-    These are the figures to reach for when the question is "will this input read as
-    a 1?", "how much will the pin sag when I sink current through it?", or "what does
-    an undriven input leak?" Every figure below is transcribed from the Datasheet's
-    DC Characteristics table.
+    Input logic threshold, output voltage while sinking or sourcing current, and input
+    leakage current, over the operating temperature range.
   source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, DC Characteristics (table), pp.47-48.
     Operating temperature range for the whole table:
     -40 degC to +105 degC unless otherwise noted. Typ column footnote:
-    'Data in the Typical \"Typ\" column is T = 25 degC unless otherwise stated'. ac_characteristics_are_clock_specs_only (AC Characteristics table, Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48)."
+    'Data in the Typical \"Typ\" column is T = 25 degC unless otherwise stated'. ac_characteristics (AC Characteristics table, Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48)."
 
   operating_temperature_range: "-40 degC to +105 degC unless otherwise noted"
 
@@ -157,19 +202,14 @@ dc_characteristics:
     max: "Vxxyy * 0.7"
     units: "V"
     what_this_means: |
-      The datasheet states the threshold as a FRACTION OF THE I/O SUPPLY, not as fixed
-      volts, and gives one threshold rather than a VIL/VIH pair. At the nominal 3.3 V
-      Vxxyy that is 0.99 V min / 1.65 V typ / 2.31 V max. Read it as: an input is
-      guaranteed to read LOW below 0.99 V and HIGH above 2.31 V; between those the
-      part is within spec either way, and where it actually switches is nominally
-      mid-supply. Because it scales with Vxxyy, a group running at 3.15 V and a group
-      running at 3.45 V do not have the same thresholds.
+      The threshold is given as a fraction of the I/O supply Vxxyy, as one threshold
+      rather than a VIL/VIH pair.
     not_stated_by_any_source: |
-      Separate VIL / VIH figures, Schmitt-trigger switching thresholds, and hysteresis
-      in millivolts. The P2 HAS Schmitt input modes (P_SCHMITT_A and its variants,
-      defined in language/spin2/symbols/spin2-builtin-symbols-complete.yaml), but no
-      Parallax document states the hysteresis those modes produce. Do not infer
-      it from this row.
+      Not documented: separate VIL / VIH figures, Schmitt-trigger switching
+      thresholds, and hysteresis in millivolts. The P2 has Schmitt input modes
+      (P_SCHMITT_A and its variants, defined in
+      language/spin2/symbols/spin2-builtin-symbols-complete.yaml); the hysteresis
+      they produce is not documented.
 
   input_leakage_current_Iil:
     parameter: "Input Leakage Current"
@@ -179,16 +219,14 @@ dc_characteristics:
 
   output_low_voltage_Vol:
     parameter: "Output Low Voltage (relative to GND)"
-    conditions_note: "VDD = 3.3 V. The datasheet's condition column says VDD; the I/O
-      rail is Vxxyy, and the table is stated as printed rather than reinterpreted."
+    conditions_note: "VDD = 3.3 V"
     sinking_1mA: "15 mV"
     sinking_10mA: "160 mV"
     sinking_30mA: "510 mV"
 
   output_high_voltage_Voh:
     parameter: "Output High Voltage (relative to Vxxyy)"
-    conditions_note: "VDD = 3.3 V, as printed. Values are NEGATIVE because they are
-      stated relative to the supply rail -- the pin sits this far BELOW Vxxyy."
+    conditions_note: "VDD = 3.3 V. Values are relative to Vxxyy."
     sourcing_1mA: "-6 mV"
     sourcing_10mA: "-170 mV"
     sourcing_30mA: "-580 mV"
@@ -201,46 +239,28 @@ dc_characteristics:
       conditions: "RESn = TEST = P0..P64 = 0V, Vxxyy = 3.3V, VDD = 1.8V"
       typ: "0.5 uA"
 
-  the_30mA_ceiling_this_table_confirms: |
-    Vol and Voh are characterised at 1 mA, 10 mA and 30 mA and stop there, which agrees
-    with absolute_maximum_ratings' max_current_per_IO_pin of +/-30 mA above. Any figure
-    above 30 mA per pin is not supported by this datasheet.
+  output_current_range: |
+    Vol and Voh are given at 1 mA, 10 mA and 30 mA.
 
-  ac_characteristics_are_clock_specs_only: |
-    The absence is deliberate: the AC
-    Characteristics table on the facing page states oscillator frequency
-    ranges and XI/XO pin capacitance ONLY. It carries no pin propagation, rise or fall
-    figures, which is why this file's description says no source states them. Its PLL
-    row -- 3.33 MHz min / 180 MHz typ / 320 MHz max, with the note that 180 MHz is
-    nominal at up to 105 degC -- is the same ceiling the clock files state.
+  ac_characteristics: |
+    Oscillator frequency ranges and XI/XO pin capacitance are given. Not documented: pin propagation, rise or fall figures. The PLL
+    row is 3.33 MHz min / 180 MHz typ / 320 MHz max, with the note that 180 MHz is
+    nominal at up to 105 degC.
 
 input_voltage_and_protection:
   source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Absolute Maximum Electrical Ratings, p.47, and DC Characteristics, pp.47-48"
   description: |
-    The P2 is a 3.3 V I/O device and is NOT natively 5 V-tolerant. Each I/O pin has an
-    internal protection (clamp) diode to the I/O supply rail (Vxxyy / VIO, nominally 3.3 V);
-    the "+0.3 V" in the pin absolute-max is that diode's forward drop.
-  io_supply: "Vxxyy (VIO) = 3.3 V nominal (3.15-3.45 V); pins operate 0-3.3 V"
-  datasheet_note: "I/O pin voltages in respect to GND may be exceeded if the internal protection diode forward bias current is not exceeded."
-  reading_a_5V_signal:
-    direct_connection: "Not safe. 5 V exceeds the ~3.6 V pin absolute-max and forward-biases the upper protection diode."
-    with_series_resistor: |
-      Permitted IF a series resistor limits the protection-diode forward current to the
-      datasheet limit of +/-10 mA. The pin clamps the input near Vxxyy + ~0.3 V (about 3.6 V);
-      the series resistor drops the remainder.
-    minimum_series_resistor_DERIVED: |
-      DERIVED value (Ohm's law applied to the stated abs-max facts -- NOT a datasheet-stated
-      number): R >= (5 V - ~3.6 V) / 10 mA ~= 140 ohm. Use a larger standard value
-      (e.g. >= 1 kohm) for margin so diode current stays well within the +/-10 mA limit.
-    caveat: "A series resistor protects the pin electrically; it does not make the pin truly '5 V tolerant.' For sustained 5 V interfacing prefer a proper level shifter or resistor divider."
-  latchup_context:
-    note: "VIO-triggered latch-up onset was reported as early as ~4.3 V on VIO -- this is a 3.3 V part; do not over-drive the rails. The figure comes from ON Semi failure analysis of a specific wafer lot, not from a characterised electrical limit table."
-    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Design Status (2019_09_13) -- \"it was determined by ON Semi that latch-up was occurring as early as 4.3V on VIO\""
+    Max DC current into an input pin with internal protection diode forward biased: +/-10 mA.
+    I/O pin voltages in respect to GND may be exceeded if the internal protection diode
+    forward bias current is not exceeded.
+  io_supply: "Vxxyy (VIO) = 3.3 V typical (3.15-3.45 V)"
+  protection_diode_details: "Not documented: the protection diode's connection and its forward voltage."
+  five_volt_inputs: "Not documented: 5 V signals on an I/O pin."
 
 timing_measurement_techniques:
   using_counters: |
-    ' Measure pin-to-pin propagation delay (plain GPIO + system counter)
-    FLTL    #0                          ' Pin 0: output driver, start low
+    ' Count system clocks from DRVH on pin 0 until pin 1 reads high (pin 0 wired to pin 1)
+    FLTL    #0                          ' Pin 0: float, OUT low
     DIRL    #1                          ' Pin 1: plain input
     DIRH    #0                          ' Enable pin 0 output
     
@@ -252,42 +272,34 @@ timing_measurement_techniques:
     SUB     end_time, start_time        ' Delay in clocks
   
   using_smart_pins: |
-    ' Measure pulse width with a smart pin (counts clocks while input is high)
-    WRPIN   ##P_HIGH_TICKS, #0          ' Pin 0: time-A-highs mode
-    WXPIN   #0, #0                      ' Continuous measurement
-    DIRH    #0                          ' Start measuring
-    RDPIN   width, #0                   ' Read high-time (pulse width in clocks)
-
-timing_violations_debug:
-  - issue: "setup_time_violation"
-    symptom: "Intermittent data errors"
-    solution: "Increase setup time or reduce clock frequency"
-  
-  - issue: "hold_time_violation"
-    symptom: "Data changes too quickly after clock"
-    solution: "Add delay to data path or adjust clock phase"
-  
-  - issue: "metastability"
-    symptom: "Random failures at domain crossings"
-    solution: "Use proper synchronizers (2-3 flip-flops)"
+    ' Time the high states of the A input of pin 0 with a smart pin (pin 0 carries the input signal)
+    WRPIN   ##P_HIGH_TICKS, #0          ' Pin 0: time A-input high states
+    DIRH    #0                          ' DIR = 1 releases reset
+    wait_hi TESTP   #0          WC      ' IN is raised on each high-to-low transition
+      if_nc JMP     #wait_hi            ' Loop until IN is high
+    RDPIN   width, #0                   ' Read the previous high duration count, in clocks
 
 related_topics:
   - topic: "smart_pins"
-    relationship: "Smart pins are configured and read through WRPIN/WXPIN/WYPIN/RDPIN; their IN-flag reset timing is the smart_pin_in_flag_reset block above. No Parallax source states a nanosecond figure for smart-pin timing overhead, so none is carried."
-  
+    relationship: "Smart pins are configured and read through WRPIN/WXPIN/WYPIN/RDPIN; their IN-flag reset timing is the smart_pin_in_flag_reset block above. Not documented: a nanosecond figure for smart-pin timing overhead."
+    reference: "architecture/smart_pins.yaml"
+
   - topic: "clock_system"
-    relationship: "Pin timing scales with system clock"
-  
+    relationship: "The latencies in this file are counted in system clocks"
+    reference: "architecture/clock_system.yaml"
+
   - topic: "pin_modes"
-    relationship: "Different modes have different timing"
-  
+    relationship: "Pin drive modes"
+    reference: "architecture/pin-drive-configuration.yaml"
+
   - topic: "streamer"
-    relationship: "Streamer provides deterministic pin timing"
+    relationship: "Streamer pin output"
+    reference: "architecture/streamer/overview.yaml"
 
   - topic: "spin2_timing_method_selection"
-    relationship: "Choosing GETCT/GETMS/GETSEC for client-code protocol timeouts. SPI, I2C, and SD card protocols often need multi-second timeouts — GETCT-based deadlines silently overflow after a few seconds at typical system clock rates; use GETMS instead."
+    relationship: "GETCT, GETMS and GETSEC timing methods"
     reference: "language/spin2/concepts/timing_operations.yaml"
 
 sources:
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), I/O PIN TIMING; SMART PINS; Design Status"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), I/O PIN TIMING; SMART PINS"
   - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES, p.2; SYSTEM CHARACTERISTICS, pp.47-48"

@@ -3,74 +3,81 @@ component_type: "hardware_subsystem"
 
 description: |
   The Hub FIFO (First-In-First-Out) Interface is a per-cog hardware structure with
-  TWO distinct roles:
+  two distinct roles:
   
-  1. STREAMER/SOFTWARE TRANSFER ROLE: high-speed sequential data transfer between
-     Hub RAM and COG registers via RDFAST/WRFAST/RFx/WFx instructions, operating
-     on 64-byte blocks. Available only in cogexec/lutexec.
+  1. Streamer/software transfer role: sequential reading or writing of hub RAM in any
+     combination of bytes, words or longs, up to one long per clock. It is used by the
+     streamer (background transfers from hub RAM to pins/DACs, or from pins/ADCs to hub
+     RAM) and by software through RDFAST/WRFAST/RFx/WFx instructions. The wrap block
+     count is in 64-byte units. It is set up from cog RAM or lookup RAM, not from hub
+     execution.
   
-  2. HUBEXEC INSTRUCTION-PREFETCH ROLE: when the cog is in hub-execute mode,
-     the FIFO is dedicated to prefetching instructions from hub RAM, allowing
-     sequential hubexec code to stream at 2 clocks/instruction (matching cogexec).
-     In this role the FIFO contains '(cogs+11) stages' —
-     19 stages on a P2 with 8 cogs.
-  
+  2. Hubexec instruction-prefetch role: when the cog is in hub-execute mode,
+     the FIFO is dedicated to prefetching instructions from hub RAM: the cog
+     employs the FIFO hardware to spool up instructions so that a stream of
+     instructions is available for continuous execution.
+     The FIFO contains (cogs+11) stages.
+
   These two roles are mutually exclusive: while a cog is in hub-execute mode,
-  the FIFO is committed to instruction prefetch and the streamer/software FIFO
-  instructions are forbidden.
+  the FIFO is committed to instruction prefetch and the FIFO instructions
+  (RDFAST, WRFAST, FBLOCK, RFx, WFx) are forbidden; so are XINIT, XZERO and
+  XCONT when the streamer mode engages the FIFO.
+
+  The FIFO serves one of hub execution, streamer use or software use (RFxxxx/WFxxxx)
+  at a time.
 
   Key features (streamer/software role):
-  - Block-based transfers (64-byte granularity)
+  - Sequential transfers of bytes, words or longs; the wrap block count is in 64-byte units
   - Automatic address incrementing
   - Block wrap events for circular buffer support
   - Variable-length encoding support (RFVAR/RFVARS)
   
   Key features (hubexec instruction-prefetch role):
-  - 19-stage ((cogs+11)) prefetch buffer
-  - Refills continuously while fewer than (cogs+7) = 15 stages are filled
-  - Sustains 2 clocks/instruction throughput on sequential code
-  - Branch refill costs minimum 13 clocks (+1 if target not long-aligned)
+  - (cogs+11) stages
+  - Loads continuously whenever fewer than (cogs+7) stages are filled
+  - Branching to a hub address takes a minimum of 13 clocks (+1 if target not long-aligned)
+  - Not documented: the clocks per sequential instruction in hub execution as a general rule
 
 architecture:
   per_cog: true
-  block_size: 64  # bytes — streamer/software-transfer block granularity
-  hubexec_prefetch_depth_stages: 19  # (cogs+11)
-  hubexec_refill_threshold_stages: 15  # (cogs+7); FIFO loads while fewer than this filled
+  block_size: 64  # bytes — the unit of the wrap block count
+  hubexec_prefetch_depth_stages: "(cogs+11)"
+  hubexec_refill_threshold_stages: "(cogs+7); FIFO loads while fewer than this filled"
   modes:
-    - read: "RDFAST initiates reading from Hub to COG (streamer/software role; cogexec only)"
-    - write: "WRFAST initiates writing from COG to Hub (streamer/software role; cogexec only)"
-    - hubexec_prefetch: "Engaged automatically while the cog is in hub-execute mode; cannot coexist with streamer/software FIFO use"
+    - read: "RDFAST initiates reading from Hub to COG (streamer/software role; executed from cog RAM, register or lookup, $00000..$003FF, not in hub execution)"
+    - write: "WRFAST initiates writing from COG to Hub (streamer/software role; executed from cog RAM, register or lookup, $00000..$003FF, not in hub execution)"
+    - hubexec_prefetch: "Engaged automatically while the cog is in hub-execute mode; cannot coexist with software FIFO use or with a streamer mode that engages the FIFO"
 
   internal_state:
-    - pointer: "Current hub address (20-bit)"
-    - block_count: "Remaining 64-byte blocks (streamer/software role)"
-    - block_start: "Block start address for wrap reload"
-    - direction: "Read or write mode (streamer/software role)"
-    - role: "Streamer/software transfer vs. hubexec instruction prefetch — mutually exclusive"
+    - "Not documented: the FIFO's internal state"
+    - "RDFAST and WRFAST set the hub start address and the block count; on a block wrap the FIFO interface reloads its block count and start address; FBLOCK sets a new start address and block count for the next wrap"
+    - "GETPTR gets the FIFO's current hub pointer"
+    - "The FIFO serves one of hub execution, streamer use or software use at a time"
 
 configuration:
   rdfast:
     purpose: "Initialize FIFO for fast sequential reads from Hub RAM"
     parameters:
-      D_bits_31: "No-wait flag (1 = don't wait for prior WRFAST)"
-      D_bits_13_0: "Block size in 64-byte units (0 = 16384 blocks max)"
-      S_bits_19_0: "Block start address in Hub RAM"
+      D_bits_31: "No-wait flag: 0 = wait for any previous WRFAST to finish, reconfigure the FIFO and wait until it has begun receiving hub data; 1 = no wait for the FIFO reconfiguration (2 clocks), and the code must allow enough clocks before any attempt to read FIFO data"
+      D_bits_13_0: "Block count in 64-byte units (0 = no wrapping until the entire 1MB hub map has been sequenced through)"
+      S_bits_19_0: "Block start address in Hub RAM; wrapping (a non-zero block count) requires a long-aligned start address (address ends in %00)"
     timing: "2 clocks, or waits for prior WRFAST to finish + 10-17 clocks"
 
   wrfast:
     purpose: "Initialize FIFO for fast sequential writes to Hub RAM"
     parameters:
-      D_bits_31: "No-wait flag (1 = don't wait for prior WRFAST)"
-      D_bits_13_0: "Block size in 64-byte units (0 = 16384 blocks max)"
-      S_bits_19_0: "Block start address in Hub RAM"
+      D_bits_31: "No-wait flag: 0 = wait for any previous WRFAST to finish, then reconfigure the FIFO for writing; 1 = no wait for the FIFO reconfiguration (2 clocks), and the code must allow enough clocks before any attempt to write FIFO data"
+      D_bits_13_0: "Block count in 64-byte units (0 = no wrapping until the entire 1MB hub map has been sequenced through)"
+      S_bits_19_0: "Block start address in Hub RAM; wrapping (a non-zero block count) requires a long-aligned start address (address ends in %00)"
     timing: "2 clocks, or waits for prior WRFAST to finish + 3 clocks"
+    before_cogstop: "A cog that has been writing to the hub via WRFAST and wants to COGSTOP itself executes WAITX #20 first, to allow time for any lingering FIFO data to be written to the hub"
 
   fblock:
     purpose: "Set next block parameters for circular buffer operation"
     parameters:
-      D: "Block size in 64-byte units"
-      S: "Block start address"
-    usage: "Called before block wrap occurs to set next block parameters"
+      D: "Block count in 64-byte units"
+      S: "Block start address (long-aligned when wrapping)"
+    usage: "Sets the start address and block count taken when the current blocks are fully read or written, in place of wrapping back to the prior start address and reloading the prior block count. FBLOCK can be executed after RDFAST, after WRFAST, or after a FIFO block wrap event. It always takes 2 clocks."
 
 instructions:
   setup:
@@ -147,17 +154,19 @@ instructions:
 
 block_wrap_event:
   description: |
-    The FIFO-interface-block-wrap event flag is set whenever the Hub RAM FIFO
-    interface exhausts its block count and reloads from FBLOCK parameters.
+    The FIFO-interface-block-wrap event flag is set whenever the hub RAM FIFO
+    interface exhausts its block count and reloads its block count and start
+    address. This happens on every block wrap, with or without an FBLOCK.
 
-    This enables circular buffer patterns where:
-    1. RDFAST/WRFAST initializes the first block
-    2. FBLOCK sets up the next block parameters
-    3. When block exhausts, event fires and FBLOCK params are loaded
-    4. Process continues indefinitely for streaming applications
+    With FBLOCK, the wrap loads the FBLOCK start address and block count in
+    place of the prior ones:
+    1. RDFAST/WRFAST sets the first block
+    2. FBLOCK sets the next block parameters
+    3. When the block count is exhausted, the flag is set and the FBLOCK
+       parameters are loaded
 
-  triggering: "Block count reaches zero"
-  clearing: "Executing POLLFBW, WAITFBW, JFBW, or JNFBW"
+  triggering: "The FIFO interface exhausts its block count and reloads its block count and start address"
+  clearing: "Executing RDFAST, WRFAST or FBLOCK, or POLLFBW, WAITFBW, JFBW or JNFBW"
 
 programming_patterns:
   - pattern: "sequential_read"
@@ -189,28 +198,37 @@ programming_patterns:
   - pattern: "circular_buffer"
     description: "Continuous circular buffer reading"
     code: |
-      ' Set up circular buffer
-              rdfast  ##buf_size, ##buffer_start
-              fblock  ##buf_size, ##buffer_start  ' Set wrap params
+      ' Circular buffer: 16 blocks of 64 bytes, buffer_start = long-aligned hub address
+              rdfast  #16, ##buffer_start  ' D = block count, S = start address
 
       .loop   rflong  data                 ' Read data
               ' Process data...
               jmp     #.loop               ' Continue forever
 
-      ' Buffer automatically wraps when exhausted
+      ' After 16 blocks the FIFO wraps to buffer_start and reloads the block count
 
   - pattern: "double_buffer"
     description: "Double-buffered streaming"
     code: |
-      ' Ping-pong between two buffers
-              rdfast  ##buf_size, ##buffer_a
-              fblock  ##buf_size, ##buffer_b  ' Next buffer
+      ' Ping-pong between two buffers: 16 blocks of 64 bytes each, both long-aligned
+              mov     next_buf, ##buffer_a
+              mov     alt_buf, ##buffer_b
+              rdfast  #16, ##buffer_a
+              fblock  #16, ##buffer_b      ' Block taken when buffer_a is fully read
 
       .loop   rflong  data
               ' Process...
-              pollfbw wc                   ' Check for wrap
-      if_c    fblock  ##buf_size, ##buffer_a  ' Toggle back
+              pollfbw wc                   ' C = 1 if the FIFO block wrap event was set
+      if_nc   jmp     #.loop
+              fblock  #16, next_buf        ' After the wrap: set the block taken at the next wrap
+              mov     swap_buf, next_buf   ' Swap the two buffer addresses
+              mov     next_buf, alt_buf
+              mov     alt_buf, swap_buf
               jmp     #.loop
+
+      next_buf long 0
+      alt_buf  long 0
+      swap_buf long 0
 
 timing:
   rdfast: "2 clocks (or wait for prior WRFAST + 10-17 clocks)"
@@ -228,17 +246,17 @@ timing:
 
 notes:
   - "Each COG has independent FIFO - no sharing between COGs"
-  - "FIFO must be in correct mode (read/write) for operations"
-  - "WRFAST must complete before starting new FIFO operation"
-  - "Block size of 0 means maximum (16384 blocks = 1MB)"
+  - "The FIFO interface is set for either hub-RAM read or hub-RAM write"
+  - "With D[31]=0, RDFAST and WRFAST wait for any previous WRFAST to finish"
+  - "A block count of 0 means no wrapping until the entire 1MB hub map has been sequenced through"
   - "FIFO is also used internally by hub execution mode"
   - "Variable-length reads (RFVAR/RFVARS) use continuation bit encoding: see language/pasm2/rfvar.yaml for the byte layout and language/pasm2/fvar.yaml for the DAT directives that emit it"
 
 limitations:
-  - "Cannot read and write simultaneously (streamer/software role)"
-  - "Minimum transfer granularity is 64-byte blocks (streamer/software role)"
+  - "The FIFO interface is set for either hub-RAM read or hub-RAM write"
+  - "The FIFO can be used for only one of hub execution, streamer use or software use at a time"
   - "Hub-execute mode dedicates the FIFO to instruction prefetch"
-  - "In hubexec, these FIFO/streamer instructions are FORBIDDEN: RDFAST, WRFAST, FBLOCK, RFBYTE, RFWORD, RFLONG, RFVAR, RFVARS, WFBYTE, WFWORD, WFLONG, XINIT, XZERO, XCONT (when streamer engages FIFO)"
+  - "In hubexec, these instructions are in the hub-execution forbidden list: RDFAST, WRFAST, FBLOCK, RFBYTE, RFWORD, RFLONG, RFVAR, RFVARS, WFBYTE, WFWORD, WFLONG, and XINIT / XZERO / XCONT (when the streamer mode engages the FIFO)"
 
 hub_symbols: "Fragments here that use a hub symbol as an immediate assume a PASM-only file, where hub addresses are absolute. In a Spin2 object, DAT hub addresses are relative to the object: see language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 related:
@@ -254,8 +272,7 @@ cross_references:
   - fvar_directive: "language/pasm2/fvar"
   - streamer_system: "architecture/streamer"
 
-documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB EXECUTION and FAST SEQUENTIAL FIFO INTERFACE"
-last_updated: "2026-04-29"
+documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB EXECUTION, THE COG -to- HUB RAM INTERFACE (FIFO operation for streamer or software usage is established by a RDFAST or WRFAST executed from cog RAM, register/lookup, $00000..$003FF) and FAST SEQUENTIAL FIFO INTERFACE"
 hubexec_fifo_facts:
   - "The FIFO contains (cogs+11) stages."
   - "When in read mode, the FIFO loads continuously whenever less than (cogs+7) stages are filled, after which point, up to 5 more longs may stream in, potentially filling all (cogs+11) stages."
@@ -263,4 +280,4 @@ hubexec_fifo_facts:
   - "While in hub execution mode, the FIFO cannot be used for anything else."
 sources:
   - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB EXECUTION (branch minimum, FIFO unavailable for other use) and THE COG -to- HUB RAM INTERFACE ((cogs+11) stages, load threshold): the hub-execution FIFO facts in hubexec_fifo_facts"
-  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.148-159: one Clocks value for Cog & LUT and Hub execution on each sequential instruction (the 2 clocks/instruction hubexec figure)"
+  - "P2 Instructions v35 Rev B/C Silicon, ADD/MOV/NOP rows (hub execution clocks: same as cog execution); Parallax Propeller 2 Documentation v35 (Rev B/C silicon), HUB EXECUTION (the FIFO spools up instructions for continuous execution)"

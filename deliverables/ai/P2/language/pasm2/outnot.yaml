@@ -5,9 +5,24 @@ category: Pin
 description: >-
   OUTNOT alters the output level register's bit(s) designated by Dest to their inverse
   state (toggles them). All other bits are left unchanged.
+
   Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates
   the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond
   the base should be affected (1-31).
+
+  A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of
+  up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature
+  (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD
+  instruction prior.
+
+  When Dest is a register, the register's value bits [10:0] are used as-is to form
+  the 11-bit ID range, unless a prior SETQ overrides value bits[10:6] with the low
+  five bits of the SETQ value. An ALTx between the SETQ and OUTNOT keeps the
+  override, and a SETQ separated from OUTNOT by other instructions is not documented.
+
+  The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) wraps within
+  OUTA / OUTB.
+
   If the WCZ effect is specified, the C and Z flags are set to the original
   (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.
 result: >-
@@ -25,22 +40,22 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZL DDDDDDDDD 001001111
   write: OUTx
   c: Orig OUTx base bit
   z: Orig OUTx base bit
   clocks: '2'
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, OUTNOT, p.108"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, OUTNOT, pp.108-109"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 364 (OUTNOT {#}D {WCZ}: toggle OUT bits of pins D[10:6]+D[5:0]..D[5:0]; wraps within OUTA/OUTB; prior SETQ overrides D[10:6]; C,Z = OUT bit; write OUTx; 2 clocks)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Pin instructions, p.39 (OUTNOT {#}D {WCZ}, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, OUTNOT, pp.108-109 (heading and one-line description on p.108; Result line, Dest and WCZ parameters, encoding row 001001111, write OUTx, C and Z Orig OUTx base bit, 2 clocks, Dest[5:0], Dest[10:6], the 9-bit literal range of Dest[8:6], ##Dest, the SETQ substitution and the C and Z rule on p.109; the manual's OUTNOT text has no wrap sentence, the wrap within OUTA or OUTB is the instruction listing's)"
+  - "description (an ALTx between the SETQ and the instruction keeps the override): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, p.38 and ALTD, p.39 (SETQ / SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction); a SETQ separated from OUTNOT by other instructions is in no source"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), I/O PIN TIMING (OUTNOT affects pin D bit in OUTx), instruction encoding listing (EEEE 1101011 CZL DDDDDDDDD 001001111 OUTNOT D/# {WCZ})"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pinop
-  pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
-    flags'
-  valueType: 30
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 30
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Toggle pin(s) to the opposite output level
+related:
+  - architecture/io_pin_timing.yaml

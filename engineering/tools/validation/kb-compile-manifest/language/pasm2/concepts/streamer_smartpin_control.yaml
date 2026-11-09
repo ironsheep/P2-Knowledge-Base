@@ -2,7 +2,7 @@
 # ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
-  - at: streamer_system.streamer_commands.XINIT.critical_timing
+  - at: streamer_system.streamer_commands.XINIT.setup_order
     fp: "455411b544d1f0f6"
     compile: fragment
     wrap: pasm2-dat
@@ -17,21 +17,11 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [spi_ck=con]
-  - at: smart_pin_system.configuration.WYPIN.multiple_uses
-    fp: "5dd3b5dd5a1f6ca1"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [drive_pins, drive_u_, pin_pwm_u_l, adc_pins]
   - at: smart_pin_system.status_operations.RDPIN.example
-    fp: "7afb1d62838b8624"
+    fp: "772661d1fb2eaa32"
     compile: fragment
     wrap: pasm2-dat
     assumes: [data, process_received_byte, rx_pin=con]
-  - at: smart_pin_system.status_operations.TESTP.hall_sensor_example
-    fp: "4682773dd0a1619e"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [pin_hall_w, hall_, pin_hall_v, pin_hall_u]
   - at: smart_pin_modes.serial_modes.async_tx.example
     fp: "ec312b2b679ad0fe"
     compile: fragment
@@ -47,23 +37,13 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [spi_ck=con]
-  - at: smart_pin_modes.pulse_modes.pwm_sawtooth.dead_time_critical
-    fp: "4669ed4560b83ded"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [drive_u_, dead_gap_, pin_pwm_u_l, pin_pwm_u_h]
   - at: smart_pin_modes.measurement_modes.quadrature_decoder.code
-    fp: "7640a5e4d6f8b1e9"
+    fp: "9264ed86d75c4a39"
     compile: fragment
     wrap: pasm2-dat
     assumes: [encoder_pin_a, position]
-  - at: smart_pin_modes.adc_modes.calibrated_adc.calibration_sequence
-    fp: "b13eee793dc9f65a"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [adc_modes, adc_pins, adc_fram, gio_levels, pin_adc_u_i, vio_levels]
   - at: smart_pin_modes.repository_mode.data_mailbox.code
-    fp: "7013854be88f4522"
+    fp: "73e29a8aebb164d6"
     compile: fragment
     wrap: pasm2-dat
     assumes: [repo_pin, data_value, received]
@@ -72,26 +52,17 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [spi_ck=con, x, wmode]
-  - at: common_patterns.motor_control_pwm.code
-    fp: "238245692a463980"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [pwmn, pin_pwm_u_l, pwmt, pin_pwm_u_h, fram, drive_pins, drive_u_, dead_gap_]
-  - at: coordination.bit_edge_lockstep.rule
-    fp: "1ea616ef9303c5fa"
-    compile: not-code
-    reason: "prose rule with pseudo-formulas (`sysclks_per_streamer_bit = $8000_0000 / SETXFRQ_value`,`->` arrows) and a worked list; English text with arithmetic notation, neither Spin2 nor PASM2 source"
   - at: coordination.bit_edge_lockstep.worked_examples
-    fp: "435cd112a76dfe1c"
+    fp: "7bcae3b743a11713"
     compile: fragment
     wrap: pasm2-dat
     assumes: [SCK_PIN=con]
   - at: coordination.alignment_pad.code
-    fp: "eacd1ce13a38d84e"
+    fp: "995ff2e47222ff11"
     compile: fragment
     wrap: pasm2-dat
     assumes: [bit_count_doubled, SCK_PIN=con, input_streamer_mode]
   - at: coordination.alignment_pad.rate_dependence
-    fp: "abaa3d2e56d3128f"
+    fp: "164d9a6323e0b7e2"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"

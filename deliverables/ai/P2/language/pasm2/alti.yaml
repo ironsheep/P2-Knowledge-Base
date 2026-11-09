@@ -18,12 +18,80 @@ usage_notes: 'The instruction following ALTI is shielded from interrupt
   Field value modification occurs in the instruction pipeline only; code is not altered,
   values do not persist
 
-  SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the
-  next instruction'
+  ALTI does not change Q: a Q value set by SETQ / SETQ2 before ALTI is still in place
+  for the instruction that follows ALTI
+
+  Intervening ALTx instructions between SETQ / SETQ2 and an RDLONG / WRLONG / WMLONG-PTRx
+  instruction cancel the special-case block-size PTRx deltas: the expected number of longs
+  transfers, but PTRx is modified only according to normal PTRx expression behavior.
+  ALTI itself is not tested for this'
+silicon_errata:
+  block_transfer_ptrx_delta:
+    description: "Parallax's known-bug entry says intervening ALTx instructions between SETQ/SETQ2 and an RDLONG/WRLONG/WMLONG-PTRx instruction cancel the special-case block-size PTRx deltas; the expected number of longs transfers, and PTRx is modified only according to normal PTRx expression behavior. ALTD with ptra++ steps PTRx by 4 and with ptra++[3] by 12 (tested); ALTI itself is not tested. Full account: architecture/silicon_errata.yaml."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS (intervening ALTx/AUGS/AUGD between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG-PTRx cancel the block-size PTRx deltas); EF-067 (ALTD as the intervening instruction; ALTI not tested)"
+  immediate_src_after_augs:
+    description: "An ALTI with an immediate #S placed between an AUGS and the instruction the AUGS was written for also uses the AUGS value, but does not cancel it, so the intended target still receives it as well. Give an ALTI in that position a register S, not an immediate #S. Full account: architecture/silicon_errata.yaml."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS (intervening ALTx instructions with an immediate #S operand between AUGS and its intended target)"
+src_operand:
+  syntax_1_fields: "Src is six 3-bit fields, %rrr_ddd_sss_RRR_DDD_SSS. The first three (%rrr, %ddd, %sss) set how many LSBs of the Result, Dest and Src fields of the Dest template take part in an increment or decrement. The last three (%RRR, %DDD, %SSS) say what is substituted into the next instruction and how the template field is adjusted."
+  syntax_2: "ALTI Dest with no Src is ALTI Dest,#%101_100_100: Dest is executed in place of the next instruction and is not altered."
+  template_fields:
+    result: "Dest[27:19]"
+    dest: "Dest[17:9]"
+    src: "Dest[8:0]"
+    condition_instruction_and_effects: "Dest[31:18] (replaces the next instruction's [31:18] under %RRR = %101)"
+    indirect_i: "Dest[18] is the template's Indirect 'I' field; under %RRR = %101 it is substituted, with the rest of Dest[31:18], into the next instruction's [31:18]. Not documented: what Dest[18] does under any other %RRR value."
+  mask_sizes:
+    applies_to: "%rrr (Result field Dest[27:19]), %ddd (Dest field Dest[17:9]), %sss (Src field Dest[8:0])"
+    codes:
+      "000": "9 bits increment/decrement (default, full span)"
+      "001": "8 LSBs (256-register looped buffer)"
+      "010": "7 LSBs (128-register looped buffer)"
+      "011": "6 LSBs (64-register looped buffer)"
+      "100": "5 LSBs (32-register looped buffer)"
+      "101": "4 LSBs (16-register looped buffer)"
+      "110": "3 LSBs (8-register looped buffer)"
+      "111": "2 LSBs (4-register looped buffer)"
+  control_codes:
+    RRR:
+      field: "Result register / instruction modification"
+      codes:
+        "000": "Dest[27:19] stays the same; no result register substitution"
+        "001": "Dest[27:19] stays the same; the next instruction's result register write is cancelled"
+        "010": "Dest[27:19] decrements per %rrr; no result register substitution"
+        "011": "Dest[27:19] increments per %rrr; no result register substitution"
+        "100": "Dest[27:19] sets the next instruction's result register; stays the same"
+        "101": "Dest[31:18] substitutes into the next instruction's [31:18] (execute Dest)"
+        "110": "Dest[27:19] sets the next instruction's result register; decrements per %rrr"
+        "111": "Dest[27:19] sets the next instruction's result register; increments per %rrr"
+    DDD:
+      field: "Dest field modification"
+      codes:
+        "x0x": "Dest[17:9] stays the same"
+        "x10": "Dest[17:9] decrements per %ddd"
+        "x11": "Dest[17:9] increments per %ddd"
+        "0xx": "no D field substitution"
+        "1xx": "Dest[17:9] substitutes into the next instruction's D field [17:9]"
+    SSS:
+      field: "Src field modification"
+      codes:
+        "x0x": "Dest[8:0] stays the same"
+        "x10": "Dest[8:0] decrements per %sss"
+        "x11": "Dest[8:0] increments per %sss"
+        "0xx": "no S field substitution"
+        "1xx": "Dest[8:0] substitutes into the next instruction's S field [8:0]"
+  execute_dest: "To execute Dest in place of the next instruction, use %RRR = %101 together with %DDD = %1xx and %SSS = %1xx."
+sources:
+  - "src_operand mask sizes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), ALTI (the %rrr/%ddd/%sss table); Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTI, pp.43-44 (Field Increment/Decrement Mask Size table)"
+  - "src_operand template_fields indirect_i: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTI, pp.43-44 (the template format table with the Indirect 'I' field at bit 18, and the %RRR = %101 row with its footnote on I); P2 Instructions v35 - Rev B/C Silicon, ALTI D,{#}S (substitute the next instruction's I/R/D/S fields)"
+  - "src_operand control codes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), ALTI (the %RRR, %DDD and %SSS tables); Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTI, p.44 (Result/Instruction, Dest and Src Field Control tables, the execute-Dest notes)"
+  - "src_operand syntax_2 and the second example: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), ALTI (ALTI register = ALTI register,#%101_100_100); Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTI, p.45 (syntax 2 and the examples); P2 Instructions v35 - Rev B/C Silicon, ALTI D"
+  - "usage_notes (Q persists across ALTI): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SETQ CONSIDERATIONS (the events that change Q; ALTx is not among them); Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTI, p.45 (Notes)"
+  - "usage_notes (PTRx block-step exception): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS; EF-067 (Q and the long count passed through an ALTD; the PTRx step did not)"
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1001101 00I DDDDDDDDD SSSSSSSSS
   write: D
   c: —
@@ -34,25 +102,20 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   c: —
   z: —
   clocks: '2'
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTI, p.43"
+encoding_notes:
+- "ALTI D (the second row) leaves D unchanged. The Write column for this form is — in some of Parallax's documents and D in others; in both, D stays the same."
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTI, pp.43-45"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_duii
-  pattern: D{,S/#}
-  description: Destination, optional source (ALTI instruction modifier)
-  valueType: 4
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 4
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Substitute next instruction's field values from template, per configuration
 related:
-- SETD
-- SETS
-- SETR
-- ALTD
-- ALTS
-- ALTR
+- language/pasm2/setd.yaml
+- language/pasm2/sets.yaml
+- language/pasm2/setr.yaml
+- language/pasm2/altd.yaml
+- language/pasm2/alts.yaml
+- language/pasm2/altr.yaml
 - architecture/silicon_errata.yaml
 examples:
 - code: "ALTI         ptrs,#%111_111                          'set next D and S fields,\

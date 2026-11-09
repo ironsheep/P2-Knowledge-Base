@@ -53,20 +53,11 @@ blocks:
     wrap: pasm2-dat
     assumes: [state, state0, state1, state2, default]
   - at: ret_prefix_rule.full_semantics
-    fp: "592b22ef61b16ad6"
+    fp: "de7ca6223a9ce220"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
-  - at: ret_prefix_rule.on_branching_instructions
-    fp: "401cf3369d4951a5"
-    compile: not-code
-    reason: "YAML description prose (English sentences), not code"
-  - at: ret_prefix_rule.correct_form
-    fp: "d890326db0587040"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [helper]
   - at: special_patterns.return_conditions.code
-    fp: "7c37de4942646a71"
+    fp: "56ec5bf5cb5197a1"
     compile: fragment
     wrap: pasm2-dat
     assumes: [x, limit]
@@ -75,16 +66,6 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [x, y]
-  - at: special_patterns.test_and_branch_alternative.traditional
-    fp: "c2d6f0d04583f798"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [flags, READY_BIT=con, wait_loop]
-  - at: special_patterns.test_and_branch_alternative.efficient
-    fp: "297304404a5fc637"
-    compile: fragment
-    wrap: pasm2-dat
-    assumes: [flags, READY_BIT=con]
   - at: common_mistakes[0].right
     fp: "78e71e808700a8eb"
     compile: fragment
@@ -115,7 +96,7 @@ blocks:
     compile: not-code
     reason: "contrast pair whose second line is an elided instruction (`IF_LT ...`, `IF_C  ' x < y`): the `...`/comment stands in for \"any instruction\", so the block is an illustration of condition-code choice, not a complete statement; the compare line itself is legal PASM2"
   - at: common_mistakes[0].wrong
-    fp: "38124e68fd048366"
+    fp: "020baf64ea8457de"
     compile: fragment
     wrap: pasm2-dat
     assumes: [helper]
@@ -124,3 +105,18 @@ blocks:
     compile: fragment
     wrap: pasm2-dat
     assumes: [x, y]
+  - at: special_patterns.test_and_branch_alternative.branch_form
+    fp: "5d339d0bed88e166"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [flags, READY_BIT=con, wait_loop]
+  - at: special_patterns.test_and_branch_alternative.conditional_form
+    fp: "dbb17d89d49136c1"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [flags, READY_BIT=con]
+  - at: ret_prefix_rule.call_then_return_forms
+    fp: "c841171d76d7d488"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [helper]

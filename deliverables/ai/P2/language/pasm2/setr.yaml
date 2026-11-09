@@ -7,9 +7,9 @@ description: >-
   instruction. Bits outside the Result field remain unaffected. The Result field does not
   exist in instruction opcodes, but takes its value from the Dest field, holding the
   address of a register for the instruction to use as its result destination upon
-  execution. SETR can also be used in self-modifying Reg RAM code, though it won't affect
-  the Register field (which doesn't exist in instruction opcodes) but rather will affect
-  the Instr field and the upper two bits of the FX field. Unlike with ALTx instructions,
+  execution. SETR can also be used in self-modifying Reg RAM code, though, because
+  the Result field does not exist in instruction opcodes, it will instead affect
+  the Instr field and the upper two bits of the FX field (bits 27:19). Unlike with ALTx instructions,
   when used this way, field value modification occurs in the program code itself (not the
   instruction pipeline); code is altered, values persist. Due to the instruction pipeline
   nature, after modifying a code register, it is necessary to elapse at least two
@@ -17,8 +17,8 @@ description: >-
 result: The Result field [27:19] of template Dest is set to Src[8:0].
 parameters:
 - Dest is the register whose 32-bit value is a template for use with an ALTI instruction.
-- Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the D field
-  of Dest.
+- Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the Result
+  field of Dest.
 flags_affected:
   C: No effect
   Z: No effect
@@ -27,25 +27,23 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1001101 01I DDDDDDDDD SSSSSSSSS
   write: D
   c: —
   z: —
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SETR, p.126"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 124 (SETR D,{#}S: set R field of D to S[8:0], D = {D[31:28], S[8:0], D[18:0]}; 2 clocks; write D)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.38 (SETR D,{#}S, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SETR, p.126 (Result line with the Result field [27:19], Dest and Src parameters, encoding row 1001101 01I, write D, C and Z none, 2 clocks, Related list, the explanation of the Result field, the ALTI template layout, the self-modifying Reg RAM use and the two spacer instructions; the Src parameter line there says the D field, where the Result line and the explanation say the Result field)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), REGISTER INDIRECTION (SETR D,S/# sets D[27:19] to S/#[8:0]; 'SETR inst,op' sets register[27:19] to op[8:0] and MOV can become AND/OR/XOR/etc.), and instruction encoding listing (EEEE 1001101 01I DDDDDDDDD SSSSSSSSS SETR D,S/#)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 0
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Set template Result field for ALTI
 related:
-- SETD
-- SETS
-- ALTI
+- language/pasm2/setd.yaml
+- language/pasm2/sets.yaml
+- language/pasm2/alti.yaml

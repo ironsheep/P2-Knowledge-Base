@@ -3,41 +3,42 @@ subtitle: "Smart Pin Mode %11010 (P_ADC_SCOPE)"
 language_reference: "combined"
 compatible_languages: ["Spin2", "PASM2"]
 
-brief_description: "Triggered ADC data capture for oscilloscope-like functionality"
+brief_description: "ADC scope with hysteretic trigger: an 8-bit ADC sample and a trigger check on every clock"
 
 detailed_description:
   operation: |
-    ADC capture mode with trigger functionality for oscilloscope-like data acquisition. Captures
-    ADC samples based on trigger conditions, enabling waveform capture and analysis. Extends the
-    basic ADC modes with triggered acquisition capability. Useful for capturing transient events
-    and analyzing signal behavior around specific trigger points.
-  
+    On every clock the mode calculates an 8-bit ADC sample and checks for hysteretic
+    triggering, providing the basis of oscilloscope functionality. Samples from blocks of up
+    to four pins can be grouped into a 32-bit data pipe for recording by the streamer or
+    reading by the GETSCP instruction.
+
   timing: |
     Trigger is configured entirely via WXPIN (the A and B trigger values and the
     filter select all live in the X register). On every clock the mode computes an
     8-bit ADC sample and checks hysteretic triggering. Triggering is a two-step
     arm-then-trigger: IN is raised on the trigger, then the mode waits for a new
     arming event. RDPIN/RQPIN returns the 8-bit sample with the 'armed' state in C.
+    The IN state is what a TESTP returns; the 'armed' state comes from the C flag of RDPIN/RQPIN.
 
 registers:
   x_register:
     function: "Trigger and filter configuration (set via WXPIN)"
     X[15:10]: "B trigger value (6-bit; MSB-justifies to sample[7:2] for comparison)"
     X[7:2]: "A trigger value (6-bit; MSB-justifies to sample[7:2] for comparison)"
-    X[1:0]: "Filter select (windowed FIR on the scope bitstream): %00=68-tap Tukey, %01=45-tap Tukey, %1x=28-tap Hann. Each sample normalizes to 8 bits, but the effective DC dynamic range is only ~5-6 bits depending on filter length."
+    X[1:0]: "Filter select (three windowed filter functions): %00=68-tap Tukey, %01=45-tap Tukey, %1x=28-tap Hann. Each sample normalizes to 8 bits, but the DC dynamic range is ~5 to ~6 bits, depending on the filter length."
     trigger_pattern: |
       The A/B relationship sets the arm-then-trigger pattern:
         A>B:  arm when sample[7:2] >= A, then trigger when sample[7:2] < B
         A<=B: arm when sample[7:2] < A,  then trigger when sample[7:2] >= B
   y_register:
-    function: "Not used in this mode"
+    function: "Not documented: a role for Y in this mode (WXPIN configures the mode)"
   z_register:
     function: "8-bit ADC sample (read via RDPIN/RQPIN; C flag returns the 'armed' state)"
 
 flags:
   in_flag: "Raised on trigger (after arming); the 'armed' state is then cancelled"
-  a_input: "Analog signal to monitor and capture"
-  b_input: "Optional external trigger or clock"
+  a_input: "The incoming ADC bit: on each clock it is shifted into a tap string and the weighted tap bits are summed to produce the sample"
+  b_input: "Not documented: a role for the B input in this mode (the A and B trigger values are fields of X)"
 
 code_examples:
   - title: "Basic Triggered Capture"
@@ -48,8 +49,8 @@ code_examples:
         adc_pin = 46                             ' Analog input
       
       PUB main() | captured_value
-        ' Trigger A/B values + filter select go in X (WXPIN); Y is unused.
-        ' B=48, A=16 (A<=B): arm when sample < 16, trigger when sample >= 48.
+        ' Trigger A/B values + filter select go in X (WXPIN); Y is written as 0.
+        ' B=48, A=16 (A<=B): arm when sample[7:2] < 16, trigger when sample[7:2] >= 48.
         ' P_ADC_1X puts the pin in ADC input mode (M[12:10] = %100), as the PASM2 example below does.
         pinstart(adc_pin, P_ADC_SCOPE | P_ADC_1X, (48 << 10) | (16 << 2), 0)
 
@@ -57,7 +58,7 @@ code_examples:
           ' Wait for trigger event
           repeat until pinread(adc_pin)
 
-          captured_value := rdpin(adc_pin)       ' Read 8-bit sample (C = armed)
+          captured_value := rdpin(adc_pin) & $FF ' The 8-bit sample (rdpin() puts the armed state, C, in bit 31)
           debug("Triggered: ", udec(captured_value))
 
       DAT
@@ -68,8 +69,8 @@ code_examples:
         wxpin   scope_trig, #adc_pin             ' A/B trigger values + filter (X)
         dirh    #adc_pin                         ' Enable smart pin
       .loop
-        testp   #adc_pin wc                      ' Check for trigger (C = armed)
-        if_nc   jmp #.loop                       ' Wait for event
+        testp   #adc_pin wc                      ' IN into C (IN is raised on the trigger)
+        if_nc   jmp #.loop                       ' Wait for the trigger
         rdpin   sample, #adc_pin                 ' Read 8-bit sample
         ' Process triggered sample...
         jmp     #.loop
@@ -94,7 +95,7 @@ code_examples:
         long capture_index
       
       PUB main() | i
-        ' Setup triggered capture (trigger A/B + filter in X; Y unused)
+        ' Setup triggered capture (trigger A/B + filter in X; Y written as 0)
         pinstart(adc_pin, P_ADC_SCOPE | P_ADC_1X, (48 << 10) | (16 << 2), 0)
 
         repeat
@@ -105,8 +106,8 @@ code_examples:
           
           ' Capture waveform after trigger
           repeat i from 0 to buffer_size-1
-            waveform_buffer[i] := rdpin(adc_pin)
-            waitct(getct() + (_clkfreq / 100_000))   ' Sample rate
+            waveform_buffer[i] := rdpin(adc_pin) & $FF   ' 8-bit sample; bit 31 of rdpin() is the armed state
+            waitct(getct() + (_clkfreq / 100_000))   ' Wait _clkfreq / 100_000 clocks between reads
           
           ' Analyze captured waveform...
           debug_waveform()
@@ -115,16 +116,10 @@ code_examples:
         repeat i from 0 to buffer_size-1
           debug("Sample ", udec(i), ": ", udec(waveform_buffer[i]))
 
-common_applications:
-  - "Oscilloscope functionality"
-  - "Transient event capture"
-  - "Signal anomaly detection"
-  - "Waveform analysis and characterization"
-
 related_modes:
   - "Mode %11000: ADC internal clock - continuous sampling"
   - "Mode %11001: ADC external clock - synchronized sampling"
-  - "Mode %10010: Time events with timeout - digital trigger"
+  - "Mode %10010: Time events with timeout"
 
 configuration_constants:
   mode_constant: "P_ADC_SCOPE"
@@ -132,28 +127,22 @@ configuration_constants:
   required_pin_config: "P_ADC_1X (M[12:10] = %100); mode word %100011_0000000_00_11010_0"
 
 notes:
-  - "Trigger A/B values and the filter select are all in the X register (WXPIN); Y is not used"
+  - "Trigger A/B values and the filter select are all in the X register (WXPIN); Not documented: a role for Y in this mode"
   - "A and B are 6-bit; they MSB-justify to sample[7:2] for comparison. Their relationship (A>B vs A<=B) sets the arm-then-trigger pattern"
-  - "Each sample normalizes to 8 bits, but the effective DC dynamic range is only ~5-6 bits depending on the selected filter length — treat the low bits as filter residue when choosing A/B trigger thresholds"
-  - "RDPIN/RQPIN returns the 8-bit sample; the C flag returns the 'armed' state"
-  - "Useful for capturing signals around specific voltage thresholds"
-  - "Can be combined with software buffering for waveform storage"
-  - "The examples put the pin in ADC input mode (P_ADC_1X, M[12:10] = %100), as the ADC modes %11000/%11001 do; the Parallax documentation does not state the ADC input mode separately for the scope mode"
-  - "The cog's SCOPE data pipe (SETSCP/GETSCP) can aggregate four 4-pin-block samples per clock for the streamer — see the SETSCP/GETSCP instructions"
+  - "Each sample normalizes to 8 bits, but the DC dynamic range is ~5 to ~6 bits, depending on the filter length"
+  - "RDPIN/RQPIN returns the 8-bit sample; the C flag returns the 'armed' state. TESTP returns IN"
+  - "The Spin2 RDPIN() and RQPIN() methods return the C flag in bit 31 of their result, so in this mode bit 31 is the 'armed' state; the Spin2 examples mask the result with $FF to keep the 8-bit sample, and (rdpin(pin) >> 31) gives the armed state. Not documented: the contents of Z bits above the 8-bit sample"
+  - "The examples put the pin in ADC input mode (P_ADC_1X, M[12:10] = %100), as the ADC modes %11000/%11001 do. Not documented: whether the scope mode needs the ADC input mode set separately."
+  - "Scope data pipe: each cog has a 32-bit SCOPE data pipe, intended for smart pins configured to the scope mode, that continuously aggregates the lower bytes of RDPIN values from a 4-pin block, so the streamer can record up to four time-aligned 8-bit ADC samples per clock; GETSCP reads the four bytes at once. SETSCP D[6] enables the pipe and D[5:2] selects the 4-pin block. The pipe is generic in function and may carry data other than scope samples. See language/pasm2/setscp.yaml and language/pasm2/getscp.yaml"
+
+sources:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %11010 = ADC Scope with Trigger (per-clock sample and trigger check, three windowed filters, A and B trigger values, Table 35, WXPIN fields, RDPIN/RQPIN armed state in C) and SCOPE Data Pipe; Propeller 2 P2X8C4M64P Hardware Manual, Nov 1, 2022 Release, ADC Scope With Trigger (%11010), p.55, SCOPE Data Pipe, p.56"
+  - "Spin2 RDPIN()/RQPIN() bit 31: Parallax Propeller 2 Spin2 Language Documentation v55, smart pin methods (RDPIN (Pin) : Zval, Zval[31] = C flag from RDPIN, other bits are RDPIN data; RQPIN the same)"
 
 power_domain:
-  fact: |
-    P_ADC_GIO / P_ADC_VIO reference THIS pin's own SILICON power group of FOUR pins (0-3,
-    4-7, ..., 60-63), each sharing one isolated VIO_{x}_{y} / GIO_{x}_{y} supply pair. A
-    single-pin ratiometric reading is therefore absolute against its own group's rails.
-  multi_pin_layout: |
-    Pins tied to a SHARED NODE for one measurement must sit WITHIN A SINGLE FOUR-PIN group
-    to share a reference domain; straddling a boundary (e.g. pins 3 and 4) mixes supply
-    domains and degrades the result. Independent single-ended channels on different pins are
-    unaffected. NOTE: the 8-pin grouping on P2 Edge boards is the LDO/header layer, where one
-    regulator feeds two silicon groups - it is not the ADC's reference domain. Stay within
-    four; that rule holds on every board.
-  reference: "Full mechanism + sourcing: p2kbArchPinPowerDomains"
+  fact: "VIO_{x}_{y} and GIO_{x}_{y} are the power and ground for smart pins x through y; smart pins are powered in groups of 4. A pin's P_ADC_VIO or P_ADC_GIO input reads the VIO or GIO of the pin's own group of 4: each smart pin has its ADC with VIO/GIO calibration and is externally powered in blocks of 4 for a clean analog Vdd reference."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), PIN DESCRIPTIONS, pin table (VIO_{x}_{y} / GIO_{x}_{y} = power / ground for smart pins {x} through {y}); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES summary, p.2 (each smart I/O pin: delta-sigma ADC with VIO/GIO calibration; externally powered in blocks of 4 for clean analog Vdd reference) and p.3 (smart I/O pins powered in groups of 4 via VIO pins); the own-group statement is these statements read together, no line states it outright"
+  reference: "Full mechanism and sourcing: p2kbArchPinPowerDomains"
 
 related:
   - architecture/pin-power-domains.yaml

@@ -3,33 +3,38 @@ subtitle: "Smart Pin Mode %01101 (P_REG_UP_DOWN)"
 language_reference: "combined"
 compatible_languages: ["Spin2", "PASM2"]
 
-brief_description: "Counts A-input positive edges, incrementing when B high, decrementing when B low"
+brief_description: "Accumulates A-input positive edges with the B input supplying increment (B=1) or decrement (B=0)"
 
 detailed_description:
   operation: |
-    Accumulates positive edges on A-input with direction controlled by B-input state. When B is
-    high, each A-input rising edge increments the counter. When B is low, each A-input rising
-    edge decrements the counter. Maintains signed 32-bit accumulator for bidirectional counting.
-    B-input can change at any time to reverse counting direction.
-  
+    Accumulates A-input positive edges, with the B input supplying increment (B=1) or
+    decrement (B=0). X establishes a measurement period in clock cycles. If zero is used
+    for the period, the measurement operation is not periodic but continuous, like a
+    totalizer, and the current 32-bit count can always be read via RDPIN/RQPIN. If a
+    non-zero value is used for the period, events are counted for that many clock cycles
+    and then the result is placed in Z, while the accumulator is set to the 0/1/-1 value
+    that would otherwise have been added into it, beginning a new measurement. This way,
+    all events get counted across measurements. At the end of each period, IN is raised
+    and RDPIN/RQPIN can be used to retrieve the 32-bit measurement.
+
   timing: |
-    Continuous mode (X=0): Z register always holds current net count
-    Periodic mode (X>0): Net count over X clock cycles
+    Continuous mode (X=0): the current 32-bit count can always be read via RDPIN/RQPIN
+    Periodic mode (X>0): events are counted for X clock cycles, then the result is placed in Z
     IN flag raised at end of each measurement period
-    Direction changes take effect immediately
+    During reset (DIR=0), IN is low and Z is set to the adder value (0/1/-1)
 
 registers:
   x_register:
     bits_31_0: "Measurement period in clocks (0=continuous totalizer)"
-  y_register:  
-    function: "Not used in this mode"
+  y_register:
+    function: "Not documented: a Y role for this mode"
   z_register:
-    function: "Signed 32-bit net count (increments minus decrements)"
+    function: "32-bit count (A-input positive edges, incremented when B=1 and decremented when B=0)"
 
 flags:
-  in_flag: "Raised at end of measurement period (periodic mode only)"
-  a_input: "Signal to count (positive edges)"
-  b_input: "Direction control (high=increment, low=decrement)"
+  in_flag: "Raised at end of measurement period (periodic mode)"
+  a_input: "Signal whose positive edges are accumulated"
+  b_input: "Supplies increment (B=1) or decrement (B=0)"
 
 code_examples:
   - title: "Bidirectional Position Control"
@@ -39,25 +44,31 @@ code_examples:
         _clkfreq = 200_000_000
         step_pin = 20                            ' Step pulse input
         dir_pin = 21                             ' Direction control
-      
+
       PUB main() | position, last_pos
         ' Configure bidirectional counter
         pinstart(step_pin, P_REG_UP_DOWN | P_PLUS1_B, 0, 0)
-        
+
         repeat
-          position := rdpin(step_pin)            ' Read current position
-          
+          position := read_z(step_pin)           ' Read current position (signed count)
+
           if position <> last_pos
             debug("Position: ", sdec(position))
             last_pos := position
-          
+
           ' Reset position on button press
           if ina.[0]
             pinclear(step_pin)
             pinstart(step_pin, P_REG_UP_DOWN | P_PLUS1_B, 0, 0)
-      
+
+      PRI read_z(pin) : z
+        ' PASM2 RDPIN keeps all 32 bits of Z, the sign bit included (the Spin2 RDPIN() method returns the C flag in bit 31)
+        org
+          rdpin   z, pin
+        end
+
       DAT
-      ' PASM2 velocity measurement example
+      ' PASM2 periodic measurement example
         org
         dirl    #step_pin                        ' Reset smart pin
         wrpin   ##P_REG_UP_DOWN | P_PLUS1_B, #step_pin
@@ -69,34 +80,32 @@ code_examples:
       .loop
         testp   #step_pin wc                     ' Wait for period end
         if_nc   jmp #.loop
-        rdpin   velocity, #step_pin              ' Net steps in 100ms
-        ' Positive = forward, negative = reverse
+        rdpin   velocity, #step_pin              ' Count for the period
         jmp     #.loop
 
-common_applications:
-  - "Stepper motor position tracking with direction"
-  - "Linear actuator control with up/down counting"
-  - "Inventory tracking (add/subtract operations)"
-  - "Fill level monitoring with fill/drain inputs"
-
 related_modes:
-  - "Mode %01011: Quadrature encoder (automatic direction)"
-  - "Mode %01100: Gated counter (B enables/disables)"
-  - "Mode %01110: Separate up/down edge counters"
-  - "Mode %01111: Count while high (level sensitive)"
+  - "Mode %01011: Quadrature encoder"
+  - "Mode %01100: Count A-input positive edges when B-input is high"
+  - "Mode %01110: Count A-input positive edges, optionally decrementing on B-input positive edges"
+  - "Mode %01111: Count A-input highs (level), optionally decrementing on B-input highs"
 
 configuration_constants:
   mode_constant: "P_REG_UP_DOWN"
   binary_value: "%01101"
   common_modifiers:
-    - "P_PLUS1_B - Use next pin for direction"
-    - "P_MINUS1_B - Use previous pin for direction"
-    - "P_INVERT_B - Reverse direction logic"
-    - "P_FILT1_AB - Add filtering for noise immunity"
+    - "P_PLUS1_B - Use next pin as the B input"
+    - "P_MINUS1_B - Use previous pin as the B input"
+    - "P_INVERT_B - Invert the B input"
+    - "P_FILT1_AB - Filter the A and B inputs using the global filt1 settings"
 
 notes:
-  - "Only counts positive edges (0→1 transitions) on A"
-  - "B-input state sampled at each A-edge for direction"
-  - "Z register is signed for negative counts"
-  - "Direction can change dynamically during operation"
-  - "No mechanical switch debouncing - add filtering if needed"
+  - "Counts A-input positive edges, with the B input supplying increment (B=1) or decrement (B=0)"
+  - "In periodic mode all events get counted across measurements: the accumulator is set to the 0/1/-1 value that would otherwise have been added into it"
+  - "During reset (DIR=0), IN is low and Z is set to the adder value (0/1/-1)"
+  - "The Spin2 example reads the count with inline PASM2 RDPIN, which keeps all 32 bits of Z; the Spin2 RDPIN() method returns the C flag in bit 31, which would replace the count's sign bit unless C is the MSB of Z. Not documented: the C flag of RDPIN in this mode."
+
+sources:
+  - "notes (Spin2 RDPIN() bit 31): Parallax Propeller 2 Spin2 Language Documentation v55, smart pin methods (RDPIN (Pin) : Zval, Zval[31] = C flag from RDPIN, other bits are RDPIN data); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (C is either a mode-related flag or the MSB of the Z result)"
+  - "operation, timing, registers, flags, notes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%01101: accumulate A-input positive edges with the B input supplying increment (B=1) or decrement (B=0); reset adder value 0/1/-1)"
+  - "configuration_constants.common_modifiers (P_FILT1_AB): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PINS (%FFF = 101 uses the global filt1 settings)"
+  - "code_examples (clkfreq as a hub long): Parallax Propeller 2 Spin2 Language Documentation v55, Clock Setup (the clkfreq hub variable at LONG[$44], read from PASM as RDLONG x,#@clkfreq)"

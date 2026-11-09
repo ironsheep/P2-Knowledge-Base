@@ -18,7 +18,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [dividend_high, dividend_low, divisor, result_quotient, result_remainder, exact_division]
   - at: examples[3].code
-    fp: "6f4480fe0e79fb70"
+    fp: "f5cf43023d7ea419"
     compile: fragment
     wrap: pasm2-dat
     assumes: [fixed_point_low, scaled_low, scaled_high, final_result]

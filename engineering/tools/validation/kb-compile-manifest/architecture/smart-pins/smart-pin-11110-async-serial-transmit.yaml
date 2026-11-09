@@ -3,17 +3,15 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: code_examples[0].code
-    fp: "afc50b19726221bb"
+    fp: "468c44cd32f2ea67"
     compile: program
   - at: code_examples[1].code
-    fp: "6e37120b8905c965"
-    compile: fragment
-    wrap: spin2-top
-    assumes: [send_byte()->1/1]
+    fp: "5c120e147509cb9b"
+    compile: program
   - at: code_examples[2].code
-    fp: "2551627ea714d181"
+    fp: "1fc9a976ea8a4b3b"
     compile: program
   - at: configuration_constants.bit_period_calculation.formula
-    fp: "39311a4574358349"
+    fp: "2047377a1dabdb8e"
     compile: not-code
     reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"

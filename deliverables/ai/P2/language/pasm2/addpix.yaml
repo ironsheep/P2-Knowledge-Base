@@ -2,7 +2,7 @@ instruction: ADDPIX
 syntax: ADDPIX Dest, {#}Src
 brief_description: Add pixels
 category: Pixel Mixer
-description: ADDPIX sums all four byte fields of Src into those of Dest and stores the result in the Dest register. For 8:8:8:8 pixel data the four bytes are the red, green, blue, and alpha channels. Each byte is saturated independently to prevent wraparound.
+description: ADDPIX sums all four byte fields of Src into those of Dest and stores the result in the Dest register. A pixel consists of four byte fields within a 32-bit cog register, and the operation is performed between each pair of D and S bytes. Each byte sum is saturated at $FF.
 result: All four byte fields of Src are added into the corresponding byte fields of Dest with full saturation (8:8:8:8 pixel data).
 parameters:
 - Dest is a register containing the 8:8:8:8 pixel value to add Src to, and is where the
@@ -17,21 +17,23 @@ syntax_variants:
 timing:
   cycles: 7
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1010010 00I DDDDDDDDD SSSSSSSSS
   write: D
   c: —
   z: —
   clocks: '7'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ADDPIX, p.33"
+sources:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), PIXEL OPERATIONS (a pixel is four byte fields in a 32-bit cog register; the pixel operations take seven clock cycles; the sum-of-products computation saturates each byte at $FF, ADDPIX with DMIX = SMIX = $FF)"
+  - "P2 Instructions v35 - Rev B/C Silicon, row 141 (ADDPIX: add bytes of S into bytes of D, with $FF saturation; 7 clocks)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 0
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Add 8:8:8:8 pixel bytes with full saturation
+mixer_values:
+  DMIX: "$FF"
+  SMIX: "$FF"
+  per_byte: "D[byte] = ((D[byte] * $FF + S[byte] * $FF + $FF) >> 8) max $FF"
+related:
+- language/pasm2/concepts/pixel_mixer.yaml

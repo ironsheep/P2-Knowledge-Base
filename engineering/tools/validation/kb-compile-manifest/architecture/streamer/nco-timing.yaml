@@ -3,15 +3,15 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: frequency_calculation.example
-    fp: "6d2dece45117686e"
+    fp: "c1128e64f54d9cb6"
     compile: fragment
     wrap: pasm2-dat
   - at: methods.setxfrq.example
-    fp: "c623e5bf6dd7d48d"
+    fp: "fdb1949ba160fe8c"
     compile: fragment
     wrap: pasm2-dat
   - at: methods.setq_inline.example
-    fp: "ad834a3d3dd4413e"
+    fp: "2dfa71bc2f5872bd"
     compile: fragment
     wrap: pasm2-dat
     assumes: [mode, data]

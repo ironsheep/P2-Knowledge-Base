@@ -13,15 +13,17 @@ description: "Iterate CRC value in D using Q[31:28] and polynomial in S. Like CR
 flags_affected:
   C: No effect
   Z: No effect
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release (2022/11/01), Propeller 2 Assembly Language (PASM2) in Brief, p.148; P2 Instructions v35 - Rev B/C Silicon, Sheet1"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release (2022/11/01), Propeller 2 Assembly Language (PASM2) in Brief, p.148; P2 Instructions v35 - Rev B/C Silicon, row 132 (CRCNIB: Iterate CRC value in D using Q[31:28] and polynomial in S. Like CRCBIT x 4. Q = Q << 4); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, instruction set listing, CRCNIB, p.36; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SETQ CONSIDERATIONS (CRCNIB inputs and outputs Q; protection from interrupts)"
+notes:
+- "CRCNIB is the only instruction that both takes Q as input and outputs Q (Q shifted left by four bits), so the SETQ and the CRCNIB instructions that follow must not be disrupted. Protect the sequence from interrupts with STALLI/ALLOWI or put it in a REP block, which is shielded from interrupts, including non-stallable debug interrupts."
+- "Each CRCNIB uses the top four bits of Q, Q[31:28], so successive CRCNIBs after a SETQ take Q from the top nibble down. Each CRCNIB acts like CRCBIT four times with the polynomial in S, then Q = Q << 4. The four bits go into the CRC iteration Q[31] first, down to Q[28]: with CRC 0 and polynomial $8C, CRCNIB of the nibbles %1000 and %1101 gives the result of four CRCBITs fed Q[31] down to Q[28], not of four fed Q[28] up to Q[31]."
+- "A SETQ before the first CRCNIB supplies the data; see language/pasm2/concepts/special_registers.yaml q_register for what else changes Q."
+sources:
+  - "P2 hardware verification, EF-119 (one board, cog execution; CRC 0, polynomial $8C, Q $8000_0000 and $D000_0000; CRCNIB matched four CRCBITs fed Q[31] down in both cases, and the Q[28]-up order differed)"
+related:
+- language/pasm2/concepts/special_registers.yaml
+- language/pasm2/setq.yaml
 documentation_level: minimal
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:
-  operandFormat: 0
 last_updated: '2025-09-19T16:04:17.633904'
 category: Math and Logic
 oneliner: Iterate CRC value in D using Q[31:28] and polynomial in S

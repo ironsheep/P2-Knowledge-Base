@@ -17,9 +17,9 @@ description: >-
   AUGD instruction prior.
 
   When Dest is a register, the register's value bits [10:0] are used as-is to
-  form the 11-bit ID range, unless a SETQ instruction immediately precedes the
-  DIRRND instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6],
-  for DIRRND's use.
+  form the 11-bit ID range. A prior SETQ overrides Dest[10:6] with the low five
+  bits of the SETQ value; an ALTx between the SETQ and DIRRND keeps the override,
+  and a SETQ separated from DIRRND by other instructions is not documented.
 
   The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap
   within the same 32-pin group (DIRA or DIRB); it will not cross the port
@@ -29,11 +29,11 @@ description: >-
   original (pre-instruction) state of the base pin's DIR bit (DIRA / DIRB), identified
   by Dest.
 result: >-
-  The I/O pin direction bit(s), described by Dest, are each set randomly low or
-  high (input or output); the rest are left as-is.
+  The I/O pin direction bit(s), described by Dest, are each set randomly; the
+  rest are left as-is.
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value
-  identifies the I/O pin(s) to set randomly to input or output.
+  identifies the I/O pin(s) whose DIR bit is set randomly.
 - WCZ is an optional effect to update flags.
 flags_affected:
   C: Set to the original (pre-instruction) state of the base pin's DIR bit
@@ -49,18 +49,17 @@ encoding:
   c: Orig DIRx base bit
   z: Orig DIRx base bit
   clocks: '2'
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DIRRND, p.72"
+encoding_notes:
+- "DIRRND uses the S-field code 001000110, the same code as TESTP with XORC or XORZ."
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DIRRND, p.72; encoding_notes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 1101011 CZL DDDDDDDDD 001000110 for both TESTP D/# XORC/XORZ and DIRRND D/# {WCZ})"
+sources:
+  - "description (DIR bits of pins D[10:6]+D[5:0]..D[5:0] = RNDs; wraps within DIRA/DIRB; prior SETQ overrides D[10:6]; C,Z = DIR bit; write DIRx; 2 clocks): P2 Instructions v35 - Rev B/C Silicon, row 355; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), list of changes (DIRx/OUTx/FLTx/DRVx can now work on a span of pins, +D[10:6] pins; prior SETQ overrides D[10:6])"
+  - "description (random low and high, input and output, from bits of the Xoroshiro128** PRNG, Dest[5:0], Dest[10:6], the 9-bit literal range of Dest[8:6], ##Dest and AUGD, the register value bits [10:0], the wrap within DIRA or DIRB): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DIRRND, p.72"
+  - "description (an ALTx between the SETQ and DIRRND keeps the override): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, pp.38-39 (SETQ / SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction); a SETQ separated by other instructions is in no source"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pinop
-  pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect flags'
-  valueType: 30
-compiler_encoding:
-  operandFormat: 30
 last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
-oneliner: Set pin(s) direction to random input/output
+oneliner: Set pin(s) DIR bit randomly
 related:
 - DIRC
 - DIRNC
@@ -69,3 +68,4 @@ related:
 - DIRNOT
 - DIRL
 - DIRH
+- architecture/io_pin_timing.yaml

@@ -35,7 +35,7 @@ registers:
     bits_31_0: "Measurement period in clocks (0=continuous totalizer)"
   y_register:  
     bit_0: "0=count A edges only, 1=inc on A edges/dec on B edges"
-    bits_31_1: "Unused"
+    bits_31_1: "Not documented: a role for Y[31:1] in this mode"
   z_register:
     function: "32-bit count (unsigned if Y[0]=0, signed if Y[0]=1)"
 
@@ -59,14 +59,20 @@ code_examples:
         pinstart(counter_pin, P_COUNT_RISES | P_PLUS1_B, 0, 1)
         
         repeat
-          net_count := rdpin(counter_pin)        ' Read net count
+          net_count := read_z(counter_pin)       ' Read net count (signed)
           debug("Net count: ", sdec(net_count))
-          
+
           ' Reset counter
           if ina.[0]
             pinclear(counter_pin)
             pinstart(counter_pin, P_COUNT_RISES | P_PLUS1_B, 0, 1)
-      
+
+      PRI read_z(pin) : z
+        ' PASM2 RDPIN keeps all 32 bits of Z, the sign bit included (the Spin2 RDPIN() method returns the C flag in bit 31)
+        org
+          rdpin   z, pin
+        end
+
       DAT
       ' PASM2 single input counter example
         org
@@ -95,17 +101,11 @@ configuration_order:
     force after it, so pinstart() is safe here.
   source: "EF-097 (order-safe Y-before-DIRH bench-measured on one board, one Y value for this mode)"
 
-common_applications:
-  - "Event counting with separate increment/decrement inputs"
-  - "Production line counting (add/reject counters)"
-  - "Parking space occupancy (enter/exit sensors)"
-  - "Resource pool tracking (allocate/free events)"
-
 related_modes:
-  - "Mode %01101: Up/down based on B level at A edge"
-  - "Mode %01111: Count while high (level sensitive)"
-  - "Mode %01011: Quadrature encoder (coordinated counting)"
-  - "Mode %01100: Gated edge counter"
+  - "Mode %01101: Accumulate A-input positive edges with the B input supplying increment (B=1) or decrement (B=0)"
+  - "Mode %01111: Count A-input highs, optionally decrementing on B-input highs"
+  - "Mode %01011: Quadrature encoder"
+  - "Mode %01100: Count A-input positive edges when B-input is high"
 
 configuration_constants:
   mode_constant: "P_COUNT_RISES"
@@ -113,8 +113,8 @@ configuration_constants:
   common_modifiers:
     - "P_PLUS1_B - Use next pin for decrement input"
     - "P_MINUS1_B - Use previous pin for decrement"
-    - "P_INVERT_A / P_INVERT_B - Count negative edges instead"
-    - "P_FILT1_AB - Add filtering for noise immunity"
+    - "P_INVERT_A / P_INVERT_B - Invert the input, so its negative edges are counted"
+    - "P_FILT1_AB - Filter the A and B inputs using the global filt1 settings"
 
 notes:
   - "Y[0]=0: Simple A-input edge counter"
@@ -122,3 +122,11 @@ notes:
   - "A and B inputs count edges independently"
   - "No gating or state dependency between inputs"
   - "Z register signed when Y[0]=1 for negative counts"
+  - "In periodic mode all events get counted across measurements: the accumulator is set to the 0/1/-1 value that would otherwise have been added into it"
+  - "During reset (DIR=0), IN is low and Z is set to the adder value (0/1/-1)"
+  - "The Spin2 example reads the count with inline PASM2 RDPIN, which keeps all 32 bits of Z; the Spin2 RDPIN() method returns the C flag in bit 31, which would replace the count's sign bit unless C is the MSB of Z. Not documented: the C flag of RDPIN in this mode."
+
+sources:
+  - "operation, timing, registers, notes: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%01110: count A-input positive edges, or with Y.[0]=1 increment on A-input positive edge and decrement on B-input positive edge; X period, continuous when zero; periodic accumulator set to the 0/1/-1 adder value; reset Z = adder value) and SMART PINS (C is either a mode-related flag or the MSB of the Z result; %FFF = 101 uses the global filt1 settings)"
+  - "notes (Spin2 RDPIN() bit 31): Parallax Propeller 2 Spin2 Language Documentation v55, smart pin methods (RDPIN (Pin) : Zval, Zval[31] = C flag from RDPIN, other bits are RDPIN data)"
+  - "configuration_order: EF-097"

@@ -6,7 +6,7 @@ encoding:
   c: —
   z: —
   clocks: '4'
-description: 'Jump to D[9:0] in cog/LUT and set SKIPF pattern to D[31:10]. PC = {10''b0,
+description: 'Jump to D[9:0] in cog/LUT and, at the same time, set the SKIPF pattern to D[31:10]. PC = {10''b0,
   D[9:0]}.
 
   '
@@ -16,17 +16,10 @@ timing:
 flags_affected:
   C: No effect
   Z: No effect
-compiler_operand_format:
-  name: operand_l
-  pattern: D/#0..511
-  description: Destination or immediate value 0-511
-  valueType: 26
-compiler_encoding:
-  operandFormat: 26
 syntax_variants:
 - EXECF {#}D
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.153, and its instruction list ('Execute fast; jump to Cog RAM and set SKIPF pattern'); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INSTRUCTION SKIPPING ('The EXECF instruction performs a JMP and a SKIPF at the same time, getting a 10-bit branch address from D[9:0] and a 22-bit skip pattern from D[31:10]')"
 documentation_level: enhanced
 last_updated: '2025-09-19T16:04:16.915391'
 category: Branch
-oneliner: Call+Skip
+oneliner: Jump to cog/LUT and set the SKIPF pattern

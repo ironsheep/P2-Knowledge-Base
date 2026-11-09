@@ -7,7 +7,9 @@ description: >-
   register described by a prior ALTSW instruction. No other bits are modified. Num (0-1)
   identifies a value's individual words, by position, in least-significant word order.
   Syntax 2 is intended for use after an ALTSW instruction, i.e. in a loop to iteratively
-  affect a series of word values within contiguous long registers.
+  affect a series of word values within contiguous long registers. SETWORD {#}Src
+  is the same as SETWORD 0,{#}Src,#0, with the Dest field and Num filled in by the
+  prior ALTSW.
 result: >-
   Src[15:0] is written to word Num (0-1) of Dest, or to another register word described
   by prior ALTSW instruction.
@@ -25,38 +27,36 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1001001 0NI DDDDDDDDD SSSSSSSSS
   write: D
   c: —
   z: —
   clocks: '2'
 - bits: EEEE 1001001 00I 000000000 SSSSSSSSS
-  write: D   1
+  write: D
   c: —
   z: —
   clocks: '2'
 encoding_notes:
-- Dest, and the target word ID, is speciﬁed by a prior ALTSW instruction.
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SETWORD, p.127"
+- Dest, and the target word ID, is specified by a prior ALTSW instruction.
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SETWORD, pp.127-128"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, rows 96-97 (SETWORD D,{#}S,#N: set S[15:0] into word N in D, keeping rest of D same; SETWORD {#}S: set S[15:0] into word established by prior ALTSW instruction; 2 clocks; write D) and rows 110-111 (ALTSW: next D field and N field = D[0] for the subsequent SETWORD)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.38 (SETWORD {#}S and SETWORD D,{#}S,#N, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SETWORD, pp.127-128 (Result line, Dest, Src and Num parameters, both encoding rows 1001001 0NI / 1001001 00I, write D, C and Z none, 2 clocks, footnote that Dest and the target word ID are specified by a prior ALTSW instruction, Related list, the explanation and Num 0-1 in least-significant word order on p.127; syntax 2 after ALTSW on p.128)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), REGISTER INDIRECTION (ALTSW sets the next D field to base+index[9:1] and the next N to index[0]; 'SETWORD S/#' = 'SETWORD 0,S/#,#0'; two of the three fields of the associated instruction are filled in by the ALTxx instruction), and instruction encoding listing (EEEE 1001001 0NI DDDDDDDDD SSSSSSSSS SETWORD D,S/#,#N)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds1set
-  pattern: S/#{,D,#0..1}
-  description: 'Set word: source/immediate, optional destination and word index 0-1'
-  valueType: 10
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 10
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Set a word to new value
 related:
-- ALTSW
-- SETNIB
-- SETBYTE
-- GETNIB
-- GETBYTE
-- GETWORD
-- ROLNIB
-- ROLBYTE
-- ROLWORD
+- language/pasm2/altsw.yaml
+- language/pasm2/setnib.yaml
+- language/pasm2/setbyte.yaml
+- language/pasm2/getnib.yaml
+- language/pasm2/getbyte.yaml
+- language/pasm2/getword.yaml
+- language/pasm2/rolnib.yaml
+- language/pasm2/rolbyte.yaml
+- language/pasm2/rolword.yaml

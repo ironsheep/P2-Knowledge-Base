@@ -25,7 +25,7 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 0000010 CZI DDDDDDDDD SSSSSSSSS
   write: D
   c: last bit shifted out if S[4:0] > 0, else D[0]
@@ -33,15 +33,13 @@ encoding:
   clocks: '2'
 encoding_notes:
 - C = last bit shifted out if Src[4:0] > 0, else C = Dest[0].
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SHR, p.128"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SHR, pp.128-129"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 4 (SHR D,{#}S {WC/WZ/WCZ}: shift right, D = [31:0] of ({32'b0, D[31:0]} >> S[4:0]), C = last bit shifted out if S[4:0] > 0, else D[0]; footnote * Z = (result == 0); 2 clocks; write D)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.38 (SHR D,{#}S {WC/WZ/WCZ}, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SHR, pp.128-129 (Result line, Dest and Src parameters, encoding row 0000010 CZI, write D, C last bit out, Z Result = 0, 2 clocks, footnote C = last bit shifted out if Src[4:0] > 0 else Dest[0], the explanation (new MSBs 0, bit-stream manipulation and unsigned division by a power-of-two, SAR for a signed value) on p.128; the WC rule (effectively result bit -1 if Src is 1-31, Dest[0] if Src is 0) and the WZ rule on p.129)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 0000010 CZI DDDDDDDDD SSSSSSSSS SHR D,S/# {WC/WZ/WCZ})"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 0
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Shift bits right; a.k.a. divide unsigned 32-bit integer by power-of-two

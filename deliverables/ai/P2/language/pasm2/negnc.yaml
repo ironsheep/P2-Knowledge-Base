@@ -29,7 +29,7 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 0110101 CZI DDDDDDDDD SSSSSSSSS
   write: D
   c: Sign of result
@@ -40,15 +40,13 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   c: Sign of result
   z: Result == 0
   clocks: '2'
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, NEGNC, p.103"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, NEGNC, pp.103-104"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, rows 67 and 68 (NEGNC D,{#}S: negate S by !C into D, if C = 0 then D = -S else D = S, C = MSB of result; NEGNC D: alias, negate D by !C, encoding EEEE 0110101 CZ0 DDDDDDDDD DDDDDDDDD; footnote * Z = (result == 0); 2 clocks; write D)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.37 (NEGNC D and NEGNC D,{#}S, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, NEGNC, pp.103-104 (Result line, Dest and Src parameters; both encoding rows 0110101 CZI and CZ0, write D, C flag sign of result, Z flag Result = 0, 2 clocks; Related NEGC, NEGZ, NEGNZ; negation when !C = 1, value left as-is when !C = 0, example 21 becomes -21 and -1,374 becomes 1,374; C set if the result is negative; Z set if the result is zero)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 0110101 CZI DDDDDDDDD SSSSSSSSS NEGNC D,S/# {WC/WZ/WCZ}) and instruction aliases (NEGNC register = NEGNC register,register)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_du
-  pattern: D{,S/#}
-  description: Destination register, optional Source register or immediate (unary/binary)
-  valueType: 3
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 3
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Negate value according to !C

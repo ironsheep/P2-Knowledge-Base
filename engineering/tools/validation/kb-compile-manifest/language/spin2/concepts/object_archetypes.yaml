@@ -8,7 +8,7 @@ blocks:
     wrap: spin2-top
     assumes: [serial.start(3)]
   - at: archetypes[1].template
-    fp: "78b4ddbceb182f5d"
+    fp: "f00836e06ec24219"
     compile: program
   - at: archetypes[2].template
     fp: "81eadabdcafdf2e0"
@@ -33,7 +33,7 @@ blocks:
     wrap: spin2-top
     assumes: [handle_idle()->1/1, handle_connecting()->1/1, handle_connected()->1/1, handle_error()->1/1]
   - at: archetypes[7].template
-    fp: "98052bd7e524689a"
+    fp: "a8e73cc4d7266c69"
     compile: fragment
     wrap: spin2-top
   - at: archetypes[8].object_template
@@ -66,10 +66,10 @@ blocks:
     wrap: spin2-top
     assumes: [cog, worker()->0/0, stack]
   - at: anti_patterns[0].correct
-    fp: "30512ef18ce3d9b1"
+    fp: "ce13d2be0f9f05d2"
     compile: fragment
     wrap: spin2-top
-    assumes: [cog, lock]
+    assumes: [cog_plus_1, lock_plus_1]
   - at: anti_patterns[1].wrong
     fp: "26cabb4458c68cce"
     compile: program
@@ -89,10 +89,10 @@ blocks:
     wrap: spin2-top
     assumes: [worker()->0/0, stack]
   - at: anti_patterns[3].correct
-    fp: "9668c22031569801"
+    fp: "2397c3db293fe42f"
     compile: fragment
     wrap: spin2-top
-    assumes: [cog, worker()->0/0, stack]
+    assumes: [cog_plus_1, worker()->0/0, stack]
   - at: anti_patterns[4].wrong
     fp: "6e5dab4cca097a4a"
     compile: fragment
@@ -103,3 +103,13 @@ blocks:
     compile: fragment
     wrap: spin2-top
     assumes: [STATE_IDLE=con, STATE_RUNNING=con, STATE_ERROR=con, state]
+  - at: anti_patterns[5].wrong
+    fp: "cbf50c6f78e0640c"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [worker()->0/0, stack]
+  - at: anti_patterns[5].correct
+    fp: "ad7573067be6140e"
+    compile: fragment
+    wrap: spin2-top
+    assumes: [worker()->0/0, stack]

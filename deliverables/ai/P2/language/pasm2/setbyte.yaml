@@ -7,7 +7,9 @@ description: >-
   register described by a prior ALTSB instruction. No other bits are modified. Num (0-3)
   identifies a value's individual bytes, by position, in least-significant byte order.
   Syntax 2 is intended for use after an ALTSB instruction, i.e. in a loop to iteratively
-  affect a series of byte values within contiguous long registers.
+  affect a series of byte values within contiguous long registers. SETBYTE {#}Src
+  is the same as SETBYTE 0,{#}Src,#0, with the Dest field and Num filled in by the
+  prior ALTSB.
 result: >-
   Src[7:0] is written to byte Num (0-3) of Dest, or to another register byte described
   by prior ALTSB instruction.
@@ -25,38 +27,36 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1000110 NNI DDDDDDDDD SSSSSSSSS
   write: D
   c: —
   z: —
   clocks: '2'
 - bits: EEEE 1000110 00I 000000000 SSSSSSSSS
-  write: D1
+  write: D
   c: —
   z: —
   clocks: '2'
 encoding_notes:
-- Dest, and the target byte ID, is speciﬁed by a prior ALTSB instruction.
+- Dest, and the target byte ID, is specified by a prior ALTSB instruction.
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SETBYTE, p.124"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, rows 90-91 (SETBYTE D,{#}S,#N: set S[7:0] into byte N in D, keeping rest of D same; SETBYTE {#}S: set S[7:0] into byte established by prior ALTSB instruction; 2 clocks; write D) and rows 106-107 (ALTSB: next D field and N field = D[1:0] for the subsequent SETBYTE)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.38 (SETBYTE {#}S and SETBYTE D,{#}S,#N, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SETBYTE, p.124 (Result line, Dest, Src and Num parameters, both encoding rows 1000110 NNI / 1000110 00I, write D, C and Z none, 2 clocks, footnote that Dest and the target byte ID are specified by a prior ALTSB instruction, Related list, Num 0-3 in least-significant byte order, syntax 2 after ALTSB)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), REGISTER INDIRECTION (ALTSB sets the next D field to base+index[10:2] and the next N to index[1:0]; 'SETBYTE S/#' = 'SETBYTE 0,S/#,#0'; two of the three fields of the associated instruction are filled in by the ALTxx instruction), and instruction encoding listing (EEEE 1000110 NNI DDDDDDDDD SSSSSSSSS SETBYTE D,S/#,#N)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds2set
-  pattern: S/#{,D,#0..3}
-  description: 'Set byte: source/immediate, optional destination and byte index 0-3'
-  valueType: 8
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 8
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Set a byte to new value
 related:
-- ALTSB
-- SETNIB
-- SETWORD
-- GETNIB
-- GETBYTE
-- GETWORD
-- ROLNIB
-- ROLBYTE
-- ROLWORD
+- language/pasm2/altsb.yaml
+- language/pasm2/setnib.yaml
+- language/pasm2/setword.yaml
+- language/pasm2/getnib.yaml
+- language/pasm2/getbyte.yaml
+- language/pasm2/getword.yaml
+- language/pasm2/rolnib.yaml
+- language/pasm2/rolbyte.yaml
+- language/pasm2/rolword.yaml

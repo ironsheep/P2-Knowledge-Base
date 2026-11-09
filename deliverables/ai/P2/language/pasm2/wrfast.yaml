@@ -9,19 +9,20 @@ encoding:
 timing:
   cycles: 2
   type: conditional
-description: Begin new fast hub write via FIFO. D[31] = no wait, D[13:0] = block size
-  in 64-byte units (0 = max), S[19:0] = block start address.
+description: Begin new fast hub write via FIFO. D[31] = no wait, D[13:0] = count of
+  64-byte blocks (0 = no wrapping until the entire 1MB hub map has been sequenced
+  through), S[19:0] = block start address (long-aligned when wrapping).
 flags_affected:
   C: No effect
   Z: No effect
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_ls
-  pattern: D/#,S/#
-  description: 'Two operands: destination/immediate, source/immediate'
-  valueType: 13
-compiler_encoding:
-  operandFormat: 13
+documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST SEQUENTIAL FIFO INTERFACE (operands, no-wait form, WAITX #20 before COGSTOP)"
+notes:
+- "D[13:0] is a count of 64-byte blocks, not an address mask: after that many blocks are written the FIFO wraps to the original start address and reloads the original block count. A block count of 0 means no wrapping until the entire 1MB hub map has been sequenced through."
+- "D and S layout: D[31] = no-wait flag; D[13:0] = %00_0000_0000_0000 for limited writing (no wrap) or %BB_BBBB_BBBB_BBBB for a wrapping block count; S[19:0] = start address, with S[1:0] = %00 when wrapping."
+- "D[31]=0 waits for any previous WRFAST to finish, then reconfigures the FIFO for writing. D[31]=1 does not wait for the FIFO reconfiguration and takes 2 clocks; the code must allow enough clocks before any attempt to write FIFO data."
+- "WRFAST is executed from cog RAM or lookup RAM."
+- "A cog that has been writing to the hub via WRFAST and wants to COGSTOP itself executes WAITX #20 first, to allow time for any lingering FIFO data to be written to the hub."
 last_updated: '2025-09-19T16:04:17.110590'
 category: Hub FIFO
 oneliner: Begin new fast hub write via FIFO

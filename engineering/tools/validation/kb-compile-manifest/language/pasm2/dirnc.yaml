@@ -3,6 +3,6 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: description
-    fp: "853692b295dabde4"
+    fp: "8ed9d66db55bb505"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"

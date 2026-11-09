@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: configuration.fblock.usage
-    fp: "2253592b49d366bf"
+    fp: "1c71628be2915d25"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: programming_patterns[0].code
@@ -17,12 +17,12 @@ blocks:
     wrap: pasm2-dat
     assumes: [hub_dest=con, temp, idx, src0]
   - at: programming_patterns[2].code
-    fp: "b378bcb96f33209f"
+    fp: "a90fe3a21eca2d34"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [buf_size=con, buffer_start=con, data]
+    assumes: [buffer_start=con, data]
   - at: programming_patterns[3].code
-    fp: "8176199d6657b2c1"
+    fp: "6ced806ec951a2a7"
     compile: fragment
     wrap: pasm2-dat
-    assumes: [buf_size=con, buffer_a=con, buffer_b=con, data]
+    assumes: [buffer_a=con, buffer_b=con, data]

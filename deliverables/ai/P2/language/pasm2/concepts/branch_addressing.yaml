@@ -4,16 +4,15 @@ category: control_flow
 description: Branch and jump addressing modes including relative, absolute, and indirect branches
 
 overview: |
-  P2 provides comprehensive branch addressing modes for control flow. Branches can be relative or absolute,
-  immediate or register-based, and can target both cog and hub memory. Understanding branch addressing
-  is critical for control flow, subroutines, and cross-memory execution.
+  Branches can be relative or absolute, immediate or register-based, and can target both cog and hub memory.
 
 addressing_modes:
   relative_immediate:
     syntax: "#label"
-    encoding: "20-bit immediate address with R = 1: PC += A, a signed 20-bit byte offset (a jump to itself assembles with A = $FFFFC, which is -4)"
+    encoding: "20-bit immediate address with R = 1: PC += A, a signed 20-bit byte offset counted from the instruction after the branch"
     range: "±512 KB: a 20-bit signed byte offset"
-    instructions: ["JMP", "CALL", "CALLA", "CALLB", "CALLD"]
+    instructions: ["JMP", "CALL", "CALLA", "CALLB"]
+    calld: "CALLD PA/PB/PTRA/PTRB,#{\\}A has the same 20-bit A field (R = 1: PC += A). In hub execution the CALLD PA field is a byte offset (see offset_units calld wide_form). Not documented: the unit for CALLD PB, PTRA and PTRB, and in cog execution"
     examples:
       - "JMP #forward_label    ' Jump to label (relative)"
       - "CALL #subroutine      ' Call with relative address"
@@ -23,24 +22,96 @@ addressing_modes:
   absolute_immediate:
     syntax: "#\\label"
     encoding: "20-bit absolute address (R = 0)"
-    range: "$00000-$FFFFF (entire hub space)"
+    range: "$00000-$FFFFF (a 20-bit address)"
     instructions: ["JMP", "CALL", "CALLA", "CALLB", "CALLD"]
     examples:
       - "JMP #\\hub_routine      ' Jump to absolute hub address"
       - "CALL #\\$10000          ' Call absolute address"
       - "JMP #cog_routine       ' Jump within cog (relative)"
-    notes: "\\ forces absolute addressing. Crossing between cog and hub is always absolute and is forced by the assembler, so # alone is enough there; @label is the hub address of a label defined under ORG. In a Spin2 object it is the object offset."
+    notes: "\\ forces absolute addressing. Crossing between cog and hub is always absolute and is forced by the assembler, so # alone is enough there; @label is the hub address of a label defined under ORG. In a Spin2 object, ## with a hub symbol (a DAT label outside ORG) resolves against $400, not the object's load address."
 
   register_indirect:
     syntax: "register"
     encoding: "Address from register contents"
     range: "Full 20-bit addressing"
-    instructions: ["JMP", "CALL", "CALLA", "CALLB", "CALLD", "RET"]
+    instructions: ["JMP", "CALL", "CALLA", "CALLB", "CALLD"]
     examples:
       - "JMP vector             ' Jump to address in vector"
       - "CALL routine_ptr       ' Call through pointer"
-      - "RET                    ' Return using stack"
-    notes: "Enables computed jumps and returns"
+    notes: "The address comes from the register's contents"
+
+  stack_return:
+    syntax: "RET"
+    encoding: "No address operand: RET pops the hardware stack entry K (with WC/WZ/WCZ: C = K[31], Z = K[30]; PC = K[19:0])"
+    instructions: ["RET"]
+    source: "P2 Instructions v35 - Rev B/C Silicon, Sheet1 (RET row: Return by popping stack (K))"
+
+  cog_hub_immediate_cases:
+    description: "What the 20-bit immediate JMP assembles to for each of # , #\\ , #@ and #\\@ , written in cog code and in hub code. The example has the cog code (ORG 0) loaded at hub $01000, the cog label cog at cog address 0 and the hub label hub at hub address $02000; the hub code is at $02000. The encoded words are those of the example, whose label positions are as stated."
+    from_cog_code:
+      - "JMP #cog    -> $FD9FFFFC, cog to cog, relative"
+      - "JMP #\\cog   -> $FD800000, cog to cog, forced absolute"
+      - "JMP #@cog   -> $FD801000, cog to hub, always absolute (@cog is the hub address where the cog code is loaded)"
+      - "JMP #\\@cog  -> $FD801000, cog to hub, always absolute"
+      - "JMP #hub, JMP #\\hub, JMP #@hub, JMP #\\@hub -> $FD802000 each, cog to hub, always absolute"
+    from_hub_code:
+      - "JMP #cog    -> $FD800000, hub to cog, always absolute"
+      - "JMP #\\cog   -> $FD800000, hub to cog, always absolute"
+      - "JMP #@cog   -> $FD9FEFF4, hub to hub, relative (the @ turns the cog label into its hub address, so the branch from hub code is hub to hub)"
+      - "JMP #\\@cog  -> $FD801000, hub to hub, forced absolute"
+      - "JMP #hub    -> $FD9FFFEC, hub to hub, relative"
+      - "JMP #\\hub   -> $FD802000, hub to hub, forced absolute"
+      - "JMP #@hub   -> $FD9FFFE4, hub to hub, relative"
+      - "JMP #\\@hub  -> $FD802000, hub to hub, forced absolute"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BRANCH ADDRESSING (the table of cases following 'The cases below illustrate use of the 20-bit immediate-address instructions and \"\\\" and \"@\"': ORGH $01000 / ORG 0 cog code, ORGH $02000 hub code, and the encoded words it lists)"
+
+offset_units:
+  description: "What one count of the branch field means, by form. The unit differs between the forms, and for the 9-bit S field and LOC it differs between cog and hub."
+  relative_immediate_20_bit:
+    syntax: "#label"
+    instructions: ["JMP", "CALL", "CALLA", "CALLB"]
+    field: "20-bit signed offset, counted from the instruction after the branch"
+    unit_in_cog: "bytes"
+    unit_in_hub: "bytes"
+    note: "The same number is stored for the same distance in cog and in hub: 8 bytes back is -8 in both."
+  absolute_immediate:
+    syntax: "#\\label"
+    instructions: ["JMP", "CALL", "CALLA", "CALLB", "CALLD", "LOC"]
+    field: "20-bit address (R = 0: PC = A for the branches; for LOC, the address loaded is A)"
+    unit: "an address"
+  loc_relative:
+    syntax: "LOC PA/PB/PTRA/PTRB,#label"
+    field: "20-bit signed offset (R = 1, address = PC + A)"
+    unit_in_cog: "longs"
+    unit_in_hub: "bytes"
+  s_field_9_bit:
+    syntax: "#label"
+    instructions: ["CALLPA", "CALLPB", "CALLD (D,S form)", "DJZ", "DJNZ", "DJF", "DJNF", "IJZ", "IJNZ", "TJZ", "TJNZ", "TJF", "TJNF", "TJS", "TJNS", "TJV", "Jevent", "JNevent"]
+    field: "9-bit signed S, -256 to +255 instructions from the instruction after the branch"
+    unit_in_cog: "whole instructions"
+    unit_in_hub: "whole instructions, times four (the value is shifted left two bits before it is added to the program counter)"
+  augmented_s_branch:
+    syntax: "##label"
+    instructions: ["DJNZ", "TJZ"]
+    unit: "The ## form assembles an AUGS word plus the instruction, with an 18-bit count of whole instructions in S"
+    backward_djnz: "A backward DJNZ D,##label with a field of -303 ($3FED1), a target 303 longs back, lands on its label in hub execution. In cog execution it misses: the field is added to PC as a positive number and execution goes to hub at PC plus the field ($4_0004 with PC at $133)."
+    write_around: "A near #label (within -256 to +255 instructions) avoids the ##label form. A register holding the target address as S assembles with no AUGS word; that form has been assembled only and has not been run on the board."
+    controls: "A forward DJNZ D,##label one instruction ahead and a near backward DJNZ D,#label each landed on the label in cog and in hub execution."
+    other_s_branches: "Not documented: a backward ##label on any S-branch other than DJNZ. The others share the encoding and have not been run."
+    note: "The ## form assembles an 18-bit field for DJNZ and TJZ. Parallax's documents also give the ##Label form a 20-bit signed offset (-524288 to +524287)."
+  calld:
+    d_s_form:
+      syntax: "CALLD D,#label (9-bit S)"
+      unit_in_cog: "whole instructions"
+      unit_in_hub: "whole instructions, times four"
+      note: "CALLD PA,#label written without \\ to a label within the 9-bit range assembles to this D,S form; to a label beyond that range, in hub code, it assembles to the 20-bit relative form (see wide_form). The PA/PB/PTRA/PTRB form with R = 0 is written with #\\. Not documented: the form assembled for a far label in cog code."
+    wide_form:
+      syntax: "CALLD PA/PB/PTRA/PTRB,#label (20-bit A, R = 1)"
+      unit_in_hub: "bytes, for CALLD PA"
+      unit_elsewhere: "Not documented: the unit in cog execution, and for CALLD PB, PTRA and PTRB"
+      assembler_note: "pnut-ts encodes a far CALLD PA,#label with the distance in instructions, so the word does not land on its label in hub execution: for a target 1006 instructions back (field $FFFF_FC12) execution goes 1006 bytes back."
+      write_around: "A hand-encoded long holding the byte distance lands on its label: long $FE10_0000 | ((label - ($ + 4)) & $F_FFFF). It is the only write-around shown to land."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BRANCH ADDRESSING (the 9-bit S branches step whole instructions, shifted left two bits in hub mode; the 20-bit immediate forms, R = 1 relative and R = 0 absolute) and the instruction-set summary (rel_imm9, rel_imm20, abs_imm20); P2 Instructions v35 - Rev B/C Silicon, Sheet1 (JMP, CALL, CALLA, CALLB, CALLD and LOC A forms); the byte unit of the 20-bit relative forms, longs in cog and bytes in hub for LOC, instructions in cog and times four in hub for DJNZ/TJZ, and the 18-bit augmented field are read from the assembler's output (CP-031, pnut-ts v1.55.10); CALLD D,{#}S is listed with the whole-instruction S branches in the same section; CALLD PA,#label without \\ to a near label assembling to the D,S form: CP-036; to a far hub label assembling to the 20-bit relative form, a register S assembling with no AUGS, and the ## DJNZ field of -303 as a 303-long distance: CP-056; the 20-bit CALLD PA field read as a byte offset in hub execution, the far CALLD PA word's instruction-count field and the hand-encoded byte-offset long: P2 hardware verification, EF-106; backward DJNZ ## in cog and in hub, the forward ## and near controls: P2 hardware verification, EF-107; the ##Label form given as a 20-bit signed offset: Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DJZ / DJNZ, p.74, and the other S-branch entries"
 
 branch_types:
   JMP:
@@ -49,7 +120,7 @@ branch_types:
       - "JMP #label            ' Relative jump"
       - "JMP #\\label           ' Absolute jump"
       - "JMP register          ' Indirect jump"
-      - "JMP #register         ' Jump to cog address"
+      - "JMP #\\$400            ' Absolute jump to a fixed address"
     timing: "JMP/CALL/RET taken: 4 clocks in cog or LUT execution, 13...20 in hub execution; DJNZ/TJZ-family branches: 2 clocks not taken, 4 taken in cog execution (2, or 13...20, in hub execution)"
 
   CALL:
@@ -69,7 +140,7 @@ branch_types:
       - "CALLB #function       ' Push {C, Z, PC} to hub at PTRB++, then jump"
       - "RETA                   ' Return: pop the long at --PTRA"
       - "RETB                   ' Return: pop the long at --PTRB"
-    use_case: "Calls nested deeper than the 8-level hardware stack; the stack lives in hub RAM (set PTRA/PTRB first)"
+    stack_location: "The return address is written to a hub long at PTRA++ (CALLB: PTRB++), so the depth is not limited to the 8-level hardware stack that CALL uses"
 
   CALLD:
     description: "Call with return in register"
@@ -78,16 +149,15 @@ branch_types:
     examples:
       - "CALLD link_reg, #function"
       - "JMP link_reg           ' Return via jump"
-    use_case: "Custom calling conventions"
+    return_location: "The return address is written to the D register, return_reg here"
 
   EXECF:
-    description: "Execute fast - skip instructions then branch"
-    syntax: "EXECF skip_pattern"
-    operation: "Load skip pattern, execute, then branch"
+    description: "Jump to a cog/LUT address and, at the same time, set a SKIPF pattern"
+    syntax: "EXECF {#}D"
+    operation: "PC = {10'b0, D[9:0]} and the SKIPF pattern is set to D[31:10]"
     example: |
       EXECF ##%1010_1010_1010_1010_000000__00_0011_1111
       ' Skip pattern in bits 31:10, branch address in 9:0
-    use_case: "Conditional execution with branch"
 
 special_addressing:
   hub_execution:
@@ -117,10 +187,6 @@ branch_optimization:
 
   alignment:
     - "Hub execution: branching to a hub address that is not long-aligned takes one additional clock"
-    - "Performance: align hot hub-execution branch targets to a long"
-
-  prediction:
-    - "Consider branch-free alternatives (conditional execution, SKIP/SKIPF) for short sequences"
 
 common_patterns:
   loop_control:
@@ -128,7 +194,7 @@ common_patterns:
       .loop
         ' Loop body
         DJNZ counter, #.loop    ' Decrement and jump if not zero
-    description: "Efficient loop with local label counter"
+    description: "Loop with a local-label counter"
     note: "Local labels (.loop) can be reused in different routines. See language/pasm2/concepts/labels.yaml"
 
   subroutine_call:
@@ -143,8 +209,8 @@ common_patterns:
   tail_call:
     code: |
       ' Instead of CALL + RET
-      JMP #other_function    ' Tail call optimization
-    description: "Optimize tail recursion"
+      JMP #other_function    ' Jump in place of CALL + RET
+    description: "A JMP to another routine in place of CALL followed by RET; the routine's own RET returns to the original caller"
 
   conditional_call:
     code: |
@@ -157,29 +223,24 @@ debugging_considerations:
   return_stack:
     - 8-level hardware stack
     - No overflow detection - a 9th push silently discards the oldest entry, so the outermost return is lost
-    - Corruption hard to debug
-    - Consider stack depth carefully
-
-  mode_transitions:
-    - Track cog/hub execution mode
-    - Return addresses encode mode
-    - Mode affects instruction timing
-
-  branch_targets:
-    - Validate addresses at assembly
-    - Runtime validation for indirect
-    - Guard against invalid pointers
 
 best_practices:
-  - Use relative branches for position-independent code
-  - Use CALLA/CALLB when call depth exceeds the 8-level hardware stack (CALL itself costs 4 clocks, CALLA 5...12)
-  - Validate indirect branch targets
-  - Consider REP for small loops
-  - Use SKIPF for conditional sequences
-  - Align hot branch targets
+  - Relative addressing is convenient for relocatable code, or code which can run from either cog RAM or hub RAM
+  - CALLA/CALLB push the return address onto a hub stack at PTRA++/PTRB++, so call depth is not limited to the 8-level hardware stack; CALL takes 4 clocks (cog), CALLA 5...12
+
+hub_symbols: "In a Spin2 object, DAT hub addresses are relative to the object; PASM-only files use absolute addresses. See language/spin2/integration/spin2-pasm2-integration.yaml hub_address_resolution."
 
 sources:
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BRANCH ADDRESSING"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BRANCH ADDRESSING; INSTRUCTION MODES, HUB EXECUTION; hardware stack depth (8 levels)"
+  - "P2 Instructions v35 - Rev B/C Silicon, Sheet1 (JMP, CALL, CALLA, CALLB, CALLD, RET, RETA, RETB, DJNZ, TJZ, LOC: encodings, timing)"
+  - "Stack discard on a 9th push, and full 32-bit entries: EF-094 (real P2 silicon)"
+  - "##label in a DAT block of a Spin2 object resolving against $400: EF-060 (real P2 silicon)"
+  - "P2 Instructions v35 - Rev B/C Silicon, Sheet1 (RET {WC/WZ/WCZ}: C = K[31], Z = K[30], PC = K[19:0]; CALLA and CALLB rows: return address written to the hub long at PTRA++ or PTRB++; CALLD D,{#}S row: return address written to D)"
+  - "The ## form assembling an 18-bit field for DJNZ and TJZ: CP-031 (pnut-ts v1.55.10)"
+  - "P2 hardware verification, EF-106 (far CALLD PA,#label in hub: the field is read as a byte offset; compiler word $FE1F_FC12 lands 1006 bytes back; hand-encoded $FE1F_FFC0 lands on its label)"
+  - "P2 hardware verification, EF-107 (backward DJNZ x,##label, field $0003_FED1: misses in cog, landing in hub at PC plus the field; lands on its label in hub; forward ## and near controls passed)"
+  - "Relative addressing for code that can run from either cog RAM or hub RAM: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BRANCH ADDRESSING"
 
 related:
   - language/pasm2/concepts/labels.yaml
+  - language/spin2/integration/spin2-pasm2-integration.yaml

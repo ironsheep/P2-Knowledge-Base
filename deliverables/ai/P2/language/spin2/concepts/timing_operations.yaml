@@ -19,20 +19,25 @@ description: |
   - Time delays: WAITMS, WAITUS (Spin2), WAITX (PASM2)
   - Time measurement: GETMS, GETSEC (elapsed since boot)
 
-  The counter rolls over approximately every 21.5 seconds at 200 MHz.
+  The 32-bit GETCT value rolls over every 2^32 clocks, about 21.5 seconds at 200 MHz.
 # Source: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48
 
 sources:
+  - "timing_functions: Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (GETCT, POLLCT returns -1 if past or 0 if not past, WAITCT, WAITUS and WAITMS use CLKFREQ and the duration must not exceed $8000_0000 clocks, GETSEC and GETMS since booting from the 64-bit system counter and CLKFREQ, rolling over every 136 years and 49.7 days); the 10.7 s figure is $8000_0000 / 200 MHz, computed"
   - "description (GETCT WC returns the upper 32; quoted 'System counter extended to 64 bits. GETCT WC retrieves upper 32-bits.'): Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status"
   - "description (rated clock sources): Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48"
 
 system_counter:
   description: |
-    The system counter increments every clock cycle continuously from boot. All cogs
-    see the same counter value; it is not affected by cog start/stop. The counter is
-    64 bits wide -- GETCT reads the low 32 bits, GETCT WC the upper 32. The rollover
-    table below is 2^32 / CLKFREQ, computed, and applies to the 32-bit GETCT value.
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status -- \"System counter extended to 64 bits. GETCT WC retrieves upper 32-bits.\" Rollover periods and cycle times below are arithmetic on that width and the rated clock frequencies of the Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48, not figures either source states."
+    The system counter is a 64-bit free-running counter which increments every clock
+    and is cleared on reset. The counter is 64 bits wide -- GETCT reads the low 32
+    bits, GETCT WC the upper 32. The low 32 bits are always current in every cog. The
+    upper 32 bits, and GETMS() and GETSEC() computed from the full 64-bit count, can
+    read short in a cog of a four-cog group (cogs 0-3 or 4-7) that had no running cog
+    at a wrap of the low 32 bits, until that group runs through its next wrap
+    (language/pasm2/getct.yaml silicon_errata). The rollover table below is
+    2^32 / CLKFREQ, computed, and applies to the 32-bit GETCT value.
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status -- \"System counter extended to 64 bits. GETCT WC retrieves upper 32-bits.\" -- and the feature list (64-bit free-running counter which increments every clock, cleared on reset). Stale upper long: P2 hardware verification, EF-068 (the lower long is always current; a group's upper long advances at a wrap only while a cog of that group runs), EF-080 (the lag closes at the group's next wrap); GETMS and GETSEC use the 64-bit counter: Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods. Rollover periods and cycle times below are arithmetic on that width and the rated clock frequencies of the Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48, not figures either source states."
   resolution: "Single clock cycle"
   range: "GETCT alone returns 0 to $FFFF_FFFF (2^32 - 1); the full counter is 64-bit"
 
@@ -49,15 +54,18 @@ system_counter:
     - clock_freq: "300 MHz"
       rollover_period: "14.3 seconds"
       cycle_time: "3.3 ns"
-    - clock_freq: "500 MHz"
-      rollover_period: "8.6 seconds"
-      cycle_time: "2 ns"
+    - clock_freq: "320 MHz"
+      rollover_period: "13.4 seconds"
+      cycle_time: "3.125 ns"
 
   rollover_safe_subtraction: |
     32-bit subtraction naturally handles wraparound correctly.
     If stop < start (wrapped), the result is still correct.
     Example: $0000_0010 - $FFFF_FFF0 = $20 (32 clocks elapsed)
-    This works as long as elapsed time < rollover period.
+    This works as long as elapsed time < rollover period. Spin2's plain comparison
+    operators (<, >=, ...) are signed, so a difference compared with them must
+    also stay below 2^31 counts; the unsigned operators (+<, +>=, ...) compare it
+    across the whole rollover period.
 
 timing_functions:
   - function: "GETCT()"
@@ -67,32 +75,34 @@ timing_functions:
 
   - function: "WAITCT(target)"
     parameters: "target counter value"
-    description: "Block until the System Counter has passed target (MSB of (CT - target) is 0); a target already in the past returns at once"
+    description: "Block until the System Counter has passed target (MSB of (CT - target) is 0)"
     use_for: "Precise delays, periodic execution"
 
   - function: "POLLCT(target)"
-    returns: "Non-zero if the System Counter has passed target"
+    returns: "-1 if the System Counter has gone past target, 0 if not"
     description: "Non-blocking check whether the System Counter has passed target"
     use_for: "Timeout checks, background work while waiting"
 
   - function: "WAITMS(ms)"
     parameters: "milliseconds"
-    description: "Block for specified milliseconds"
+    description: "Block for specified milliseconds; uses CLKFREQ, and the duration must not exceed $8000_0000 clocks (about 10.7 s at 200 MHz)"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (WAITMS uses CLKFREQ; duration must not exceed $8000_0000 clocks); the 10.7 s figure is $8000_0000 / 200 MHz, computed on a clock frequency within the rated sources of Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48"
     use_for: "Simple delays when cycle precision not needed"
 
   - function: "WAITUS(us)"
     parameters: "microseconds"
-    description: "Block for specified microseconds"
+    description: "Block for specified microseconds; uses CLKFREQ, and the duration must not exceed $8000_0000 clocks (about 10.7 s at 200 MHz)"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (WAITUS uses CLKFREQ; duration must not exceed $8000_0000 clocks); the 10.7 s figure is $8000_0000 / 200 MHz, computed on a clock frequency within the rated sources of Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48"
     use_for: "Short delays, microsecond precision"
 
   - function: "GETMS()"
-    returns: "milliseconds since boot"
-    description: "Get elapsed time in milliseconds"
-    use_for: "Timestamps, timeout deadlines"
+    returns: "milliseconds since booting"
+    description: "Get elapsed time in milliseconds; uses the 64-bit system counter and CLKFREQ, rolls over every 49.7 days"
+    use_for: "Timestamps, timeouts measured as elapsed time"
 
   - function: "GETSEC()"
-    returns: "seconds since boot"
-    description: "Get elapsed time in seconds"
+    returns: "seconds since booting"
+    description: "Get elapsed time in seconds; uses the 64-bit system counter and CLKFREQ, rolls over every 136 years"
     use_for: "Uptime, coarse timestamps"
 
 method_selection:
@@ -101,8 +111,8 @@ method_selection:
   description: |
     GETCT, GETMS, and GETSEC return time at three different scales. The choice
     is not just about resolution — each has a different safe-span ceiling driven
-    by 32-bit overflow, and the wrong choice for long timeouts produces silent
-    bugs (the loop appears to "time out immediately" or behaves unpredictably).
+    by 32-bit overflow, and the wrong choice for a long timeout gives a timeout
+    at the wrong time with no error (anti_patterns.getct_long_timeout).
   decision_table:
     - method: "GETCT()"
       resolution: "1 system clock"
@@ -138,12 +148,11 @@ method_selection:
     - "Protocol-level timeouts (100 ms to many seconds): GETMS"
     - "Coarse, long-duration intervals (≥ 1 minute): GETSEC"
     - "When in doubt, GETMS — the 49.7-day headroom is rarely a constraint"
-  incident_note: |
-    A real bug was traced to this exact gap: an agent-authored SD card driver
-    used the GETCT timeout idiom for an SDSC write busy-wait (24-second spec).
-    At 200 MHz the (CLKFREQ/1000)*24_000 product overflows signed 32-bit,
-    and the wrap-aware compare cannot span 24 s. GETMS would have made this
-    straightforward. See anti_patterns.getct_long_timeout below.
+  worked_case: |
+    A 24-second timeout shows the gap. At 200 MHz the (CLKFREQ/1000)*24_000
+    product overflows signed 32-bit, and the wrap-aware compare cannot span
+    24 s. Timed with GETMS, the same timeout is an elapsed-millisecond compare
+    well inside its range. See anti_patterns.getct_long_timeout below.
 
 time_conversions:
   computation_note: "Arithmetic on the 32-bit GETCT value and CLKFREQ. The ~10_737 ms overflow bound at 200 MHz is 2^31 / (CLKFREQ/1000), computed here -- no source states it."
@@ -210,7 +219,7 @@ patterns:
   - pattern: "periodic_execution"
     computation_note: "The interval bound below is 2^31 / (CLKFREQ/1000), computed here, not a figure any source states."
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status, for the counter width"
-    description: "Jitter-free periodic task execution"
+    description: "Periodic task execution with WAITCT targets a fixed period apart, so the work's time does not add to the period"
     key_insight: "Add period to target, don't wait after work"
     constraints: |
       interval_ms must satisfy (clkfreq/1000) * interval_ms < 2^31. At 200 MHz
@@ -228,17 +237,17 @@ patterns:
           waitct(next_tick)    ' Maintains precise spacing
 
   - pattern: "timeout_polling"
-    description: "Wait for condition with timeout"
+    description: "Wait for condition with timeout. The timeout compares elapsed time (now minus start), which stays correct when GETMS rolls over; a deadline compared with >= does not"
     code: |
-      PUB wait_for_response(timeout_ms) : success | deadline
-        deadline := getms() + timeout_ms
+      PUB wait_for_response(timeout_ms) : success | start_ms
+        start_ms := getms()
 
         REPEAT
           IF response_ready()
             RETURN TRUE
-          IF getms() >= deadline
+          IF getms() - start_ms >= timeout_ms
             RETURN FALSE
-          waitms(1)            ' Small delay to avoid busy-waiting
+          waitms(1)            ' Small delay between checks
 
   - pattern: "debouncing"
     description: "Button/switch debounce with delay"
@@ -297,19 +306,21 @@ patterns:
           waitct(next_cycle)
 
   - pattern: "multi_timer"
-    description: "Multiple independent timers"
+    description: "Multiple independent timers, each kept as a start time and a duration so that the expiry test is an elapsed-time compare"
     code: |
       VAR
-        LONG timer_targets[4]
+        LONG timer_starts[4]
+        LONG timer_lengths[4]
         LONG timer_active[4]
 
       PUB start_timer(index, ms)
-        timer_targets[index] := getms() + ms
+        timer_starts[index] := getms()
+        timer_lengths[index] := ms
         timer_active[index] := TRUE
 
       PUB check_timer(index) : expired
         IF timer_active[index]
-          IF getms() >= timer_targets[index]
+          IF getms() - timer_starts[index] >= timer_lengths[index]
             timer_active[index] := FALSE
             expired := TRUE
 
@@ -319,21 +330,21 @@ patterns:
             handle_timer_expired(i)
 
   - pattern: "overhead_compensation"
-    description: "Compensate for execution overhead"
+    description: >-
+      Subtract the clocks of the measurement itself from a measured duration. A loop that
+      adds its period to a WAITCT target (periodic_execution) needs no such
+      compensation: each target is the previous target plus the period, so the time the
+      loop body takes does not add up from one period to the next. Subtracting an
+      overhead from that period instead shortens every period by the overhead.
     code: |
-      PUB precise_interval() | period, deadline, overhead
-        ' Measure overhead once
-        deadline := getct()
-        waitct(deadline)
-        overhead := getct() - deadline
+      PUB measure_work() : cycles | start, overhead
+        ' Clocks of an empty GETCT-to-GETCT measurement
+        start := getct()
+        overhead := getct() - start
 
-        period := clkfreq / 1000       ' 1ms period
-        deadline := getct()
-
-        REPEAT
-          deadline += period - overhead
-          do_work()
-          waitct(deadline)
+        start := getct()
+        do_work()
+        cycles := getct() - start - overhead
 
   - pattern: "time_measurement"
     description: "Measure operation duration"
@@ -347,15 +358,15 @@ patterns:
 anti_patterns:
   - anti_pattern: "busy_waiting"
     severity: "performance"
-    description: "Spinning in loop wastes CPU cycles"
+    description: "A loop that only polls GETMS until a delay passes keeps the cog executing interpreter code for the whole delay; WAITMS(ms) states the same delay in one call. A WAITMS duration must not exceed $8000_0000 clocks (about 10.7 s at 200 MHz); a longer delay is a loop of shorter WAITMS calls"
     wrong: |
-      PUB bad_wait(ms) | deadline
-        deadline := getms() + ms
-        REPEAT WHILE getms() < deadline
-          ' Doing nothing but consuming cycles
+      PUB bad_wait(ms) | start_ms
+        start_ms := getms()
+        REPEAT WHILE getms() - start_ms < ms
+          ' Doing nothing but polling
     correct: |
       PUB good_wait(ms)
-        waitms(ms)
+        waitms(ms)                   ' duration must not exceed $8000_0000 clocks
 
   - anti_pattern: "ignoring_rollover"
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), Design Status, for the counter width; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, AC Characteristics, p.48, for the rated frequencies; every quantity in this block is arithmetic on the 32-bit GETCT value and CLKFREQ, and no source states these bounds"
@@ -381,24 +392,25 @@ anti_patterns:
       Using GETCT for a timeout that may exceed 2^31 cycles. At 200 MHz
       that is ~10.7 s; at 250 MHz, ~8.6 s. The (clkfreq/divisor)*value
       deadline calculation overflows signed 32-bit, and the wrap-aware
-      compare cannot span the elapsed time. The loop appears to time out
-      immediately or behave unpredictably. Discovered via real incident:
-      agent-authored SD driver used this idiom for a 24-second SDSC
-      write busy-wait. See method_selection above for the full rule.
+      compare cannot span the elapsed time. A product between 2^31 and
+      2^32 makes the compare false at once, so the loop times out
+      immediately; a product past 2^32 wraps, and at 200 MHz a
+      24-second timeout (4,800,000,000 clocks) becomes 505,032,704 clocks,
+      about 2.5 s. See method_selection above for the full rule.
     wrong: |
       PUB sd_wait_write_complete() : status | timeout
         ' BROKEN at 200 MHz:
         ' (clkfreq/1000) * 24_000 = 200_000 * 24_000 = 4.8e9, overflows signed 32-bit
-        timeout := getct() + (clkfreq / 1000) * 24_000   ' 24s SDSC spec
+        timeout := getct() + (clkfreq / 1000) * 24_000   ' 24-second timeout
         REPEAT WHILE (getct() - timeout) < 0
           IF sd_busy_released()
             RETURN SD_OK
         RETURN ERR_TIMEOUT
     correct: |
-      PUB sd_wait_write_complete() : status | timeout_ms
-        ' GETMS handles multi-second timeouts cleanly (49.7-day wrap)
-        timeout_ms := getms() + 24_000                    ' 24s SDSC spec
-        REPEAT WHILE getms() < timeout_ms
+      PUB sd_wait_write_complete() : status | start_ms
+        ' GETMS times multi-second timeouts as elapsed milliseconds (49.7-day wrap)
+        start_ms := getms()
+        REPEAT WHILE getms() - start_ms < 24_000          ' 24-second timeout
           IF sd_busy_released()
             RETURN SD_OK
         RETURN ERR_TIMEOUT
@@ -427,11 +439,11 @@ anti_patterns:
         cycles := clkfreq / 1_000_000 * us  ' May truncate significantly
     correct: |
       PUB better_us_delay(us) | cycles
-        cycles := MULDIV64(clkfreq, us, 1_000_000)  ' full precision, no overflow
+        cycles := MULDIV64(clkfreq, us, 1_000_000)  ' 64-bit product, divided once
 
-      ' Or use library functions
+      ' Or use the built-in method
       PUB best_us_delay(us)
-        waitus(us)                   ' Handles precision internally
+        waitus(us)                   ' uses CLKFREQ; duration must not exceed $8000_0000 clocks
 
   - anti_pattern: "blocking_critical_code"
     severity: "design"
@@ -444,7 +456,7 @@ anti_patterns:
     correct: |
       VAR
         LONG sensor_state
-        LONG sensor_deadline
+        LONG sensor_start_ms
 
       CON
         IDLE = 0
@@ -453,24 +465,24 @@ anti_patterns:
 
       PUB start_sensor_read()
         request_reading()
-        sensor_deadline := getms() + 100
+        sensor_start_ms := getms()
         sensor_state := WAITING
 
       PUB check_sensor_read() : is_ready
         IF sensor_state == WAITING
-          IF getms() >= sensor_deadline
+          IF getms() - sensor_start_ms >= 100
             sensor_state := READY
-            is_ready := TRUE
+        is_ready := sensor_state == READY
 
 notes:
   - "GETCT resolution is single clock cycle"
-  - "32-bit subtraction handles rollover correctly"
-  - "WAITMS/WAITUS use CLKFREQ internally for accuracy"
-  - "All cogs share the same system counter"
+  - "32-bit subtraction gives the elapsed count across a rollover, for an interval shorter than the rollover period; compare the difference, not two time values"
+  - "WAITMS/WAITUS use CLKFREQ; a duration must not exceed $8000_0000 clocks"
+  - "The low 32 bits of the system counter (GETCT) read the same in every cog; the upper 32 bits can read short in one four-cog group (system_counter)"
   - "Spin2 interpreter adds overhead to all operations"
   - "Use WAITCT for cycle-accurate timing"
-  - "Use GETMS/GETSEC for timestamps and deadlines"
-  - "Hardware smart pins often better than software timing"
+  - "Use GETMS/GETSEC for timestamps and timeouts measured as elapsed time"
+  - "Smart pin modes time pin events in hardware (architecture/smart_pins.yaml)"
 
 related:
   - language/spin2/methods/getct.yaml

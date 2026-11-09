@@ -7,17 +7,17 @@ encoding:
   z: —
   clocks: '2 or WRFAST finish + 10...17'
 timing:
-  cycles: 2
-  type: fixed
-description: 'Begin new fast hub read via FIFO. D[31] = no wait, D[13:0] = block size
-  in 64-byte units (0 = max), S[19:0] = block start address. The FIFO then reads hub
+  cycles: "2 (no-wait form) or WRFAST finish + 10...17 (waiting form)"
+  type: variable
+description: 'Begin new fast hub read via FIFO. D[31] = no wait, D[13:0] = count of
+  64-byte blocks (0 = no wrapping until the entire 1MB hub map has been sequenced through), S[19:0] = block start address (long-aligned when wrapping). The FIFO then reads hub
   sequentially and refills in the background; the cog takes the data with
   RFBYTE/RFWORD/RFLONG, or the streamer consumes it.'
 flags_affected:
   C: No effect
   Z: No effect
 documentation_level: comprehensive
-documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST SEQUENTIAL FIFO INTERFACE (waiting and no-wait RDFAST forms); hardware-verified on Rev C silicon: the 10-17 clock waiting form and the 8-15 clock no-wait first-read window (EF-073); the 16-clock spacing and the read and write widths covered (EF-074, EF-077, EF-084, EF-086, EF-087, EF-088; spacing tested with WAITX and NOPs only)"
+documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), FAST SEQUENTIAL FIFO INTERFACE (waiting and no-wait RDFAST forms); Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.154 (RDFAST clocks: 2 or WRFAST finish + 10...17); hardware-verified on Rev C silicon: the 10-17 clock waiting form and the 8-15 clock no-wait first-read window (EF-073); the 16-clock spacing and the read and write widths covered (EF-074, EF-077, EF-084, EF-086, EF-087, EF-088; spacing tested with WAITX and NOPs only)"
 examples:
 - name: Fast Checksum Calculation
   description: Verify application checksum by summing FIFO-read longs
@@ -53,18 +53,18 @@ related_instructions:
 - FBLOCK: Set the next start address and 64-byte block count, taken when the current blocks are fully read (2 clocks, never waits)
 notes:
 - "D[31]=0 (waiting form): waits for any previous WRFAST to finish, then until the FIFO has begun receiving hub data, so the next instruction can read it; it takes 10-17 clocks."
-- "D[31]=1 (no-wait form): takes 2 clocks; the documentation requires 'a sufficient number of clocks' before reading FIFO data. The first correct RFxxxx read comes 8-15 clocks after the RDFAST starts, by hub alignment; an earlier read returns $0000_0000 with no error. Allow at least 15 clocks (e.g. WAITX #11 directly after it)."
+- "D[31]=1 (no-wait form): takes 2 clocks; code must allow a sufficient number of clocks before reading FIFO data. The first correct RFxxxx read comes 8-15 clocks after the RDFAST starts, by hub alignment; an earlier read returns $0000_0000 with no error. A read from 15 clocks after the RDFAST starts (WAITX #11 directly after it) returns the new data in every hub alignment."
 - "After a no-wait RDFAST, start no hub instruction (RDxxxx, WRxxxx, SETQ block, another RDFAST) for 16 clocks -- see silicon_errata.no_wait_rdfast_releases_next_hub_op. A no-wait WRFAST has no such effect."
-- Block size is in 64-byte units; 0 means maximum (16384 blocks = 262,144 longs)
-- FIFO automatically wraps at block boundary
-- Critical for high-throughput data processing
+- "D[13:0] is a count of 64-byte blocks, not an address mask: after that many blocks are read the FIFO wraps to the original start address and reloads the original block count. A block count of 0 means no wrapping until the entire 1MB hub map has been sequenced through."
+- "Wrapping requires a long-aligned start address (S ends in %00), since there is no extra cycle in which to read a portion of a long in an extra hub RAM slice."
+- "D and S layout: D[31] = no-wait flag; D[13:0] = %00_0000_0000_0000 for limited reading (no wrap) or %BB_BBBB_BBBB_BBBB for a wrapping block count; S[19:0] = start address, with S[1:0] = %00 when wrapping."
+- "RDFAST is executed from cog RAM or lookup RAM; the FIFO serves one of hub execution, streamer use or software use at a time."
 
 silicon_errata:
   no_wait_rdfast_releases_next_hub_op:
-    erratum: "E7"
     condition: "A hub instruction started fewer than 16 clocks after the start of a no-wait RDFAST (D[31]=1), while it still waits for its hub slot. Cog execution (hub execution cannot use RDFAST)."
-    effect: "It can complete before its own hub access (43 of 64 hub alignments at the next instruction; none from 16 clocks): RDBYTE/RDWORD/RDLONG return the PREVIOUS hub read's data (byte/word at their own offset) with that value's C/Z, and PTRA++ still steps; WRBYTE/WRWORD/WRLONG is lost if a hub read follows at once; a SETQ block RDLONG writes one wrong long, leaves the rest unwritten and can overwrite cog registers outside its destination, or the cog does not finish; a blocking RDFAST issued 8-15 clocks after it takes 2 clocks without waiting and the next RFLONG returns $0000_0000. Nothing flags any of these."
-    workaround: "Rule at each use: use the waiting form (D[31]=0), or start the next hub instruction at least 16 clocks after the no-wait RDFAST starts -- e.g. WAITX #12 directly after it (2 + 14 = 16 clocks), or 7 two-clock non-hub instructions (a SETQ counts as one). The waiting form and the 16-clock spacing hold for every read and write width, SETQ block reads and a following RDFAST."
+    effect: "It can complete before its own hub access (43 of 64 hub alignments at the next instruction; none from 16 clocks): RDBYTE/RDWORD/RDLONG return the previous hub read's data (byte/word at their own offset) with that value's C/Z, and PTRA++ still steps; WRBYTE/WRWORD/WRLONG is lost if a hub read follows at once; a SETQ block RDLONG writes one wrong long, leaves the rest unwritten and can overwrite cog registers outside its destination, or the cog does not finish; a blocking RDFAST issued 8-15 clocks after it takes 2 clocks without waiting and the next RFLONG returns $0000_0000. Nothing flags any of these."
+    workaround: "Use the waiting form (D[31]=0), or start the next hub instruction at least 16 clocks after the no-wait RDFAST starts -- e.g. WAITX #12 directly after it, or 7 two-clock non-hub instructions (a SETQ counts as one). The waiting form and the 16-clock spacing hold for every read and write width, SETQ block reads and a following RDFAST."
     not_affected: "A no-wait WRFAST releases nothing. A blocking first RDFAST removes the RDFAST-after-RDFAST case."
     untested: "RETA and other hub-stack instructions, WMLONG, SETQ2 block reads, SETQ block writes, an interrupt inside the window, the streamer."
     source: "Hardware-verified on Rev C silicon, 200 MHz: EF-074, EF-077, EF-084, EF-086, EF-087, EF-088. Not listed in Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS."
@@ -72,34 +72,23 @@ silicon_errata:
 streamer_pairing:
   rule: |
     Use RDFAST before any streamer command that moves data from hub
-    memory OUT to pins (e.g., X_RFBYTE_*, X_RFLONG_* modes). The FIFO
+    memory out to pins (e.g., X_RFBYTE_*, X_RFLONG_* modes). The FIFO
     pre-fetches hub data for the streamer to consume.
   direction_from_cogs_perspective: "RDFAST = 'I, the cog, am about to read from hub' — and yes, the streamer/FIFO is the agent doing that reading"
   paired_with: language/pasm2/wrfast.yaml
   verb_clarification: |
-    The verb names can mislead. From the COG's perspective, RDFAST means
+    The verb names can mislead. From the cog's perspective, RDFAST means
     "set up the FIFO so reads-from-hub will be fast" — which serves any
-    streaming OUTPUT operation (hub → FIFO → streamer → pin). WRFAST
-    similarly sets up writes-to-hub, which serves streaming INPUT
+    streaming output operation (hub → FIFO → streamer → pin). WRFAST
+    similarly sets up writes-to-hub, which serves streaming input
     (pin → streamer → FIFO → hub). The streamer's direction is the
-    INVERSE of the verb's apparent direction.
+    inverse of the verb's apparent direction.
   source: "Parallax SPI Flash Programmer and Boot Loader v51, Programmer, Get ready to program flash (RDFAST #0,#@loader, then the streamer outputs hub data to spi_di)"
-compiler_operand_format:
-  name: operand_ls
-  pattern: D/#,S/#
-  description: 'Two operands: destination/immediate, source/immediate'
-  valueType: 13
-compiler_encoding:
-  operandFormat: 13
 last_updated: '2025-09-19T16:04:17.018932'
 category: Hub FIFO
 oneliner: Begin new fast hub read via FIFO
 aliases:
 - no-wait RDFAST
-- RDFAST erratum E7
-- erratum E7
-- P2 erratum E7
-- E7 erratum
 - After a No-Wait RDFAST, the Next Hub Instruction Can Complete Early
 - RDLONG returns stale value after RDFAST
 - WRLONG lost after RDFAST

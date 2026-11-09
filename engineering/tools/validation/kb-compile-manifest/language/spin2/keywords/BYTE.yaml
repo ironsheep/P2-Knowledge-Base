@@ -10,7 +10,7 @@ blocks:
     fp: "fd93be0d48b4c9e6"
     compile: program
   - at: description
-    fp: "7393d1c86baabe5c"
+    fp: "9518384d2eb0ac3b"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: usage_contexts[2].example

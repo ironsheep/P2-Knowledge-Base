@@ -23,11 +23,11 @@ blocks:
     compile: not-code
     reason: "value gloss (a number or field value followed by its meaning), not a statement"
   - at: spin2_complete
-    fp: "e4855f0cde378bc6"
+    fp: "a77d94f5a4a61316"
     compile: program
   - at: pasm2_complete
-    fp: "8e00dfe0ad5ddfc3"
+    fp: "f903fcc7eb208512"
     compile: program
   - at: spin2_inline
-    fp: "aa19dc8ad4dcbafc"
+    fp: "861b82fc7a64fc2e"
     compile: program

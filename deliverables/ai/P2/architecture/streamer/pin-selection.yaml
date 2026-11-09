@@ -1,10 +1,9 @@
 # Pin Selection and Control
-# D[22:20] pin group; D[19:17] sub-pin selection (D[16] is the %a alternate-bit-order bit, NOT part of the sub-pin field — the whole pin number is D[22:17])
+# D[22:20] pin group; D[19:17] low-order %p bits for modes of fewer than 8 pins; D[16] is the %a alternate-bit-order bit where a mode has one
 #
-# NOT a definition home for any constant. Per-constant definitions live in
-# language/spin2/symbols/streamer-symbols.yaml and
-# language/spin2/symbols/spin2-builtin-symbols-complete.yaml. This file names an
-# X_* constant only as a VALUE or in prose, never as a defining key.
+# Per-constant definitions are in language/spin2/symbols/streamer-symbols.yaml and
+# language/spin2/symbols/spin2-builtin-symbols-complete.yaml. X_* constants appear
+# here as values and in prose.
 
 component: streamer_pins
 description: Pin group selection via %ppp field and sub-pin selection
@@ -66,37 +65,37 @@ pin_groups:
 
 # Sub-pin selection (for <8 pin modes)
 sub_pin_selection:
-  field: "D[19:17], the low three bits of the six-bit pin number in D[22:17]"
+  field: "D[19:17], the low-order %p bits of modes that involve fewer than 8 pins"
   rule: |
-    The pin number is ONE six-bit field spread across D[22:17]. D[22:20] selects the
-    8-pin group ("%ppp ... in 8-pin increments"); D[19:17] resolves the pin within
-    that group. So the whole field is just `pin << 17`, and D[19:17] = pin & 7.
+    D[22:20] selects the pin group in 8-pin increments. "For modes which involve less
+    than 8 pins, lower-order %p bit(s) in D[19:19..17] are used to further resolve the
+    pin number(s)." A 1-pin mode's pin field spans D[22:17]; an 8-pin mode takes its
+    group from D[22:20] in 8-pin steps.
 
-    How many of those three bits a mode leaves free is what changes with the pin
-    width, because the mode template occupies the rest. Read the per-mode template
-    off architecture/streamer/modes-reference.yaml's d_19_16 column: a `p` is yours, a `0`/`1` is the
-    mode's.
+    The per-mode template is the d_19_16 column of
+    architecture/streamer/modes-reference.yaml: a `p` marks a pin bit, a `0`/`1` marks
+    a bit the mode template fixes.
   bits_free_by_width:
     - width: "1 pin"
       template: "%pppa"
       free_bits: "D[19:17]"
-      base_must_be: "any pin"
+      base_alignment: "See pin_base_encoding.alignment_rule"
     - width: "2 pins"
-      template: "%pp0a"
-      free_bits: "D[19:18] -- D[17] is a fixed 0"
-      base_must_be: "a multiple of 2; the mode captures/drives base and base+1"
+      template: "%pp0a (2-pin + 2-DAC1) and %pp1a (2-pin + 1-DAC2)"
+      free_bits: "D[19:18]; D[17] is 0 in the %pp0a template and 1 in the %pp1a template"
+      base_alignment: "See pin_base_encoding.alignment_rule"
     - width: "4 pins"
-      template: "%p00a"
-      free_bits: "D[19] -- D[18:17] are fixed 0"
-      base_must_be: "a multiple of 4; the mode covers base..base+3"
+      template: "%p00a (4-pin + 4-DAC1), %p01a (4-pin + 2-DAC2) and %p10a (4-pin + 1-DAC4)"
+      free_bits: "D[19]; D[18:17] are 00, 01 or 10 according to the template"
+      base_alignment: "See pin_base_encoding.alignment_rule"
     - width: "8 pins and wider"
-      template: "all four D[19:16] bits are fixed by the mode"
-      free_bits: "none"
-      base_must_be: "a multiple of 8 -- the group select D[22:20] is the ONLY pin field"
-  worked_1_pin_mapping:
-    note: "The 1-pin case is the only width where all three bits are free, so it is
-      the one that can be tabulated without a mode caveat. Offsets are from the
-      group's base pin, which is D[22:20] * 8."
+      template: "In the 8-pin and wider pin and DAC modes, D[19:16] is fixed by the mode template. Other mode groups carry fields there: bbbb (the LUT base) in the immediate-to-LUT modes, %a in D[16] in the RFLONG-to-LUT modes, and a %p bit in D[19] in the DDS/Goertzel modes; each mode's template is in architecture/streamer/modes-reference.yaml (d_19_16)."
+      free_bits: "none in the 8-pin and wider pin and DAC modes"
+      base_alignment: "See pin_base_encoding.alignment_rule"
+  one_pin_mapping:
+    note: "In the 1-pin template %pppa, D[19:17] are all pin bits. Offsets are from the
+      lowest pin of the groups %000..%100 in pin_groups.groups. Not documented: the
+      offset order within the wrap-around groups %101..%111."
     "%000": "group base + 0"
     "%001": "group base + 1"
     "%010": "group base + 2"
@@ -105,10 +104,14 @@ sub_pin_selection:
     "%101": "group base + 5"
     "%110": "group base + 6"
     "%111": "group base + 7"
-  what_a_misaligned_base_does: "It does not error and it does not round. The stray low
-    bits land in D[19:16], which is the MODE field -- see pin_base_encoding below and
+  what_a_misaligned_base_does: "In a 2-pin, 4-pin, 8-pin or wider mode, the low bits of a
+    base that does not meet pin_base_encoding.alignment_rule fall in D[19:17], where the
+    mode template holds its fixed bits. Composed with `|` they OR into those bits; composed
+    with `+` they add into them and can carry into D[22:20]. Either way the word can select
+    a different mode: an odd 2-pin base turns %pp0a (2-pin + 2-DAC1) into %pp1a (2-pin +
+    1-DAC2). Both composition forms assemble; see pin_base_encoding below and
     architecture/streamer/modes-reference.yaml field_notation_caveat."
-  source: "EF-105 (2-pin and 4-pin capture at every base in P32..P47). EF-065, EF-059 (misaligned-base hazard bench-proven twice, in two different mode families). Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER: \"In every mode,
+  source: "EF-105 (2-pin captures at each base in P32..P46, pairs 0 to 7, and 4-pin captures at the bases P32, P36, P40 and P44). EF-065, EF-059 (misaligned-base hazard bench-proven twice, in two different mode families). Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER: \"In every mode,
     the three %ppp bits in D[22:20] select the pin group, in 8-pin increments\" and \"For
     modes which involve less than 8 pins, lower-order %p bit(s) in D[19:19..17] are
     used to further resolve the pin number(s)\". Per-width templates from the
@@ -125,7 +128,7 @@ enable_control:
   
   output_modes:
     bit_name: "%e"
-    value_0: "Pin output disabled (DACs only)"
+    value_0: "Pin output disabled"
     value_1: "Pin output enabled"
     symbol_0: X_PINS_OFF
     symbol_1: X_PINS_ON
@@ -133,25 +136,24 @@ enable_control:
       streamer's pin data is OR'd \"with {OUTB, OUTA} to produce the final 64 pin
       output states on each clock for the cog. For these modes, %e in D[23] must be
       '1' to enable pin output.\""
-    dir_is_still_required: "%e enables the streamer's OUT contribution; it does NOT
-      enable the pin's output driver. DIR still gates that, so a streamer pin drives
-      nothing until DIR is raised. With DIR high and OUT = 0, the streamer's pin
-      data alone drives the pin."
+    dir_is_still_required: "%e enables the streamer's contribution to the pin's OUT
+      side. A pin's output enable is controlled by its DIR bit, so the pin drives when
+      DIR is high. In the tested X_PINS_ON command, DIR low left the pin undriven,
+      and DIR high with OUT = 0 drove it."
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, for the
-      OR rule and the %e requirement; EF-062 for the DIR result (one streamer
-      command run twice, differing only in DIR: 4 of 8 pins with DIR low, 8 of 8 with
-      DIRH, against an 8-of-8 plain-drive control; the DIR-high leg started from OUT = 0)."
+      OR rule and the %e requirement; EF-062 for the DIR result (one
+      streamer command run twice, differing only in DIR: 4 of 8 pins with DIR low, a
+      constant readback against an alternating expectation, and 8 of 8 with DIRH,
+      against an 8-of-8 plain-drive control; the DIR-high leg started from OUT = 0)."
 
   input_modes:
     bit_name: "%w"
-    value_0: "WRFAST disabled (DACs only)"
+    value_0: "WRFAST disabled"
     value_1: "WRFAST enabled"
     symbol_0: X_WRITE_OFF
     symbol_1: X_WRITE_ON
-    # WHAT IS CAPTURED, AND FROM WHERE. The source is {INB, INA}, which decides
-    # whether a capture reads traffic or a smart pin's handshake.
-    what_is_read: "{INB, INA} -- the cog's IN registers, not the pins' raw pads.
-      \"Initially, and on each subsequent NCO rollover, 1/2/4/8/16/32 pins
+    # Capture source: {INB, INA}
+    what_is_read: "{INB, INA}. \"Initially, and on each subsequent NCO rollover, 1/2/4/8/16/32 pins
       are read from {INB, INA} and X3, X2, X1, and X0 are updated using the read data.\""
     widths: "1, 2, 4, 8, 16 or 32 pins, set by the mode -- see
       architecture/streamer/modes-reference.yaml, the %1100..%1111 capture block."
@@ -160,26 +162,24 @@ enable_control:
       three is used is fixed by the mode; the mode symbol names it (…_WFBYTE,
       …_WFWORD, …_WFLONG)."
     accrual_rule: "\"In the case of 1/2/4-pin modes, a WFBYTE will be done
-      each time 8 bits of pin data accrue.\" So a 1-pin mode writes one byte per 8
-      NCO rollovers, a 2-pin mode per 4, a 4-pin mode per 2 -- samples pack into the
-      byte, they are not one byte each."
+      each time 8 bits of pin data accrue.\""
     bit_order_within_the_byte: "bottom-first by default; the %a bit in D[16] reorders
       to top-first. See alt_bit_order below."
-    prerequisite: "A WRFAST must have been executed beforehand, from cog RAM.
+    prerequisite: "A WRFAST must have been executed beforehand, from cog or LUT RAM (during hub execution the FIFO cannot be used for anything else).
       \"For WRFAST modes, it is necessary to do a WRFAST sometime beforehand,
       to ensure that the hub RAM FIFO is ready to receive data.\" WRFAST's D operand is
       the block count (0 = no wrapping) and its S operand is the hub start address."
-    what_this_does_NOT_capture: "the logic level of any pin that is running a smart-pin
-      mode. On such a pin IN is the smart pin's event flag, so the capture records
-      ready/done pulses instead of the waveform. This is not a corner case -- it is the
-      normal outcome of pointing the capture path at a working bus. The mechanism, and
+    smart_pin_lane_content: "On a pin that is running a smart-pin
+      mode, IN is the smart pin's event flag, so the capture records
+      ready/done pulses. The mechanism, and
       the neighbour-routing composition that gets the waveform instead, are in
       architecture/streamer/pin-capture.yaml; the IN rule itself is in
       architecture/smart_pins.yaml in_signal_semantics."
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, Pins => DACs/WRFAST
       (the read source, the widths, the %w rule and the accrual rule), the %w statement and
       the bit-order rule in STREAMER, and the WRFAST prerequisite with the WRFAST operand
-      definitions in HUB RAM, FAST SEQUENTIAL FIFO INTERFACE."
+      definitions in HUB RAM, FAST SEQUENTIAL FIFO INTERFACE; the hub-execution limit in
+      INSTRUCTION MODES, HUB EXECUTION."
 
 # Alternate bit order
 alt_bit_order:
@@ -189,52 +189,54 @@ alt_bit_order:
   values:
     - value: "0"
       symbol: X_ALT_OFF
-      order: "LSB first (default)"
+      order: "bottom-first within each byte (default)"
       
     - value: "1"
       symbol: X_ALT_ON
-      order: "MSB first"
+      order: "top-first within each byte"
       
-  use_case: "Use X_ALT_ON for MSB-first SPI *within the 1/2/4-bit modes* — the scope on the line above is the whole rule, and this recommendation does not reach past it."
-  scope_warning: |
-    The %a bit reorders bits WITHIN a sub-byte group, so it has an effect only in the
-    1-, 2- and 4-bit modes. An 8-bit-per-transfer SPI capture is NOT one of those: a
-    whole byte per transfer has no sub-byte grouping to reorder, so X_ALT_ON does not
-    make it MSB-first. Reading the use_case without its scope is how an 8-bit SPI
-    capture gets built on a bit that does nothing to it.
-  what_to_do_in_8_bit_modes: |
-    Reorder the byte after capture (REV / MOVBYTS), or select a mode whose grouping the
-    %a bit actually reaches. Which of those two is cheaper in a given pipeline is not
-    documented: no Parallax document compares them.
+  use_case: "The flash loader's 1-pin SPI output and input modes set %a for bytes-msb-first transfers ($4081_0008, $8081_0800 and $C081_0000, each + pin<<17)."
+  scope: |
+    Some modes that shift data have the %a bit in D[16]. The modes whose D[19:16] template
+    ends in an a are the 1, 2 and 4-bit modes and the RFLONG 1/2/4-bit LUT modes; each
+    mode's template is in the d_19_16 column of architecture/streamer/modes-reference.yaml.
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER (the bottom-first and %a sentence; the mode table's D[19:16] templates); Parallax SPI Flash Programmer and Boot Loader v51, Data (bmode, rmode, wmode: 'bytes-msb-first')"
 
 # Pin base calculation
 pin_base_encoding:
-  description: "Pin base is encoded in D[22:17]: D[22:20] is the 8-pin group,
-    D[19:17] resolves within it. How many of D[19:17] a mode leaves free depends on
-    the pin width -- see sub_pin_selection.bits_free_by_width above."
+  description: "D[22:20] selects the pin group in 8-pin increments; in modes of fewer
+    than 8 pins, low-order %p bits in D[19:17] further resolve the pin number. How many
+    of D[19:17] a mode leaves free depends on the pin width -- see
+    sub_pin_selection.bits_free_by_width above."
   formula: "pin_base << 17"
-  alignment_rule: "pin_base must be a multiple of the mode's pin width: any pin for
-    1-pin modes, even for 2-pin, a multiple of 4 for 4-pin, a multiple of 8 for 8-pin
-    and wider."
-  composition_rule: "Compose the pin base with `|`, and only after checking the
-    alignment rule. `|` cannot carry, so a misaligned base is at worst lost rather
-    than turned into a different mode -- but LOST IS ALSO SILENT, so `|` is the safer
-    operator and not a safe one."
+  source: "alignment_rule: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER (the %ppp bits in D[22:20] select the pin group in 8-pin increments; for modes of fewer than 8 pins, lower-order %p bits in D[19:17] further resolve the pin number); Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Streamer Modes (the %PPPA, %PP0A, %PP1A, %P00A, %P01A and %P10A templates); EF-105 (2-pin captures at the even bases P32..P46 and 4-pin captures at P32, P36, P40 and P44 landed on their pins)"
+  alignment_rule: "The mode template sets which of D[19:17] are pin bits, so it sets the
+    base alignment. 1-pin modes (%pppa): D[22:17] all carry the pin, so any pin is a base.
+    2-pin modes (%pp0a, %pp1a): the pin bits stop at D[18] and D[17] is fixed, so the base
+    is an even pin. 4-pin modes (%p00a, %p01a, %p10a): the pin bits stop at D[19] and
+    D[18:17] are fixed, so the base is a multiple of 4. 8 pins and wider: D[22:20] selects
+    the pin group in 8-pin increments, so the base is a multiple of 8; a 32-pin DVI base is
+    declared as hdmi_base = 16 with the comment 'must be a multiple of 8'. A base that does
+    not meet its width's alignment puts its low bits on the template's fixed bits
+    (what_a_misaligned_base_does)."
+  composition_rule: "For X_IMM_4X8_1DAC8 + X_PINS_ON + 20<<17, the `+` carries bit 19
+    into D[19:16] (template %1110 becomes %0110, X_IMM_4X8_4DAC2) and sets D[22:20] to
+    %011 (P24..P31). The same expression composed with `|` instead of `+` gives the
+    word of base 16."
   example: |
-    ' 8-pin mode. Base MUST be a multiple of 8; 16 is, 20 is not.
+    ' 8-pin mode, base pin 16 (D[22:20] = %010)
     mode := X_RFBYTE_8P_1DAC8 | X_PINS_ON | (16<<17) | count
   what_goes_wrong_at_an_unaligned_base:
     with_plus: "`X_RFBYTE_8P_1DAC8 | X_PINS_ON + 20<<17 + $FFFF` assembles to
-      $A0B6_FFFF, not $A0AE_FFFF. Bit 19 is already set by the mode template %1110,
-      so the `+` CARRIES: D[19:16] becomes %0110 (X_RFBYTE_8P_4DAC2, a different
-      mode) and D[22:20] becomes %011 (the P24..P31 group). A different mode at a
-      different group, with no diagnostic."
+      $A0B6_FFFF, where base 16 assembles to $A0AE_FFFF. Bit 19 is already set by the
+      mode template %1110, so the `+` carries: D[19:16] becomes %0110
+      (X_RFBYTE_8P_4DAC2, a different mode) and D[22:20] becomes %011 (the P24..P31
+      group)."
     with_or: "`X_RFBYTE_8P_1DAC8 | X_PINS_ON | (20<<17) | $FFFF` assembles to
-      $A0AE_FFFF -- BYTE-IDENTICAL to the same expression with base 16. The
-      misaligned bits set bits the template already sets, so the base silently
-      vanishes and the transfer runs at P16..P23."
-    neither_errors: "Both forms compile clean. No compiler can separate them, and no
-      runtime check exists. Alignment is the reader's obligation."
+      $A0AE_FFFF, the same word as the same expression with base 16. The
+      misaligned bits set bits the template already sets, so the word selects
+      P16..P23."
+    both_forms_assemble: "Both forms assemble."
     source: "Command words above assembled with pnut-ts from the exact
       expressions shown. The mechanism is hardware-verified in a different mode family
       by EF-065 (X_IMM_4X8_1DAC8 + 20<<17 drove P24..P31 against an aligned control
@@ -244,19 +246,19 @@ pin_base_encoding:
 
 # Common pin configurations
 common_configs:
-  note: "Each base below satisfies the alignment rule for its mode's pin width. `|`
-    is used throughout, per pin_base_encoding.composition_rule."
-  vga_pins_0_3:
-    description: "VGA on pins 0-3 (R,G,B,Sync) -- 4-pin mode, base 0, a multiple of 4"
+  note: "four_pin_base_0 and spi_single_pin compose the base with `|`; dvi_base composes it with `+`."
+  four_pin_base_0:
+    description: "A 4-pin mode with base 0"
     code: "mode | (0<<17)"
 
-  hdmi_pins_8_15:
-    description: "HDMI on 8-pin block starting at pin 8 -- 8-pin mode, base 8, a
-      multiple of 8"
-    code: "mode | (8<<17)"
+  dvi_base:
+    description: "Digital video (DVI/HDMI) output: the 32-pin mode words of the
+      640x480 example carry hdmi_base<<17 (architecture/streamer/colorspace-and-dvi.yaml)"
+    code: "$70810000 + hdmi_base<<17 + count"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), STREAMER, Digital Video Output (DVI/HDMI), Table 22 (CON hdmi_base = 16 'must be a multiple of 8'; the m_bs..m_vi longs; drvl #7<<6 + hdmi_base)"
 
   spi_single_pin:
-    description: "SPI data on a single pin -- 1-pin mode, so any pin is a legal base"
+    description: "SPI data on a single pin -- 1-pin mode, template %pppa"
     code: "X_RFBYTE_1P_1DAC1 | X_PINS_ON | X_ALT_ON | (pin<<17)"
 
 related:

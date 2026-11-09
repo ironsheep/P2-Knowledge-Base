@@ -10,32 +10,36 @@ component_name: "Hardware Locks"
 component_type: "hardware_semaphore"
 
 description: |
-  The P2 provides 16 hardware locks (semaphores) that enable atomic resource management across 
-  all 8 COGs. These locks provide guaranteed mutual exclusion for shared resources without the 
-  possibility of race conditions. Each lock can be in one of two states: available (free) or 
-  owned by a specific COG. The hardware ensures atomic test-and-set operations, preventing 
-  multiple COGs from simultaneously acquiring the same lock.
+  The hub contains a pool of 16 semaphore bits, called locks, with atomic
+  read-modify-write operations, which cogs use to coordinate exclusive access to a
+  shared resource. One cog allocates a lock with LOCKNEW; cooperative cogs then take it
+  with LOCKTRY and release it with LOCKREL, and LOCKRET returns it to the unallocated
+  pool. Only one cog at a time can hold a lock. A lock has two separate pieces of
+  state, whether it is allocated and whether it is held (state_versus_allocation).
+  What a lock represents is up to the application.
 
 architecture:
   total_locks: 16
   lock_numbering: "0-15"
 
   lock_states:
-    - state: "available"
-      description: "Lock is free and can be acquired by any COG"
+    - state: "unallocated"
+      description: "Not issued by LOCKNEW. LOCKTRY on it does not take it."
 
-    - state: "owned"
-      description: "Lock is held by a specific COG"
+    - state: "allocated, not held"
+      description: "Any cog can take it with LOCKTRY"
+
+    - state: "allocated, held"
+      description: "Held by one cog until that cog executes LOCKREL, is stopped (COGSTOP) or restarted (COGINIT), or LOCKRET is executed for the lock"
       cog_id: "0-7 (owning COG number)"
-  
+
   atomic_operations:
     - name: "test_and_set"
-      description: "Atomically check if lock is free and acquire if available"
-      guarantee: "Hardware ensures no race conditions between COGs"
+      description: "LOCKTRY takes an allocated lock that no other cog holds, in one instruction, and reports with WC whether it did"
+      guarantee: "Lock arbitration is performed by the hub in a round-robin fashion, so only one cog is awarded ownership at a time and a cog waiting in a loop gets its fair turn"
     
-    - name: "check_owner"
-      description: "Determine which COG owns a lock"
-      non_blocking: true
+    - name: "report_owner"
+      description: "LOCKREL with WC and a register D writes the current (or last) owner's cog ID into D and the lock status into C; if the executing cog holds the lock it is released"
     
     - name: "release"
       description: "Free a lock that current COG owns"
@@ -44,29 +48,29 @@ architecture:
 state_versus_allocation:
   source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOCKS (LOCKRET returns an allocated lock, any cog may; only the cog that has taken the lock can release it; a lock is implicitly released if the holding cog is stopped via COGSTOP or restarted via COGINIT, or if LOCKRET is executed for it)"
   summary: >-
-    A lock has TWO independent pieces of state and they are freed by different things.
-    Confusing them is the most expensive mistake available with locks, because the
-    consequence appears in unrelated code much later.
+    A lock has two pieces of state, and the documents give different instructions and
+    events for them: whether it is held, and whether its number is allocated.
   held_state:
     what: "Whether the lock is currently taken, and by which cog."
     cleared_by:
       - "The owner's LOCKREL."
-      - "The owner cog becoming INACTIVE - for any cause, including COGSTOP. Ownership stops holding; nothing has to release it."
-      - "The lock being unallocated."
+      - "The owner cog being stopped by COGSTOP while it holds the lock."
+      - "The owner cog being restarted by COGINIT while it holds the lock."
+      - "LOCKRET executed for the lock."
   allocation:
     what: "Whether the lock number is issued at all - what LOCKNEW hands out."
     cleared_by:
-      - "LOCKRET, and nothing else."
-    note: "COGSTOP does NOT return the number, and neither does the cog ending any other way."
+      - "LOCKRET, which returns the lock to the unallocated pool; any cog can execute it."
+    note: "The documents name LOCKRET as the way to return a lock to the pool, and COGSTOP and COGINIT as releasing a held lock. Not documented: whether stopping or restarting a cog also returns a lock to the pool."
   the_leak: >-
-    Stopping a cog that owns a lock therefore frees the lock and LEAKS its number.
-    Anyone can now take that lock, but nobody can ever be ISSUED it again. Sixteen such
-    leaks (one fewer in a -d build, where the debugger allocates lock 15) and LOCKNEW returns nothing for
-    the rest of the run, and the failure appears at
-    some later LOCKNEW in code that never touched the lock that leaked.
+    LOCKNEW reports, with C = 1, when all 16 locks are already allocated, and in a -d
+    build the debugger allocates lock 15. A program that allocates locks and does not
+    LOCKRET them can run out, and the failure appears at a later LOCKNEW in code that
+    never touched the locks that were not returned.
   the_rule: >-
-    Every LOCKNEW needs a LOCKRET on EVERY path out, including error and shutdown paths.
-    Releasing is not enough, and stopping the cog is not enough.
+    Every LOCKNEW needs a LOCKRET on every path out, including error and shutdown paths:
+    LOCKRET is the documented way to return a lock to the pool. Releasing the lock
+    (LOCKREL) only ends the hold.
   corroboration: >-
     This page's own LOCKREL WC behaviour shows the stale-owner half already: it reports the
     cog ID of the current owner if held, or of the LAST owner if released, so the owner
@@ -104,21 +108,26 @@ instructions:
       Attempt to take lock D[3:0].
       C := 1 if the lock was successfully taken (it is now held by this cog)
       C := 0 if it was not taken -- another cog holds it, or it is not allocated
+      C is written only when WC is given.
       D is not written by LOCKTRY.
+      Lock arbitration is performed by the hub in a round-robin fashion, so any cog
+      waiting in a loop to capture a lock gets its fair turn.
     flags_affected: "C"
     timing: "2 clocks (range 2...9, +2 if WC; per language/pasm2/locktry.yaml encoding)"
     usage_example: |
-      LOCKTRY lock_num         ' Try to get lock
+      LOCKTRY lock_num WC      ' Try to get lock; WC writes C
       IF_C    JMP #got_lock    ' Jump if successful
       ' Lock was busy (C = 0); LOCKTRY does not write D
   
   - instruction: "LOCKREL"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 000000111"
+    encoding: "EEEE 1101011 C0L DDDDDDDDD 000000111"
+    encoding_conflict: "Parallax's documents also give LOCKREL's encoding as EEEE 1101011 00L DDDDDDDDD 000000111, with no C bit, beside the syntax LOCKREL D/# {WC}."
     description: >-
       Release lock D[3:0]. With WC and a register D, also reports the lock's status in C
       and its current/last owner in D.
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), LOCKS, Using Locks; encoding: Assembly Language (instruction encodings).
+      encoding and encoding_conflict: P2 Instructions v35 - Rev B/C Silicon, LOCKREL row (C0L); Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language (instruction encodings: 00L).
       Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.41.
     operation: |
       Release lock D[3:0]. Only the cog holding the lock can release it.
@@ -164,7 +173,8 @@ instructions:
       LOCKRET lock_num         ' Return the lock to the pool (any cog may); D is not written
 
   - instruction: "LOCKREL (query form)"
-    encoding: "EEEE 1101011 00L DDDDDDDDD 000000111"
+    encoding: "EEEE 1101011 C0L DDDDDDDDD 000000111"
+    encoding_conflict: "Parallax's documents also give LOCKREL's encoding as EEEE 1101011 00L DDDDDDDDD 000000111, with no C bit, beside the syntax LOCKREL D/# {WC}."
     description: >-
       LOCKREL is the instruction that reports lock status and ownership -- LOCKTRY has no
       status-only form. LOCKTRY always attempts to take the lock.
@@ -184,7 +194,7 @@ instructions:
 
 programming_patterns:
   - pattern: "basic_mutex"
-    description: "Standard mutual exclusion pattern"
+    description: "Mutual exclusion pattern: lock arbitration is performed by the hub in a round-robin fashion, so a cog waiting in this loop gets its fair turn"
     code: |
       
       ' Critical section entry
@@ -202,14 +212,12 @@ programming_patterns:
     code: |
       ' Try to acquire lock with timeout
           GETCT   timeout
-          ADD     timeout, ##1_000_000  ' 1 million clock timeout
-      
+          ADDCT1  timeout, ##1_000_000  ' CT1 target 1 million clocks ahead; clears the CT1 event flag
+
       .try_loop
           LOCKTRY lock_num WC
           IF_C    JMP #.got_lock
-          GETCT   current
-          CMP     current, timeout WC
-          IF_C    JMP #.try_loop
+          JNCT1   #.try_loop            ' CT has not passed the target yet
           JMP     #.timeout_error
       
       .got_lock
@@ -217,19 +225,20 @@ programming_patterns:
           LOCKREL lock_num
   
   - pattern: "multi_lock"
-    description: "Acquire multiple locks in order to prevent deadlock"
+    description: "Take two locks one after the other, releasing the first and starting again if the second is not taken"
     code: |
-      ' Always acquire locks in ascending order
-          LOCKTRY #LOCK_A WC
-          IF_NC   JMP #$-1
-          LOCKTRY #LOCK_B WC
-          IF_NC   LOCKREL #LOCK_A     ' Release A if B fails
-          IF_NC   JMP #retry
-      
+      ' Acquire lock_a, then lock_b (both numbers returned by LOCKNEW)
+      .retry
+          LOCKTRY lock_a WC
+          IF_NC   JMP #.retry
+          LOCKTRY lock_b WC
+          IF_NC   LOCKREL lock_a       ' Release A if B is not taken
+          IF_NC   JMP #.retry
+
       ' ... use both resources ...
-      
-          LOCKREL #LOCK_B              ' Release in any order
-          LOCKREL #LOCK_A
+
+          LOCKREL lock_b               ' Release in any order
+          LOCKREL lock_a
 
   - pattern: "dynamic_lock_allocation"
     description: "Allocate locks dynamically at runtime"
@@ -297,39 +306,11 @@ common_applications:
       
           LOCKTRY lock_num WC
           IF_C    CALL #do_initialization
-          ' All COGs continue here after init
-
-best_practices:
-  - practice: "ordered_acquisition"
-    description: "Always acquire multiple locks in the same order to prevent deadlock"
-    rationale: "Prevents circular wait conditions"
-  
-  - practice: "minimal_hold_time"
-    description: "Hold locks for the shortest time possible"
-    rationale: "Reduces contention and improves system throughput"
-  
-  - practice: "always_release"
-    description: "Ensure locks are released in all code paths including errors"
-    rationale: "Prevents permanent lock starvation"
-  
-  - practice: "document_lock_usage"
-    description: "Clearly document which locks protect which resources"
-    rationale: "Prevents misuse and conflicting lock assignments"
+          ' The cog that took the lock runs the initialization; the other cogs continue without waiting
 
 performance_considerations:
   lock_access_time: "LOCKNEW: 4 clocks (range 4...11). LOCKTRY/LOCKREL/LOCKRET: 2 clocks (range 2...9, +2 if WC for LOCKTRY/LOCKREL). Per per-instruction YAMLs."
-  
-  contention_impact:
-    low_contention: "Minimal overhead per cited timings above"
-    high_contention: "COGs spin-waiting consume hub slots"
-    
-  hub_bandwidth:
-    description: "Lock operations use hub cycles like memory access"
-    optimization: "Minimize lock checking frequency in spin loops"
-  
-  scalability:
-    max_locks: 16
-    workaround: "Use locks to protect larger lock tables in hub RAM if needed"
+  max_locks: 16
 
 debugging_tips:
   - tip: "lock_ownership_tracking"
@@ -339,12 +320,8 @@ debugging_tips:
     code: |
       LOCKREL lock_num WC      ' C = lock currently taken; lock_num = current/last owner
   
-  - tip: "deadlock_detection"
-    description: "Implement timeouts on lock acquisition"
-    importance: "Prevents system hangs from deadlock"
-  
   - tip: "lock_usage_map"
-    description: "Document lock assignments in a central location"
+    description: "Lock numbers come from LOCKNEW and are shared between cogs by the application"
     source: "lock 15 comment: Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG ('LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts to time-share the DEBUG serial TX and RX pins, as well as some RAM'; the DLY command releases LOCK[15] so other cogs may capture LOCK[15] and output their own DEBUG messages)"
     example: |
       ' Lock assignments for this project (the numbers are whatever LOCKNEW returned):

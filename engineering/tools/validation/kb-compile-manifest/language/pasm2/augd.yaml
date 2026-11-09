@@ -3,7 +3,7 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: silicon_errata.setq_ptrx_block_size_delta_cancelled.description
-    fp: "d8201999475d503a"
+    fp: "f9fba117de3a7a86"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"
   - at: silicon_errata.setq_ptrx_block_size_delta_cancelled.example

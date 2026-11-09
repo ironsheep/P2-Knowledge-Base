@@ -1,0 +1,341 @@
+# Colorspace converter and digital video (DVI/HDMI) output
+# The CMOD register set by SETCMOD carries both: bits 8:7 select digital video
+# output of the streamer, bits 6:0 configure the colorspace converter.
+
+component: colorspace_converter_and_dvi
+aliases:
+  - "colorspace converter"
+  - "CMOD"
+  - "CMOD bit map"
+  - "SETCMOD bits"
+  - "DVI output"
+  - "streamer DVI output"
+  - "streamer digital video output"
+  - "streamer colorspace converter"
+  - "HDMI output"
+  - "digital video output"
+  - "DVI pin order"
+  - "DVI forward reverse"
+  - "TMDS encoding"
+  - "10x pixel clock"
+  - "composite video"
+  - "NTSC PAL"
+  - "VGA H-Sync"
+  - "HDTV Y Pb Pr"
+  - "3 x 3 matrix"
+  - "chroma modulator"
+  - "CFRQ formula"
+  - "640x480 HDMI example"
+description: >-
+  Each cog has a colorspace converter which can perform ongoing matrix
+  transformations and modulation of the cog's 8-bit DAC channels. The colorspace
+  converter is intended primarily for baseband video modulation, but it can also
+  be used as a general-purpose RF modulator. The same CMOD parameter, written by
+  SETCMOD, selects the streamer's digital video (DVI/HDMI) output in bits 8:7.
+source: >-
+  Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COLORSPACE CONVERTER (first paragraph);
+  STREAMER, Digital Video Output (DVI/HDMI) (the SETCMOD sentence before Table 20).
+
+# One table per parameter field. Each row names the place in this file that
+# carries the field's meaning.
+cmod_bit_map:
+  register: "CMOD, set to D[8:0] by SETCMOD"
+  bits:
+    - bits: "8:7"
+      meaning: "Digital video mode: %0x normal, %10 DVI forward, %11 DVI reverse"
+      detail: dvi.pin_order
+    - bits: "6:5"
+      meaning: "Final output terms written to DAC3..DAC0"
+      detail: output_select
+    - bits: "4"
+      meaning: "1: the CY/CI/CQ terms are sign-extended; 0: they are zero-extended"
+      detail: matrix
+    - bits: "3"
+      meaning: "When 1, DAC0 is added into FY"
+      detail: output_terms
+    - bits: "2"
+      meaning: "When 1, DAC0 is added into FI"
+      detail: output_terms
+    - bits: "1"
+      meaning: "When 1, DAC0 is added into FQ"
+      detail: output_terms
+    - bits: "0"
+      meaning: "XORed with DAC0[0] to form FS, the VGA H-Sync term"
+      detail: output_terms
+  source: >-
+    Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COLORSPACE CONVERTER (SETCMOD D[8:0];
+    CMOD[4] in the multiply-accumulate paragraph; CMOD[3], CMOD[2], CMOD[1] and CMOD[0] in the FY, FI,
+    FQ and FS terms; CMOD[6:5] in Table 23); STREAMER, Digital Video Output (DVI/HDMI) (CMOD[8:7],
+    Table 20).
+
+instructions:
+  SETCY: language/pasm2/setcy.yaml
+  SETCI: language/pasm2/setci.yaml
+  SETCQ: language/pasm2/setcq.yaml
+  SETCFRQ: language/pasm2/setcfrq.yaml
+  SETCMOD: language/pasm2/setcmod.yaml
+
+# ---------------------------------------------------------------- converter
+converter:
+  rgb_channels: "It is intended that DAC3/DAC2/DAC1 serve as R/G/B channels."
+  pipeline: "On each clock, new matrix and modulation calculations are performed through a pipeline."
+  group_delay: "There is a group delay of five clocks from DAC-channel inputs to outputs when the colorspace converter is in use."
+  dac_override: "The converter's outputs, like the streamer's, override the SETDACS values: language/pasm2/setdacs.yaml."
+  source: >-
+    Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COLORSPACE CONVERTER (the paragraph
+    after the instruction list); DACs (the SETDACS override sentence).
+
+matrix:
+  coefficients: "A 3 x 3 matrix with 8-bit signed/unsigned coefficients."
+  sign_extension: "CMOD[4] determines whether the CY/CI/CQ terms are sign-extended (CMOD[4] = 1) or zero-extended (CMOD[4] = 0)."
+  unity: "If zero-extended, using 128 for a CY/CI/CQ term results in no attenuation of the related DAC term."
+  formulas: |
+    Y[7:0] = (DAC3 * CY[31:24] + DAC2 * CY[23:16] + DAC1 * CY[15:8]) / 128
+    I[7:0] = (DAC3 * CI[31:24] + DAC2 * CI[23:16] + DAC1 * CI[15:8]) / 128
+    Q[7:0] = (DAC3 * CQ[31:24] + DAC2 * CQ[23:16] + DAC1 * CQ[15:8]) / 128
+  source: >-
+    Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COLORSPACE CONVERTER (the signed
+    multiply-accumulate computations);
+    Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, cog features list, p.2
+    ("Live colorspace conversion using a 3 x 3 matrix with 8-bit signed/unsigned coefficients").
+
+modulator:
+  phase: "The modulator subtracts CFRQ from PHS on each clock cycle, to get a clockwise angle rotation in the upper bits of PHS."
+  rotation: "PHS[31:24] rotates the coordinate pair (I, Q). The rotated Q coordinate becomes IQ."
+  gain: "A 5-stage CORDIC rotator performs the rotation, so IQ is scaled by 1.646. When using the modulator, this scaling needs to be taken into account when computing the CI/CQ terms, in order to avoid IQ overflow."
+  formulas: |
+    PHS[31:0] = PHS[31:0] - CFRQ[31:0]
+    IQ[7:0]   = Q of (I,Q) after being rotated by PHS and multiplied by 1.646
+  cfrq_formula: "CFRQ = $1_0000_0000 * desired_frequency / clock_frequency"
+  cfrq_example: "3.579545 MHz at an 80 MHz clock: $1_0000_0000 * 3_579_545 / 80_000_000 = $0B74_5CFE, set with SETCFRQ."
+  source: >-
+    Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COLORSPACE CONVERTER (the modulator
+    paragraph, the PHS and IQ lines, and the CFRQ formula with its 3.579545 MHz example).
+
+output_terms:
+  formulas: |
+    FY[7:0]  = CY[7:0] + (DAC0 & {8{CMOD[3]}}) + Y[7:0]     (VGA R / HDTV Y)
+    FI[7:0]  = CI[7:0] + (DAC0 & {8{CMOD[2]}}) + I[7:0]     (VGA G / HDTV Pb)
+    FQ[7:0]  = CQ[7:0] + (DAC0 & {8{CMOD[1]}}) + Q[7:0]     (VGA B / HDTV Pr)
+
+    FS[7:0]  = {8{DAC0[0] ^ CMOD[0]}}                       (VGA H-Sync)
+
+    FIQ[7:0] = CQ[7:0] + IQ[7:0]                            (Chroma)
+
+    FYS[7:0] = DAC0[1] ? 8'b0                               (1x = Luma Sync)
+             : DAC0[0] ? CI[7:0]                            (01 = Luma Blank/Burst)
+             : CY[7:0] + Y[7:0]                             (00 = Luma Visible)
+
+    FYC[7:0] = FYS[7:0] + IQ[7:0]                           (Composite Luma+Chroma)
+  source: >-
+    Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COLORSPACE CONVERTER (the preliminary
+    output terms).
+
+output_select:
+  rule: "The final output terms are selected by CMOD[6:5]."
+  modes:
+    - cmod_6_5: "00"
+      mode: "<off>"
+      dac3: "DAC3 (bypass)"
+      dac2: "DAC2 (bypass)"
+      dac1: "DAC1 (bypass)"
+      dac0: "DAC0 (bypass)"
+    - cmod_6_5: "01"
+      mode: "VGA (R-G-B) / HDTV (Y-Pb-Pr)"
+      dac3: "FY (R / Y)"
+      dac2: "FI (G / Pb)"
+      dac1: "FQ (B / Pr)"
+      dac0: "FS (H-Sync)"
+    - cmod_6_5: "10"
+      mode: "NTSC/PAL Composite + S-Video"
+      dac3: "FYC (Composite)"
+      dac2: "FYC (Composite)"
+      dac1: "FIQ (Chroma)"
+      dac0: "FYS (Luma)"
+    - cmod_6_5: "11"
+      mode: "NTSC/PAL Composite"
+      dac3: "FYC (Composite)"
+      dac2: "FYC (Composite)"
+      dac1: "FYC (Composite)"
+      dac0: "FYC (Composite)"
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COLORSPACE CONVERTER, Table 23."
+
+# ---------------------------------------------------------------- DVI
+dvi:
+  description: >-
+    The streamer can serialize its internal 32 pin output data P[31:0] into
+    8-pin/10-bit digital video format, where the 32-pin output becomes $000000xx
+    with $xx being a reversible pattern of RED, GRN, BLU, and CLK differential pairs.
+    Pin +0 to +31 are the 32 pins the streamer command selects with %ppp in D[22:20]
+    (architecture/streamer/pin-selection.yaml).
+  enable: "SETCMOD writes bits 8:7 of the CMOD register to set digital video mode."
+  pin_order:
+    - cmod_8_7: "%0x"
+      mode: "Normal"
+      pin_31_8: "P[31:8]"
+      pin_7: "P[7]"
+      pin_6: "P[6]"
+      pin_5: "P[5]"
+      pin_4: "P[4]"
+      pin_3: "P[3]"
+      pin_2: "P[2]"
+      pin_1: "P[1]"
+      pin_0: "P[0]"
+    - cmod_8_7: "%10"
+      mode: "DVI fwd"
+      pin_31_8: "$000000"
+      pin_7: "RED+"
+      pin_6: "RED-"
+      pin_5: "GRN+"
+      pin_4: "GRN-"
+      pin_3: "BLU+"
+      pin_2: "BLU-"
+      pin_1: "CLK+"
+      pin_0: "CLK-"
+    - cmod_8_7: "%11"
+      mode: "DVI rev"
+      pin_31_8: "$000000"
+      pin_7: "CLK-"
+      pin_6: "CLK+"
+      pin_5: "BLU-"
+      pin_4: "BLU+"
+      pin_3: "GRN-"
+      pin_2: "GRN+"
+      pin_1: "RED-"
+      pin_0: "RED+"
+  encoding:
+    rule: >-
+      Eight-bit red, green, and blue pixel data are encoded into 10-bit TMDS patterns
+      for transmission, while control data, such as horizontal and vertical syncs, are
+      transmitted literally. P[1] in the internal pin output data selects whether data
+      will be TMDS-encoded or sent out literally.
+    words:
+      - p_31_0: "%RRRRRRRR_GGGGGGGG_BBBBBBBB_xxxxxx0x"
+        red: "%RRRRRRRR gets encoded"
+        green: "%GGGGGGGG gets encoded"
+        blue: "%BBBBBBBB gets encoded"
+      - p_31_0: "%rrrrrrrrrr_gggggggggg_bbbbbbbbbb_1x"
+        red: "%rrrrrrrrrr is sent literally"
+        green: "%gggggggggg is sent literally"
+        blue: "%bbbbbbbbbb is sent literally"
+  clock_rule: >-
+    Digital video output mode requires that the P2 clock frequency be 10x the pixel
+    rate. For standard-compliant 640x480 digital video, which has a pixel rate of
+    25 MHz, the P2 chip should be clocked at 250 MHz.
+  nco_rule: >-
+    The streamer NCO frequency is set to 1/10 of the main clock using the value
+    $0CCCCCCC+1, where the +1 forces initial NCO rollover on the 10th clock.
+  example:
+    context: "16bpp image in 640x480 HDMI mode"
+    code: |
+      '********************************************
+      '* VGA 640 x 480 x 16bpp 5:6:5 RGB - HDMI *
+      '********************************************
+
+      CON hdmi_base = 16                      'must be a multiple of 8
+
+      DAT             org
+      '
+      '
+      ' Setup
+      '
+                      hubset  ##%1_000001_0000011000_1111_10_00   'config PLL, 20MHz/2*25*1 = 250MHz
+                      waitx   ##20_000_000 / 200      'allow crystal+PLL 5ms to stabilize
+                      hubset  ##%1_000001_0000011000_1111_10_11   'switch to PLL
+
+                      rdfast  ##640*350*2/64,##$1000  'set rdfast to wrap on bitmap
+
+                      setxfrq ##$0CCCCCCC+1           'set streamer freq to 1/10th clk
+
+                      setcmod #$100                   'enable HDMI mode
+
+                      drvl    #7<<6 + hdmi_base       'enable HDMI pins
+
+                      wrpin   ##%100100_00_00000_0,#7<<6 + hdmi_base  'set 1mA drive on HDMI pins
+      '
+      '
+      ' Field loop
+      '
+      fieldloop       mov     hsync0,sync_000         'vsync off
+                      mov     hsync1,sync_001
+
+                      callpa  #90,#blank              'top blanks
+
+                      mov     x,#350                  'set visible lines
+      line            call    #hsync                  'do horizontal sync
+                      xcont   m_rf,#0                 'do visible line
+                      djnz    x,#line                 'another line?
+
+                      callpa  #83,#blank              'bottom blanks
+
+                      mov     hsync0,sync_222         'vsync on
+                      mov     hsync1,sync_223
+
+                      callpa  #2,#blank               'vertical sync blanks
+
+                      jmp     #fieldloop              'loop
+      '
+      '
+      ' Subroutines
+      '
+      blank           call    #hsync                  'blank lines
+                      xcont   m_vi,hsync0
+              _ret_   djnz    pa,#blank
+
+      hsync           xcont   m_bs,hsync0             'horizontal sync
+                      xzero   m_sn,hsync1
+              _ret_   xcont   m_bv,hsync0
+      '
+      '
+      ' Initialized data
+      '
+      sync_000        long    %1101010100_1101010100_1101010100_10    '
+      sync_001        long    %1101010100_1101010100_0010101011_10    'hsync
+      sync_222        long    %0101010100_0101010100_0101010100_10    'vsync
+      sync_223        long    %0101010100_0101010100_1010101011_10    'vsync + hsync
+
+      m_bs            long    $70810000 + hdmi_base<<17 + 16          'before sync
+      m_sn            long    $70810000 + hdmi_base<<17 + 96          'sync
+      m_bv            long    $70810000 + hdmi_base<<17 + 48          'before visible
+      m_vi            long    $70810000 + hdmi_base<<17 + 640         'visible
+
+      m_rf            long    $B0850000 + hdmi_base<<17 + 640         'visible rfword rgb16 (5:6:5)
+      '
+      '
+      ' Uninitialized data
+      '
+      x               res     1
+
+      hsync0          res     1
+      hsync1          res     1
+      '
+      '
+      ' Bitmap
+      '
+                      orgh    $1000 - 70              'justify pixels at $1000
+                      file    "birds_16bpp.bmp"       'rayman's picture (640 x 350)
+    notes: "The FILE directive names the bitmap, birds_16bpp.bmp."
+  board: >-
+    The P2 Eval Digital Video Out add-on board: hardware/addon-digital-video-out.yaml
+    (its pin labels CLK-, CLK+, D0-, D0+, D1-, D1+, D2-, D2+ on pins 0 to 7).
+  source: >-
+    Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER, Digital Video Output (DVI/HDMI)
+    (the serializing paragraph, Table 20, the TMDS paragraph and Table 21, the 10x clock and NCO
+    sentences, and the Table 22 program, with only its column layout changed);
+    pin group: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STREAMER (the %ppp paragraph).
+    Board pin labels:
+    P2 Eval Add-on Boards (#64006 Series) v2.0 1/12/2021, P2 Eval Digital Video Out Add-on Board (#64006D), p.5.
+
+related:
+  - language/pasm2/setcmod.yaml
+  - language/pasm2/setcy.yaml
+  - language/pasm2/setci.yaml
+  - language/pasm2/setcq.yaml
+  - language/pasm2/setcfrq.yaml
+  - language/pasm2/setdacs.yaml
+  - language/pasm2/setxfrq.yaml
+  - architecture/streamer/overview.yaml
+  - architecture/streamer/modes-reference.yaml
+  - architecture/streamer/nco-timing.yaml
+  - architecture/streamer/pin-selection.yaml
+  - hardware/addon-digital-video-out.yaml

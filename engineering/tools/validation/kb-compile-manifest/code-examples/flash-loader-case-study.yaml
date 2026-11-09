@@ -1,0 +1,9 @@
+# engineering/tools/validation/kb-compile-manifest/code-examples/flash-loader-case-study.yaml
+# ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
+# context declared here, never that the code is correct (F-381, F-312).
+blocks:
+  - at: large_transfer_chunking.implementation
+    fp: "8252f869abc3b58f"
+    compile: fragment
+    wrap: pasm2-dat
+    assumes: [x, count, mode, clk_pin=con]

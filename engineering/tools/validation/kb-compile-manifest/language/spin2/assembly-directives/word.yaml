@@ -16,11 +16,11 @@ blocks:
     wrap: pasm2-dat
     assumes: [value=con]
   - at: examples[3]
-    fp: "4e6266f18889cf71"
+    fp: "bac9781486b4373a"
     compile: fragment
     wrap: pasm2-hub
     assumes: [label, base]
   - at: usage
-    fp: "a509d43159168c72"
+    fp: "a02cc4b00696e127"
     compile: not-code
     reason: "YAML description prose (English sentences), not code"

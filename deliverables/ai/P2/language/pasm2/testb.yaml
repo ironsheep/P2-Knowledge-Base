@@ -1,5 +1,5 @@
 instruction: TESTB
-syntax: TESTB   D,{#}S         WC/WZ
+syntax: TESTB   D,{#}S         WC|WZ|ANDC|ANDZ|ORC|ORZ|XORC|XORZ
 encoding:
 - bits: EEEE 0100000 CZI DDDDDDDDD SSSSSSSSS
   write: —
@@ -24,27 +24,45 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: 'Test bit S[4:0] of D, write to C/Z. C/Z = D[S[4:0]].'
+description: >-
+  TESTB reads the state (0/1) of bit Src[4:0] of Dest and either stores it as-is
+  into C or Z (WC, WZ), or bitwise ANDs (ANDC, ANDZ), ORs (ORC, ORZ) or XORs (XORC,
+  XORZ) it into C or Z. Dest is not written. One of the eight effects is required;
+  WCZ is not accepted.
+result: >-
+  The state of Dest's bit Src[4:0] is read and either stored as-is, or bitwise
+  ANDed, ORed, or XORed into C or Z.
+parameters:
+- Dest is the register whose value will have a single bit tested.
+- Src is a register or 5-bit literal whose value identifies the bit (0-31) of Dest
+  to test.
+- WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC and XORZ are a required effect to update or
+  bitwise combine into the C or Z flag.
 flags_affected:
-  C: Set to D[S[4:0]] (tested bit value), or AND/OR/XOR with C
-  Z: Set to D[S[4:0]] (tested bit value), or AND/OR/XOR with Z
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TESTB / TESTBN, p.134"
+  C: Written only by a C effect - WC sets C to D[S[4:0]]; ANDC, ORC and XORC combine D[S[4:0]] into C with AND, OR and XOR; a Z effect leaves C unchanged
+  Z: Written only by a Z effect - WZ sets Z to D[S[4:0]]; ANDZ, ORZ and XORZ combine D[S[4:0]] into Z with AND, OR and XOR; a C effect leaves Z unchanged
+encoding_notes:
+- TESTB shares its INSTR field with BITL, BITC, BITZ and BITRND, and the effect bits tell them apart. 0100000 is TESTB WC or WZ (C Z = 10 or 01) and BITL with no effect or WCZ (C Z = 00 or 11); 0100010 is TESTB ANDC or ANDZ (C Z = 10 or 01) and BITC; 0100100 is TESTB ORC or ORZ and BITZ; 0100110 is TESTB XORC or XORZ and BITRND. TESTB takes one of the eight effects, and a WCZ on TESTB is refused.
+sources:
+  - "encoding rows and effects: P2 Instructions v35 - Rev B/C Silicon, rows 34, 36, 38, 40 (TESTB with WC/WZ, ANDC/ANDZ, ORC/ORZ, XORC/XORZ); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 0100000, 0100010, 0100100, 0100110 for TESTB; the same fields for BITL, BITC, BITZ, BITRND); Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TESTB / TESTBN, pp.134-135"
+  - "encoding_notes: CP-033 (the assembled words: testb wc/wz, andc/andz, orc/orz and xorc/xorz carry the same opcode field as bitl, bitc, bitz and bitrnd; the effect bits C Z are 10 or 01 for TESTB and 00 or 11 for BITx; testb x,#1 wcz is refused with 'Expected WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, or XORZ')"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TESTB / TESTBN, pp.134-135"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_testb
-  pattern: D,S/#
-  description: 'Test bit with logic function: Destination register, bit position'
-  valueType: 2
-compiler_encoding:
-  operandFormat: 2
 syntax_variants:
-- TESTB D,{#}S
+- TESTB D,{#}S WC|WZ
+- TESTB D,{#}S ANDC|ANDZ
+- TESTB D,{#}S ORC|ORZ
+- TESTB D,{#}S XORC|XORZ
 last_updated: '2025-09-19T16:04:17.344434'
 category: Math and Logic
-oneliner: Test bit of register and write to C/Z flag
+oneliner: Test bit of D and either store, AND, OR, or XOR the result into C or Z
 related:
-- TESTBN
-- TEST
-- TESTN
-- TESTP
-- TESTPN
+- language/pasm2/testbn.yaml
+- language/pasm2/bitl.yaml
+- language/pasm2/bitc.yaml
+- language/pasm2/bitz.yaml
+- language/pasm2/bitrnd.yaml
+- language/pasm2/test.yaml
+- language/pasm2/testn.yaml
+- language/pasm2/testp.yaml
+- language/pasm2/testpn.yaml

@@ -3,17 +3,17 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "dd372b48ab91d711"
+    fp: "5b476ce6e6c29d9b"
     compile: fragment
     wrap: pasm2-dat
     assumes: [fraction, remainder]
   - at: examples[1].code
-    fp: "2ed2db05709193ef"
+    fp: "15f759d3180a58eb"
     compile: fragment
     wrap: pasm2-dat
     assumes: [fraction, remainder]
   - at: examples[2].code
-    fp: "5383d4f1a599d41a"
+    fp: "163d45b9f6c9c319"
     compile: fragment
     wrap: pasm2-dat
     assumes: [value_a, scaled_low, scaled_high, value_b, percentage]

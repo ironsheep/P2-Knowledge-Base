@@ -36,13 +36,6 @@ encoding:
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, TESTN, p.135"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:
-  operandFormat: 0
 last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
 oneliner: Test D by bitwise ANDing with !S to affect flags only

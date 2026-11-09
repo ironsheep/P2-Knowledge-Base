@@ -9,8 +9,7 @@ detailed_description:
   operation: |
     Measures the duration of each logic state on A-input continuously. When input transitions,
     captures clock count of previous state in Z register and state type in C flag. Each
-    transition triggers new measurement automatically. Useful for PWM analysis, pulse timing,
-    and protocol decoding where both high and low times are needed.
+    transition triggers new measurement automatically.
   
   timing: |
     Continuous operation - no periodic mode
@@ -21,9 +20,9 @@ detailed_description:
 
 registers:
   x_register:
-    function: "Not used in this mode"
-  y_register:  
-    function: "Not used in this mode"
+    function: "Not documented: a role for X in this mode"
+  y_register:
+    function: "Not documented: a role for Y in this mode"
   z_register:
     function: "Duration of previous state in clock cycles (max $80000000)"
     reset_value: "$00000001 during reset (DIR=0); IN is low"
@@ -77,12 +76,6 @@ code_examples:
       high_reg        res     1
       low_reg         res     1
 
-common_applications:
-  - "PWM duty cycle and frequency measurement"
-  - "Serial protocol bit timing analysis"
-  - "Pulse width and gap measurement"
-  - "IR remote control decoding"
-
 related_modes:
   - "Mode %10001: Time only high states"
   - "Mode %10010: Time with timeout capability"
@@ -94,12 +87,17 @@ configuration_constants:
   binary_value: "%10000"
   common_modifiers:
     - "P_INVERT_A - Swap high/low state interpretation"
-    - "P_FILT1_AB - Add filtering to reduce glitches"
-    - "P_SCHMITT_A - Use Schmitt trigger for cleaner edges"
+    - "P_FILT1_AB - Filter the A and B inputs using the global filt1 settings"
+    - "P_SCHMITT_A - Schmitt-trigger input on the A input"
 
 notes:
   - "Automatically alternates between timing high and low states"
   - "C flag tells you what the previous state was"
-  - "Fast transitions may be missed if not read in time"
-  - "Use two pins with inverted inputs to capture all transitions"
-  - "Z register limited to $80000000 (2.14 billion clocks)"
+  - "If states change faster than the cog retrieves measurements, old measurements are overwritten by new ones and effectively lost"
+  - "Workaround: time highs (%10001) on two smart pins on the same signal, one with its A input inverted; both states are then captured as long as the sum of the states' durations does not exceed the cog's ability to retrieve both results. This helps when one state is very short and the other is not"
+  - "Z register limited to $80000000"
+  - "The Spin2 RDPIN() method returns the C flag (the prior state) in bit 31, so the Spin2 example takes the state from bit 31 and the duration from bits 30..0. A duration at the $80000000 limit has Z bit 31 set, so it reads as 0 in bits 30..0; inline PASM2 RDPIN with WC returns all 32 bits of Z in D and the state in C"
+
+sources:
+  - "operation, timing, notes (overrun and the two-pin workaround), registers: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SMART PIN MODES (%10000 time A-input states)"
+  - "notes (Spin2 RDPIN() bit 31): Parallax Propeller 2 Spin2 Language Documentation v55, smart pin methods (RDPIN (Pin) : Zval, Zval[31] = C flag from RDPIN, other bits are RDPIN data)"

@@ -24,17 +24,20 @@ description: |
   out in groups of 8 I/O pins each. Each group has a dedicated LDO regulator with
   the VIO output labeled Vxx at the edge connector."
 
-  The distinction decides which pins may be grouped for an absolute (ratiometric)
-  ADC measurement: the ADC references its own SILICON group, so a shared-node
-  measurement must stay within four pins even though the board wires eight to one
-  LDO. The Edge narrative says as much of its own scheme: "The distributed power
-  scheme is not a requirement of the P2 microprocessor; rather a design choice for
-  this particular module."
+  The supply domain the chip defines is the SILICON group of four; the board's group
+  of eight is one LDO feeding two of them. The Edge narrative says as much of its
+  own scheme: "The distributed power scheme is not a requirement of the P2
+  microprocessor; rather a design choice for this particular module."
+
+  A pin's ADC calibration inputs (P_ADC_VIO, P_ADC_GIO) read its own silicon group's
+  rails, not the board's eight-pin LDO group (adc_reference).
 
 sources:
   - "description, silicon layer: P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4; Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES summary, p.3, \"Smart I/O pins: 3.3 VDC, powered in groups of 4 via VIO pins.\""
   - "silicon grouping: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), PIN DESCRIPTIONS — the TQFP-100 package pinout figure. Sixteen VIO package pins labelled VIO_0_3 through VIO_60_63, and sixteen internal GIO_0_3 through GIO_60_63 blocks."
-  - "silicon_power_grouping.pin_table_symbols, adc_reference: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), PIN DESCRIPTIONS — pin table: VIO_{x}_{y} / GIO_{x}_{y} = power / ground for smart pins {x} through {y} (per-group supply pairs; a pin's ADC references its own group's rails for calibration)."
+  - "silicon_power_grouping.pin_table_symbols, adc_reference: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), PIN DESCRIPTIONS — pin table: VIO_{x}_{y} = power for smart pins {x} through {y}; GIO_{x}_{y} = ground for smart pins {x} through {y} and other related circuits."
+  - "adc_reference.fact: Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES summary, p.2 (64 Smart I/O pins, each with: delta-sigma ADC with 5 ranges, 2 sources, and VIO/GIO calibration; externally powered in blocks of 4 for clean analog Vdd reference), with the PIN DESCRIPTIONS pin table above; the own-group statement is these statements read together, no line states it outright"
+  - "adc_reference.calibration_inputs: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (delta-sigma ADC with 5 ranges, 2 sources, and VIO/GIO calibration); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES summary, p.2 (the same); Parallax Propeller 2 Spin2 Language Documentation v55, smart pin symbols, ADC Input Modes (P_ADC_GIO = ADC GIO -> IN, P_ADC_VIO = ADC VIO -> IN, P_ADC_1X..P_ADC_100X)"
   - "board_power_grouping: P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4, and Edge Connector Pin Assignments, p.10: 8 independent 3.3 V LDO regulators, V00 through V56, one per 8-pin header group at 300 mA — the BOARD grouping."
   - "description, board layer: P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4"
   - "description, distributed power scheme quotation: P2 Edge Module Rev D (#P2-EC) v3.0 6/3/2022, 3. LDO regulators for I/O Pin Voltage, p.4"
@@ -43,7 +46,7 @@ silicon_power_grouping:
   scope: "The P2X8C4M64P package itself — true on every board."
   group_size: 4
   groups: "0-3, 4-7, 8-11, ... , 60-63 (16 groups across 64 pins)"
-  supply_pair: "Each group shares one VIO (supply) / GIO (ground) pair — an isolated supply domain."
+  supply_pair: "Each group shares one VIO (supply) / GIO (ground) pair: each 4 I/O pins have a dedicated voltage supply connection."
   pin_table_symbols: "VIO_{x}_{y} / GIO_{x}_{y} = power / ground for smart pins {x} through {y}. The package instances are VIO_0_3 ... VIO_60_63 and GIO_0_3 ... GIO_60_63."
   package_layout: |
     Each rail of the TQFP-100 repeats a six-pin cycle — P(n), P(n+1), VIO_n_(n+3),
@@ -52,21 +55,23 @@ silicon_power_grouping:
     TEST + RESN + XI + XO. GIO is internal and consumes no package pins.
 
 adc_reference:
+  calibration_inputs: "The delta-sigma ADC has VIO/GIO calibration: P_ADC_GIO and P_ADC_VIO set the ADC's input to GIO or to VIO, where P_ADC_1X to P_ADC_100X set it to one of the input ranges."
   fact: |
-    A pin's ADC, when set to P_ADC_GIO or P_ADC_VIO, references ITS OWN SILICON GROUP's
-    ground / supply rails — the four-pin VIO_{x}_{y} / GIO_{x}_{y} domain, not the board's
-    eight-pin LDO group. This is why a single-pin ratiometric measurement is absolute.
-  multi_pin_constraint: |
-    Pins tied to a SHARED NODE for one measurement must sit WITHIN A SINGLE FOUR-PIN
-    SILICON GROUP to share a reference domain. Straddling a group boundary (e.g. pins 3
-    and 4) mixes supply domains and degrades the result. Independent single-ended channels
-    on different pins are unaffected — each reads against its own group's reference.
-  why_four_and_not_eight: |
-    On an Edge module two adjacent four-pin groups share an LDO net, so eight pins can look
-    like one domain. They are not: each four-pin group reaches the die through its own
-    package pin and bond wire, so IR drop and bond-wire drop still differ between them.
-    STAY WITHIN FOUR — that rule is correct on every board. "Within eight" is an
-    Edge-specific relaxation and is not the chip's behaviour.
+    A pin's ADC, set to P_ADC_VIO or P_ADC_GIO, reads the VIO or GIO of the pin's own
+    four-pin silicon group. Each smart pin has its ADC with VIO/GIO calibration and is
+    externally powered in blocks of 4 for a clean analog Vdd reference, and
+    VIO_{x}_{y} / GIO_{x}_{y} are the power and ground for smart pins x through y.
+    The board's eight-pin LDO group is not the reference domain.
+  shared_group: |
+    Pins of one four-pin silicon group share one VIO/GIO pair, so they share one
+    calibration reference. Pins in different groups are on different VIO package pins,
+    even where an Edge module feeds both from one LDO. Not documented: how far apart two
+    groups' rails sit, or how much a shared-node measurement that straddles a group
+    boundary (e.g. pins 3 and 4) differs from one inside a group.
+  four_and_eight: |
+    On an Edge module two adjacent four-pin groups share an LDO net, so eight pins can
+    look like one domain. The chip's own grouping is four: the package has a separate
+    VIO pin, VIO_n_(n+3), for each four pins.
 
 board_power_grouping:
   scope: "P2 Edge modules (standard and 32MB) — the BOARD layer, not the chip."
@@ -98,7 +103,7 @@ see_also:
   - hardware/edge-standard-module.yaml
   # P2 Edge 32MB module -- same board power architecture
   - hardware/edge-32mb-module.yaml
-  - "ADC sample/filter/capture, internal clock (mode %11000) — the per-group reference governs P_ADC_GIO/P_ADC_VIO"
+  - "ADC sample/filter/capture, internal clock (mode %11000), with the P_ADC_GIO/P_ADC_VIO calibration inputs: architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml"
   - "Ratiometric and multi-channel ADC layout is covered in the I/O & Smart Pins User Guide (Ch.16)"
 
-oneliner: "P2 I/O pins are powered in isolated SILICON groups of 4 (0-3, 4-7, ..., 60-63) sharing one VIO/GIO pair — a pin's P_ADC_GIO/P_ADC_VIO references its own group, so multi-pin shared-node measurements must stay within four; the 8-pin grouping readers see on Edge boards is the LDO/header layer, where one LDO feeds two silicon groups."
+oneliner: "P2 I/O pins are powered in SILICON groups of 4 (0-3, 4-7, ..., 60-63), each sharing one VIO/GIO pair; the 8-pin grouping readers see on Edge boards is the LDO/header layer, where one LDO feeds two silicon groups. A pin's P_ADC_GIO/P_ADC_VIO reads its own silicon group's GIO/VIO."

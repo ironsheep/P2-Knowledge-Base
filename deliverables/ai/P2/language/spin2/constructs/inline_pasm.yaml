@@ -1,6 +1,5 @@
 # Spin2 Language Construct: Inline PASM2
 # Source: Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE
-# Critical for: Performance optimization and hardware control
 # Canonical entry. Concept-side stub: language/spin2/concepts/inline_pasm2.yaml
 
 aliases:
@@ -15,28 +14,23 @@ category: "program_structure"
 type: "assembly_integration"
 
 metadata:
-  query_tags: ["org", "end", "pasm", "assembly", "inline", "performance", "optimization", "cogexec"]
-  complexity: "advanced"
-  use_cases: ["performance_critical", "hardware_control", "timing_precise", "driver_code"]
+  query_tags: ["org", "end", "pasm", "assembly", "inline", "cogexec"]
   common_questions:
     - "How do I embed assembly in Spin2?"
-    - "When should I use inline PASM?"
     - "How do I share data between Spin2 and PASM?"
     - "Does inline PASM run in hub-exec or cog-exec?"
     - "What's the size limit on an inline PASM block?"
 
 fundamental_purpose: |
-  Inline PASM2 exists because the P2 philosophy embraces mixed-level programming:
-  - Spin2 for logic and control flow (easy to write/maintain)
-  - PASM2 for performance and precise timing (deterministic execution)
-  - Seamless integration between both levels
-  - Access to hardware features not exposed in Spin2
+  A Spin2 method can execute PASM2 instructions in its own body: the PASM2 code is placed
+  between ORG (or ORGH) and END, and the method's first 16 long variables are addressed
+  in it by their own names.
 
 execution_model:
-  # CRITICAL: this is cog-exec, NOT hub-exec.
+  # ORG..END inline runs as cog-exec; ORGH..END inline runs as hub-exec.
   summary: |
     Inline PASM2 in a Spin2 method (ORG...END inside PUB/PRI) is loaded into
-    cog RAM at runtime by the Spin2 interpreter. The interpreter performs TWO
+    cog RAM at runtime by the Spin2 interpreter. The interpreter performs two
     separate copies before jumping:
     
     1. "Copy the method's first 16 long variables, including any parameters,
@@ -46,15 +40,15 @@ execution_model:
        starting at the register address specified after the ORG (default
        is $000)."
     
-    The block then runs as cog-exec at the deterministic per-instruction
+    The block then runs as cog-exec at the per-instruction
     PASM timings.
   source: "summary (the two copies, quoted): Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE"
 
-  it_does_NOT_run_in_hubexec: true
-  
+  org_end_inline_execution_mode: "cog execution: the code is loaded into cog registers and runs from them"
+
   variable_limit:
     total_longs: 16
-    breakdown: "First 16 long variables (params + result + locals) are copied to cog registers $1E0..$1EF. This 16-long limit applies to VARIABLES ONLY — not to the PASM code itself."
+    breakdown: "First 16 long variables (params + result + locals) are copied to cog registers $1E0..$1EF. This 16-long limit applies to variables only, not to the PASM code itself."
     source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE (the internal Spin2 procedure for executing in-line PASM code)"
 
   over_16_longs_error:
@@ -63,9 +57,10 @@ execution_model:
     source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE (the first 16 long variables); CP-020 (the 17th local is rejected at the PASM line that names it; declared first it compiles)"
 
   code_buffering:
-    description: "PASM code is copied separately into cog registers starting at the ORG address (default $000), so code length is NOT constrained by the 16-long variable limit."
-    code_size_limit: "Inline code area is $000..$11F (288 longs) when no multitasking is in use, plus LUT $000..$00F (16 longs). When the cog uses multitasking, $100..$11F is the multitasking taskptr table (building DOWNWARD from $11F), reducing the available inline code area; programs using fewer than 32 software tasks leave the LOWER portion of $100..$11F free for user code as well. Avoid writing to $120..$1D7 (Spin2 interpreter) and LUT $010..$1FF (interpreter)."
-    source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE (free cog registers $000..$11F; avoid writing $120..$1D7); Document Status (v47: task pointers build downward in the last 32 free cog registers, from $11F..$100)"
+    description: "PASM code is copied separately into cog registers starting at the ORG address (default $000), so code length is not constrained by the 16-long variable limit."
+    code_size_limit: "Inline code area is $000..$11F when no multitasking is in use. When the cog uses multitasking, $100..$11F is the multitasking taskptr table (the pointer of task n, the number TASKSPIN and TASKID use, is at $11F-n), reducing the available inline code area; a task started with NEWTASK takes the lowest free task number, so a program that starts its tasks with NEWTASK and uses fewer than 32 of them leaves the lower portion of $100..$11F free for user code as well. A task started with a fixed task number n (0..31) uses the register at $11F-n wherever that falls: task 31 uses $100. The Spin2 interpreter occupies $120..$1D7 and LUT $010..$1FF."
+    lut_free_area: "LUT $000..$00F is free for any use"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE (free cog registers $000..$11F; LUT $000..$00F available for any use; avoid writing $120..$1D7); Document Status (v47: task pointers build downward in the last 32 free cog registers, from $11F..$100; TASKSPIN task = 0..31 for a fixed task or -1 for the first free task); Parallax Spin2 Interpreter v55 (2026.05.07), taskptr (res $20 at org $100), taskspin_ (altd tasknum,#taskptr; new-task selection: not y,taskena then encod y; fixed task: NOT task AND $1F), tasknum (initial internal number $1F), taskid_ (TASKID returns NOT tasknum AND $1F): task n's pointer is at $100+(31-n)"
 
   interrupts:
     description: "In-line PASM code may enable an interrupt which executes code residing somewhere in cog registers $000..$11F. Spin2 accommodates interrupts and only stalls them briefly."
@@ -73,16 +68,15 @@ execution_model:
 
   multitasking_taskptr_table:
     location: "$100..$11F (cog registers)"
-    fill_direction: "Downward from $11F (taskptr for task 31 occupies $11F, task 30 at $11E, etc.)"
-    free_when_fewer_tasks: "Programs using fewer than 32 software tasks leave the LOWER portion of $100..$11F free for user code"
+    fill_direction: "The pointer of task n (the number TASKSPIN and TASKID use) is at $11F-n (task 0 at $11F, task 1 at $11E, task 31 at $100); the initial task is task 0, and a task started with NEWTASK takes the lowest free task number, so the table fills downward from $11F"
+    free_when_fewer_tasks: "A program that starts its tasks with NEWTASK and uses fewer than 32 of them leaves the lower portion of $100..$11F free for user code; a task started with a fixed task number n (0..31) uses the register at $11F-n wherever that falls (task 31 uses $100)"
     overlaps_inline_code_area: "This range is the upper portion of the inline-PASM code area ($000..$11F), so multitasking and large inline-PASM blocks compete for the same space"
-    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: task pointers build downward in the last 32 free cog registers, from $11F..$100); IN-LINE PASM CODE (free cog registers $000..$11F)"
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Document Status (v47: task pointers build downward in the last 32 free cog registers, from $11F..$100; TASKSPIN task = 0..31 for a fixed task or -1 for the first free task), Built-In Symbols (NEWTASK = -1); IN-LINE PASM CODE (free cog registers $000..$11F); Parallax Spin2 Interpreter v55 (2026.05.07), taskptr (res $20 at org $100), tasknum (initial internal number $1F), taskspin_ (fixed task: internal number = NOT task AND $1F; new task: not y,taskena then encod y, the highest free internal number; altd tasknum,#taskptr), taskid_ (TASKID returns NOT tasknum AND $1F): the internal number is 31 minus the task number, so task n's pointer is at $100+(31-n)"
   
   why_it_matters_for_timing:
-    - "Inline PASM gets cog-exec timing — deterministic 2 clocks/instruction for typical ALU ops"
-    - "REP and ALTI work (cog-exec)"
-    - "Branches inside the block are 4 clocks (cog branch), NOT 13+ (which would be the hub-exec branch refill cost)"
-    - "FIFO/streamer instructions (RDFAST/WRFAST/FBLOCK/RFx/WFx/XINIT/XZERO/XCONT) are usable here because this is cog-exec (they would be forbidden in hub-exec)"
+    - "Inline PASM in an ORG..END block runs as cog-exec: 2 clocks per typical ALU instruction"
+    - "A branch inside an ORG..END block takes 4 clocks (cog branch); a branch executed from hub takes 13...20 clocks"
+    - "The FIFO can be used temporarily by RDFAST/WRFAST and RFxxxx/WFxxxx instructions, and the streamer can be used, in an ORG..END block (in hub-exec the FIFO instructions cannot be used, and neither can XINIT/XZERO/XCONT when the streamer mode engages the FIFO)"
     - "Returning to Spin2 after END incurs interpreter dispatch overhead (clock count: not documented)"
 
 syntax_forms:
@@ -92,7 +86,7 @@ syntax_forms:
         ' PASM2 code here
       END
     description: "Inline PASM2 inside a Spin2 method"
-    execution: "Loaded into cog RAM at runtime by the Spin2 interpreter as TWO separate copies: (1) first 16 long variables (params + result + locals) → cog $1E0..$1EF; (2) PASM code longs → cog registers starting at ORG address (default $000). Runs as cog-exec, NOT hub-exec. The 16-long limit applies to VARIABLES ONLY; code is buffered separately and is not bound by that figure."
+    execution: "Loaded into cog RAM at runtime by the Spin2 interpreter as two separate copies: (1) first 16 long variables (params + result + locals) → cog $1E0..$1EF; (2) PASM code longs → cog registers starting at ORG address (default $000). Runs as cog-exec, not hub-exec. The 16-long limit applies to variables only; code is buffered separately and is not bound by that figure."
     
   - form: "cog_code"
     syntax: |
@@ -111,12 +105,12 @@ syntax_forms:
       hub_code
         NOP              ' PASM2 code for hub execution
     description: "PASM2 code in DAT that runs as hub-exec (separate from inline PASM)"
-    execution: "Executes directly from hub memory through the (cogs+11)=19-stage prefetch FIFO. Sequential code: 2 clocks/instruction (same as cog-exec). Branches: minimum 13 clocks (+1 if not long-aligned). FIFO/streamer instructions (RDFAST/WRFAST/FBLOCK/RFx/WFx/XINIT/XZERO/XCONT) are FORBIDDEN in this mode. NOT the same as inline PASM in a method."
-    source: "execution: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION (minimum 13 clocks to branch to a hub address, one more if not long-aligned; the instructions that cannot be used during hub execution); the (cogs+11)-stage FIFO: the same document, the hub FIFO interface description"
+    execution: "Executes directly from hub memory; the cog employs the FIFO hardware to spool up instructions, and the FIFO contains (cogs+11) stages. ALU instructions such as ADD, MOV and NOP take 2 clocks, the same as in cog-exec. Not documented: the clocks per sequential instruction in hub execution as a general rule. A branch to a hub address takes a minimum of 13 clocks (+1 if not long-aligned). The FIFO instructions (RDFAST/WRFAST/FBLOCK/RFx/WFx) cannot be used in this mode, and neither can XINIT/XZERO/XCONT when the streamer mode engages the FIFO. This is separate from inline PASM in a method."
+    source: "execution: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB EXECUTION (minimum 13 clocks to branch to a hub address, one more if not long-aligned; the instructions that cannot be used during hub execution); the (cogs+11)-stage FIFO: the same document, the hub FIFO interface description; P2 Instructions v35 Rev B/C Silicon, ADD/MOV/NOP rows (hub execution mode: same as cog execution)"
 
   - form: "mixed_method"
     syntax: |
-      PUB fast_method(x, y) : result | temp
+      PUB mixed_method(x, y) : result | temp
         temp := x + y    ' Spin2 code
         
         ORG
@@ -133,41 +127,32 @@ syntax_forms:
         ORGH
           ' PASM2 code here — executes from hub RAM, no cog-RAM copy
         END
-    description: "V50+ inline PASM2 that runs as hub-exec directly from hub RAM (NOT loaded into cog RAM)"
+    description: "Inline PASM2 that runs as hub-exec directly from hub RAM, not loaded into cog RAM"
     introduced: "Spin2 v50"
-    source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE (execution: ORGH..END inline; the documented procedure for ORG..END inline; the ORGH example at the $FFFF-long limit)"
-    execution: "ORGH..END inline does NOT load code into cog RAM; PASM runs in hub-exec mode directly from hub. The first 16 long variables (params + result + locals) are still copied into cog $1E0..$1EF at entry and restored at exit, as in the documented procedure for ORG..END inline. Sequential PASM: 2 clocks/instruction (FIFO streaming, same as cogexec). Branches: minimum 13 clocks (FIFO refill, +1 if not long-aligned). Maximum block size: $FFFF longs including the appended RET (the documentation's own ORGH example is at the $FFFF-long limit)."
+    source: "Parallax Propeller 2 Spin2 Language Documentation v55, Document Status table, v50 row (PUB/PRI methods now support ORGH inline PASM code); IN-LINE PASM CODE (execution: ORGH..END inline; the documented procedure for ORG..END inline; the ORGH example at the $FFFF-long limit)"
+    execution: "ORGH..END inline does not load code into cog RAM; PASM runs in hub-exec mode directly from hub. The first 16 long variables (params + result + locals) are still copied into cog $1E0..$1EF at entry and restored at exit, as in ORG..END inline. ALU instructions such as ADD, MOV and NOP take 2 clocks, the same as in cog-exec; not documented: the clocks per sequential instruction in hub execution as a general rule. A branch to a hub address takes a minimum of 13 clocks (+1 if not long-aligned). Maximum block size: $FFFF longs including the appended RET (ORGH inline code can be up to $FFFF instructions long). Hub-exec limitations apply (no RDFAST, XINIT, etc), branches are slower, and the start time is faster than ORG; for a few lines of non-branching PASM code, ORGH is better than ORG."
     contrast_with_org_inline: |
       ORG..END  : code copied into cog RAM at $000..; runs as cog-exec; size limited by cog code area ($000..$11F minus multitasking taskptr table)
-      ORGH..END : code stays in hub RAM; runs as hub-exec; up to $FFFF longs; sequential 2 clocks/instruction but branches 13+ clocks
+      ORGH..END : code stays in hub RAM; runs as hub-exec; up to $FFFF longs; a branch takes 13 clocks or more
     related: "language/spin2/assembly-directives/orgh.yaml"
 
 why_inline_pasm_matters:
   performance: |
-    Inline PASM2 runs at the deterministic PASM2 timings cited in the per-
-    instruction YAMLs:
+    An ORG..END block runs at the PASM2 instruction timings:
     - Typical ALU ops: 2 clocks each (ADD/MOV/AND/OR/XOR/shifts/etc.)
     - Cog branches (JMP/CALL/RET): 4 clocks
     - Cog hub I/O (RDLONG/WRLONG): 9-16 / 3-10 clocks (egg-beater dependent)
-    - CORDIC ops (QMUL/QDIV/QSQRT/QROTATE): 55-clock latency, 8-clock issue interval
-    
+    - CORDIC ops (QMUL/QDIV/QSQRT/QROTATE): results 55 clocks after the command, a command can start every 8 clocks
+
     Spin2 method invocations execute via the bytecode interpreter; per-method
-    clock counts are not documented. The performance benefit of inline PASM is that you replace
-    interpreter-dispatched bytecode with directly-executed cog instructions
-    at their deterministic timings.
-  
-  determinism: |
-    PASM2 provides cycle-accurate timing:
-    - Exact delays for protocol timing
-    - Predictable interrupt response
-    - Jitter-free signal generation
-  
+    clock counts are not documented.
+
   hardware_access: |
-    Direct access to P2 features:
-    - CORDIC operations
-    - Streamer control
-    - Smart pin configuration
-    - Special registers
+    Within an ORG..END block:
+    - The FIFO can be used temporarily (RDFAST/WRFAST and RFxxxx/WFxxxx instructions)
+    - The streamer can be used, including LUT modes which use LUT $000..$00F
+    - The RES, ORGF and FIT directives can be used
+    - An interrupt service routine can be established which remains in registers
 
 register_access:
   source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE (method_interface)"
@@ -179,10 +164,10 @@ register_access:
     - PR0..PR7 ($1D8..$1DF) are separate general-purpose registers shared between
       Spin2 and PASM code. They are not the parameters or the result.
     - Variable budget  → first 16 long variables go to $1E0..$1EF (params + result + locals only).
-                       Code is NOT counted against this 16-long figure — for ORG..END inline, PASM
+                       Code is not counted against this 16-long figure — for ORG..END inline, PASM
                        code is copied separately into cog registers starting at the ORG address
-                       (default $000), with the inline code area being $000..$11F (288 longs)
-                       when no multitasking is in use. For ORGH..END inline (V50+), code stays
+                       (default $000), with the inline code area being $000..$11F
+                       when no multitasking is in use. For ORGH..END inline, code stays
                        in hub RAM and runs as hub-exec; the 16-long variable buffer at $1E0..$1EF
                        behaves identically.
 
@@ -202,7 +187,7 @@ data_sharing_patterns:
   - pattern: "register_passing"
     description: "Use method parameters as registers"
     code: |
-      PUB fast_add(a, b) : sum
+      PUB add_pair(a, b) : sum
         ORG
           ADD   a, b      ' a + b
           MOV   sum, a    ' Result in sum
@@ -222,8 +207,8 @@ data_sharing_patterns:
           WRLONG PA, p
         END
 
-  - pattern: "inline_optimization"
-    description: "Optimize hot spots: CRC-32 (reflected polynomial) of a buffer"
+  - pattern: "crc32_bit_loop"
+    description: "CRC-32 (reflected polynomial) of a buffer"
     code: |
       PUB checksum(buffer, size) : crc | ptr, byt
         ptr := buffer
@@ -232,7 +217,7 @@ data_sharing_patterns:
         REPEAT size
           byt := BYTE[ptr++]
           ORG
-            REP    #2, #8                 ' 8 bits per byte
+            REP    #3, #8                 ' 8 times: the 3 longs SHR, AUGS, CRCBIT
             SHR    byt, #1 WC             ' next data bit (LSB first) into C
             CRCBIT crc, ##$EDB88320       ' if (C xor crc[0]) crc = (crc >> 1) xor poly, else crc >> 1
           END
@@ -241,7 +226,7 @@ data_sharing_patterns:
 
 common_use_cases:
   - use_case: "bit_manipulation"
-    description: "Fast bit operations"
+    description: "Reverse the bits of a value"
     code: |
       PUB reverse_bits(value) : result
         ORG
@@ -250,16 +235,16 @@ common_use_cases:
         END
   
   - use_case: "cordic_operations"
-    description: "Hardware math acceleration"
+    description: "CORDIC multiply"
     code: |
-      PUB fast_multiply(x, y) : product
+      PUB qmul_product(x, y) : product
         ORG
           QMUL  x, y
           GETQX product
         END
   
-  - use_case: "precise_timing"
-    description: "Cycle-accurate delays"
+  - use_case: "pin_pulse_waitx"
+    description: "Pin pulse with a WAITX delay"
     code: |
       PUB pulse(pin, width)
         ORG
@@ -285,8 +270,11 @@ cog_loading:
     cog_code
       ' PASM2 code here
       
+      JMP   #cog_code           ' loop forever
+    mailbox LONG 0              ' data after the code, not executed
+
     PUB start_cog()
-      COGINIT(COGEXEC_NEW, @cog_code, @parameters)
+      COGINIT(COGEXEC_NEW, @cog_code, @mailbox)
   
   with_communication: |
     DAT
@@ -302,80 +290,52 @@ cog_loading:
       ' which puts @command in PTRA
       ORG   0
     cog_loop
-      RDLONG temp, PTRA WZ
+      RDLONG scratch, PTRA WZ
       IF_Z  JMP #cog_loop        ' Wait for command
 
       ' Process command
       WRLONG #0, PTRA            ' Clear command
       JMP    #cog_loop
 
+    scratch RES   1              ' register for the command read
+
 debugging_considerations:
   - consideration: "register_preservation"
-    description: "Inline PASM can modify registers"
-    solution: "Save/restore if needed"
-    
-  - consideration: "flag_states"
-    description: "C and Z flags affected by PASM"
-    solution: "Don't assume flag states after PASM"
-    
+    description: "At END the 16 longs in cog registers $1E0..$1EF are restored back to hub RAM, updating any modified method variables"
+    solution: "The method's variables hold the values the PASM code left in $1E0..$1EF"
+
   - consideration: "stack_usage"
     description: >-
-      Inline PASM does not use the Spin2 method stack, but it DOES share the cog's
-      8-level hardware CALL stack with the interpreter, and only 5 of those levels are
-      yours. Exceeding 5 levels of nested CALL corrupts the interpreter's own return
-      path, and the failure appears after the inline block has returned.
-    solution: "Keep nested CALLs within 5 levels; use a register or hub variable, not deeper nesting, to carry state"
+      Use up to 5 levels of the hardware stack for nested CALLs, including CALLs to hub RAM.
+    solution: "Up to 5 levels of nested CALLs"
 
   - consideration: "entry_exit_contract"
     description: >-
-      The inline block is entered by a CALL and is assembled with a RET appended at the
-      end, so it returns to Spin2 even if no _RET_ or RET of yours executes. It returns
-      at whichever comes first: an intervening _RET_, an explicit RET, or that appended
-      RET. This is why the block must not fall through past its own end and must not be
-      jumped into from outside.
-    solution: "Let the appended RET do the work, or return early with _RET_ / RET; never fall out of the block"
+      The inline PASM code is entered with a CALL. It is assembled with a RET instruction
+      added at the end to ensure that it returns to Spin2, in case no early _RET_ or RET
+      executes. It returns when an intervening _RET_ or RET executes, or the appended RET
+      executes.
+    solution: "Return early with _RET_ or RET, or let the appended RET return"
 
 hardware_stack_budget:
-  source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE and CALLING PASM FROM SPIN2, both state: 'Use up to 5 levels of the hardware stack for nested CALLs, including CALLs to hub RAM.'"
+  source: "Parallax Propeller 2 Spin2 Language Documentation v55, IN-LINE PASM CODE and CALLING PASM FROM SPIN2, both state: 'Use up to 5 levels of the hardware stack for nested CALLs, including CALLs to hub RAM.' (in IN-LINE PASM CODE that item sits at the outer list level, outside the 'If ORG:' sub-list, so it covers ORGH..END as well as ORG..END: list nesting checked in the v55 document source); the not_documented statement: a search of the Spin2 v55 text, the P2 Documentation and the Silicon Doc for the C and Z flags on entry to in-line PASM found no statement; the Parallax Spin2 Interpreter v55 (2026.05.07) comment at the call of the PASM code says 'C/Z=0' (inline routine, call w) while the code before it sets the flags (mov ptrb,pb wc, comment 'C=1'; cmp pa,#bc_org wz), so the comment and the code disagree"
   levels_available: 5
   of_total: 8
-  applies_to: "both the ORG/END inline form and the CALL() surface -- the Spin2 documentation states it in both places"
+  applies_to: "the ORG..END and ORGH..END inline forms and the CALL() surface"
   why_not_eight: >-
-    The cog's hardware stack has 8 levels; the Spin2 interpreter holds the remainder for
-    its own return path while your inline code runs. The documentation states the budget
-    you may use, not the hardware depth.
+    The cog's hardware stack has 8 levels. Not documented: why the budget of up to 5 levels
+    is less than the hardware depth.
   not_documented: >-
-    The C and Z flag state ON ENTRY to an inline block. The Spin2 documentation's
-    inline-PASM section says nothing about it, so do not assume C or Z are cleared, set, or
-    carried in from the calling Spin2 code. Read the flags only after an instruction of
-    yours has written them.
-
-performance_guidelines:
-  when_to_use_inline:
-    - "Inner loops with simple operations"
-    - "Bit manipulation and testing"
-    - "Hardware interface timing"
-    - "CORDIC operations"
-    - "Interrupt handlers"
-  
-  when_not_to_use:
-    - "Complex logic (use Spin2)"
-    - "String manipulation (use Spin2)"
-    - "User interface code (use Spin2)"
-    - "Non-critical paths (use Spin2)"
+    Not documented: the C and Z flag state on entry to an inline block.
 
 pitfalls:
   - pitfall: "forgetting_org"
     description: "PASM code without ORG directive"
-    consequence: "Code doesn't execute as PASM"
+    consequence: "Not documented: the result of in-line PASM code with no ORG directive; in-line PASM code is written between ORG and END"
     
   - pitfall: "register_confusion"
     description: "Not understanding parameter mapping"
     solution: "Parameters, results and locals are addressed by their own names (the first 16 longs, $1E0..$1EF); PR0..PR7 are separate registers"
-    
-  - pitfall: "address_modes"
-    description: "Mixing COG and hub addresses"
-    solution: "Use @ for hub addresses, # for immediates"
 
 related:
   - language/spin2/constructs/method_definition.yaml

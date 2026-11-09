@@ -11,13 +11,9 @@ blocks:
     compile: not-code
     reason: "constant-name listing: the `constants:` entry names the smart-pin mode constant for each language (a bare symbol, no statement); a lone word compiles as a PASM label or fails as Spin2, so the block carries no code to compile"
   - at: spin2_complete
-    fp: "ca9ae196a72c9193"
+    fp: "80b6bf0b20c9545d"
     compile: fragment
     wrap: spin2-top
   - at: pasm2_complete
-    fp: "16bd7a5e746c347d"
+    fp: "9aaaef7afc572d39"
     compile: program
-  - at: y_register.formula
-    fp: "b75f09c352f1ad74"
-    compile: not-code
-    reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"

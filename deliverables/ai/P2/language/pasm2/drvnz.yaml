@@ -23,8 +23,16 @@ description: >-
   (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD
   instruction prior.
 
+  When Dest is a register, the register's value bits [10:0] are used as-is to form
+  the 11-bit ID range. A prior SETQ overrides Dest[10:6] with the low five bits of
+  the SETQ value; an ALTx between the SETQ and DRVNZ keeps the override, and a SETQ
+  separated from DRVNZ by other instructions is not documented.
+
   The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within
-  the same 32-pin group; it will not cross the port boundary.
+  the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not cross the port
+  boundary.
+
+  DRVNZ achieves the same effect as two instructions-- OUTNZ followed by DIRH.
 
   If the WCZ effect is specified, the C and Z flags are set to the original
   (pre-instruction) state of the base pin's OUT bit (OUTA / OUTB), identified by Dest.
@@ -36,21 +44,19 @@ flags_affected:
   Z: Set to the original (pre-instruction) state of the base pin's OUT bit
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
-  the I/O pin(s) to set to output direction and output levels of low or high.
+  the I/O pin(s) to set to output direction and output levels of !Z.
+- WCZ is an optional effect to update flags.
+sources:
+  - "description (OUT bits of pins D[10:6]+D[5:0]..D[5:0] = !Z, DIR bits = 1; wraps within OUTA/OUTB; prior SETQ overrides D[10:6]; C,Z = OUT bit; write DIRx* + OUTx; 2 clocks): P2 Instructions v35 - Rev B/C Silicon, row 378; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), list of changes (DIRx/OUTx/FLTx/DRVx can now work on a span of pins, +D[10:6] pins; prior SETQ overrides D[10:6])"
+  - "description (Dest[5:0], Dest[10:6], the 9-bit literal range of Dest[8:6], ##Dest and AUGD, the register value bits [10:0], the wrap within DIRA or DIRB and OUTA or OUTB, OUTNZ followed by DIRH) and encoding_notes (footnote 1): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DRVZ / DRVNZ, p.78"
+  - "description (an ALTx between the SETQ and DRVNZ keeps the override): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, pp.38-39 (SETQ / SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction); a SETQ separated by other instructions is in no source"
 encoding_notes:
 - New DIRx state is not data-forwarded; the next pipelined instruction sees the old
   state.
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DRVZ / DRVNZ, p.78"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pinop
-  pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
-    flags'
-  valueType: 30
-compiler_encoding:
-  operandFormat: 30
 last_updated: '2025-09-19T16:04:17.283347'
 category: Pin
-oneliner: Set pin(s) direction to output and output level to low/high according to
-  Z or !Z
+oneliner: Set pin(s) direction to output and output level to !Z
+related:
+  - architecture/io_pin_timing.yaml

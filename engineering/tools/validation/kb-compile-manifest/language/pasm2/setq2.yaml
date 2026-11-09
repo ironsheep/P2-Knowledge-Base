@@ -12,7 +12,7 @@ blocks:
     wrap: pasm2-dat
     assumes: [sine_table_hub, amplitude, phase]
   - at: examples[1].code
-    fp: "f3d7d6a9f3621148"
+    fp: "0f1d9f15cafa9342"
     compile: fragment
     wrap: pasm2-dat
     assumes: [source_addr, index, data, dest_addr]

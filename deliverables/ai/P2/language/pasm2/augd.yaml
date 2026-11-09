@@ -31,41 +31,40 @@ usage_notes: 'All instructions following AUGD are shielded from interrupt until 
   before. When counting
 
   clock cycles, make sure to account for 2 extra clock cycles for instructions containing
-  ## augmented literals.'
+  ## augmented literals.
+
+  Not documented: what happens when a second AUGD executes before the first AUGD
+  has been used by an instruction with an immediate Dest.'
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-- bits: EEEE 11111DD DDD DDDDDDDDD DDDDDDDDD
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
+- bits: EEEE 11111nn nnn nnnnnnnnn nnnnnnnnn
   write: Hidden D Queue
   c: —
   z: —
   clocks: '2'
 silicon_errata:
   setq_ptrx_block_size_delta_cancelled:
-    erratum: "E1"
-    severity: critical
     description: |
       AUGD placed between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG-PTRx cancels the
       special-case block-size PTRx delta. The expected number of longs transfers
-      correctly, but PTRx advances by only a single-long (normal PTRx-expression)
-      delta instead of the block-size delta.
+      correctly, but PTRx is modified only according to the normal PTRx expression
+      behavior instead of the block-size delta.
     example: |
       SETQ   #16-1         ' ready to load 16 longs
       AUGD   #$123456      ' AUGD here cancels the block-size PTRx delta!
       RDLONG 0,ptra++      ' ptra incremented by 4 (1 long), not 16*4
+    example_note: "Parallax's known-bug entry lists AUGD with ALTx and AUGS as cancelling the delta and shows its example with ALTD; the AUGD sequence above follows that general statement, and no test covers AUGD."
     workaround: "Do not place AUGD (or ALTx/AUGS) between SETQ/SETQ2 and the RDLONG/WRLONG/WMLONG-PTRx instruction; keep SETQ adjacent to the block transfer."
-    status: "Active in Rev C silicon (current production)."
-    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS ('Intervening ALTx/AUGS/AUGD instructions between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG-PTRx instructions will cancel the special-case block-size PTRx deltas')"
+    status: "Listed among the known silicon bugs."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS ('Intervening ALTx/AUGS/AUGD instructions between SETQ/SETQ2 and RDLONG/WRLONG/WMLONG-PTRx instructions will cancel the special-case block-size PTRx deltas'); hardware-verification ledger EF-067 (the PTRx step after SETQ, ALTD and a block RDLONG/WRLONG is the plain PTRx expression's own step: +4 for ptra++, +12 for ptra++[3]; AUGS and AUGD not tested)"
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, AUGD, p.50"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 409 (AUGD #n: EEEE 11111nn nnn nnnnnnnnn nnnnnnnnn; queue #n as the upper 23 bits for the next #D occurrence; next instruction shielded from interrupt; 2 clocks)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 11111NN NNN NNNNNNNNN NNNNNNNNN AUGD #N)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, AUGD, p.50 (the encoding table writes the 23 bits as DD DDD DDDDDDDDD DDDDDDDDD)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_aug
-  pattern: '#S'
-  description: 'Augment: immediate 23-bit value for AUGS/AUGD'
-  valueType: 23
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 23
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Augment next literal Dest to 32-bits

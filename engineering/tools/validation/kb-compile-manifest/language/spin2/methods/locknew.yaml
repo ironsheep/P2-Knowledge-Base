@@ -6,7 +6,7 @@ blocks:
     fp: "af11b59e14faa1a6"
     compile: program
   - at: examples[1].code
-    fp: "be696be7ce4f5436"
+    fp: "34855517bd527784"
     compile: program
   - at: examples[2].code
     fp: "06e0650ef719d461"
@@ -17,12 +17,11 @@ blocks:
     wrap: spin2-top
     assumes: [my_lock]
   - at: anti_patterns[0].correct
-    fp: "82e224f551043d0a"
+    fp: "a54aee4925381db8"
     compile: fragment
     wrap: spin2-top
-    assumes: [my_lock]
   - at: anti_patterns[1].wrong
-    fp: "1c56cb7420ed8e42"
+    fp: "afdf7c47aa71edce"
     compile: fragment
     wrap: spin2-method
     assumes: [lock]

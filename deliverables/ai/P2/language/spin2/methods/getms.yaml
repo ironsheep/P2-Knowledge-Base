@@ -18,8 +18,8 @@ examples:
     description: "Measure operation duration"
   - code: |
       ' Simple timeout
-      timeout_ms := GETMS() + 5000  ' 5 second timeout
-      repeat while GETMS() < timeout_ms
+      start_ms := GETMS()
+      repeat while GETMS() - start_ms < 5000   ' 5 second timeout
         if check_condition()
           quit
     description: "Implement millisecond timeout"
@@ -32,28 +32,25 @@ examples:
       debug("Uptime: ", udec(hours), ":", udec(minutes//60), ":", udec(seconds//60))
     description: "Calculate and display system uptime"
   - code: |
-      ' SD card SDSC write busy-wait — spec allows up to 24 seconds.
+      ' A 24-second busy-wait, here on an SD card write.
       ' GETCT cannot express this safely: at 200 MHz, GETCT-based timeouts
       ' are bounded to ~10 s by the 32-bit signed cycle window, and the
       ' (CLKFREQ/1000)*24_000 deadline calculation overflows. GETMS has
       ' plenty of headroom (49.7-day wrap), so multi-second protocol
       ' timeouts are straightforward.
-      timeout_ms := GETMS() + 24_000        ' 24-second SDSC write deadline
-      repeat while GETMS() < timeout_ms
+      start_ms := GETMS()
+      repeat while GETMS() - start_ms < 24_000   ' 24-second deadline
         if sd_busy_released()
           return SD_OK                      ' write completed
       return ERR_WRITE_TIMEOUT              ' fell through — timed out
-    description: "Multi-second protocol timeout (SD card SDSC write, 24s spec)"
+    description: "Multi-second timeout measured with GETMS"
 notes:
-  - "Based on system counter divided by clkfreq/1000"
+  - "Uses the 64-bit system counter and CLKFREQ"
   - "32-bit value wraps after ~49.7 days"
-  - "Resolution depends on clock frequency"
   - "Less precise than GETCT for short intervals"
   - "Good for human-scale timing (UI, timeouts)"
-  - "Handles clock frequency changes automatically"
 silicon_errata:
   stale_upper_long_after_missed_wrap:
-    erratum: "E3"
     effect: "GETMS() is computed from the calling cog's 64-bit counter (GETCT WC + GETCT, divided by clkfreq), so it reads short in a cog whose group of four (cogs 0-3 or 4-7) had no running cog at a wrap of the lower long, until that group runs through its next wrap: 2^32 clocks (21,474-21,475 ms at 200 MHz) per missed wrap -- after 8 missed wraps a cog 5 read 18,819 ms beside cog 0's 190,617. Workaround: keep a cog of the group running at every wrap (a keeper cog started first), or take no time in that group until it has run through one wrap. Full account: language/pasm2/getct.yaml silicon_errata."
     verified_against: "EF-068, EF-080, EF-082"
 timing:
@@ -61,10 +58,6 @@ timing:
     Spin2 methods execute via the bytecode interpreter. Clock count: not documented.
 
 aliases:
-  - "GETMS erratum E3"
-  - "erratum E3"
-  - "P2 erratum E3"
-  - "E3 erratum"
   - "GETMS reads short in cogs 4-7"
 
 related:
@@ -80,3 +73,5 @@ see_also:
   - "language/spin2/concepts/timing_operations.yaml"
   - "language/spin2/methods/getct.yaml"
   - "language/spin2/methods/getsec.yaml"
+sources:
+  - "description, returns and notes (64-bit system counter and CLKFREQ; rolls over every 49.7 days): Parallax Propeller 2 Spin2 Language Documentation v55, GETMS() : Milliseconds"

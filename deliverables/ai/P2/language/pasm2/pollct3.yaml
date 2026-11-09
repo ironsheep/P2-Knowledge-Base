@@ -6,9 +6,9 @@ description: >-
   POLLCT3 copies the state of the counter 3 event flag into C and/or Z and then clears
   the flag (unless it's being set again by the event sensor).
   If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to
-  the state of the counter event flag prior to clearing it.
+  the state of the counter 3 event flag prior to clearing it.
   The counter 3 event flag is set whenever the System Counter (CT) passes the value
-  in the CT3 event trigger register; i.e. MSB of (CT - CT3) is 0. The counter event
+  in the CT3 event trigger register; i.e. MSB of (CT - CT3) is 0. The counter 3 event
   flag is cleared upon execution of ADDCT3, POLLCT3, WAITCT3, JCT3, or JNCT3.
 result: CT3 event flag state is optionally copied into C and/or Z, then the flag is cleared.
 flags_affected:
@@ -21,21 +21,19 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZ0 000000011 000100100
   write: —
   c: CT3 Event
   z: CT3 Event
   clocks: '2'
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLCT1/2/3, p.111"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLCT1/2/3, pp.111-112"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 274 (POLLCT3 {WC/WZ/WCZ}: get CT3 event flag into C/Z, then clear it; 2 clocks)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Event instructions, p.43 (POLLCT3 {WC/WZ/WCZ}, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLCT1/2/3, pp.111-112 (Result line, WC / WZ / WCZ parameter, encoding row 000000011 / 000100100, write none, C and Z CT3 Event, 2 clocks, Related list, the copy-then-clear and update-C-and/or-Z explanation on p.111; the System Counter pass rule and the clearing list ADDCTx, POLLCTx, WAITCTx, JCTx, JNCTx on p.112)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (the POLLxxx instructions simultaneously return their event-occurred flag into C and/or Z and clear it unless it is set again by the event sensor; POLLCT3 event flag: cleared on ADDCT3, set whenever CT passes the result of the ADDCT3 (MSB of CT minus CT3 is 0), also cleared on POLLCT3 / WAITCT3 / JCT3 / JNCT3), instruction encoding listing (EEEE 1101011 CZ0 000000011 000100100 POLLCT3 {WC/WZ/WCZ})"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pollwait
-  pattern: ''
-  description: No operands - poll/wait instruction (moves S to D, sets S to $024)
-  valueType: 28
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 28
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Retrieve and clear CT3 event flag
@@ -55,3 +53,4 @@ related:
 - WAITCTx
 - JCTx
 - JNCTx
+- architecture/event_system.yaml

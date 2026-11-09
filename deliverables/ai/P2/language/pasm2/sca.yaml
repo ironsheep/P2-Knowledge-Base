@@ -6,7 +6,8 @@ description: >-
   SCA multiplies the lower 16-bits of each of Dest and Src together, right shifts the
   32-bit product by 16 (to scale down the result), and substitutes this value as the
   next instruction's Src value. If the WZ effect is specified, the Z flag is set (1) if
-  the product (before scaling down) is zero, or is cleared (0) if non-zero.
+  the product (before scaling down) is zero, or is cleared (0) if non-zero. The
+  instruction following SCA is shielded from interrupt.
 result: >-
   The upper 16 bits of the unsigned product from the 16-bit Dest and Src multiplication
   is substituted as the next instruction's Src value.
@@ -23,21 +24,19 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1010001 0ZI DDDDDDDDD SSSSSSSSS
   write: —
   c: —
   z: Product == 0
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SCA, p.123"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 139 (SCA D,{#}S {WZ}: next instruction's S value = unsigned (D[15:0] * S[15:0]) >> 16; footnote * Z = (result == 0); marked in the Next Inst Shielded from Interrupt column; 2 clocks; no write)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and Logic Instructions, p.38 (SCA D,{#}S {WZ}, 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, SCA, p.123 (Result line, Dest, Src and WZ parameters, encoding row 1010001 0ZI, write none, C none, Z Product = 0, 2 clocks, Related SCAS, the lower-16-bits product shifted right by 16 explanation, the WZ rule and the note that the instruction following SCA is shielded from interrupt)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 1010001 0ZI DDDDDDDDD SSSSSSSSS SCA D,S/# {WZ}), and INTERRUPTS (an interrupt branch cannot happen while SCA is executing)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 0
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Create unsigned 16-bit scale value for next instruction's S value

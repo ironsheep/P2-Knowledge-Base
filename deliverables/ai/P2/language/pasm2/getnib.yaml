@@ -12,7 +12,7 @@ description: >-
   Syntax 2 (GETNIB Dest) is intended for use after an ALTGN instruction; i.e. in
   a loop to iteratively read a series of nibble values within contiguous long registers.
 result: Nibble Num (0-7) of Src, or a nibble from a source described by prior ALTGN
-  instruction, is written to Dest.
+  instruction, is written to Dest (Dest = {28'b0, nibble}).
 parameters:
 - Dest is the register in which to store the nibble.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains
@@ -27,7 +27,7 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 100001N NNI DDDDDDDDD SSSSSSSSS
   write: D
   c: —
@@ -39,24 +39,21 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   z: —
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, GETNIB, p.88"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, rows 86-87 (GETNIB D,{#}S,#N: D = {28'b0, S.NIBBLE[N]}; GETNIB D: nibble established by prior ALTGN; 2 clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, GETNIB, p.88 (both encoding rows, Num 0-7 in least-significant nibble order, syntax 2 after ALTGN)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Math and logic instructions, p.36 (GETNIB D and GETNIB D,{#}S,#N, 2 clocks)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds3get
-  pattern: D{,S/#,#0..7}
-  description: 'Get nibble: destination, optional source and nibble index 0-7'
-  valueType: 7
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 7
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Get a nibble from a value
 related:
-- ALTGN
-- GETBYTE
-- GETWORD
-- SETNIB
-- SETBYTE
-- SETWORD
-- ROLNIB
-- ROLBYTE
-- ROLWORD
+- language/pasm2/altgn.yaml
+- language/pasm2/getbyte.yaml
+- language/pasm2/getword.yaml
+- language/pasm2/setnib.yaml
+- language/pasm2/setbyte.yaml
+- language/pasm2/setword.yaml
+- language/pasm2/rolnib.yaml
+- language/pasm2/rolbyte.yaml
+- language/pasm2/rolword.yaml

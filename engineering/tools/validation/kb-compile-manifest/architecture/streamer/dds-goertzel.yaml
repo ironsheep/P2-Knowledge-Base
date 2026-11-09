@@ -2,41 +2,33 @@
 # ENH-03 compile manifest. LEGALITY ONLY: a pass proves pnut-ts accepts the block in the
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
-  - at: operation.goertzel_calculation
-    fp: "a7b1df8010e469e6"
-    compile: not-code
-    reason: "operation / usage notation (pseudo-code with `:=`, `D[n:m]` fields and English), not Spin2 or PASM2 source (field layout / flag-effect description of the instruction; its facts were read against the silicon doc)"
   - at: lut_setup.example
-    fp: "129f88e059c79bfd"
+    fp: "40a19f2b1c30f26b"
     compile: fragment
     wrap: pasm2-dat
     assumes: [ampl=con, x, y, z]
   - at: lut_setup.sinc2_amplitude
-    fp: "255d517c45e4cb89"
+    fp: "c50b426fc1f695be"
     compile: fragment
     wrap: pasm2-dat
     assumes: [z]
-  - at: reading_results.reading_protocol
-    fp: "89c32e8da80d3592"
-    compile: not-code
-    reason: "YAML description prose (English sentences), not code"
   - at: reading_results.example
-    fp: "9ec5914b346bd3bc"
+    fp: "bcd7ab11150fa8d4"
     compile: fragment
     wrap: pasm2-dat
     assumes: [cos_result, sin_result]
   - at: reading_results.magnitude_calculation
-    fp: "dacdbcadfe244474"
+    fp: "a67fa7afdf08d48c"
     compile: fragment
     wrap: pasm2-dat
     assumes: [cos_result, sin_result, magnitude, phase]
   - at: frequency.example
-    fp: "603e78f11243060d"
+    fp: "6409e4edb1cc8770"
     compile: fragment
     wrap: pasm2-dat
     assumes: [clkf, xfrq]
   - at: usage_pattern.code
-    fp: "8013623bd45e424d"
+    fp: "25ef90c9c2817ffc"
     compile: fragment
     wrap: pasm2-dat
     assumes: [sine_table=con, adc_pin=con, clkf, target_freq, xfrq, dds_cmd, cycles, dds_s, cos_acc, sin_acc, magnitude]
@@ -44,3 +36,11 @@ blocks:
     fp: "805c4c5f2a8a1293"
     compile: not-code
     reason: "arithmetic formula or expression shown as notation (`=`, `x`, a bare expression), not a Spin2 or PASM2 statement"
+  - at: operation.goertzel_calculation.sinc1
+    fp: "f2887837b9ee0dfd"
+    compile: not-code
+    reason: "accumulation notation (SIN_MUL / SIN_ACC lines with `+=` and a D[23] heading) copied from the Silicon Doc SINC1/SINC2 table, not Spin2 or PASM2 source"
+  - at: operation.goertzel_calculation.sinc2
+    fp: "c2ef450b5b514d60"
+    compile: not-code
+    reason: "accumulation notation (SIN_MUL / SIN_ACC lines with `+=` and a D[23] heading) copied from the Silicon Doc SINC1/SINC2 table, not Spin2 or PASM2 source"

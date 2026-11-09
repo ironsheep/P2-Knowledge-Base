@@ -7,8 +7,8 @@ encoding:
   z: —
   clocks: '2...9'
 timing:
-  cycles: 2
-  type: fixed
+  cycles: "2...9"
+  type: variable
 description: Rotate a 32-bit signed (X, Y) point around origin (0, 0) by a specified
   angle. X coordinate comes from D operand, Y coordinate from SETQ value (or 0 if
   SETQ not used). Angle specified in S operand. Results retrieved via GETQX (X) and
@@ -35,10 +35,6 @@ long_description: 'The QROTATE instruction performs point rotation using the P2'
   This instruction can also be used for polar to cartesian conversion by setting the
   X coordinate (D) to the length, Y coordinate (SETQ) to 0, and the angle (S) to the
   desired angle.
-
-
-  Common applications include graphics transformations, signal processing rotations,
-  and coordinate system conversions.
 
   '
 examples:
@@ -89,6 +85,9 @@ related_instructions:
 - GETQY
 - SETQ
 - QVECTOR
+related:
+- language/pasm2/concepts/special_registers.yaml
+- language/pasm2/setq.yaml
 operand_details:
   D: X coordinate (32-bit signed)
   S: Rotation angle in P2 angle units (32-bit unsigned)
@@ -96,19 +95,13 @@ operand_details:
 result_details:
   GETQX: Rotated X coordinate (32-bit signed)
   GETQY: Rotated Y coordinate (32-bit signed)
-timing_notes: Result available 55 clocks after instruction issue. Each cog can issue
+timing_notes: The cog first waits for its hub slot to hand the command to the CORDIC solver; the result is available 55 clocks after that, and GETQX/GETQY wait for it if it has not arrived. Each cog can issue
   one CORDIC instruction per hub window (every 8 clocks).
 usage_notes: Use SETQ before QROTATE to specify Y coordinate. If SETQ is not used,
-  Y defaults to 0. Can be used for polar to cartesian conversion.
-documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.20, and CORDIC Solver Instructions, p.45; Parallax Propeller 2 Documentation v35 (Rev B/C silicon), CORDIC Solver (angle units); P2 Instructions v35 - Rev B/C Silicon, Sheet1"
+  Y defaults to 0, and QROTATE sets Q to zero (see language/pasm2/concepts/special_registers.yaml q_register).
+  Can be used for polar to cartesian conversion.
+documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.20, and CORDIC Solver Instructions, p.45; Parallax Propeller 2 Documentation v35 (Rev B/C silicon), CORDIC Solver (angle units, (X,Y) rotation); SETQ CONSIDERATIONS (COGINIT/QDIV/QFRAC/QROTATE without a preceding SETQ set Q to zero); P2 Instructions v35 - Rev B/C Silicon, Sheet1"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ls
-  pattern: D/#,S/#
-  description: 'Two operands: destination/immediate, source/immediate'
-  valueType: 13
-compiler_encoding:
-  operandFormat: 13
 last_updated: '2025-09-19T16:04:17.469590'
 category: CORDIC Solver
 oneliner: Rotate a 32-bit signed (X, Y) point around origin (0, 0) by a specified

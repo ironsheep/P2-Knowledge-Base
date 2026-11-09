@@ -1,0 +1,166 @@
+concept: instruction_encoding_key
+title: "PASM2 Instruction Encoding Key (the letters in an encoding: bits field)"
+category: instruction_encoding
+aliases:
+  - "encoding key"
+  - "instruction encoding key"
+  - "encoding table reference"
+  - "bits field"
+  - "bits: field letters"
+  - "EEEE"
+  - "EEEE CZI DDDDDDDDD SSSSSSSSS"
+  - "WC WZ WCZ bits"
+  - "CZI bits"
+  - "CZI FX field"
+  - "FX field"
+  - "R bit relative absolute"
+  - "WW field PA PB PTRA PTRB"
+  - "RAA AAAAAAAAA"
+  - "N NN NNN index"
+  - "cccc zzzz"
+  - "what do the letters in the encoding mean"
+description: >-
+  What each letter in the bits field of a PASM2 instruction's encoding stands for, and what the
+  write, c, z and clocks entries of an encoding row mean. The letters are positions in the 32-bit
+  instruction word; the digits 0 and 1 are fixed bits.
+overview: |
+  Every PASM2 instruction is one 32-bit word. An encoding row writes that word as five groups
+  separated by spaces, for example EEEE 0001000 CZI DDDDDDDDD SSSSSSSSS (ADD D,{#}S {WC/WZ/WCZ}).
+  A letter marks a field the assembler fills in from the instruction line. A 0 or 1 is a bit with a
+  fixed value. Several instructions share one INSTR group and are told apart by the fixed bits in
+  the FX, DEST and SRC groups.
+
+word_layout:
+  - group: COND
+    bits: "31:28"
+    written_as: "EEEE"
+    meaning: "The condition under which the instruction executes."
+  - group: INSTR
+    bits: "27:21"
+    meaning: "Identifies the instruction or class of instruction."
+  - group: FX
+    bits: "20:18"
+    meaning: "The effect bits, usually C, Z and I. They also say how the SRC field is read."
+  - group: DEST
+    bits: "17:9"
+    meaning: "The 9-bit destination register address, or a literal when the L bit is 1."
+  - group: SRC
+    bits: "8:0"
+    meaning: "The 9-bit source register address, or a literal when the I bit is 1."
+
+word_layout_note: "Some instructions use the groups differently: the branch forms RAA AAAAAAAAA AAAAAAAAA hold one 20-bit address in the low bits (see A), and AUGS and AUGD hold one 23-bit value in bits 22:0 (see n)."
+
+letters:
+  "0, 1":
+    meaning: "A fixed bit. The fixed bits of INSTR, FX, DEST and SRC are what identify the instruction. Some instructions fix some or all of the FX bits when C, Z or I would have no use there, or when DEST or SRC has a special meaning."
+  EEEE:
+    meaning: "The 4-bit condition code, bits 31:28. 1111 (execute always) is the value when the instruction line has no condition. The 16 values are in condition_codes below."
+  C:
+    meaning: "FX bit 20. 1 when the instruction line carries WC or WCZ, so the instruction writes the C flag. 0 when it does not."
+  Z:
+    meaning: "FX bit 19. 1 when the instruction line carries WZ or WCZ, so the instruction writes the Z flag. 0 when it does not."
+  I:
+    meaning: "FX bit 18. 1 when the source operand is prefixed by #, so the SRC field is a 9-bit literal value. 0 when SRC is a register address. A ## literal or a preceding AUGS widens the 9-bit literal to 32 bits."
+  L:
+    meaning: "1 when the destination operand is prefixed by #, so the DEST field is a literal value. 0 when DEST is a register address. L sits in an FX bit, but not the same FX bit in every instruction: read it from the position it has in the bits field (C0L has it at bit 18, CLI at bit 19)."
+  R:
+    meaning: "Bit 20 of the branch forms written RAA. R = 1: the 20-bit A field is relative to the program counter (PC += A). R = 0: A is absolute (PC = A). A backslash before the address (#\\label) forces R = 0, and a branch that crosses between cog and hub assembles with R = 0 without one."
+  A:
+    meaning: "The 20-bit address field of the branch forms (bits 19:0, the AA and the two AAAAAAAAA groups). Its meaning follows R: relative offset when R = 1, absolute address when R = 0."
+  WW:
+    meaning: "Bits 22:21 of the two forms EEEE 11100WW RAA ... (CALLD to a special register) and EEEE 11101WW RAA ... (LOC). Selects the special register that is written: 00 = PA, 01 = PB, 10 = PTRA, 11 = PTRB."
+  D:
+    meaning: "The 9-bit destination field (bits 17:9): the address of the register the instruction reads and usually overwrites. With L = 1 it is a literal. An AUGD before it, or a ## literal, widens a literal to 32 bits."
+  S:
+    meaning: "The 9-bit source field (bits 8:0): the address of the register that supplies the source value, or a 9-bit literal when I = 1. An AUGS before it, or a ## literal, widens a literal to 32 bits."
+  n:
+    meaning: "The 23-bit augment field of AUGS and AUGD (bits 22:0). AUGS queues it as the upper 23 bits of the next #S literal and AUGD as the upper 23 bits of the next #D literal, so the next 9-bit literal becomes 32 bits."
+  N:
+    meaning: "An index for instructions with a third operand, in three widths: N is 1 bit, a word index (0-1); NN is 2 bits, a byte index (0-3); NNN is 3 bits, a nibble index (0-7). In the nibble forms the three N bits run across the INSTR/FX boundary and end at bit 19; I is bit 18."
+  NN:
+    meaning: "The 2-bit byte index (0-3). See N."
+  NNN:
+    meaning: "The 3-bit nibble index (0-7). See N."
+  cccc:
+    meaning: "The 4-bit code in bits 16:13 of MODCZ and MODC that sets the new C value. %0000 clears C, %1111 sets C, and every other value is a condition the same way EEEE conditions are, evaluated on the current C and Z."
+  zzzz:
+    meaning: "The 4-bit code in bits 12:9 of MODCZ and MODZ that sets the new Z value, coded as cccc is. %0000 clears Z, %1111 sets Z."
+  no_other_letters:
+    meaning: "No letter other than those above appears in the bits field of any PASM2 instruction page."
+
+condition_codes:
+  note: "The EEEE value for each prefix. A prefix name that shares a value with another is an alias of the same condition."
+  "0000": "_RET_ (execute always and return if the instruction did not branch)"
+  "0001": "IF_NC_AND_NZ (IF_NZ_AND_NC, IF_GT, IF_A, IF_00)"
+  "0010": "IF_NC_AND_Z (IF_Z_AND_NC, IF_01)"
+  "0011": "IF_NC (IF_GE, IF_AE, IF_0X)"
+  "0100": "IF_C_AND_NZ (IF_NZ_AND_C, IF_10)"
+  "0101": "IF_NZ (IF_NE, IF_X0)"
+  "0110": "IF_C_NE_Z (IF_Z_NE_C, IF_DIFF)"
+  "0111": "IF_NC_OR_NZ (IF_NZ_OR_NC, IF_NOT_11)"
+  "1000": "IF_C_AND_Z (IF_Z_AND_C, IF_11)"
+  "1001": "IF_C_EQ_Z (IF_Z_EQ_C, IF_SAME)"
+  "1010": "IF_Z (IF_E, IF_X1)"
+  "1011": "IF_NC_OR_Z (IF_Z_OR_NC, IF_NOT_10)"
+  "1100": "IF_C (IF_LT, IF_B, IF_1X)"
+  "1101": "IF_C_OR_NZ (IF_NZ_OR_C, IF_NOT_01)"
+  "1110": "IF_C_OR_Z (IF_Z_OR_C, IF_LE, IF_BE, IF_NOT_00)"
+  "1111": "execute always (the value when no prefix is written)"
+
+other_encoding_entries:
+  write: "The register or registers the instruction writes. Most often D, the register addressed by the D operand; PC for a branch; K for the 8-level hardware stack; H for a hub long used to store calling context (C, Z and the return address). A dash means nothing is written."
+  c: "The value the instruction writes to the C flag when the instruction line carries WC or WCZ. A dash means the flag is never updated. Without the effect the flag is left as it was."
+  z: "The value the instruction writes to the Z flag when the instruction line carries WZ or WCZ. A dash means the flag is never updated. Without the effect the flag is left as it was."
+  clocks: "The clock cycles the instruction takes. A single value or range is the count wherever the instruction executes (cog, LUT or hub). Two values or ranges separated by a slash are the count for cog or LUT execution (left) and for hub execution (right). A value written as two numbers with the word or between them is the count when not branching and when branching."
+
+unnamed_encodings:
+  note: "Two instruction slots in the encoding list have no mnemonic; the list shows <empty> in place of the name. Both take a D operand and an S operand, each of which may be a literal (the L and I bits). What these words do when executed is not documented."
+  slots:
+    - bits: "EEEE 1011110 1LI DDDDDDDDD SSSSSSSSS"
+      operands: "{#}D,{#}S"
+    - bits: "EEEE 1011111 0LI DDDDDDDDD SSSSSSSSS"
+      operands: "{#}D,{#}S"
+
+worked_examples:
+  - instruction: "ADD D,{#}S {WC/WZ/WCZ}"
+    bits: "EEEE 0001000 CZI DDDDDDDDD SSSSSSSSS"
+    reading: "With WC the C bit is 1, with WZ the Z bit is 1, with WCZ both are 1. ADD x,#5 sets the I bit to 1; ADD x,y leaves it 0."
+  - instruction: "CALL #{\\}A"
+    bits: "EEEE 1101101 RAA AAAAAAAAA AAAAAAAAA"
+    reading: "CALL #label to a label in the same cog or hub area assembles with R = 1 (relative). CALL #\\label assembles with R = 0 (absolute)."
+  - instruction: "CALLD PA/PB/PTRA/PTRB,#{\\}A"
+    bits: "EEEE 11100WW RAA AAAAAAAAA AAAAAAAAA"
+    reading: "CALLD PTRA,#\\label assembles with WW = 10 and R = 0; the same with PB has WW = 01."
+  - instruction: "AUGS #n"
+    bits: "EEEE 11110nn nnn nnnnnnnnn nnnnnnnnn"
+    reading: "AUGS #$12345600 holds $12345600 shifted right by 9 bits, $91A2B, in its low 23 bits."
+  - instruction: "GETNIB D,{#}S,#N"
+    bits: "EEEE 100001N NNI DDDDDDDDD SSSSSSSSS"
+    reading: "GETNIB x,y,#5 has NNN = 101."
+  - instruction: "MODCZ c,z {WC|WZ|WCZ}"
+    bits: "EEEE 1101011 CZ1 0cccczzzz 001101111"
+    reading: "MODCZ _SET,_CLR WCZ has C = 1, Z = 1, cccc = 1111 and zzzz = 0000."
+
+related:
+  - language/pasm2/call.yaml
+  - language/pasm2/calld.yaml
+  - language/pasm2/loc.yaml
+  - language/pasm2/augs.yaml
+  - language/pasm2/augd.yaml
+  - language/pasm2/modcz.yaml
+  - language/pasm2/modc.yaml
+  - language/pasm2/modz.yaml
+  - language/pasm2/getnib.yaml
+  - language/pasm2/getbyte.yaml
+  - language/pasm2/getword.yaml
+  - language/pasm2/concepts/conditional_execution.yaml
+  - language/pasm2/concepts/branch_addressing.yaml
+  - language/pasm2/concepts/addressing_modes.yaml
+
+sources:
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, Assembly Language Elements, Term Definitions (A, C, D, H, I, K, L, N, R, S, W, Z), pp.29-30; Opcode Tables (COND, INSTR, FX, DEST and SRC bit ranges; the CZI, L and R bits; the Write, C Flag, Z Flag and Clocks columns), pp.30-31"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COGS (Table 6, the key to the Encoding column: EEEE, C, Z, I, L, WW, DDDDDDDDD, SSSSSSSSS, AAAAAAA, nnnnnn, N/NN/NNN, cccc, zzzz). The R row of that table says 0 = relative and 1 = absolute, the reverse of the instruction spreadsheet, the PASM2 manual and the compiled words; R here follows those three."
+  - "P2 Instructions v35 - Rev B/C Silicon, rows 402-407 (JMP, CALL, CALLA, CALLB, CALLD, LOC with an A field: 'If R = 1 then PC += A, else PC = A. \\ forces R = 0'; CALLD and LOC 'per W'), row 157 (CALLD D,S), rows 408-409 (AUGS and AUGD, n field), rows 398-399 (MODC and MODZ, cccc and zzzz), rows 410-459 (instruction prefixes and their EEEE codes), rows 460-491 (MODCZ operand codes cccc or zzzz), rows 10 (ADD), 86, 92 and 98 (GETNIB, GETBYTE, GETWORD with #N), 104, 108 and 112 (ALTGN, ALTGB, ALTGW: N field D[2:0], D[1:0], D[0]), 242 (COGID, the L bit)"
+  - "unnamed_encodings: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 1011110 1LI DDDDDDDDD SSSSSSSSS and EEEE 1011111 0LI DDDDDDDDD SSSSSSSSS, listed as <empty> D/#,S/#); P2 Instructions v35 - Rev B/C Silicon, rows 213 and 214 (<empty> {#}D,{#}S with those two encodings and no description); searched both documents and the PASM2 Manual for a description of these words: none"
+  - "CP-036 (the assembled words: R = 1 relative and R = 0 absolute for CALL/CALLB/LOC; WW = 00, 01, 10, 11 for PA, PB, PTRA, PTRB in CALLD and LOC; the AUGS/AUGD low 23 bits; MODCZ cccc/zzzz; the GETNIB NNN field; the C, Z and I bits; the EEEE field)"
+  - "R across domains: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), BRANCH ADDRESSING (absolute addressing is forced by the assembler when crossing between cog and hub domains; the JMP cases); CP-052 (from hub code, JMP #fastLoop to a cog label assembles to $FD800000, R = 0)"

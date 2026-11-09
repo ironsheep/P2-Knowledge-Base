@@ -3,7 +3,11 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: examples[0].code
-    fp: "58387c4e95002923"
+    fp: "b3242b9e5474efac"
     compile: fragment
     wrap: pasm2-dat
     assumes: [start, fin]
+  - at: examples[1].code
+    fp: "a1d50bc60b0733d8"
+    compile: fragment
+    wrap: pasm2-dat

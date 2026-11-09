@@ -6,12 +6,13 @@ description: |
   Addresses $1F0-$1F7 are dual-purpose: usable as general RAM or as special
   registers when their associated functions are enabled.
 
-  Addresses $1F8-$1FF are fixed special-purpose registers that always provide
-  their special functions when accessed.
+  Addresses $1F8-$1FF give mapped access to eight special-purpose registers. In
+  general, when an instruction specifies an address in this range it accesses a
+  special-purpose register, not just the underlying RAM.
 
 category: Special Registers
 documentation_level: complete
-documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Special-purpose Registers, p.14; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG RAM"
+documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Special-purpose Registers, p.14, Cog RAM, p.13, Direction and State, p.21, and I/O Pin Timing, p.22; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), COG RAM, SMART PINS, I/O PIN TIMING and INTERRUPTS; COGINIT PTRB: Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), STARTING AND STOPPING COGS; P2 hardware verification, EF-114 (one board, P0 with no smart pin mode, cog 0 and one worker cog: cog 0 DIR 1 OUT 0 with the worker DIR 0 OUT 1 reads 0, and cog 0 DIR 0 OUT 1 with the worker DIR 1 OUT 0 reads 0)"
 
 dual_purpose_registers:
   description: |
@@ -138,9 +139,9 @@ dual_purpose_registers:
 
 fixed_special_registers:
   description: |
-    Registers $1F8-$1FF are fixed special-purpose registers. When specifying
-    an address in this range, the instruction accesses the special-purpose
-    register, not just the underlying RAM.
+    Registers $1F8-$1FF are special-purpose registers. In general, when
+    specifying an address in this range, the instruction accesses the
+    special-purpose register, not just the underlying RAM.
 
   PTRA:
     address: 504
@@ -148,9 +149,9 @@ fixed_special_registers:
     description: Pointer A to Hub RAM
     access: read_write
     usage: |
-      Primary pointer register for Hub RAM access.
-      Used with PTRx-based addressing modes for efficient Hub memory operations.
-      Supports pre/post increment/decrement addressing.
+      Pointer A to hub RAM.
+      Used in PTRx expressions by hub read and write instructions, which can
+      pre- or post-increment and decrement the pointer.
     examples:
     - code: |
         rdlong  data, ptra++      ' Read long from Hub at PTRA, post-increment
@@ -169,10 +170,10 @@ fixed_special_registers:
     description: Pointer B to Hub RAM
     access: read_write
     usage: |
-      Secondary pointer register for Hub RAM access.
-      Used with PTRx-based addressing modes for efficient Hub memory operations.
-      Supports pre/post increment/decrement addressing.
-      COGINIT writes the code address to the target cog's PTRB.
+      Pointer B to hub RAM.
+      Used in PTRx expressions by hub read and write instructions, which can
+      pre- or post-increment and decrement the pointer.
+      COGINIT writes its S/# value (the code address) into the target cog's PTRB.
     examples:
     - code: |
         rdlong  data, ptrb++      ' Read long from Hub at PTRB, post-increment
@@ -191,7 +192,7 @@ fixed_special_registers:
     description: Direction register A (pins 0-31)
     access: read_write
     usage: |
-      Controls pin direction for pins 0-31.
+      Output enable bits for pins 0-31.
       1 = output, 0 = input
     examples:
     - code: |
@@ -213,7 +214,7 @@ fixed_special_registers:
     description: Direction register B (pins 32-63)
     access: read_write
     usage: |
-      Controls pin direction for pins 32-63.
+      Output enable bits for pins 32-63.
       1 = output, 0 = input
     examples:
     - code: |
@@ -231,8 +232,8 @@ fixed_special_registers:
     description: Output register A (pins 0-31)
     access: read_write
     usage: |
-      Sets output state for pins 0-31.
-      Only affects pins configured as outputs via DIRA.
+      Output state bits for pins 0-31.
+      The corresponding DIRA bit must be high to enable output.
     examples:
     - code: |
         mov     OUTA, #0            ' Clear all outputs 0-31
@@ -253,8 +254,8 @@ fixed_special_registers:
     description: Output register B (pins 32-63)
     access: read_write
     usage: |
-      Sets output state for pins 32-63.
-      Only affects pins configured as outputs via DIRB.
+      Output state bits for pins 32-63.
+      The corresponding DIRB bit must be high to enable output.
     examples:
     - code: |
         mov     OUTB, pattern       ' Set output pattern for pins 32-63
@@ -272,8 +273,8 @@ fixed_special_registers:
     access: read_only
     alternate_function: Debug interrupt call address
     usage: |
-      Reads current state of pins 0-31.
-      Returns actual pin states regardless of direction setting.
+      Input state bits for pins 0-31. An IN bit returns the pin's read state,
+      or, in smart pin modes, a flag from the smart pin circuit.
       Also serves as debug interrupt call address.
     examples:
     - code: |
@@ -293,8 +294,8 @@ fixed_special_registers:
     access: read_only
     alternate_function: Debug interrupt return address
     usage: |
-      Reads current state of pins 32-63.
-      Returns actual pin states regardless of direction setting.
+      Input state bits for pins 32-63. An IN bit returns the pin's read state,
+      or, in smart pin modes, a flag from the smart pin circuit.
       Also serves as debug interrupt return address.
     examples:
     - code: |
@@ -308,11 +309,11 @@ fixed_special_registers:
 
 usage_notes:
 - Dual-purpose registers ($1F0-$1F7) can be used as general RAM when their special functions are not enabled
-- Fixed special registers ($1F8-$1FF) always provide special functions when accessed
+- In general, an instruction specifying an address in $1F8-$1FF accesses a special-purpose register, not just the underlying RAM
 - Each cog has its own copy of all these registers
-- Changes to output/direction registers take effect immediately
-- Multiple cogs can control the same pins (outputs are OR'd together)
-- Smart pin modes override basic I/O functions on DIRA/DIRB/OUTA/OUTB/INA/INB
+- When a DIRx or OUTx bit is changed by any instruction, it takes three additional clocks after the instruction before the pin starts transitioning to the new state
+- On a pin with no smart pin mode, a cog's OUT bit reaches the pin only through that cog's own DIR bit
+- In smart pin modes, the DIR bit is used as an active-low reset to the smart pin circuit, a configuration bit controls the output enable, the smart pin can take over driving the output state (OUT ignored), and the IN bit serves as a flag
 
 common_patterns:
 - pattern: Toggle pin
@@ -323,7 +324,7 @@ common_patterns:
             if_z    jmp     #.wait
 - pattern: Copy input to output
   code: mov     OUTA, INA
-- pattern: Set multiple pins atomically
+- pattern: Write all 32 output state bits
   code: mov     OUTA, new_pattern
 - pattern: Hub block read with pointer
   code: |

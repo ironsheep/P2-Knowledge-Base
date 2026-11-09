@@ -9,21 +9,24 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: Trigger INT1, regardless of STALLI mode.
+description: >-
+  Trigger INT1. In cog execution with STALLI active, TRGINT1 is held: the INT1 branch
+  did not occur in the 16 instructions measured after the trigger, and occurred once
+  ALLOWI executed. Parallax's documents also give: Trigger INT1, regardless of STALLI
+  mode.
 flags_affected:
   C: No effect
   Z: No effect
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.157"
+sources:
+  - "P2 hardware verification, EF-112 (one board, cog execution; ISR entered via IJMP1 with SETINT1 #0; no trigger counts 0 and TRGINT1 under ALLOWI counts 1; after STALLI then TRGINT1 no branch during the 16 NOPs that followed, and the branch occurred after ALLOWI; GETBRK D[1] read 1 under STALLI, 0 under ALLOWI)"
+  - "P2 Instructions v35 - Rev B/C Silicon, row 304 (Trigger INT1, regardless of STALLI mode)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Interrupt Instructions, p.44 (Trigger INT1, regardless of STALLI mode)"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_pollwait
-  pattern: ''
-  description: No operands - poll/wait instruction (moves S to D, sets S to $024)
-  valueType: 28
-compiler_encoding:
-  operandFormat: 28
 syntax_variants:
-- TRGINT1 Trigger
+- TRGINT1
 last_updated: '2025-09-19T16:04:17.048115'
 category: Interrupt
-oneliner: Trigger INT1, regardless of STALLI mode
+oneliner: Trigger INT1; with STALLI active the branch waits for ALLOWI
+related:
+  - architecture/interrupts.yaml

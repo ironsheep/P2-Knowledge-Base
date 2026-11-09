@@ -14,11 +14,9 @@ component_name: "Event System"
 component_type: "hardware_event_controller"
 
 description: |
-  The P2 Event System provides hardware event detection and routing capabilities that
-  enable COGs to respond to various hardware conditions without polling. Events can
-  trigger interrupts, wake COGs from wait states, or be polled directly. The system
-  supports pin patterns, edges, timer comparisons, and subsystem completion events,
-  creating a flexible event-driven programming model.
+  Each cog tracks 16 background events. Events can be polled (POLLxxx), waited for
+  (WAITxxx), branched on (Jxxx/JNxxx) and used as interrupt sources. The events cover
+  pin patterns, pin edges and levels, CT comparisons, and subsystem conditions.
 
 architecture:
   event_sources: 16
@@ -27,7 +25,6 @@ architecture:
   the_sixteen_events:
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS ("Cogs monitor and track 16 different background events, numbered 0..15").
-      note: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS.
     list:
       - {event: 0,  name: "interrupt occurred",        poll: "POLLINT"}
       - {event: 1,  name: "CT passed CT1",             poll: "POLLCT1"}
@@ -43,19 +40,19 @@ architecture:
       - {event: 11, name: "streamer finished -- out of commands, now idle", poll: "POLLXFI"}
       - {event: 12, name: "streamer NCO rollover occurred", poll: "POLLXRO"}
       - {event: 13, name: "streamer read lookup RAM location $1FF", poll: "POLLXRL"}
-      - {event: 14, name: "attention requested by another cog or cogs", poll: "POLLATN"}
+      - {event: 14, name: "attention requested by a cog's COGATN (another cog's, or this cog's own bit)", poll: "POLLATN"}
       - {event: 15, name: "GETQX/GETQY executed with no CORDIC result available", poll: "POLLQMT"}
     note: >-
       Every event but 15 has a matching WAITxxx, and every event has a Jxxx/JNxxx branch. There is no
-      WAITQMT, because that event cannot occur while waiting. Events 0-3 and 8-15 are fixed sensors; only events 4-7
-      are programmable, via SETSE1..4.
+      WAITQMT, because that event cannot occur while waiting. Events 4-7 (SE1..SE4) are configured by
+      SETSE1..SETSE4; events 1-3 are established by ADDCT1..ADDCT3 and event 8 by SETPAT.
   
   event_routing:
     - destination: "interrupts"
       description: "Events can trigger INT1/2/3"
       dispatch_mechanism: "Hardware inserts 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline"
-      entry_overhead_cogexec: "4 clocks (per language/pasm2/calld.yaml encoding)"
-      entry_overhead_hubexec: "13-20 clocks (FIFO refill on the branch)"
+      entry_overhead_cogexec: "Not documented"
+      entry_overhead_hubexec: "Not documented"
       deferral_conditions: "See architecture/interrupts.yaml deferral_conditions; the branch is held off during ALTxx/SETQ/REP/STALLI/WAITx etc."
     
     - destination: "wait_release"
@@ -64,28 +61,119 @@ architecture:
     
     - destination: "polling"
       description: "Events can be polled via POLL instructions"
-      timing: "POLLxxx instructions are 2 clocks (per per-instruction YAMLs)"
+      timing: "POLLxxx instructions are 2 clocks"
+
+event_clearing:
+  source: >-
+    Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS (the per-flag
+    descriptions: POLLINT/WAITINT through POLLQMT event flag; the POLLxxx, WAITxxx
+    and Jxxx/JNxxx paragraphs; Selectable Events);
+    Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, POLLATN through POLLXRO, pp.111-116 (set and clear sentences of each Explanation).
+  note: >-
+    One row per event. The cleared-by column lists the POLLxxx, WAITxxx and
+    Jxxx/JNxxx instructions of the event (a Jxxx/JNxxx clears the flag whether or
+    not it branches) and the other instructions that clear it. A POLLxxx, WAITxxx or
+    Jxxx/JNxxx leaves the flag set if the event sensor is setting it again at that
+    moment. Cog-start cells: "Cleared" for events 0, 13, 14 and 15; for the other
+    events the state of the flag at cog start is not documented.
+  rows:
+    - event: 0
+      name: "interrupt occurred"
+      set_by: "Interrupt 1, 2 or 3 occurring (debug interrupts are ignored)"
+      cleared_by: "POLLINT, WAITINT, JINT, JNINT"
+      cleared_on_cog_start: "Cleared"
+    - event: 1
+      name: "CT passed CT1"
+      set_by: "CT passing the result of the ADDCT1 (MSB of CT minus CT1 is 0)"
+      cleared_by: "ADDCT1, POLLCT1, WAITCT1, JCT1, JNCT1"
+      cleared_on_cog_start: "Not documented"
+    - event: 2
+      name: "CT passed CT2"
+      set_by: "CT passing the result of the ADDCT2 (MSB of CT minus CT2 is 0)"
+      cleared_by: "ADDCT2, POLLCT2, WAITCT2, JCT2, JNCT2"
+      cleared_on_cog_start: "Not documented"
+    - event: 3
+      name: "CT passed CT3"
+      set_by: "CT passing the result of the ADDCT3 (MSB of CT minus CT3 is 0)"
+      cleared_by: "ADDCT3, POLLCT3, WAITCT3, JCT3, JNCT3"
+      cleared_on_cog_start: "Not documented"
+    - event: 4
+      name: "selectable event 1 occurred"
+      set_by: "The event configured by SETSE1 occurring"
+      cleared_by: "SETSE1, POLLSE1, WAITSE1, JSE1, JNSE1"
+      cleared_on_cog_start: "Not documented"
+    - event: 5
+      name: "selectable event 2 occurred"
+      set_by: "The event configured by SETSE2 occurring"
+      cleared_by: "SETSE2, POLLSE2, WAITSE2, JSE2, JNSE2"
+      cleared_on_cog_start: "Not documented"
+    - event: 6
+      name: "selectable event 3 occurred"
+      set_by: "The event configured by SETSE3 occurring"
+      cleared_by: "SETSE3, POLLSE3, WAITSE3, JSE3, JNSE3"
+      cleared_on_cog_start: "Not documented"
+    - event: 7
+      name: "selectable event 4 occurred"
+      set_by: "The event configured by SETSE4 occurring"
+      cleared_by: "SETSE4, POLLSE4, WAITSE4, JSE4, JNSE4"
+      cleared_on_cog_start: "Not documented"
+    - event: 8
+      name: "pattern match or mismatch on INA or INB"
+      set_by: "After SETPAT: (INA & D) != S with C=0, Z=0; (INA & D) == S with C=0, Z=1; (INB & D) != S with C=1, Z=0; (INB & D) == S with C=1, Z=1"
+      cleared_by: "SETPAT, POLLPAT, WAITPAT, JPAT, JNPAT"
+      cleared_on_cog_start: "Not documented"
+    - event: 9
+      name: "hub FIFO block-wrap"
+      set_by: "The hub RAM FIFO interface exhausting its block count and reloading its block count and start address"
+      cleared_by: "RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW, JNFBW"
+      cleared_on_cog_start: "Not documented"
+    - event: 10
+      name: "streamer command buffer empty"
+      set_by: "The streamer being ready for a new command"
+      cleared_by: "XINIT, XZERO, XCONT, POLLXMT, WAITXMT, JXMT, JNXMT"
+      cleared_on_cog_start: "Not documented"
+    - event: 11
+      name: "streamer finished"
+      set_by: "The streamer running out of commands"
+      cleared_by: "XINIT, XZERO, XCONT, POLLXFI, WAITXFI, JXFI, JNXFI"
+      cleared_on_cog_start: "Not documented"
+    - event: 12
+      name: "streamer NCO rollover"
+      set_by: "The streamer NCO rolling over"
+      cleared_by: "XINIT, XZERO, XCONT, POLLXRO, WAITXRO, JXRO, JNXRO"
+      cleared_on_cog_start: "Not documented"
+    - event: 13
+      name: "streamer read lookup RAM location $1FF"
+      set_by: "Location $1FF of the lookup RAM being read by the streamer"
+      cleared_by: "POLLXRL, WAITXRL, JXRL, JNXRL"
+      cleared_on_cog_start: "Cleared"
+    - event: 14
+      name: "attention requested"
+      set_by: "Any cog requesting attention with COGATN, this cog included when its own bit is set in COGATN's D"
+      cleared_by: "POLLATN, WAITATN, JATN, JNATN"
+      cleared_on_cog_start: "Cleared"
+    - event: 15
+      name: "GETQX/GETQY executed with no CORDIC result"
+      set_by: "GETQX or GETQY executing without any CORDIC results available or in progress"
+      cleared_by: "POLLQMT, JQMT, JNQMT (there is no WAITQMT, because the event could not happen while waiting; Parallax's documents also name WAITQMT among the clearing instructions)"
+      cleared_on_cog_start: "Cleared"
 
 event_selectors:
   SE1:
-    register: "Internal selector 1"
+    register: "Not documented: where the selectable event's SETSEn setting is stored"
     configuration: "SETSE1 instruction"
-    typical_use: "Primary event monitoring"
-  
+
   SE2:
-    register: "Internal selector 2"
+    register: "Not documented: where the selectable event's SETSEn setting is stored"
     configuration: "SETSE2 instruction"
-    typical_use: "Secondary event monitoring"
-  
+
   SE3:
-    register: "Internal selector 3"
+    register: "Not documented: where the selectable event's SETSEn setting is stored"
     configuration: "SETSE3 instruction"
-    typical_use: "Tertiary event monitoring"
-  
+
   SE4:
-    register: "Internal selector 4"
+    register: "Not documented: where the selectable event's SETSEn setting is stored"
     configuration: "SETSE4 instruction"
-    typical_use: "Quaternary event monitoring"
 
 instructions:
   - instruction: "SETSE1"
@@ -97,7 +185,8 @@ instructions:
       (instruction encodings).
     operation: |
       SE1 := D[8:0] event configuration (9 bits)
-      SETSE can ONLY configure pin, LUT, or lock events (NOT timer/ATN/pattern events)
+      SETSEn D/# accepts the configuration values listed in d_encoding_table: LUT read and write events, hub lock rises, falls and changes, and pin rises, falls, changes, low and high.
+      SEn is cleared when the matched SETSEn executes.
     d_encoding_table: |
       D[8:0] encoding:
       %000_00_00AA = this cog reads LUT address %1111111AA
@@ -121,7 +210,7 @@ instructions:
   - instruction: "SETSE2"
     encoding: "EEEE 1101011 00L DDDDDDDDD 000100001"
     description: "Configure selectable event 2"
-    operation: "Similar to SETSE1 for event selector 2"
+    operation: "As SETSE1, for selectable event 2"
   
   - instruction: "SETSE3"
     encoding: "EEEE 1101011 00L DDDDDDDDD 000100010"
@@ -136,8 +225,8 @@ instructions:
     description: "Get the SE1 event flag into C and/or Z, then clear it"
     operation: |
       C and/or Z := SE1 event flag (per WC / WZ / WCZ)
-      The flag is then cleared, unless the event sensor is setting it again on
-      the same clock. SE1 is also cleared by WAITSE1/JSE1/JNSE1 and by SETSE1.
+      The flag is then cleared, unless the event sensor is setting it again at
+      that moment. SE1 is also cleared by WAITSE1/JSE1/JNSE1 and by SETSE1.
     flags_affected: "C and/or Z = SE1 event flag"
     timing: "2 clocks"
     usage_example: |
@@ -186,10 +275,11 @@ instructions:
     source: >-
       Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS, POLLPAT/WAITPAT event flag; encoding: Assembly Language (instruction encodings).
       Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.43.
+      No-effect-flag fact: CP-040 (pnut-ts refuses SETPAT D,S WC; plain SETPAT assembles).
     operation: |
       D = mask, S = match value.
       C and Z are read as INPUTS at the moment SETPAT executes -- they are not
-      effect flags, and pnut-ts rejects `SETPAT D,S WC/WZ/WCZ`. Set them first:
+      effect flags: SETPAT takes no WC/WZ/WCZ effect. Set them first:
         C=0, Z=0  ->  event set whenever (INA & D) != S
         C=0, Z=1  ->  event set whenever (INA & D) == S
         C=1, Z=0  ->  event set whenever (INB & D) != S
@@ -201,7 +291,7 @@ instructions:
 
 event_configurations:
   pin_edge_detection:
-    note: "SETSE uses D[8:6] as mode bits (3 bits, not 2)"
+    note: "SETSEn takes a 9-bit D value: for pin edges, D[8:6] = %001 rises, %010 falls, %011 changes, and D[5:0] = the pin number"
     modes:
       - mode: "%001_PPPPPP"
         description: "Pin rises (positive edge)"
@@ -236,13 +326,13 @@ event_configurations:
       WAITSE1
   
   pattern_matching:
-    description: "Match specific pin patterns using dedicated WAITPAT (not SETSE)"
-    note: "Pattern match uses WAITPAT directly - SETSE cannot configure pattern events"
+    description: "Match specific pin patterns: SETPAT sets the pattern, then WAITPAT waits for it"
+    note: "SETPAT sets the pattern first, then WAITPAT waits for the match"
 
     setup_example: |
       ' Wait for INA[7:0] == $A5.
       ' C and Z are INPUTS to SETPAT: C picks INA(0)/INB(1), Z picks !=(0)/==(1).
-      ' They must be set BEFORE SETPAT -- SETPAT takes no WC/WZ effect.
+      ' They are set before SETPAT -- SETPAT takes no WC/WZ effect.
       MOV     mask, #$FF
       MOV     pattern, #$A5
       CMP     mask, mask WCZ  ' C := 0 (INA), Z := 1 (fire on equality)
@@ -250,25 +340,24 @@ event_configurations:
       WAITPAT                 ' Wait for (INA & mask) == pattern
   
   timer_events:
-    description: "Events based on counter comparisons using dedicated WAITCTn (not SETSE)"
-    note: "Timer events use WAITCT1/2/3 directly - SETSE cannot configure timer events"
+    description: "Events based on counter comparisons, established by ADDCT1..ADDCT3 and awaited with WAITCT1..WAITCT3"
+    note: "The CT-passed-CTn event flag is set when CT passes the CTn target; ADDCTn clears it"
 
     setup_example: |
       ' Setup 1ms timer event
       GETCT   timeout
       ADDCT1  timeout, ##160_000  ' 1ms at 160MHz
-      WAITCT1                     ' Wait for CT to pass CT1 (dedicated instruction)
+      WAITCT1                     ' Wait for CT to pass CT1
 
 programming_patterns:
   - pattern: "multi_event_monitor"
     description: "Monitor multiple events simultaneously"
     note: |
-      IMPORTANT: SETSE can ONLY configure pin/LUT/lock events.
-      Timer (CT), ATN, pattern, and streamer events have dedicated POLL/WAIT instructions.
-      There is NO single instruction to wait for any of multiple selectable events -
-      must use polling loop or map events to interrupts.
+      SETSEn configures pin, LUT and hub lock events. Timer (CT), ATN, pattern and streamer
+      events each have their own POLL/WAIT instructions.
+      Each WAITSEn waits for its own selectable event (SETSEn / WAITSEn / POLLSEn are matched by n).
     code: |
-      ' Setup multiple PIN events (SETSE is limited to pins/LUT/locks)
+      ' Set up four selectable events: three pin edges and a hub lock
       SETSE1  #%001_000001     ' Pin 1 rises (positive edge)
       SETSE2  #%010_000010     ' Pin 2 falls (negative edge)
       SETSE3  #%011_000011     ' Pin 3 changes (any edge)
@@ -291,10 +380,10 @@ programming_patterns:
           POLLSE4 WC
           IF_C    CALL #handle_lock
 
-          POLLCT1 WC            ' Timer uses dedicated POLL instruction
+          POLLCT1 WC            ' Poll the CT1 event
           IF_C    CALL #handle_timeout
 
-          POLLATN WC            ' ATN uses dedicated POLL instruction
+          POLLATN WC            ' Poll the ATN event
           IF_C    CALL #handle_atn
 
           JMP     #event_loop
@@ -317,13 +406,18 @@ programming_patterns:
           JMP     #state_machine
 
       active_state
-          ' Timer events use WAITCT directly (not SETSE)
+          ' Wait for CT to pass the CT1 target
           GETCT   timeout
           ADDCT1  timeout, ##16_000_000
-          WAITCT1                   ' Wait for timer (dedicated instruction)
+          WAITCT1                   ' Wait for CT to pass CT1
           MOV     state, #STATE_DONE
           JMP     #state_machine
-  
+
+      done_state
+          ' (the done-state handling is application code)
+          MOV     state, #STATE_IDLE
+          JMP     #state_machine
+
   - pattern: "pin_change_notification"
     description: "Respond to any pin change in a group"
     code: |
@@ -342,13 +436,13 @@ programming_patterns:
   - pattern: "synchronized_sampling"
     description: "Sample multiple inputs on timer event"
     code: |
-      ' Sample every 100us
+      ' Wait 100us (at 160 MHz) from the start of each pass, then sample
       sample_loop
           GETCT   next_sample
           ADDCT2  next_sample, ##16_000  ' 100us
-          WAITCT2                        ' Wait for timer (dedicated instruction)
+          WAITCT2                        ' Wait for CT to pass CT2
 
-          ' Sample all inputs at one instant: one MOV reads all 32 pins of a port
+          ' Read each port with one MOV
           MOV     sample1, INA           ' P31..P0
           MOV     sample2, INB           ' P63..P32
 
@@ -389,10 +483,9 @@ event_interrupt_mapping:
       source: "SE4 event"
       interrupt: "Any (1/2/3)"
 
-common_applications:
+usage_examples:
   - application: "button_debouncing"
-    description: "Detect clean button press with timing"
-    complexity: "beginner"
+    description: "Wait for a pin rising edge, then wait 10 ms at a 160 MHz clock"
     implementation: |
       ' Wait for button press with debounce
       SETSE1  #%001_000000 | BUTTON_PIN ' INA/INB bit of pin rises
@@ -401,8 +494,7 @@ common_applications:
       TESTP   #BUTTON_PIN WC            ' C = pin is still high (pressed)
   
   - application: "pulse_measurement"
-    description: "Measure pulse width using events"
-    complexity: "intermediate"
+    description: "Read CT at a pin's rising edge and at its falling edge, then subtract the two CT reads"
     implementation: |
       ' Measure positive pulse width
       SETSE1  #%001_000000 | PULSE_PIN  ' INA/INB bit of pin rises
@@ -414,8 +506,7 @@ common_applications:
       SUB     end_time, start_time      ' Pulse width
   
   - application: "protocol_timeout"
-    description: "Timeout waiting for protocol response"
-    complexity: "intermediate"
+    description: "Poll a CT1 timeout and a pin rising edge in one loop"
     implementation: |
       ' Wait for response with timeout
       GETCT   timeout
@@ -423,87 +514,58 @@ common_applications:
       SETSE1  #%001_000000 | DATA_PIN   ' Data pin rises (positive edge)
 
       ' Race between timeout and data using polling loop
-      POLLCT1 WC                       ' Check timeout (dedicated instruction)
+      POLLCT1 WC                       ' Check the CT1 timeout
       IF_C    JMP #timeout_handler
       POLLSE1 WC                        ' Check data pin event
       IF_C    JMP #data_received
       JMP     #$-4                      ' Keep checking
 
-best_practices:
-  - practice: "clear_before_wait"
-    description: "Clear event flags before waiting"
-    rationale: "Prevents responding to stale events"
-  
-  - practice: "use_edge_for_signals"
-    description: "Use edge detection for signal changes"
-    rationale: "Level detection can cause repeated triggers"
-  
-  - practice: "combine_with_interrupts"
-    description: "Map critical events to interrupts"
-    rationale: "Ensures timely response to important events"
-  
-  - practice: "document_event_usage"
-    description: "Document which events each COG uses"
-    rationale: "Prevents conflicts in multi-COG systems"
-
 performance_characteristics:
   event_detection: |
-    Event flags are set by hardware at the moment the event condition is
-    evaluated; the flag is then visible to POLLxxx/WAITxxx/JATN/etc. on
-    subsequent instructions. Detection-to-flag clock count: not documented.
+    Each event flag is set by its event condition (see the set_by entries under
+    the event flags) and is tested or cleared by its POLLxxx/WAITxxx/Jxxx/JNxxx
+    instructions. Detection-to-flag clock count: Not documented.
   
   response_latency:
-    polling: "POLLxxx: 2 clocks (per per-instruction YAMLs)"
+    polling: "POLLxxx: 2 clocks"
     waiting: "WAITxxx releases when the event occurs; no clock count is documented"
-    interrupt: "4 clocks cog / 13-20 clocks hub for the dispatched CALLD (per language/pasm2/calld.yaml)"
-  
-  simultaneous_events: "All 4 SE events tracked independently"
+    interrupt: "Not documented as a clock count; the interrupt branch is a 'CALLD IRETx,IJMPx WCZ' inserted into the instruction pipeline"
+
+  simultaneous_events: "Each cog can track up to four selectable events"
   
   overhead:
     configuration: "2 clocks per SETSEn instruction"
     monitoring: >-
-      2 clocks per POLLSEn. A WAITSEn costs 2 clocks once the flag is already set, and
-      stalls the cog for as long as it is not -- there is no separate per-wait overhead.
+      2 clocks per POLLSEn. A WAITSEn takes 2+ clocks and stalls the cog while its flag
+      is not set.
 
 limitations:
   - limitation: "four_selectable_events"
-    description: "Only 4 SE events available per COG"
-    workaround: "Reconfigure events dynamically or use interrupts"
+    description: "Each cog can track up to four selectable events (SE1..SE4)"
 
-  - limitation: "no_event_queuing"
-    description: "Events are flags, not queued"
-    workaround: "Must handle before next occurrence"
-
-  - limitation: "cog_local_events"
-    description: "Events are per-COG, not global"
-    workaround: "Use ATN for inter-COG event notification"
-
-  - limitation: "no_multi_event_wait"
-    description: "No single instruction to wait for any of multiple SE events"
-    workaround: "Use polling loop (POLLSE1..4) or map events to interrupts via SETINT"
+  - limitation: "event_flags"
+    description: "Each event is tracked as a flag that is set when the event occurs and cleared by its POLL, WAIT, J or JN instruction, and for most events also by the instruction that sets the event up (event_clearing)"
 
   - limitation: "setse_limited_sources"
-    description: "SETSE can ONLY configure pin, LUT, or lock events"
-    workaround: "Timer events use WAITCT1/2/3, ATN uses WAITATN, pattern uses WAITPAT"
+    description: "SETSEn configures pin, LUT, or hub lock events. CT events are established by ADDCT1..ADDCT3, the pattern event by SETPAT"
 
 critical_distinction:
-  title: "SETSE vs SETINT Encoding (Common Source of Confusion)"
+  title: "SETSE and SETINT Encodings"
   explanation: |
-    There are TWO separate encoding systems that are often confused:
+    Two separate encodings apply:
 
-    1. SETSE D[8:0] - Configures WHAT triggers a Selectable Event (SE1-4)
-       - 9-bit encoding for pin edges/levels, LUT accesses, lock states
-       - CANNOT configure timer, ATN, pattern, streamer, or CORDIC events
+    1. SETSE D[8:0] - Configures what triggers a selectable event (SE1-4)
+       - 9-bit encoding for pin edges and levels, LUT accesses, hub lock states
        - Example: SETSE1 #%001_000010 = pin 2 rises
 
-    2. SETINT D[3:0] - Configures WHAT triggers an Interrupt (INT1-3)
+    2. SETINT D[3:0] - Configures what triggers an interrupt (INT1-3)
        - 4-bit code selecting from 16 interrupt sources:
          0=off, 1=CT1, 2=CT2, 3=CT3, 4=SE1, 5=SE2, 6=SE3, 7=SE4,
          8=pattern, 9=FIFO, 10=streamer ready, 11=streamer done,
          12=NCO roll, 13=streamer reads LUT $1FF, 14=ATN, 15=CORDIC empty
        - Example: SETINT1 #4 = INT1 triggered by SE1 event
 
-    To wait for timer/ATN/pattern events without interrupts, use dedicated instructions:
+    Instructions that wait for or poll the other events:
     - Timer: WAITCT1, WAITCT2, WAITCT3, POLLCT1, POLLCT2, POLLCT3
     - ATN: WAITATN, POLLATN
     - Pattern: WAITPAT, POLLPAT
@@ -524,4 +586,8 @@ related_topics:
 sources:
     - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), EVENTS"
     - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Assembly Language (instruction encodings)"
+    - "P2 Instructions v35 Rev B/C Silicon, POLLxxx rows (2 clocks) and WAITxxx rows (2+ clocks)"
+    - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), INTERRUPTS (interrupt branch is a CALLD IRETx,IJMPx WCZ inserted into the instruction pipeline)"
     - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (SETPAT), p.43"
+    - "EF-099 (COGATN with the issuing cog's own bit raises that cog's attention event, event 14; detectors POLLATN WC, JATN, SETQ plus WAITATN WC, Spin2 POLLATN(); the attention interrupt path not tested)"
+    - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, instruction groups list, p.24 (WAITSE1..4 'Wait for and clear selectable event n flag', JSE1..4 / JNSE1..4 'selectable event n flag')"

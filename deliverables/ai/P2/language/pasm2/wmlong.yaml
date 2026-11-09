@@ -7,40 +7,39 @@ encoding:
   z: —
   clocks: '3...10 *'
 timing:
-  cycles: '3...10 (cog) / 3...20 (hub-exec)'
+  cycles: '3...10 (cog or LUT exec) / 3...20 (hub exec)'
   type: variable
-  source: "P2 Instructions v35 - Rev B/C Silicon, WMLONG row (clocks 3...10 * / 3...20 *)"
-  notes: "Hub-window dependent. +1 clock if the long crosses a hub long boundary (PASM2 Manual instruction table, footnote '+1 if crosses hub long')."
+  source: "P2 Instructions v35 - Rev B/C Silicon, WMLONG row (clocks 3...10 * / 3...20 *; the hub-exec column's footnote '* +1 if crosses hub long'); Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF (WMLONG 3...10 / 3...20 with the footnote '+1 if crosses hub long'), p.155"
+  notes: "+1 clock if the long crosses a hub long."
 description: Write only non-$00 bytes in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2
   invokes cog/LUT block transfer.
 flags_affected:
   C: No effect
   Z: No effect
+notes:
+- "Cog registers $1F8..$1FF are special-purpose registers which cannot be transferred to hub RAM via SETQ+WMLONG."
 silicon_errata:
   setq_block_ptrx_delta:
-    erratum: "E1"
-    description: "When used as a SETQ/SETQ2 block transfer with a PTRx expression, do NOT place an ALTx/AUGS/AUGD between the SETQ and this WMLONG -- the intervening instruction cancels the block-size PTRx delta: PTRx takes the plain expression's own step (+4 for ptra++, +12 for ptra++[3]), NOT N*4. Full detail: language/pasm2/concepts/setq_block_ops.yaml."
+    description: "When used as a SETQ/SETQ2 block transfer with a PTRx expression, do not place an ALTx/AUGS/AUGD between the SETQ and this WMLONG -- the intervening instruction cancels the block-size PTRx delta: PTRx takes the plain expression's own step (+4 for ptra++, +12 for ptra++[3]), not N*4; the expected number of longs still transfers. Full detail: language/pasm2/concepts/setq_block_ops.yaml."
     source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), KNOWN SILICON BUGS; EF-067 (measured for RDLONG/WRLONG)"
 documentation_level: enhanced
+documentation_source: "P2 Instructions v35 - Rev B/C Silicon, WMLONG row; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), RANDOM ACCESS INTERFACE (WMLONG skips $00 bytes) and FAST BLOCK MOVES ($1F8..$1FF cannot be block-written to hub)"
 related_instructions:
 - WRLONG
 - WRBYTE
 - WRWORD
-compiler_note: pnut-ts internally uses WMLONG_ (with underscore) but this is a compiler
-  naming quirk, not a separate instruction. The enum_name ac_wmlong confirms the
-  canonical name is WMLONG.
 last_updated: '2025-11-26'
 category: Hub RAM
 oneliner: Write masked long to hub RAM (non-zero bytes only)
 immediate_address_note:
   note: >-
-    A plain immediate source/address operand is limited to 0-255 (the 9-bit S
-    field's bit 8 is the pointer/expression selector, so a literal spans only bits
-    7:0). For 20-bit hub addresses this rarely matters - use a register, a
-    PTRA/PTRB pointer, or the ## augmented form for the full range. This cap is
-    shared across the hub-memory operand family (RDLONG WRLONG RDBYTE WRBYTE RDWORD
-    WRWORD WMLONG) and is felt most with RDLUT/WRLUT, where small LUT addresses are
-    written as bare literals.
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, RANDOM ACCESS INTERFACE (the S/#/PTRx operand: #%0AAAAAAAA 8-bit immediate address versus #%1SUPNNNNN PTR expression)"
+    The S/#/PTRx operand gives the hub address in one of five forms: a register
+    (address $000..$1FF) whose 20 LSBs are used as the hub address; an 8-bit immediate hub
+    address (#$00..$FF); a 20-bit immediate hub address (##$00000..$FFFFF, which
+    invokes AUGS); a PTR expression with a 5-bit scaled index (PTRx {[index5]});
+    or a PTR expression with a 20-bit unscaled index (PTRx {[##index20]}, which
+    invokes AUGS). Without AUGS, bit 8 of the 9-bit S field selects a PTR expression
+    (#%1SUPNNNNN) instead of an 8-bit immediate address (#%0AAAAAAAA).
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, RANDOM ACCESS INTERFACE (the five ways to express a hub address in the S/#/PTRx operand; #%0AAAAAAAA 8-bit immediate address versus #%1SUPNNNNN PTR expression)"
 related:
   - architecture/silicon_errata.yaml

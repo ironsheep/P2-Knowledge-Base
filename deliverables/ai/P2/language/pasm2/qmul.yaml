@@ -1,52 +1,31 @@
 instruction: QMUL
 syntax: QMUL    {#}D,{#}S
-compiler_syntax: QMUL D/#,S/#
 encoding:
 - bits: EEEE 1101000 0LI DDDDDDDDD SSSSSSSSS
   write: —
   c: —
   z: —
   clocks: '2...9'
-compiler_encoding:
-  bits: 32
-  opcode: 416
-  effects: 0
-  operandFormat: 13
-  rawValue: 27040
 timing:
-  cycles: 2
-  type: fixed
-description: Perform 32×32 unsigned multiplication producing 64-bit result. Multiplies
-  D operand by S operand. Results retrieved via GETQX (lower 32 bits) and GETQY (upper
-  32 bits) instructions 55 clocks later.
+  cycles: "2...9"
+  type: variable
+description: Multiply D by S, two unsigned 32-bit numbers. GETQX retrieves the lower
+  long and GETQY the upper long of the product 55 clocks later.
 flags_affected:
   C: No effect
   Z: No effect
-long_description: 'The QMUL instruction performs high-precision unsigned multiplication
-  using the P2''s 54-stage pipelined CORDIC solver. It multiplies two 32-bit unsigned
-  integers (D × S) and produces a full 64-bit product, avoiding the precision loss
-  that would occur with standard 32-bit multiplication.
+long_description: 'QMUL multiplies two unsigned 32-bit numbers (D × S) using the
+  hub''s 54-stage pipelined CORDIC solver. Fifty-five clocks after the cog hands the
+  command to the CORDIC solver, the lower long of the product is available through
+  GETQX and the upper long through GETQY; both wait if the result has not yet arrived.
 
-
-  The instruction takes the first multiplicand in the D operand and the second multiplicand
-  in the S operand, both as 32-bit unsigned values. After 55 clocks, the 64-bit result
-  can be retrieved using GETQX for the lower 32 bits and GETQY for the upper 32 bits.
-
-
-  This full-precision multiplication is essential for applications requiring accurate
-  large number arithmetic, such as DSP operations, cryptographic calculations, fixed-point
-  mathematics, and multiply-accumulate operations where intermediate precision is
-  critical.
-
-
-  The pipelined nature allows for continuous multiply-accumulate operations by issuing
-  new QMUL instructions every 8 clocks (hub window) while retrieving results from
-  previous operations, enabling high-throughput mathematical processing.
+  Several CORDIC commands can be given to the solver before their results are read,
+  because the pipeline is 54 clocks long and each cog''s hub slot comes around every
+  8 clocks on the P2.
 
   '
-compiler_category: Miscellaneous
 examples:
-- code: ''' Multiply 1000000 × 2000000 = 2000000000000
+- code: ''' Multiply 1000000 by 2000000
 
     QMUL    ##1000000, ##2000000
 
@@ -70,13 +49,13 @@ examples:
 
     '
   description: Variable unsigned multiplication
-- code: ''' Multiply-accumulate pattern
+- code: ''' Add a product to a 64-bit accumulator
 
     MOV     acc_low, #0
 
     MOV     acc_high, #0
 
-    QMUL    a1, b1          '' First multiplication
+    QMUL    a1, b1          '' Start the multiplication
 
     '' ... 55 clocks of other work ...
 
@@ -89,29 +68,23 @@ examples:
     ADDX    acc_high, prod_high  '' Add with carry
 
     '
-  description: Multiply-accumulate operation
-- code: ''' Pipelined multiplication for throughput
+  description: Accumulate a 64-bit product
+- code: ''' Two multiplications in the CORDIC solver at once
 
     QMUL    a1, b1          '' Start first multiply
 
-    '' ... 8 clocks later ...
-
     QMUL    a2, b2          '' Start second multiply
-
-    '' ... 47 clocks later ...
 
     GETQX   result1_low     '' Get first result
 
     GETQY   result1_high
-
-    '' ... 8 clocks later ...
 
     GETQX   result2_low     '' Get second result
 
     GETQY   result2_high
 
     '
-  description: Pipelined multiplications for high throughput
+  description: Two overlapped multiplications
 related_instructions:
 - GETQX
 - GETQY
@@ -123,31 +96,16 @@ operand_details:
   D: First multiplicand (32-bit unsigned)
   S: Second multiplicand (32-bit unsigned)
 result_details:
-  GETQX: Lower 32 bits of 64-bit product
-  GETQY: Upper 32 bits of 64-bit product
-timing_notes: Result available 55 clocks after instruction issue. Each cog can issue
-  one CORDIC instruction per hub window (every 8 clocks).
-applications: DSP multiply-accumulate, fixed-point arithmetic, large integer calculations,
-  cryptographic operations, precise mathematical computations.
-interrupt_protection: |
-  For timing-critical PASM2 code with interrupts enabled, place the 55-clock CORDIC
-  window within a single-iteration REP block, which is automatically shielded from
-  interrupts. A pending interrupt is allowed to branch once REP is no longer active
-  and the other branch conditions are met:
-    REP @.protect, #1
-    QMUL multiplicand, multiplier
-    GETQX result_lo
-    GETQY result_hi
-    .protect
-  See language/pasm2/concepts/cordic_solver.yaml for detailed patterns.
-documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.20, and CORDIC Solver Instructions, p.44; P2 Instructions v35 - Rev B/C Silicon, Sheet1"
+  GETQX: Lower long of the product
+  GETQY: Upper long of the product
+timing_notes: A cog waits for its hub slot, zero to (cogs-1) clocks away, to hand the
+  command to the CORDIC solver. Fifty-five clocks later the results are available
+  via GETQX and GETQY. With interrupts enabled while CORDIC commands overlap, an
+  interrupt service routine can steal enough clocks that one or more results are
+  overwritten before they are read; language/pasm2/concepts/cordic_solver.yaml
+  (interrupt_protection) shows how to shield such a sequence from interrupts.
+documentation_source: "Parallax Propeller 2 (P2X8C4M64P) Datasheet Release November 1, 2022 (2022/11/01), CORDIC Solver, p.20, and CORDIC Solver Instructions, p.44; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), CORDIC SOLVER (MULTIPLY) and OVERLAPPING CORDIC COMMANDS (interrupts during overlapped commands); P2 Instructions v35 - Rev B/C Silicon, Sheet1"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ls
-  pattern: D/#,S/#
-  description: 'Two operands: destination/immediate, source/immediate'
-  valueType: 13
-compiler_effects: []
 last_updated: '2025-09-19T16:04:17.531155'
 category: CORDIC Solver
-oneliner: Perform 32×32 unsigned multiplication producing 64-bit result
+oneliner: Multiply two unsigned 32-bit numbers; GETQX and GETQY retrieve the lower and upper long of the product

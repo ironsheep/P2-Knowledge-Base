@@ -9,19 +9,12 @@ encoding:
 timing:
   cycles: 3
   type: fixed
-description: Read data from LUT address {#}S/PTRx into D. C = MSB of data.
+description: Read data from LUT address {#}S/PTRx into D. C = MSB of data. RDLUT also sets Q to the data it read, replacing any value an earlier SETQ left there (see language/pasm2/concepts/special_registers.yaml q_register).
 flags_affected:
   C: Set to MSB of data
   Z: Set if result equals zero
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.158"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, PROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF, p.158; Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), SETQ CONSIDERATIONS (RDLUT sets Q to the data read); P2 Instructions v35 - Rev B/C Silicon, Sheet1"
 documentation_level: enhanced
-compiler_operand_format:
-  name: operand_dsp
-  pattern: D,S/#/PTRA/PTRB
-  description: Destination, source/immediate/pointer register
-  valueType: 15
-compiler_encoding:
-  operandFormat: 15
 syntax_variants:
 - RDLUT D,{#}S/P
 last_updated: '2025-09-19T16:04:17.422959'
@@ -33,38 +26,32 @@ aliases:
 - RDLUT 256 compile error
 immediate_address_limit:
   rule: >-
-    A plain immediate LUT address (RDLUT D,#S) is limited to #0-#255, the lower
-    half of the 512-long LUT. #256 and above are a hard compile error
-    ("Constant must be from 0 to 255") - not a wrap, not a silent runtime trap,
-    not a wrong-long read.
+    A plain immediate LUT address (RDLUT D,#S) is limited to #0-#255: #256 and #511
+    are a compile error ("Constant must be from 0 to 255").
   full_range_access: >-
-    To reach any LUT long (0-511), use a register operand holding the address
-    (RDLUT D, addrReg) or a PTRA/PTRB pointer, optionally indexed
-    (RDLUT D, PTRB[4]).
+    The 32-bit words are addressible from $000 to $1FF. S gives the LUT address, so
+    an address held in a register used as S (RDLUT D,S) reaches $100-$1FF, which a
+    plain immediate cannot. Not documented: which bits of the register form the
+    address.
+  ptrx_expression: >-
+    RDLUT accepts a PTRx expression for S. PTRA indexes and updates count LUT longs:
+    with PTRA = 8, RDLUT D,PTRA[2] reads LUT[10]; RDLUT D,PTRA++ reads LUT[8] and
+    adds 1 to PTRA. Not documented: the PTRB, pre-increment and -- forms, and other
+    index values.
   encoding_reason: >-
-    The 9-bit S address field's top bit (bit 8) is the pointer/expression
-    selector, not address bit 8. A literal cannot set it, so a literal spans
-    only bits 7:0 (0-255); a PTRx expression sets bit 8 to take the pointer
-    path, and a register operand carries the full 9-bit address.
+    RDLUT's S operand is a register, an immediate or a PTRx expression. The
+    assembler refuses a plain immediate above 255.
   augmented_form_warning: >-
-    Do NOT use the ## augmented form (RDLUT D,##500) to reach the upper half: it
-    compiles, but its low 9 bits set bit 8 and land on the pointer-decode path -
-    the AUGS high bits are meaningless for a 9-bit LUT address. Use a register or
-    PTRA/PTRB instead.
+    RDLUT D,##256 assembles. Not documented: what RDLUT does with an augmented S
+    value.
   scope: >-
-    All 512 LUT longs are reachable; only the plain-literal addressing mode is
-    capped at the lower 256. The limit is on the immediate operand, not the
-    memory.
-  applies_to_family: >-
-    The 0-255 plain-immediate cap is shared by the whole hub-memory operand
-    family (RDLONG WRLONG RDBYTE WRBYTE RDWORD WRWORD WMLONG); it bites for LUT
-    specifically because LUT addresses are small numbers authors write as bare
-    literals.
+    The limit applies to the plain immediate operand.
   compiler_behavior: >-
-    The compiler enforces the limit; the over-range case was
-    verified by compiling it.
-  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), HUB, RANDOM ACCESS INTERFACE (the S/#/PTRx operand: #%0AAAAAAAA 8-bit immediate address versus #%1SUPNNNNN PTR expression)"
+    The compiler enforces the limit: a plain immediate of #256 or #511 is a
+    compile error.
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), LOOKUP RAM, LOAD/STORE ACCESS (lookup RAM is read into cog RAM with RDLUT; the 32-bit words are addressible from $000 to $1FF), instruction encoding listing (RDLUT D,S/#/PTRx), list of changes (RDLUT/WRLUT can now handle PTRx expressions); CP-037 (rdlut x,#256 and x,#511 refused with 'Constant must be from 0 to 255'; #255 and ##256 accepted); ptrx_expression: P2 hardware verification, EF-118 (one board, cog execution; LUT[i] = $C0DE_0000 + i, PTRA = 8; RDLUT PTRA[2] read index 10; RDLUT PTRA++ read index 8 with PTRA delta 1; controls RDLONG PTRA[2] and ++ and RDBYTE steps of 4 and 1); full_range_access (register S): P2 Instructions v35 - Rev B/C Silicon, row 151 (Read data from LUT address {#}S/PTRx into D)"
 related:
 - architecture/lookup_ram.yaml
 - language/pasm2/wrlut.yaml
 - language/pasm2/setq2.yaml
+- language/pasm2/concepts/special_registers.yaml

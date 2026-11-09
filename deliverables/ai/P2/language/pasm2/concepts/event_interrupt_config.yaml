@@ -6,13 +6,13 @@ documentation_source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon),
 documentation_level: comprehensive
 
 overview: |
-  P2 provides sophisticated event and interrupt handling with 16 event sources per cog (four of them selectable, SE1..SE4),
-  three program-visible interrupts with dedicated vectors, and both polling and interrupt-driven
-  responses. A fourth, hidden debug interrupt sits above all three and is inaccessible to normal
-  cog programs.
-  Events can trigger interrupts, wake from WAIT, or be polled. Each cog has independent event configuration.
-  
-  Debug infrastructure uses interrupts extensively for breakpoints and single-stepping.
+  Each cog tracks 16 events, numbered 0..15 (four of them selectable, SE1..SE4), and has
+  three program-visible interrupts with dedicated vectors; an event can be polled, waited for,
+  branched on, or used as an interrupt source. A fourth, hidden debug interrupt sits above all
+  three and is inaccessible to normal cog programs.
+  Each cog has independent event configuration.
+
+  The debug interrupt provides breakpoints and single-stepping.
 
 interrupt_system:
   interrupt_levels:
@@ -26,19 +26,16 @@ interrupt_system:
         normal cog programs and enabled per cog via HUBSET. During a debug ISR the read-only INA
         and INB registers become readable/writable and are named IJMP0 and IRET0; IJMP0 is
         initialized to $1F8 on COGINIT, the debug-ISR-entry routine in the cog-register ROM.
-        Used by the Spin2 debugger infrastructure.
 
     INT1:
       priority: "Highest of the three program-visible interrupts - can interrupt INT2 and INT3"
       vector: "IJMP1"
       return: "RETI1 or RESI1"
-      typical_use: "Timer interrupts"
 
     INT2:
       priority: "Middle - can interrupt INT3"
       vector: "IJMP2"
       return: "RETI2 or RESI2"
-      typical_use: "Pin events (SE1..SE4)"
 
     INT3:
       priority: "Lowest - can interrupt only non-interrupt code"
@@ -72,6 +69,7 @@ interrupt_system:
     NIXINT1_3:
       syntax: "NIXINT1/2/3"
       operation: "Cancel a triggered interrupt that is waiting to branch"
+      use: "Only useful in main code after STALLI executes, or in an ISR which needs to stop a lower-level interrupt from executing after the current ISR exits"
 
   return_instructions:
     RETI0_3:
@@ -83,12 +81,11 @@ interrupt_system:
     RESI0_3:
       syntax: "RESI0/1/2/3"
       operation: "Return from the interrupt, but resume this ISR at its next instruction when the next interrupt occurs"
-      behavior: "RESIx is the alias CALLD IJMPx,IRETx WCZ: it returns to the interrupted code and writes the ISR's next address into IJMPx, so the next interrupt continues after the RESI instead of at the start of the ISR (RETIx leaves IJMPx unchanged)"
-      use: "Co-routine style interrupt service routines that keep their place between interrupts"
+      behavior: "RESIx is the alias CALLD IJMPx,IRETx WCZ (RESI0: CALLD INA,INB WCZ): it returns to the interrupted code, restores C and Z from IRETx, and writes the ISR's next address into IJMPx, so the next interrupt continues after the RESI instead of at the start of the ISR (RETIx leaves IJMPx unchanged)"
 
 event_sources:
   interrupt_sources:
-    0: "Never (disabled)"
+    0: "<off>, the default on cog start"
     1: "CT-passed-CT1"
     2: "CT-passed-CT2"
     3: "CT-passed-CT3"
@@ -102,7 +99,7 @@ event_sources:
     11: "Streamer ran out of commands, established by XINIT/XZERO/XCONT"
     12: "Streamer NCO rolled over, established by XINIT/XZERO/XCONT"
     13: "Streamer read location $1FF of lookup RAM"
-    14: "Attention requested by other cog(s)"
+    14: "Attention requested by other cog(s). A COGATN that names this cog's own bit also sets its attention event flag. Not documented: whether that self strobe also triggers this interrupt"
     15: "GETQX/GETQY executed without any CORDIC results available or in progress"
 
   event_configuration:
@@ -127,35 +124,35 @@ event_sources:
     SETPAT:
       syntax: "SETPAT mask, match"
       operation: "Configure pin pattern detection"
-      use: "Trigger on specific pin combinations"
-      
+      use: "SETPAT clears the PAT event flag and sets the pattern; the flag is then set whenever (INA & D) != S (C=0, Z=0), (INA & D) == S (C=0, Z=1), (INB & D) != S (C=1, Z=0) or (INB & D) == S (C=1, Z=1)"
+
     ADDCT1_3:
       syntax: "ADDCT1/2/3 value, #delta"
-      operation: "Set timer compare value"
-      use: "Schedule future events"
+      operation: "Add S into D and copy the result into the dedicated CTx target register; clear the CT-passed-CTx event flag"
+      use: "The CT-passed-CTx event flag is set when CT passes the target"
 
 event_operations:
   polling:
     POLLATN:
-      syntax: "POLLATN {WC}"
+      syntax: "POLLATN {WC|WZ|WCZ}"
       operation: "Poll for attention, clear if set"
       
     POLLCT1_3:
-      syntax: "POLLCTx {WC}"
+      syntax: "POLLCTx {WC|WZ|WCZ}"
       operation: "Poll for CT passing CTx"
       
     POLLPAT:
-      syntax: "POLLPAT {WC}"
+      syntax: "POLLPAT {WC|WZ|WCZ}"
       operation: "Poll for pin pattern"
       
     POLLSE1_4:
-      syntax: "POLLSEx {WC}"
+      syntax: "POLLSEx {WC|WZ|WCZ}"
       operation: "Poll selectable event"
 
   waiting:
     WAITINT:
       syntax: "WAITINT"
-      operation: "Wait for any interrupt"
+      operation: "Wait for an interrupt (INT1, INT2 or INT3) to occur; stalls the cog to save power"
       
     WAITCT1:
       syntax: "WAITCT1"
@@ -187,11 +184,8 @@ interrupt_context:
     - "C flag"
     - "Z flag"
     
-  not_saved:
-    - "General registers"
-    - "PTRA/PTRB"
-    - "Q register"
-    - "Must be saved by ISR if needed"
+  other_registers:
+    - "Not documented: any automatic save of general registers or PTRA/PTRB"
 
   context_preservation:
     code: |
@@ -237,11 +231,11 @@ common_patterns:
       SETINT3 #14      ' ATN event
       
       atn_handler
-        ' Check which cog sent ATN
+        ' Clear the ATN event flag (C = 1 if it was set). Not documented: which cog requested attention
         POLLATN WC
-        ' Process message
+        ' Process the request
         RETI3
-    description: "Inter-cog communication"
+    description: "Attention-requested interrupt. The ATN flag is set whenever any cog requests attention. Not documented: which cog requested attention."
 
   critical_section:
     code: |
@@ -256,14 +250,14 @@ priority_and_nesting:
     - "INT1 has the highest program-visible priority and can interrupt INT2 and INT3"
     - "INT2 has the middle priority and can interrupt INT3"
     - "INT3 has the lowest priority and can interrupt only non-interrupt code"
-    - "Same level cannot interrupt itself"
+    - "Same level cannot interrupt itself: while an interrupt is waiting to branch and while its ISR executes, intervening interrupt events at the same priority level are ignored; a new event is waited for once the ISR returns (architecture/interrupts.yaml priority_preemption.interrupt_states)"
     - "The hidden debug interrupt (INT0) has priority over all three"
-    
+
   nesting_depth:
-    - "Maximum 4 levels deep - the three program-visible interrupts plus the debug interrupt"
+    - "The interrupt levels are the debug interrupt, INT1, INT2 and INT3; higher interrupts can interrupt lower ISRs"
+    - "Not documented: a stated maximum nesting depth"
     - "Each level has own return address"
     - "Flags saved per level"
-    - "Debug ISR must handle full nesting"
 
   dispatch:
     mechanism: |
@@ -271,48 +265,40 @@ priority_and_nesting:
       'CALLD IRETx,IJMPx WCZ' into the instruction pipeline while holding the
       program counter at its current value, so that the interrupt later
       returns to the address saved in IRETx.
-    entry_overhead_cogexec: "4 clocks (per language/pasm2/calld.yaml encoding)"
-    entry_overhead_hubexec: "13-20 clocks (FIFO refill on the branch)"
-    exit_overhead: "Same as entry (RETIx/RESIx are CALLD instructions)"
+    entry_overhead_cogexec: "Not documented: a clock count for the interrupt branch (a CALLD instruction takes 4 clocks in cog/LUT execution)"
+    entry_overhead_hubexec: "Not documented: a clock count for the interrupt branch (a CALLD instruction takes 13...20 clocks in hub execution)"
+    exit_overhead: "RETIx/RESIx are CALLD instructions: 4 clocks cog/LUT, 13...20 hub"
     deferral_conditions: "See architecture/interrupts.yaml deferral_conditions; the branch is held off during ALTxx/SETQ/SETQ2/REP/STALLI/WAITx/AUGS/AUGD/XBYTE/etc."
     factors:
-      - "Current instruction completion (deferral conditions)"
-      - "Higher priority interrupts in flight"
-      - "Execution mode (cog vs hub)"
+      - "Deferral conditions: ALTxx / CRCNIB / SCA / SCAS / GETCT+WC / GETXACC / SETQ / SETQ2 / XORO32 / XBYTE must not be executing; AUGS and AUGD must not be executing or waiting for their operand instruction; REP and STALLI must not be executing or active; the cog must not be stalled in any WAITx instruction"
+      - "Priority once the conditions are met: INT1, then INT2, then INT3"
 
 best_practices:
   interrupt_design:
-    - "Keep ISRs short and fast"
-    - "Save/restore only needed registers"
-    - "Use CALLA/CALLB in ISR for leaf functions"
-    - "Clear event sources in ISR"
-    - "Test with all interrupt combinations"
-    - "Leave the debug interrupt to the debugger: it is the hidden INT0, not INT3, and is enabled per cog via HUBSET"
-    
+    - "Same-level events that arrive while an ISR waits to branch or runs are ignored"
+    - "The CALLD that realises the interrupt branch writes the return address and C/Z into IRETx. Not documented: any other automatic save"
+    - "The debug interrupt is the hidden INT0, not INT3, and is enabled per cog via HUBSET; it was designed to operate without any cooperation from the program being debugged"
+
   event_selection:
-    - "Use polling for non-critical events"
-    - "Use interrupts for time-critical events"
-    - "Configure before enabling interrupts"
-    - "Document event assignments clearly"
+    - "To set up an interrupt, its IJMP register is pointed to the ISR first; once the IJMPx register is configured, the interrupt is enabled with SETINTx"
     - "LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts (architecture/locks.yaml)"
-    
+
   debugging:
-    - "Add markers at ISR entry/exit"
-    - "Track interrupt nesting depth"
-    - "Verify flag preservation"
-    - "Test maximum interrupt rate"
-    - "Use GETBRK to identify debug context"
+    - "Inside a debug ISR, GETBRK D WCZ returns C = 1 if the debug interrupt came from a COGINIT"
 
 limitations:
   - "Only 4 interrupt levels"
   - "16 event sources per cog"
-  - "No interrupt priority modification"
-  - "Cannot interrupt AUGS/AUGD pairs"
+  - "INT1 has the highest priority, then INT2, then INT3. Not documented: a way to change these priorities"
+  - "An interrupt branch cannot occur while AUGS waits for its S/# instruction or AUGD for its D/# instruction"
   - "REP must not be executing or active before an interrupt branch can happen"
   - "SETQ/SETQ2 shields the next instruction from interruption"
-  - "Debug ISR size limited by COG RAM"
+  - "Debug ISR code runs strictly in cog register space"
 
 sources:
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS"
-  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INTERRUPTS"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (16 events numbered 0..15; ADDCT1 copies D + S into a dedicated CT1 target register and clears the CT-passed-CT1 event flag; PAT and ATN set and clear rules: the ATN flag is set whenever any cogs request attention; WAITINT stalls the cog to save power)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), INTERRUPTS (priorities; IJMPx first, then SETINTx; RETIx and RESIx definitions; NIXINTx only useful in main code after STALLI or in an ISR stopping a lower-level interrupt; branch-deferral conditions; the three interrupt states with same-level events ignored during states 2 and 3)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), DEBUG INTERRUPT (RESI0 = CALLD INA,INB WCZ; GETBRK D WCZ in a debug ISR: C = 1 if from COGINIT; the debug ISR executes strictly in cog register space; the scheme operates without cooperation from the program being debugged)"
+  - "P2 Instructions v35 - Rev B/C Silicon, POLLxxx rows ({WC/WZ/WCZ}), CALLD and RETIx/RESIx rows (4 cog/LUT, 13...20 hub), SETQ and SETQ2 rows (next instruction shielded from interrupt)"
+  - "EF-099 (COGATN with the issuing cog's own bit raises that cog's attention event flag; event flag only, the attention interrupt path not tested)"
   - "Parallax Propeller 2 Spin2 Language Documentation v55, DEBUG (LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts)"

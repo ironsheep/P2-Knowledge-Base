@@ -15,7 +15,7 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 0010000 CZI DDDDDDDDD SSSSSSSSS
   write: —
   c: Unsigned (D < S)
@@ -23,38 +23,9 @@ encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, CMP, p.59"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  bits: 32
-  opcode: 64
-  effects: 3
-  operandFormat: 0
-  rawValue: 1600
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Compare two unsigned values
-compiler_syntax: CMP D,S/#
-compiler_category: Arithmetic
-compiler_effects:
-- name: wc
-  symbol: WC
-  value: 1
-  description: Write Carry flag
-  bitPattern: '01'
-- name: wz
-  symbol: WZ
-  value: 2
-  description: Write Zero flag
-  bitPattern: '10'
-- name: wcz
-  symbol: WCZ
-  value: 3
-  description: Write Carry and Zero flags
-  bitPattern: '11'
 related:
 - CMPR
 - CMPX

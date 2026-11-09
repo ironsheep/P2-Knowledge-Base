@@ -41,7 +41,7 @@ audience: [human, agent]
 # Nested under cross_references so the crossref validator enforces every path resolves.
 cross_references:
   composes:
-    - architecture/cordic.yaml                    # the solver: 54-stage pipeline, 55-clock latency, ~6-7 in flight
+    - architecture/cordic.yaml                    # the solver: 54-stage pipeline, 55-clock latency, several commands in flight
     - language/pasm2/qrotate.yaml                  # rotate (X,Y) by angle
     - language/pasm2/qvector.yaml                  # cartesian -> polar (length, angle)
     - language/pasm2/qmul.yaml                     # 32x32 -> 64 unsigned product
@@ -74,15 +74,15 @@ runnable_code:
     - {id: fixed-point,      file: cordic-fixed-point.spin2,      note: "Recipe 5 — MULDIV64 + QVECTOR + QLOG/QEXP: 64-bit-safe scale/magnitude/log"}
     - {id: pipeline-throughput, file: cordic-pipeline-throughput.spin2, note: "Recipe 6 — fill/steady/drain: one result ~every 8 clocks"}
   ceiling_reference:
-    note: "Three-phase field-oriented motor control (Park transform = QROTATE ops) — DESCRIBED/LINKED only; complete impl is OBEX #2811 (ManAtWork)"
+    note: "Three-phase field-oriented motor control (Park transform = QROTATE ops) — DESCRIBED/LINKED only; see OBEX #2811 (ManAtWork), a code snippet showing how the P2 CORDIC does the Park transform"
   toolchain: "pnut-ts, _clkfreq = 200_000_000, compiled with -d (uses debug())"
 
 key_parameters:
   pipeline_stages: 54
   result_latency_clocks: 55
   issue_interval_clocks: 8            # a cog's hub-access window
-  ops_in_flight_per_cog: "several (~6-7, derived 54/8) — the Propeller 2 Documentation states no hard count"
-  binary_angle: "full circle = 2^32; $4000_0000=90deg, $8000_0000=180deg, $C000_0000=270deg, $5555_5555=120deg, $AAAA_AAAA=240deg"
+  ops_in_flight_per_cog: "several (the Propeller 2 Documentation gives no count)"
+  binary_angle: "full circle = 2^32; $4000_0000=90deg, $8000_0000=180deg, $C000_0000=270deg"
   operations:
     - "QMUL 32x32->64 (unsigned)"
     - "QDIV 64/32 -> quotient+remainder (unsigned)"
@@ -105,32 +105,32 @@ gotchas:
     - flag: pitfall
       text: "QMUL/QDIV/QFRAC/QSQRT are UNSIGNED -- a negative operand becomes a huge positive one. For signed data take magnitude and sign separately. QVECTOR/QROTATE ARE signed, being built for coordinates."
     - flag: pitfall
-      text: "Read each result before the next overwrites it. Reading with nothing pending raises the documented event: 'GETQX/GETQY executed without any CORDIC results available or in progress' (event 15). Never let an interrupt stall a pipelined sequence -- wrap it in REP."
+      text: "Read each result before the next overwrites it. Reading with nothing pending raises the documented event: 'GETQX/GETQY executed without any CORDIC results available or in progress' (event 15). Interrupts must not be enabled while CORDIC commands are overlapped: the interrupt service routine can steal enough clocks that one or more results are overwritten before they are read."
     - flag: pitfall
       text: "Keep hub access OUT of both CORDIC loops -- correctness, not optimization. At 200 MHz a RDLONG inside the fill loop first gives wrong results at FILL=2; a WRLONG inside the drain at FILL=3; register-only fill AND drain, with hub I/O batched outside, stays clean through FILL=7. The failure is SILENT -- plausible-looking numbers, no fault and no flag. Scope: this identifies WHERE results are lost, not why; the rule is the shape -- keep hub access out of both loops -- not a law about any hub access. Index a cog-RAM buffer with ALTS/ALTD in between."
     - flag: tip
       text: "The angle occupies the whole 32-bit range, so there is no wrap to manage -- add and subtract angles freely; the overflow IS the wrap you want."
     - flag: hardware
-      text: "The solver is shared across cogs on a fixed rotation and the latency is fixed: 'Cogs can start CORDIC operations every 1/2/4/8/16 (#cogs) clocks and get results 55 clocks later.' No locking is needed, and the 55 clocks do not shrink when fewer cogs are running."
+      text: "The solver is shared across cogs on a fixed rotation and the latency is fixed: 'Cogs can start CORDIC operations every 1/2/4/8/16 (#cogs) clocks and get results 55 clocks later.' Each cog's active CORDIC instructions and forthcoming results are completely isolated from each other, as well as from other cogs."
     - flag: hardware
-      text: "It is a '32-bit, pipelined CORDIC solver with scale-factor correction' -- expect the low bits of rotate/vector/sin/log/exp to be approximate, so a predicted (0,100) may read (0,99)."
+      text: "It is a '32-bit, pipelined CORDIC solver with scale-factor correction'."
 
 hardware_status: |
-  The CORDIC computes deterministic, closed-form math, so every recipe's expected output is
-  derivable by hand and checkable against known answers in a DEBUG window (no external instruments).
-  Values are arithmetic-derived. This note carries no accuracy-unknown caveat.
+  Hardware-verified in this file: the pipelined fill/drain behaviour and the truncated
+  square root. The other recipe results are not bench-verified here.
 
 sources:
   - "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), CORDIC Solver"
   - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, CORDIC Solver (functions and throughput), p.20"
   - "Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Methods (CORDIC methods)"
   - "EF-104: the square root is the truncated (floor) root"
+  - "OBEX 2811 (Park transformation); OBEX 2812 (Binary Floating Point Routines (IEEE-32 subset)); OBEX 5278 (QMC5883L HMC5883 BMM150 compass drivers); OBEX 5361 (FFT IFFT) -- the community_examples descriptions"
 
 community_examples:
-  - "OBEX #2811 Park transformation (ManAtWork) — the FOC capstone reference"
-  - "OBEX #2812 Binary Floating Point Routines (IEEE-32 subset) (ersmith) — CORDIC-based software floating point; fixed-point format discipline"
-  - "OBEX #5278 QMC5883L HMC5883 BMM150 compass drivers (m.k. borri) — polynomial atan2 chosen over the CORDIC for a one-shot use"
-  - "OBEX #5361 FFT IFFT (James Smith) — real-input FFT, windowing, radix-4 digit reversal on the CORDIC butterfly"
+  - "OBEX #2811 Park transformation (ManAtWork) — code snippet showing how the P2 CORDIC does the Park (d/q) transform and its inverse, for AC or brushless servo motors"
+  - "OBEX #2812 Binary Floating Point Routines (IEEE-32 subset) (Eric R. Smith) — Spin2 functions for binary floating point math (an IEEE-32 subset), used by including a BinFloat object"
+  - "OBEX #5278 QMC5883L HMC5883 BMM150 compass drivers (m.k. borri) — compass drivers for the QMC5883L, HMC5883 and BMM150 on the prop2, including fastatan2 for compass heading"
+  - "OBEX #5361 FFT IFFT (James Smith) — Spin2 FFT and IFFT libraries (32 to 16384 points in cog_fft_mixed), with Spin2 and C demo programs"
 
 companion_publication:
   - "P2 Assembly Language Reference Manual; P2 Streamer Programming Guide (companion P2 Knowledge Base publications)"

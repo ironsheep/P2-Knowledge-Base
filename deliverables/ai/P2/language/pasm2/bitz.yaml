@@ -9,23 +9,26 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: BITZ alters the Dest bit(s) designated by Src to equal the state of the Z flag. Dest bit(s) described by Src are set to Z; the rest are left as-is. Src[4:0] is the bit number (0-31) and Src[9:5] is how many further contiguous bits are affected, so a non-zero Src[9:5] changes a span of bits rather than one; a SETQ immediately before the instruction overrides Src[9:5] (a SETQ of zero forces a single bit). If WCZ is specified, the Z flag is updated to the original state of the target bit.
+description: "BITZ alters the Dest bit(s) designated by Src to equal the state of the Z flag. Dest bit(s) described by Src are set to Z; the rest are left as-is. Src[4:0] is the bit number (0-31) and Src[9:5] is how many further contiguous bits are affected, so a non-zero Src[9:5] changes a span of bits rather than one; a prior SETQ overrides Src[9:5] with the low five bits of the SETQ value; an ALTx between the SETQ and BITZ keeps the override (SETQ #0, ALTB, BITZ forces a single bit), and a SETQ separated from BITZ by other instructions is not documented. If WCZ is specified, the C and Z flags are set to the original state of the base bit D[Src[4:0]]. BITZ takes no effect or WCZ."
 flags_affected:
-  C: Set to original D[S[4:0]] (original state of target bit)
-  Z: Set to original D[S[4:0]] (original state of target bit)
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BITZ / BITNZ, p.54"
+  C: With WCZ, set to original D[S[4:0]] (original state of target bit)
+  Z: With WCZ, set to original D[S[4:0]] (original state of target bit)
+encoding_notes:
+- BITZ and TESTB with ORC or ORZ share the INSTR field 0100100; the effect bits tell them apart (BITZ no effect = C Z 00, WCZ = 11; TESTB ORC = 10, ORZ = 01). BITZ takes no effect or WCZ.
+sources:
+  - "encoding row and flags: P2 Instructions v35 - Rev B/C Silicon, row 46 (BITZ: bits D[S[9:5]+S[4:0]:S[4:0]] = Z; other bits unaffected; prior SETQ overrides S[9:5]; C,Z = original D[S[4:0]]; 2 clocks; write D); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), instruction encoding listing (EEEE 0100100 CZI ... BITZ D,S/# {WCZ}; the same INSTR field as TESTB D,S/# ORC/ORZ) and its list of changes (the span of bits, +S[9:5]; prior SETQ overrides S[9:5])"
+  - "description (Src[4:0] and Src[9:5], the WCZ rule, the literal forms): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BITZ / BITNZ, pp.54-55"
+  - "description (SETQ #0 then ALTB then BITxxx forces Src[9:5] to 0): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, pp.38-39; the manual's BITZ / BITNZ text says a SETQ immediately preceding substitutes its Dest[4:0]; a SETQ separated by other instructions is in no source"
+  - "encoding_notes: CP-033 (BITZ assembles as EEEE 0100100 with C Z = 00 with no effect and 11 with WCZ; TESTB ORC/ORZ share 0100100 with C Z = 10/01)"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, BITZ / BITNZ, pp.54-55"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_bitx
-  pattern: D,S/#
-  description: 'Bit manipulation with optional effect flags: Destination register,
-    bit position'
-  valueType: 1
-compiler_encoding:
-  operandFormat: 1
 parameters:
 - Dest is the register whose value will have one or more bits set to Z.
 - Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
+- WCZ is an optional effect to update flags.
 last_updated: '2025-09-19T16:04:17.455318'
 category: Math and Logic
-oneliner: Set bit(s) low/high according to Z or !Z
+oneliner: Set bit(s) low/high according to Z
+related:
+- language/pasm2/bitnz.yaml
+- language/pasm2/testb.yaml

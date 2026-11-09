@@ -7,17 +7,23 @@ brief_description: "Analog-to-digital conversion with internal clock and optiona
 
 detailed_description:
   operation: |
-    Converts analog voltage on pin to digital values using internal clock sampling. Supports
-    four sample/filter modes: SINC2 sampling, SINC2 filtering, SINC3 filtering, and raw
-    bitstream capture. Requires specific pin mode configuration (M[12:10] = %100) to enable
-    ADC function. Can configure multiple consecutive pins simultaneously for multi-channel ADC.
+    The A input is sampled on every clock and should be a pin configured for ADC operation
+    (M[12:10] = %100). Supports four sample/filter modes: SINC2 sampling, SINC2 filtering,
+    SINC3 filtering, and raw bitstream capture. WXPIN sets the mode to X[5:4] and the sample
+    period to POWER(2, X[3:0]); not all mode and period combinations are useful, or even
+    functional (see sample_period_table). Several pins can be configured at once by putting
+    a pin count in bits 10..6 of the pin operand: with a pin operand of %00111_010000, one
+    WRPIN, WXPIN and DIRH configure pins 16 through 23.
 
   timing: |
-    Sampling rate controlled by X register settings
-    Bitstream capture (%11): new 32-bit snapshot every 32 clocks
-    SINC2 sampling (%00): power-of-2 periods only; SINC2/SINC3 filtering: configurable periods
-    IN flag raised when new sample ready
-    Use SETSE1 for event-driven sample capture
+    Upon completion of each sample period, the measurement is placed in Z, IN is raised, and
+    a new measurement begins; RDPIN/RQPIN then retrieves the completed measurement.
+    The sample period is POWER(2, X[3:0]) clocks; for X[5:4] > %00 a WYPIN after the WXPIN
+    replaces it with the value in Y[13:0].
+    SINC2 sampling (%00): complete conversion in hardware, power-of-2 periods only
+    Bitstream capture (%11): buffers 32 bits and is meant to be read once every 32 clocks
+    (X[3:0] = %0101) to get contiguous snapshots
+    SETSE1 on the pin's IN rise can trigger a software step after each sample period
 
 registers:
   x_register:
@@ -27,19 +33,45 @@ registers:
       %01 = SINC2 filtering (software difference computation required)
       %10 = SINC3 filtering (software post-processing required)
       %11 = Bitstream capturing (raw 32-bit ADC snapshot, read every 32 clocks, LSB=oldest)
-    bits_3_0: "Sample period configuration (resolution/period setting)"
+    bits_3_0: "Sample period = POWER(2, X[3:0]) clocks (see sample_period_table)"
+    bitstream_mode: "Bit 31 of a bitstream snapshot is the most recent ADC bit and bit 0 is from 31 clocks earlier. Bitstream capturing can be used for purposes other than capturing ADC bitstreams: it captures the A input without regard to pin configuration."
+    pin_operand: "A pin operand of the form %nnnnn_pppppp, with the number of additional pins in bits 10..6, configures several consecutive pins in one WRPIN, WXPIN and DIRH sequence: %00111_010000 configures pins 16 through 23."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %11000 and %11001 (WXPIN mode and period), Bitstream Capturing Mode (%11) and the SINC2 Sampling Mode (%00) note on the pin operand; Propeller 2 P2X8C4M64P Hardware Manual, Nov 1, 2022 Release, ADC Sample/Filter/Capture (%11000), p.52, Bitstream Capturing Mode (%11), p.55"
+  sample_period_table:
+    columns: "X[3:0] | sample period | SINC2 sampling (%00) sample resolution | SINC2 filtering (%01) post-diff ENOB | SINC3 filtering (%10) post-diff ENOB | bitstream capturing (%11), LSB = oldest bit"
+    note: "ENOB is the Effective Number of Bits, or the sample resolution. Not all mode and period combinations are useful, or even functional."
+    rows:
+      - "%0000 | 1 clock | impractical | impractical | impractical | 1 new bit"
+      - "%0001 | 2 clocks | 2 bits | impractical | impractical | 2 new bits"
+      - "%0010 | 4 clocks | 3 bits | impractical | impractical | 4 new bits"
+      - "%0011 | 8 clocks | 4 bits | 4 | impractical | 8 new bits"
+      - "%0100 | 16 clocks | 5 bits | 5 | 8 | 16 new bits"
+      - "%0101 | 32 clocks | 6 bits | 6 | 10 | 32 new bits"
+      - "%0110 | 64 clocks | 7 bits | 7 | 12 | overflow"
+      - "%0111 | 128 clocks | 8 bits | 8 | 14 | overflow"
+      - "%1000 | 256 clocks | 9 bits | 9 | 16 | overflow"
+      - "%1001 | 512 clocks | 10 bits | 10 | 18 | overflow"
+      - "%1010 | 1,024 clocks | 11 bits | 11 | overflow | overflow"
+      - "%1011 | 2,048 clocks | 12 bits | 12 | overflow | overflow"
+      - "%1100 | 4,096 clocks | 13 bits | 13 | overflow | overflow"
+      - "%1101 | 8,192 clocks | 14 bits | 14 | overflow | overflow"
+      - "%1110 | 16,384 clocks | overflow | overflow | overflow | overflow"
+      - "%1111 | 32,768 clocks | overflow | overflow | overflow | overflow"
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %11000 and %11001, Table 34; Propeller 2 P2X8C4M64P Hardware Manual, Nov 1, 2022 Release, ADC Sample/Filter/Capture (%11000), p.52"
   y_register:
-    function: "Not used in this mode"
+    bits_13_0: "For modes other than SINC2 sampling (X[5:4] > %00), WYPIN after WXPIN overrides the initial period established by X[3:0] with the arbitrary value in Y[13:0]. Example: SINC3 filtering with a period of 320 clocks is a WXPIN followed by WYPIN #320. Not used with SINC2 sampling (%00)."
+    source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %11000 and %11001 (WYPIN after WXPIN); Propeller 2 P2X8C4M64P Hardware Manual, Nov 1, 2022 Release, ADC Sample/Filter/Capture (%11000), p.52"
   z_register:
-    function: "ADC sample value (raw bitstream or accumulated filter result)"
+    function: "The completed measurement, placed in Z at the end of each sample period and read with RDPIN/RQPIN (raw bitstream or accumulated filter result)"
+    before_first_result: "Not documented: the value RDPIN/RQPIN returns before the first sample period has completed."
 
 flags:
-  in_flag: "Raised when new sample ready (use SETSE1 for event detection)"
-  a_input: "Analog voltage input to convert"
+  in_flag: "Raised when a sample period completes, after the measurement is placed in Z (SETSE1 on the pin's IN rise can detect it)"
+  a_input: "Analog voltage input to convert; sampled on every clock"
 
 code_examples:
   - title: "Basic 8-bit ADC Reading"
-    description: "Simple ADC with SINC2 sampling (8-bit)"
+    description: "ADC with SINC2 sampling (8-bit)"
     code: |
       CON
         _clkfreq = 200_000_000
@@ -47,13 +79,19 @@ code_examples:
       
       PUB main() | adc_value
         ' Configure ADC mode: P_ADC (mode %11000) with the 1x input range P_ADC_1X
-        ' P_ADC_1X sets M[12:10] = %100, which enables the ADC
+        ' P_ADC_1X sets M[12:10] = %100, a pin configured for ADC operation
         pinstart(adc_pin, P_ADC | P_ADC_1X, %00_0111, 0)  ' 8-bit resolution
         
         repeat
           waitms(10)                             ' Delay between samples
-          adc_value := rdpin(adc_pin)            ' Read ADC result
+          adc_value := read_adc(adc_pin)         ' Read ADC result
           debug("ADC: ", udec(adc_value))
+
+      PRI read_adc(pin_num) : value
+        ' PASM2 RDPIN keeps all 32 bits of Z (the Spin2 RDPIN() method returns the C flag in bit 31)
+        org
+          rdpin   value, pin_num
+        end
       
       DAT
       ' PASM2 example - SINC2 sampling (8-bit)
@@ -88,13 +126,14 @@ code_examples:
         wrpin   adc_mode, #adc_pin               ' Configure mode
         wxpin   #%01_0111, #adc_pin              ' SINC2 filtering at 128 clocks
         dirh    #adc_pin                         ' Enable smart pin
-        setse1  #%001<<6 + adc_pin               ' Event trigger on pin IN high
+        setse1  #%001<<6 + adc_pin               ' Event trigger on pin IN rise
       .loop
         waitse1                                  ' Wait for sample ready
         rdpin   sample, #adc_pin                 ' Read accumulator
-        sub     sample, diff                     ' Compute sample difference
-        add     diff, sample                     ' Update diff accumulator
+        sub     sample, diff                     ' Compute sample from the accumulator difference
+        add     diff, sample                     ' Update diff value
         shr     sample, #6                       ' Right-justify (LOG2(128)-1)
+        zerox   sample, #7                       ' Trim to the 8-bit sample
         mov     outa, sample                     ' Display on LEDs
         jmp     #.loop
       
@@ -112,90 +151,89 @@ code_examples:
         num_channels = 4                         ' Pins 46-49
       
       PUB main() | ch, values[4]
-        ' Configure 4 consecutive pins for ADC. These are INDEPENDENT channels, so any
-        ' pins work; pins that share a node/reference must stay within ONE four-pin power
-        ' group (0-3, 4-7, ...) to share a supply domain - see p2kbArchPinPowerDomains.
+        ' Configure 4 consecutive pins for ADC, each as its own channel
         repeat ch from 0 to num_channels-1
           pinstart(adc_base + ch, P_ADC | P_ADC_1X, %00_0111, 0)
         
         repeat
           waitms(100)
           repeat ch from 0 to num_channels-1
-            values[ch] := rdpin(adc_base + ch)
+            values[ch] := read_adc(adc_base + ch)
             debug("CH", udec(ch), ": ", udec(values[ch]))
 
-common_applications:
-  - "Analog sensor reading (temperature, light, voltage)"
-  - "Audio signal capture"
-  - "Multi-channel data acquisition"
-  - "Continuous analog monitoring"
+      PRI read_adc(pin_num) : value
+        ' PASM2 RDPIN keeps all 32 bits of Z (the Spin2 RDPIN() method returns the C flag in bit 31)
+        org
+          rdpin   value, pin_num
+        end
 
 related_modes:
-  - "Mode %11001: ADC external clock - external timing control"
-  - "Mode %11010: ADC scope trigger - triggered acquisition"
-  - "Mode %00001: DAC with noise - analog output counterpart"
+  - "Mode %11001: ADC external clock"
+  - "Mode %11010: ADC scope with trigger"
+  - "Mode %00001: DAC noise"
 
 configuration_constants:
   mode_constant: "P_ADC"
   binary_value: "%11000"
-  required_pin_config: "%100011_0000000_00_11000_0 = P_ADC_1X | P_ADC (M[12:10]=%100 enables ADC)"
+  required_pin_config: "%100011_0000000_00_11000_0 = P_ADC_1X | P_ADC (M[12:10]=%100: a pin configured for ADC operation)"
   
   adc_input_modes:
-    # GIO / VIO / FLOAT are NOT input ranges - they select an INTERNAL reference as the
-    # ADC's input. Only the 1x..100x entries are pin-input gain ranges.
-    - "P_ADC_GIO - GIO calibration reference to the ADC (a calibration SOURCE, not an input range)"
-    - "P_ADC_VIO - VIO calibration reference to the ADC (a calibration SOURCE, not an input range)"
+    # GIO / VIO / FLOAT select an internal source as the ADC's input; only the 1x..100x
+    # entries are pin-input gain ranges.
+    - "P_ADC_GIO - GIO calibration reference to the ADC (a calibration source, not an input range)"
+    - "P_ADC_VIO - VIO calibration reference to the ADC (a calibration source, not an input range)"
     - "P_ADC_FLOAT - ADC input floated (Rev C silicon); used to determine the ADC's floating bias point, not an input range"
     - "P_ADC_1X - 1x gain"
-    - "P_ADC_3X - 3.16x gain (sqrt-10-spaced ladder)"
+    - "P_ADC_3X - 3.16x gain"
     - "P_ADC_10X - 10x gain"
-    - "P_ADC_30X - 31.6x gain (sqrt-10-spaced ladder)"
+    - "P_ADC_30X - 31.6x gain"
     - "P_ADC_100X - 100x gain"
-  
+
   x_register_modes:
     - "%00_xxxx - SINC2 sampling (complete conversion in hardware, power-of-2 periods)"
     - "%01_xxxx - SINC2 filtering (software difference computation required)"
-    - "%10_xxxx - SINC3 filtering (software post-process required)"
-    - "%11_xxxx - Bitstream capturing (raw 32-bit ADC snapshot every 32 clocks)"
-    - "Lower 4 bits control sample period/resolution"
+    - "%10_xxxx - SINC3 filtering (software post-processing required)"
+    - "%11_xxxx - Bitstream capturing (raw 32-bit ADC snapshot, read every 32 clocks)"
+    - "Lower 4 bits set the sample period: POWER(2, X[3:0]) clocks"
 
   sources:
     - "adc_input_modes (5 ranges, 2 sources, VIO/GIO calibration): Parallax Propeller 2 Documentation v35 (Rev B/C silicon), OVERVIEW (smart I/O pin functions)"
     - "adc_input_modes (P_ADC_FLOAT floats the ADC input on Rev C; useful for determining the floating bias point): Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Design Status (2020_02_24)"
     - "adc_input_modes (mode-name glosses): Parallax Propeller 2 Spin2 Language Documentation v55, Built-In Symbols for Smart Pin Configuration"
     - "P_ADC_FLOAT: Parallax Propeller 2 Documentation v35 (Rev B/C silicon), Design Status (2020_02_24)"
+    - "notes (27-bit accumulators, About SINC2 and SINC3 filtering, prescale and post-trim, SINC2 and SINC3 shift rules, accuracy from the third and fifth sample, bitstream snapshots): Parallax Propeller 2 Documentation v35 (Rev B/C silicon), SMART PIN MODES, %11000 and %11001"
+    - "notes (the same filtering text; accuracy from the second period for SINC2 and the third period for SINC3): Propeller 2 P2X8C4M64P Hardware Manual, Nov 1, 2022 Release, About SINC2 and SINC3 filtering, p.52; SINC2 Filtering Mode (%01) and SINC3 Filtering Mode (%10), p.54; Bitstream Capturing Mode (%11), p.55"
 
 notes:
-  - "Requires M[12:10] = %100 in WRPIN configuration to enable ADC"
-  - "Bitstream capture (%11) provides a new 32-bit snapshot every 32 system clock periods"
+  - "The A input is sampled on every clock and should be a pin configured for ADC operation (M[12:10] = %100)"
+  - "Bitstream capture (%11) buffers 32 bits and is meant to be read once every 32 clocks (X[3:0] = %0101) for contiguous snapshots; bit 31 is the newest bit, bit 0 is from 31 clocks earlier"
   - "SINC2 filtering (%01) and SINC3 (%10) require software post-processing; SINC2 sampling (%00) does not"
-  - "Use SETSE1 with waitse1 for event-driven sample acquisition"
-  - "Multiple consecutive pins can be configured simultaneously"
-  - "SINC2 post-processing: shift right by [LOG2(samples)]-1"
-  - "SINC3 requires difference calculations and multiple accumulators"
-  - "The gain modes (1x/3.16x/10x/31.6x/100x) set the pin-input voltage window and sensitivity. GIO/VIO do NOT - they substitute an internal calibration reference for the pin, and are how a reading is calibrated rather than how its range is chosen"
+  - "SETSE1 with WAITSE1 can wait for the pin's IN rise after each sample period"
+  - "The examples read the sample with inline PASM2 RDPIN, which keeps all 32 bits of Z; the Spin2 RDPIN() method returns the C flag in bit 31. Not documented: the C flag of RDPIN in this mode."
+  - "A pin operand with a pin count in bits 10..6 configures several consecutive pins at once"
+  - "The smart pin accumulators are 27 bits wide: up to 2^(27/3), or 512, clocks per decimation in SINC3 filtering and up to 2^(27/2), or 11,585, clocks in SINC2 filtering"
+  - "27-bit rollover: because the accumulators are 27 bits wide, 32-bit integer adds and subtracts in software roll over incorrectly. Either prescale the 27-bit value to 32 bits before the SUB (SHL x,#5) or post-trim the result to 27 bits after the ADD (ZEROX x,#26)"
+  - "SINC2 filtering sums the input bit into an accumulator on each clock, which is summed into a second accumulator; at the end of each period the difference between the new and previous second-accumulator value is the sample and the previous value is updated. SINC2 filtering is best for DC measurements where precision is important; practical measurements of 14-bit resolution can be made every 8,192 clocks"
+  - "SINC2 post-processing: shift the computed sample right by LOG2(clocks per period)-1 (LOG2(128)-1 = 6 for a 128-clock period) to leave the ENOBs intact"
+  - "SINC3 filtering is like SINC2, but employs an additional level of accumulation to increase sensitivity to dynamics in the input signal; it doubles the ENOB (effective number of bits) over simple bit-summing for fast signals (Parallax's documents also give \"doubles the theoretical ENOB\"), but is only slightly better at DC measurements than SINC2 filtering at the same sample period. It takes more resources within the smart pin, so it is limited to 512 samples per period"
+  - "SINC3 post-processing: two difference stages (diff1 and diff2), then shift the computed sample right by LOG2(clocks per period) (LOG2(128) = 7 for a 128-clock period) and trim"
+  - "After starting SINC2 filtering the filter becomes accurate starting on the third sample, and SINC3 filtering starting on the fifth sample; Parallax's documents also give the second period for SINC2 filtering and the third period for SINC3 filtering"
+  - "The gain modes (1x/3.16x/10x/31.6x/100x) are the pin-input ranges. GIO/VIO substitute an internal calibration reference for the pin"
 
 gain_mode_window:
-  fact: "The gain-mode window is CENTERED ON MID-SUPPLY (~VIO/2), not referenced up from 0V: centered at ~1.64V for every gain. A ground-referenced small-signal source needs a mid-rail bias network before it can be read through a gain mode."
-  source: "Hardware-verified on P2 silicon (Rev C): hardware-verification ledger EF-024."
+  fact: "With the gain modes P_ADC_3X, P_ADC_10X, P_ADC_30X and P_ADC_100X, the input window is centred near 1.64 V, about mid-supply, for the one part tested."
+  source: "EF-024 (one part; gain-mode window measured by a DAC-to-ADC jumper loopback on one pin pair)"
 
 power_domain:
-  fact: |
-    P_ADC_GIO / P_ADC_VIO reference THIS pin's own SILICON power group of FOUR pins (0-3,
-    4-7, ..., 60-63), each sharing one isolated VIO_{x}_{y} / GIO_{x}_{y} supply pair. A
-    single-pin ratiometric reading is therefore absolute against its own group's rails.
-  multi_pin_layout: |
-    Pins tied to a SHARED NODE for one measurement must sit WITHIN A SINGLE FOUR-PIN group
-    to share a reference domain; straddling a boundary (e.g. pins 3 and 4) mixes supply
-    domains and degrades the result. Independent single-ended channels on different pins are
-    unaffected. NOTE: the 8-pin grouping on P2 Edge boards is the LDO/header layer, where one
-    regulator feeds two silicon groups - it is not the ADC's reference domain. Stay within
-    four; that rule holds on every board.
-  reference: "Full mechanism + sourcing: p2kbArchPinPowerDomains"
+  fact: "VIO_{x}_{y} and GIO_{x}_{y} are the power and ground for smart pins x through y; smart pins are powered in groups of 4. A pin's P_ADC_VIO or P_ADC_GIO input reads the VIO or GIO of the pin's own group of 4: each smart pin has its ADC with VIO/GIO calibration and is externally powered in blocks of 4 for a clean analog Vdd reference."
+  source: "Parallax Propeller 2 Documentation v35 (Rev B/C silicon), PIN DESCRIPTIONS, pin table (VIO_{x}_{y} / GIO_{x}_{y} = power / ground for smart pins {x} through {y}); Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, FEATURES summary, p.2 (each smart I/O pin: delta-sigma ADC with VIO/GIO calibration; externally powered in blocks of 4 for clean analog Vdd reference) and p.3 (smart I/O pins powered in groups of 4 via VIO pins); the own-group statement is these statements read together, no line states it outright"
+  reference: "Full mechanism and sourcing: p2kbArchPinPowerDomains"
 
 related:
   - architecture/pin-power-domains.yaml
   - architecture/smart_pins.yaml
+  - architecture/smart-pins/smart-pin-11001-adc-external-clock.yaml
+  - language/pasm2/akpin.yaml
 
 see_also:
   - "I/O pin power domains — silicon groups of 4 sharing VIO/GIO (and the separate 8-pin Edge board LDO layer); governs the P_ADC_GIO/P_ADC_VIO reference: p2kbArchPinPowerDomains"

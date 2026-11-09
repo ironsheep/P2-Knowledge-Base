@@ -2,7 +2,7 @@ instruction: ADDCT3
 syntax: ADDCT3 Dest, {#}Src
 brief_description: Add and set CT3 event trigger
 category: Event
-description: Set the CT3 event target to D + S. The event fires once the System Counter has PASSED that target, by the MSB rule the wait uses - the flag is set whenever the MSB of (CT - CT3) is 0 - NOT only on the single cycle where CT equals it. A target already in the recent past therefore fires AT ONCE rather than waiting for the counter to come round; a target more than 2^31 clocks ahead reads as already passed and fires at once too. ADDCT3 sets the hidden CT3 event trigger register to the value of Dest + Src. The result is also written to Dest. Use the POLLCT3, WAITCT3, JCT3, and JNCT3 instructions to process CT3 time-based events.
+description: "ADDCT3 sets the hidden CT3 event trigger register to the value of Dest + Src. The result is also written to Dest. ADDCT3 clears the CT3 event flag. The flag is set whenever the System Counter (CT) passes the CT3 target, that is whenever the MSB of (CT - CT3) is 0. Parallax's documents also describe the event as triggering when CT = Dest + Src. Use the POLLCT3, WAITCT3, JCT3, and JNCT3 instructions to process CT3 time-based events."
 flags_affected:
   C: No effect
   Z: No effect
@@ -17,25 +17,22 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1010011 10I DDDDDDDDD SSSSSSSSS
   write: D
   c: —
   z: —
   clocks: '2'
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ADDCT1/2/3, p.32"
+sources:
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), POLLCT3/WAITCT3 event flag (cleared on ADDCT3; set whenever CT passes the result of the ADDCT3, MSB of CT minus CT3 is 0)"
+  - "P2 Instructions v35 - Rev B/C Silicon, row 147 (ADDCT3: set CT3 event to trigger on CT = D + S; adds S into D)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ADDCT1/2/3, p.32 (the event triggers when CT = original Dest + Src)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 0
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Set CT3 counter event trigger time
-long_description: The Src value is added into Dest and the result is also stored in the hidden CT3 event trigger register. The event fires once the System Counter has PASSED that target, by the MSB rule the wait uses - the flag is set whenever the MSB of (CT - CT3) is 0 - NOT only on the single cycle where CT equals it. A target already in the recent past therefore fires AT ONCE rather than waiting for the counter to come round; a target more than 2^31 clocks ahead reads as already passed and fires at once too.
+long_description: "The Src value is added into Dest and the result is also stored in the hidden CT3 event trigger register. ADDCT3 clears the CT3 event flag. The flag is set whenever the System Counter (CT) passes the CT3 target, that is whenever the MSB of (CT - CT3) is 0. Parallax's documents also describe the event as triggering when CT = Dest + Src."
 related:
 - POLLCTx
 - WAITCTx

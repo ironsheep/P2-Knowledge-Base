@@ -7,7 +7,7 @@ blocks:
     compile: fragment
     wrap: spin2-method
   - at: examples[1].code
-    fp: "0f65a692c3b7d02a"
+    fp: "115a0bfa01f81fa1"
     compile: fragment
     wrap: spin2-method
     assumes: [sample_value]
@@ -17,7 +17,7 @@ blocks:
     wrap: spin2-method
     assumes: [bus_value]
   - at: examples[3].code
-    fp: "48d2bf2d05d8c543"
+    fp: "0b974f9bda207479"
     compile: program
   - at: syntax.create
     fp: "2b0ca595f0abe456"

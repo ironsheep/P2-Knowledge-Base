@@ -3,10 +3,10 @@
 # context declared here, never that the code is correct (F-381, F-312).
 blocks:
   - at: code_examples[0].code
-    fp: "ff7701dfa299df74"
+    fp: "0b148249c3e1bf5a"
     compile: fragment
     wrap: spin2-top
     assumes: [clkf, periods]
   - at: code_examples[1].code
-    fp: "38f2f110c62103cc"
+    fp: "19eecfaea4747284"
     compile: program

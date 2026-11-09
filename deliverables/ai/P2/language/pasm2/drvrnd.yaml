@@ -7,9 +7,8 @@ description: >-
   output level(s) set randomly low and high, based on bit(s) from the
   Xoroshiro128** PRNG. All other pins are left unchanged. This instruction can
   affect one or more of the bits within the DIRA or DIRB and OUTA or OUTB
-  registers.
-
-  DRVRND achieves the same effect as two instructions-- OUTRND followed by DIRH.
+  registers. DRVRND achieves the same effect as two instructions-- OUTRND followed
+  by DIRH.
 
   Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0]
   indicates the base pin number (0-63) and Dest[10:6] indicates how many
@@ -21,9 +20,10 @@ description: >-
   AUGD instruction prior.
 
   When Dest is a register, the register's value bits [10:0] are used as-is to
-  form the 11-bit ID range, unless a SETQ instruction immediately precedes the
-  DRVRND instruction; substituting SETQ's Dest[4:0] in place of value
-  bits[10:6], for DRVRND's use.
+  form the 11-bit ID range, unless a prior SETQ overrides value bits[10:6] with
+  the low five bits of the SETQ value. An ALTx between the SETQ and DRVRND keeps
+  the override, and a SETQ separated from DRVRND by other instructions is not
+  documented.
 
   The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap
   within the same 32-pin group (DIRA or DIRB and OUTA or OUTB); it will not
@@ -50,20 +50,17 @@ timing:
   type: fixed
 encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001011110
-  write: DIRx + OUTx
+  write: DIRx* + OUTx
   c: Orig OUTx base bit
   z: Orig OUTx base bit
   clocks: '2'
   notes: New DIRx state is not data-forwarded; next pipelined instruction sees old state
 documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DRVRND, p.77"
+sources:
+  - "description (prior SETQ overrides D[10:6]): P2 Instructions v35 - Rev B/C Silicon, row 379 (DRVRND: OUT bits of pins D[10:6]+D[5:0]..D[5:0] = RNDs; DIR bits = 1; wraps within OUTA/OUTB; prior SETQ overrides D[10:6]; C,Z = OUT bit; write DIRx* + OUTx; 2 clocks); Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), list of changes (DIRx/OUTx/FLTx/DRVx span of pins, +D[10:6]; prior SETQ overrides D[10:6])"
+  - "description (an ALTx between the SETQ and the instruction keeps the override): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, ALTB, p.38 and ALTD, p.39 (SETQ / SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction); a SETQ separated from DRVRND by other instructions is in no source"
+  - "description (Dest forms, wrap, WCZ rule, Xoroshiro128** bits, OUTRND followed by DIRH, not data-forwarded note): Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, DRVRND, p.77 (encoding row 001011110, write DIRx and OUTx, C and Z Orig OUTx base bit, 2 clocks)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pinop
-  pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect flags'
-  valueType: 30
-compiler_encoding:
-  operandFormat: 30
 last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
 oneliner: Set pin(s) direction to output and output level to random low/high
@@ -75,3 +72,4 @@ related:
 - DRVZ
 - DRVNZ
 - DRVNOT
+- architecture/io_pin_timing.yaml

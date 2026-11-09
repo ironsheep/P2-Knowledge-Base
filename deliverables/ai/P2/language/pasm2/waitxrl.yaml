@@ -1,6 +1,7 @@
 instruction: WAITXRL
 syntax: WAITXRL {WC|WZ|WCZ}
-no_setq_behavior: "With no preceding SETQ, no timeout is armed, so the event always satisfies the wait first: the effect then clears the flag it names (WC: C, WZ: Z, WCZ: both C and Z; each carries the same timeout result). Using this instruction with WCZ and no SETQ is therefore a legitimate one-instruction way to clear C and Z."
+no_setq_behavior: "With no preceding SETQ, no timeout is armed, so the event always satisfies the wait first: the effect then clears the flag it names (WC: C, WZ: Z, WCZ: both C and Z; each carries the same timeout result). Using this instruction with WCZ and no SETQ therefore clears C and Z in one instruction; the instruction still waits for its event (and clears the event flag), so C and Z are cleared once the event has occurred."
+source: "EF-020 (the no-SETQ flag clear, run on WAITSEx; same mechanism here, not run on this instruction)"
 brief_description: Wait streamer rollover LUT
 category: Event
 description: >-
@@ -19,34 +20,31 @@ description: >-
   event flag is set whenever location $1FF of the Lookup RAM is read by the streamer.
   The streamer-LUT-RAM-rollover event flag is cleared upon cog start or upon execution
   of POLLXRL, WAITXRL, JXRL, or JNXRL instructions.
-result: >-
-  Wait for streamer-LUT-RAM-rollover event, then clear the flag; optionally aborting
-  on timeout and setting C and/or Z on abort.
+result: Waits for the streamer-LUT-RAM-rollover event, clears the flag, and resumes. With a prior SETQ and the WC, WZ or WCZ effect, C and/or Z are set if the timeout occurred before the event.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C: Set if timeout occurred before event
-  Z: Set if timeout occurred before event
+  C: "With a prior SETQ and the WC or WCZ effect, 1 if the timeout came first, otherwise 0; with no SETQ the effect clears the flag"
+  Z: "With a prior SETQ and the WZ or WCZ effect, 1 if the timeout came first, otherwise 0; with no SETQ the effect clears the flag"
 syntax_variants:
 - WAITXRL {WC|WZ|WCZ}
 timing:
   cycles: 2+
   type: variable
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:  # [bits|write|c|z|clocks] See language/pasm2/concepts/instruction_encoding_key.yaml
 - bits: EEEE 1101011 CZ0 000011101 000100100
   write: —
   c: Timeout Abort
   z: Timeout Abort
   clocks: 2+
-documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, WAITXRL, p.144"
+documentation_source: "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, WAITXRL, pp.144-145"
+sources:
+  - "P2 Instructions v35 - Rev B/C Silicon, row 300 (WAITXRL {WC/WZ/WCZ}: wait for XRL event flag, then clear it; prior SETQ sets optional CT timeout value; C/Z = timeout; 2+ clocks)"
+  - "Parallax Propeller 2 (P2X8C4M64P) Datasheet 2022/11/01, Event Instructions, p.43 (WAITXRL {WC/WZ/WCZ}, 2+ clocks)"
+  - "Propeller 2 Assembly Language (PASM2) Manual Nov 1, 2022 Release, WAITXRL, pp.144-145 (Result line, WC / WZ / WCZ parameter, encoding row 000011101 / 000100100, write none, C and Z Timeout Abort, 2+ clocks, Related list, wait-then-clear explanation, SETQ timeout, C and Z set if a timeout occurred before the event and cleared if the event occurred before the timeout, pipeline stalled during a wait, set condition (location $1FF of the Lookup RAM read by the streamer) and clearing list)"
+  - "Parallax Propeller 2 Documentation v35 (Rev B/C Silicon), EVENTS (WAITxxx waits for the event flag and then clears it unless it is set again by the event sensor; a SETQ right before supplies a future CT target that ends the wait prematurely, and with WAITxxx WC, C is set if the timeout occurred before the event and otherwise cleared; POLLXRL / WAITXRL event flag: cleared on cog start, set whenever location $1FF of the lookup RAM is read by the streamer, also cleared on POLLXRL / WAITXRL / JXRL / JNXRL), and instruction encoding listing (EEEE 1101011 CZ0 000011101 000100100 WAITXRL {WC/WZ/WCZ})"
+  - "EF-020 (SETQ plus WAITSEx releases on whichever of event and timeout comes first and reports it in C, and with no SETQ a WCZ wait clears C and Z; the ledger states the mechanism is shared by the wait family)"
 documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_pollwait
-  pattern: ''
-  description: No operands - poll/wait instruction (moves S to D, sets S to $024)
-  valueType: 28
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-  operandFormat: 28
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Wait for and clear streamer-LUT-RAM-rollover event flag
@@ -57,3 +55,4 @@ related:
 - POLLXRL
 - JXRL
 - JNXRL
+- architecture/event_system.yaml
