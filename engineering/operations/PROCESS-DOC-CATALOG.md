@@ -117,6 +117,8 @@ A "process doc" is sound to retire **only after** its owning skill exists and ca
 | project-guidance/work-mode-lifecycle.md | planning-vs-exec matrix | ✅ | whats-next |
 | project-guidance/release-workflow-v1.0.md | early release workflow | ✅ | release-manual |
 | operations/RELEASE-PLANNING.md | YAML release process | ✅ | release-yamls |
+| operations/YAML-CERTIFICATION-RECORD.md | one row per YAML file read whole against its sources | ✅ | yaml-knowledge-base-maintenance / release-yamls |
+| tools/validation/audit-yaml-certification-record.py | release gate: a changed YAML file with no certification row | ✅ | release-yamls |
 | operations/P2KB-CORRECTION-PLAN.md | how-to-apply corrections | 🆕 | yaml-knowledge-base-maintenance |
 | standards/version-control-discipline.md | commit/tag wrap levels | 🆕 | build-wrapup/release-manual |
 | project-guidance/plan-review-methodology.md | section-by-section review | 🆕 | (plan skill) |
