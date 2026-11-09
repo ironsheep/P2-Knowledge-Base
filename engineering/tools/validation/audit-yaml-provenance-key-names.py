@@ -97,7 +97,6 @@ ALLOW = {
     "source_tension":         ("content", "declared conflict between sources (source-lock Class B marker)"),
     "what_other_sources_say": ("content", "declared conflict between sources (source-lock Class B marker)"),
     "what_the_source_says":   ("content", "pitfall: what a source says, set against the verified behaviour"),
-    "consequence_source":     ("content", "smart_pins: the statement the consequence rests on (declared-conflict note)"),
     "verification_status":    ("content", "streamer/pin-capture.yaml: what was measured on silicon (the facts themselves), each sub-block with its own EF source: line"),
 }
 
