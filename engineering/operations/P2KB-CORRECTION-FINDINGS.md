@@ -23,7 +23,7 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 **No inference or derivation.** Every correction must trace to an authoritative source. Aligning a file to an authority it contradicts is fine; **inventing a value or claim that no source states — by computation, reasoning, or "it must logically be" — is not.** If a change can only be justified by inference, log it as a finding that needs a source. Match the source's wording, not an interpretive paraphrase.
 
-**Next finding ID: `F-643`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
+**Next finding ID: `F-644`** · gap IDs are **not allocated here** — `engineering/ingestion/KNOWLEDGE-GAPS.md` owns the `G-` allocator and declares its own counter. (This line previously carried `Next gap ID: G-008`, stale by fourteen against that register's actual G-022; two registers claiming one allocator is the collision `audit-register-hygiene.py` exists to catch. Retired 2026-08-26 — see F-352 for the earlier, smaller instance of the same drift.)
 
 **Archives** — search them before re-filing; a finding that reappears is usually a regression:
 - F-001…F-124 → `correction-sweeps/2026-06-13-P2KB-CORRECTION-FINDINGS-archive.md`
@@ -77,9 +77,10 @@ outstanding?" of this file alone — never re-derive completion state from an ar
 
 ## Found by the contract-gaps sprint (2026-11-09) — F-643
 
-### F-643 — what `COGINIT()` returns when no cog is free: the Spin2 document and the interpreter listing disagree — `NEEDS-VERIFICATION` (found 2026-11-09, «#462»)
-> **KB decision:** held (bench): a run with all eight cogs busy, added to the contract-gaps bench visit
-`spin2-v55-text.txt:517` says the method returns -1 when no cog is free. The Spin2 interpreter v55 (lines 1104-1105) runs `coginit x,y wc`, then `_ret_ bitc x,#31`; the Silicon Doc (`silicon-doc-text.txt:386`) says a failed COGINIT writes $F into D with C set, and BITC writes C into bit 31. Read together, the listing's path returns $8000_000F. The served text and the `IF cog == -1` examples stay as the Spin2 document has them until the run decides. COGSPIN's return needs the same check.
+### F-643 — what `COGINIT()` and `COGSPIN()` return when no cog is free: `$8000_000F`, not the Spin2 document's -1 (decided by EF-120) — `PENDING-VALIDATION` (found 2026-11-09, «#462»; decided 2026-11-09, «#465»)
+> **KB decision:** in batch v1.26.0
+Resolved 2026-11-09 by the bench; served text changed in this batch. Validation owed: the release and its code-compile gate. Close and sweep once the KB release carries it.
+Decided by EF-120 (`test-contract-gaps-p3-coginit-no-free-cog.spin2`, log `debug_261109-123259`). With all 8 cogs busy, `COGINIT(COGEXEC_NEW, ...)` and `COGSPIN(NEWCOG, ...)` used as expressions returned `$8000_000F` on every call, five calls each; controls and recovery passed (every other start read a cog ID in 0..7 and COGSTOP freed the cog). The document says otherwise: `spin2-v55-text.txt:516` (COGSPIN) and `:517` (COGINIT) give "-1 = no cog free". The premise is sourced: the Silicon Doc (`silicon-doc-text.txt:386`) says a failed COGINIT sets C and writes $F into D, and the interpreter listing (`Spin2_interpreter.spin2` v55 lines 1104-1105) runs `coginit x,y wc` then `_ret_ bitc x,#31`, which gives `$8000_000F`; the listing predicted the bench. The KB now states `$8000_000F` for the forms measured (`language/spin2/methods/coginit.yaml` and `cogspin.yaml` returns), gives the document's value as "Parallax's documents also give -1", and the `== -1` tests in the examples are sign tests (`< 0`, or `>= 0` for success). Not measured: the HUBEXEC_NEW and pair forms, and whether a failed COGSPIN writes its stack buffer. The document's wording is an erratum for `SOURCE-ERRATA.md` (a bench result, not a compile; the arbiter files it under the bench-proof rule).
 
 ## Found by the RFVAR/RFVARS change «#440» (2026-11-05) — F-640 … F-642 (F-625 … F-639 archived)
 
