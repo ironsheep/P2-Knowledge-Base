@@ -1806,3 +1806,30 @@ The fifth program references a local label backward across `table long 0`, and t
 **Grounds:** the Spin2 document mentions regular and local symbols for inline PASM but states no scope rule; this record shows what the assembler accepts in a DAT block. In the first program `.loop` and `.finish` each appear under both `first` and `second`, and `call #.finish` precedes its target. The second program refers from under `first` to a local defined under `second`. The third repeats `.loop` under one global. The fourth has `table long 0` between a local label and a reference to a local defined after it, and the reference fails, so the label on the storage directive began a new scope.
 *Limits:* DAT blocks only; legality only. Maximum length of a local name, the characters it may contain, and scope at the end of a DAT block are not shown. One compiler version.
 *→ EF:* none — legality stays CP.
+
+### CP-044 · `IF_RET`, `IF_RETURN` and `IF_NEVER` are not condition keywords: at the start of a DAT line each defines a label that a JMP can reach; `IF_ALWAYS` is a condition and defines no label
+*KB:* `language/pasm2/concepts/conditional_execution.yaml`
+*Class:* legality (the compiler's answer).
+*Source:* `proofs/cp-044-if-names-are-labels.spin2` (accepted), `proofs/cp-044-reject-if-always-as-symbol.spin2` (refused)
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-044-if-names-are-labels.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-044-if-names-are-labels.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-044-if-names-are-labels.bin (24 bytes)
+pnut-ts: Done
+```
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-044-reject-if-always-as-symbol.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-044-reject-if-always-as-symbol.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-044-reject-if-always-as-symbol.spin2:5:error:Expected a constant, unary operator, or "("
+```
+**Grounds:** the PASM2 Manual's condition table has no `IF_RET`, `IF_RETURN` or `IF_NEVER`. The first program's three JMPs resolve, so each name was taken as a symbol definition. In the control, `IF_ALWAYS` on the same line shape leaves nothing a JMP can name, so it was taken as a condition.
+*Limits:* DAT blocks only; legality only. The other condition aliases were not run. One compiler version.
+*→ EF:* none — legality stays CP.

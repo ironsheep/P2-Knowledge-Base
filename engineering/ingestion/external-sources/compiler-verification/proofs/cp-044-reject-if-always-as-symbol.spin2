@@ -1,0 +1,5 @@
+' IF_ALWAYS is a condition: it does not define a label that can be jumped to
+DAT
+              org
+IF_ALWAYS     nop
+              jmp     #IF_ALWAYS

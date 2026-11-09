@@ -1,0 +1,9 @@
+' IF_RET, IF_RETURN and IF_NEVER are defined as labels and can be jumped to
+DAT
+              org
+IF_RET        nop
+IF_RETURN     nop
+IF_NEVER      nop
+              jmp     #IF_RET
+              jmp     #IF_RETURN
+              jmp     #IF_NEVER
