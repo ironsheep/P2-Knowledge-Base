@@ -1,0 +1,4 @@
+' ORG $100 with its default limit: one long past $200 is refused
+DAT
+        org     $100
+        long    0[257]

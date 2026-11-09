@@ -1833,3 +1833,30 @@ engineering/ingestion/external-sources/compiler-verification/proofs/cp-044-rejec
 **Grounds:** the PASM2 Manual's condition table has no `IF_RET`, `IF_RETURN` or `IF_NEVER`. The first program's three JMPs resolve, so each name was taken as a symbol definition. In the control, `IF_ALWAYS` on the same line shape leaves nothing a JMP can name, so it was taken as a condition.
 *Limits:* DAT blocks only; legality only. The other condition aliases were not run. One compiler version.
 *→ EF:* none — legality stays CP.
+
+### CP-045 · `ORG $100` with no limit takes a default limit of `$200`: 256 longs assemble and the 257th is refused with "Cog address exceeds limit (m113)"
+*KB:* `language/pasm2/org.yaml`
+*Class:* legality (the compiler's answer).
+*Source:* `proofs/cp-045-org100-256-longs.spin2` (accepted), `proofs/cp-045-reject-org100-257-longs.spin2` (refused)
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-045-org100-256-longs.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-045-org100-256-longs.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-045-org100-256-longs.bin (1024 bytes)
+pnut-ts: Done
+```
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-045-reject-org100-257-longs.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-045-reject-org100-257-longs.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-045-reject-org100-257-longs.spin2:4:error:Cog address exceeds limit (m113)
+```
+**Grounds:** the Spin2 document lists `ORG $100` as "cog limit = $1F8 (reg, default limit)". From `$100`, 256 longs end at `$1FF` and a limit of `$1F8` would refuse the 249th; the compiler accepts all 256 and refuses the 257th, so the default limit it applies is `$200`.
+*Limits:* one start address, `$100`, with no limit operand; legality only. One compiler version.
+*→ EF:* none — legality stays CP.

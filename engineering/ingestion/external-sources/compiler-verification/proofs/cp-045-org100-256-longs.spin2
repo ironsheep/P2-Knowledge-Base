@@ -1,0 +1,4 @@
+' ORG $100 with its default limit: 256 longs reach $200
+DAT
+        org     $100
+        long    0[256]
