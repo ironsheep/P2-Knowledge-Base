@@ -1,0 +1,361 @@
+'' ===========================================================================
+''
+''   File.......  test-contract-gaps-p3-coginit-no-free-cog.spin2
+''   Purpose....  What COGINIT() and COGSPIN() return, used as expressions,
+''                when no cog is free, arms P and Q.  No pins are used.
+''   Manual.....  P2 Knowledge Base
+''   Authors....  Iron Sheep Productions, LLC
+''   E-mail.....  stephen@ironsheep.biz
+''   Started....  Nov 2026
+''   Updated....  Nov 2026
+''
+'' ===========================================================================
+
+{ RIG
+  Bare P2 board, 200 MHz, NOTHING attached.  No pins are touched.
+  Build pnut-ts -d.  Cog 0 supervises and prints; no other cog has the
+  debugger.  The started cogs do nothing but hold their cog, so no step waits
+  on another cog and no step can hang.  Results print before verdicts, and
+  every reading not named below is printed raw.
+
+ARM P  What does COGINIT(COGEXEC_NEW, ...) return when no cog is free?
+ARM Q  What does COGSPIN(NEWCOG, ...) return when no cog is free?
+  The Spin2 document gives -1.  The interpreter listing runs COGINIT x,y WC
+  then BITC x,#31; with the silicon's failure result, $F in D and C set, that
+  path gives $8000_000F.
+
+  Each arm makes every start through one call site, try_start(), so the call
+  that succeeds and the call that fails are the same code.
+    Control      one start before filling.  It must return an ID in 0..7 that
+                 names a cog free before the start and running after it; a
+                 COGSTOP must return the running-cog mask to its first value.
+    Fill         one start for every cog the mask shows free.  Each must return
+                 an ID as above.  The mask must then read $FF, measured.  The
+                 next call after the last successful start is the first call
+                 under test.
+    Measure      N_RPT calls with the mask read before and after each.  Every
+                 raw return value is printed in hex.
+    Recovery     stop the last cog filled.  The mask must show exactly that
+                 cog free; the same call must return that cog's ID, and the
+                 mask must read $FF again.  This shows the instrument reading
+                 a success on the state next to the state under test.
+
+  The running-cog mask comes from COGCHK() on 0..7.  It is shown to read a
+  cog as running and as stopped by the control's own start and stop.
+
+  READINGS, each from the raw values of the calls under test only:
+    READS -1             every call returned $FFFF_FFFF
+    READS $8000_000F     every call returned $8000_000F
+    OTHER                every call returned the same other value, printed raw
+    MIXED                the calls did not all return one value, printed raw
+    NO READING           a premise above missed; no label is given
+
+NOT MEASURED
+  COGINIT or COGSPIN naming a specific cog; the HUBEXEC and PAIR forms; whether
+  a failed COGSPIN leaves its stack buffer unwritten.  One part, N = 1.
+}
+
+CON ' ---- Rig Parameters ----
+  _clkfreq        = 200_000_000
+  DEBUG_COGS      = %0000_0001
+
+  K_CI            = 0                   ' arm P, COGINIT
+  K_CS            = 1                   ' arm Q, COGSPIN
+  N_ARM           = 2
+  N_COG           = 8
+  N_RPT           = 5                   ' calls under test in each arm
+  ALL_COGS        = $FF
+  READ_NEG1       = $FFFF_FFFF
+  READ_BITC       = $8000_000F
+  STK_LONGS       = 64
+  STK_SLOTS       = 16                  ' control + fill + calls + recovery, each its own
+  SETTLE_MS       = 2
+
+VAR ' ---- Rig State ----
+  long  myCog
+  long  slot                            ' next unused COGSPIN stack
+  long  stk[STK_LONGS * STK_SLOTS]
+  long  startMask[N_ARM]
+  long  ctlV[N_ARM], ctlOn[N_ARM], ctlOff[N_ARM]
+  long  fillN[N_ARM]
+  long  fillIn[N_ARM * N_COG], fillV[N_ARM * N_COG], fillOn[N_ARM * N_COG]
+  long  fullMask[N_ARM]
+  long  callIn[N_ARM * N_RPT], callV[N_ARM * N_RPT], callOn[N_ARM * N_RPT]
+  long  recVictim[N_ARM], recOff[N_ARM], recRaw[N_ARM], recOn[N_ARM]
+
+PUB main()
+'' Run arms P and Q and print every reading and verdict.
+''
+
+  p0(string("=== test-contract-gaps-p3-coginit-no-free-cog ==="))
+  myCog := cogid()
+  run_arm(K_CI)
+  report(K_CI, string("P COGINIT"))
+  run_arm(K_CS)
+  report(K_CS, string("Q COGSPIN"))
+  p0(string("=== END ==="))
+  debug("DEBUG_END_SESSION")
+  repeat
+
+' ---------------------------------------------------------------- the rig
+
+PRI parked_spin()
+' Hold the cog this method started in.
+'
+
+  repeat
+
+PRI try_start(kind) : v
+' Start one parked cog; the one call site every step of an arm uses.
+'
+' @param kind - K_CI for COGINIT, K_CS for COGSPIN
+' @returns v - the raw value the call returned
+
+  if kind == K_CI
+    v := coginit(COGEXEC_NEW, @parked_pasm, 0)
+  else
+    v := cogspin(NEWCOG, parked_spin(), @stk[slot * STK_LONGS])
+    slot++
+
+PRI cog_mask() : m | i
+' Read which cogs are running.
+'
+' @returns m - bit n set when COGCHK reads cog n as running
+
+' Local Variables:
+' @local i - the cog being read
+
+  repeat i from 0 to N_COG - 1
+    if cogchk(i)
+      m |= 1 << i
+
+PRI is_id(v) : yes
+' Whether a value is a cog ID.
+'
+' @param v - the raw value
+' @returns yes - TRUE when v is in 0..7
+
+  yes := v >= 0 and v <= N_COG - 1
+
+PRI run_arm(k) | m, v, i, idx, last
+' Run one arm and keep every raw value for the report.
+'
+' @param k - K_CI or K_CS
+
+' Local Variables:
+' @local m - the running-cog mask as the fill proceeds
+' @local v - a raw return value
+' @local i - loop index
+' @local idx - record index
+' @local last - the last cog the fill started, -1 if none
+
+  slot := 0
+  startMask[k] := cog_mask()
+
+  v := try_start(k)                     ' the control
+  ctlV[k] := v
+  ctlOn[k] := cog_mask()
+  if is_id(v) and v <> myCog
+    cogstop(v)
+  waitms(SETTLE_MS)
+  m := cog_mask()
+  ctlOff[k] := m
+
+  fillN[k] := N_COG - ones(m)           ' the fill
+  last := -1
+  i := 0
+  repeat while i < fillN[k]
+    idx := k * N_COG + i
+    fillIn[idx] := m
+    v := try_start(k)
+    fillV[idx] := v
+    m := cog_mask()
+    fillOn[idx] := m
+    if is_id(v) and v <> myCog
+      last := v
+    i++
+  fullMask[k] := m
+
+  repeat i from 0 to N_RPT - 1          ' the calls under test
+    idx := k * N_RPT + i
+    callIn[idx] := cog_mask()
+    callV[idx] := try_start(k)
+    callOn[idx] := cog_mask()
+
+  recVictim[k] := last                  ' the recovery
+  if last <> -1
+    cogstop(last)
+  waitms(SETTLE_MS)
+  recOff[k] := cog_mask()
+  recRaw[k] := try_start(k)
+  recOn[k] := cog_mask()
+
+  repeat i from 0 to N_COG - 1          ' leave only this cog running
+    if i <> myCog
+      cogstop(i)
+  waitms(SETTLE_MS)
+
+' ---------------------------------------------------------------- verdicts
+
+PRI ok_start(k) : ok
+' Whether the arm began with this cog running and at least one cog free.
+'
+' @param k - the arm
+' @returns ok - TRUE when it did
+
+  ok := (startMask[k] & (1 << myCog)) <> 0 and ones(startMask[k]) < N_COG
+
+PRI ok_control(k) : ok | b
+' Whether the control start returned an ID naming a free cog, and its COGSTOP
+' brought the mask back.
+'
+' @param k - the arm
+' @returns ok - TRUE when it did
+
+' Local Variables:
+' @local b - the started cog's mask bit
+
+  if not is_id(ctlV[k])
+    return FALSE
+  b := 1 << ctlV[k]
+  ok := (startMask[k] & b) == 0 and ctlOn[k] == (startMask[k] | b) and ctlOff[k] == startMask[k]
+
+PRI ok_fill(k) : ok | i, idx, v, b
+' Whether every fill start returned an ID naming a free cog and the mask ended
+' with every cog running.
+'
+' @param k - the arm
+' @returns ok - TRUE when they did
+
+' Local Variables:
+' @local i - loop index
+' @local idx - record index
+' @local v - the raw value
+' @local b - the started cog's mask bit
+
+  if fillN[k] < 1 or fullMask[k] <> ALL_COGS
+    return FALSE
+  i := 0
+  repeat while i < fillN[k]
+    idx := k * N_COG + i
+    v := fillV[idx]
+    if not is_id(v)
+      return FALSE
+    b := 1 << v
+    if (fillIn[idx] & b) <> 0 or fillOn[idx] <> (fillIn[idx] | b)
+      return FALSE
+    i++
+  ok := TRUE
+
+PRI ok_calls(k) : ok | i, idx
+' Whether every cog read as running before and after every call under test.
+'
+' @param k - the arm
+' @returns ok - TRUE when they did
+
+' Local Variables:
+' @local i - loop index
+' @local idx - record index
+
+  repeat i from 0 to N_RPT - 1
+    idx := k * N_RPT + i
+    if callIn[idx] <> ALL_COGS or callOn[idx] <> ALL_COGS
+      return FALSE
+  ok := TRUE
+
+PRI ok_recovery(k) : ok | b
+' Whether stopping one cog freed exactly that cog and the same call started it.
+'
+' @param k - the arm
+' @returns ok - TRUE when it did
+
+' Local Variables:
+' @local b - the stopped cog's mask bit
+
+  if not is_id(recVictim[k])
+    return FALSE
+  b := 1 << recVictim[k]
+  ok := recOff[k] == (ALL_COGS & !b) and recRaw[k] == recVictim[k] and recOn[k] == ALL_COGS
+
+PRI report(k, pArm) | i, idx, v0, same
+' Print an arm's raw values, then its verdict from those values.
+'
+' @param k - the arm
+' @param pArm - the arm's name
+
+' Local Variables:
+' @local i - loop index
+' @local idx - record index
+' @local v0 - the first call's raw value
+' @local same - TRUE while every call matches the first
+
+  debug(zstr_(pArm), " start: my cog ", uhex_long_(myCog), " mask ", uhex_long_(startMask[k]))
+  debug(zstr_(pArm), " control: raw ", uhex_long_(ctlV[k]), " mask on ", uhex_long_(ctlOn[k]), " mask off ", uhex_long_(ctlOff[k]))
+  debug(zstr_(pArm), " fill count: ", uhex_long_(fillN[k]))
+  i := 0
+  repeat while i < fillN[k]
+    idx := k * N_COG + i
+    debug(zstr_(pArm), " fill ", uhex_long_(i), ": mask in ", uhex_long_(fillIn[idx]), " raw ", uhex_long_(fillV[idx]), " mask on ", uhex_long_(fillOn[idx]))
+    i++
+  debug(zstr_(pArm), " full mask: ", uhex_long_(fullMask[k]))
+  repeat i from 0 to N_RPT - 1
+    idx := k * N_RPT + i
+    debug(zstr_(pArm), " call ", uhex_long_(i), ": mask in ", uhex_long_(callIn[idx]), " raw ", uhex_long_(callV[idx]), " mask on ", uhex_long_(callOn[idx]))
+  debug(zstr_(pArm), " recovery: stopped ", uhex_long_(recVictim[k]), " mask off ", uhex_long_(recOff[k]), " raw ", uhex_long_(recRaw[k]), " mask on ", uhex_long_(recOn[k]))
+
+  if not ok_start(k)
+    pv(pArm, string("NO READING, the start mask does not show this cog running and one cog free"))
+  elseif not ok_control(k)
+    pv(pArm, string("NO READING, the control did not return a free cog's ID or its COGSTOP did not free it"))
+  elseif not ok_fill(k)
+    pv(pArm, string("NO READING, a fill start missed or the mask did not end at $FF"))
+  elseif not ok_calls(k)
+    pv(pArm, string("NO READING, a cog read as free around a call under test"))
+  elseif not ok_recovery(k)
+    pv(pArm, string("NO READING, the recovery did not free one cog and start it again"))
+  else
+    idx := k * N_RPT
+    v0 := callV[idx]
+    same := TRUE
+    repeat i from 1 to N_RPT - 1
+      if callV[idx + i] <> v0
+        same := FALSE
+    if not same
+      pv(pArm, string("MIXED, the calls under test did not all return one value; the raw values are the call lines"))
+    elseif v0 == READ_NEG1
+      pv(pArm, string("READS -1, every call returned $FFFF_FFFF"))
+    elseif v0 == READ_BITC
+      pv(pArm, string("READS $8000_000F, every call returned $8000_000F"))
+    else
+      pv1(pArm, string("OTHER, every call returned this one value"), v0)
+
+' ---------------------------------------------------------------- printing
+
+PRI p0(pS)
+' Print a hub string.
+'
+' @param pS - the string
+
+  debug(zstr_(pS))
+
+PRI pv(pArm, pText)
+' Print one verdict line.
+'
+' @param pArm - the arm
+' @param pText - the verdict
+
+  debug("VERDICT ", zstr_(pArm), ": ", zstr_(pText))
+
+PRI pv1(pArm, pText, v)
+' Print one verdict line with its reading.
+'
+' @param pArm - the arm
+' @param pText - the verdict
+' @param v - the reading
+
+  debug("VERDICT ", zstr_(pArm), ": ", zstr_(pText), " ", uhex_long_(v))
+
+DAT ' ---- the parked image: holds the cog it started in ----
+                alignl
+                org     0
+parked_pasm     jmp     #parked_pasm

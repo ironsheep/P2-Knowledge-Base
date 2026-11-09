@@ -1,6 +1,6 @@
 # Run sheet — KB contract-gaps bench, November 2026
 
-Two programs. **Bare board, nothing attached, no jumpers.**
+Three programs. **Bare board, nothing attached, no jumpers.**
 
 **For the run**
 1. USB serial connected (DEBUG on P62/P63). Board on its 20 MHz crystal.
@@ -8,7 +8,8 @@ Two programs. **Bare board, nothing attached, no jumpers.**
 3. Build each with `pnut-ts -d` and load it to RAM with DEBUG on, one download per program:
    - `pnut-ts -d tests/test-contract-gaps-p1-instruction-flow.spin2`
    - `pnut-ts -d tests/test-contract-gaps-p2-cog-lifecycle.spin2`
-4. Check that the log's `DOWNLOAD TO RAM` line names the program's binary: `test-contract-gaps-p1-instruction-flow.bin` (27,654 bytes from pnut-ts 1.55.10) or `test-contract-gaps-p2-cog-lifecycle.bin` (22,506 bytes).
+   - `pnut-ts -d tests/test-contract-gaps-p3-coginit-no-free-cog.spin2`
+4. Check that the log's `DOWNLOAD TO RAM` line names the program's binary: `test-contract-gaps-p1-instruction-flow.bin` (27,654 bytes from pnut-ts 1.55.10), `test-contract-gaps-p2-cog-lifecycle.bin` (22,506 bytes) or `test-contract-gaps-p3-coginit-no-free-cog.bin` (11,240 bytes).
 5. **Save the whole console output** of each run into `tests/logs/` (create the folder if it is not there). The terminal's own file name is fine.
 6. If no `=== END ===` appears within the hang limit: power-cycle and save the log as it is. That is a hang, not a result.
 
@@ -16,6 +17,7 @@ Two programs. **Bare board, nothing attached, no jumpers.**
 |---|---|---|---|---|
 | `test-contract-gaps-p1-instruction-flow.spin2` | **none** | under 1 s | 20 s | `VERDICT` lines for A to H, `=== END ===` |
 | `test-contract-gaps-p2-cog-lifecycle.spin2` | **P0–P2** (driven) | about 1 s | 30 s | `VERDICT` lines for I to O, `=== END ===` |
+| `test-contract-gaps-p3-coginit-no-free-cog.spin2` | **none** | under 1 s | 20 s | `VERDICT` lines for P and Q, `=== END ===` |
 
 **Questions**
 - **A:** does a far `CALLD PA,#label` in hub land on its label, or where a byte field puts it?
@@ -32,5 +34,6 @@ Two programs. **Bare board, nothing attached, no jumpers.**
 - **M:** what `GETQX` returns with nothing pending, and in how many clocks.
 - **N:** whether `RDLUT`/`WRLUT` PTRA indexes and updates count longs or step by four.
 - **O:** the bit order `CRCNIB` takes from Q.
+- **P, Q:** what `COGINIT()` and `COGSPIN()` return, used as expressions, when no cog is free.
 
 **Reading it.** Each question has controls that must come out both ways. These labels mean that arm is not a result: `RIG FAIL` (a control or a premise missed), `INCONCLUSIVE` (the two sides could not differ), `NO READING` (no reading the program expects, or a step hung) and `STEP HUNG` (a worker did not finish in its limit). `OTHER` and `MIXED` are readings outside the expected ones, and their raw values are printed. Either way, send the log as it is.
