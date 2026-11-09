@@ -185,3 +185,135 @@ Lesser gaps (PARTIAL, listed in the ledger): the streamer releasing DAC override
 (SD:1409); the SINC2 accumulation formula (SD:1615-1618); the 32-bit accumulator width (SD:1602);
 `setdacs.yaml` not saying that the streamer and colorspace converter override it (SD:1272); and
 `setdacs.yaml` filed under `category: Smart Pin`.
+
+## Closure (task «#455», 2026-11-09)
+
+Each row was re-found by content, confirmed at its SD line, and checked against the YAML text as it
+stands now. Fix lines are in the files as edited by this task. KB paths are relative to
+`deliverables/ai/P2/`; `strm/` = `architecture/streamer/`; `pasm2/` = `language/pasm2/`. Ledger rows
+are named by their SD lines and by their line in this file.
+
+### Canonical home for the colorspace converter and DVI facts
+
+- **Where agents look.** The local index (`deliverables/ai/p2kb-index.json`) sends `SETCMOD` and
+  `setcmod` to `pasm2/setcmod.yaml`, `colorspace` to the `pasm2_colorspace` category (the five
+  `setc*` files), and `DVI` / `HDMI` only to the add-on board's aliases
+  (`hardware/addon-digital-video-out.yaml`). `TMDS`, `NTSC`, `composite` and `VGA` reach no
+  converter or DVI content at all. The YAML text search found the facts in no file.
+- **Choice: one new YAML file, `strm/colorspace-and-dvi.yaml`**, not blocks in existing files.
+  - The CMOD register is shared: bits 8:7 select the streamer's DVI serialization (SD:1711) and
+    bits 6:0 configure the converter (SD:1863-1893). Splitting them across `setcmod.yaml` and a
+    streamer page would put half of one register's map in each.
+  - The facts are tables (Table 20, Table 21, Table 23) and formula blocks. A single-instruction
+    file may hold only its own instruction's facts, and five `setc*` files share them, so no one
+    of them can be the home.
+  - `strm/modes-reference.yaml` is the mode table; the converter is not a streamer mode, and the
+    file is already the home of Tables 14-18.
+  - The DVI rule (clock 10x the pixel rate, NCO `$0CCCCCCC+1`, SD:1751-1753) is stated once, at
+    `strm/colorspace-and-dvi.yaml:198-204`; `strm/nco-timing.yaml:110` (see_also) links to it.
+- **Links to the home:** `pasm2/setcmod.yaml:13` (cmod_fields) and `related:`;
+  `pasm2/setcy.yaml`, `setci.yaml`, `setcq.yaml`, `setcfrq.yaml` `:13` (parameter_use) and
+  `related:`; `pasm2/setdacs.yaml:20`; `strm/overview.yaml:36,76,216`; `strm/modes-reference.yaml:647`;
+  `strm/nco-timing.yaml:110`; `strm/pin-selection.yaml:245-249`; `strm/_index.yaml:74-84`;
+  `hardware/addon-digital-video-out.yaml:15-21,61`. Aliases are left to task «#463».
+- **No table in two files.** The CMOD map, Tables 20, 21 and 23 and the converter formulas exist
+  only in the new file. Tables 14-18 and the lane column exist only in `strm/modes-reference.yaml`.
+  The 1 to 1/8 multiplier table exists only in `strm/nco-timing.yaml` (`setxfrq.yaml:40` points to
+  it). The DAC pin mapping stays in `strm/dac-routing.yaml` (`setdacs.yaml` points to it).
+
+### MISMATCH rows
+
+| Ledger row | SD lines confirmed | Disposition | Fix (file:line) |
+|---|---|---|---|
+| 1285 GETXACC on the SETXFRQ page (line 39) | 1285, 1604 | CLOSED, fixed | `pasm2/setxfrq.yaml`: the GETXACC entry is removed from related_instructions (it is another instruction's content); the `related:` path `language/pasm2/getxacc.yaml` remains and carries the SD:1285 / instruction listing row 265 wording. |
+| 1309, 1313 XINIT/XCONT operands (line 45) | 1309, 1313 | CLOSED, fixed | `pasm2/concepts/streamer_smartpin_control.yaml:26-32` (XINIT `{#}D,{#}S`; D = command in D[31:16] and NCO-rollover count in D[15:0]; S = data, sub-mode or ignored), `:43-47` (XCONT), `:49-54` (XZERO, same operands). |
+| 1313-1397 wrong mode codes (line 48) | 1313-1397 | CLOSED, fixed | `streamer_smartpin_control.yaml:57-64`: the three wrong lists replaced by a one-sentence group summary and `mode_table: architecture/streamer/modes-reference.yaml`, the one home of the table. Searched the KB for `32_bit_output`, `rfbyte_fetch`, `%0001_0000` and `%0010_xxxx` as streamer codes: none remain. |
+| 1751 `hdmi_720p` NCO values (line 92) | 1751, 1753 | CLOSED, fixed | `strm/nco-timing.yaml:77-80`: `hdmi_720p` removed, and with it the whole derived video_rates table (VGA 640x480 at 25.175 MHz, 800x600, 1024x768: no source states those values), now "Not documented"; the DVI rule at `strm/colorspace-and-dvi.yaml:198-204` is linked from `nco-timing.yaml:110` (see_also). The `(HDMI 10x)` note on the 1:10 row went with the derived 1:10 and 1:16 rows; the table at `:49-75` is the SD table (1, 1/2 ... 1/8, with 1/6 and 1/7 added). `grep hdmi_720p` and `74.25` over the KB: none. |
+
+### NOT CARRIED rows
+
+| Ledger row | SD lines confirmed | Disposition | Fix (file:line) |
+|---|---|---|---|
+| 1316-1391 per-mode lane layout (line 49) | 1316-1391 | CLOSED, fixed | `strm/modes-reference.yaml:140-600`: every one of the 56 rows carries `s_operand`, `pins` and `dac_lanes` copied from the S/#, Pins and DAC Channels columns; notation at `:128-135`. |
+| 1468 immediate-to-pins, last value repeats (line 67) | 1464, 1468 | CLOSED, fixed | `strm/modes-reference.yaml:69-75` (immediate_direct.data); the LUT form at `:58-67`. |
+| 1480 RGB modes {R,G,B,0} to X3..X0 (line 70) | 1480 | CLOSED, fixed | `strm/modes-reference.yaml:611-615` (rgb_modes.output); the five RGB rows' dac_lanes at `:400-438`; `strm/overview.yaml:76`. |
+| 1482-1494 LUMA8 colour from S[2:0], Table 14 (line 71) | 1482-1494 | CLOSED, fixed | `strm/modes-reference.yaml:616-626`, 8 rows; the LUMA8 row's S operand at `:404`. |
+| 1512-1531 RGB8, RGB16, RGB24, Tables 16-18 (line 73) | 1512-1531 | CLOSED, fixed | `strm/modes-reference.yaml:638-648`. |
+| 1541 ADC capture needs SETSCP and an ADC sample/scope smart pin (line 75) | 1541, 3834-3836, 4555-4557 | CLOSED, fixed | `strm/modes-reference.yaml:653-657` (adc_modes.prerequisite), links to `pasm2/setscp.yaml` and the `11000`, `11001`, `11010` smart pin files at `:676-680`. |
+| 1549 ADC plus pins: pins low half, SCOPE high half (line 77) | 1549 | CLOSED, fixed | `strm/modes-reference.yaml:662-665` (adc_modes.word_layout). |
+| 1709 DVI output (line 89) | 1709 | CLOSED, fixed | `strm/colorspace-and-dvi.yaml:141-147`. |
+| 1711-1718 SETCMOD bits 8:7 and Table 20 (line 90) | 1711-1718 | CLOSED, fixed | `strm/colorspace-and-dvi.yaml:148-182` (3 rows x 11 cells); `pasm2/setcmod.yaml:13` points to it. |
+| 1721-1748 P[1] TMDS or literal, Table 21 (line 91) | 1721-1748 | CLOSED, fixed | `strm/colorspace-and-dvi.yaml:183-197`. |
+| 1755-1845 640x480 DVI example (line 94) | 1755-1845 | CLOSED, fixed | `strm/colorspace-and-dvi.yaml:205-294`, the Table 22 program line for line (column layout only changed; the `file "birds_16bpp.bmp"` line kept, its file named in notes). It assembles: manifest entry `dvi.example.code`, fragment, wrap spin2-top, assumes `file:birds_16bpp.bmp`. The XZERO hsync subroutine is excerpted at `pasm2/xzero.yaml:31-38` and the visible-line loop at `pasm2/xcont.yaml:31-38`; the 32-pin mode words at a multiple-of-8 base at `strm/pin-selection.yaml:245-249`. |
+| 1861 DAC3/2/1 = R/G/B, group delay 5 clocks (line 97) | 1861 | CLOSED, fixed | `strm/colorspace-and-dvi.yaml:56-64`. |
+| 1863-1867 CMOD[4] and the /128 matrix (line 98) | 1863-1867; Datasheet p.2 | CLOSED, fixed | `strm/colorspace-and-dvi.yaml:65-78`. |
+| 1869-1874 modulator, 1.646, CFRQ formula (line 99) | 1869-1874 | CLOSED, fixed | `strm/colorspace-and-dvi.yaml:79-91`, including SD's own $0B74_5CFE example; `pasm2/setcfrq.yaml:13` points to it. |
+| 1876-1890 FY..FYC terms and CMOD[3:0] (line 100) | 1876-1890 | CLOSED, fixed | `strm/colorspace-and-dvi.yaml:92-110`. |
+| 1893-1958 CMOD[6:5] output select, Table 23 (line 101) | 1893-1958 | CLOSED, fixed | `strm/colorspace-and-dvi.yaml:111-138` (4 rows x 6 cells). |
+
+The walk's CMOD map was confirmed bit by bit at its SD lines before it was written, and it is
+written from those lines, not from the walk's summary (`strm/colorspace-and-dvi.yaml:18-47`):
+[8:7] digital video mode (SD:1711, Table 20); [6:5] final output terms (SD:1893, Table 23); [4]
+sign or zero extension of CY/CI/CQ (SD:1863); [3], [2], [1] add DAC0 into FY, FI, FQ (SD:1878-1880,
+`DAC0 & {8{CMOD[3]}}` and so on); [0] is XORed with DAC0[0] to form FS, the VGA H-Sync term
+(SD:1882). The walk's "[0] sync polarity" is that XOR; the served text gives the formula's meaning,
+not the label.
+
+### PARTIAL rows on touched files
+
+| Ledger row | SD lines confirmed | Disposition | Fix (file:line) |
+|---|---|---|---|
+| 1270 `setdacs.yaml` category Smart Pin (line 35) | instruction listing row 263 | REFUTED as a misfile | The instruction listing files SETDACS in its "Smart Pins" group, and `engineering/tools/p2kb-categories.json` lists `setdacs` under `smart_pin`, as the index generator accepts it. `category: Smart Pin` is kept. |
+| 1272 SETDACS values overridden by the streamer and the converter (line 36) | 1268-1272 | CLOSED, fixed | `pasm2/setdacs.yaml:13-20` (background_state, with links to the streamer and converter homes); the converter side also at `strm/colorspace-and-dvi.yaml:60`. |
+| 1311 command buffer and XINIT-then-XCONT idiom (line 46) | 1311 | CLOSED, fixed | `strm/overview.yaml:42-48` (command_buffer); `pasm2/xcont.yaml:44` points to it. |
+| 1387-1391 ADC modes' D[22:20] (line 50) | 1387-1391; Spin2 v55 symbol templates W000 | CLOSED, fixed, two documents | `strm/modes-reference.yaml:666-670` (no_pin_field: the mode table marks them ---; Parallax's documents also give 000 in the symbol templates), the rows' `d_22_20` at `:542,560,578`; `strm/overview.yaml:139-147` (the mode table marks D[22:20] ---). |
+| 1401 count 0 releases DAC overrides and pin outputs (line 52) | 1401 | CLOSED, fixed | `strm/overview.yaml:124-126` (count_field.zero); `pasm2/xinit.yaml:85` points to it. |
+| 1407 XZERO waits (line 55) | 1407 | CLOSED, fixed | `pasm2/xzero.yaml:39-44` (waiting). |
+| 1409 XZERO glitch with fractional NCO values (line 56) | 1409 | CLOSED, fixed | `pasm2/xzero.yaml:45-50` (fractional_frequency_glitch, with SD's own `%5555_5555 = ~1/3` as printed there; the increment-by-1 sentence moved to `strm/nco-timing.yaml:35-41`, frequency_calculation.note); `strm/nco-timing.yaml:104` points to it, and the unsourced "prevents drift accumulation" is gone. |
+| 1464 imm->LUT last value repeats (line 66) | 1464 | CLOSED, fixed | `strm/modes-reference.yaml:58-67`. |
+| 1472 RDFAST->LUT refill on last value (line 68) | 1472 | CLOSED, fixed | `strm/modes-reference.yaml:77-87`. |
+| 1476 RDFAST->pins refill on last value (line 69) | 1476 | CLOSED, fixed | `strm/modes-reference.yaml:88-95`. |
+| 1497-1509 RGBI8 colours and expansion, Table 15 (line 72) | 1497-1509 | CLOSED, fixed | `strm/modes-reference.yaml:627-637`, 8 rows. |
+| 1543-1545 S[1:0] and S[1] channel select (line 76) | 1543-1547 | CLOSED, fixed | `strm/modes-reference.yaml:658-661`; the rows' `s_operand` at `:543,552,561,570,579`. |
+| 1602 32-bit accumulators (line 83) | 1602 | CLOSED, fixed | `strm/dds-goertzel.yaml:91,106`. |
+| 1606-1618 SINC2 accumulation formula (line 85) | 1606-1618 | CLOSED, fixed | `strm/dds-goertzel.yaml:101-119` (both SINC1 and SINC2 blocks, copied). |
+| 1851 converter introduction (line 95) | 1851 | CLOSED, fixed | `strm/colorspace-and-dvi.yaml:6-11`; the `setc*` files point to it. |
+
+### IN-PLAN row
+
+| Ledger row | Closed against |
+|---|---|
+| 1214-1255 pixel formula and Table 13 (line 33) | task «#454», `language/pasm2/concepts/pixel_mixer.yaml`. Not touched here. |
+
+### CLOSE-AGAINST
+
+- "zero-overhead I/O operations" in `strm/overview.yaml` (unscoped, unsourced): CLOSED, fixed. The
+  description at `strm/overview.yaml:24-28` is the SD:1277 introduction, and the file was certified
+  whole. `grep -i "zero.overhead"` over `strm/`: none.
+
+### Found beyond the rows (KB carve-out, fixed in this pass)
+
+- `pasm2/concepts/streamer_smartpin_control.yaml`: the repository mode wrote its long with WYPIN
+  (SD:3914: WXPIN writes it); TESTP's `Z = !pin state` (SD:1984: Z = IN); the sync serial X given as
+  `clock pin<<24 | bit count` (SD:4646-4654: X[5] and X[4:0], the clock is the B input); P_NCO_FREQ's
+  X and Y, P_HIGH_TICKS's X, and the quadrature reset by WYPIN (SD:4000-4014, 4165-4171, 4103).
+- `pasm2/xinit.yaml` large_transfer_chunking described the flash loader's read loop as draining hub
+  data to an output pin; the loader's `wmode` is a 1-pin input to hub RAM. The loop now lives in
+  `code-examples/flash-loader-case-study.yaml:88-107` (large_transfer_chunking), as the one home of
+  the loader's code; `pasm2/xinit.yaml:83` points to it.
+- `strm/pin-selection.yaml` gave HDMI as an 8-pin mode at base 8; the SD program uses 32-pin mode
+  words at a multiple-of-8 base. Its %a scope warning said X_ALT_ON does nothing in 8-bit modes; in
+  the 8-pin and wider modes it sets a template bit and can select a different mode.
+- `strm/dac-routing.yaml` common_configs gave X_DACS_3_2_1_0 as "R, G, B, Sync"; the RGB modes put
+  0 on X0 (SD:1480).
+- Derived values with no source (video pixel-rate NCO words, 48 kHz and 44.1 kHz words, NCO
+  resolution) removed from `strm/nco-timing.yaml`, `pasm2/setxfrq.yaml` and `strm/dds-goertzel.yaml`.
+
+### Sample MATCH rows re-read
+
+| Ledger row | Result |
+|---|---|
+| 1416-1436 %dddd table (line 59) | MATCH. `strm/dac-routing.yaml:24-151`, 16 rows: dddd and the four channel cells agree with SD:1421-1436 row by row; descriptions now SD's own. |
+| 1443-1452 %ppp pin groups (line 62) | MATCH. `strm/pin-selection.yaml:29-64` (pin_groups), 8 rows agree with SD:1445-1452. |
+| 1294-1305 SETXFRQ table (line 41) | MATCH, restated. `strm/nco-timing.yaml:49-75` carries all eight SD rows in SD's own form. |
+| 1586-1600 S[11:0] loop table (line 82) | MATCH. `strm/dds-goertzel.yaml` lut_window, 8 rows agree with SD:1590-1597. |
