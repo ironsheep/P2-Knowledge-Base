@@ -1,0 +1,6 @@
+PUB t()
+  WAITUS(5)
+
+DAT
+  ORG 0
+  WAITX #5

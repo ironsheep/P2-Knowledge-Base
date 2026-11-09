@@ -1,0 +1,20 @@
+DAT
+fastCode     ' Loads into cog registers
+  ORG 0
+fastLoop
+  REP @endFast, ##1000
+    MOV outa, ina
+endFast
+  JMP ptra
+
+  ORGH
+slowCode
+  CALL #complexMath
+  JMP #\fastLoop
+  JMP #fastLoop
+
+complexMath
+  RET
+
+PUB start()
+  COGINIT(COGEXEC_NEW, @fastCode, @slowCode)

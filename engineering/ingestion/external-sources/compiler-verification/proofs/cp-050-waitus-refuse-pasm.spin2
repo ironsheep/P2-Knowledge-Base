@@ -1,0 +1,5 @@
+PUB t()
+
+DAT
+  ORG 0
+  WAITUS #5

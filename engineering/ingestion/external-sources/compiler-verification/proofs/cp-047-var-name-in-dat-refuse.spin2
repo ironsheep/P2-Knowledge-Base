@@ -1,0 +1,10 @@
+VAR
+  LONG shared_flag
+
+PUB t()
+  shared_flag := 0
+
+DAT
+  ORG 0
+  WRLONG flag_addr, shared_flag
+flag_addr long 0

@@ -1860,3 +1860,231 @@ engineering/ingestion/external-sources/compiler-verification/proofs/cp-045-rejec
 **Grounds:** the Spin2 document lists `ORG $100` as "cog limit = $1F8 (reg, default limit)". From `$100`, 256 longs end at `$1FF` and a limit of `$1F8` would refuse the 249th; the compiler accepts all 256 and refuses the 257th, so the default limit it applies is `$200`.
 *Limits:* one start address, `$100`, with no limit operand; legality only. One compiler version.
 *→ EF:* none — legality stays CP.
+
+### CP-046 · `CALL(#$080)` and `x := CALL(#label)` are refused; `CALL(#label)` as a statement is accepted
+*KB:* `language/spin2/integration/spin2-pasm2-integration.yaml`
+*Class:* legality (the compiler's answer).
+*Source:* `proofs/cp-046-call-operands-accept-label.spin2` (accepted), `proofs/cp-046-call-operands-refuse-numeric.spin2` (refused), `proofs/cp-046-call-operands-refuse-assign.spin2` (refused)
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-09):* `pnut-ts proofs/cp-046-call-operands-accept-label.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: Wrote .../cp-046-call-operands-accept-label.bin (6300 bytes)
+pnut-ts: Done
+```
+*Command (2026-11-09):* `pnut-ts proofs/cp-046-call-operands-refuse-numeric.spin2`
+*Output (exit status 1):*
+```text
+.../cp-046-call-operands-refuse-numeric.spin2:2:error:NumberStack: attempted pop from empty stack
+```
+*Command (2026-11-09):* `pnut-ts proofs/cp-046-call-operands-refuse-assign.spin2`
+*Output (exit status 1):*
+```text
+.../cp-046-call-operands-refuse-assign.spin2:2:error:Expression terms must return a single result
+```
+**Grounds:** the same DAT block (`ORG 0`, label `lbl`, `RET`) is called with `CALL(#lbl)` as a statement and compiles; `CALL(#$080)` and `x := CALL(#lbl)` each change one thing and are refused.
+*Limits:* legality only; the error text for the numeric literal does not name the cause. One compiler version.
+*→ EF:* none — legality stays CP.
+
+### CP-047 · A DAT block cannot name a Spin2 VAR; the VAR's address can be stored from Spin2 with `@`
+*KB:* `language/spin2/integration/spin2-pasm2-integration.yaml`
+*Class:* legality (the compiler's answer).
+*Source:* `proofs/cp-047-var-name-in-dat-accept.spin2` (accepted), `proofs/cp-047-var-name-in-dat-refuse.spin2` (refused)
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-09):* `pnut-ts proofs/cp-047-var-name-in-dat-accept.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: Wrote .../cp-047-var-name-in-dat-accept.bin (6308 bytes)
+pnut-ts: Done
+```
+*Command (2026-11-09):* `pnut-ts proofs/cp-047-var-name-in-dat-refuse.spin2`
+*Output (exit status 1):*
+```text
+.../cp-047-var-name-in-dat-refuse.spin2:9:error:Expected a constant, unary operator, or "("
+```
+**Grounds:** both files declare `VAR LONG shared_flag`. The refused one uses `shared_flag` as the source operand of `WRLONG` in DAT (line 9); the accepted one stores `@shared_flag` into a DAT long from a PUB with `LONG[@flag_addr] := @shared_flag` and uses only DAT symbols in DAT.
+*Limits:* legality only; one operand position. One compiler version.
+*→ EF:* none — legality stays CP.
+
+### CP-048 · `#-1` as a PASM immediate is refused with "Constant must be from 0 to 511 (m130)"; `##-1` and `#511` are accepted
+*KB:* `language/spin2/integration/spin2-pasm2-integration.yaml`
+*Class:* legality (the compiler's answer).
+*Source:* `proofs/cp-048-imm9-negative-accept.spin2` (accepted), `proofs/cp-048-imm9-negative-refuse.spin2` (refused)
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-09):* `pnut-ts proofs/cp-048-imm9-negative-accept.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: Wrote .../cp-048-imm9-negative-accept.bin (6308 bytes)
+pnut-ts: Done
+```
+*Command (2026-11-09):* `pnut-ts proofs/cp-048-imm9-negative-refuse.spin2`
+*Output (exit status 1):*
+```text
+.../cp-048-imm9-negative-refuse.spin2:5:error:Constant must be from 0 to 511 (m130)
+```
+**Grounds:** `MOV x, ##-1` and `MOV x, #511` assemble; `MOV x, #-1` is refused with m130.
+*Limits:* `MOV` only; 512 not tried. One compiler version.
+*→ EF:* none — legality stays CP.
+
+### CP-049 · `WAITCNT`, `cnt` and `par` are refused; `GETCT`, `ADDCT1`, `WAITCT1`, `ptra` and Spin2 `GETCT()` are accepted
+*KB:* `language/spin2/integration/spin2-pasm2-integration.yaml`
+*Class:* legality (the compiler's answer).
+*Source:* `proofs/cp-049-p1-names-accept.spin2` (accepted), `proofs/cp-049-p1-names-refuse-waitcnt.spin2`, `proofs/cp-049-p1-names-refuse-cnt.spin2`, `proofs/cp-049-p1-names-refuse-par.spin2` (each refused)
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-09):* `pnut-ts proofs/cp-049-p1-names-accept.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: Wrote .../cp-049-p1-names-accept.bin (6312 bytes)
+pnut-ts: Done
+```
+*Command (2026-11-09):* `pnut-ts proofs/cp-049-p1-names-refuse-waitcnt.spin2`
+*Output (exit status 1):*
+```text
+.../cp-049-p1-names-refuse-waitcnt.spin2:5:error:Expected a unique name, BYTE, WORD, LONG, or assembly instruction
+```
+*Command (2026-11-09):* `pnut-ts proofs/cp-049-p1-names-refuse-cnt.spin2`
+*Output (exit status 1):*
+```text
+.../cp-049-p1-names-refuse-cnt.spin2:2:error:Expected an expression term (m172)
+```
+*Command (2026-11-09):* `pnut-ts proofs/cp-049-p1-names-refuse-par.spin2`
+*Output (exit status 1):*
+```text
+.../cp-049-p1-names-refuse-par.spin2:5:error:Undefined symbol
+```
+**Grounds:** the accepted file uses the P2 timing and pointer names in the same positions (PASM line, Spin2 expression, PASM source operand) where the refused files use `WAITCNT`, `cnt` and `par`.
+*Limits:* legality only; says nothing about P1. One compiler version.
+*→ EF:* none — legality stays CP.
+
+### CP-050 · `WAITUS` is refused as a PASM instruction; Spin2 `WAITUS()` and PASM `WAITX` are accepted
+*KB:* `language/spin2/methods/waitus.yaml`
+*Class:* legality (the compiler's answer).
+*Source:* `proofs/cp-050-waitus-accept.spin2` (accepted), `proofs/cp-050-waitus-refuse-pasm.spin2` (refused)
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-09):* `pnut-ts proofs/cp-050-waitus-accept.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: Wrote .../cp-050-waitus-accept.bin (6300 bytes)
+pnut-ts: Done
+```
+*Command (2026-11-09):* `pnut-ts proofs/cp-050-waitus-refuse-pasm.spin2`
+*Output (exit status 1):*
+```text
+.../cp-050-waitus-refuse-pasm.spin2:5:error:Expected a unique name, BYTE, WORD, LONG, or assembly instruction
+```
+**Grounds:** `WAITUS` appears in a Spin2 method (line 2) in the accepted file and as a DAT instruction (line 5) in the refused one.
+*Limits:* legality only. One compiler version.
+*→ EF:* none — legality stays CP.
+
+### CP-051 · `IF x THEN` is refused; `IF x` is accepted
+*KB:* `language/spin2/integration/spin2-pasm2-integration.yaml`
+*Class:* legality (the compiler's answer).
+*Source:* `proofs/cp-051-if-no-then-accept.spin2` (accepted), `proofs/cp-051-if-no-then-refuse.spin2` (refused)
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-09):* `pnut-ts proofs/cp-051-if-no-then-accept.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: Wrote .../cp-051-if-no-then-accept.bin (6296 bytes)
+pnut-ts: Done
+```
+*Command (2026-11-09):* `pnut-ts proofs/cp-051-if-no-then-refuse.spin2`
+*Output (exit status 1):*
+```text
+.../cp-051-if-no-then-refuse.spin2:2:error:Expected end of line (m281)
+```
+**Grounds:** the two files differ only in the word THEN after the condition.
+*Limits:* legality only. One compiler version.
+*→ EF:* none — legality stays CP.
+
+### CP-052 · From hub code, `JMP #\fastLoop` and `JMP #fastLoop` to a cog label at cog address 0 both assemble to $FD800000; `CALL #complexMath` to a hub label assembles relative
+*KB:* `language/spin2/integration/spin2-pasm2-integration.yaml`
+*Class:* legality and encoding (the assembler's output).
+*Source:* `proofs/cp-052-hub-to-cog-jump-words.spin2` (accepted)
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-09):* `pnut-ts -l proofs/cp-052-hub-to-cog-jump-words.spin2`
+*Output (exit status 0), listing bytes:*
+```text
+00010- FE F9 03 F6 2C F0 63 FD 08 00 B0 FD 00 00 80 FD   '....,.c.........'
+00020- 00 00 80 FD 2D 00 64 FD 00 42 10 4F 08 1B 5B 18   '....-.d..B.O..[.'
+```
+**Grounds:** at object offset $14 `2C F0 63 FD` = $FD63F02C is `JMP ptra` (D field = $1F8); at $18 `08 00 B0 FD` = $FDB00008 is `CALL #complexMath` with R = 1 and +8 from the next long ($1C), the address of `complexMath` ($24); at $1C `00 00 80 FD` = $FD800000 is `JMP #\fastLoop` with R = 0 and address 0; at $20 the same word is `JMP #fastLoop` (the assembler forces a hub-to-cog branch absolute, as the Silicon Doc's branch cases state).
+*Limits:* decoding by hand from the bytes; no silicon run. One compiler version.
+*→ EF:* none — encoding stays CP.
+
+### CP-053 · In-line PASM resolves a method's parameters, return values and locals to registers $1E0 onward in that order
+*KB:* `language/spin2/integration/spin2-pasm2-integration.yaml`
+*Class:* encoding (the assembler's output).
+*Source:* `proofs/cp-053-inline-variable-registers.spin2` (accepted)
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-09):* `pnut-ts -l proofs/cp-053-inline-variable-registers.spin2`
+*Output (exit status 0), listing:*
+```text
+TYPE: LOC_LONG          VALUE: 00000000          NAME: P1
+TYPE: LOC_LONG          VALUE: 00000004          NAME: P2
+TYPE: LOC_LONG          VALUE: 00000008          NAME: P3
+TYPE: LOC_LONG          VALUE: 0000000C          NAME: R1
+TYPE: LOC_LONG          VALUE: 00000010          NAME: R2
+TYPE: LOC_LONG          VALUE: 00000014          NAME: LOCAL1
+TYPE: LOC_LONG          VALUE: 00000018          NAME: LOCAL2
+TYPE: LOC_LONG          VALUE: 0000001C          NAME: LOCAL3
+00000- 08 00 20 83 38 00 00 00 03 19 5C 00 00 09 00 E0   '.. .8.....\.....'
+00010- B1 03 F6 E1 B1 03 F6 E2 B1 03 F6 E3 B1 03 F6 E4   '................'
+00020- B1 03 F6 E5 B1 03 F6 E6 B1 03 F6 E7 B1 03 F6 2D   '...............-'
+```
+**Grounds:** the program is `PUB method(p1, p2, p3) : r1, r2 | local1, local2, local3` with eight `MOV PR0, <variable>` lines. The eight instruction words are `$F603B1E0` through `$F603B1E7`; the source field (bits 8:0) is `$1E0` for p1, then `$1E1` p2, `$1E2` p3, `$1E3` r1, `$1E4` r2, `$1E5` local1, `$1E6` local2, `$1E7` local3. The listing's variable offsets run 0, 4, ... $1C in the same order.
+*Limits:* one method with 8 variables; array and structure variables, and more than 16 variables, not tried. One compiler version.
+*→ EF:* none — encoding stays CP.
+
+### CP-054 · Bare `ORG` takes a cog limit of `$1F8`: 504 longs (`$000..$1F7`) assemble and the 505th is refused with "Cog address exceeds limit (m113)"
+*KB:* `guides/pasm2-getting-started.yaml`
+*Class:* legality (the compiler's answer).
+*Source:* `proofs/cp-054-bare-org-504.spin2` (accepted), `proofs/cp-054-bare-org-505.spin2`, `-512`, `-513` (refused)
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-054-bare-org-504.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-054-bare-org-504.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-054-bare-org-504.bin (2016 bytes)
+pnut-ts: Done
+```
+
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-054-bare-org-505.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-054-bare-org-505.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-054-bare-org-505.spin2:4:error:Cog address exceeds limit (m113)
+```
+
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-054-bare-org-512.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-054-bare-org-512.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-054-bare-org-512.spin2:4:error:Cog address exceeds limit (m113)
+```
+
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-054-bare-org-513.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-054-bare-org-513.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-054-bare-org-513.spin2:4:error:Cog address exceeds limit (m113)
+```
+
+*Limits:* bare `ORG` with no address or limit operand; legality only. One compiler version.
+*→ EF:* none — legality stays CP.

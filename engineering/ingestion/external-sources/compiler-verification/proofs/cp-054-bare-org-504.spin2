@@ -1,0 +1,4 @@
+DAT
+        ORG
+        JMP   #$
+        long  0[503]

@@ -1,0 +1,7 @@
+PUB t() | x
+  x := CALL(#lbl)
+
+DAT
+  ORG 0
+lbl
+  RET

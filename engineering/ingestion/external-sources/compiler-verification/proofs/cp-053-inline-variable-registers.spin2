@@ -1,0 +1,12 @@
+PUB method(p1, p2, p3) : r1, r2 | local1, local2, local3
+  ORG
+    MOV PR0, p1
+    MOV PR0, p2
+    MOV PR0, p3
+    MOV PR0, r1
+    MOV PR0, r2
+    MOV PR0, local1
+    MOV PR0, local2
+    MOV PR0, local3
+    RET
+  END

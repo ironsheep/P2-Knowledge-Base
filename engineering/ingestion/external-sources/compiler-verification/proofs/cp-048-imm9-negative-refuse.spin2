@@ -1,0 +1,6 @@
+PUB t()
+
+DAT
+  ORG 0
+  MOV x, #-1
+x long 0

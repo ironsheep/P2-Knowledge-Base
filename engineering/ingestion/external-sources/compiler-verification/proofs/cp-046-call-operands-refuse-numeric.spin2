@@ -1,0 +1,7 @@
+PUB t()
+  CALL(#$080)
+
+DAT
+  ORG 0
+lbl
+  RET

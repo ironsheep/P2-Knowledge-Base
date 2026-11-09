@@ -1,0 +1,10 @@
+PUB t() | v
+  v := GETCT()
+
+DAT
+  ORG 0
+  GETCT x
+  ADDCT1 x, #1
+  WAITCT1
+  MOV x, ptra
+x long 0

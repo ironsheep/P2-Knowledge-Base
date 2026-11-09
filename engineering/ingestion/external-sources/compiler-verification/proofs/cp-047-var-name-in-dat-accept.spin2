@@ -1,0 +1,11 @@
+VAR
+  LONG shared_flag
+
+PUB t()
+  LONG[@flag_addr] := @shared_flag
+  shared_flag := 0
+
+DAT
+  ORG 0
+  WRLONG flag_addr, flag_addr
+flag_addr long 0
