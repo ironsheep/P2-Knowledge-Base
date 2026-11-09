@@ -2088,3 +2088,64 @@ engineering/ingestion/external-sources/compiler-verification/proofs/cp-054-bare-
 
 *Limits:* bare `ORG` with no address or limit operand; legality only. One compiler version.
 *→ EF:* none — legality stays CP.
+
+### CP-055 · `REP #1,#1` with `WC`, `WZ` or `WCZ` is refused with "This effect is not allowed for this instruction"; `REP #1,#1` with no effect and `ADD x,#1 WC` assemble
+*KB:* `language/pasm2/concepts/rep_instruction.yaml`; `language/pasm2/rep.yaml`
+*Class:* legality (the compiler's answer).
+*Source:* `proofs/cp-055-rep-effects-wc.spin2`, `-wz.spin2`, `-wcz.spin2` (each refused); controls `proofs/cp-055-rep-effects-control-rep-plain.spin2` and `-control-add-wc.spin2` (accepted), `-control-jmp-wc.spin2` (refused)
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-09):* `pnut-ts cp-055-rep-effects-wc.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts cp-055-rep-effects-wc.spin2
+cp-055-rep-effects-wc.spin2:3:error:This effect is not allowed for this instruction
+```
+*Command (2026-11-09):* `pnut-ts cp-055-rep-effects-wz.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts cp-055-rep-effects-wz.spin2
+cp-055-rep-effects-wz.spin2:3:error:This effect is not allowed for this instruction
+```
+*Command (2026-11-09):* `pnut-ts cp-055-rep-effects-wcz.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts cp-055-rep-effects-wcz.spin2
+cp-055-rep-effects-wcz.spin2:3:error:This effect is not allowed for this instruction
+```
+*Command (2026-11-09):* `pnut-ts cp-055-rep-effects-control-rep-plain.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts cp-055-rep-effects-control-rep-plain.spin2
+pnut-ts: Wrote cp-055-rep-effects-control-rep-plain.bin (12 bytes)
+pnut-ts: Done
+```
+*Command (2026-11-09):* `pnut-ts cp-055-rep-effects-control-add-wc.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts cp-055-rep-effects-control-add-wc.spin2
+pnut-ts: Wrote cp-055-rep-effects-control-add-wc.bin (12 bytes)
+pnut-ts: Done
+```
+*Command (2026-11-09):* `pnut-ts cp-055-rep-effects-control-jmp-wc.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts cp-055-rep-effects-control-jmp-wc.spin2
+cp-055-rep-effects-control-jmp-wc.spin2:3:error:This effect is not allowed for this instruction
+```
+**Grounds:** the three cases differ from the accepted plain-REP control only by the effect suffix, and the same body (NOP, JMP) is used in all REP files. An instruction that takes WC (ADD) assembles and one that refuses it (JMP) is refused, so the check can fail both ways.
+*Limits:* legality only; one compiler version; the refusal wording is the compiler's, and no document states it. The programs were run from their own directory; the command paths above are relative to it.
+*→ EF:* none — legality stays CP.
+- Bench test for REP nesting is already being built; on its result replace the Not documented line in rep_instruction.yaml constraints.

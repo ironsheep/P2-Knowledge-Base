@@ -1,0 +1,5 @@
+DAT
+        ORG
+        ADD   x,#1 WC
+        JMP   #$
+x       long  0

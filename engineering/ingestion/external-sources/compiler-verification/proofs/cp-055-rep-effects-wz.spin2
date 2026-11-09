@@ -1,0 +1,5 @@
+DAT
+        ORG
+        REP   #1,#1 WZ
+        NOP
+        JMP   #$
