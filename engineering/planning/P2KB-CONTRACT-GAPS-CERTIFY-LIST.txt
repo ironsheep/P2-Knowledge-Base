@@ -285,3 +285,14 @@ language/pasm2/fle.yaml
 language/pasm2/setbyte.yaml
 language/pasm2/concepts/pixel_mixer.yaml
 architecture/streamer/colorspace-and-dvi.yaml
+architecture/cog_state.yaml
+architecture/smart-pins/smart-pin-11000-adc-internal-clock.yaml
+architecture/smart-pins/smart-pin-11001-adc-external-clock.yaml
+guides/pasm2-getting-started.yaml
+language/pasm2/concepts/skipf_branching.yaml
+language/spin2/integration/spin2-pasm2-integration.yaml
+language/spin2/methods/cogspin.yaml
+language/spin2/methods/rdpin.yaml
+language/spin2/methods/rqpin.yaml
+language/spin2/methods/waitus.yaml
+language/spin2/methods/cogatn.yaml
