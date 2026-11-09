@@ -1,0 +1,7 @@
+' A global label on a storage directive between a local label and its reference
+DAT
+              org
+first         nop
+.here         jmp     #.after
+table         long    0
+.after        jmp     #.here

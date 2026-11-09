@@ -1754,3 +1754,54 @@ pnut-ts: Done
 **Grounds:** the Silicon Doc's instruction list gives `WRLUT D/#,S/#/PTRx`, and its hub random-access operand form has an immediate S of `#%0AAAAAAAA` as an 8-bit address; this record shows the assembler refuses a plain WRLUT immediate above 255 rather than encoding it, as CP-037 shows for RDLUT.
 *Limits:* WRLUT only, at the lower end of the refused range. What WRLUT does at run time with an augmented `##` S value is not shown. One compiler version.
 *→ EF:* none — legality stays CP.
+
+### CP-043 · PASM2 local label scope: a local name may repeat under different global labels and may be referenced forward; it cannot be referenced from under another global label or repeat under one; a label on a storage directive ends the scope
+
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-043-local-scope-reuse.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-043-local-scope-reuse.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-043-local-scope-reuse.bin (24 bytes)
+pnut-ts: Done
+```
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-043-reject-local-under-other-global.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-043-reject-local-under-other-global.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-043-reject-local-under-other-global.spin2:4:error:Undefined symbol
+```
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-043-reject-duplicate-local.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-043-reject-duplicate-local.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-043-reject-duplicate-local.spin2:6:error:Symbol is already defined (m540)
+```
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-043-reject-local-across-storage-label.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-043-reject-local-across-storage-label.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-043-reject-local-across-storage-label.spin2:5:error:Undefined symbol
+```
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-043-local-backward-across-storage-label.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-043-local-backward-across-storage-label.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-043-local-backward-across-storage-label.spin2:7:error:Undefined symbol
+```
+The fifth program references a local label backward across `table long 0`, and that reference fails too.
+
+**Grounds:** the Spin2 document mentions regular and local symbols for inline PASM but states no scope rule; this record shows what the assembler accepts in a DAT block. In the first program `.loop` and `.finish` each appear under both `first` and `second`, and `call #.finish` precedes its target. The second program refers from under `first` to a local defined under `second`. The third repeats `.loop` under one global. The fourth has `table long 0` between a local label and a reference to a local defined after it, and the reference fails, so the label on the storage directive began a new scope.
+*Limits:* DAT blocks only; legality only. Maximum length of a local name, the characters it may contain, and scope at the end of a DAT block are not shown. One compiler version.
+*→ EF:* none — legality stays CP.

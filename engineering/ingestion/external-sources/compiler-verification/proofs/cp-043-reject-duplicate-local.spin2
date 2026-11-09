@@ -1,0 +1,6 @@
+' The same local name twice under one global label
+DAT
+              org
+first         nop
+.loop         jmp     #.loop
+.loop         jmp     #.loop

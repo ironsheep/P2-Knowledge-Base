@@ -1,0 +1,7 @@
+' A local label referenced from under a different global label
+DAT
+              org
+first         jmp     #.only_in_second
+.loop         jmp     #.loop
+second        nop
+.only_in_second ret

@@ -1,0 +1,7 @@
+' A backward reference to a local label across a label on a storage directive
+DAT
+              org
+first         nop
+.here         nop
+table         long    0
+              jmp     #.here

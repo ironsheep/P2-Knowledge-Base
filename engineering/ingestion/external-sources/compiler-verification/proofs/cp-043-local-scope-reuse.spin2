@@ -1,0 +1,9 @@
+' Local label scope: the same local name under two global labels, and a forward reference
+DAT
+              org
+first         call    #.finish
+.loop         jmp     #.loop
+.finish       ret
+second        jmp     #.finish
+.loop         jmp     #.loop
+.finish       ret
