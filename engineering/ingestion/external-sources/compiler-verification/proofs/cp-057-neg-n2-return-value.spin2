@@ -1,0 +1,2 @@
+PUB calculate(x)
+  RETURN x * 2

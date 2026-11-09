@@ -1,0 +1,5 @@
+DAT
+  table LONG 0
+
+PUB method(table)
+  table := 10

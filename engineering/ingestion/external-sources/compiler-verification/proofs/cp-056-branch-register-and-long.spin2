@@ -1,0 +1,35 @@
+' Scratch compile: S-branch ## field and the register-form write-around.
+PUB go()
+  repeat
+
+DAT
+        org     0
+top     nop
+        long    0[300]
+b1      djnz    x, ##top
+b2      tjs     x, ##top
+b3      tjnf    x, ##top
+b4      tjz     x, ##top
+b5      djz     x, ##top
+b6      tjns    x, ##top
+b7      jint    ##top
+b8      callpa  #1, ##top
+b9      jpat    ##top
+' write-around: register Src holding the cog address
+wa1     djnz    x, tgt
+wa2     tjs     x, tgt
+wa3     jint    tgt
+' near form, within the 9-bit range
+near    djnz    x, #wa1
+tgt     long    top
+x       long    5
+
+        orgh
+        alignl
+htop    nop
+        long    0[300]
+hb1     djnz    x, ##htop
+hb2     calld   pa, #htop
+hb3     long    $FE10_0000 | ((htop - ($ + 4)) & $F_FFFF)
+hb4     calld   pa, #\htop
+hb5     djnz    x, tgt

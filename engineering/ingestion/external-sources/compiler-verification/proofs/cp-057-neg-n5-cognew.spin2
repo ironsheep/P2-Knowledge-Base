@@ -1,0 +1,8 @@
+VAR
+  LONG stack[16]
+
+PUB main()
+  cognew(worker(), @stack)
+
+PRI worker()
+  REPEAT

@@ -1,0 +1,5 @@
+PUB main()
+  configure(1)
+
+PRI configure(pin, mode)
+  pin := mode

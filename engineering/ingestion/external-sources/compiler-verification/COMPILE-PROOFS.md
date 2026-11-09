@@ -18,7 +18,7 @@ assembled word; stays CP) · `BEHAVIOUR` (what
 compiled code does; the compile does not prove it) · `BEHAVIOUR → EF-NNN` (a P2 run has since
 proved it; the KB cites the EF).
 
-**Next record ID: `CP-056`** — take the number from this line and advance it in the same edit
+**Next record ID: `CP-058`** — take the number from this line and advance it in the same edit
 that files the record.
 
 **Commands** are run from the repository root with the repository-relative path, so each output
@@ -2149,3 +2149,144 @@ cp-055-rep-effects-control-jmp-wc.spin2:3:error:This effect is not allowed for t
 *Limits:* legality only; one compiler version; the refusal wording is the compiler's, and no document states it. The programs were run from their own directory; the command paths above are relative to it.
 *→ EF:* none — legality stays CP.
 - Bench test for REP nesting is already being built; on its result replace the Not documented line in rep_instruction.yaml constraints.
+
+### CP-056 · A backward `##label` 300 longs back assembles for each of the 47 S-branch instructions as `AUGS #$1FF` (`$FF00_01FF`) plus the instruction, with an 18-bit field that counts longs; a register Src assembles with no AUGS; `CALLD PA,#label` in hub carries a long count and a hand-encoded long carries a byte count
+*KB:* `language/pasm2/concepts/branch_addressing.yaml`; `language/pasm2/calld.yaml`; the 47 S-branch files: `language/pasm2/djz.yaml`; `language/pasm2/djnz.yaml`; `language/pasm2/djf.yaml`; `language/pasm2/djnf.yaml`; `language/pasm2/ijz.yaml`; `language/pasm2/ijnz.yaml`; `language/pasm2/tjz.yaml`; `language/pasm2/tjnz.yaml`; `language/pasm2/tjf.yaml`; `language/pasm2/tjnf.yaml`; `language/pasm2/tjs.yaml`; `language/pasm2/tjns.yaml`; `language/pasm2/tjv.yaml`; `language/pasm2/callpa.yaml`; `language/pasm2/callpb.yaml`; `language/pasm2/jint.yaml`; `language/pasm2/jnint.yaml`; `language/pasm2/jct1.yaml`; `language/pasm2/jnct1.yaml`; `language/pasm2/jct2.yaml`; `language/pasm2/jnct2.yaml`; `language/pasm2/jct3.yaml`; `language/pasm2/jnct3.yaml`; `language/pasm2/jse1.yaml`; `language/pasm2/jnse1.yaml`; `language/pasm2/jse2.yaml`; `language/pasm2/jnse2.yaml`; `language/pasm2/jse3.yaml`; `language/pasm2/jnse3.yaml`; `language/pasm2/jse4.yaml`; `language/pasm2/jnse4.yaml`; `language/pasm2/jpat.yaml`; `language/pasm2/jnpat.yaml`; `language/pasm2/jfbw.yaml`; `language/pasm2/jnfbw.yaml`; `language/pasm2/jxmt.yaml`; `language/pasm2/jnxmt.yaml`; `language/pasm2/jxfi.yaml`; `language/pasm2/jnxfi.yaml`; `language/pasm2/jxro.yaml`; `language/pasm2/jnxro.yaml`; `language/pasm2/jxrl.yaml`; `language/pasm2/jnxrl.yaml`; `language/pasm2/jatn.yaml`; `language/pasm2/jnatn.yaml`; `language/pasm2/jqmt.yaml`; `language/pasm2/jnqmt.yaml`
+*Class:* encoding (the assembler's output).
+*Source:* `proofs/cp-056-branch-backward-all47.spin2` (the 47 instructions, each `##top` with `top` 300 longs back; accepted) and `proofs/cp-056-branch-register-and-long.spin2` (nine `##` forms, three register-Src forms, one near form, and in hub a `##` DJNZ, a `CALLD PA,#label`, a hand-encoded long, a `CALLD PA,#\label` and a register-Src DJNZ; accepted)
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-09):* `pnut-ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-056-branch-backward-all47.spin2`
+*Output (exit status 0), listing excerpt (object offsets `$4B0` to `$637`, the 47 pairs start at `$4BC`):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-056-branch-backward-all47.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-056-branch-backward-all47.lst
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-056-branch-backward-all47.bin (7876 bytes)
+pnut-ts: Done
+004B0- 00 00 00 00 00 00 00 00 00 00 00 00 FF 01 00 FF   '................'
+004C0- D1 16 67 FB FF 01 00 FF CF 16 6F FB FF 01 00 FF   '..g.......o.....'
+004D0- CD 16 77 FB FF 01 00 FF CB 16 7F FB FF 01 00 FF   '..w.............'
+004E0- C9 16 87 FB FF 01 00 FF C7 16 8F FB FF 01 00 FF   '................'
+004F0- C5 16 97 FB FF 01 00 FF C3 16 9F FB FF 01 00 FF   '................'
+00500- C1 16 A7 FB FF 01 00 FF BF 16 AF FB FF 01 00 FF   '................'
+00510- BD 16 B7 FB FF 01 00 FF BB 16 BF FB FF 01 00 FF   '................'
+00520- B9 16 C7 FB FF 01 00 FF B7 16 47 FB FF 01 00 FF   '..........G.....'
+00530- B5 16 57 FB FF 01 00 FF B3 00 CC FB FF 01 00 FF   '..W.............'
+00540- B1 20 CC FB FF 01 00 FF AF 02 CC FB FF 01 00 FF   '. ..............'
+00550- AD 22 CC FB FF 01 00 FF AB 04 CC FB FF 01 00 FF   '."..............'
+00560- A9 24 CC FB FF 01 00 FF A7 06 CC FB FF 01 00 FF   '.$..............'
+00570- A5 26 CC FB FF 01 00 FF A3 08 CC FB FF 01 00 FF   '.&..............'
+00580- A1 28 CC FB FF 01 00 FF 9F 0A CC FB FF 01 00 FF   '.(..............'
+00590- 9D 2A CC FB FF 01 00 FF 9B 0C CC FB FF 01 00 FF   '.*..............'
+005A0- 99 2C CC FB FF 01 00 FF 97 0E CC FB FF 01 00 FF   '.,..............'
+005B0- 95 2E CC FB FF 01 00 FF 93 10 CC FB FF 01 00 FF   '................'
+005C0- 91 30 CC FB FF 01 00 FF 8F 12 CC FB FF 01 00 FF   '.0..............'
+005D0- 8D 32 CC FB FF 01 00 FF 8B 14 CC FB FF 01 00 FF   '.2..............'
+005E0- 89 34 CC FB FF 01 00 FF 87 16 CC FB FF 01 00 FF   '.4..............'
+005F0- 85 36 CC FB FF 01 00 FF 83 18 CC FB FF 01 00 FF   '.6..............'
+00600- 81 38 CC FB FF 01 00 FF 7F 1A CC FB FF 01 00 FF   '.8..............'
+00610- 7D 3A CC FB FF 01 00 FF 7B 1C CC FB FF 01 00 FF   '}:......{.......'
+00620- 79 3C CC FB FF 01 00 FF 77 1E CC FB FF 01 00 FF   'y<......w.......'
+00630- 75 3E CC FB 05 00 00 00 00 12 7F 04               'u>..........'
+```
+
+*Command (2026-11-09):* `pnut-ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-056-branch-register-and-long.spin2`
+*Output (exit status 0), listing excerpt (cog part at `$4B0`, hub part at `$9D0`):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts -l engineering/ingestion/external-sources/compiler-verification/proofs/cp-056-branch-register-and-long.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-056-branch-register-and-long.lst
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-056-branch-register-and-long.bin (8820 bytes)
+pnut-ts: Done
+004B0- 00 00 00 00 00 00 00 00 00 00 00 00 FF 01 00 FF   '................'
+004C0- D1 88 6E FB FF 01 00 FF CF 88 B6 FB FF 01 00 FF   '..n.............'
+004D0- CD 88 AE FB FF 01 00 FF CB 88 96 FB FF 01 00 FF   '................'
+004E0- C9 88 66 FB FF 01 00 FF C7 88 BE FB FF 01 00 FF   '..f.............'
+004F0- C5 00 CC FB FF 01 00 FF C3 02 4C FB FF 01 00 FF   '..........L.....'
+00500- C1 10 CC FB 43 89 6A FB 43 89 B2 FB 43 01 C8 FB   '....C.j.C...C...'
+00510- FC 89 6E FB 00 00 00 00 05 00 00 00 00 00 00 00   '..n.............'
+009D0- FF 01 00 FF D1 88 6E FB D0 FE 1F FE 3C FB 1F FE   '......n.....<...'
+009E0- 00 04 00 FE 43 89 6A FB 00 12 7F 04               '....C.j.....'
+```
+**Grounds:** read from the listings, little-endian. In `cp-056-branch-backward-all47.spin2` the label `top` is followed by 300 longs, then the 47 instructions from `djz` to `jnqmt`, each `##top`, each emitted as the pair `$FF00_01FF` (`AUGS #$1FF`) then the instruction word; 47 pairs fill `$4BC` to `$633`. The first instruction (`djz`) is `$FB67_16D1`, its S[8:0] `$0D1`; with the AUGS payload `$1FF` above it the 18-bit field is `$3_FED1`, which is −303 and is 303 longs, the distance from `top` to the instruction after `djz` (`top`, 300 longs, one AUGS, one instruction). Each later pair's field is 2 less than the one before (`$0CF`, `$0CD`, ... `$075`), the next pair being two longs farther on; the 15th (`callpb`) is `$FB57_16B5`, field `$3_FEB5`, and the last (`jnqmt`) is `$FBCC_3E75`, S[8:0] `$075`, field `$3_FE75` (−395, 395 longs). S[8] is 0 in all 47.
+In `cp-056-branch-register-and-long.spin2`: the nine `##top` forms in cog (`b1` to `b9`: `djnz`, `tjs`, `tjnf`, `tjz`, `djz`, `tjns`, `jint`, `callpa #1`, `jpat`) are the same pairs, `AUGS #$1FF` then the instruction, fields `$3_FED1` down by 2 to `$3_FEC1`. The three register-Src forms (`djnz x,tgt`, `tjs x,tgt`, `jint tgt`) are one long each with no AUGS, S = `$143`, the cog address of `tgt`. The near form `djnz x,#wa1` is one long with S `$1FC` (−4). In hub, after `orgh` and `alignl`: `djnz x,##htop` is the pair `$FF00_01FF`, `$FB6E_88D1` (field `$3_FED1`, −303); `calld pa,#htop` is one long `$FE1F_FED0` with 20-bit field `$F_FED0` (−304; 1,216 bytes back, 304 longs); the hand-encoded `long $FE10_0000 | ((htop - ($ + 4)) & $F_FFFF)` is `$FE1F_FB3C`, field `$F_FB3C` (−1,220, the byte distance `htop - ($ + 4)`); `calld pa,#\htop` is `$FE00_0400`, R = 0 and absolute address `$00400`; `djnz x,tgt` is `$FB6A_8943`, S `$143`. The compiler's own `calld pa,#htop` field counts longs (−304, for a label 1,216 bytes back of the next instruction); the hand-encoded long's counts bytes (−1,220, for a label 1,220 bytes back of the next instruction).
+*Limits:* encoding only: what these words do on the board is EF-106 and EF-107. One label distance (300 longs back) for the 47; the hub forms are four instructions with one label; no forward `##`, no `##` with a label farther than 300 longs, and the S-branch instructions other than `djnz` are not assembled in hub. One compiler version.
+*→ EF:* none — encoding stays CP; the behaviour of the DJNZ and CALLD words is EF-107 and EF-106.
+
+### CP-057 · Seven Spin2 method forms are refused with the compiler's messages, and a `COGSPIN(NEWCOG, kid.handler(), @stack)` of a child-object method is accepted beside the forms method_definition.yaml shows
+*KB:* `language/spin2/methods/cogspin.yaml`; `language/spin2/idioms/cog-operations.yaml`; `language/spin2/constructs/method_definition.yaml`
+*Class:* legality (the compiler's answer).
+*Source:* refused: `proofs/cp-057-neg-n1-noresult-expr.spin2`, `-n2-return-value.spin2`, `-n3-missing-param.spin2`, `-n4-local-var-clash.spin2`, `-n5-cognew.spin2`, `-n6-param-dat-clash.spin2`, `-n7-result-con-clash.spin2`; accepted: `proofs/cp-057-md-ok.spin2`, which names its child object `"cp-057-md-child"` and so needs `proofs/cp-057-md-child.spin2` (one `PUB handler()` that repeats forever) in the same folder to compile
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n1-noresult-expr.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n1-noresult-expr.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n1-noresult-expr.spin2:2:error:This method returns no results
+```
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n2-return-value.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n2-return-value.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n2-return-value.spin2:2:error:Expected end of line (m280)
+```
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n3-missing-param.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n3-missing-param.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n3-missing-param.spin2:2:error:Expected ","
+```
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n4-local-var-clash.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n4-local-var-clash.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n4-local-var-clash.spin2:4:error:Expected a unique variable name, STRUCT name, BYTE, WORD, LONG, "^", ALIGNW, or ALIGNL (m241)
+```
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n5-cognew.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n5-cognew.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n5-cognew.spin2:5:error:Expected an instruction or variable
+```
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n6-param-dat-clash.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n6-param-dat-clash.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n6-param-dat-clash.spin2:4:error:Expected a unique parameter name (m221)
+```
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n7-result-con-clash.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n7-result-con-clash.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-neg-n7-result-con-clash.spin2:4:error:Expected a unique result name (m230)
+```
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-md-ok.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-md-ok.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-057-md-ok.bin (6544 bytes)
+pnut-ts: Done
+```
+**Grounds:** each refused file is one form and nothing else. n1: `x := nores()` where `nores()` declares no result (line 2). n2: `RETURN x * 2` in a `PUB calculate(x)` with no declared result (line 2). n3: `configure(1)` calling `PRI configure(pin, mode)` with one argument (line 2). n4: a local `count` in `PUB method() | count` with `VAR LONG count` (line 4). n5: `cognew(worker(), @stack)` (line 5). n6: a parameter `table` in `PUB method(table)` with `DAT table LONG 0` (line 4). n7: a result `limit` in `PUB method() : limit` with `CON LIMIT = 3` (line 4). The accepted file holds a method with three parameters called from another with three arguments, a method that declares a result called as an instruction, `^BYTE` parameters, a `^BYTE result`, `BYTE`/`WORD`/`ALIGNL LONG` array locals, an in-line `ORG`/`END` block, `COGINIT(COGEXEC_NEW, @pasm_code, @params)` tested with `id >= 0`, `COGSPIN(NEWCOG, worker(), @stack)` with `id >= 0`, and `COGSPIN(NEWCOG, kid.handler(), @serial_stack)` of a method of the child object; the copy's `OBJ` line names `"cp-057-md-child"` where the staged original named `"md_child"`.
+*Limits:* legality only; one compiler version; the refusal wording is the compiler's and no document states it. `cognew` is shown refused as written (a statement), not in every position.
+*→ EF:* none — legality stays CP.

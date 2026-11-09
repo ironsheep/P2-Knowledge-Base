@@ -1,0 +1,81 @@
+' method_definition.yaml and spin2_cog_management.yaml forms expected to compile
+CON
+  OUTPUT = 1
+  NO_PULL = 0
+  MAX_VALUE = 10
+  NO_COG = -1
+
+OBJ
+  kid : "cp-057-md-child"
+
+VAR
+  LONG count
+  LONG cog
+  LONG cog_id
+  LONG params[4]
+  LONG stack[64]
+  LONG serial_stack[128]
+
+DAT
+  ORG 0
+pasm_code
+  JMP   #pasm_code
+
+PUB main()
+  start()
+  stop()
+  configure_simple(1)
+  noreturn_as_instr()
+  COGSPIN(NEWCOG, kid.handler(), @serial_stack)
+  COGSPIN(NEWCOG, worker(), @stack)
+
+PUB configure(pin, mode, pull)
+  pin := mode + pull
+
+PUB configure_simple(pin)
+  configure(pin, OUTPUT, NO_PULL)
+
+PUB noreturn_as_instr() : v
+  v := 1
+
+PUB process(^BYTE strPtr, ^LONG dataPtr)
+  strPtr := dataPtr
+
+PUB getBuffer() : ^BYTE result
+  result := 0
+
+PUB locals() : result | BYTE buffer[64], WORD index, ALIGNL LONG data[16]
+  result := 0
+
+PUB fast_multiply(x, y) : result
+  ORG
+    QMUL x, y
+    GETQX result
+  END
+
+PUB start() : success | id
+  stop()
+  id := COGINIT(COGEXEC_NEW, @pasm_code, @params)
+  IF id >= 0
+    cog := id + 1
+  success := cog
+
+PUB stop()
+  IF cog
+    COGSTOP(cog - 1)
+    cog := 0
+
+PUB lifecycle_start() : success | id
+  lifecycle_stop()
+  id := COGSPIN(NEWCOG, worker(), @stack)
+  if id >= 0
+    cog_id := id + 1
+  return cog_id <> 0
+
+PUB lifecycle_stop()
+  if cog_id
+    COGSTOP(cog_id - 1)
+    cog_id := 0
+
+PRI worker()
+  REPEAT

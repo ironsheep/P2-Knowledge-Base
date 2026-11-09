@@ -1,0 +1,5 @@
+VAR
+  LONG count
+
+PUB method() | count
+  count := 10

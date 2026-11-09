@@ -1,0 +1,56 @@
+' Scratch compile: every S-branch instruction with a backward ## target.
+PUB go()
+  repeat
+
+DAT
+        org     0
+top     nop
+        long    0[300]
+        djz     x, ##top
+        djnz    x, ##top
+        djf     x, ##top
+        djnf    x, ##top
+        ijz     x, ##top
+        ijnz    x, ##top
+        tjz     x, ##top
+        tjnz    x, ##top
+        tjf     x, ##top
+        tjnf    x, ##top
+        tjs     x, ##top
+        tjns    x, ##top
+        tjv     x, ##top
+        callpa  x, ##top
+        callpb  x, ##top
+        jint    ##top
+        jnint   ##top
+        jct1    ##top
+        jnct1   ##top
+        jct2    ##top
+        jnct2   ##top
+        jct3    ##top
+        jnct3   ##top
+        jse1    ##top
+        jnse1   ##top
+        jse2    ##top
+        jnse2   ##top
+        jse3    ##top
+        jnse3   ##top
+        jse4    ##top
+        jnse4   ##top
+        jpat    ##top
+        jnpat   ##top
+        jfbw    ##top
+        jnfbw   ##top
+        jxmt    ##top
+        jnxmt   ##top
+        jxfi    ##top
+        jnxfi   ##top
+        jxro    ##top
+        jnxro   ##top
+        jxrl    ##top
+        jnxrl   ##top
+        jatn    ##top
+        jnatn   ##top
+        jqmt    ##top
+        jnqmt   ##top
+x       long    5

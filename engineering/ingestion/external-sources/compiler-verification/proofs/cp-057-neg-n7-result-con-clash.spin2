@@ -1,0 +1,5 @@
+CON
+  LIMIT = 3
+
+PUB method() : limit
+  limit := 10
