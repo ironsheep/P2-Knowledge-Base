@@ -1,10 +1,13 @@
 architecture/cog.yaml
 architecture/cordic.yaml
+architecture/decomposition/decomposition-glossary.yaml
+architecture/decomposition/resource-ownership.yaml
 architecture/event_system.yaml
 architecture/hub.yaml
 architecture/interrupts.yaml
 architecture/io_pin_timing.yaml
 architecture/lookup_ram.yaml
+architecture/multi_resource_management.yaml
 architecture/smart-pins/smart-pin-11110-async-serial-transmit.yaml
 architecture/smart-pins/smart-pin-11111-async-serial-receive.yaml
 architecture/smart_pins.yaml
@@ -33,6 +36,7 @@ language/pasm2/callpb.yaml
 language/pasm2/cogbrk.yaml
 language/pasm2/coginit.yaml
 language/pasm2/concepts/addressing_modes.yaml
+language/pasm2/concepts/basic-io.yaml
 language/pasm2/concepts/branch_addressing.yaml
 language/pasm2/concepts/cog_hub_execution.yaml
 language/pasm2/concepts/execution_modes.yaml
@@ -178,11 +182,14 @@ language/pasm2/concepts/cordic_solver.yaml
 language/spin2/concepts/random_generation.yaml
 language/spin2/keywords/VAR.yaml
 language/spin2/operators/op_rand.yaml
+language/spin2/patterns/implementation/spin2_cog_management.yaml
 language/spin2/methods/coginit.yaml
 language/spin2/methods/getrnd.yaml
 language/pasm2/hubexec.yaml
 architecture/fifo.yaml
 language/spin2/constructs/inline_pasm.yaml
+language/spin2/constructs/method_definition.yaml
+language/spin2/idioms/cog-operations.yaml
 architecture/smart-pins/smart-pin-11100-sync-serial-transmit.yaml
 architecture/smart-pins/smart-pin-11101-sync-serial-receive.yaml
 hardware/p2-package-mechanical.yaml
@@ -357,6 +364,7 @@ language/pasm2/setse3.yaml
 language/pasm2/setse4.yaml
 language/pasm2/skip.yaml
 language/pasm2/skipf.yaml
+language/pasm2/special-registers.yaml
 language/pasm2/splitb.yaml
 language/pasm2/splitw.yaml
 language/pasm2/sumc.yaml
@@ -373,3 +381,4 @@ language/pasm2/wrword.yaml
 language/pasm2/wrz.yaml
 language/pasm2/xstop.yaml
 language/pasm2/zerox.yaml
+language/spin2/concepts/basic-io.yaml
