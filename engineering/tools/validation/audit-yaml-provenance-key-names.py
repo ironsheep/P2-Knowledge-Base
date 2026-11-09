@@ -92,12 +92,9 @@ ALLOW = {
     # ---- self-declared source conflicts, read by audit-yaml-source-lock (kind 'content') --
     "conflicting_sources":    ("content", "declared conflict between sources (source-lock Class B marker)"),
     "cross_source_conflict":  ("content", "declared conflict between sources (source-lock Class B marker)"),
-    "known_source_defect_in_that_passage": ("content", "declared source defect (source-lock Class B marker)"),
     "not_stated_by_any_source": ("content", "declared silence of the sources (source-lock Class B marker)"),
-    "source_tension":         ("content", "declared conflict between sources (source-lock Class B marker)"),
     "what_other_sources_say": ("content", "declared conflict between sources (source-lock Class B marker)"),
     "what_the_source_says":   ("content", "pitfall: what a source says, set against the verified behaviour"),
-    "verification_status":    ("content", "streamer/pin-capture.yaml: what was measured on silicon (the facts themselves), each sub-block with its own EF source: line"),
 }
 
 STEMS = ("extract", "scrape", "verif", "authorit", "provenance", "tracking")
