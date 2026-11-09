@@ -1757,6 +1757,7 @@ pnut-ts: Done
 
 ### CP-043 · PASM2 local label scope: a local name may repeat under different global labels and may be referenced forward; it cannot be referenced from under another global label or repeat under one; a label on a storage directive ends the scope
 
+*KB:* `language/pasm2/concepts/labels.yaml`
 *Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
 
 *Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-043-local-scope-reuse.spin2`
