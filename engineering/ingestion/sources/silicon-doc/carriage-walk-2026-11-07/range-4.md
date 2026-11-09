@@ -184,3 +184,55 @@ Ledger counts (row dispositions):
 - IN-PLAN: 5.
 
 Several MATCH rows also carry a PARTIAL note on a sibling page (jint, hubset RCFAST and CC, event_interrupt_config ATN comment).
+
+## Closure (task «#453»)
+
+Each row was re-found by content, confirmed at its SD line, and checked against the YAML text as it stands now. Fix lines are in the files as edited by this task. KB paths are relative to `deliverables/ai/P2/`.
+
+### MISMATCH rows
+
+| Ledger row | SD lines confirmed | Disposition | Fix (file:line) |
+|---|---|---|---|
+| 2304-2311 RETIx/RESIx flags | 2294, 2304-2311, 2313-2317; RETI0/RESI0 at 2420, 2423, 2482 | CLOSED, fixed | `pasm2/reti0.yaml:6-7,13-24`; `reti1.yaml`, `reti2.yaml`, `reti3.yaml` and `resi0.yaml`..`resi3.yaml` the same lines (encoding c/z, description, flags_affected). C = IRETx[31], Z = IRETx[30] (IRET0 for the two INT0 forms); the interrupt-busy flag cleared by the CALLD with S = IRETx and WCZ. The encoding clocks corrected from '4' to '4 / 13...20' (instruction listing rows 158-165). Nothing added on RESIx flags beyond the CALLD WCZ restore. |
+| 2726 switching away from the PLL | 2726; datasheet p.18 and Hardware Manual (System Clock Configuration) give HUBSET #$F0 / #$F1 | CLOSED, conflict recorded, no winner | `architecture/clock_system.yaml:150` (hubset_configuration.cross_source_conflict: both recipes, unnamed; $F0/$F1 write %PPPP = %1111 with %CC = %00 and E = 0; "Not documented: which recipe holds where the two differ"); `:229` (clock_switching.switch_away_from_pll_warning), `:344-348` (anti_patterns.unsafe_switch_away_from_pll.correct) point to it. `pasm2/hubset.yaml:136` (pll_200mhz description) re-read against it: its HUBSET #$F0 starts from RCFAST, and the description now says what $F0 writes and points to the conflict. |
+| 2741 PLL settling on RC | 2741, 2730-2739, 2721-2722 (10 ms / 5 ms) | CLOSED, fixed | `architecture/clock_system.yaml:244-269` (basic_crystal_20mhz now waits ~5 ms; pll_160mhz and overclock_250mhz rewritten to the four steps: HUBSET #$F0, enable crystal+PLL with %SS = %00, ~10 ms wait, %SS = %11), `:194` (stabilization_timing.pll_and_crystal_settle_on_rc), `:235-240` (clock_switching.sequence), `:340-343` (new anti_patterns.enable_pll_while_on_xi); `pasm2/hubset.yaml:96-131` (safe_clock_switching: the rule and the SD four-step example, replacing "stay on current source" and the clkfreq-based wait). No example now enables the PLL while %SS names XI or the PLL. |
+
+### NOT CARRIED rows
+
+| Ledger row | SD lines confirmed | Disposition | Fix (file:line) |
+|---|---|---|---|
+| 2104 Jxxx clear the flag whether or not they branch | 2104 | CLOSED against existing text | `grep -L -i "whether or"` over the 32 event jump files lists none: all carry it. Nothing added. jint/jnint set condition matches SD:2129-2131. |
+| 2311 any CALLD with S = IRETx and WCZ ends the interrupt | 2311, 2482 | CLOSED, fixed | `pasm2/calld.yaml:38-45` (one paragraph: any D with S = IRETx and WCZ clears the interrupt-busy flag; RETIx D = INB, RESIx D = IJMPx; in a debug ISR any CALLD anyreg,INB WCZ ends it, RETI0 = CALLD INB,INB WCZ, RESI0 = CALLD INA,INB WCZ); also `architecture/debug_interrupt.yaml:87` (ending_a_debug_isr). Equivalence checked with pnut-ts: CALLD INB,IRET1 WCZ and RETI1 both assemble to $FB3BFFF5, CALLD INA,INB WCZ and RESI0 to $FB3BFDFF. |
+| 2361-2367 three states; same-level events ignored | 2361-2367 | CLOSED, fixed | `architecture/interrupts.yaml:472` (priority_preemption.interrupt_states); also `interrupts.yaml` best_practices keep_isr_short, `pasm2/concepts/event_interrupt_config.yaml:255`. |
+| 2086 WAITINT stalls the cog to save power | 2086 | CLOSED, fixed | `pasm2/waitint.yaml:19-20`; `event_interrupt_config.yaml:156`; `clock_system.yaml` power_management.waitint. |
+
+### PARTIAL rows on touched files
+
+| Ledger row | SD lines confirmed | Disposition | Fix (file:line) |
+|---|---|---|---|
+| 2334-2338 NIXINTx use window | 2334-2338 | CLOSED, fixed | `pasm2/nixint1.yaml:12-17`, `nixint2.yaml:12-16`, `nixint3.yaml:12-17` (each its own level); `event_interrupt_config.yaml:73`; `architecture/interrupts.yaml:202-212`. |
+| 2401, 2405-2420 ROM words | 2405-2420 | CLOSED, fixed | `architecture/debug_interrupt.yaml:76-86` (rom_words: the eight words with the address patterns; their 32-bit encodings stated as not documented). |
+| 2427-2439 JMP #$1FD exit | 2435 | CLOSED, fixed | `architecture/debug_interrupt.yaml:75`. |
+| 2433 host link over P63/P62 | 2433 | CLOSED, not carried: design intent ("somewhat hypothetical") | nothing served. |
+| 2480-2484 any-D CALLD ends a debug ISR | 2482 | CLOSED, fixed | `architecture/debug_interrupt.yaml:87`; `pasm2/calld.yaml:38-45`; `pasm2/resi0.yaml` description. |
+| 2522-2524 COGBRK width | 2524 | CLOSED, fixed: `pasm2/cogbrk.yaml:5,12-13` now gives the three forms Parallax's documents use, unnamed (%CCCC, D[3:0], D[2:0]; it had only Dest[2:0]); `architecture/debug_interrupt.yaml:186` gives the same three. Preconditions: `debug_interrupt.yaml:357` (cross_cog_debugging) and related_topics now state both. |
+| 2780 filter unanimity | 2780, also 203 | CLOSED, fixed | `architecture/smart_pins.yaml:221` (global_digital_filters.unanimity), with where_the_output_goes. The file was re-read whole. |
+| 2200-2203 ATN carries no sender | 2200-2203 | CLOSED, fixed | `event_interrupt_config.yaml:236,240` (comment rewritten) and the pattern description. |
+| 2613, 2686-2715 hubset RCFAST and CC | 2613, 2686-2715 | CLOSED against «#452» | `pasm2/hubset.yaml:91` and `:83-86` carry them. |
+| 2854, 2859 PRNG | 2854, 2859 | CLOSED against «#452» | `pasm2/hubset.yaml:58-59` (prng_seeding). |
+
+### IN-PLAN rows
+
+| Ledger row | Closed against |
+|---|---|
+| 2327-2331 TRGINTx under STALLI | arm H, task «#465». trgint1..3.yaml unchanged. stalli.yaml carries an uncommitted change made before this task (file time 2026-11-08 07:31); this task did not touch it. |
+| 2489, 2496-2512 BRK bit order; 2399 debug-area address | task «#445» |
+| 2527-2584 GETBRK codes; 2598-2606 HUBSET modes; 2852 PRNG seeding; 2124-2211 event_clearing table | task «#452» |
+| 2359 inserted CALLD | `architecture/event_system.yaml` carries it (the interrupt branch is an inserted CALLD; entry clocks not documented). `interrupts.yaml` and `event_interrupt_config.yaml` entry-overhead fields now say not documented, as event_system.yaml does. |
+
+### Sample MATCH rows re-read
+
+| Ledger row | Result |
+|---|---|
+| 2794-2847 Table 30 filter defaults | MATCH. `architecture/smart_pins.yaml` reset_defaults: filt0 tap 0, 2 flipflops, 12.5 ns; filt1 tap 5, 3, 600 ns; filt2 tap 19, 5, 16.4 ms; filt3 tap 22, 8, 210 ms. Same as SD:2808-2847. |
+| 2276-2291 interrupt source codes | MATCH. `architecture/interrupts.yaml` interrupt_sources and interrupt_sources_detail list 0..15 in SD order; the KB's XCONT is right where SD:2286-2287 write ZCONT. %0000 now reads "<off>, the default on cog start" and %1000 "established by SETPAT", as SD:2276 and 2284 say. |
