@@ -3,7 +3,7 @@
 > Backing doc **#5** of the ingestion set (README dashboard · `AUTHORITATIVE-SOURCES` ·
 > `DOCUMENT-LINEAGE` · `KNOWLEDGE-GAPS` · **this**). Standing register, created 2026-08-25.
 >
-> **Next erratum ID: `E-026`**
+> **Next erratum ID: `E-032`**
 
 ## What this register is for
 
@@ -108,6 +108,12 @@ nowhere else. It is never licence to state a fact no evidence supports — that 
 | E-023 | Spin2 Documentation v55 | PASM DEBUG() "can output … C/Z flags", `C_Z` "useful in PASM code"; the compiler rejects `C_Z` in PASM (CP-004) | never carried as code | `CONFIRMED` |
 | E-024 | PASM2 Manual 2022-11-01 **and** P2 Documentation v35 (Rev B/C) | the POLLQMT clearing list names **WAITQMT**, which does not exist (the Silicon Doc's own text says so at one place and lists it at another); the manual's sentence also names the **pin-pattern-detected** flag where the QMT flag is meant | follows the Silicon Doc's "no WAITQMT"; notes the other wording | `CONFIRMED` |
 | E-025 | P2 Documentation v35 (Rev B/C) | the PRNG-seeding example writes `SETB x,#31`; SETB is not a PASM2 instruction and the assembler refuses it (CP-039) | diverges: the KB example uses `BITH` | `CONFIRMED` |
+| E-026 | P2 Documentation v35 (Rev B/C) | the encoding-key table's R legend says **0 = relative, 1 = absolute**; the same document's branch text, the instruction CSV and the assembler (CP-036) all say **R = 1 relative** | follows the CSV and the assembler | `CONFIRMED` |
+| E-027 | P2 Documentation v35 (Rev B/C) | the LOCKREL encoding is printed `00L`; its own syntax (`{WC}`), its LOCKTRY row and the instruction CSV give `C0L` | follows the CSV (`lockrel.yaml`); `locks.yaml` copied `00L` and now reads `C0L` | `CONFIRMED` |
+| E-028 | P2 Documentation v35 (Rev B/C) | ORG "Defaults to `$000,$200`"; Spin2 v55 and the assembler give the default cog limit **`$1F8`** | follows `$1F8` | `CONFIRMED` |
+| E-029 | P2 Documentation v35 (Rev B/C) | the booter prose runs the SPI program at once on a **P60** pull-up, and the loader-preemption sentence names the same P60 pull-up; the document's own Table 36, the Hardware Manual and the ROM booter make fast boot a **P59 pull-down** | follows the table and the booter | `CONFIRMED` |
+| E-030 | P2 Hardware Manual | the serial loader's line format says the signal "should be inverted … data bits are high for 0"; the Silicon Doc, the loader's receive configuration and its autobaud pattern are plain non-inverted 8-N-1 | diverges deliberately (`serial_loader.yaml` copied it until «#459») | `CONFIRMED` |
+| E-031 | Spin2 Documentation v55 | the DAT Cog-exec example gives `ORG $100` a default cog limit of **`$1F8`**; the assembler gives `$200` (CP-045) | follows the assembler (`org.yaml`) | `CONFIRMED` |
 
 ---
 
@@ -739,6 +745,175 @@ the MSB of D set writes {1'b1, D[30:0]} into 32 of the 128 state bits) stands.
 **Evidence tier:** compile proof (CP-039) against the document's example; the instruction CSV has
 no SETB. · **Reached our KB?** **Diverges**: `language/pasm2/hubset.yaml` `examples.seed_prng`
 uses `BITH seedval,#31`, with the document's SETB recorded in its source field. Filed 2026-11-08 («#452»).
+
+---
+
+## E-026 — the Silicon Doc's encoding-key table gives the **R** bit as **0 = relative, 1 = absolute**; the same document, the instruction CSV and the assembler have it the other way · `CONFIRMED`
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Propeller 2 Documentation**, v35 (Rev B/C silicon; the Silicon Doc) | COGS, the key table that follows *"When reading the "Encoding" column, the following table may help"* (extraction "Table 6"), row **R** | *"0: 20-bit Address field is relative to current PC."* / *"1: 20-bit Address field is absolute."* | `sources/silicon-doc/silicon-doc-text.txt:314-315` |
+| Against (same document) | same | the branch-instruction section, the sentence above the JMP / CALL / CALLA / CALLB / CALLD / LOC encodings | *"Their addresses can be either relative to the program counter (R=1) or absolute (R=0):"* | `sources/silicon-doc/silicon-doc-text.txt:711` |
+| Against (other document) | **P2 Instructions v35 - Rev B/C Silicon** (the instruction CSV) | JMP, CALL, CALLA, CALLB and CALLD rows, Description column; the LOC row | *"If R = 1 then PC += A, else PC = A. "\" forces R = 0."*; LOC: *"If R = 1, address = PC + A, else address = A. "\" forces R = 0."* | `sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:426-431` |
+| Against (assembler) | **pnut-ts** v1.55.10 | the assembled words | `call #sub1` is `FDB00058` with bit 20 = 1; `call #\sub1` is `FDA00017` with bit 20 = 0; `loc pa,#sub1` has R = 1 | `external-sources/compiler-verification/COMPILE-PROOFS.md` **CP-036** |
+| Against (assembler) | **pnut-ts** | the relative `CALLD` prototype of the plan (`callddemo.spin2`) | word `FE1FFC12`: bit 20 = 1 (R), A = -1006 | `engineering/planning/P2KB-CONTRACT-GAPS-SPRINT-PLAN.md:336` |
+
+**OUR FINDING.** R is bit 20 of the branch word: **R = 1 is relative (PC += A); R = 0 is absolute
+(PC = A)**, and a `\` before the address forces R = 0. The key table has the two lines swapped; the
+document's own branch text at `:711` already has them right.
+
+**Would it disappear if Parallax fixed the document tomorrow?** Yes — swapping the two legend lines
+removes it. Erratum.
+
+**Evidence tier:** the document against itself, the instruction CSV, and the assembled words
+(CP-036, a layout proof: legality of the field position, not behaviour). · **Reached our KB?**
+**Follows the CSV and the assembler, not the legend** — `language/pasm2/call.yaml:63` ("relative
+(R=1, PC += A) or absolute (R=0, PC = A) address; a backslash forces R=0"),
+`language/pasm2/loc.yaml:13-14` ("If the R bit is 1 … address = PC + A"),
+`guides/pasm2-getting-started.yaml:298` ("If R = 1 then PC += A, else PC = A"), all grepped
+2026-11-09. No KB change is owed; the entry exists so that no later pass "corrects" the KB from the
+Silicon Doc's legend. Filed 2026-11-09 («#460»), from the carriage walk (range 1).
+
+---
+
+## E-027 — the Silicon Doc prints the **LOCKREL** encoding as `00L`; its own syntax line, its LOCKTRY row and the instruction CSV give `C0L` · `CONFIRMED`
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Propeller 2 Documentation**, v35 (Rev B/C silicon; the Silicon Doc) | the encoding list under *instructions*, the Hub Control rows | `EEEE 1101011 00L DDDDDDDDD 000000111 LOCKREL D/# {WC}` | `sources/silicon-doc/silicon-doc-text.txt:5239` |
+| Against (same document) | same | LOCKS, *"The LOCK instructions are:"* | `LOCKREL {#}D {WC}` | `sources/silicon-doc/silicon-doc-text.txt:3680` |
+| Against (same document) | same | LOCKS, Using Locks | *"When LOCKREL is executed with WC, the C flag will indicate whether the lock is currently taken."* | `sources/silicon-doc/silicon-doc-text.txt:3700` |
+| Against (same document) | same | the encoding list, the sibling row | `EEEE 1101011 C0L DDDDDDDDD 000000110 LOCKTRY D/# {WC}` (and `00L` is the form of LOCKRET, which has no `{WC}`: `:5237`) | `sources/silicon-doc/silicon-doc-text.txt:5238` |
+| Against (other document) | **P2 Instructions v35 - Rev B/C Silicon** (the instruction CSV) | Hub Control - Locks, the LOCKREL row | `LOCKREL {#}D            {WC}` … `EEEE 1101011 C0L DDDDDDDDD 000000111` | `sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv:271` |
+
+**OUR FINDING.** LOCKREL encodes as `EEEE 1101011 C0L DDDDDDDDD 000000111`: the C bit (bit 20) is the
+one that `WC` sets, as for LOCKTRY. `00L` is the pattern of an instruction that takes no `WC`.
+
+**Would it disappear if Parallax fixed the document tomorrow?** Yes — correcting one character at
+`:5239` removes it. Erratum.
+
+**Evidence tier:** the document against its own syntax line and its own LOCKTRY row, and against the
+instruction CSV; no compile or bench result was run for this bit. · **Reached our KB?** **Follows
+the CSV in the instruction page, and followed the Silicon Doc's slip in the architecture page until
+«#456» fixed it.** `language/pasm2/lockrel.yaml:4` reads `C0L`; `architecture/locks.yaml:119` and
+`:170` read `EEEE 1101011 C0L DDDDDDDDD 000000111` (grepped 2026-11-09; they read `00L` before
+«#456»). `locks.yaml:156` reads `00L` for LOCKRET, which is correct. No KB change is owed now. Filed
+2026-11-09 («#460»), from the carriage walk (ranges 5 and 8).
+
+---
+
+## E-028 — the Silicon Doc says ORG "Defaults to `$000,$200`"; Spin2 v55 and the assembler have the default cog limit at **`$1F8`** · `CONFIRMED`
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Propeller 2 Documentation**, v35 (Rev B/C silicon; the Silicon Doc) | notes, *"The following assembler directives exist:"*, the `ORG {cog_address {,cog_address_limit}}` entry | *"Set cog mode with optional cog address and limit. Defaults to $000,$200."* | `sources/silicon-doc/silicon-doc-text.txt:5587` |
+| Against (other document) | **Parallax Spin2 Documentation**, v55 | the DAT section, *DAT Cog-exec*, the ORG examples | *"ORG 'set cog-exec mode, cog address = $000, cog limit = $1F8 (reg, both defaults)"* | `sources/spin2-v55/spin2-v55-text.txt:313` |
+| Against (assembler) | **pnut-ts** v1.55.10 | a `DAT` block of a bare `ORG` followed by `long 0[504]` and, separately, `long 0[505]` | the 504-long file compiles (exit 0, 2,016-byte image); the 505-long file → `Cog address exceeds limit (m113)` (exit 1) | re-run 2026-11-09 in a scratch directory; **no CP record** covers it (`COMPILE-PROOFS.md` has no `m113` or `1F8`) |
+
+**OUR FINDING.** A bare `ORG` sets cog address `$000` and cog limit `$1F8` (504 longs of code), not
+`$200`.
+
+**Would it disappear if Parallax fixed the document tomorrow?** Yes — changing `$200` to `$1F8` in
+that sentence removes it. Erratum. It covers the bare `ORG` default only, and that statement stands:
+the `ORG <address>` form is separate and is E-031. (For `ORG $100` with no limit the limit is `$200`,
+so the Silicon Doc's `$200` is right for that form and wrong for the bare one.)
+
+**Evidence tier:** two Parallax documents against each other, decided by the assembler's legality
+(pnut-ts; PNut not run). · **Reached our KB?** **Follows `$1F8`** —
+`language/pasm2/org.yaml:17` ("bare ORG defaults to address 0 with limit $1F8"), `:42` and `:49`
+(grepped 2026-11-09). No KB change is owed. Filed 2026-11-09 («#460»), from the carriage walk
+(range 8).
+
+---
+
+## E-029 — the Silicon Doc's booter prose runs the SPI program at once on a **P60** pull-up; its own Table 36, the Hardware Manual and the ROM booter make fast boot a **P59 pull-down** · `CONFIRMED`
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Propeller 2 Documentation**, v35 (Rev B/C silicon; the Silicon Doc) | BOOT PROCESS *(needs more editing)*, the booter steps after *"The booter program (ROM_Booter.spin2) performs the following steps:"* | *"If an external pull-up resistor is sensed on P60 (SPI_CK):"* then *"Execute 'JMP #$000' to run the SPI program. Done."* | `sources/silicon-doc/silicon-doc-text.txt:4805-4806` (heading `:4741`) |
+| The claim (second sentence, same document) | same | SERIAL LOADING PROTOCOL, the paragraph after the response-message paragraph | *"Unless preempted by a program in a SPI memory chip with a pull-up resistor on P60 (SPI_CK), the serial loader becomes active within 15ms of reset being released."* | `sources/silicon-doc/silicon-doc-text.txt:4827` |
+| Against (other document) | **Propeller 2 Hardware Manual**, Nov 1, 2022 release | HOST COMMUNICATION, *Download Propeller Application* (contents page 61), the same paragraph | *"Unless forbidden by the Boot Pattern or preempted by a program in an SPI memory chip, the serial loader becomes active within 15ms of reset being released."* (no P60) | `sources/p2-hardware-manual/p2-hardware-manual-text.txt:1595` |
+| Against (same document) | same | BOOT PROCESS, Table 36 *Boot Pattern Set By Resistors*, row *SPI flash only (fast boot), no serial window* | P61 pull-up, P60 ignored, P59 pull-down; *"If SPI flash fails then shutdown."* | `sources/silicon-doc/silicon-doc-text.txt:4763-4768` |
+| Against (other document) | **Propeller 2 Hardware Manual**, Nov 1, 2022 release | Operation, Boot Up, the Boot Pattern table (columns P61, P60, P59) | `⇧ \| ⨯ \| ⇩ \| Fast boot from flash; no serial.  If it fails, shutdown.` | `sources/p2-hardware-manual/p2-hardware-manual-text.txt:276` |
+| Against (the code that runs) | **Parallax Propeller 2 ROM Booter** v33_01j | the pin checks before `try_spi` | *"If pull-up on spi_di then try serial"* → `jmp #reset_serial`; *"If pull-up on spi_cs then try to load from SPI memory"* → `jmp #try_spi`; *"If pull-up on spi_ck (also sd_cs) then try to load from SD card"*; *"If no pull-down on spi_di then try serial"* (`spi_cs` = P61, `spi_ck` = P60, `spi_di` = P59) | `sources/rom-booter/rom_booter_v33_01j.lst:218-238`, pins `:135-137` |
+| Against (the code that runs) | same | `try_serial` | *"Try serial if no pull-down on spi_di / else, run SPI program if valid or float SPI pins and shut down"*; `drvh #spi_di` then `callpa #spi_di,#check_pulldn`; *"if pull-down on spi_di, boot if SPI okay (z=1) or shut down"* → `serial_done`, which runs `jmp #0` when z = 1 | `sources/rom-booter/rom_booter_v33_01j.lst:318-334`, `:758-760` |
+| Against (the code that runs) | same | after the SPI load | *"If SPI failed, check for pull-up on spi_ck (also sd_cs)"* → `if_nz_and_c jmp #@_start_sdcard`, else `jmp #try_serial`; the serial wait: `timeout_per long rc_max/10` *"100ms timeout for serial receive"* | `sources/rom-booter/rom_booter_v33_01j.lst:286-291`, `:434`, `:750-752` |
+
+**OUR FINDING.** Fast boot (SPI program, no serial window) is selected by **a pull-up on P61 with a
+pull-down on P59**; P60 is not consulted on that path. In the booter the P60 pull-up is read in only
+two places, both of which start the **SD card** boot: when P59 and P61 show no pull-up (`:230-233`),
+and after an SPI attempt that found no SPI memory or failed its checksum (`:263`, `:286-289`). With P61 pulled up and P59 floating, a
+verified SPI program runs only after the 100 ms serial window; with P59 pulled up the booter goes to
+serial without loading SPI. The prose line at `:4805-4806` is wrong; Table 36 and the Hardware
+Manual are right, and this finding rests on the booter listing, which is the code that runs. **The
+P60 pull-up condition in `:4827` is the same defect**: the booter never reads P60 to decide whether
+an SPI program preempts the serial loader, and the Hardware Manual's version of that sentence has
+no P60 clause.
+
+**Would it disappear if Parallax fixed the document tomorrow?** Yes — the prose sits under a heading
+that reads *(needs more editing)*; rewriting it to match Table 36 removes the conflict. Erratum.
+
+**Evidence tier:** the ROM booter listing (Parallax's running code), with the document's own
+Table 36 and the Hardware Manual agreeing; no bench run cited here. · **Reached our KB?**
+**Follows the table and the booter** — `architecture/boot-rom/boot-pattern-selection.yaml:47-51`
+(`p61: up`, `p60: any`, `p59: down`, "Fast boot from flash; no serial window", "If flash fails:
+shutdown"), grepped 2026-11-09. `architecture/serial_loader.yaml` `timing.loader_active` (line 31)
+carried the P60 condition from `:4827` until this pass; it now reads the Hardware Manual's wording,
+"…preempted by a program in an SPI memory chip, the serial loader becomes active within 15ms…", with
+the Hardware Manual cited in the block's source field (grepped 2026-11-09). Filed 2026-11-09
+(«#460»), from the carriage walk (range 7); the `:4827` row was added the same day.
+
+---
+
+## E-030 — the Hardware Manual says the serial loader's signal "should be **inverted** … data bits are high for 0"; the loader takes plain 8-N-1 · `CONFIRMED`
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Propeller 2 Hardware Manual**, Nov 1, 2022 release | HOST COMMUNICATION, *Download Propeller Application* (Heading 2; contents page 61), first paragraph | *"The signal should be inverted; start bit is low, stop bit is high, and data bits are high for 0 and low for 1."* | `sources/p2-hardware-manual/p2-hardware-manual-text.txt:1592` (heading `:1591`) |
+| Against (other document) | **Propeller 2 Documentation**, v35 (Rev B/C silicon; the Silicon Doc) | SERIAL LOADING PROTOCOL, first paragraph | *"…loaded via 8-N-1 asynchronous serial into P63, where START=low and STOP=high…"* (it states no data inversion) | `sources/silicon-doc/silicon-doc-text.txt:4821` |
+| Against (other document) | same | SERIAL LOADING PROTOCOL, the closing paragraph | *"To try out the serial loader, just open a terminal program on your PC with the Propeller 2 connected and type…"*; *"A simple Propeller 2 development tool needs no special serial signalling"* — an ordinary PC terminal sends non-inverted data | `sources/silicon-doc/silicon-doc-text.txt:4968` |
+| Against (the code that runs) | **Parallax Propeller 2 ROM Booter** v33_01j | `reset_serial` | `wrpin #%00_11111_0,#rx_pin` *"configure rx_pin for asynchronous receive, always input"*. WRPIN's D layout is `%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0` with `1xxx` in `%AAAA` meaning *inverted* (Silicon Doc, `:3731-3735`); the booter's `%AAAA` is `0000`, so the A input is true | `sources/rom-booter/rom_booter_v33_01j.lst:512` (and `:4545`); layout `sources/silicon-doc/silicon-doc-text.txt:3731-3735` |
+| Against (the code that runs) | same | the autobaud ISR header, the line pattern the loader expects for `>` ($3E) | `$3E --> ..10011111001..` — idle high, low start bit, then the eight data bits LSB first (`0 1 1 1 1 1 0 0`), high stop bit: data bits are **high for 1** | `sources/rom-booter/rom_booter_v33_01j.lst:374-375` |
+
+**OUR FINDING.** P63 takes ordinary non-inverted 8-N-1 asynchronous serial: line idle high, start bit
+low, data bits LSB first with high = 1, stop bit high. The Hardware Manual's "should be inverted" and
+"high for 0 and low for 1" are wrong: in the booter's frame data bits are high for 1.
+
+**Would it disappear if Parallax fixed the document tomorrow?** Yes — deleting the inversion clause
+from that sentence removes it. Erratum.
+
+**Evidence tier:** the ROM booter's receive configuration and its autobaud pattern (Parallax's
+running code), with the Silicon Doc's frame and terminal instruction agreeing; no bench result is
+cited here. · **Reached our KB?** **Diverges, deliberately.** `architecture/serial_loader.yaml:27`
+copied the Hardware Manual sentence verbatim until «#459»; it now reads "…asynchronous serial into
+P63. The start bit is low and the stop bit is high." (grepped 2026-11-09). No other page under
+`deliverables/ai/P2/` carries the inverted-data wording (grep for `high for 0` and `should be
+inverted`, no hits); the manuals were not searched here. Filed 2026-11-09 («#460»), from the
+carriage walk (range 8, Finding 2).
+
+---
+
+## E-031 — Spin2 v55 gives `ORG $100` a default cog limit of **`$1F8`**; the assembler's default there is **`$200`** · `CONFIRMED`
+
+| Side | Document @ edition | Where in that document | Verbatim | Our locator |
+|---|---|---|---|---|
+| The claim | **Parallax Spin2 Documentation**, v55 | the DAT section, *DAT Cog-exec*, the ORG examples | *"ORG $100 'set cog-exec mode, cog address = $100, cog limit = $1F8 (reg, default limit)"* | `sources/spin2-v55/spin2-v55-text.txt:313` |
+| Against (assembler) | **pnut-ts** v1.55.10 | `ORG $100` with no limit, then 256 longs, and separately 257 longs | the 256-long file assembles (exit 0, 1,024-byte image); the 257-long file → `Cog address exceeds limit (m113)` (exit 1). From `$100`, 256 longs end at `$1FF`; a limit of `$1F8` would have refused the 249th | `external-sources/compiler-verification/COMPILE-PROOFS.md` **CP-045** |
+| For comparison (other document) | **Propeller 2 Documentation**, v35 (Rev B/C silicon; the Silicon Doc) | assembler directives, ORG | *"Defaults to $000,$200."* — which fits the `ORG $100` result and not the bare `ORG` one (E-028) | `sources/silicon-doc/silicon-doc-text.txt:5587` |
+
+**OUR FINDING.** `ORG $100` with no limit takes a default cog limit of `$200`, not `$1F8`. The bare
+`ORG` default of `$1F8` (E-028) is a separate fact and is unchanged. The proof used one start address,
+`$100`, and no limit operand; other start addresses below `$200` are not proved.
+
+**Would it disappear if Parallax fixed the document tomorrow?** Yes — changing `$1F8` to `$200` on
+that example's `ORG $100` line removes it. Erratum. Where the Spin2 document and the compiler
+disagree on legality, the KB teaches what compiles.
+
+**Evidence tier:** the document against the assembler's legality (pnut-ts; PNut not run). ·
+**Reached our KB?** **Follows the assembler** — `language/pasm2/org.yaml:43` ("ORG $100 with no
+limit has cog limit $200; 256 longs assemble from $100 and the 257th is refused"), grepped
+2026-11-09. Filed 2026-11-09 («#460»), from the carriage walk (range 8, the unexplained note at its
+lines 182-184).
 
 ---
 

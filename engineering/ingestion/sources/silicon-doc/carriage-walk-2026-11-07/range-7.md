@@ -109,7 +109,7 @@ KB root below: `deliverables/ai/P2/`. Smart-pin pages abbreviated `sp-NNNNN` =
 | 4744-4784 | Table 36 boot patterns (six rows) | C | `architecture/boot-rom/boot-pattern-selection.yaml:27-64` | MATCH | Row by row, including "built into SD card" P60 pull-up (:126-127). |
 | 4788-4796 | Tables 37/38: P63 RX, P62 TX; flash CSn/CLK/DI/DO = P61/P60/P59/P58; SD CLK/CSn swapped | C | boot-pattern-selection.yaml:105; `spi-flash-boot.yaml:35-38` | MATCH | |
 | 4799-4804 | Booter loads first 1 KB of SPI **into hub $00000**, sums 256 longs to "Prop" $706F7250, copies to cog $000-$0FF | C | spi-flash-boot.yaml:41-49 | PARTIAL | KB `destination: "Cog 0 register space $000..$0FF"`; that hub $00000-$003FF also holds the image is not stated. Sum and value match. |
-| 4805-4806 | Prose: P60 pull-up → JMP #$000 at once | C | boot-pattern-selection.yaml:46-50 | MATCH (KB) / source conflict | SD Table 36 and the Hardware Manual give fast boot as P59 pull-down; KB follows them. The SD prose (heading "needs more editing") disagrees with its own table. SOURCE-ERRATA candidate, no KB change. |
+| 4805-4806 | Prose: P60 pull-up → JMP #$000 at once | C | boot-pattern-selection.yaml:46-50 | MATCH (KB) / source conflict | CLOSED 2026-11-09: filed as SOURCE-ERRATA E-029 («#460»), decided from the ROM booter listing. SD Table 36 and the Hardware Manual give fast boot as P59 pull-down; KB follows them. The SD prose (heading "needs more editing") disagrees with its own table. No KB change. |
 | 4807-4812 | 100 ms serial window then JMP to SPI program; serial load → COGINIT #0,#0 | C | boot-pattern-selection.yaml:44-45; `serial_loader.yaml:35` | MATCH | |
 | 4816 | Failure: slow clock to 20 kHz, stop cog 0 | C | boot-pattern-selection.yaml:91 | MATCH | "HUBSET #1 -- 'set 20KHz oscillator' -- before COGSTOP" |
 
@@ -137,7 +137,7 @@ MISMATCH and NOT-CARRIED contract rows, most consequential first.
 18. **Bitstream mode captures A regardless of pin configuration (NOT-CARRIED).** SD:4506. Searches `regardless`, `without regard`. Home: sp-11000 x_register %11.
 19. **sp-11101 examples contradict their own clock-routing rule (internal).** `smart-pin-11101-…:113`, `:168` omit B routing that `:26` calls "WRONG".
 
-Also recorded (not KB defects): the SD booter prose (SD:4805) puts fast boot on a P60 pull-up, against SD Table 36 and the Hardware Manual (P59 pull-down), which the KB follows; this is a SOURCE-ERRATA candidate. UNEXPLAINED: the async TX examples (sp-11110:65, :94; sp-11111:162, :167) wait for IN before the first WYPIN, which SD's state sequence (SD:4700-4701) does not obviously support. Recorded for planning, not chased.
+Also recorded (not KB defects): the SD booter prose (SD:4805) puts fast boot on a P60 pull-up, against SD Table 36 and the Hardware Manual (P59 pull-down), which the KB follows; filed as SOURCE-ERRATA E-029 («#460»). UNEXPLAINED: the async TX examples (sp-11110:65, :94; sp-11111:162, :167) wait for IN before the first WYPIN, which SD's state sequence (SD:4700-4701) does not obviously support. Recorded for planning, not chased.
 
 ## Counts
 

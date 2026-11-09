@@ -69,14 +69,18 @@ All 26 findings checked so far were confirmed, as was the R-bit source erratum b
 
 ## Source errata found
 
-| Source | Error | Evidence |
-|---|---|---|
-| Silicon Doc | The R bit legend gives 0 = relative | CSV:426-430 "If R = 1 then PC += A"; compiled `calld pa,#landing` is `FE1FFC12`, R = 1 relative |
-| Silicon Doc | LOCKREL typo; ORG default limit | Range 8 rows; `pnut-ts` gives $1F8, as the YAML says |
-| Silicon Doc | SD:4805 booter prose puts fast boot on a P60 pull-up | SD Table 36 and the Hardware Manual give a P59 pull-down, which the KB follows (range 7; to hand-check in 17.9) |
-| Hardware Manual | `:1592` says loader data is inverted | SD:4821, 4968; standard serial downloads |
+| Source | Error | Evidence | Entry |
+|---|---|---|---|
+| Silicon Doc | The R bit legend gives 0 = relative | CSV:426-430 "If R = 1 then PC += A"; compiled `calld pa,#landing` is `FE1FFC12`, R = 1 relative; CP-036 | E-026 |
+| Silicon Doc | LOCKREL encoding printed `00L` (SD:5239) | SD:3680 `{WC}`, SD:5238 LOCKTRY `C0L`, CSV:271 `C0L` | E-027 |
+| Silicon Doc | ORG default limit `$000,$200` (SD:5587) | Spin2 v55:313 and `pnut-ts` give $1F8, as the YAML says | E-028 |
+| Silicon Doc | SD:4805 booter prose puts fast boot on a P60 pull-up; SD:4827 ties serial preemption to the same P60 pull-up | SD Table 36, the Hardware Manual and the ROM booter listing (try_serial, check_pulldn on P59) give a P59 pull-down, which the KB follows (range 7) | E-029 |
+| Hardware Manual | `:1592` says loader data is inverted | SD:4821, 4968; the booter's `wrpin #%00_11111_0,#rx_pin` and its `$3E` autobaud pattern | E-030 |
+| Spin2 Documentation v55 | `ORG $100` default limit `$1F8` (v55:313) | CP-045: 256 longs assemble from `$100` and the 257th is refused, so the default limit there is `$200` | E-031 |
 
-These go to `engineering/ingestion/SOURCE-ERRATA.md` in the sprint.
+The six entries are in `engineering/ingestion/SOURCE-ERRATA.md` (filed 2026-11-09, «#460»). The
+plan's file table says four; the ledger's second row joined two defects (LOCKREL and ORG), which are
+two entries, and E-031 came from the disagreement recorded at range 8.
 
 ## Not compared
 
