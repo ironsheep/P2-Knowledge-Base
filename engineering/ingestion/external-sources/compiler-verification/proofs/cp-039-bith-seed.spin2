@@ -1,0 +1,6 @@
+' BITH sets bit 31 of x, then HUBSET x seeds the PRNG: accepted.
+DAT
+        org
+        bith    x, #31
+        hubset  x
+x       long    0

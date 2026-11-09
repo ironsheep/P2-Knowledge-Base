@@ -1,0 +1,5 @@
+' GETBRK needs an effect: the line with none is refused.
+DAT
+        org
+        getbrk  x
+x       long    0

@@ -1,0 +1,6 @@
+' SETPAT takes no effect flags: the WC line is refused.
+DAT
+        org
+        setpat  a, b wc
+a       long    0
+b       long    0

@@ -1,0 +1,7 @@
+' GETBRK with WC, WZ or WCZ is accepted.
+DAT
+        org
+        getbrk  x wc
+        getbrk  x wz
+        getbrk  x wcz
+x       long    0

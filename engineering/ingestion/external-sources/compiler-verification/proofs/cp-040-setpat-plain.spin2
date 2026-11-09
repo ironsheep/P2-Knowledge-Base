@@ -1,0 +1,6 @@
+' SETPAT with no effect flag is accepted.
+DAT
+        org
+        setpat  a, b
+a       long    0
+b       long    0

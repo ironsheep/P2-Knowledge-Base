@@ -1,0 +1,6 @@
+' SETB is not a PASM2 instruction: the line is refused.
+DAT
+        org
+        setb    x, #31
+        hubset  x
+x       long    0

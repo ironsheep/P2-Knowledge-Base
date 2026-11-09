@@ -18,7 +18,7 @@ assembled word; stays CP) · `BEHAVIOUR` (what
 compiled code does; the compile does not prove it) · `BEHAVIOUR → EF-NNN` (a P2 run has since
 proved it; the KB cites the EF).
 
-**Next record ID: `CP-039`** — take the number from this line and advance it in the same edit
+**Next record ID: `CP-042`** — take the number from this line and advance it in the same edit
 that files the record.
 
 **Commands** are run from the repository root with the repository-relative path, so each output
@@ -1646,3 +1646,84 @@ The first long, `$FCDC080A`, is REP (`EEEE 1100110 1LI DDDDDDDDD SSSSSSSSS`) wit
 **Grounds:** the Silicon Doc's REP entry ("repeat the next D[8:0] instructions"); the assembler, given the block end as a label, counts the AUGS that a `##` operand inserts as one of those instructions.
 *Limits:* what is assembled — the assembler's count of the block. Whether the hardware counts the AUGS word the same way at run time is not shown here. One compiler version.
 *→ EF:* none — layout stays CP.
+
+### CP-039 · `SETB` is not a PASM2 instruction: `setb x,#31` is refused; the PRNG-seed sequence assembles with `bith x,#31` — `LEGALITY`
+*KB:* `language/pasm2/hubset.yaml`
+*Class:* legality (the compiler's answer).
+*Source:* `proofs/cp-039-reject-setb.spin2` (refused), `proofs/cp-039-bith-seed.spin2` (accepted).
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-08):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-039-reject-setb.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-039-reject-setb.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-039-reject-setb.spin2:4:error:Expected a unique name, BYTE, WORD, LONG, or assembly instruction
+```
+*Command (2026-11-08):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-039-bith-seed.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-039-bith-seed.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-039-bith-seed.bin (12 bytes)
+pnut-ts: Done
+```
+**Grounds:** the Silicon Doc's PRNG-seeding example (HUB, "Seeding the Xoroshiro128** PRNG") writes `SETB x,#31`; SETB is in neither the instruction CSV nor the PASM2 Manual, and the CSV's BITH row ("Bits D[S[9:5]+S[4:0]:S[4:0]] = 1") is the bit-set instruction. This record shows the assembler refuses SETB and accepts the same sequence with BITH. Source erratum: SOURCE-ERRATA.md E-025.
+*Limits:* one refused mnemonic; nothing about run-time seeding behaviour. One compiler version.
+*→ EF:* none — legality stays CP.
+
+### CP-040 · SETPAT takes no effect flag: `setpat a,b wc` is refused ("This effect is not allowed for this instruction"); `setpat a,b` is accepted — `LEGALITY`
+*KB:* `architecture/event_system.yaml`, `language/pasm2/setpat.yaml`
+*Class:* legality (the compiler's answer).
+*Source:* `proofs/cp-040-reject-setpat-wc.spin2` (refused), `proofs/cp-040-setpat-plain.spin2` (accepted).
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-08):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-040-reject-setpat-wc.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-040-reject-setpat-wc.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-040-reject-setpat-wc.spin2:4:error:This effect is not allowed for this instruction
+```
+*Command (2026-11-08):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-040-setpat-plain.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-040-setpat-plain.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-040-setpat-plain.bin (12 bytes)
+pnut-ts: Done
+```
+**Grounds:** the instruction CSV's SETPAT row ("SETPAT {#}D,{#}S", no effect field; "C selects INA/INB, Z selects =/!=") and the Silicon Doc's PAT event lines, where C and Z are the flag values at the time SETPAT executes. This record shows the assembler refuses an effect on SETPAT. Also compiled while recording, not filed as proof files: `setpat a,b wz` and `setpat a,b wcz` give the same error.
+*Limits:* legality only; the run-time use of C and Z as inputs rests on the CSV and the Silicon Doc. One compiler version.
+*→ EF:* none — legality stays CP.
+
+### CP-041 · GETBRK needs an effect: `getbrk x` with none is refused ("Expected WC, WZ, or WCZ"); the WC, WZ and WCZ forms are accepted — `LEGALITY`
+*KB:* `language/pasm2/getbrk.yaml`
+*Class:* legality (the compiler's answer).
+*Source:* `proofs/cp-041-reject-getbrk-no-effect.spin2` (refused), `proofs/cp-041-getbrk-effects.spin2` (accepted).
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-041-reject-getbrk-no-effect.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-041-reject-getbrk-no-effect.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-041-reject-getbrk-no-effect.spin2:4:error:Expected WC, WZ, or WCZ
+```
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-041-getbrk-effects.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-041-getbrk-effects.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-041-getbrk-effects.bin (16 bytes)
+pnut-ts: Done
+```
+**Grounds:** the instruction CSV's GETBRK row ("GETBRK D WC/WZ/WCZ", no no-effect form) and the Silicon Doc's GETBRK section, which defines only the WCZ, WC and WZ results. This record shows the assembler enforces it.
+*Limits:* legality only. One compiler version.
+*→ EF:* none — legality stays CP.
