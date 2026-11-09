@@ -1,0 +1,6 @@
+PUB main()
+
+DAT
+        org
+        wrlut   x, #256
+x       long    0

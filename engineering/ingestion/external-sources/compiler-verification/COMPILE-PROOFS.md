@@ -18,7 +18,7 @@ assembled word; stays CP) · `BEHAVIOUR` (what
 compiled code does; the compile does not prove it) · `BEHAVIOUR → EF-NNN` (a P2 run has since
 proved it; the KB cites the EF).
 
-**Next record ID: `CP-042`** — take the number from this line and advance it in the same edit
+**Next record ID: `CP-043`** — take the number from this line and advance it in the same edit
 that files the record.
 
 **Commands** are run from the repository root with the repository-relative path, so each output
@@ -1726,4 +1726,31 @@ pnut-ts: Done
 ```
 **Grounds:** the instruction CSV's GETBRK row ("GETBRK D WC/WZ/WCZ", no no-effect form) and the Silicon Doc's GETBRK section, which defines only the WCZ, WC and WZ results. This record shows the assembler enforces it.
 *Limits:* legality only. One compiler version.
+*→ EF:* none — legality stays CP.
+
+### CP-042 · WRLUT's plain immediate address is limited to `#0`-`#255`: `wrlut x,#256` is refused with "Constant must be from 0 to 255"; `#255` and the augmented `##256` are accepted — `LEGALITY`
+*KB:* `language/pasm2/wrlut.yaml`, `architecture/lookup_ram.yaml`
+*Class:* legality (the compiler's answer).
+*Source:* `proofs/cp-042-reject-wrlut-imm-256.spin2` (refused), `proofs/cp-042-wrlut-imm-255-and-aug-256.spin2` (accepted).
+*Compiler:* `pnut-ts` v1.55.10, build date 11/5/2026.
+
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-042-reject-wrlut-imm-256.spin2`
+*Output (exit status 1):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-042-reject-wrlut-imm-256.spin2
+engineering/ingestion/external-sources/compiler-verification/proofs/cp-042-reject-wrlut-imm-256.spin2:5:error:Constant must be from 0 to 255
+```
+*Command (2026-11-09):* `pnut-ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-042-wrlut-imm-255-and-aug-256.spin2`
+*Output (exit status 0):*
+```text
+pnut-ts: * Propeller Spin2/PASM2 Compiler 'pnut_ts' (c) 2024-2026 Iron Sheep Productions, LLC., Parallax Inc.
+pnut-ts: * Version 1.55.10, Build date: 11/5/2026
+pnut-ts: * pnut_ts engineering/ingestion/external-sources/compiler-verification/proofs/cp-042-wrlut-imm-255-and-aug-256.spin2
+pnut-ts: Wrote engineering/ingestion/external-sources/compiler-verification/proofs/cp-042-wrlut-imm-255-and-aug-256.bin (6308 bytes)
+pnut-ts: Done
+```
+**Grounds:** the Silicon Doc's instruction list gives `WRLUT D/#,S/#/PTRx`, and its hub random-access operand form has an immediate S of `#%0AAAAAAAA` as an 8-bit address; this record shows the assembler refuses a plain WRLUT immediate above 255 rather than encoding it, as CP-037 shows for RDLUT.
+*Limits:* WRLUT only, at the lower end of the refused range. What WRLUT does at run time with an augmented `##` S value is not shown. One compiler version.
 *→ EF:* none — legality stays CP.
